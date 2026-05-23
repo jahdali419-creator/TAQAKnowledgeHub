@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload Document — TAQA Knowledge Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#00686A;--primary-light:#00BFB2;--accent:#FF6720;
+  --dark:#f4f5f7;--dark-2:#eaecf0;--dark-3:#ffffff;
+  --glass:rgba(255,255,255,0.85);--glass-2:rgba(255,255,255,0.98);
+  --glass-border:rgba(0,0,0,0.09);--glass-border-hover:rgba(0,104,106,0.35);
+  --text:#1a2235;--text-muted:#64748b;--gradient:linear-gradient(135deg,#00686A,#00BFB2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+@keyframes pageFadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;animation:pageFadeIn 0.4s cubic-bezier(.4,0,.2,1);}
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+.page-wrapper{position:relative;z-index:1;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,0.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--glass-border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
+.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.nav-brand-icon{width:40px;height:40px;border-radius:11px;background:var(--gradient);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  position:relative;overflow:hidden;box-shadow:0 4px 18px rgba(0,104,106,0.38);}
+.nav-brand-icon::before{content:'';position:absolute;top:-10px;left:-6px;width:32px;height:32px;
+  background:rgba(255,255,255,0.13);border-radius:50%;pointer-events:none;}
+.nav-brand-text{font-family:'Urbanist',sans-serif;font-size:15px;}
+.nav-brand-name{font-weight:800;color:var(--primary);}
+.nav-brand-hub{font-weight:500;color:#64748b;}
+.nav-subtitle{font-size:11px;color:var(--text-muted);display:block;margin-top:-1px;}
+.nav-links{display:flex;gap:2px;list-style:none;}
+.nav-links a{padding:7px 15px;border-radius:6px;text-decoration:none;font-size:13.5px;font-weight:500;color:var(--text-muted);transition:background 0.2s,color 0.2s;position:relative;}
+.nav-links a:hover{background:#f0f1f3;color:var(--text);}
+.nav-links a.active{background:transparent;color:var(--primary);font-weight:600;}
+.nav-links a.active::after{content:'';position:absolute;bottom:3px;left:15px;right:15px;height:2px;background:var(--primary);border-radius:2px;}
+.nav-right{display:flex;gap:10px;}
+.btn{padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
+  transition:all 0.25s;border:none;font-family:'Inter',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:7px;}
+.btn-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--text-muted);}
+.btn-ghost:hover{border-color:var(--glass-border-hover);color:var(--primary-light);}
+.btn-primary{background:var(--gradient);color:#fff;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,104,106,0.4);}
+
+@keyframes heroKenBurns{0%{transform:scale(1) translate(0%,0%);}30%{transform:scale(1.06) translate(-1.2%,0.4%);}65%{transform:scale(1.09) translate(0.8%,-0.6%);}100%{transform:scale(1.04) translate(-0.4%,0.8%);}}
+/* ── Page Hero ── */
+.page-hero{position:relative;overflow:hidden;padding:112px 48px 56px;}
+.page-hero-bg{position:absolute;inset:0;background-size:cover;background-position:center 30%;animation:heroKenBurns 18s ease-in-out infinite;}
+.page-hero-overlay{position:absolute;inset:0;
+  background:linear-gradient(105deg,rgba(6,18,26,0.93) 0%,rgba(6,18,26,0.76) 55%,rgba(0,104,106,0.25) 100%);}
+.page-hero-content{position:relative;z-index:2;max-width:1000px;margin:0 auto;}
+.page-hero-tag{display:inline-block;padding:4px 14px;margin-bottom:16px;
+  background:rgba(77,217,211,0.12);border:1px solid rgba(77,217,211,0.28);
+  border-radius:50px;font-size:11px;color:#4DD9D3;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;}
+.page-hero-content h1{font-family:'Urbanist',sans-serif;font-size:clamp(26px,4vw,40px);
+  font-weight:800;letter-spacing:-0.8px;color:#fff;margin-bottom:12px;}
+.page-hero-content p{font-size:15px;color:rgba(255,255,255,0.62);line-height:1.75;max-width:540px;}
+
+/* ── Step Indicator ── */
+.upload-steps-bar{max-width:1000px;margin:0 auto;padding:28px 48px 0;}
+.upload-steps{display:flex;align-items:center;}
+.ustep{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:500;color:var(--text-muted);white-space:nowrap;}
+.ustep-num{width:28px;height:28px;border-radius:50%;border:2px solid var(--glass-border);
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;
+  color:var(--text-muted);transition:all 0.35s;flex-shrink:0;}
+.ustep.active{color:var(--primary);}
+.ustep.active .ustep-num{background:var(--gradient);border-color:transparent;color:#fff;box-shadow:0 4px 14px rgba(0,104,106,0.3);}
+.ustep.done{color:var(--primary-light);}
+.ustep.done .ustep-num{background:rgba(0,191,178,0.12);border-color:rgba(0,191,178,0.3);color:var(--primary-light);}
+.ustep-line{flex:1;height:2px;background:var(--glass-border);margin:0 14px;border-radius:1px;transition:background 0.35s;}
+.ustep-line.done{background:rgba(0,191,178,0.3);}
+
+/* ── Layout ── */
+.upload-layout{padding:16px 48px 80px;max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 320px;gap:28px;align-items:start;}
+@media(max-width:800px){.upload-layout{grid-template-columns:1fr;}}
+
+/* ── Upload Form Card ── */
+.upload-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;padding:36px;backdrop-filter:blur(12px);}
+
+/* ── Drop Zone ── */
+.drop-zone{
+  border:2px dashed var(--glass-border);border-radius:16px;padding:52px 40px;
+  text-align:center;cursor:pointer;transition:all 0.3s;margin-bottom:28px;
+  background:rgba(0,104,106,0.02);position:relative;overflow:hidden;
+}
+.drop-zone.drag-over{border-color:var(--primary-light);background:rgba(0,191,178,0.05);transform:scale(1.01);}
+.drop-zone:hover{border-color:rgba(0,191,178,0.25);background:rgba(0,104,106,0.04);}
+.drop-icon{margin-bottom:16px;display:block;transition:transform 0.3s;line-height:1;}
+.drop-zone:hover .drop-icon,.drop-zone.drag-over .drop-icon{transform:scale(1.1);}
+.drop-title{font-family:'Urbanist',sans-serif;font-size:17px;font-weight:600;margin-bottom:8px;}
+.drop-sub{font-size:13px;color:var(--text-muted);margin-bottom:18px;line-height:1.6;}
+.drop-input{display:none;}
+.drop-btn{padding:9px 22px;border-radius:9px;font-size:13.5px;font-weight:500;
+  background:var(--glass-2);border:1px solid var(--glass-border);color:var(--text);cursor:pointer;
+  font-family:'Inter',sans-serif;transition:all 0.25s;}
+.drop-btn:hover{border-color:var(--glass-border-hover);color:var(--primary-light);}
+.drop-types{margin-top:16px;font-size:11px;color:var(--text-muted);}
+
+/* ── File Queue ── */
+.file-queue{margin-bottom:24px;}
+.file-queue-title{font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:10px;
+  text-transform:uppercase;letter-spacing:1px;}
+.file-item{
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;
+  background:var(--glass-2);border:1px solid var(--glass-border);border-radius:12px;
+  padding:14px 16px;margin-bottom:8px;
+}
+.file-item-icon{width:42px;height:42px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Urbanist',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;}
+.fi-pdf{background:rgba(220,38,38,0.1);color:#f87171;border:1px solid rgba(220,38,38,0.18);}
+.fi-doc{background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.18);}
+.fi-xls{background:rgba(34,197,94,0.1);color:#4ade80;border:1px solid rgba(34,197,94,0.18);}
+.fi-ppt{background:rgba(251,146,60,0.1);color:#fb923c;border:1px solid rgba(251,146,60,0.18);}
+.fi-default{background:rgba(100,116,139,0.1);color:#94a3b8;border:1px solid rgba(100,116,139,0.18);}
+.file-item-name{font-size:13.5px;font-weight:500;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.file-item-size{font-size:11.5px;color:var(--text-muted);}
+.progress-bar-wrap{height:4px;background:var(--glass-border);border-radius:2px;margin-top:7px;overflow:hidden;}
+.progress-bar{height:100%;background:var(--gradient);border-radius:2px;width:0%;transition:width 0.4s ease;}
+.file-remove{width:28px;height:28px;border-radius:7px;border:1px solid var(--glass-border);
+  background:transparent;cursor:pointer;color:var(--text-muted);font-size:14px;
+  display:flex;align-items:center;justify-content:center;transition:all 0.25s;}
+.file-remove:hover{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.2);color:#f87171;}
+
+/* ── Form Fields ── */
+.form-section{margin-bottom:24px;}
+.form-section-title{font-family:'Urbanist',sans-serif;font-size:13px;font-weight:600;color:var(--primary-light);
+  text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--glass-border);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-group{margin-bottom:16px;}
+.form-group:last-child{margin-bottom:0;}
+.form-label{display:block;font-size:13px;font-weight:500;color:var(--text-muted);margin-bottom:7px;}
+.form-label span{color:var(--accent);}
+.form-input,.form-select,.form-textarea{
+  width:100%;padding:11px 15px;
+  background:var(--glass-2);border:1px solid var(--glass-border);border-radius:10px;
+  color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;
+  transition:border-color 0.25s,box-shadow 0.25s;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:rgba(0,191,178,0.4);box-shadow:0 0 0 3px rgba(0,104,106,0.08);}
+.form-input::placeholder,.form-textarea::placeholder{color:transparent;}
+.form-select{cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a8ba0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;}
+.form-select option{background:#ffffff;color:var(--text);}
+.form-textarea{resize:vertical;min-height:90px;line-height:1.6;}
+
+/* ── Floating Label ── */
+.fl-wrap{position:relative;margin-bottom:0;}
+.fl-wrap .form-input,.fl-wrap .form-textarea{padding:20px 15px 8px;}
+.fl-label{
+  position:absolute;top:14px;left:15px;
+  font-size:13.5px;color:var(--text-muted);pointer-events:none;
+  transition:top 0.2s,font-size 0.2s,color 0.2s;
+  background:transparent;
+}
+.fl-label .req{color:var(--accent);margin-left:2px;}
+.fl-wrap .form-input:focus ~ .fl-label,
+.fl-wrap .form-input:not(:placeholder-shown) ~ .fl-label,
+.fl-wrap .form-textarea:focus ~ .fl-label,
+.fl-wrap .form-textarea:not(:placeholder-shown) ~ .fl-label{
+  top:6px;font-size:10.5px;color:var(--primary-light);font-weight:600;
+}
+.fl-wrap .form-input::placeholder,.fl-wrap .form-textarea::placeholder{color:transparent;}
+
+/* ── Approval Note ── */
+.approval-note{
+  background:linear-gradient(135deg,rgba(59,130,246,0.06),rgba(59,130,246,0.02));
+  border:1px solid rgba(59,130,246,0.15);border-radius:12px;padding:16px 20px;margin-bottom:24px;
+  display:flex;gap:12px;align-items:flex-start;
+}
+.approval-icon{display:flex;align-items:center;flex-shrink:0;}
+.approval-text strong{font-size:13px;color:#60a5fa;display:block;margin-bottom:3px;}
+.approval-text small{font-size:12px;color:var(--text-muted);line-height:1.5;}
+
+/* ── Submit ── */
+.submit-row{display:flex;gap:12px;}
+.btn-submit{flex:1;padding:14px 24px;border-radius:11px;font-size:15px;font-weight:600;
+  background:var(--gradient);color:#fff;border:none;cursor:pointer;font-family:'Urbanist',sans-serif;
+  transition:all 0.3s;box-shadow:0 4px 20px rgba(0,104,106,0.3);}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,104,106,0.45);}
+.btn-cancel{padding:14px 24px;border-radius:11px;font-size:14px;font-weight:500;
+  background:transparent;color:var(--text-muted);border:1px solid var(--glass-border);cursor:pointer;
+  font-family:'Inter',sans-serif;transition:all 0.25s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;}
+.btn-cancel:hover{border-color:var(--glass-border-hover);color:var(--text);}
+
+/* ── Sidebar ── */
+.sidebar{display:flex;flex-direction:column;gap:18px;}
+.info-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;padding:22px;backdrop-filter:blur(12px);}
+.info-card h3{font-family:'Urbanist',sans-serif;font-size:13.5px;font-weight:600;margin-bottom:14px;}
+.workflow-steps{display:flex;flex-direction:column;gap:0;}
+.wf-step{display:flex;gap:14px;align-items:flex-start;padding:10px 0;position:relative;}
+.wf-step:not(:last-child)::after{content:'';position:absolute;left:15px;top:36px;width:1px;height:calc(100% - 16px);background:var(--glass-border);}
+.wf-dot{width:30px;height:30px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:14px;margin-top:2px;}
+.wf-dot.done{background:rgba(0,104,106,0.2);}
+.wf-dot.pending{background:rgba(255,103,32,0.12);}
+.wf-dot.wait{background:rgba(255,255,255,0.06);}
+.wf-text strong{font-size:13px;font-weight:600;display:block;margin-bottom:2px;}
+.wf-text small{font-size:11.5px;color:var(--text-muted);line-height:1.4;}
+.allowed-types{display:flex;flex-wrap:wrap;gap:6px;}
+.type-chip{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;
+  background:rgba(0,104,106,0.1);border:1px solid rgba(0,191,178,0.12);color:var(--primary-light);}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:32px;right:32px;z-index:9999;
+  background:var(--dark-3);border:1px solid rgba(0,191,178,0.3);border-radius:14px;
+  padding:18px 24px;display:flex;align-items:center;gap:14px;
+  box-shadow:0 12px 40px rgba(0,0,0,0.5);min-width:320px;
+  transform:translateY(100px);opacity:0;transition:all 0.4s cubic-bezier(.4,0,.2,1);}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast-icon{display:flex;align-items:center;flex-shrink:0;}
+.toast strong{font-family:'Urbanist',sans-serif;font-size:14px;display:block;margin-bottom:3px;}
+.toast small{font-size:12px;color:var(--text-muted);}
+
+footer{border-top:none;padding:28px 48px;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);position:relative;}
+footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#00686A 0%,#00BFB2 100%);}
+.footer-inner{max-width:1000px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+.footer-brand{font-family:'Urbanist',sans-serif;font-weight:700;font-size:13.5px;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.footer-copy{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
+.footer-links{display:flex;gap:20px;}
+.footer-links a{font-size:12.5px;color:var(--text-muted);text-decoration:none;transition:color 0.2s;}
+.footer-links a:hover{color:var(--primary);}
+.bg-blobs{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.bg-blob{position:absolute;border-radius:50%;filter:blur(100px);}
+.bg-blob-1{width:720px;height:720px;top:-220px;left:-200px;background:radial-gradient(circle,rgba(0,191,178,0.13) 0%,transparent 65%);animation:blob1 26s ease-in-out infinite;}
+.bg-blob-2{width:580px;height:580px;top:38%;right:-160px;background:radial-gradient(circle,rgba(0,104,106,0.10) 0%,transparent 65%);animation:blob2 32s ease-in-out infinite;}
+.bg-blob-3{width:460px;height:460px;bottom:-80px;left:28%;background:radial-gradient(circle,rgba(0,191,178,0.08) 0%,transparent 65%);animation:blob3 22s ease-in-out infinite;}
+@keyframes blob1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(50px,-70px) scale(1.08);}}
+@keyframes blob2{0%,100%{transform:translate(0,0) scale(1);}40%{transform:translate(-60px,50px) scale(1.06);}80%{transform:translate(30px,-30px) scale(0.95);}}
+@keyframes blob3{0%,100%{transform:translate(0,0) scale(1);}60%{transform:translate(-40px,60px) scale(1.1);}}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(0,104,106,0.28);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:rgba(0,104,106,0.5);}
+.nav-links{position:relative;}.nav-pill{position:absolute;top:50%;transform:translateY(-50%);height:34px;background:rgba(0,104,106,0.1);border-radius:8px;transition:left 0.28s cubic-bezier(.4,0,.2,1),width 0.28s cubic-bezier(.4,0,.2,1),opacity 0.2s;pointer-events:none;z-index:0;opacity:0;}
+.nav-links a.active::after{display:none!important;}
+.dark-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:border-color 0.2s,color 0.2s,background 0.2s;flex-shrink:0;padding:0;}
+.dark-toggle:hover{border-color:var(--primary);color:var(--primary);background:rgba(0,104,106,0.06);}
+html[data-theme="dark"]{--dark:#0e1824;--glass:rgba(25,38,58,0.88);--glass-border:rgba(255,255,255,0.07);--text:#dde4ef;--text-muted:#7e94ab;}
+html[data-theme="dark"] body{background:#0e1824;}
+html[data-theme="dark"] nav{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.06);}
+html[data-theme="dark"] .nav-brand-name{color:#dde4ef;}html[data-theme="dark"] .nav-brand-hub{color:#7e94ab;}
+html[data-theme="dark"] .nav-pill{background:rgba(0,191,178,0.12);}
+html[data-theme="dark"] .dark-toggle{border-color:rgba(255,255,255,0.1);color:#7e94ab;}
+html[data-theme="dark"] .upload-card,.upload-form-card{background:#19263a!important;border-color:#243044!important;}
+html[data-theme="dark"] .drop-zone{background:#111e2d;border-color:#243044;}
+html[data-theme="dark"] .drop-zone.drag-over{background:rgba(0,104,106,0.12);border-color:rgba(0,191,178,0.4);}
+html[data-theme="dark"] .form-group input,html[data-theme="dark"] .form-group select,html[data-theme="dark"] .form-group textarea{background:#0e1824;border-color:#243044;color:#dde4ef;}
+html[data-theme="dark"] .form-group label{color:#7e94ab;}
+html[data-theme="dark"] .sidebar-card{background:#19263a;border-color:#243044;}
+html[data-theme="dark"] footer{background:#19263a;border-color:#243044;}
+html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,191,178,0.2);}
+html[data-theme="dark"] .bg-blob-1{background:radial-gradient(circle,rgba(0,191,178,0.05) 0%,transparent 65%);}
+html[data-theme="dark"] .bg-blob-2{background:radial-gradient(circle,rgba(0,104,106,0.04) 0%,transparent 65%);}
+html[data-theme="dark"] .bg-blob-3{background:radial-gradient(circle,rgba(0,191,178,0.03) 0%,transparent 65%);}
+html[data-theme="dark"] .scroll-top-btn{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.1);}
+
+/* ── Page Exit Transition ── */
+@keyframes pageFadeOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-5px);}}
+body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
+
+/* ── Scroll Progress Ring ── */
+.scroll-top-btn{
+  position:fixed;bottom:28px;right:28px;z-index:500;
+  width:46px;height:46px;border-radius:50%;
+  background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--glass-border);box-shadow:0 4px 20px rgba(0,0,0,0.1);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(14px);
+  transition:opacity 0.3s,transform 0.3s,box-shadow 0.2s;padding:0;
+}
+.scroll-top-btn.stp-visible{opacity:1;transform:translateY(0);}
+.scroll-top-btn:hover{box-shadow:0 8px 28px rgba(0,104,106,0.3);transform:translateY(-3px)!important;}
+.scroll-top-btn svg{position:absolute;top:0;left:0;width:46px;height:46px;}
+.stp-arrow{font-size:13px;color:var(--primary);position:relative;z-index:1;font-weight:800;}
+
+@media(max-width:640px){nav{padding:0 20px;}.page-header,.upload-layout,footer{padding-left:20px;padding-right:20px;}
+  .form-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="bg-blobs" aria-hidden="true"><div class="bg-blob bg-blob-1"></div><div class="bg-blob bg-blob-2"></div><div class="bg-blob bg-blob-3"></div></div>
+<canvas id="bg-canvas"></canvas>
+<div class="page-wrapper">
+
+<nav>
+  <a href="index.html" class="nav-brand">
+    <span class="nav-brand-text"><span class="nav-brand-name">TAQA</span> <span class="nav-brand-hub">Knowledge Hub</span><span class="nav-subtitle"><em style="color:#00686A; font-style:italic;">The One</em> Platform</span></span>
+  </a>
+  <ul class="nav-links">
+    <div class="nav-pill" id="nav-pill"></div>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="ai-search.html">Document Search</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="upload.html" class="active">Upload</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode"><svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <a href="support-ticket.html" class="btn btn-primary">Ask an Expert</a>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-bg" style="background-image:url('taqa-hero-2.jpg')"></div>
+  <div class="page-hero-overlay"></div>
+  <div class="page-hero-content">
+    <span class="page-hero-tag">Document Upload</span>
+    <h1>Upload a Document</h1>
+    <p>Submit new SOPs, manuals, policies, technical alerts, or lessons learned. All documents go through an approval workflow before going live.</p>
+    <div style="margin-top:18px;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);">Part of <em style="color:#4DD9D3;font-style:italic;font-weight:700;text-transform:none;letter-spacing:0;">The One</em> Platform</div>
+  </div>
+</div>
+
+<div class="upload-steps-bar">
+  <div class="upload-steps">
+    <div class="ustep active" id="ustep-1"><div class="ustep-num">1</div><span>Select File</span></div>
+    <div class="ustep-line" id="ustep-line-1"></div>
+    <div class="ustep" id="ustep-2"><div class="ustep-num">2</div><span>Document Details</span></div>
+    <div class="ustep-line" id="ustep-line-2"></div>
+    <div class="ustep" id="ustep-3"><div class="ustep-num">3</div><span>Review &amp; Submit</span></div>
+  </div>
+</div>
+
+<div class="upload-layout">
+
+  <div class="upload-card">
+
+    <!-- ── Drop Zone ── -->
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+      <span class="drop-icon"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 28V16M20 16L15 21M20 16L25 21" stroke="#00BFB2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 30C6.686 30 4 27.314 4 24C4 21.12 5.954 18.69 8.64 18.13C8.226 17.146 8 16.1 8 15C8 10.582 11.582 7 16 7C19.456 7 22.414 9.094 23.618 12.11C24.37 11.41 25.376 11 26.5 11C28.985 11 31 13.015 31 15.5C31 15.906 30.948 16.3 30.85 16.676C32.718 17.448 34 19.278 34 21.5C34 24.538 31.538 27 28.5 27H28" stroke="#00BFB2" stroke-width="2" stroke-linecap="round"/></svg></span>
+      <div class="drop-title">Drag & drop your file here</div>
+      <div class="drop-sub">Supports PDF, Word, Excel, PowerPoint files.<br>Max file size: 50 MB per file.</div>
+      <button class="drop-btn" type="button">Browse Files</button>
+      <div class="drop-types">Accepted: .pdf · .docx · .doc · .xlsx · .xls · .pptx · .ppt</div>
+    </div>
+    <input type="file" id="file-input" class="drop-input" accept=".pdf,.docx,.doc,.xlsx,.xls,.pptx,.ppt" multiple>
+
+    <!-- ── File Queue ── -->
+    <div class="file-queue" id="file-queue" style="display:none;">
+      <div class="file-queue-title">Selected Files</div>
+      <div id="file-list"></div>
+    </div>
+
+    <!-- ── Document Details ── -->
+    <form id="upload-form" onsubmit="submitUpload(event)">
+      <div class="form-section">
+        <div class="form-section-title">Document Details</div>
+        <div class="form-group">
+          <div class="fl-wrap">
+            <input type="text" class="form-input" placeholder=" " required>
+            <label class="fl-label">Document Title<span class="req">*</span></label>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Segment <span>*</span></label>
+            <select class="form-select" required>
+              <option value="" disabled selected>Select segment</option>
+              <option>Coiled Tubing</option>
+              <option>Fracturing</option>
+              <option>Wireline</option>
+              <option>Drilling</option>
+              <option>Cementing</option>
+              <option>Inspection Services</option>
+              <option>Well Safety</option>
+              <option>QHSE</option>
+              <option>TWS Maintenance</option>
+              <option>Human Resources</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Document Type <span>*</span></label>
+            <select class="form-select" required>
+              <option value="" disabled selected>Select type</option>
+              <option>SOP</option>
+              <option>Manual</option>
+              <option>Policy</option>
+              <option>Technical Alert</option>
+              <option>Lesson Learned</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Revision Number</label>
+            <input type="text" class="form-input" placeholder="e.g. Rev 1.0, v2.3">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Document Date</label>
+            <input type="date" class="form-input">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Document Author / Owner</label>
+          <input type="text" class="form-input" placeholder="Name of document owner or originating department">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Document Summary <span style="color:var(--accent);font-style:normal;">*</span></div>
+        <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:18px;line-height:1.6;">
+          Provide a clear and complete summary of the document. This summary will be displayed to all users in the document library so they can quickly understand the document before opening it.
+        </p>
+        <div class="form-group">
+          <label class="form-label">What does this document cover? <span>*</span></label>
+          <textarea class="form-textarea" id="summary-main" style="min-height:110px;"
+            placeholder="Describe the main content, procedures, or information this document provides. Include the key topics, steps, or requirements it addresses." required></textarea>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;" id="summary-count">0 / 500 characters</div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Purpose / Objective <span>*</span></label>
+            <textarea class="form-textarea" style="min-height:80px;"
+              placeholder="Why does this document exist? What problem does it solve or what requirement does it fulfill?" required></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Scope of Application <span>*</span></label>
+            <textarea class="form-textarea" style="min-height:80px;"
+              placeholder="Which operations, locations, job roles, or equipment does this document apply to?" required></textarea>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Target Audience <span>*</span></label>
+            <select class="form-select" required>
+              <option value="" disabled selected>Who is this document for?</option>
+              <option>Field Operators</option>
+              <option>Supervisors &amp; Engineers</option>
+              <option>All Segment Personnel</option>
+              <option>Management</option>
+              <option>Safety &amp; QHSE Personnel</option>
+              <option>Maintenance Technicians</option>
+              <option>All TAQA Employees</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Key Topics / Keywords</label>
+            <input type="text" class="form-input" placeholder="e.g. well control, BOP, H2S, pressure testing — separate with commas">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prerequisites / Related Documents</label>
+          <textarea class="form-textarea" style="min-height:70px;"
+            placeholder="List any documents that should be read before this one, or any related SOPs, manuals, or policies that are referenced in this document."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Change Summary <span style="font-size:11px;font-weight:400;color:var(--text-muted);">(for revised documents)</span></label>
+          <textarea class="form-textarea" style="min-height:70px;"
+            placeholder="If this is a revised version, describe what changed from the previous version and the reason for the revision."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Submitted By</div>
+        <div class="form-row">
+          <div class="form-group">
+            <div class="fl-wrap">
+              <input type="text" class="form-input" placeholder=" " required>
+              <label class="fl-label">Your Name<span class="req">*</span></label>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="fl-wrap">
+              <input type="email" class="form-input" placeholder=" " required>
+              <label class="fl-label">Your Email<span class="req">*</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="approval-note">
+        <span class="approval-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#00BFB2" stroke-width="1.5"/><path d="M8 7v5M8 5v.5" stroke="#00BFB2" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        <div class="approval-text">
+          <strong>Approval Workflow</strong>
+          <small>Documents are reviewed by the Knowledge Team Lead before being published. You'll receive an email notification when your document is approved or if any changes are needed.</small>
+        </div>
+      </div>
+
+      <div class="submit-row">
+        <button type="submit" class="btn-submit">Submit for Review →</button>
+        <a href="index.html" class="btn-cancel">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- ── Sidebar ── -->
+  <div class="sidebar">
+    <div class="info-card">
+      <h3>Approval Workflow</h3>
+      <div class="workflow-steps">
+        <div class="wf-step">
+          <div class="wf-dot done">1</div>
+          <div class="wf-text"><strong>Submit</strong><small>You upload the file and fill in document details.</small></div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-dot pending">2</div>
+          <div class="wf-text"><strong>Review</strong><small>Knowledge Team Lead reviews within 1 business day.</small></div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-dot wait">3</div>
+          <div class="wf-text"><strong>Approve / Return</strong><small>Document is approved or returned with feedback.</small></div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-dot wait">4</div>
+          <div class="wf-text"><strong>Published</strong><small>Appears live in the segment library for all users.</small></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h3>Accepted File Types</h3>
+      <div class="allowed-types">
+        <span class="type-chip">PDF</span>
+        <span class="type-chip">DOCX</span>
+        <span class="type-chip">DOC</span>
+        <span class="type-chip">XLSX</span>
+        <span class="type-chip">XLS</span>
+        <span class="type-chip">PPTX</span>
+        <span class="type-chip">PPT</span>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:12px;line-height:1.6;">Max 50 MB per file. For files larger than 50 MB, contact the Knowledge Team for alternative upload options.</p>
+    </div>
+
+    <div class="info-card">
+      <h3>Upload Tips</h3>
+      <div style="font-size:13px;color:var(--text-muted);line-height:1.8;">
+        <p>✓ Use a clear, descriptive title</p>
+        <p>✓ Include revision number if applicable</p>
+        <p>✓ Ensure document is finalized before uploading</p>
+        <p>✓ Use PDF format for best compatibility</p>
+        <p>✓ One document per upload submission</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ── -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toast-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="rgba(0,191,178,0.15)" stroke="#00BFB2" stroke-width="1.5"/><path d="M7 11l3 3 5-5" stroke="#00BFB2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+  <div>
+    <strong id="toast-title">Upload Submitted!</strong>
+    <small id="toast-sub">Your document is queued for review. Ref: <span id="upload-ref">--</span></small>
+  </div>
+</div>
+
+<!-- ── Scroll Progress Ring ── -->
+<button class="scroll-top-btn" id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top" aria-label="Back to top">
+  <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="23" cy="23" r="19" stroke="rgba(0,104,106,0.12)" stroke-width="2.5"/>
+    <circle id="stp-ring" cx="23" cy="23" r="19" stroke="url(#stpg)" stroke-width="2.5"
+      stroke-linecap="round" stroke-dasharray="119.4" stroke-dashoffset="119.4"
+      transform="rotate(-90 23 23)"/>
+    <defs><linearGradient id="stpg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00686A"/><stop offset="100%" stop-color="#00BFB2"/>
+    </linearGradient></defs>
+  </svg>
+  <span class="stp-arrow">↑</span>
+</button>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">TAQA Knowledge Hub &nbsp;·&nbsp; <em style="color:#00BFB2; font-style:italic; font-weight:700;">The One</em> Platform</div>
+      <div class="footer-copy">© 2026 TAQA — Industrialization &amp; Energy Services Company. All rights reserved.</div>
+      <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">Built by <span style="color:#00686A;font-weight:600;">TAQA LEARNING CENTER</span></div>
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="ai-search.html">Document Search</a>
+      <a href="glossary.html">Field Glossary</a>
+      <a href="upload.html">Upload</a>
+      <a href="support-ticket.html">Ask Expert</a>
+    </div>
+  </div>
+</footer>
+</div>
+
+<script>
+// ── Drag & Drop ──
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+const fileQueue = document.getElementById('file-queue');
+const fileList = document.getElementById('file-list');
+let selectedFiles = [];
+
+['dragenter','dragover'].forEach(e => {
+  dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.add('drag-over'); });
+});
+['dragleave','drop'].forEach(e => {
+  dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.remove('drag-over'); });
+});
+dropZone.addEventListener('drop', ev => {
+  ev.preventDefault();
+  addFiles([...ev.dataTransfer.files]);
+});
+fileInput.addEventListener('change', () => {
+  addFiles([...fileInput.files]);
+  fileInput.value = '';
+  setUploadStep(2);
+});
+
+const FILE_EXT_MAP = { pdf:['PDF','fi-pdf'], docx:['DOC','fi-doc'], doc:['DOC','fi-doc'],
+  xlsx:['XLS','fi-xls'], xls:['XLS','fi-xls'], pptx:['PPT','fi-ppt'], ppt:['PPT','fi-ppt'] };
+function getIconInfo(name) {
+  const ext = name.split('.').pop().toLowerCase();
+  return FILE_EXT_MAP[ext] || ['FILE','fi-default'];
+}
+function fmtSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/(1024*1024)).toFixed(1) + ' MB';
+}
+
+// ── Toast helper ──
+let toastTimer = null;
+const ICON_OK = `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="rgba(0,191,178,0.15)" stroke="#00BFB2" stroke-width="1.5"/><path d="M7 11l3 3 5-5" stroke="#00BFB2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const ICON_ADD = `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="rgba(0,191,178,0.12)" stroke="#00BFB2" stroke-width="1.5"/><path d="M11 7v8M7 11h8" stroke="#00BFB2" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+const ICON_REMOVE = `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="rgba(255,103,32,0.1)" stroke="#FF6720" stroke-width="1.5"/><path d="M8 11h6" stroke="#FF6720" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+function showToast(title, sub, iconHTML) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-sub').textContent = sub;
+  document.getElementById('toast-icon').innerHTML = iconHTML || ICON_OK;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+function addFiles(files) {
+  let added = 0;
+  files.forEach(f => {
+    if (selectedFiles.find(x => x.name === f.name)) return;
+    selectedFiles.push(f);
+    added++;
+    const id = 'fi-' + Date.now() + Math.random().toString(36).substr(2,5);
+    const div = document.createElement('div');
+    div.className = 'file-item';
+    div.id = id;
+    div.innerHTML = `
+      <div class="file-item-icon ${getIconInfo(f.name)[1]}">${getIconInfo(f.name)[0]}</div>
+      <div>
+        <div class="file-item-name">${f.name}</div>
+        <div class="file-item-size">${fmtSize(f.size)}</div>
+        <div class="progress-bar-wrap"><div class="progress-bar" id="pb-${id}"></div></div>
+      </div>
+      <button class="file-remove" onclick="removeFile('${id}','${f.name}')">✕</button>`;
+    fileList.appendChild(div);
+    setTimeout(() => {
+      const pb = document.getElementById('pb-'+id);
+      if (pb) { let w=0; const t=setInterval(()=>{ w+=Math.random()*15; if(w>=100){w=100;clearInterval(t);} pb.style.width=w+'%'; },80); }
+    }, 200);
+  });
+  fileQueue.style.display = selectedFiles.length ? 'block' : 'none';
+  if (added > 0) showToast('File Added', files[0].name.length > 32 ? files[0].name.substring(0,32)+'…' : files[0].name, ICON_ADD);
+}
+
+function removeFile(id, name) {
+  selectedFiles = selectedFiles.filter(f => f.name !== name);
+  const el = document.getElementById(id);
+  if (el) el.remove();
+  fileQueue.style.display = selectedFiles.length ? 'block' : 'none';
+  showToast('File Removed', name.length > 36 ? name.substring(0,36)+'…' : name, ICON_REMOVE);
+}
+
+// ── Summary Character Counter ──
+const summaryMain = document.getElementById('summary-main');
+const summaryCount = document.getElementById('summary-count');
+if (summaryMain && summaryCount) {
+  summaryMain.addEventListener('input', () => {
+    const len = summaryMain.value.length;
+    summaryCount.textContent = len + ' / 500 characters';
+    summaryCount.style.color = len > 400 ? '#C0392B' : '#6b7a8d';
+  });
+}
+
+function setUploadStep(n) {
+  [1,2,3].forEach(i => {
+    const s = document.getElementById('ustep-' + i);
+    s.classList.remove('active','done');
+    if (i < n) s.classList.add('done');
+    if (i === n) s.classList.add('active');
+    if (i < 3) {
+      const l = document.getElementById('ustep-line-' + i);
+      if (i < n) l.classList.add('done'); else l.classList.remove('done');
+    }
+  });
+}
+
+function submitUpload(e) {
+  e.preventDefault();
+  setUploadStep(3);
+  const ref = 'UPL-' + new Date().getFullYear() + '-' + Math.floor(1000+Math.random()*9000);
+  document.getElementById('upload-ref').textContent = ref;
+  document.getElementById('toast-title').textContent = 'Upload Submitted!';
+  document.getElementById('toast-sub').textContent = 'Queued for review. Ref: ' + ref;
+  document.getElementById('toast-icon').innerHTML = ICON_OK;
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toast.classList.remove('show'); setUploadStep(1); }, 5000);
+  e.target.reset();
+  selectedFiles = [];
+  fileList.innerHTML = '';
+  fileQueue.style.display = 'none';
+}
+
+// ── Canvas ──
+const canvas=document.getElementById('bg-canvas');const ctx=canvas.getContext('2d');
+let W,H,pts=[];
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+function initPts(){pts=[];const n=Math.floor(W*H/20000);
+  for(let i=0;i<n;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,s:Math.random()*1.5+.3});}
+initPts();
+function draw(){ctx.fillStyle='#f4f5f7';ctx.fillRect(0,0,W,H);
+  const g=ctx.createRadialGradient(W*.15,H*.8,0,W*.15,H*.8,380);
+  g.addColorStop(0,'rgba(59,130,246,0.04)');g.addColorStop(1,'transparent');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.s,0,Math.PI*2);ctx.fillStyle='rgba(0,104,106,0.1)';ctx.fill();});
+  requestAnimationFrame(draw);}
+draw();
+// ── Sliding Pill Nav ──
+const pill=document.getElementById('nav-pill'),navList=document.querySelector('.nav-links');
+function pillTo(el){const lr=navList.getBoundingClientRect(),ar=el.getBoundingClientRect();pill.style.left=(ar.left-lr.left)+'px';pill.style.width=ar.width+'px';pill.style.opacity='1';}
+function pillToActive(){const a=navList.querySelector('a.active');if(a)pillTo(a);else pill.style.opacity='0';}
+pillToActive();navList.querySelectorAll('a').forEach(a=>a.addEventListener('mouseenter',()=>pillTo(a)));navList.addEventListener('mouseleave',pillToActive);
+// ── Dark Mode ──
+const MOON='M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
+const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
+function toggleDark(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme',next);}
+(function(){const s=localStorage.getItem('taqa-theme');if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
+
+// ── Scroll Progress Ring ──
+(function(){
+  const btn=document.getElementById('scroll-top-btn');
+  const ring=document.getElementById('stp-ring');
+  const C=119.4;
+  window.addEventListener('scroll',function(){
+    const pct=window.scrollY/(document.documentElement.scrollHeight-window.innerHeight)||0;
+    if(btn){if(window.scrollY>300)btn.classList.add('stp-visible');else btn.classList.remove('stp-visible');}
+    if(ring)ring.style.strokeDashoffset=C*(1-pct);
+  },{passive:true});
+})();
+
+// ── Page Exit Transition ──
+document.addEventListener('click',function(e){
+  const a=e.target.closest('a[href]');
+  if(!a)return;
+  const h=a.getAttribute('href');
+  if(!h||h.startsWith('#')||h.startsWith('http')||h.startsWith('mailto'))return;
+  if(a.target==='_blank')return;
+  e.preventDefault();
+  document.body.classList.add('page-exit');
+  setTimeout(()=>window.location.href=h,270);
+});
+</script>
+</body>
+</html>

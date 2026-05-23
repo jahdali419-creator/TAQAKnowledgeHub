@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Search — TAQA Knowledge Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#00686A;--primary-light:#00BFB2;--accent:#FF6720;
+  --dark:#f4f5f7;--glass:rgba(255,255,255,0.88);--glass-2:rgba(255,255,255,0.98);
+  --glass-border:rgba(0,0,0,0.08);--glass-border-hover:rgba(0,104,106,0.35);
+  --text:#1a2235;--text-muted:#64748b;--gradient:linear-gradient(135deg,#00686A,#00BFB2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+@keyframes pageFadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;animation:pageFadeIn 0.45s cubic-bezier(.4,0,.2,1);}
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+.page-wrapper{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
+
+/* ── Nav ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--glass-border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
+.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.nav-brand-icon{width:40px;height:40px;border-radius:11px;background:var(--gradient);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  position:relative;overflow:hidden;box-shadow:0 4px 18px rgba(0,104,106,0.38);}
+.nav-brand-icon::before{content:'';position:absolute;top:-10px;left:-6px;width:32px;height:32px;
+  background:rgba(255,255,255,0.13);border-radius:50%;pointer-events:none;}
+.nav-brand-text{font-family:'Urbanist',sans-serif;font-size:15px;}
+.nav-brand-name{font-weight:800;color:var(--primary);}
+.nav-brand-hub{font-weight:500;color:#64748b;}
+.nav-subtitle{font-size:11px;color:var(--text-muted);display:block;margin-top:-1px;}
+.nav-links{display:flex;gap:2px;list-style:none;}
+.nav-links a{padding:7px 15px;border-radius:6px;text-decoration:none;font-size:13.5px;font-weight:500;color:var(--text-muted);transition:background 0.2s,color 0.2s;position:relative;}
+.nav-links a:hover{background:#f0f1f3;color:var(--text);}
+.nav-links a.active{background:transparent;color:var(--primary);font-weight:600;}
+.nav-links a.active::after{content:'';position:absolute;bottom:3px;left:15px;right:15px;height:2px;background:var(--primary);border-radius:2px;}
+.nav-right{display:flex;gap:10px;}
+.btn{padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
+  transition:all 0.25s;border:none;font-family:'Inter',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:7px;}
+.btn-primary{background:var(--gradient);color:#fff;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,104,106,0.4);}
+
+/* ── Search Hub (centered column) ── */
+.search-hub{
+  padding:110px 24px 0;
+  max-width:700px;margin:0 auto;width:100%;
+  text-align:center;
+  position:relative;
+}
+
+/* ── Ambient Glow ── */
+.hub-glow{
+  position:absolute;top:-60px;left:50%;transform:translateX(-50%);
+  width:900px;height:560px;
+  background:radial-gradient(ellipse 700px 420px at 50% 0%, rgba(0,191,178,0.11) 0%, rgba(0,104,106,0.04) 45%, transparent 70%);
+  pointer-events:none;z-index:0;
+}
+
+/* ── AI Badge ── */
+.ai-badge{
+  display:inline-flex;align-items:center;gap:9px;padding:6px 18px;margin-bottom:26px;
+  background:linear-gradient(135deg,rgba(0,104,106,0.09),rgba(0,191,178,0.06));
+  border:1px solid rgba(0,191,178,0.28);border-radius:50px;
+  font-size:11.5px;color:var(--primary-light);font-weight:500;letter-spacing:0.3px;
+  box-shadow:0 2px 16px rgba(0,191,178,0.12);
+  position:relative;z-index:1;
+}
+.ai-spark{animation:sparkSpin 5s linear infinite;display:inline-block;}
+@keyframes sparkSpin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+
+/* ── Hero Title ── */
+.hub-title{
+  font-family:'Urbanist',sans-serif;
+  font-size:clamp(32px,5.5vw,56px);
+  font-weight:800;letter-spacing:-1.5px;line-height:1.08;
+  margin-bottom:18px;color:var(--text);
+  position:relative;z-index:1;
+}
+.hub-title .grad{
+  background:var(--gradient);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hub-sub{font-size:15px;color:var(--text-muted);line-height:1.7;max-width:460px;margin:0 auto 24px;position:relative;z-index:1;}
+
+/* ── Stats Pills ── */
+.stats-pills{
+  display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:36px;
+  flex-wrap:wrap;position:relative;z-index:1;
+}
+.stat-pill{
+  display:flex;align-items:center;gap:7px;padding:5px 15px;border-radius:50px;
+  background:rgba(255,255,255,0.82);border:1px solid var(--glass-border);
+  font-size:12px;color:var(--text-muted);font-weight:500;
+  backdrop-filter:blur(8px);
+}
+.stat-dot{width:6px;height:6px;border-radius:50%;background:var(--primary-light);flex-shrink:0;}
+.stat-sep{color:rgba(0,0,0,0.18);font-size:12px;}
+
+/* ── Search Card ── */
+.search-card{
+  background:rgba(255,255,255,0.95);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border:1.5px solid rgba(255,255,255,0.95);
+  border-radius:22px;
+  box-shadow:0 4px 28px rgba(0,0,0,0.08),0 1px 6px rgba(0,0,0,0.04),
+             inset 0 1px 0 rgba(255,255,255,1);
+  overflow:hidden;
+  transition:border-color 0.32s,box-shadow 0.35s,transform 0.32s;
+  position:relative;z-index:1;
+  margin-bottom:0;
+}
+.search-card:focus-within{
+  border-color:rgba(0,191,178,0.45);
+  box-shadow:0 0 0 4px rgba(0,191,178,0.09),0 12px 40px rgba(0,0,0,0.1),
+             inset 0 1px 0 rgba(255,255,255,1);
+  transform:translateY(-4px);
+}
+
+/* ── Input Row ── */
+.search-input-row{
+  display:flex;align-items:flex-end;gap:12px;
+  padding:18px 16px 16px 22px;
+}
+#query-input{
+  flex:1;border:none;outline:none;background:transparent;
+  color:var(--text);font-size:15.5px;font-family:'Inter',sans-serif;
+  resize:none;line-height:1.6;min-height:28px;max-height:180px;
+  padding:0;
+}
+#query-input::placeholder{color:var(--text-muted);opacity:0.65;}
+
+/* ── Send Button ── */
+.send-btn{
+  width:44px;height:44px;border-radius:13px;
+  background:var(--gradient);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:19px;flex-shrink:0;
+  transition:transform 0.22s,box-shadow 0.22s,opacity 0.2s;
+  box-shadow:0 4px 16px rgba(0,104,106,0.32);
+}
+.send-btn:hover{transform:scale(1.08) translateY(-1px);box-shadow:0 7px 24px rgba(0,104,106,0.48);}
+.send-btn:disabled{opacity:0.6;cursor:default;transform:none;}
+.send-btn.loading{animation:pulse-btn 0.9s ease infinite;}
+@keyframes pulse-btn{0%,100%{opacity:1;}50%{opacity:0.5;}}
+
+/* ── Bottom Row (filters + char count) ── */
+.search-bottom-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:9px 18px 12px;
+  border-top:1px solid rgba(0,0,0,0.055);
+}
+.seg-filters{display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap;}
+.seg-filters::-webkit-scrollbar{display:none;}
+.filter-label{font-size:11px;color:var(--text-muted);white-space:nowrap;flex-shrink:0;font-weight:500;letter-spacing:0.3px;}
+.filter-chip{
+  padding:4px 12px;border-radius:50px;font-size:11.5px;font-weight:500;
+  background:transparent;border:1px solid var(--glass-border);
+  color:var(--text-muted);cursor:pointer;transition:all 0.22s;white-space:nowrap;flex-shrink:0;
+}
+.filter-chip.active{
+  background:rgba(0,104,106,0.1);border-color:rgba(0,191,178,0.3);
+  color:var(--primary);font-weight:600;
+}
+.filter-chip:hover{border-color:var(--glass-border-hover);color:var(--text);}
+.char-count{font-size:10.5px;color:var(--text-muted);opacity:0.5;white-space:nowrap;flex-shrink:0;}
+
+/* ── Suggested Prompts ── */
+.prompts-section{
+  max-width:700px;margin:0 auto;width:100%;
+  padding:20px 24px 0;
+  position:relative;z-index:1;
+}
+.prompts-row{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+.prompts-tag{font-size:11.5px;color:var(--text-muted);font-weight:600;letter-spacing:0.4px;text-transform:uppercase;white-space:nowrap;padding-top:6px;}
+.prompts-chips{display:flex;flex-wrap:wrap;gap:7px;}
+.prompt-chip{
+  padding:6px 14px;border-radius:50px;font-size:12.5px;
+  background:rgba(255,255,255,0.75);border:1px solid var(--glass-border);
+  color:var(--text-muted);cursor:pointer;
+  transition:all 0.22s;backdrop-filter:blur(8px);
+}
+.prompt-chip:hover{
+  border-color:rgba(0,191,178,0.35);color:var(--primary);
+  background:rgba(0,191,178,0.05);transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(0,0,0,0.06);
+}
+
+/* ── Results Section ── */
+.results-section{
+  flex:1;max-width:700px;margin:0 auto;width:100%;
+  padding:28px 24px 80px;
+}
+
+/* ── Welcome State ── */
+.welcome-state{text-align:center;padding:56px 20px 20px;}
+.welcome-icon{
+  width:64px;height:64px;border-radius:20px;background:var(--gradient);
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;color:#fff;margin:0 auto 20px;
+  box-shadow:0 8px 32px rgba(0,104,106,0.25);
+}
+.welcome-state h3{font-family:'Urbanist',sans-serif;font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px;}
+.welcome-state p{font-size:13.5px;color:var(--text-muted);line-height:1.65;max-width:320px;margin:0 auto;}
+
+/* ── Thinking Block ── */
+.thinking-block{display:none;align-items:center;gap:14px;
+  background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;
+  padding:20px 22px;margin-bottom:16px;}
+.thinking-block.active{display:flex;}
+.thinking-avatar{
+  width:34px;height:34px;border-radius:10px;background:var(--gradient);
+  display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex-shrink:0;}
+.thinking-label{font-size:13px;color:var(--text-muted);margin-bottom:8px;}
+.thinking-dots{display:flex;gap:5px;}
+.thinking-dot{width:7px;height:7px;border-radius:50%;background:var(--primary-light);}
+.thinking-dot:nth-child(1){animation:dot 1.2s ease infinite 0s;}
+.thinking-dot:nth-child(2){animation:dot 1.2s ease infinite 0.2s;}
+.thinking-dot:nth-child(3){animation:dot 1.2s ease infinite 0.4s;}
+@keyframes dot{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-7px);}}
+
+/* ── Chat Bubbles ── */
+.chat-log{display:flex;flex-direction:column;gap:16px;}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.msg-user,.msg-ai{animation:msgIn 0.3s cubic-bezier(.4,0,.2,1);}
+.msg-user{display:flex;justify-content:flex-end;}
+.msg-user .bubble{
+  max-width:72%;background:linear-gradient(135deg,rgba(0,104,106,0.12),rgba(0,191,178,0.08));
+  border:1px solid rgba(0,191,178,0.18);
+  border-radius:18px 18px 4px 18px;padding:13px 18px;font-size:14.5px;line-height:1.65;
+}
+.msg-ai{display:flex;gap:12px;align-items:flex-start;}
+.msg-ai-avatar{
+  width:34px;height:34px;border-radius:10px;background:var(--gradient);
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;color:#fff;flex-shrink:0;margin-top:2px;
+  box-shadow:0 4px 12px rgba(0,104,106,0.25);
+}
+.msg-ai .bubble{
+  flex:1;background:var(--glass-2);border:1px solid var(--glass-border);
+  border-radius:4px 18px 18px 18px;padding:18px 20px;
+  font-size:14px;line-height:1.78;
+  box-shadow:0 2px 12px rgba(0,0,0,0.05);
+}
+.msg-ai .bubble h4{font-family:'Urbanist',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;color:var(--primary);}
+.msg-ai .bubble p{margin-bottom:10px;color:var(--text-muted);}
+.msg-ai .bubble p:last-of-type{margin-bottom:0;}
+.msg-ai .bubble strong{color:var(--text);}
+
+/* ── Source Citations ── */
+.sources-block{margin-top:18px;padding-top:16px;border-top:1px solid rgba(0,0,0,0.07);}
+.sources-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:8px;font-weight:600;}
+.sources-label::after{content:'';flex:1;height:1px;background:rgba(0,0,0,0.07);}
+.sources-list{display:flex;flex-direction:column;gap:7px;}
+.source-card{
+  display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:11px;
+  background:rgba(0,104,106,0.04);border:1px solid rgba(0,191,178,0.1);
+  cursor:pointer;transition:all 0.22s;text-decoration:none;
+}
+.source-card:hover{background:rgba(0,104,106,0.09);border-color:rgba(0,191,178,0.28);transform:translateX(3px);}
+.source-card-bar{width:3px;height:30px;border-radius:2px;flex-shrink:0;}
+.source-card-body{flex:1;min-width:0;}
+.source-card-title{font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.source-card-meta{display:flex;align-items:center;gap:8px;margin-top:3px;}
+.source-card-seg{font-size:10.5px;color:var(--text-muted);}
+.source-card-type{font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:0.4px;}
+.source-card-arrow{font-size:14px;color:var(--text-muted);flex-shrink:0;transition:color 0.2s;}
+.source-card:hover .source-card-arrow{color:var(--primary-light);}
+
+/* ── Footer ── */
+footer{border-top:none;padding:28px 48px;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);position:relative;}
+footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#00686A 0%,#00BFB2 100%);}
+.footer-inner{max-width:900px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+.footer-brand{font-family:'Urbanist',sans-serif;font-weight:700;font-size:13.5px;background:var(--gradient);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
+.footer-copy{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
+.footer-links{display:flex;gap:20px;}
+.footer-links a{font-size:12.5px;color:var(--text-muted);text-decoration:none;transition:color 0.2s;}
+.footer-links a:hover{color:var(--primary);}
+.bg-blobs{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.bg-blob{position:absolute;border-radius:50%;filter:blur(100px);}
+.bg-blob-1{width:720px;height:720px;top:-220px;left:-200px;background:radial-gradient(circle,rgba(0,191,178,0.13) 0%,transparent 65%);animation:blob1 26s ease-in-out infinite;}
+.bg-blob-2{width:580px;height:580px;top:38%;right:-160px;background:radial-gradient(circle,rgba(0,104,106,0.10) 0%,transparent 65%);animation:blob2 32s ease-in-out infinite;}
+.bg-blob-3{width:460px;height:460px;bottom:-80px;left:28%;background:radial-gradient(circle,rgba(0,191,178,0.08) 0%,transparent 65%);animation:blob3 22s ease-in-out infinite;}
+@keyframes blob1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(50px,-70px) scale(1.08);}}
+@keyframes blob2{0%,100%{transform:translate(0,0) scale(1);}40%{transform:translate(-60px,50px) scale(1.06);}80%{transform:translate(30px,-30px) scale(0.95);}}
+@keyframes blob3{0%,100%{transform:translate(0,0) scale(1);}60%{transform:translate(-40px,60px) scale(1.1);}}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(0,104,106,0.28);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:rgba(0,104,106,0.5);}
+.nav-links{position:relative;}.nav-pill{position:absolute;top:50%;transform:translateY(-50%);height:34px;background:rgba(0,104,106,0.1);border-radius:8px;transition:left 0.28s cubic-bezier(.4,0,.2,1),width 0.28s cubic-bezier(.4,0,.2,1),opacity 0.2s;pointer-events:none;z-index:0;opacity:0;}
+.nav-links a.active::after{display:none!important;}
+.dark-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:border-color 0.2s,color 0.2s,background 0.2s;flex-shrink:0;padding:0;}
+.dark-toggle:hover{border-color:var(--primary);color:var(--primary);background:rgba(0,104,106,0.06);}
+html[data-theme="dark"]{--dark:#0e1824;--glass:rgba(25,38,58,0.88);--glass-border:rgba(255,255,255,0.07);--text:#dde4ef;--text-muted:#7e94ab;}
+html[data-theme="dark"] body{background:#0e1824;}
+html[data-theme="dark"] nav{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.06);}
+html[data-theme="dark"] .nav-brand-name{color:#dde4ef;}html[data-theme="dark"] .nav-brand-hub{color:#7e94ab;}
+html[data-theme="dark"] .nav-pill{background:rgba(0,191,178,0.12);}
+html[data-theme="dark"] .dark-toggle{border-color:rgba(255,255,255,0.1);color:#7e94ab;}
+html[data-theme="dark"] .search-card{background:rgba(25,38,58,0.95);border-color:rgba(255,255,255,0.08);}
+html[data-theme="dark"] #query-input{color:#dde4ef;}html[data-theme="dark"] #query-input::placeholder{color:#4d6070;}
+html[data-theme="dark"] .search-bottom-row{border-color:rgba(255,255,255,0.07);}
+html[data-theme="dark"] .filter-chip{border-color:rgba(255,255,255,0.1);color:#7e94ab;}
+html[data-theme="dark"] .filter-chip.active{background:rgba(0,104,106,0.2);border-color:rgba(0,191,178,0.3);color:#00BFB2;}
+html[data-theme="dark"] .stat-pill{background:rgba(25,38,58,0.8);border-color:rgba(255,255,255,0.07);}
+html[data-theme="dark"] .msg-ai{background:#19263a;border-color:#243044;}
+html[data-theme="dark"] .results-area{background:transparent;}
+html[data-theme="dark"] .prompt-chip{background:rgba(25,38,58,0.8);border-color:rgba(255,255,255,0.09);color:#7e94ab;}
+html[data-theme="dark"] .prompt-chip:hover{background:rgba(0,104,106,0.15);border-color:rgba(0,191,178,0.25);color:#00BFB2;}
+html[data-theme="dark"] footer{background:#19263a;border-color:#243044;}
+html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,191,178,0.2);}
+html[data-theme="dark"] .bg-blob-1{background:radial-gradient(circle,rgba(0,191,178,0.05) 0%,transparent 65%);}
+html[data-theme="dark"] .bg-blob-2{background:radial-gradient(circle,rgba(0,104,106,0.04) 0%,transparent 65%);}
+html[data-theme="dark"] .bg-blob-3{background:radial-gradient(circle,rgba(0,191,178,0.03) 0%,transparent 65%);}
+html[data-theme="dark"] .scroll-top-btn{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.1);}
+
+/* ── Typewriter cursor ── */
+.tw-cursor{display:inline-block;width:2px;height:1em;background:var(--primary-light);margin-left:2px;vertical-align:text-bottom;animation:twBlink 0.9s ease infinite;}
+@keyframes twBlink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* ── Page Exit Transition ── */
+@keyframes pageFadeOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-5px);}}
+body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
+
+/* ── Scroll Progress Ring ── */
+.scroll-top-btn{
+  position:fixed;bottom:28px;right:28px;z-index:500;
+  width:46px;height:46px;border-radius:50%;
+  background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--glass-border);box-shadow:0 4px 20px rgba(0,0,0,0.1);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(14px);
+  transition:opacity 0.3s,transform 0.3s,box-shadow 0.2s;padding:0;
+}
+.scroll-top-btn.stp-visible{opacity:1;transform:translateY(0);}
+.scroll-top-btn:hover{box-shadow:0 8px 28px rgba(0,104,106,0.3);transform:translateY(-3px)!important;}
+.scroll-top-btn svg{position:absolute;top:0;left:0;width:46px;height:46px;}
+.stp-arrow{font-size:13px;color:var(--primary);position:relative;z-index:1;font-weight:800;}
+
+/* ── Hub Word Animations ── */
+@keyframes hubWordIn{from{opacity:0;transform:translateY(26px);}to{opacity:1;transform:translateY(0);}}
+.hw{opacity:0;animation:hubWordIn 0.72s cubic-bezier(0.16,1,0.3,1) forwards;}
+.hw-i{display:inline-block;}
+.hw-1{animation-delay:0.10s;}
+.hw-2{animation-delay:0.28s;}
+.hw-3{animation-delay:0.46s;}
+.hw-4{animation-delay:0.64s;}
+.hw-5{animation-delay:0.84s;}
+.hw-6{animation-delay:1.08s;}
+.hw-7{animation-delay:1.24s;}
+.hw-8{animation-delay:1.38s;}
+
+@media(max-width:640px){
+  nav{padding:0 20px;}.nav-links{display:none;}
+  .search-hub,.prompts-section,.results-section{padding-left:16px;padding-right:16px;}
+  footer{padding:20px;}
+  .hub-title{letter-spacing:-1px;}
+}
+</style>
+</head>
+<body>
+<div class="bg-blobs" aria-hidden="true"><div class="bg-blob bg-blob-1"></div><div class="bg-blob bg-blob-2"></div><div class="bg-blob bg-blob-3"></div></div>
+<canvas id="bg-canvas"></canvas>
+<div class="page-wrapper">
+
+<nav>
+  <a href="index.html" class="nav-brand">
+    <span class="nav-brand-text"><span class="nav-brand-name">TAQA</span> <span class="nav-brand-hub">Knowledge Hub</span><span class="nav-subtitle"><em style="color:#00686A; font-style:italic;">The One</em> Platform</span></span>
+  </a>
+  <ul class="nav-links">
+    <div class="nav-pill" id="nav-pill"></div>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="ai-search.html" class="active">Document Search</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="upload.html">Upload</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode"><svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <a href="upload.html" class="btn btn-primary">+ Upload</a>
+  </div>
+</nav>
+
+<!-- ── Search Hub ── -->
+<div class="search-hub">
+  <div class="hub-glow"></div>
+
+  <div style="font-size:10px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;color:var(--primary);margin-bottom:10px;position:relative;z-index:1;">Part of <em style="font-style:italic;color:#00686A;font-weight:700;">The One</em> Platform</div>
+  <div class="ai-badge hw hw-1"><span class="ai-spark">✦</span> AI-Powered Document Intelligence</div>
+  <h1 class="hub-title"><span class="hw hw-2 hw-i">Ask</span> <span class="hw hw-3 hw-i">Anything</span> <span class="hw hw-4 hw-i">About</span><br><span class="hw hw-5 hw-i"><span class="grad">TAQA Operations</span></span></h1>
+  <p class="hub-sub hw hw-6">Answers sourced directly from 492 operational documents across all ten TAQA business segments.</p>
+
+  <div class="stats-pills hw hw-7">
+    <div class="stat-pill"><span class="stat-dot"></span>492 Documents</div>
+    <span class="stat-sep">·</span>
+    <div class="stat-pill"><span class="stat-dot"></span>10 Segments</div>
+    <span class="stat-sep">·</span>
+    <div class="stat-pill"><span class="stat-dot"></span>SOPs · Manuals · Alerts</div>
+  </div>
+
+  <!-- Search Card -->
+  <div class="search-card">
+    <div class="search-input-row">
+      <textarea id="query-input" placeholder="e.g. What is the well shut-in procedure? What are the H2S PPE requirements?" rows="1"></textarea>
+      <button class="send-btn" id="send-btn" onclick="submitQuery()" title="Ask AI">✦</button>
+    </div>
+    <div class="search-bottom-row">
+      <div class="seg-filters">
+        <span class="filter-label">Segment</span>
+        <span class="filter-chip active" data-seg="all">All</span>
+        <span class="filter-chip" data-seg="drilling">Drilling</span>
+        <span class="filter-chip" data-seg="well-safety">Well Safety</span>
+        <span class="filter-chip" data-seg="fracturing">Fracturing</span>
+        <span class="filter-chip" data-seg="qhse">QHSE</span>
+        <span class="filter-chip" data-seg="hr">HR</span>
+      </div>
+      <span class="char-count" id="char-count">0 / 500</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Suggested Prompts ── -->
+<div class="prompts-section">
+  <div class="prompts-row">
+    <span class="prompts-tag">Try</span>
+    <div class="prompts-chips">
+      <span class="prompt-chip" onclick="setPrompt(this)">Well shut-in procedure</span>
+      <span class="prompt-chip" onclick="setPrompt(this)">BOP test frequency</span>
+      <span class="prompt-chip" onclick="setPrompt(this)">H2S PPE requirements</span>
+      <span class="prompt-chip" onclick="setPrompt(this)">Active technical alerts</span>
+      <span class="prompt-chip" onclick="setPrompt(this)">Cement slurry mixing</span>
+      <span class="prompt-chip" onclick="setPrompt(this)">Non-conformance report</span>
+      <span class="prompt-chip" onclick="setPrompt(this)">CT BHA assembly steps</span>
+      <span class="prompt-chip" onclick="setPrompt(this)">SIMOPS restrictions</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Results ── -->
+<div class="results-section">
+  <div class="thinking-block" id="thinking-block">
+    <div class="thinking-avatar">✦</div>
+    <div>
+      <div class="thinking-label">Searching 492 documents...</div>
+      <div class="thinking-dots">
+        <div class="thinking-dot"></div>
+        <div class="thinking-dot"></div>
+        <div class="thinking-dot"></div>
+      </div>
+    </div>
+  </div>
+  <div class="chat-log" id="chat-log">
+    <div class="welcome-state">
+      <div class="welcome-icon">✦</div>
+      <h3>Ready to Search</h3>
+      <p>Type a question or select a suggested prompt above to get started.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">TAQA Knowledge Hub &nbsp;·&nbsp; <em style="color:#00BFB2; font-style:italic; font-weight:700;">The One</em> Platform</div>
+      <div class="footer-copy">© 2026 TAQA — Industrialization &amp; Energy Services Company. All rights reserved.</div>
+      <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">Built by <span style="color:#00686A;font-weight:600;">TAQA LEARNING CENTER</span></div>
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="ai-search.html">Document Search</a>
+      <a href="glossary.html">Field Glossary</a>
+      <a href="upload.html">Upload</a>
+      <a href="support-ticket.html">Ask Expert</a>
+    </div>
+  </div>
+</footer>
+</div>
+
+<!-- ── Scroll Progress Ring ── -->
+<button class="scroll-top-btn" id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top" aria-label="Back to top">
+  <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="23" cy="23" r="19" stroke="rgba(0,104,106,0.12)" stroke-width="2.5"/>
+    <circle id="stp-ring" cx="23" cy="23" r="19" stroke="url(#stpg)" stroke-width="2.5"
+      stroke-linecap="round" stroke-dasharray="119.4" stroke-dashoffset="119.4"
+      transform="rotate(-90 23 23)"/>
+    <defs><linearGradient id="stpg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00686A"/><stop offset="100%" stop-color="#00BFB2"/>
+    </linearGradient></defs>
+  </svg>
+  <span class="stp-arrow">↑</span>
+</button>
+
+<script>
+// ── Prefill from URL ──
+const urlQ = new URLSearchParams(window.location.search).get('q');
+if (urlQ) { document.getElementById('query-input').value = urlQ; }
+
+// ── Char Counter + auto-resize ──
+const input = document.getElementById('query-input');
+input.addEventListener('input', () => {
+  const len = input.value.length;
+  document.getElementById('char-count').textContent = len + ' / 500';
+  if (len > 500) input.value = input.value.substring(0, 500);
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 180) + 'px';
+});
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitQuery(); }
+});
+
+// ── Prompt Chips ──
+function setPrompt(el) {
+  input.value = el.textContent;
+  input.dispatchEvent(new Event('input'));
+  input.focus();
+}
+
+// ── Segment Filters ──
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+  });
+});
+
+// ── Demo AI Responses ──
+const RESPONSES = {
+  'well shut-in': {
+    answer: `<h4>Well Shut-In Procedure</h4>
+    <p>According to <strong>WS-003 Well Shut-In Procedure</strong> and the <strong>Well Control Manual v6.0</strong>, the immediate shut-in sequence is:</p>
+    <p><strong>1. Detect the kick:</strong> Monitor for pit gain, flow while pumps are off, increased pump pressure, or increased rate of penetration.</p>
+    <p><strong>2. Pick up off bottom:</strong> Stop drilling, pick up to a safe position above the formation.</p>
+    <p><strong>3. Shut down pumps:</strong> Stop all circulation pumps immediately.</p>
+    <p><strong>4. Close the BOP:</strong> Per WS-004, a Hard Shut-In (direct BOP closure) is the preferred TAQA method.</p>
+    <p><strong>5. Record SICP and SIDPP:</strong> Wait for pressures to stabilize, record all readings on the kill sheet.</p>
+    <p><strong>6. Notify:</strong> Alert the Company Man, Well Site Leader, and QHSE immediately.</p>`,
+    sources: [
+      {title:'WS-003 Well Shut-In Procedure',seg:'Well Safety',type:'SOP'},
+      {title:'WS-004 Hard vs Soft Shut-In',seg:'Well Safety',type:'SOP'},
+      {title:'Well Control Manual v6.0',seg:'Drilling',type:'Manual'},
+      {title:'QHSE-016 Document Control',seg:'QHSE',type:'Policy'}
+    ]
+  },
+  'bop test': {
+    answer: `<h4>BOP Testing Requirements</h4>
+    <p>Per <strong>WS-001 Daily BOP Test SOP</strong> and <strong>ALERT-DRL-002</strong> (effective June 2026), BOP testing intervals at TAQA are:</p>
+    <p><strong>Pressure Tests:</strong> Every 14 days, or after each connection/nipple-up, or after any BOP repair.</p>
+    <p><strong>Function Tests:</strong> Every 7 days for all BOP functions including annulars, pipe rams, and blind rams.</p>
+    <p><strong>H2S Zones (updated):</strong> Inspection intervals reduced to 14 days per ALERT-INS-002.</p>
+    <p><strong>Test Pressure:</strong> Low pressure (200–300 psi), followed by high pressure (as per casing design — typically MAASP or 70% of burst).</p>
+    <p><strong>Documentation:</strong> All tests must be recorded in the BOP test log and reviewed by the Company Man.</p>`,
+    sources: [
+      {title:'WS-001 Daily BOP Test SOP',seg:'Well Safety',type:'SOP'},
+      {title:'DRL-022 End of Well Report SOP',seg:'Drilling',type:'SOP'},
+      {title:'ALERT-DRL-002',seg:'Drilling',type:'Alert'},
+      {title:'Well Control Manual v6.0',seg:'Drilling',type:'Manual'}
+    ]
+  },
+  'h2s': {
+    answer: `<h4>H2S Safety &amp; PPE Requirements</h4>
+    <p>Per <strong>WS-008 H2S Alarm Response SOP</strong> and the <strong>H2S Safety Manual</strong>, TAQA H2S requirements include:</p>
+    <p><strong>Detection Levels:</strong></p>
+    <p>• <strong>1 ppm:</strong> Warning alarm — monitor closely<br>• <strong>5 ppm:</strong> Personnel upwind, emergency response standby<br>• <strong>10 ppm:</strong> SCBA mandatory for all personnel near source<br>• <strong>20 ppm:</strong> Full evacuation of work area</p>
+    <p><strong>PPE Requirements:</strong> SCBA units must be worn when entering any area with confirmed H2S ≥10 ppm. All personnel must pass annual H2S Awareness Training.</p>
+    <p><strong>ALERT-DRL-004:</strong> H2S concentrations elevated in Shedgum area — updated PPE requirements are in effect immediately.</p>`,
+    sources: [
+      {title:'WS-008 H2S Alarm Response SOP',seg:'Well Safety',type:'SOP'},
+      {title:'H2S Safety Manual',seg:'QHSE',type:'Manual'},
+      {title:'ALERT-DRL-004',seg:'Drilling',type:'Alert'},
+      {title:'WS-011 H2S Safety SOP',seg:'Well Safety',type:'SOP'}
+    ]
+  },
+  'default': {
+    answer: `<h4>Search Results</h4>
+    <p>I found relevant information across multiple TAQA segments. Based on the 492 documents in the Knowledge Hub, here is a summary of the most relevant procedures and standards:</p>
+    <p>For operational procedures, refer to the relevant segment's <strong>Standard Operating Procedures (SOPs)</strong>. For equipment specifications, consult the <strong>Technical Manuals</strong>. For compliance requirements, review the <strong>Policies</strong> section.</p>
+    <p>To get more specific results, try narrowing your question or selecting a segment filter above. You can also browse documents directly by navigating to a segment page.</p>
+    <p><strong>Note:</strong> This is a demo interface. Full AI-powered search will be connected to the Claude API in the next phase, enabling real document Q&amp;A with citations.</p>`,
+    sources: [
+      {title:'Knowledge Hub Documentation',seg:'All Segments',type:'Manual'},
+      {title:'QHSE-016 Document Control SOP',seg:'QHSE',type:'SOP'}
+    ]
+  }
+};
+
+function getResponse(q) {
+  q = q.toLowerCase();
+  if (q.includes('shut') || q.includes('kick') || q.includes('well control')) return RESPONSES['well shut-in'];
+  if (q.includes('bop') || q.includes('blowout') || q.includes('preventer')) return RESPONSES['bop test'];
+  if (q.includes('h2s') || q.includes('hydrogen') || q.includes('sulfide') || q.includes('toxic')) return RESPONSES['h2s'];
+  return RESPONSES['default'];
+}
+
+// ── Typewriter for AI responses ──
+function typewriteHTML(el, html, speed, onDone) {
+  el.innerHTML = '';
+  let i = 0;
+  const cursor = document.createElement('span');
+  cursor.className = 'tw-cursor';
+  el.appendChild(cursor);
+  function step() {
+    if (i >= html.length) {
+      el.innerHTML = html;
+      if (onDone) onDone();
+      return;
+    }
+    if (html[i] === '<') {
+      const end = html.indexOf('>', i);
+      i = end !== -1 ? end + 1 : html.length;
+    } else {
+      i++;
+    }
+    el.innerHTML = html.substring(0, i) + '<span class="tw-cursor"></span>';
+    setTimeout(step, speed);
+  }
+  step();
+}
+
+function addMessage(type, content, sources) {
+  const log = document.getElementById('chat-log');
+  const welcome = log.querySelector('.welcome-state');
+  if (welcome) welcome.remove();
+
+  const div = document.createElement('div');
+  if (type === 'user') {
+    div.className = 'msg-user';
+    div.innerHTML = `<div class="bubble">${content}</div>`;
+    log.appendChild(div);
+    div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  } else {
+    const typeColor = {SOP:'#3498DB',Manual:'#8E44AD',Policy:'#27AE60',Alert:'#E74C3C',default:'#00BFB2'};
+    const srcsHTML = sources && sources.length ? `<div class="sources-block">
+      <div class="sources-label">${sources.length} Source${sources.length>1?'s':''}</div>
+      <div class="sources-list">${sources.map(s=>`
+        <div class="source-card">
+          <div class="source-card-bar" style="background:${typeColor[s.type]||typeColor.default}"></div>
+          <div class="source-card-body">
+            <div class="source-card-title">${s.title}</div>
+            <div class="source-card-meta">
+              <span class="source-card-seg">${s.seg}</span>
+              <span class="source-card-type" style="background:${typeColor[s.type]||typeColor.default}22;border-color:${typeColor[s.type]||typeColor.default}33;color:${typeColor[s.type]||typeColor.default}">${s.type}</span>
+            </div>
+          </div>
+          <span class="source-card-arrow">›</span>
+        </div>`).join('')}
+      </div></div>` : '';
+    div.className = 'msg-ai';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    div.innerHTML = '<div class="msg-ai-avatar">✦</div>';
+    div.appendChild(bubble);
+    log.appendChild(div);
+    div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    typewriteHTML(bubble, content, 9, () => {
+      if (srcsHTML) {
+        const srcDiv = document.createElement('div');
+        srcDiv.innerHTML = srcsHTML;
+        srcDiv.style.cssText = 'opacity:0;transform:translateY(8px);transition:opacity 0.4s,transform 0.4s;';
+        bubble.appendChild(srcDiv);
+        setTimeout(() => { srcDiv.style.opacity='1'; srcDiv.style.transform='none'; }, 80);
+      }
+      div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    });
+  }
+}
+
+function submitQuery() {
+  const q = input.value.trim();
+  if (!q) return;
+
+  addMessage('user', q);
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('char-count').textContent = '0 / 500';
+
+  const thinking = document.getElementById('thinking-block');
+  thinking.classList.add('active');
+  const btn = document.getElementById('send-btn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  setTimeout(() => {
+    thinking.classList.remove('active');
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    const resp = getResponse(q);
+    addMessage('ai', resp.answer, resp.sources);
+  }, 1800 + Math.random() * 800);
+}
+
+// ── Canvas ──
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W,H,pts=[];
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+function initPts(){pts=[];let n=Math.floor(W*H/20000);
+  for(let i=0;i<n;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,s:Math.random()*1.5+.3});}
+initPts();
+function draw(){ctx.fillStyle='#f4f5f7';ctx.fillRect(0,0,W,H);
+  const g=ctx.createRadialGradient(W*.5,H*.25,0,W*.5,H*.25,500);
+  g.addColorStop(0,'rgba(0,104,106,0.05)');g.addColorStop(1,'transparent');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.s,0,Math.PI*2);ctx.fillStyle='rgba(0,104,106,0.1)';ctx.fill();});
+  requestAnimationFrame(draw);}
+draw();
+// ── Sliding Pill Nav ──
+const pill=document.getElementById('nav-pill'),navList=document.querySelector('.nav-links');
+function pillTo(el){const lr=navList.getBoundingClientRect(),ar=el.getBoundingClientRect();pill.style.left=(ar.left-lr.left)+'px';pill.style.width=ar.width+'px';pill.style.opacity='1';}
+function pillToActive(){const a=navList.querySelector('a.active');if(a)pillTo(a);else pill.style.opacity='0';}
+pillToActive();navList.querySelectorAll('a').forEach(a=>a.addEventListener('mouseenter',()=>pillTo(a)));navList.addEventListener('mouseleave',pillToActive);
+// ── Dark Mode ──
+const MOON='M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
+const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
+function toggleDark(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme',next);}
+(function(){const s=localStorage.getItem('taqa-theme');if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
+
+if (urlQ) setTimeout(submitQuery, 600);
+
+// ── Scroll Progress Ring ──
+(function(){
+  const btn=document.getElementById('scroll-top-btn');
+  const ring=document.getElementById('stp-ring');
+  const C=119.4;
+  window.addEventListener('scroll',function(){
+    const pct=window.scrollY/(document.documentElement.scrollHeight-window.innerHeight)||0;
+    if(btn){if(window.scrollY>300)btn.classList.add('stp-visible');else btn.classList.remove('stp-visible');}
+    if(ring)ring.style.strokeDashoffset=C*(1-pct);
+  },{passive:true});
+})();
+
+// ── Page Exit Transition ──
+document.addEventListener('click',function(e){
+  const a=e.target.closest('a[href]');
+  if(!a)return;
+  const h=a.getAttribute('href');
+  if(!h||h.startsWith('#')||h.startsWith('http')||h.startsWith('mailto'))return;
+  if(a.target==='_blank')return;
+  e.preventDefault();
+  document.body.classList.add('page-exit');
+  setTimeout(()=>window.location.href=h,270);
+});
+</script>
+</body>
+</html>
