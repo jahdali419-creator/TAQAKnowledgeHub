@@ -796,6 +796,29 @@ html[data-theme="dark"] .section-hl-title { color:var(--text); }
 }
 .sidebar-brand-card-credit span { color:rgba(0,191,178,0.7); }
 
+/* ── Mobile Nav ── */
+.nav-hamburger {
+  display:none; background:none; border:1px solid var(--border);
+  border-radius:7px; padding:7px 9px; cursor:pointer;
+  flex-direction:column; gap:4px; align-items:center; justify-content:center;
+}
+.nav-hamburger span { display:block; width:17px; height:2px; background:var(--text-muted); border-radius:2px; transition:all 0.25s; }
+.nav-mobile-menu {
+  display:none; position:fixed; top:64px; left:0; right:0; z-index:998;
+  background:rgba(255,255,255,0.97); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border); padding:8px 20px 20px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.1);
+}
+.nav-mobile-menu.open { display:block; }
+.nav-mobile-menu a {
+  display:block; padding:13px 0; font-size:15px; font-weight:500;
+  color:var(--text); text-decoration:none; border-bottom:1px solid var(--border); transition:color 0.2s;
+}
+.nav-mobile-menu a:last-child { border-bottom:none; }
+.nav-mobile-menu a.active, .nav-mobile-menu a:hover { color:var(--primary); }
+html[data-theme="dark"] .nav-mobile-menu { background:rgba(14,24,36,0.97); border-color:#243044; }
+html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
+
 /* ── Responsive ── */
 @media(max-width:1100px) {
   .main-inner { grid-template-columns:1fr 280px; gap:32px; }
@@ -810,18 +833,33 @@ html[data-theme="dark"] .section-hl-title { color:var(--text); }
   .sidebar-brand-card { flex:none; min-height:160px; }
   .segments-grid { grid-template-columns:repeat(2,1fr); }
   .sidebar-tools { display:grid; grid-template-columns:1fr 1fr; }
-  .sidebar-tool-featured { grid-column:1/-1; }
+  .sidebar-tool-featured { grid-column:1/-1; flex:none; }
 }
 @media(max-width:768px) {
   .main-wrapper { padding:32px 24px; }
   .alert-bar { padding:0 24px 24px; }
   .sidebar-tools { grid-template-columns:1fr; }
+  .stats-strip-inner { padding:0 24px; }
 }
 @media(max-width:640px) {
-  nav { padding:0 20px; } .nav-links { display:none; }
+  nav { padding:0 20px; }
+  .nav-links { display:none; }
+  .nav-hamburger { display:flex; }
+  .nav-actions .btn { display:none; }
   .hero { padding:80px 20px 56px; }
-  .main-wrapper { padding:28px 20px; } .alert-bar { padding:0 20px 24px; }
-  .segments-grid { grid-template-columns:1fr; }
+  .hero h1 { font-size:clamp(24px,7.5vw,36px); }
+  .hero-search-bar { flex-wrap:wrap; }
+  .hero-search-bar .btn { width:100%; justify-content:center; }
+  .main-wrapper { padding:28px 20px; }
+  .alert-bar { padding:0 20px 24px; }
+  .stats-strip-inner { padding:0 16px; flex-wrap:wrap; }
+  .stats-strip-item { flex:0 0 50%; padding:16px 8px; }
+  .stats-strip-divider { display:none; }
+  .stats-strip-num { font-size:22px; }
+  .section-hl-title { white-space:normal; font-size:15px; }
+  .sidebar-brand-card { min-height:auto; }
+  .footer-inner { flex-direction:column; align-items:flex-start; gap:12px; }
+  .footer-links { flex-wrap:wrap; gap:12px; }
   footer { padding:24px 20px; }
 }
 </style>
@@ -853,6 +891,9 @@ html[data-theme="dark"] .section-hl-title { color:var(--text); }
     <li><a href="support-ticket.html">Ask Expert</a></li>
   </ul>
   <div class="nav-actions">
+    <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
     <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode">
       <svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor">
         <path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/>
@@ -862,6 +903,15 @@ html[data-theme="dark"] .section-hl-title { color:var(--text); }
     <a href="upload.html" class="btn btn-primary">Upload Document</a>
   </div>
 </nav>
+
+<!-- ── Mobile Nav Menu ── -->
+<div class="nav-mobile-menu" id="nav-mobile-menu">
+  <a href="index.html" class="active">Home</a>
+  <a href="ai-search.html">Document Search</a>
+  <a href="glossary.html">Field Glossary</a>
+  <a href="upload.html">Upload</a>
+  <a href="support-ticket.html">Ask Expert</a>
+</div>
 
 <!-- ── Hero ── -->
 <div class="hero-wrap">
@@ -1497,6 +1547,19 @@ function toggleDark() {
   }
 })();
 
+
+// ── Mobile Nav ──
+function toggleMobileNav() {
+  const menu = document.getElementById('nav-mobile-menu');
+  menu.classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('nav-mobile-menu');
+  const btn = document.getElementById('nav-hamburger');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
 
 // ── Scroll Hint Hide ──
 (function(){
