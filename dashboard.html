@@ -256,6 +256,7 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
     <li><a href="support-ticket.html">Ask Expert</a></li>
   </ul>
   <div class="nav-right">
+    <a id="back-to-segment" href="segment.html" class="btn btn-ghost" style="font-size:13px;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5"/><path d="M12 5l-7 7 7 7"/></svg> Back to Segment</a>
     <span class="nav-role-badge">Segment Controller</span>
     <button class="btn btn-ghost" style="font-size:13px;">Sign Out</button>
   </div>
@@ -266,13 +267,13 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
   <div class="dash-hero-inner">
     <div class="dash-hero-left">
       <span class="dash-hero-tag">Control Panel</span>
-      <div class="dash-hero-title">Coiled Tubing Segment</div>
-      <div class="dash-hero-sub">You are managing document approvals and access for this segment.</div>
+      <div class="dash-hero-title" id="dash-seg-name">Coiled Tubing Segment</div>
+      <div class="dash-hero-sub" id="dash-seg-sub">You are managing document approvals and access for this segment.</div>
       <div class="dash-user-pill">
-        <div class="dash-user-avatar">MJ</div>
+        <div class="dash-user-avatar av-teal" id="dash-owner-avatar">MJ</div>
         <div>
-          <div class="dash-user-name">Mohammed Jahdali</div>
-          <div class="dash-user-role">Segment Controller · Coiled Tubing</div>
+          <div class="dash-user-name" id="dash-owner-name">Mohammed Jahdali</div>
+          <div class="dash-user-role" id="dash-owner-role">Segment Controller · Coiled Tubing</div>
         </div>
       </div>
     </div>
@@ -282,11 +283,11 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
         <div class="dash-hero-stat-label">Pending</div>
       </div>
       <div class="dash-hero-stat">
-        <span class="dash-hero-stat-num">47</span>
+        <span class="dash-hero-stat-num" id="stat-published">47</span>
         <div class="dash-hero-stat-label">Published</div>
       </div>
       <div class="dash-hero-stat">
-        <span class="dash-hero-stat-num">5</span>
+        <span class="dash-hero-stat-num" id="stat-contributors">5</span>
         <div class="dash-hero-stat-label">Contributors</div>
       </div>
       <div class="dash-hero-stat">
@@ -394,7 +395,7 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
               <th></th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="pub-docs-body">
             <tr>
               <td class="pub-doc-title">CT-SOP-001 Morning Safety Meeting Checklist</td>
               <td><span class="pub-doc-type-badge pub-type-sop">SOP</span></td>
@@ -448,8 +449,7 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Segment Contributors
         </div>
-        <div id="contributors-list">
-        <div class="contributor-row">
+        <div id="contributors-list"><div class="contributor-row">
           <div class="contributor-avatar av-teal">MJ</div>
           <div class="contributor-info">
             <div class="contributor-name">Mohammed Jahdali</div>
@@ -501,7 +501,7 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           Recent Activity
         </div>
-        <div class="activity-item">
+        <div id="activity-feed"><div class="activity-item">
           <div class="activity-dot dot-orange"></div>
           <div>
             <div class="activity-text"><strong>Khalid Al-Otaibi</strong> submitted CT-240 Maintenance Manual for review</div>
@@ -543,6 +543,7 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
             <div class="activity-time">3 days ago</div>
           </div>
         </div>
+        </div><!-- /activity-feed -->
       </div>
 
     </div><!-- /right col -->
@@ -559,7 +560,7 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
   <div class="modal-box">
     <button class="modal-close" onclick="closeAddContributor()">×</button>
     <div class="modal-title">Add Contributor</div>
-    <div class="modal-sub">This person will be able to upload documents to the Coiled Tubing segment.</div>
+    <div class="modal-sub">This person will be able to upload documents to the <span id="modal-seg-name">Coiled Tubing</span> segment.</div>
     <div class="form-group">
       <label class="form-label">Full Name</label>
       <input class="form-input" id="contrib-name" type="text" placeholder="e.g. Ahmed Al-Zahrani" autocomplete="off">
@@ -591,7 +592,372 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
 </div>
 
 <script>
-let pendingCount = 3;
+let pendingCount = 0;
+
+// ── Per-Segment Dashboard Data ──
+const DASH_DATA = {
+'coiled-tubing':{
+  name:'Coiled Tubing',
+  owner:{name:'Mohammed Jahdali',initials:'MJ',title:'CT Operations Lead',av:'av-teal'},
+  contributors:[
+    {name:'Khalid Al-Otaibi',initials:'KO',title:'CT Engineer',role:'Editor',av:'av-blue'},
+    {name:'Faisal Al-Ghamdi',initials:'FG',title:'Field Supervisor',role:'Editor',av:'av-orange'},
+    {name:'Omar Al-Harbi',initials:'OH',title:'HSE Lead',role:'Editor',av:'av-purple'}
+  ],
+  published:47,
+  pending:[
+    {type:'Vendor Manual',title:'Halliburton CT-240 Coiled Tubing Unit — Maintenance Manual v3.2',submitter:'Khalid Al-Otaibi',when:'2 hours ago',size:'4.8 MB',preview:'Covers preventive and corrective maintenance for the CT-240 unit: hydraulic service intervals, injector head inspection, BOP function tests, and reel drum alignment.'},
+    {type:'Technical Alert',title:'ALERT-CT-009: Nitrogen Pump Pressure Relief Valve — Inspection Required',submitter:'Faisal Al-Ghamdi',when:'5 hours ago',size:'1.2 MB',preview:'A pressure relief valve failure was found on two CT units during routine inspection. All units must be inspected within 48 hours per attached checklist.'},
+    {type:'SOP Update',title:'CT-SOP-007 Wellhead Connection Procedure — Revision 4',submitter:'Omar Al-Harbi',when:'Yesterday',size:'2.1 MB',preview:'Revision 4 updates wellhead connection torque specifications after the Q1 2026 equipment audit. Sections 4.2 and 6.1 updated. Previous Rev 3 to be archived upon approval.'}
+  ],
+  pubDocs:[
+    {title:'CT-SOP-001 Morning Safety Meeting Checklist',type:'sop',date:'Apr 2026',by:'M. Jahdali'},
+    {title:'Nowsco CT Unit Operations Manual v4.1',type:'manual',date:'Mar 2026',by:'K. Al-Otaibi'},
+    {title:'ALERT-CT-007: BOP Ram Seal Replacement',type:'alert',date:'May 2026',by:'F. Al-Ghamdi'},
+    {title:'CT-SOP-003 Wellhead Rigging Procedure',type:'sop',date:'Feb 2026',by:'O. Al-Harbi'},
+    {title:'CT Operations Safety Policy v2.0',type:'policy',date:'Jan 2026',by:'M. Jahdali'}
+  ],
+  activity:[
+    {dot:'dot-orange',text:'<strong>Khalid Al-Otaibi</strong> submitted CT-240 Maintenance Manual for review',time:'2 hours ago'},
+    {dot:'dot-orange',text:'<strong>Faisal Al-Ghamdi</strong> submitted Technical Alert CT-009',time:'5 hours ago'},
+    {dot:'dot-green',text:'You approved <strong>CT-SOP-006 Pressure Test Procedure</strong>',time:'Yesterday'},
+    {dot:'dot-red',text:'You rejected <strong>CT-POL-003 draft</strong> — incomplete scope section',time:'2 days ago'},
+    {dot:'dot-green',text:'You published <strong>Nowsco CT Unit Manual v4.1</strong>',time:'3 days ago'}
+  ]
+},
+'fracturing':{
+  name:'Fracturing',
+  owner:{name:'Sultan Al-Qahtani',initials:'SQ',title:'Fracturing Operations Lead',av:'av-blue'},
+  contributors:[
+    {name:'Abdulrahman Al-Mutairi',initials:'AM',title:'Frac Engineer',role:'Editor',av:'av-orange'},
+    {name:'Waleed Al-Harbi',initials:'WH',title:'Pump Supervisor',role:'Editor',av:'av-purple'},
+    {name:'Tariq Al-Asmari',initials:'TA',title:'Field Coordinator',role:'Editor',av:'av-teal'}
+  ],
+  published:39,
+  pending:[
+    {type:'SOP Update',title:'FRAC-SOP-009 Multi-Stage Fracturing Procedure — Revision 2',submitter:'Abdulrahman Al-Mutairi',when:'3 hours ago',size:'3.1 MB',preview:'Incorporates new proppant concentration limits and revised pump rate schedules from Q1 2026 field findings. Sections 3.1–3.5 updated.'},
+    {type:'Technical Alert',title:'ALERT-FRAC-005: Screen-Out Risk in Carbonate Formations — Updated Protocol',submitter:'Tariq Al-Asmari',when:'Yesterday',size:'0.9 MB',preview:'Updated protocol mandates a pre-flush acid stage and reduced proppant loading for all carbonate completions following recent screen-out analysis.'}
+  ],
+  pubDocs:[
+    {title:'FRAC-SOP-001 Pre-Job Safety Meeting',type:'sop',date:'May 2026',by:'S. Al-Qahtani'},
+    {title:'Hydraulic Fracturing Design Manual v4.1',type:'manual',date:'Apr 2026',by:'A. Al-Mutairi'},
+    {title:'FRAC-POL-002 High Pressure Operations Policy',type:'policy',date:'Mar 2026',by:'S. Al-Qahtani'},
+    {title:'ALERT-FRAC-003: Proppant Concentration Limits',type:'alert',date:'Feb 2026',by:'T. Al-Asmari'},
+    {title:'FRAC-SOP-007 Emergency Shutdown Procedure',type:'sop',date:'Jan 2026',by:'W. Al-Harbi'}
+  ],
+  activity:[
+    {dot:'dot-orange',text:'<strong>Abdulrahman Al-Mutairi</strong> submitted FRAC-SOP-009 Revision 2 for review',time:'3 hours ago'},
+    {dot:'dot-orange',text:'<strong>Tariq Al-Asmari</strong> submitted ALERT-FRAC-005 for review',time:'Yesterday'},
+    {dot:'dot-green',text:'You approved <strong>FRAC-POL-003 Fluid Disposal Policy</strong>',time:'2 days ago'},
+    {dot:'dot-green',text:'You published <strong>Hydraulic Fracturing Design Manual v4.1</strong>',time:'4 days ago'}
+  ]
+},
+'wireline':{
+  name:'Wireline',
+  owner:{name:'Nasser Al-Dosari',initials:'ND',title:'Wireline Operations Lead',av:'av-teal'},
+  contributors:[
+    {name:'Saad Al-Zahrani',initials:'SZ',title:'Wireline Engineer',role:'Editor',av:'av-blue'},
+    {name:'Majed Al-Otaibi',initials:'MO',title:'PCE Technician',role:'Editor',av:'av-orange'}
+  ],
+  published:27,
+  pending:[
+    {type:'SOP Update',title:'WL-SOP-006 Pump-Down Operations — Revision 3',submitter:'Saad Al-Zahrani',when:'4 hours ago',size:'2.2 MB',preview:'Updates pump-down speed limits and tool string weight constraints for high-angle wells based on recent field incidents.'},
+    {type:'Policy',title:'WL-POL-003 Explosives Handling Policy — Annual Review',submitter:'Majed Al-Otaibi',when:'2 days ago',size:'1.4 MB',preview:'Annual review incorporating updated regulatory requirements. Section 5 (Transport) and Section 8 (Storage) have been revised.'}
+  ],
+  pubDocs:[
+    {title:'WL-SOP-001 Pre-Job Hazard Assessment',type:'sop',date:'May 2026',by:'N. Al-Dosari'},
+    {title:'Wireline Operations Manual v2.8',type:'manual',date:'Apr 2026',by:'S. Al-Zahrani'},
+    {title:'WL-POL-002 Pressure Control Policy',type:'policy',date:'Mar 2026',by:'N. Al-Dosari'},
+    {title:'WL-SOP-004 Slickline Tool Running SOP',type:'sop',date:'Feb 2026',by:'M. Al-Otaibi'},
+    {title:'LL-WL-001: Tool String Stuck — Recovery Lessons',type:'lesson',date:'Jan 2026',by:'S. Al-Zahrani'}
+  ],
+  activity:[
+    {dot:'dot-orange',text:'<strong>Saad Al-Zahrani</strong> submitted WL-SOP-006 Revision 3 for review',time:'4 hours ago'},
+    {dot:'dot-orange',text:'<strong>Majed Al-Otaibi</strong> submitted Explosives Policy annual review',time:'2 days ago'},
+    {dot:'dot-green',text:'You approved <strong>WL-SOP-003 Perforation Operations SOP</strong>',time:'3 days ago'},
+    {dot:'dot-green',text:'You published <strong>Wireline Operations Manual v2.8</strong>',time:'5 days ago'}
+  ]
+},
+'drilling':{
+  name:'Drilling',
+  owner:{name:'Ibrahim Al-Shehri',initials:'IS',title:'Drilling Operations Lead',av:'av-orange'},
+  contributors:[
+    {name:'Saud Al-Qahtani',initials:'SQ',title:'Drilling Engineer',role:'Editor',av:'av-blue'},
+    {name:'Nawaf Al-Ghamdi',initials:'NG',title:'Mud Engineer',role:'Editor',av:'av-purple'},
+    {name:'Badr Al-Harbi',initials:'BH',title:'Well Control Supervisor',role:'Editor',av:'av-teal'}
+  ],
+  published:64,
+  pending:[
+    {type:'SOP Update',title:'DRL-SOP-003 Well Control Response — Revision 5',submitter:'Badr Al-Harbi',when:'1 hour ago',size:'3.8 MB',preview:'Integrates new kick tolerance margins and updated kill sheet templates per IADC 2026 well control guidelines.'},
+    {type:'Technical Alert',title:'ALERT-DRL-007: Directional Tool Limitations in High-Temperature Wells',submitter:'Saud Al-Qahtani',when:'6 hours ago',size:'1.1 MB',preview:'New limitations for directional steering tools in wells exceeding 180°C. Temporary depth restrictions apply — consult drilling engineer before proceeding.'},
+    {type:'Manual Update',title:'DRL-MAN-008 Cementing Reference Manual — 2026 Edition',submitter:'Nawaf Al-Ghamdi',when:'Yesterday',size:'5.2 MB',preview:'Annual update incorporating new slurry designs and revised displacement procedures for deepwater applications.'}
+  ],
+  pubDocs:[
+    {title:'DRL-SOP-001 Morning Safety Meeting Checklist',type:'sop',date:'May 2026',by:'I. Al-Shehri'},
+    {title:'Drilling Engineering Manual v5.0',type:'manual',date:'Apr 2026',by:'S. Al-Qahtani'},
+    {title:'DRL-POL-001 Drilling Authorization Policy',type:'policy',date:'Mar 2026',by:'I. Al-Shehri'},
+    {title:'ALERT-DRL-001: Revised Kick Tolerance',type:'alert',date:'May 2026',by:'B. Al-Harbi'},
+    {title:'DRL-SOP-003 Well Control Response SOP',type:'sop',date:'Feb 2026',by:'B. Al-Harbi'}
+  ],
+  activity:[
+    {dot:'dot-orange',text:'<strong>Badr Al-Harbi</strong> submitted DRL-SOP-003 Revision 5 for review',time:'1 hour ago'},
+    {dot:'dot-orange',text:'<strong>Saud Al-Qahtani</strong> submitted ALERT-DRL-007',time:'6 hours ago'},
+    {dot:'dot-green',text:'You approved <strong>DRL-SOP-011 H2S Safety SOP</strong>',time:'Yesterday'},
+    {dot:'dot-red',text:'You rejected <strong>DRL-POL-010 draft</strong> — requires legal sign-off',time:'3 days ago'},
+    {dot:'dot-green',text:'You published <strong>Drilling Engineering Manual v5.0</strong>',time:'4 days ago'}
+  ]
+},
+'cementing':{
+  name:'Cementing',
+  owner:{name:'Turki Al-Malki',initials:'TM',title:'Cementing Operations Lead',av:'av-blue'},
+  contributors:[
+    {name:'Hamad Al-Shimmari',initials:'HS',title:'Cement Engineer',role:'Editor',av:'av-orange'},
+    {name:'Rayan Al-Turki',initials:'RT',title:'Lab Technician',role:'Editor',av:'av-purple'}
+  ],
+  published:34,
+  pending:[
+    {type:'SOP Update',title:'CEM-SOP-003 Primary Cement Job — Revision 3',submitter:'Hamad Al-Shimmari',when:'3 hours ago',size:'2.7 MB',preview:'Updates displacement rates and plug schedule for high-angle wells following field optimisation findings in Q1 2026.'},
+    {type:'Policy',title:'CEM-POL-007 Data Management Policy — Annual Review',submitter:'Rayan Al-Turki',when:'Yesterday',size:'0.8 MB',preview:'Annual review covering lab test record archiving, job data management, and third-party reporting requirements.'}
+  ],
+  pubDocs:[
+    {title:'CEM-SOP-001 Pre-Job Safety Check',type:'sop',date:'Apr 2026',by:'T. Al-Malki'},
+    {title:'Cementing Operations Manual v3.1',type:'manual',date:'Mar 2026',by:'H. Al-Shimmari'},
+    {title:'CEM-POL-001 Cementing Quality Assurance Policy',type:'policy',date:'Feb 2026',by:'T. Al-Malki'},
+    {title:'CEM-SOP-008 Remedial Squeeze SOP',type:'sop',date:'Jan 2026',by:'H. Al-Shimmari'},
+    {title:'LL-CEM-001: Cement Top Failure Analysis',type:'lesson',date:'Dec 2025',by:'R. Al-Turki'}
+  ],
+  activity:[
+    {dot:'dot-orange',text:'<strong>Hamad Al-Shimmari</strong> submitted CEM-SOP-003 Revision 3 for review',time:'3 hours ago'},
+    {dot:'dot-orange',text:'<strong>Rayan Al-Turki</strong> submitted Data Management Policy review',time:'Yesterday'},
+    {dot:'dot-green',text:'You approved <strong>CEM-SOP-010 Thickening Time Test SOP</strong>',time:'3 days ago'},
+    {dot:'dot-green',text:'You published <strong>Cementing Operations Manual v3.1</strong>',time:'5 days ago'}
+  ]
+},
+'inspection':{
+  name:'Inspection Services',
+  owner:{name:'Walid Al-Zahrani',initials:'WZ',title:'Inspection Services Lead',av:'av-purple'},
+  contributors:[
+    {name:'Faris Al-Bishi',initials:'FB',title:'NDT Inspector',role:'Editor',av:'av-teal'},
+    {name:'Mansour Al-Otaibi',initials:'MO',title:'Compliance Officer',role:'Editor',av:'av-blue'},
+    {name:'Saleh Al-Dossary',initials:'SD',title:'QC Inspector',role:'Viewer',av:'av-orange'}
+  ],
+  published:44,
+  pending:[
+    {type:'SOP Update',title:'INS-SOP-002 MPI Inspection — Revision 4',submitter:'Faris Al-Bishi',when:'2 hours ago',size:'1.9 MB',preview:'Incorporates updated acceptance criteria per API 5CT 2026 amendment and new fluorescent MPI technique requirements.'},
+    {type:'Technical Alert',title:'ALERT-INS-003: Third-Party Inspector Qualification Renewal — August 2026',submitter:'Mansour Al-Otaibi',when:'4 hours ago',size:'0.7 MB',preview:'All third-party inspection personnel must renew qualifications by August 31, 2026. Updated competency requirements attached.'}
+  ],
+  pubDocs:[
+    {title:'INS-SOP-001 Visual Inspection SOP',type:'sop',date:'May 2026',by:'W. Al-Zahrani'},
+    {title:'NDT Methods Reference Manual',type:'manual',date:'Apr 2026',by:'F. Al-Bishi'},
+    {title:'INS-POL-002 Inspector Qualification Policy',type:'policy',date:'Mar 2026',by:'W. Al-Zahrani'},
+    {title:'ALERT-INS-001: API 5CT Rejection Criteria Update',type:'alert',date:'May 2026',by:'M. Al-Otaibi'},
+    {title:'INS-SOP-012 Third-Party Audit SOP',type:'sop',date:'Feb 2026',by:'S. Al-Dossary'}
+  ],
+  activity:[
+    {dot:'dot-orange',text:'<strong>Faris Al-Bishi</strong> submitted INS-SOP-002 Revision 4 for review',time:'2 hours ago'},
+    {dot:'dot-orange',text:'<strong>Mansour Al-Otaibi</strong> submitted ALERT-INS-003',time:'4 hours ago'},
+    {dot:'dot-green',text:'You approved <strong>INS-SOP-015 Calibration Management SOP</strong>',time:'2 days ago'},
+    {dot:'dot-green',text:'You published <strong>NDT Methods Reference Manual</strong>',time:'4 days ago'}
+  ]
+},
+'well-safety':{
+  name:'Well Safety',
+  owner:{name:'Saeed Al-Harbi',initials:'SH',title:'Well Safety Manager',av:'av-teal'},
+  contributors:[
+    {name:'Yasser Al-Anzi',initials:'YA',title:'Well Control Trainer',role:'Editor',av:'av-blue'},
+    {name:'Ghassan Al-Malki',initials:'GM',title:'Safety Engineer',role:'Editor',av:'av-orange'},
+    {name:'Adel Al-Qahtani',initials:'AQ',title:'Emergency Response Lead',role:'Editor',av:'av-purple'}
+  ],
+  published:56,
+  pending:[
+    {type:'Critical Alert',title:'ALERT-WS-001: Revised Well Control Kill Weight Calculation — Mandatory Briefing',submitter:'Yasser Al-Anzi',when:'30 min ago',size:'1.5 MB',preview:'Updated kill weight calculation methodology based on recent regional well control incidents. ALL drilling crews must attend briefing. New kill sheets attached.'},
+    {type:'SOP Update',title:'WS-SOP-015 Blowout Response — Revision 7',submitter:'Ghassan Al-Malki',when:'3 hours ago',size:'4.2 MB',preview:'Revision 7 restructures the blowout response sequence and updates assembly points following the 2026 emergency response drill findings.'},
+    {type:'Policy Update',title:'WS-POL-011 SIMOPS Restriction Policy — Near Active Completions',submitter:'Adel Al-Qahtani',when:'Yesterday',size:'1.8 MB',preview:'New SIMOPS exclusion zones following contractor incident. Minimum distances updated — applies to all operations within 500m of active completions.'}
+  ],
+  pubDocs:[
+    {title:'WS-SOP-001 Daily BOP Test SOP',type:'sop',date:'May 2026',by:'S. Al-Harbi'},
+    {title:'Well Control Manual v6.0 (IWCF Aligned)',type:'manual',date:'Apr 2026',by:'Y. Al-Anzi'},
+    {title:'WS-POL-001 Well Control Authorization Policy',type:'policy',date:'Mar 2026',by:'S. Al-Harbi'},
+    {title:'ALERT-WS-002: BOP Ram Seals Replacement Schedule',type:'alert',date:'May 2026',by:'G. Al-Malki'},
+    {title:'WS-SOP-007 Emergency Evacuation SOP',type:'sop',date:'Feb 2026',by:'A. Al-Qahtani'}
+  ],
+  activity:[
+    {dot:'dot-orange',text:'<strong>Yasser Al-Anzi</strong> submitted ALERT-WS-001 (CRITICAL) for review',time:'30 min ago'},
+    {dot:'dot-orange',text:'<strong>Ghassan Al-Malki</strong> submitted WS-SOP-015 Revision 7',time:'3 hours ago'},
+    {dot:'dot-red',text:'You rejected <strong>WS-SOP-019 draft</strong> — requires IWCF validation',time:'2 days ago'},
+    {dot:'dot-green',text:'You approved <strong>WS-POL-009 Barrier Management Policy</strong>',time:'3 days ago'},
+    {dot:'dot-green',text:'You published <strong>Well Control Manual v6.0</strong>',time:'5 days ago'}
+  ]
+},
+'qhse':{
+  name:'QHSE',
+  owner:{name:'Abdulaziz Al-Ghamdi',initials:'AG',title:'QHSE Manager',av:'av-orange'},
+  contributors:[
+    {name:'Hani Al-Rashidi',initials:'HR',title:'HSE Officer',role:'Editor',av:'av-blue'},
+    {name:'Laila Al-Otaibi',initials:'LO',title:'Quality Auditor',role:'Editor',av:'av-purple'},
+    {name:'Khaled Al-Binsaif',initials:'KB',title:'Environmental Officer',role:'Viewer',av:'av-teal'}
+  ],
+  published:51,
+  pending:[
+    {type:'SOP Update',title:'QHSE-SOP-011 Management of Change (MOC) — Revision 3',submitter:'Hani Al-Rashidi',when:'1 hour ago',size:'2.3 MB',preview:'Strengthens the MOC review board composition and adds mandatory safety impact assessment for all operational changes.'},
+    {type:'Technical Alert',title:'ALERT-QHSE-002: PPE Standard Update — Type III Gloves Required in All Chemical Zones',submitter:'Laila Al-Otaibi',when:'5 hours ago',size:'0.6 MB',preview:'Revised PPE standard following chemical exposure incident. Type III chemical-resistant gloves mandatory in all areas where hazardous chemicals are handled.'}
+  ],
+  pubDocs:[
+    {title:'QHSE-SOP-001 Risk Assessment (HAZID) SOP',type:'sop',date:'May 2026',by:'A. Al-Ghamdi'},
+    {title:'QHSE Management System Manual v2.0',type:'manual',date:'Apr 2026',by:'H. Al-Rashidi'},
+    {title:'QHSE-POL-001 QHSE Policy Statement',type:'policy',date:'Mar 2026',by:'A. Al-Ghamdi'},
+    {title:'ALERT-QHSE-001: Waste Segregation Requirements',type:'alert',date:'May 2026',by:'K. Al-Binsaif'},
+    {title:'QHSE-SOP-004 Incident Investigation SOP',type:'sop',date:'Feb 2026',by:'L. Al-Otaibi'}
+  ],
+  activity:[
+    {dot:'dot-orange',text:'<strong>Hani Al-Rashidi</strong> submitted QHSE-SOP-011 Revision 3 for review',time:'1 hour ago'},
+    {dot:'dot-orange',text:'<strong>Laila Al-Otaibi</strong> submitted ALERT-QHSE-002',time:'5 hours ago'},
+    {dot:'dot-green',text:'You approved <strong>QHSE-POL-010 Audit Frequency Policy</strong>',time:'2 days ago'},
+    {dot:'dot-green',text:'You published <strong>QHSE Management System Manual v2.0</strong>',time:'4 days ago'}
+  ]
+},
+'hr':{
+  name:'Human Resources',
+  owner:{name:'Reem Al-Otaibi',initials:'RO',title:'HR Director',av:'av-purple'},
+  contributors:[
+    {name:'Ahmad Al-Zahrani',initials:'AZ',title:'HR Business Partner',role:'Editor',av:'av-teal'},
+    {name:'Sara Al-Shehri',initials:'SS',title:'Talent Acquisition Lead',role:'Editor',av:'av-blue'}
+  ],
+  published:33,
+  pending:[
+    {type:'Policy Update',title:'HR-POL-010 Remote & Flexible Work Policy — 2026 Annual Review',submitter:'Ahmad Al-Zahrani',when:'2 hours ago',size:'1.6 MB',preview:'Updated hybrid work guidelines and attendance management requirements following organizational restructuring.'},
+    {type:'Manual Update',title:'Employee Handbook v4.0 — 2026 Edition',submitter:'Sara Al-Shehri',when:'3 hours ago',size:'8.4 MB',preview:'Full update incorporating new HR policies, organisational chart updates, and revised benefits information effective June 2026.'}
+  ],
+  pubDocs:[
+    {title:'HR-SOP-001 Employee Onboarding SOP',type:'sop',date:'Apr 2026',by:'R. Al-Otaibi'},
+    {title:'HR Operations Manual',type:'manual',date:'Mar 2026',by:'A. Al-Zahrani'},
+    {title:'HR-POL-001 Code of Conduct Policy',type:'policy',date:'Feb 2026',by:'R. Al-Otaibi'},
+    {title:'HR-SOP-006 Recruitment & Selection SOP',type:'sop',date:'Jan 2026',by:'S. Al-Shehri'},
+    {title:'LL-HR-001: Onboarding Gap Analysis',type:'lesson',date:'Dec 2025',by:'A. Al-Zahrani'}
+  ],
+  activity:[
+    {dot:'dot-orange',text:'<strong>Ahmad Al-Zahrani</strong> submitted Remote Work Policy review',time:'2 hours ago'},
+    {dot:'dot-orange',text:'<strong>Sara Al-Shehri</strong> submitted Employee Handbook v4.0',time:'3 hours ago'},
+    {dot:'dot-green',text:'You approved <strong>HR-POL-002 Equal Opportunity Policy</strong>',time:'2 days ago'},
+    {dot:'dot-green',text:'You published <strong>Performance Management Manual</strong>',time:'4 days ago'}
+  ]
+},
+'tws-maintenance':{
+  name:'TWS Maintenance',
+  owner:{name:'Fahad Al-Amri',initials:'FA',title:'Maintenance & Workshop Lead',av:'av-blue'},
+  contributors:[
+    {name:'Khaled Al-Otaibi',initials:'KO',title:'Maintenance Technician',role:'Editor',av:'av-orange'},
+    {name:'Rashid Al-Ghamdi',initials:'RG',title:'Hydraulics Specialist',role:'Editor',av:'av-purple'},
+    {name:'Hamoud Al-Shamrani',initials:'HS',title:'Workshop Supervisor',role:'Viewer',av:'av-teal'}
+  ],
+  published:39,
+  pending:[
+    {type:'SOP Update',title:'TWS-SOP-008 Hydraulic System Maintenance — Revision 3',submitter:'Rashid Al-Ghamdi',when:'2 hours ago',size:'2.8 MB',preview:'Adds new seal inspection criteria and revised fluid sampling intervals following hydraulic system failures observed in Q1 2026.'},
+    {type:'Policy',title:'TWS-POL-006 Spare Parts Management Policy — Annual Review',submitter:'Hamoud Al-Shamrani',when:'Yesterday',size:'1.1 MB',preview:'Updated minimum stock levels, vendor qualification requirements, and critical spare parts identification process.'}
+  ],
+  pubDocs:[
+    {title:'TWS-SOP-001 PM Schedule Execution SOP',type:'sop',date:'May 2026',by:'F. Al-Amri'},
+    {title:'Preventive Maintenance Manual v2.1',type:'manual',date:'Apr 2026',by:'K. Al-Otaibi'},
+    {title:'TWS-POL-001 Maintenance Authorization Policy',type:'policy',date:'Mar 2026',by:'F. Al-Amri'},
+    {title:'TWS-SOP-004 Tool Pre-Job Inspection SOP',type:'sop',date:'Feb 2026',by:'H. Al-Shamrani'},
+    {title:'LL-TWS-001: In-Field Tool Failure Analysis',type:'lesson',date:'Jan 2026',by:'R. Al-Ghamdi'}
+  ],
+  activity:[
+    {dot:'dot-orange',text:'<strong>Rashid Al-Ghamdi</strong> submitted TWS-SOP-008 Revision 3 for review',time:'2 hours ago'},
+    {dot:'dot-orange',text:'<strong>Hamoud Al-Shamrani</strong> submitted Spare Parts Policy review',time:'Yesterday'},
+    {dot:'dot-green',text:'You approved <strong>TWS-SOP-007 Motor Overhaul SOP</strong>',time:'3 days ago'},
+    {dot:'dot-green',text:'You published <strong>Preventive Maintenance Manual v2.1</strong>',time:'5 days ago'}
+  ]
+}
+};
+
+// ── Init dashboard from URL param ──
+const dashParams = new URLSearchParams(window.location.search);
+const dashSegId = dashParams.get('id') || 'coiled-tubing';
+const dash = DASH_DATA[dashSegId] || DASH_DATA['coiled-tubing'];
+
+function initDashboard() {
+  document.title = dash.name + ' — Control Panel · TAQA Knowledge Hub';
+  document.getElementById('dash-seg-name').textContent = dash.name + ' Segment';
+  document.getElementById('dash-owner-avatar').textContent = dash.owner.initials;
+  document.getElementById('dash-owner-avatar').className = 'dash-user-avatar ' + dash.owner.av;
+  document.getElementById('dash-owner-name').textContent = dash.owner.name;
+  document.getElementById('dash-owner-role').textContent = 'Segment Controller · ' + dash.name;
+  document.getElementById('modal-seg-name').textContent = dash.name;
+
+  // Back link
+  document.getElementById('back-to-segment').href = 'segment.html?id=' + dashSegId;
+
+  // Stats
+  pendingCount = dash.pending.length;
+  document.getElementById('stat-pending').textContent = pendingCount;
+  document.getElementById('stat-published').textContent = dash.published;
+  document.getElementById('stat-contributors').textContent = dash.contributors.length + 1;
+  document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
+
+  // Pending cards
+  const pendingList = document.getElementById('pending-list');
+  if (!dash.pending.length) {
+    pendingList.innerHTML = '<div class="empty-pending"><div class="empty-pending-icon">✓</div><h3>All caught up!</h3><p>No documents awaiting review in this segment.</p></div>';
+  } else {
+    pendingList.innerHTML = dash.pending.map((p, i) => `
+      <div class="pending-card" id="pcard-${i+1}">
+        <div class="pending-card-top">
+          <div class="pending-doc-info">
+            <div class="pending-doc-type">${p.type}</div>
+            <div class="pending-doc-title">${p.title}</div>
+            <div class="pending-doc-meta">Submitted by <strong>${p.submitter}</strong> · ${p.when} · PDF · ${p.size}</div>
+          </div>
+          <span class="pending-status-badge badge-pending">Awaiting Review</span>
+        </div>
+        <div class="pending-doc-preview">${p.preview}</div>
+        <div class="pending-actions">
+          <button class="btn-approve" onclick="approveDoc(${i+1})">✓ Approve</button>
+          <button class="btn-reject" onclick="rejectDoc(${i+1})">✕ Reject</button>
+          <button class="btn-preview-link">Preview Document</button>
+          <span class="action-result" id="result-${i+1}"></span>
+        </div>
+      </div>`).join('');
+  }
+
+  // Contributors
+  const roleBadge = r => r==='Owner'?'crole-owner':r==='Editor'?'crole-editor':'crole-viewer';
+  const avColors = ['av-teal','av-blue','av-orange','av-purple'];
+  const ownerRow = `<div class="contributor-row">
+    <div class="contributor-avatar ${dash.owner.av}">${dash.owner.initials}</div>
+    <div class="contributor-info"><div class="contributor-name">${dash.owner.name}</div><div class="contributor-role">${dash.owner.title}</div></div>
+    <span class="contributor-role-badge crole-owner">Owner</span></div>`;
+  const cRows = dash.contributors.map(c => `<div class="contributor-row">
+    <div class="contributor-avatar ${c.av}">${c.initials}</div>
+    <div class="contributor-info"><div class="contributor-name">${c.name}</div><div class="contributor-role">${c.title}</div></div>
+    <span class="contributor-role-badge ${roleBadge(c.role)}">${c.role}</span></div>`).join('');
+  const viewerRow = `<div class="contributor-row">
+    <div class="contributor-avatar" style="background:rgba(100,116,139,0.25);color:#64748b;font-size:11px;">★</div>
+    <div class="contributor-info"><div class="contributor-name">All ${dash.name} Staff</div><div class="contributor-role">Read-only access</div></div>
+    <span class="contributor-role-badge crole-viewer">Viewer</span></div>`;
+  document.getElementById('contributors-list').innerHTML = ownerRow + cRows + viewerRow;
+
+  // Activity
+  document.getElementById('activity-feed').innerHTML = dash.activity.map(a => `
+    <div class="activity-item">
+      <div class="activity-dot ${a.dot}"></div>
+      <div><div class="activity-text">${a.text}</div><div class="activity-time">${a.time}</div></div>
+    </div>`).join('');
+
+  // Published docs
+  const tc = {sop:'pub-type-sop',manual:'pub-type-manual',policy:'pub-type-policy',alert:'pub-type-alert',lesson:'pub-type-manual'};
+  const tl = {sop:'SOP',manual:'Manual',policy:'Policy',alert:'Alert',lesson:'Lesson'};
+  const more = Math.max(0, dash.published - dash.pubDocs.length);
+  document.getElementById('pub-docs-body').innerHTML = dash.pubDocs.map(d =>
+    `<tr><td class="pub-doc-title">${d.title}</td>
+    <td><span class="pub-doc-type-badge ${tc[d.type]||'pub-type-sop'}">${tl[d.type]||d.type}</span></td>
+    <td style="color:var(--text-muted);font-size:12px;">${d.date}</td>
+    <td style="color:var(--text-muted);font-size:12px;">${d.by}</td>
+    <td><button class="pub-remove-btn" onclick="removeDoc(this)">Remove</button></td></tr>`
+  ).join('') + (more > 0 ? `<tr><td style="color:var(--text-muted);font-size:12.5px;font-style:italic;" colspan="5">+ ${more} more documents published</td></tr>` : '');
+}
+
+initDashboard();
 
 function showToast(msg, color) {
   const t = document.getElementById('dash-toast');
