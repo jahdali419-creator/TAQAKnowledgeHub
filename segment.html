@@ -962,21 +962,24 @@ function getDocSummary(title, type) {
   return 'Contains operational guidance, technical specifications, and procedural requirements for field personnel and supervisors involved in these activities.';
 }
 
+const LIST_TYPE_MAP = {sops:'sop',manuals:'manual',policies:'policy',lessons:'lesson',alerts:'alert'};
+
 function buildDocCard(title, type, idx) {
   const labels = {sop:'SOP',manual:'Manual',policy:'Policy',alert:'Alert',lesson:'Lesson Learned'};
-  const typeClass = type === 'lesson' ? 'lesson' : type;
+  const typeClass = type;
   const summary = getDocSummary(title, type);
   const safeTitle = title.replace(/'/g,"&#39;").replace(/"/g,"&quot;");
   const safeType = typeClass;
   const newBadge = idx === 0 ? '<span class="doc-new-badge">New</span>' : idx === 1 ? '<span class="doc-new-badge updated">Updated</span>' : '';
+  const icon = type === 'sop' ? `<div class="doc-type-icon sop">SOP</div>` : '';
   return `
   <div class="doc-card">
-    <div class="doc-type-icon ${typeClass}"></div>
+    ${icon}
     <div>
       <div class="doc-info-title">${title}${newBadge}</div>
       <div class="doc-summary">${summary}</div>
       <div class="doc-info-meta">
-        <span class="doc-type-badge ${typeClass}">${labels[type]}</span>
+        <span class="doc-type-badge ${typeClass}">${labels[type] || type}</span>
         <span class="doc-meta-item">${rnd(AUTHORS)}</span>
         <span class="doc-meta-item">${fmtDate(idx)}</span>
         <span class="doc-meta-item">${rnd(SIZES)}</span>
@@ -997,7 +1000,6 @@ function buildAlertCard(text, idx) {
   const alertSummary = 'This technical alert requires immediate review by all supervisors and relevant field personnel. Refer to the full alert document for required actions, affected equipment or procedures, and implementation deadlines.';
   return `
   <div class="alert-card">
-    <div class="doc-type-icon alert">ALT</div>
     <div>
       <div class="doc-info-title">${text.replace('⚠️ ','')}</div>
       <div class="doc-summary">${alertSummary}</div>
@@ -1030,7 +1032,7 @@ function renderList(type, items, isAlert) {
       if(vis) vis.textContent = '0';
       return;
     }
-    el.innerHTML = items.map((t,i) => isAlert ? buildAlertCard(t,i) : buildDocCard(t, type.replace('s','').replace('lesson','lesson'), i)).join('');
+    el.innerHTML = items.map((t,i) => isAlert ? buildAlertCard(t,i) : buildDocCard(t, LIST_TYPE_MAP[type] || type, i)).join('');
     if(vis) vis.textContent = items.length;
     if(isAlert) { const dot = document.getElementById('alert-pulse-dot'); if(dot) dot.style.display='inline-block'; }
   }, 420);
