@@ -194,6 +194,27 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
 .footer-brand{font-family:'Urbanist',sans-serif;font-size:13px;font-weight:600;color:var(--text-muted);}
 .footer-copy{font-size:11.5px;color:var(--text-dim);}
 
+/* ── Add Contributor Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:2000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.modal-box{background:#fff;border-radius:18px;padding:32px;width:100%;max-width:460px;box-shadow:0 24px 64px rgba(0,0,0,0.18);position:relative;animation:pageFadeIn 0.25s ease;}
+.modal-title{font-family:'Urbanist',sans-serif;font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;}
+.modal-sub{font-size:13px;color:var(--text-muted);margin-bottom:24px;}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:background 0.15s;}
+.modal-close:hover{background:#f0f1f3;}
+.form-group{margin-bottom:16px;}
+.form-label{font-size:12px;font-weight:600;color:var(--text-muted);letter-spacing:0.5px;text-transform:uppercase;display:block;margin-bottom:6px;}
+.form-input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:#fff;outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(0,191,178,0.1);}
+.form-select{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:#fff;outline:none;cursor:pointer;transition:border-color 0.2s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a8ba0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
+.form-select:focus{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(0,191,178,0.1);}
+.role-hint{font-size:11.5px;color:var(--text-dim);margin-top:5px;}
+.modal-actions{display:flex;gap:10px;margin-top:24px;}
+.btn-modal-add{flex:1;padding:11px;border-radius:10px;background:var(--gradient);color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity 0.2s;}
+.btn-modal-add:hover{opacity:0.88;}
+.btn-modal-cancel{padding:11px 20px;border-radius:10px;background:transparent;border:1px solid var(--border);color:var(--text-muted);font-size:14px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:border-color 0.2s;}
+.btn-modal-cancel:hover{border-color:var(--glass-border-hover);}
+
 /* ── Notification toast ── */
 .dash-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
   background:#1a2235;color:#fff;padding:12px 24px;border-radius:50px;font-size:13.5px;font-weight:500;
@@ -427,6 +448,7 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Segment Contributors
         </div>
+        <div id="contributors-list">
         <div class="contributor-row">
           <div class="contributor-avatar av-teal">MJ</div>
           <div class="contributor-info">
@@ -467,8 +489,9 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
           </div>
           <span class="contributor-role-badge crole-viewer">Viewer</span>
         </div>
+        </div><!-- /contributors-list -->
         <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
-          <button class="btn btn-ghost" style="width:100%;font-size:12.5px;justify-content:center;">+ Add Contributor</button>
+          <button class="btn btn-ghost" style="width:100%;font-size:12.5px;justify-content:center;" onclick="openAddContributor()">+ Add Contributor</button>
         </div>
       </div>
 
@@ -539,6 +562,36 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
 
 </div><!-- /page-wrapper -->
 
+<!-- Add Contributor Modal -->
+<div class="modal-overlay" id="add-contributor-modal" onclick="handleModalClick(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeAddContributor()">×</button>
+    <div class="modal-title">Add Contributor</div>
+    <div class="modal-sub">This person will be able to upload documents to the Coiled Tubing segment.</div>
+    <div class="form-group">
+      <label class="form-label">Full Name</label>
+      <input class="form-input" id="contrib-name" type="text" placeholder="e.g. Ahmed Al-Zahrani" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Job Title</label>
+      <input class="form-input" id="contrib-title" type="text" placeholder="e.g. CT Field Engineer">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Assign Role</label>
+      <select class="form-select" id="contrib-role" onchange="updateRoleHint()">
+        <option value="Editor">Editor — Can upload and submit documents for approval</option>
+        <option value="Viewer">Viewer — Can read documents only, cannot upload</option>
+        <option value="Owner">Owner — Full control, can approve and manage contributors</option>
+      </select>
+      <div class="role-hint" id="role-hint">This person can upload documents. All uploads will require your approval before going live.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeAddContributor()">Cancel</button>
+      <button class="btn-modal-add" onclick="addContributor()">Add to Segment</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="dash-toast" id="dash-toast">
   <div class="dash-toast-dot"></div>
@@ -595,6 +648,63 @@ function rejectDoc(id) {
   document.getElementById('stat-pending').textContent = pendingCount;
   document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
   showToast('Document rejected — submitter will be notified', '#ef4444');
+}
+
+const ROLE_HINTS = {
+  Editor: 'This person can upload documents. All uploads will require your approval before going live.',
+  Viewer: 'This person can read and download documents only. They cannot upload or make changes.',
+  Owner: 'Full control — can approve documents, manage contributors, and remove content.'
+};
+const AVATAR_COLORS = ['av-teal','av-blue','av-orange','av-purple',
+  'style="background:linear-gradient(135deg,#ec4899,#f472b6)"',
+  'style="background:linear-gradient(135deg,#10b981,#34d399)"'];
+let avatarIdx = 0;
+
+function openAddContributor() {
+  document.getElementById('contrib-name').value = '';
+  document.getElementById('contrib-title').value = '';
+  document.getElementById('contrib-role').value = 'Editor';
+  updateRoleHint();
+  document.getElementById('add-contributor-modal').classList.add('open');
+  setTimeout(() => document.getElementById('contrib-name').focus(), 100);
+}
+function closeAddContributor() {
+  document.getElementById('add-contributor-modal').classList.remove('open');
+}
+function handleModalClick(e) {
+  if(e.target === document.getElementById('add-contributor-modal')) closeAddContributor();
+}
+function updateRoleHint() {
+  const role = document.getElementById('contrib-role').value;
+  document.getElementById('role-hint').textContent = ROLE_HINTS[role];
+}
+function addContributor() {
+  const name = document.getElementById('contrib-name').value.trim();
+  const title = document.getElementById('contrib-title').value.trim();
+  const role = document.getElementById('contrib-role').value;
+  if(!name) { document.getElementById('contrib-name').focus(); document.getElementById('contrib-name').style.borderColor='#ef4444'; return; }
+  document.getElementById('contrib-name').style.borderColor='';
+  const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().substring(0,2);
+  const roleBadgeClass = {Editor:'crole-editor',Viewer:'crole-viewer',Owner:'crole-owner'}[role];
+  const avColors = ['av-teal','av-blue','av-orange','av-purple'];
+  const avClass = avColors[avatarIdx % avColors.length];
+  avatarIdx++;
+  const list = document.getElementById('contributors-list');
+  const newRow = document.createElement('div');
+  newRow.className = 'contributor-row';
+  newRow.style.opacity = '0';
+  newRow.style.transition = 'opacity 0.3s';
+  newRow.innerHTML = `
+    <div class="contributor-avatar ${avClass}">${initials}</div>
+    <div class="contributor-info">
+      <div class="contributor-name">${name}</div>
+      <div class="contributor-role">${title || 'Segment Contributor'}</div>
+    </div>
+    <span class="contributor-role-badge ${roleBadgeClass}">${role}</span>`;
+  list.insertBefore(newRow, list.lastElementChild);
+  setTimeout(() => newRow.style.opacity = '1', 30);
+  closeAddContributor();
+  showToast(name + ' added as ' + role, '#00BFB2');
 }
 
 function removeDoc(btn) {
