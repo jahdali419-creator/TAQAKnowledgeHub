@@ -118,6 +118,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   background:rgba(255,255,255,0.08);color:var(--text-muted);}
 .tab-alert-count{padding:2px 8px;border-radius:50px;font-size:10px;font-weight:600;
   background:rgba(255,103,32,0.15);color:var(--accent);}
+.alert-pulse-dot{display:none;width:7px;height:7px;background:#FF6720;border-radius:50%;flex-shrink:0;animation:alertPulse 1.6s ease-in-out infinite;}
+@keyframes alertPulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.35;transform:scale(0.65);}}
+.doc-new-badge{display:inline-block;padding:1px 7px;border-radius:50px;font-size:9.5px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;background:rgba(34,197,94,0.12);color:#4ade80;border:1px solid rgba(34,197,94,0.25);margin-left:6px;vertical-align:middle;}
+.doc-new-badge.updated{background:rgba(0,191,178,0.1);color:#00BFB2;border-color:rgba(0,191,178,0.22);}
+.empty-state-upload{display:inline-block;margin-top:14px;padding:8px 20px;border-radius:9px;background:rgba(0,104,106,0.1);border:1px solid rgba(0,191,178,0.2);color:var(--primary-light);font-size:13px;font-weight:500;text-decoration:none;transition:background 0.2s;}
+.empty-state-upload:hover{background:rgba(0,104,106,0.18);}
 
 /* ── Content Area ── */
 .content-outer{padding:0 48px 80px;max-width:1200px;margin:0 auto;}
@@ -391,7 +397,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
     <button class="tab-btn active" data-tab="sops">SOPs <span class="tab-count" id="tc-sops">–</span></button>
     <button class="tab-btn" data-tab="manuals">Manuals <span class="tab-count" id="tc-manuals">–</span></button>
     <button class="tab-btn" data-tab="policies">Policies <span class="tab-count" id="tc-policies">–</span></button>
-    <button class="tab-btn" data-tab="alerts">Alerts <span class="tab-alert-count" id="tc-alerts">–</span></button>
+    <button class="tab-btn" data-tab="alerts">Alerts <span class="tab-alert-count" id="tc-alerts">–</span><span class="alert-pulse-dot" id="alert-pulse-dot"></span></button>
     <button class="tab-btn" data-tab="lessons">Lessons Learned <span class="tab-count" id="tc-lessons">–</span></button>
   </div>
 </div>
@@ -892,11 +898,12 @@ function buildDocCard(title, type, idx) {
   const summary = getDocSummary(title, type);
   const safeTitle = title.replace(/'/g,"&#39;").replace(/"/g,"&quot;");
   const safeType = typeClass;
+  const newBadge = idx === 0 ? '<span class="doc-new-badge">New</span>' : idx === 1 ? '<span class="doc-new-badge updated">Updated</span>' : '';
   return `
   <div class="doc-card">
     <div class="doc-type-icon ${typeClass}"></div>
     <div>
-      <div class="doc-info-title">${title}</div>
+      <div class="doc-info-title">${title}${newBadge}</div>
       <div class="doc-summary">${summary}</div>
       <div class="doc-info-meta">
         <span class="doc-type-badge ${typeClass}">${labels[type]}</span>
@@ -939,12 +946,18 @@ function renderList(type, items, isAlert) {
   const el = document.getElementById('list-'+type);
   const vis = document.getElementById('vis-'+type);
   if (!items || items.length === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,191,178,0.3);font-family:'Urbanist',sans-serif;letter-spacing:2px;">CLEAR</div><h3>No active alerts</h3><p>This segment currently has no outstanding technical alerts.</p></div>`;
+    const typeLabels = {sops:'procedures',manuals:'manuals',policies:'policies',lessons:'lessons learned'};
+    const label = typeLabels[type] || type;
+    const emptyHTML = isAlert
+      ? `<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,191,178,0.3);font-family:'Urbanist',sans-serif;letter-spacing:2px;">CLEAR</div><h3>No active alerts</h3><p>This segment currently has no outstanding technical alerts.</p></div>`
+      : `<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,191,178,0.15);font-family:'Urbanist',sans-serif;letter-spacing:2px;">—</div><h3>No ${label} uploaded yet</h3><p>Be the first to contribute to this segment.</p><a href="upload.html" class="empty-state-upload">+ Upload Document</a></div>`;
+    el.innerHTML = emptyHTML;
     if(vis) vis.textContent = '0';
     return;
   }
   el.innerHTML = items.map((t,i) => isAlert ? buildAlertCard(t,i) : buildDocCard(t, type.replace('s','').replace('lesson','lesson'), i)).join('');
   if(vis) vis.textContent = items.length;
+  if(isAlert) { const dot = document.getElementById('alert-pulse-dot'); if(dot) dot.style.display='inline-block'; }
 }
 
 renderList('sops', seg.docs.sops, false);
