@@ -973,22 +973,22 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
 <div class="stats-strip reveal">
   <div class="stats-strip-inner">
     <div class="stats-strip-item">
-      <span class="stats-strip-num">523</span>
+      <span class="stats-strip-num" data-target="523">0</span>
       <span class="stats-strip-label">Documents</span>
     </div>
     <div class="stats-strip-divider"></div>
     <div class="stats-strip-item">
-      <span class="stats-strip-num">11</span>
+      <span class="stats-strip-num" data-target="11">0</span>
       <span class="stats-strip-label">Segments</span>
     </div>
     <div class="stats-strip-divider"></div>
     <div class="stats-strip-item">
-      <span class="stats-strip-num">160+</span>
+      <span class="stats-strip-num" data-target="160" data-suffix="+">0</span>
       <span class="stats-strip-label">Glossary Terms</span>
     </div>
     <div class="stats-strip-divider"></div>
     <div class="stats-strip-item">
-      <span class="stats-strip-num">1</span>
+      <span class="stats-strip-num" data-target="1">0</span>
       <span class="stats-strip-label">Platform</span>
     </div>
   </div>
@@ -1470,6 +1470,7 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
 // ── Animated Counters ──
 function animateCounter(el, target, delay) {
+  const suffix = el.dataset.suffix || (target >= 1000 ? '+' : '');
   setTimeout(() => {
     let start = 0;
     const step = ts => {
@@ -1478,7 +1479,7 @@ function animateCounter(el, target, delay) {
       const ease = 1 - Math.pow(1 - p, 2);
       el.textContent = Math.floor(ease * target).toLocaleString();
       if (p < 1) requestAnimationFrame(step);
-      else el.textContent = target >= 1000 ? target.toLocaleString() + '+' : target;
+      else el.textContent = target.toLocaleString() + suffix;
     };
     requestAnimationFrame(step);
   }, delay);
