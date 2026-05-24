@@ -120,6 +120,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .fi-xls{background:rgba(34,197,94,0.1);color:#4ade80;border:1px solid rgba(34,197,94,0.18);}
 .fi-ppt{background:rgba(251,146,60,0.1);color:#fb923c;border:1px solid rgba(251,146,60,0.18);}
 .fi-default{background:rgba(100,116,139,0.1);color:#94a3b8;border:1px solid rgba(100,116,139,0.18);}
+.fi-zip{background:rgba(168,85,247,0.1);color:#c084fc;border:1px solid rgba(168,85,247,0.18);}
 .file-item-name{font-size:13.5px;font-weight:500;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .file-item-size{font-size:11.5px;color:var(--text-muted);}
 .progress-bar-wrap{height:4px;background:var(--glass-border);border-radius:2px;margin-top:7px;overflow:hidden;}
@@ -335,11 +336,11 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
     <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
       <span class="drop-icon"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 28V16M20 16L15 21M20 16L25 21" stroke="#00BFB2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 30C6.686 30 4 27.314 4 24C4 21.12 5.954 18.69 8.64 18.13C8.226 17.146 8 16.1 8 15C8 10.582 11.582 7 16 7C19.456 7 22.414 9.094 23.618 12.11C24.37 11.41 25.376 11 26.5 11C28.985 11 31 13.015 31 15.5C31 15.906 30.948 16.3 30.85 16.676C32.718 17.448 34 19.278 34 21.5C34 24.538 31.538 27 28.5 27H28" stroke="#00BFB2" stroke-width="2" stroke-linecap="round"/></svg></span>
       <div class="drop-title">Drag & drop your file here</div>
-      <div class="drop-sub">Supports PDF, Word, Excel, PowerPoint files.<br>Max file size: 50 MB per file.</div>
+      <div class="drop-sub">Supports documents, presentations, and software packages.<br>Max file size: 500 MB per file.</div>
       <button class="drop-btn" type="button">Browse Files</button>
-      <div class="drop-types">Accepted: .pdf · .docx · .doc · .xlsx · .xls · .pptx · .ppt</div>
+      <div class="drop-types">Documents: .pdf · .docx · .xlsx · .pptx &nbsp;|&nbsp; Software: .zip · .exe · .msi</div>
     </div>
-    <input type="file" id="file-input" class="drop-input" accept=".pdf,.docx,.doc,.xlsx,.xls,.pptx,.ppt" multiple>
+    <input type="file" id="file-input" class="drop-input" accept=".pdf,.docx,.doc,.xlsx,.xls,.pptx,.ppt,.zip,.exe,.msi" multiple>
 
     <!-- ── File Queue ── -->
     <div class="file-queue" id="file-queue" style="display:none;">
@@ -376,13 +377,14 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
           </div>
           <div class="form-group">
             <label class="form-label">Document Type <span>*</span></label>
-            <select class="form-select" required>
+            <select class="form-select" id="doc-type-select" required onchange="toggleSoftwareFields(this.value)">
               <option value="" disabled selected>Select type</option>
               <option>SOP</option>
               <option>Manual</option>
               <option>Policy</option>
               <option>Technical Alert</option>
               <option>Lesson Learned</option>
+              <option value="Software">Software / Tool</option>
             </select>
           </div>
         </div>
@@ -394,6 +396,16 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
           <div class="form-group">
             <label class="form-label">Document Date</label>
             <input type="date" class="form-input">
+          </div>
+        </div>
+        <div class="form-row" id="software-fields" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Software Version <span>*</span></label>
+            <input type="text" class="form-input" placeholder="e.g. v2.3.1, 2024.1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Compatible Platform</label>
+            <input type="text" class="form-input" placeholder="e.g. Windows 10/11, Windows Server 2019">
           </div>
         </div>
         <div class="form-group">
@@ -567,6 +579,9 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 </div>
 
 <script>
+function toggleSoftwareFields(val) {
+  document.getElementById('software-fields').style.display = val === 'Software' ? '' : 'none';
+}
 // ── Drag & Drop ──
 const dropZone = document.getElementById('drop-zone');
 const fileInput = document.getElementById('file-input');
@@ -591,7 +606,8 @@ fileInput.addEventListener('change', () => {
 });
 
 const FILE_EXT_MAP = { pdf:['PDF','fi-pdf'], docx:['DOC','fi-doc'], doc:['DOC','fi-doc'],
-  xlsx:['XLS','fi-xls'], xls:['XLS','fi-xls'], pptx:['PPT','fi-ppt'], ppt:['PPT','fi-ppt'] };
+  xlsx:['XLS','fi-xls'], xls:['XLS','fi-xls'], pptx:['PPT','fi-ppt'], ppt:['PPT','fi-ppt'],
+  zip:['ZIP','fi-zip'], exe:['EXE','fi-zip'], msi:['MSI','fi-zip'] };
 function getIconInfo(name) {
   const ext = name.split('.').pop().toLowerCase();
   return FILE_EXT_MAP[ext] || ['FILE','fi-default'];

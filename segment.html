@@ -168,6 +168,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .doc-type-icon.policy{background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.2);}
 .doc-type-icon.alert{background:rgba(255,103,32,0.1);color:#FF6720;border:1px solid rgba(255,103,32,0.2);}
 .doc-type-icon.lesson{background:rgba(34,197,94,0.1);color:#4ade80;border:1px solid rgba(34,197,94,0.2);}
+.doc-type-icon.software{background:rgba(168,85,247,0.12);color:#c084fc;border:1px solid rgba(168,85,247,0.22);}
+.doc-type-badge.software{background:rgba(168,85,247,0.1);color:#c084fc;border:1px solid rgba(168,85,247,0.18);}
+.sw-version{display:inline-block;padding:1px 7px;border-radius:50px;font-size:9.5px;font-weight:700;letter-spacing:0.4px;background:rgba(168,85,247,0.1);color:#c084fc;border:1px solid rgba(168,85,247,0.22);margin-left:6px;vertical-align:middle;}
 .doc-info-title{font-family:'Urbanist',sans-serif;font-size:14.5px;font-weight:600;margin-bottom:5px;line-height:1.3;}
 .doc-summary{font-size:12.5px;color:var(--text-muted);line-height:1.6;margin-bottom:8px;max-width:620px;}
 .doc-info-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
@@ -428,6 +431,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
         <div class="mini-stat"><div class="mini-stat-num" id="ms-manuals">–</div><div class="mini-stat-label">Manuals</div></div>
         <div class="mini-stat"><div class="mini-stat-num" id="ms-policies">–</div><div class="mini-stat-label">Policies</div></div>
         <div class="mini-stat"><div class="mini-stat-num" id="ms-lessons">–</div><div class="mini-stat-label">Lessons</div></div>
+        <div class="mini-stat"><div class="mini-stat-num" id="ms-software" style="color:#c084fc;">–</div><div class="mini-stat-label">Software</div></div>
       </div>
     </div>
   </div>
@@ -442,6 +446,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
     <button class="tab-btn" data-tab="policies">Policies <span class="tab-count" id="tc-policies">–</span></button>
     <button class="tab-btn" data-tab="alerts">Alerts <span class="tab-alert-count" id="tc-alerts">–</span><span class="alert-pulse-dot" id="alert-pulse-dot"></span></button>
     <button class="tab-btn" data-tab="lessons">Lessons Learned <span class="tab-count" id="tc-lessons">–</span></button>
+    <button class="tab-btn" data-tab="software">Software <span class="tab-count" id="tc-software" style="background:linear-gradient(135deg,#a855f7,#c084fc);">–</span></button>
   </div>
 </div>
 
@@ -491,6 +496,14 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
       <span class="doc-count-label">Showing <strong id="vis-lessons">–</strong> lessons</span>
     </div>
     <div class="docs-grid" id="list-lessons"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-software">
+    <div class="doc-toolbar">
+      <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search software & tools..." oninput="filterDocs(this,'software')"></div>
+      <span class="doc-count-label">Showing <strong id="vis-software">–</strong> tools</span>
+    </div>
+    <div class="docs-grid" id="list-software"></div>
   </div>
 
 </div>
@@ -546,7 +559,7 @@ const SEGMENTS = {
   'coiled-tubing': {
     name:'Coiled Tubing', icon:'🔄', tag:'Operations',
     desc:'Coiled tubing operations, equipment specifications, and continuous operation field procedures for all CT units.',
-    sops:12, manuals:9, policies:6, alerts:3, lessons:5,
+    sops:12, manuals:9, policies:6, alerts:3, lessons:5, software:3,
     docs:{
       sops:['CT-001 Pre-Job Safety Checklist','CT-002 BHA Assembly Procedure','CT-003 Well Entry Protocol',
         'CT-004 Emergency Disconnect Procedure','CT-005 Pressure Testing Procedure','CT-006 CT Unit Rig-Up & Rig-Down',
@@ -564,13 +577,16 @@ const SEGMENTS = {
         'LL-CT-002: CT string failure analysis — root cause and prevention',
         'LL-CT-003: Lessons from coiled tubing fishing operation',
         'LL-CT-004: Mud motor stall — diagnosis and recovery',
-        'LL-CT-005: Pressure integrity test failure — field findings']
+        'LL-CT-005: Pressure integrity test failure — field findings'],
+      software:['Orion CT Control System | v2.3 | Windows 10/11 | 145 MB',
+        'WellPlan CT Simulator | v4.1 | Windows 10/11 | 312 MB',
+        'CoilScan Inspection Reporter | v1.8 | Windows 10 | 89 MB']
     }
   },
   'fracturing': {
     name:'Fracturing', icon:'💥', tag:'Stimulation',
     desc:'Hydraulic fracturing design, execution procedures, fluid systems, pump operations, and post-job analysis documentation.',
-    sops:18, manuals:11, policies:8, alerts:5, lessons:7,
+    sops:18, manuals:11, policies:8, alerts:5, lessons:7, software:3,
     docs:{
       sops:['FRAC-001 Pre-Job Safety Meeting','FRAC-002 Pump Rig-Up Procedure','FRAC-003 Iron Pressure Test',
         'FRAC-004 Fluid Mixing SOP','FRAC-005 Proppant Handling SOP','FRAC-006 Treatment Execution SOP',
@@ -595,13 +611,16 @@ const SEGMENTS = {
         'LL-FRAC-004: Equipment failure in extreme temperature — design modifications',
         'LL-FRAC-005: Wellhead pressure anomaly — identification and mitigation',
         'LL-FRAC-006: Crew safety observation — confined space near pump unit',
-        'LL-FRAC-007: Data acquisition failure — system improvements implemented']
+        'LL-FRAC-007: Data acquisition failure — system improvements implemented'],
+      software:['FracPro RT Fracturing Simulator | v10.5 | Windows 10/11 | 425 MB',
+        'GOHFER Hydraulic Fracturing Software | v8.2 | Windows 10 | 280 MB',
+        'DataVan Monitoring Suite | v3.0 | Windows 10/11 | 156 MB']
     }
   },
   'wireline': {
     name:'Wireline', icon:'📡', tag:'Logging',
     desc:'Wireline logging, perforating, and well intervention operations — memory, pump-down, and slickline procedures.',
-    sops:10, manuals:8, policies:5, alerts:0, lessons:4,
+    sops:10, manuals:8, policies:5, alerts:0, lessons:4, software:2,
     docs:{
       sops:['WL-001 Pre-Job Hazard Assessment','WL-002 Tool String Assembly SOP','WL-003 Perforation Operations SOP',
         'WL-004 Slickline Tool Running SOP','WL-005 Memory Logging SOP','WL-006 Pump-Down Operations SOP',
@@ -615,13 +634,15 @@ const SEGMENTS = {
       lessons:['LL-WL-001: Tool string stuck — successful retrieval and lessons',
         'LL-WL-002: Perforating misfire — investigation and protocol update',
         'LL-WL-003: Data loss during real-time logging — system redundancy added',
-        'LL-WL-004: PCE leak detection — early intervention that prevented incident']
+        'LL-WL-004: PCE leak detection — early intervention that prevented incident'],
+      software:['WellCAD Log Analysis Suite | v5.8 | Windows 10/11 | 234 MB',
+        'Warrior Wireline Logging System | v8.4 | Windows 10 | 178 MB']
     }
   },
   'drilling': {
     name:'Drilling', icon:'⛏️', tag:'Drilling Ops',
     desc:'Drilling engineering, well planning, rig operations, mud systems, BHA design, and formation evaluation procedures.',
-    sops:22, manuals:15, policies:12, alerts:7, lessons:9,
+    sops:22, manuals:15, policies:12, alerts:7, lessons:9, software:3,
     docs:{
       sops:['DRL-001 Morning Safety Meeting Checklist','DRL-002 BHA Make-Up SOP','DRL-003 Well Control Response SOP',
         'DRL-004 Casing Running SOP','DRL-005 Mud Weight Adjustment SOP','DRL-006 Directional Drilling SOP',
@@ -654,13 +675,16 @@ const SEGMENTS = {
         'LL-DRL-006: Mud system failure — rapid response and redesign',
         'LL-DRL-007: Tool failure at depth — retrieval and analysis',
         'LL-DRL-008: Sidetrack planning in complex geology',
-        'LL-DRL-009: Wellbore instability — geomechanical study findings']
+        'LL-DRL-009: Wellbore instability — geomechanical study findings'],
+      software:['Well Seeker Pro Directional Software | v2.6 | Windows 10/11 | 512 MB',
+        'COMPASS Directional Planning Suite | v5.1 | Windows 10 | 290 MB',
+        'INTEQ Drilling Manager | v4.3 | Windows 10/11 | 380 MB']
     }
   },
   'cementing': {
     name:'Cementing', icon:'🏗️', tag:'Well Construction',
     desc:'Primary and remedial cementing operations, slurry design, quality control standards, and pressure testing procedures.',
-    sops:13, manuals:9, policies:7, alerts:0, lessons:5,
+    sops:13, manuals:9, policies:7, alerts:0, lessons:5, software:2,
     docs:{
       sops:['CEM-001 Pre-Job Safety Check','CEM-002 Batch Mixing SOP','CEM-003 Primary Cement Job SOP',
         'CEM-004 Displacement Procedure','CEM-005 Pressure Test SOP','CEM-006 Float Equipment SOP',
@@ -677,13 +701,15 @@ const SEGMENTS = {
         'LL-CEM-002: Free water observed after primary cement — mix design review',
         'LL-CEM-003: Failed squeeze job — lessons from over-pressuring zone',
         'LL-CEM-004: Float collar failure — pre-job testing enhancement',
-        'LL-CEM-005: Centralizer placement issue in deviated well — planning improvement']
+        'LL-CEM-005: Centralizer placement issue in deviated well — planning improvement'],
+      software:['OptiCem Slurry Design Software | v8.2 | Windows 10/11 | 198 MB',
+        'CemCADE Cement Job Simulator | v6.4 | Windows 10 | 267 MB']
     }
   },
   'inspection': {
     name:'Inspection Services', icon:'🔍', tag:'Compliance',
     desc:'Equipment inspection standards, NDT methods, compliance requirements, certification workflows, and audit documentation.',
-    sops:15, manuals:10, policies:9, alerts:3, lessons:6,
+    sops:15, manuals:10, policies:9, alerts:3, lessons:6, software:2,
     docs:{
       sops:['INS-001 Visual Inspection SOP','INS-002 MPI Inspection SOP','INS-003 UT Wall Thickness SOP',
         'INS-004 Pressure Test Inspection SOP','INS-005 Tubular Inspection SOP','INS-006 BOP Inspection SOP',
@@ -704,13 +730,15 @@ const SEGMENTS = {
         'LL-INS-003: Lifting equipment failure after passed inspection — gap analysis',
         'LL-INS-004: Vendor inspection discrepancy — dual verification implemented',
         'LL-INS-005: Crane overload incident — pre-lift checklist improvements',
-        'LL-INS-006: NDT equipment drift — calibration frequency doubled']
+        'LL-INS-006: NDT equipment drift — calibration frequency doubled'],
+      software:['InspectTrack Pro Inspection Manager | v3.2 | Windows 10/11 | 156 MB',
+        'NTDS Tubular Inspection Database | v2.1 | Windows 10 | 98 MB']
     }
   },
   'well-safety': {
     name:'Well Safety', icon:'🛡️', tag:'Safety Critical',
     desc:'Well control procedures, blowout prevention, emergency response plans, pressure management, and safety management systems.',
-    sops:20, manuals:12, policies:15, alerts:8, lessons:9,
+    sops:20, manuals:12, policies:15, alerts:8, lessons:9, software:2,
     docs:{
       sops:['WS-001 Daily BOP Test SOP','WS-002 Kill Sheet Preparation SOP','WS-003 Well Shut-In Procedure',
         'WS-004 Hard Shut-In vs. Soft Shut-In','WS-005 Stripping Operations SOP','WS-006 Bullheading SOP',
@@ -744,13 +772,15 @@ const SEGMENTS = {
         'LL-WS-006: SIMOPS incident during concurrent operations',
         'LL-WS-007: Barrier verification failure found during well handover',
         'LL-WS-008: Surface safety valve failure — testing protocol enhancement',
-        'LL-WS-009: Night-time well control event — communications lesson']
+        'LL-WS-009: Night-time well control event — communications lesson'],
+      software:['OLGA Well Control Simulator | v2024.1 | Windows 10/11 | 620 MB',
+        'SafetyNet BOP Management System | v4.0 | Windows 10/11 | 145 MB']
     }
   },
   'qhse': {
     name:'QHSE', icon:'✅', tag:'Quality & Safety',
     desc:'Quality, Health, Safety and Environmental management standards, risk assessment, compliance, and audit documentation.',
-    sops:16, manuals:10, policies:18, alerts:4, lessons:7,
+    sops:16, manuals:10, policies:18, alerts:4, lessons:7, software:2,
     docs:{
       sops:['QHSE-001 Risk Assessment (HAZID) SOP','QHSE-002 JSA / JHA Preparation SOP','QHSE-003 Permit to Work SOP',
         'QHSE-004 Incident Investigation SOP','QHSE-005 Near-Miss Reporting SOP','QHSE-006 Environmental Impact Assessment',
@@ -776,13 +806,15 @@ const SEGMENTS = {
         'LL-QHSE-004: Permit to Work violation — systemic fix applied',
         'LL-QHSE-005: Chemical exposure incident — improved storage and labeling',
         'LL-QHSE-006: MOC bypass led to equipment failure — process strengthened',
-        'LL-QHSE-007: Waste classification error — training and audit response']
+        'LL-QHSE-007: Waste classification error — training and audit response'],
+      software:['IncidentTracker Pro HSSE Suite | v5.1 | Windows 10/11 | 187 MB',
+        'HSSE Management System v3.4 | v3.4 | Windows 10/11 | 234 MB']
     }
   },
   'hr': {
     name:'Human Resources', icon:'👥', tag:'HR & People',
     desc:'TAQA HR policies, employee standards, code of conduct, organizational guidelines, and personnel procedures for all employees.',
-    sops:10, manuals:8, policies:15, alerts:0, lessons:5,
+    sops:10, manuals:8, policies:15, alerts:0, lessons:5, software:1,
     docs:{
       sops:['HR-001 Employee Onboarding SOP','HR-002 Exit & Offboarding SOP','HR-003 Performance Review SOP',
         'HR-004 Disciplinary Procedure SOP','HR-005 Leave Application SOP','HR-006 Recruitment & Selection SOP',
@@ -801,13 +833,14 @@ const SEGMENTS = {
         'LL-HR-002: Performance review cycle delay — revised timeline and manager training',
         'LL-HR-003: Recruitment timeline reduction — structured interview process adopted',
         'LL-HR-004: Policy communication failure — multi-channel distribution approach adopted',
-        'LL-HR-005: HRMS data accuracy issues — validation controls implemented']
+        'LL-HR-005: HRMS data accuracy issues — validation controls implemented'],
+      software:['Oracle HRMS Integration Pack | v12.2 | Windows 10/11 | 156 MB']
     }
   },
   'tws-maintenance': {
     name:'TWS Maintenance', icon:'🔧', tag:'Maintenance',
     desc:'Tool and equipment maintenance schedules, preventive maintenance programs, repair procedures, calibration, and technical specs.',
-    sops:14, manuals:11, policies:8, alerts:0, lessons:6,
+    sops:14, manuals:11, policies:8, alerts:0, lessons:6, software:2,
     docs:{
       sops:['TWS-001 PM Schedule Execution SOP','TWS-002 Corrective Maintenance SOP','TWS-003 Calibration SOP',
         'TWS-004 Tool Pre-Job Inspection SOP','TWS-005 Tool Post-Job Inspection SOP','TWS-006 Pressure Gauge Certification SOP',
@@ -827,7 +860,9 @@ const SEGMENTS = {
         'LL-TWS-003: Hydraulic seal failure — new inspection criteria added',
         'LL-TWS-004: Incorrect reassembly after overhaul — checklist improvement',
         'LL-TWS-005: Motor bearing failure — vibration monitoring added',
-        'LL-TWS-006: Spare parts stockout — inventory management improvement']
+        'LL-TWS-006: Spare parts stockout — inventory management improvement'],
+      software:['SAP PM Integration Toolkit | v7.4 | Windows 10/11 | 312 MB',
+        'AssetTrak Maintenance Manager | v3.2 | Windows 10/11 | 178 MB']
     }
   }
 };
@@ -860,17 +895,19 @@ document.getElementById('breadcrumb-name').textContent = seg.name;
 document.getElementById('seg-tag').textContent = seg.tag;
 document.getElementById('seg-name').textContent = seg.name;
 document.getElementById('seg-desc').textContent = seg.desc;
-document.getElementById('seg-total').textContent = seg.sops + seg.manuals + seg.policies + seg.alerts + seg.lessons;
+document.getElementById('seg-total').textContent = seg.sops + seg.manuals + seg.policies + seg.alerts + seg.lessons + (seg.software||0);
 document.getElementById('seg-alerts').textContent = seg.alerts || 'None';
 document.getElementById('ms-sops').textContent = seg.sops;
 document.getElementById('ms-manuals').textContent = seg.manuals;
 document.getElementById('ms-policies').textContent = seg.policies;
 document.getElementById('ms-lessons').textContent = seg.lessons;
+document.getElementById('ms-software').textContent = seg.software||0;
 document.getElementById('tc-sops').textContent = seg.sops;
 document.getElementById('tc-manuals').textContent = seg.manuals;
 document.getElementById('tc-policies').textContent = seg.policies;
 document.getElementById('tc-alerts').textContent = seg.alerts;
 document.getElementById('tc-lessons').textContent = seg.lessons;
+document.getElementById('tc-software').textContent = seg.software||0;
 
 // ── Build Document Lists ──
 const AUTHORS = ['Mohammed Al-Ghamdi','Ahmed Al-Zahrani','Saud Al-Harbi','Faisal Al-Otaibi','Khalid Al-Shehri',
@@ -1004,6 +1041,48 @@ renderList('manuals', seg.docs.manuals, false);
 renderList('policies', seg.docs.policies, false);
 renderList('alerts', seg.docs.alerts, true);
 renderList('lessons', seg.docs.lessons, false);
+renderSoftware(seg.docs.software || []);
+
+function buildSoftwareCard(raw, idx) {
+  const parts = raw.split(' | ');
+  const name = parts[0] || raw;
+  const ver = parts[1] || 'v1.0';
+  const platform = parts[2] || 'Windows';
+  const size = parts[3] || '–';
+  const safeName = name.replace(/'/g,"&#39;").replace(/"/g,"&quot;");
+  return `
+  <div class="doc-card">
+    <div class="doc-type-icon software">ZIP</div>
+    <div>
+      <div class="doc-info-title">${name}<span class="sw-version">${ver}</span></div>
+      <div class="doc-summary">Operational software tool for this segment. Download the installer package and follow the setup guide included in the archive.</div>
+      <div class="doc-info-meta">
+        <span class="doc-type-badge software">Software</span>
+        <span class="doc-meta-item">💻 ${platform}</span>
+        <span class="doc-meta-item">📦 ${size}</span>
+      </div>
+    </div>
+    <div class="doc-actions">
+      <button class="doc-action-btn primary-action" title="Download">Download</button>
+      <button class="doc-action-btn" onclick="copyDocLink(this,'${safeName}')" title="Copy Link">Copy Link</button>
+    </div>
+  </div>`;
+}
+
+function renderSoftware(items) {
+  const el = document.getElementById('list-software');
+  const vis = document.getElementById('vis-software');
+  el.innerHTML = SKEL + SKEL;
+  setTimeout(() => {
+    if (!items || items.length === 0) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(168,85,247,0.2);font-family:'Urbanist',sans-serif;">ZIP</div><h3>No software uploaded yet</h3><p>Upload installer packages or tools relevant to this segment.</p><a href="upload.html" class="empty-state-upload">+ Upload Software</a></div>`;
+      if(vis) vis.textContent = '0';
+      return;
+    }
+    el.innerHTML = items.map((t,i) => buildSoftwareCard(t,i)).join('');
+    if(vis) vis.textContent = items.length;
+  }, 420);
+}
 
 // Fix type mapping for render
 document.getElementById('list-sops').querySelectorAll('.doc-type-icon').forEach(el=>{ el.className='doc-type-icon sop'; el.textContent='SOP';});
