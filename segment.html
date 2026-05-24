@@ -207,6 +207,37 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 /* ── Empty State ── */
 .empty-state{text-align:center;padding:80px 40px;}
 .empty-icon{font-size:48px;margin-bottom:16px;opacity:0.4;}
+
+/* ── Skeleton Loading ── */
+@keyframes skeletonPulse{0%,100%{opacity:0.4;}50%{opacity:0.9;}}
+.skeleton-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:20px 24px;display:flex;gap:16px;align-items:flex-start;}
+.skel-icon{width:44px;height:44px;border-radius:10px;background:rgba(120,140,160,0.15);flex-shrink:0;animation:skeletonPulse 1.4s ease-in-out infinite;}
+.skel-lines{flex:1;display:flex;flex-direction:column;gap:10px;padding-top:4px;}
+.skel-line{height:11px;border-radius:6px;background:rgba(120,140,160,0.12);animation:skeletonPulse 1.4s ease-in-out infinite;}
+.skel-line.w80{width:80%;}.skel-line.w60{width:60%;}.skel-line.w40{width:40%;}
+
+/* ── Recently Viewed ── */
+.recent-strip{margin-bottom:28px;}
+.recent-strip-label{font-size:10.5px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--primary);margin-bottom:12px;}
+.recent-cards{display:flex;gap:10px;flex-wrap:wrap;}
+.recent-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;padding:11px 16px;cursor:pointer;transition:border-color 0.2s,box-shadow 0.2s;min-width:0;flex:0 0 auto;max-width:260px;}
+.recent-card:hover{border-color:var(--glass-border-hover);box-shadow:0 4px 12px rgba(0,0,0,0.08);}
+.recent-card-title{font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
+.recent-card-meta{font-size:11px;color:var(--text-muted);}
+
+/* ── Copy Link feedback ── */
+.copy-ok{color:var(--primary)!important;border-color:rgba(0,191,178,0.3)!important;}
+
+/* ── Print ── */
+@media print{
+  nav,.seg-hero-banner,footer,.doc-toolbar,.tabs-outer,.scroll-top-btn,.doc-actions,.alert-pulse-dot,.doc-new-badge{display:none!important;}
+  body{background:#fff!important;color:#111!important;}
+  .page-wrapper{background:#fff!important;}
+  .doc-card,.alert-card{border:1px solid #ddd!important;background:#fff!important;box-shadow:none!important;page-break-inside:avoid;margin-bottom:8px;}
+  .doc-summary{color:#444!important;}
+  .tab-panel{display:block!important;}
+  .content-outer{padding:0!important;}
+}
 .empty-state h3{font-family:'Urbanist',sans-serif;font-size:18px;font-weight:600;margin-bottom:8px;color:var(--text-muted);}
 .empty-state p{font-size:14px;color:var(--text-dim);}
 
@@ -376,7 +407,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
         <div class="seg-hero-meta">
           <div class="seg-meta-item"><strong id="seg-total">–</strong> Total Documents</div>
           <div class="seg-meta-item"><strong id="seg-alerts">–</strong> Active Alerts</div>
-          <div class="seg-meta-item">Updated <strong>May 2026</strong></div>
+          <div class="seg-meta-item">Updated <strong id="seg-updated">recently</strong></div>
         </div>
         <div style="margin-top:18px;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);">Part of <em style="color:#4DD9D3;font-style:italic;font-weight:700;text-transform:none;letter-spacing:0;">The One</em> Platform</div>
       </div>
@@ -404,6 +435,11 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 
 <!-- ── Document Panels ── -->
 <div class="content-outer">
+
+  <div id="recent-strip" class="recent-strip" style="display:none;">
+    <div class="recent-strip-label">Your Recent</div>
+    <div class="recent-cards" id="recent-cards"></div>
+  </div>
 
   <div class="tab-panel active" id="panel-sops">
     <div class="doc-toolbar">
@@ -913,8 +949,9 @@ function buildDocCard(title, type, idx) {
       </div>
     </div>
     <div class="doc-actions">
-      <button class="doc-action-btn" onclick="openDocModal('${safeTitle}','${safeType}')" title="Preview">View</button>
+      <button class="doc-action-btn" onclick="openDocModal('${safeTitle}','${safeType}');saveRecent('${safeTitle}','${safeType}')" title="Preview">View</button>
       <button class="doc-action-btn primary-action" title="Download">Download</button>
+      <button class="doc-action-btn" onclick="copyDocLink(this,'${safeTitle}')" title="Copy Link">Copy Link</button>
     </div>
   </div>`;
 }
@@ -942,22 +979,27 @@ function buildAlertCard(text, idx) {
   </div>`;
 }
 
+const SKEL = `<div class="skeleton-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>`;
+
 function renderList(type, items, isAlert) {
   const el = document.getElementById('list-'+type);
   const vis = document.getElementById('vis-'+type);
-  if (!items || items.length === 0) {
-    const typeLabels = {sops:'procedures',manuals:'manuals',policies:'policies',lessons:'lessons learned'};
-    const label = typeLabels[type] || type;
-    const emptyHTML = isAlert
-      ? `<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,191,178,0.3);font-family:'Urbanist',sans-serif;letter-spacing:2px;">CLEAR</div><h3>No active alerts</h3><p>This segment currently has no outstanding technical alerts.</p></div>`
-      : `<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,191,178,0.15);font-family:'Urbanist',sans-serif;letter-spacing:2px;">—</div><h3>No ${label} uploaded yet</h3><p>Be the first to contribute to this segment.</p><a href="upload.html" class="empty-state-upload">+ Upload Document</a></div>`;
-    el.innerHTML = emptyHTML;
-    if(vis) vis.textContent = '0';
-    return;
-  }
-  el.innerHTML = items.map((t,i) => isAlert ? buildAlertCard(t,i) : buildDocCard(t, type.replace('s','').replace('lesson','lesson'), i)).join('');
-  if(vis) vis.textContent = items.length;
-  if(isAlert) { const dot = document.getElementById('alert-pulse-dot'); if(dot) dot.style.display='inline-block'; }
+  el.innerHTML = SKEL + SKEL + SKEL;
+  setTimeout(() => {
+    if (!items || items.length === 0) {
+      const typeLabels = {sops:'procedures',manuals:'manuals',policies:'policies',lessons:'lessons learned'};
+      const label = typeLabels[type] || type;
+      const emptyHTML = isAlert
+        ? `<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,191,178,0.3);font-family:'Urbanist',sans-serif;letter-spacing:2px;">CLEAR</div><h3>No active alerts</h3><p>This segment currently has no outstanding technical alerts.</p></div>`
+        : `<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,191,178,0.15);font-family:'Urbanist',sans-serif;letter-spacing:2px;">—</div><h3>No ${label} uploaded yet</h3><p>Be the first to contribute to this segment.</p><a href="upload.html" class="empty-state-upload">+ Upload Document</a></div>`;
+      el.innerHTML = emptyHTML;
+      if(vis) vis.textContent = '0';
+      return;
+    }
+    el.innerHTML = items.map((t,i) => isAlert ? buildAlertCard(t,i) : buildDocCard(t, type.replace('s','').replace('lesson','lesson'), i)).join('');
+    if(vis) vis.textContent = items.length;
+    if(isAlert) { const dot = document.getElementById('alert-pulse-dot'); if(dot) dot.style.display='inline-block'; }
+  }, 420);
 }
 
 renderList('sops', seg.docs.sops, false);
@@ -1095,6 +1137,63 @@ document.addEventListener('click',function(e){
   e.preventDefault();
   document.body.classList.add('page-exit');
   setTimeout(()=>window.location.href=h,270);
+});
+
+// ── Dynamic Last Updated ──
+(function(){
+  const el = document.getElementById('seg-updated');
+  if(!el) return;
+  const ref = new Date('2026-05-18');
+  const now = new Date();
+  const days = Math.floor((now - ref) / 86400000);
+  el.textContent = days === 0 ? 'today' : days === 1 ? 'yesterday' : days + ' days ago';
+})();
+
+// ── Recently Viewed ──
+const RECENT_KEY = 'taqa-recent-docs';
+function saveRecent(title, type) {
+  const segId = new URLSearchParams(location.search).get('id') || 'unknown';
+  const segName = seg ? seg.name : segId;
+  let items = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+  items = items.filter(i => i.title !== title);
+  items.unshift({title, type, segId, segName, ts: Date.now()});
+  localStorage.setItem(RECENT_KEY, JSON.stringify(items.slice(0, 6)));
+}
+function loadRecent() {
+  const items = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+  if (!items.length) return;
+  const strip = document.getElementById('recent-strip');
+  const cards = document.getElementById('recent-cards');
+  if (!strip || !cards) return;
+  cards.innerHTML = items.slice(0,3).map(i => {
+    const typeLabel = {sop:'SOP',manual:'Manual',policy:'Policy',lesson:'Lesson',alert:'Alert'}[i.type] || i.type;
+    return `<div class="recent-card" onclick="openDocModal('${i.title.replace(/'/g,"&#39;")}','${i.type}')">
+      <div class="recent-card-title">${i.title}</div>
+      <div class="recent-card-meta">${typeLabel} · ${i.segName}</div>
+    </div>`;
+  }).join('');
+  strip.style.display = 'block';
+}
+loadRecent();
+
+// ── Copy Link ──
+function copyDocLink(btn, title) {
+  const url = location.href.split('#')[0] + '#doc-' + encodeURIComponent(title);
+  navigator.clipboard.writeText(url).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.classList.add('copy-ok');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copy-ok'); }, 1800);
+  });
+}
+
+// ── / Keyboard Shortcut ──
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    const panel = document.querySelector('.tab-panel.active');
+    if (panel) { const inp = panel.querySelector('input'); if (inp) inp.focus(); }
+  }
 });
 </script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
