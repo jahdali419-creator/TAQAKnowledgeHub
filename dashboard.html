@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00686A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The One">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<title>Segment Control Panel — TAQA Knowledge Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#00686A;--primary-light:#00BFB2;--accent:#FF6720;
+  --bg:#f4f5f7;--bg-white:#ffffff;
+  --glass:rgba(255,255,255,0.85);--glass-2:rgba(255,255,255,0.98);
+  --glass-border:rgba(0,0,0,0.09);--glass-border-hover:rgba(0,104,106,0.35);
+  --text:#1a2235;--text-muted:#64748b;--text-dim:#94a3b8;
+  --radius:14px;--gradient:linear-gradient(135deg,#00686A 0%,#00BFB2 100%);
+  --border:rgba(0,0,0,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+@keyframes pageFadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;animation:pageFadeIn 0.4s ease;}
+.page-wrapper{min-height:100vh;}
+
+/* ── Nav ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,0.93);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
+.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.nav-brand-icon{width:40px;height:40px;border-radius:11px;background:var(--gradient);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  box-shadow:0 4px 18px rgba(0,104,106,0.38);}
+.nav-brand-icon svg{width:20px;height:20px;}
+.nav-brand-text{font-family:'Urbanist',sans-serif;font-size:15px;}
+.nav-brand-name{font-weight:800;color:var(--primary);}
+.nav-brand-hub{font-weight:500;color:#64748b;}
+.nav-links{display:flex;gap:2px;list-style:none;align-items:center;}
+.nav-links a{padding:7px 15px;border-radius:6px;text-decoration:none;font-size:13.5px;
+  font-weight:500;color:var(--text-muted);transition:background 0.2s,color 0.2s;}
+.nav-links a:hover{background:#f0f1f3;color:var(--text);}
+.nav-links a.active{color:var(--primary);font-weight:600;}
+.nav-right{display:flex;gap:10px;align-items:center;}
+.nav-role-badge{padding:4px 12px;border-radius:20px;font-size:11.5px;font-weight:600;
+  background:rgba(0,104,106,0.1);color:var(--primary);border:1px solid rgba(0,104,106,0.2);
+  letter-spacing:0.3px;}
+.btn{padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
+  border:none;font-family:'Inter',sans-serif;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
+.btn-ghost:hover{border-color:var(--glass-border-hover);color:var(--primary);}
+.btn-primary{background:var(--gradient);color:#fff;box-shadow:0 4px 14px rgba(0,104,106,0.25);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,104,106,0.32);}
+
+/* ── Page Hero ── */
+.dash-hero{margin-top:68px;background:linear-gradient(135deg,#06121a 0%,#0d2030 100%);
+  padding:40px 48px;position:relative;overflow:hidden;border-bottom:1px solid rgba(0,191,178,0.12);}
+.dash-hero::before{content:'';position:absolute;top:-80px;right:-80px;width:320px;height:320px;
+  border-radius:50%;background:radial-gradient(circle,rgba(0,191,178,0.08) 0%,transparent 70%);pointer-events:none;}
+.dash-hero::after{content:'';position:absolute;bottom:-60px;left:30%;width:200px;height:200px;
+  border-radius:50%;background:radial-gradient(circle,rgba(0,104,106,0.06) 0%,transparent 70%);pointer-events:none;}
+.dash-hero-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:32px;position:relative;z-index:1;}
+.dash-hero-left{}
+.dash-hero-tag{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(0,191,178,0.7);margin-bottom:10px;display:block;}
+.dash-hero-title{font-family:'Urbanist',sans-serif;font-size:28px;font-weight:800;color:#fff;
+  margin-bottom:6px;letter-spacing:-0.3px;}
+.dash-hero-sub{font-size:13.5px;color:rgba(255,255,255,0.5);margin-bottom:20px;}
+.dash-user-pill{display:inline-flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+  border-radius:50px;padding:7px 16px;}
+.dash-user-avatar{width:28px;height:28px;border-radius:50%;background:var(--gradient);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.dash-user-name{font-size:13px;font-weight:500;color:rgba(255,255,255,0.8);}
+.dash-user-role{font-size:11px;color:rgba(0,191,178,0.8);font-weight:600;}
+.dash-hero-stats{display:flex;gap:24px;}
+.dash-hero-stat{text-align:center;}
+.dash-hero-stat-num{font-family:'Urbanist',sans-serif;font-size:30px;font-weight:800;color:#fff;display:block;line-height:1;}
+.dash-hero-stat-label{font-size:11px;color:rgba(255,255,255,0.35);margin-top:5px;text-transform:uppercase;letter-spacing:1px;}
+
+/* ── Main Layout ── */
+.dash-outer{max-width:1200px;margin:0 auto;padding:32px 48px 80px;}
+.dash-grid{display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start;}
+
+/* ── Section Header ── */
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.section-hd-title{font-family:'Urbanist',sans-serif;font-size:16px;font-weight:700;color:var(--text);}
+.section-hd-count{font-size:12px;color:var(--text-muted);background:var(--glass);
+  border:1px solid var(--border);border-radius:20px;padding:2px 10px;}
+
+/* ── Pending Card ── */
+.pending-card{background:var(--bg-white);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px 24px;margin-bottom:10px;transition:box-shadow 0.2s,border-color 0.2s;}
+.pending-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.07);border-color:rgba(0,104,106,0.2);}
+.pending-card.approved{border-left:3px solid #00BFB2;opacity:0.7;}
+.pending-card.rejected{border-left:3px solid #ef4444;opacity:0.7;}
+.pending-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px;}
+.pending-doc-info{}
+.pending-doc-type{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--primary-light);margin-bottom:5px;}
+.pending-doc-title{font-family:'Urbanist',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.pending-doc-meta{font-size:12px;color:var(--text-muted);}
+.pending-status-badge{padding:3px 10px;border-radius:20px;font-size:10.5px;font-weight:600;flex-shrink:0;white-space:nowrap;}
+.badge-pending{background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.2);}
+.badge-approved{background:rgba(0,191,178,0.1);color:#00BFB2;border:1px solid rgba(0,191,178,0.2);}
+.badge-rejected{background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.2);}
+.pending-doc-preview{font-size:12.5px;color:var(--text-muted);line-height:1.6;
+  background:#f8f9fb;border-radius:8px;padding:10px 14px;margin-bottom:14px;border:1px solid var(--border);}
+.pending-actions{display:flex;gap:8px;align-items:center;}
+.btn-approve{background:rgba(0,191,178,0.1);border:1px solid rgba(0,191,178,0.3);color:#00868a;
+  padding:7px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;
+  font-family:'Inter',sans-serif;transition:all 0.2s;}
+.btn-approve:hover{background:rgba(0,191,178,0.2);border-color:var(--primary-light);}
+.btn-reject{background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);color:#ef4444;
+  padding:7px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;
+  font-family:'Inter',sans-serif;transition:all 0.2s;}
+.btn-reject:hover{background:rgba(239,68,68,0.14);}
+.btn-preview-link{font-size:12.5px;color:var(--text-muted);text-decoration:none;
+  padding:7px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;
+  background:transparent;font-family:'Inter',sans-serif;transition:all 0.2s;}
+.btn-preview-link:hover{border-color:var(--glass-border-hover);color:var(--primary);}
+.action-result{font-size:12px;font-weight:600;margin-left:4px;display:none;}
+.action-result.show{display:inline;}
+.action-result.approved-txt{color:#00BFB2;}
+.action-result.rejected-txt{color:#ef4444;}
+
+/* ── Published Docs ── */
+.pub-table{width:100%;border-collapse:collapse;margin-bottom:4px;}
+.pub-table th{font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;
+  color:var(--text-muted);padding:0 16px 10px;text-align:left;border-bottom:1px solid var(--border);}
+.pub-table td{padding:14px 16px;font-size:13px;color:var(--text);border-bottom:1px solid rgba(0,0,0,0.04);}
+.pub-table tr:hover td{background:rgba(0,104,106,0.02);}
+.pub-table tr:last-child td{border-bottom:none;}
+.pub-doc-title{font-weight:500;}
+.pub-doc-type-badge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;}
+.pub-type-sop{background:rgba(0,104,106,0.1);color:#00868a;}
+.pub-type-manual{background:rgba(59,130,246,0.1);color:#60a5fa;}
+.pub-type-policy{background:rgba(245,158,11,0.1);color:#f59e0b;}
+.pub-type-alert{background:rgba(255,103,32,0.1);color:#FF6720;}
+.pub-remove-btn{font-size:12px;color:#ef4444;background:none;border:none;cursor:pointer;
+  padding:4px 8px;border-radius:6px;font-family:'Inter',sans-serif;transition:background 0.15s;}
+.pub-remove-btn:hover{background:rgba(239,68,68,0.08);}
+
+/* ── Right Column ── */
+.right-col{display:flex;flex-direction:column;gap:20px;}
+
+/* ── Contributors ── */
+.widget{background:var(--bg-white);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;}
+.widget-title{font-family:'Urbanist',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.contributor-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.05);}
+.contributor-row:last-child{border-bottom:none;padding-bottom:0;}
+.contributor-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+.av-teal{background:linear-gradient(135deg,#00686A,#00BFB2);}
+.av-blue{background:linear-gradient(135deg,#3b82f6,#60a5fa);}
+.av-orange{background:linear-gradient(135deg,#f59e0b,#fbbf24);}
+.av-purple{background:linear-gradient(135deg,#8b5cf6,#a78bfa);}
+.contributor-info{flex:1;}
+.contributor-name{font-size:13px;font-weight:600;color:var(--text);}
+.contributor-role{font-size:11.5px;color:var(--text-muted);}
+.contributor-role-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;}
+.crole-owner{background:rgba(0,104,106,0.1);color:var(--primary);}
+.crole-editor{background:rgba(59,130,246,0.1);color:#60a5fa;}
+.crole-viewer{background:rgba(100,116,139,0.1);color:var(--text-muted);}
+
+/* ── Activity Feed ── */
+.activity-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.05);}
+.activity-item:last-child{border-bottom:none;padding-bottom:0;}
+.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.dot-green{background:#00BFB2;}
+.dot-orange{background:#f59e0b;}
+.dot-red{background:#ef4444;}
+.dot-blue{background:#60a5fa;}
+.activity-text{font-size:12.5px;color:var(--text-muted);line-height:1.5;}
+.activity-text strong{color:var(--text);font-weight:600;}
+.activity-time{font-size:11px;color:var(--text-dim);margin-top:2px;}
+
+/* ── Empty pending ── */
+.empty-pending{text-align:center;padding:48px 24px;background:var(--bg-white);
+  border:1px solid var(--border);border-radius:var(--radius);}
+.empty-pending-icon{font-size:36px;margin-bottom:12px;opacity:0.3;}
+.empty-pending h3{font-family:'Urbanist',sans-serif;font-size:16px;font-weight:600;color:var(--text-muted);margin-bottom:6px;}
+.empty-pending p{font-size:13px;color:var(--text-dim);}
+
+/* ── Footer ── */
+footer{background:var(--bg-white);padding:24px 48px;position:relative;margin-top:40px;}
+footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--primary) 0%,#00BFB2 100%);}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.footer-brand{font-family:'Urbanist',sans-serif;font-size:13px;font-weight:600;color:var(--text-muted);}
+.footer-copy{font-size:11.5px;color:var(--text-dim);}
+
+/* ── Notification toast ── */
+.dash-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:#1a2235;color:#fff;padding:12px 24px;border-radius:50px;font-size:13.5px;font-weight:500;
+  box-shadow:0 8px 32px rgba(0,0,0,0.2);opacity:0;transition:all 0.3s;z-index:9999;pointer-events:none;
+  display:flex;align-items:center;gap:10px;}
+.dash-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.dash-toast-dot{width:8px;height:8px;border-radius:50%;background:#00BFB2;flex-shrink:0;}
+
+@media(max-width:900px){
+  .dash-grid{grid-template-columns:1fr;}
+  .dash-hero-stats{display:none;}
+  nav{padding:0 20px;}
+  .dash-outer{padding:24px 20px 60px;}
+  .dash-hero{padding:32px 20px;}
+}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<!-- ── Nav ── -->
+<nav>
+  <a href="index.html" class="nav-brand">
+    <div class="nav-brand-icon">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 3L4 7v5c0 4.5 3.5 8.7 8 9.9 4.5-1.2 8-5.4 8-9.9V7l-8-4z" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
+        <path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="nav-brand-text">
+      <span class="nav-brand-name">TAQA</span><span class="nav-brand-hub"> Knowledge Hub</span>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="ai-search.html">Document Search</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="upload.html">Upload</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
+  <div class="nav-right">
+    <span class="nav-role-badge">Segment Controller</span>
+    <button class="btn btn-ghost" style="font-size:13px;">Sign Out</button>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<div class="dash-hero">
+  <div class="dash-hero-inner">
+    <div class="dash-hero-left">
+      <span class="dash-hero-tag">Control Panel</span>
+      <div class="dash-hero-title">Coiled Tubing Segment</div>
+      <div class="dash-hero-sub">You are managing document approvals and access for this segment.</div>
+      <div class="dash-user-pill">
+        <div class="dash-user-avatar">MJ</div>
+        <div>
+          <div class="dash-user-name">Mohammed Jahdali</div>
+          <div class="dash-user-role">Segment Controller · Coiled Tubing</div>
+        </div>
+      </div>
+    </div>
+    <div class="dash-hero-stats">
+      <div class="dash-hero-stat">
+        <span class="dash-hero-stat-num" id="stat-pending">3</span>
+        <div class="dash-hero-stat-label">Pending</div>
+      </div>
+      <div class="dash-hero-stat">
+        <span class="dash-hero-stat-num">47</span>
+        <div class="dash-hero-stat-label">Published</div>
+      </div>
+      <div class="dash-hero-stat">
+        <span class="dash-hero-stat-num">5</span>
+        <div class="dash-hero-stat-label">Contributors</div>
+      </div>
+      <div class="dash-hero-stat">
+        <span class="dash-hero-stat-num">1</span>
+        <div class="dash-hero-stat-label">Rejected</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main Content ── -->
+<div class="dash-outer">
+  <div class="dash-grid">
+
+    <!-- Left Column -->
+    <div>
+
+      <!-- Pending Approvals -->
+      <div class="section-hd">
+        <div class="section-hd-title">Pending Approvals</div>
+        <span class="section-hd-count" id="pending-count">3 documents</span>
+      </div>
+
+      <div id="pending-list">
+
+        <!-- Pending 1 -->
+        <div class="pending-card" id="pcard-1">
+          <div class="pending-card-top">
+            <div class="pending-doc-info">
+              <div class="pending-doc-type">Vendor Manual</div>
+              <div class="pending-doc-title">Halliburton CT-240 Coiled Tubing Unit — Maintenance Manual v3.2</div>
+              <div class="pending-doc-meta">Submitted by <strong>Khalid Al-Otaibi</strong> · 2 hours ago · PDF · 4.8 MB</div>
+            </div>
+            <span class="pending-status-badge badge-pending">Awaiting Review</span>
+          </div>
+          <div class="pending-doc-preview">
+            This manual covers preventive and corrective maintenance procedures for the CT-240 unit including hydraulic system service intervals, injector head inspection criteria, BOP function test procedures, and reel drum alignment specifications.
+          </div>
+          <div class="pending-actions">
+            <button class="btn-approve" onclick="approveDoc(1)">✓ Approve</button>
+            <button class="btn-reject" onclick="rejectDoc(1)">✕ Reject</button>
+            <button class="btn-preview-link">Preview Document</button>
+            <span class="action-result" id="result-1"></span>
+          </div>
+        </div>
+
+        <!-- Pending 2 -->
+        <div class="pending-card" id="pcard-2">
+          <div class="pending-card-top">
+            <div class="pending-doc-info">
+              <div class="pending-doc-type">Technical Alert</div>
+              <div class="pending-doc-title">ALERT-CT-009: Nitrogen Pump Pressure Relief Valve — Inspection Required</div>
+              <div class="pending-doc-meta">Submitted by <strong>Faisal Al-Ghamdi</strong> · 5 hours ago · PDF · 1.2 MB</div>
+            </div>
+            <span class="pending-status-badge badge-pending">Awaiting Review</span>
+          </div>
+          <div class="pending-doc-preview">
+            A pressure relief valve failure was identified on two CT units during routine inspection. All units must be inspected within 48 hours. Refer to the attached checklist for inspection criteria and corrective action steps.
+          </div>
+          <div class="pending-actions">
+            <button class="btn-approve" onclick="approveDoc(2)">✓ Approve</button>
+            <button class="btn-reject" onclick="rejectDoc(2)">✕ Reject</button>
+            <button class="btn-preview-link">Preview Document</button>
+            <span class="action-result" id="result-2"></span>
+          </div>
+        </div>
+
+        <!-- Pending 3 -->
+        <div class="pending-card" id="pcard-3">
+          <div class="pending-card-top">
+            <div class="pending-doc-info">
+              <div class="pending-doc-type">SOP Update</div>
+              <div class="pending-doc-title">CT-SOP-007 Wellhead Connection Procedure — Revision 4</div>
+              <div class="pending-doc-meta">Submitted by <strong>Omar Al-Harbi</strong> · Yesterday · PDF · 2.1 MB</div>
+            </div>
+            <span class="pending-status-badge badge-pending">Awaiting Review</span>
+          </div>
+          <div class="pending-doc-preview">
+            Revision 4 updates the wellhead connection torque specifications following the Q1 2026 equipment audit findings. Section 4.2 (Connection Verification) and Section 6.1 (Pressure Test Sequence) have been updated. Previous revision (Rev 3) to be archived upon approval.
+          </div>
+          <div class="pending-actions">
+            <button class="btn-approve" onclick="approveDoc(3)">✓ Approve</button>
+            <button class="btn-reject" onclick="rejectDoc(3)">✕ Reject</button>
+            <button class="btn-preview-link">Preview Document</button>
+            <span class="action-result" id="result-3"></span>
+          </div>
+        </div>
+
+      </div><!-- /pending-list -->
+
+      <!-- Published Documents -->
+      <div class="section-hd" style="margin-top:36px;">
+        <div class="section-hd-title">Published Documents</div>
+        <span class="section-hd-count">47 documents</span>
+      </div>
+
+      <div style="background:var(--bg-white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+        <table class="pub-table">
+          <thead>
+            <tr>
+              <th>Document</th>
+              <th>Type</th>
+              <th>Published</th>
+              <th>By</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="pub-doc-title">CT-SOP-001 Morning Safety Meeting Checklist</td>
+              <td><span class="pub-doc-type-badge pub-type-sop">SOP</span></td>
+              <td style="color:var(--text-muted);font-size:12px;">Apr 2026</td>
+              <td style="color:var(--text-muted);font-size:12px;">M. Jahdali</td>
+              <td><button class="pub-remove-btn" onclick="removeDoc(this)">Remove</button></td>
+            </tr>
+            <tr>
+              <td class="pub-doc-title">Nowsco CT Unit Operations Manual v4.1</td>
+              <td><span class="pub-doc-type-badge pub-type-manual">Manual</span></td>
+              <td style="color:var(--text-muted);font-size:12px;">Mar 2026</td>
+              <td style="color:var(--text-muted);font-size:12px;">K. Al-Otaibi</td>
+              <td><button class="pub-remove-btn" onclick="removeDoc(this)">Remove</button></td>
+            </tr>
+            <tr>
+              <td class="pub-doc-title">ALERT-CT-007: BOP Ram Seal Replacement</td>
+              <td><span class="pub-doc-type-badge pub-type-alert">Alert</span></td>
+              <td style="color:var(--text-muted);font-size:12px;">May 2026</td>
+              <td style="color:var(--text-muted);font-size:12px;">F. Al-Ghamdi</td>
+              <td><button class="pub-remove-btn" onclick="removeDoc(this)">Remove</button></td>
+            </tr>
+            <tr>
+              <td class="pub-doc-title">CT-SOP-003 Wellhead Rigging Procedure</td>
+              <td><span class="pub-doc-type-badge pub-type-sop">SOP</span></td>
+              <td style="color:var(--text-muted);font-size:12px;">Feb 2026</td>
+              <td style="color:var(--text-muted);font-size:12px;">O. Al-Harbi</td>
+              <td><button class="pub-remove-btn" onclick="removeDoc(this)">Remove</button></td>
+            </tr>
+            <tr>
+              <td class="pub-doc-title">CT Operations Safety Policy v2.0</td>
+              <td><span class="pub-doc-type-badge pub-type-policy">Policy</span></td>
+              <td style="color:var(--text-muted);font-size:12px;">Jan 2026</td>
+              <td style="color:var(--text-muted);font-size:12px;">M. Jahdali</td>
+              <td><button class="pub-remove-btn" onclick="removeDoc(this)">Remove</button></td>
+            </tr>
+            <tr>
+              <td style="color:var(--text-muted);font-size:12.5px;font-style:italic;" colspan="5">+ 42 more documents published</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /left col -->
+
+    <!-- Right Column -->
+    <div class="right-col">
+
+      <!-- Contributors -->
+      <div class="widget">
+        <div class="widget-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Segment Contributors
+        </div>
+        <div class="contributor-row">
+          <div class="contributor-avatar av-teal">MJ</div>
+          <div class="contributor-info">
+            <div class="contributor-name">Mohammed Jahdali</div>
+            <div class="contributor-role">You</div>
+          </div>
+          <span class="contributor-role-badge crole-owner">Owner</span>
+        </div>
+        <div class="contributor-row">
+          <div class="contributor-avatar av-blue">KO</div>
+          <div class="contributor-info">
+            <div class="contributor-name">Khalid Al-Otaibi</div>
+            <div class="contributor-role">CT Engineer</div>
+          </div>
+          <span class="contributor-role-badge crole-editor">Editor</span>
+        </div>
+        <div class="contributor-row">
+          <div class="contributor-avatar av-orange">FG</div>
+          <div class="contributor-info">
+            <div class="contributor-name">Faisal Al-Ghamdi</div>
+            <div class="contributor-role">Field Supervisor</div>
+          </div>
+          <span class="contributor-role-badge crole-editor">Editor</span>
+        </div>
+        <div class="contributor-row">
+          <div class="contributor-avatar av-purple">OH</div>
+          <div class="contributor-info">
+            <div class="contributor-name">Omar Al-Harbi</div>
+            <div class="contributor-role">HSE Lead</div>
+          </div>
+          <span class="contributor-role-badge crole-editor">Editor</span>
+        </div>
+        <div class="contributor-row">
+          <div class="contributor-avatar" style="background:linear-gradient(135deg,#64748b,#94a3b8);">SA</div>
+          <div class="contributor-info">
+            <div class="contributor-name">Segment Access</div>
+            <div class="contributor-role">All CT Staff</div>
+          </div>
+          <span class="contributor-role-badge crole-viewer">Viewer</span>
+        </div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+          <button class="btn btn-ghost" style="width:100%;font-size:12.5px;justify-content:center;">+ Add Contributor</button>
+        </div>
+      </div>
+
+      <!-- Activity Feed -->
+      <div class="widget">
+        <div class="widget-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Recent Activity
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot dot-orange"></div>
+          <div>
+            <div class="activity-text"><strong>Khalid Al-Otaibi</strong> submitted CT-240 Maintenance Manual for review</div>
+            <div class="activity-time">2 hours ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot dot-orange"></div>
+          <div>
+            <div class="activity-text"><strong>Faisal Al-Ghamdi</strong> submitted Technical Alert CT-009</div>
+            <div class="activity-time">5 hours ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot dot-green"></div>
+          <div>
+            <div class="activity-text">You approved <strong>CT-SOP-006 Pressure Test Procedure</strong></div>
+            <div class="activity-time">Yesterday</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot dot-red"></div>
+          <div>
+            <div class="activity-text">You rejected <strong>CT-POL-003 draft</strong> — incomplete scope section</div>
+            <div class="activity-time">2 days ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot dot-blue"></div>
+          <div>
+            <div class="activity-text"><strong>Omar Al-Harbi</strong> submitted SOP-007 Revision 4 for review</div>
+            <div class="activity-time">Yesterday</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot dot-green"></div>
+          <div>
+            <div class="activity-text">You published <strong>Nowsco CT Unit Manual v4.1</strong></div>
+            <div class="activity-time">3 days ago</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /right col -->
+
+  </div><!-- /dash-grid -->
+</div><!-- /dash-outer -->
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">TAQA Knowledge Hub &nbsp;·&nbsp; <em style="color:#00BFB2;font-style:italic;font-weight:700;">The One</em> Platform</div>
+      <div class="footer-copy" style="margin-top:4px;">© 2026 TAQA — Industrialization &amp; Energy Services Company. All rights reserved.</div>
+    </div>
+    <div style="font-size:11.5px;color:var(--text-muted);">Built by <span style="color:var(--primary);font-weight:600;">TAQA LEARNING CENTER</span></div>
+  </div>
+</footer>
+
+</div><!-- /page-wrapper -->
+
+<!-- Toast -->
+<div class="dash-toast" id="dash-toast">
+  <div class="dash-toast-dot"></div>
+  <span id="dash-toast-msg">Done</span>
+</div>
+
+<script>
+let pendingCount = 3;
+
+function showToast(msg, color) {
+  const t = document.getElementById('dash-toast');
+  const dot = t.querySelector('.dash-toast-dot');
+  document.getElementById('dash-toast-msg').textContent = msg;
+  if(color) dot.style.background = color;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function approveDoc(id) {
+  const card = document.getElementById('pcard-' + id);
+  const badge = card.querySelector('.pending-status-badge');
+  const result = document.getElementById('result-' + id);
+  const actions = card.querySelector('.pending-actions');
+  badge.className = 'pending-status-badge badge-approved';
+  badge.textContent = 'Approved';
+  card.classList.add('approved');
+  actions.querySelector('.btn-approve').disabled = true;
+  actions.querySelector('.btn-reject').disabled = true;
+  actions.querySelector('.btn-approve').style.opacity = '0.4';
+  actions.querySelector('.btn-reject').style.opacity = '0.4';
+  result.textContent = '✓ Published to segment';
+  result.className = 'action-result show approved-txt';
+  pendingCount = Math.max(0, pendingCount - 1);
+  document.getElementById('stat-pending').textContent = pendingCount;
+  document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
+  showToast('Document approved and published to segment', '#00BFB2');
+}
+
+function rejectDoc(id) {
+  const card = document.getElementById('pcard-' + id);
+  const badge = card.querySelector('.pending-status-badge');
+  const result = document.getElementById('result-' + id);
+  const actions = card.querySelector('.pending-actions');
+  badge.className = 'pending-status-badge badge-rejected';
+  badge.textContent = 'Rejected';
+  card.classList.add('rejected');
+  actions.querySelector('.btn-approve').disabled = true;
+  actions.querySelector('.btn-reject').disabled = true;
+  actions.querySelector('.btn-approve').style.opacity = '0.4';
+  actions.querySelector('.btn-reject').style.opacity = '0.4';
+  result.textContent = '✕ Returned to submitter';
+  result.className = 'action-result show rejected-txt';
+  pendingCount = Math.max(0, pendingCount - 1);
+  document.getElementById('stat-pending').textContent = pendingCount;
+  document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
+  showToast('Document rejected — submitter will be notified', '#ef4444');
+}
+
+function removeDoc(btn) {
+  const row = btn.closest('tr');
+  const title = row.querySelector('.pub-doc-title').textContent;
+  if(confirm('Remove "' + title + '" from the segment? This cannot be undone.')) {
+    row.style.opacity = '0.3';
+    row.style.transition = 'opacity 0.3s';
+    setTimeout(() => row.remove(), 300);
+    showToast('Document removed from segment', '#f59e0b');
+  }
+}
+</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
+</body>
+</html>
