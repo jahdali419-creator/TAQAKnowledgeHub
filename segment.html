@@ -133,6 +133,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .tab-panel{display:none;}
 .tab-panel.active{display:block;animation:fadeIn 0.35s ease;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-4px);}}
+.copy-link-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:8px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.55);font-size:11.5px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;line-height:1;}
+.copy-link-btn:hover{background:rgba(255,255,255,0.13);color:#fff;}
 
 /* ── Doc Toolbar ── */
 .doc-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:16px;flex-wrap:wrap;}
@@ -404,7 +407,9 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="breadcrumb">
     <a href="index.html">Home</a>
     <span class="bc-sep">/</span>
-    <span class="current" id="breadcrumb-name">Loading...</span>
+    <span id="breadcrumb-name">Loading...</span>
+    <span class="bc-sep">/</span>
+    <span class="current" id="breadcrumb-tab">SOPs</span>
   </div>
 
   <!-- ── Segment Hero ── -->
@@ -425,6 +430,10 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
             Manage Segment
           </a>
+          <button class="copy-link-btn" onclick="copySegLink()" title="Copy link to this segment" aria-label="Copy link">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Copy link
+          </button>
         </div>
       </div>
       <div class="seg-hero-stats">
@@ -1127,16 +1136,38 @@ document.getElementById('list-manuals').querySelectorAll('.doc-type-badge').forE
 document.getElementById('list-lessons').querySelectorAll('.doc-type-badge').forEach(el=>{ el.className='doc-type-badge lesson'; el.textContent='Lesson Learned';});
 
 // ── Tab Switching ──
+const TAB_LABELS = {sops:'SOPs', manuals:'Manuals', policies:'Policies', alerts:'Alerts', lessons:'Lessons Learned', software:'Software & Tools'};
 function openTab(name) {
+  const cur = document.querySelector('.tab-panel.active');
+  const next = document.getElementById('panel-' + name);
+  if(cur === next) return;
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelector('[data-tab="'+name+'"]').classList.add('active');
-  document.getElementById('panel-'+name).classList.add('active');
+  const bcTab = document.getElementById('breadcrumb-tab');
+  if(bcTab) bcTab.textContent = TAB_LABELS[name] || name;
+  if(cur) {
+    cur.style.animation = 'fadeOut 0.15s ease forwards';
+    setTimeout(function(){
+      cur.classList.remove('active');
+      cur.style.animation = '';
+      next.classList.add('active');
+    }, 150);
+  } else {
+    next.classList.add('active');
+  }
 }
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => openTab(btn.dataset.tab));
 });
 openTab(startTab);
+
+function copySegLink() {
+  navigator.clipboard.writeText(location.href).then(function(){
+    if(window.showToast) window.showToast('Link copied to clipboard!');
+  }).catch(function(){
+    if(window.showToast) window.showToast('Could not copy link', 'error');
+  });
+}
 
 // ── Filter ──
 function filterDocs(input, type) {
@@ -1305,6 +1336,7 @@ document.addEventListener('keydown', e => {
   }
 });
 </script>
+<script src="shared.js"></script>
 <script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:linear-gradient(90deg,#00686A,#00BFB2);animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
 </body>

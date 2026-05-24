@@ -56,6 +56,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .btn-primary{background:var(--gradient);color:#fff;box-shadow:0 4px 14px rgba(0,104,106,0.25);}
 .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,104,106,0.32);}
 
+/* ── Breadcrumb ── */
+.dash-breadcrumb{padding-bottom:16px;font-size:11px;font-weight:500;color:rgba(255,255,255,0.35);display:flex;align-items:center;gap:6px;max-width:1200px;margin:0 auto;position:relative;z-index:1;}
+.dash-breadcrumb a{color:rgba(255,255,255,0.35);text-decoration:none;transition:color 0.2s;}
+.dash-breadcrumb a:hover{color:#00BFB2;}
+.dash-breadcrumb .bc-sep{opacity:0.35;}
+.dash-breadcrumb .bc-cur{color:rgba(0,191,178,0.85);font-weight:600;}
+
 /* ── Page Hero ── */
 .dash-hero{margin-top:68px;background:linear-gradient(135deg,#06121a 0%,#0d2030 100%);
   padding:40px 48px;position:relative;overflow:hidden;border-bottom:1px solid rgba(0,191,178,0.12);}
@@ -293,6 +300,13 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,191,178,0.2)
 
 <!-- ── Hero ── -->
 <div class="dash-hero">
+  <div class="dash-breadcrumb">
+    <a href="index.html">Home</a>
+    <span class="bc-sep">›</span>
+    <span id="dash-bc-seg">Segment</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-cur">Manage Segment</span>
+  </div>
   <div class="dash-hero-inner">
     <div class="dash-hero-left">
       <span class="dash-hero-tag">Control Panel</span>
@@ -931,6 +945,20 @@ const dashParams = new URLSearchParams(window.location.search);
 const dashSegId = dashParams.get('id') || 'coiled-tubing';
 const dash = DASH_DATA[dashSegId] || DASH_DATA['coiled-tubing'];
 
+function animateCount(el, target, duration) {
+  duration = duration || 650;
+  var startTime = null;
+  function step(ts) {
+    if(!startTime) startTime = ts;
+    var progress = Math.min((ts - startTime) / duration, 1);
+    var ease = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.floor(ease * target);
+    if(progress < 1) requestAnimationFrame(step);
+    else el.textContent = target;
+  }
+  requestAnimationFrame(step);
+}
+
 function initDashboard() {
   document.title = dash.name + ' — Control Panel · TAQA Knowledge Hub';
   document.getElementById('dash-seg-name').textContent = dash.name + ' Segment';
@@ -943,11 +971,14 @@ function initDashboard() {
   // Back link
   document.getElementById('back-to-segment').href = 'segment.html?id=' + dashSegId;
 
+  // Breadcrumb
+  document.getElementById('dash-bc-seg').textContent = dash.name;
+
   // Stats
   pendingCount = dash.pending.length;
-  document.getElementById('stat-pending').textContent = pendingCount;
-  document.getElementById('stat-published').textContent = dash.published;
-  document.getElementById('stat-contributors').textContent = dash.contributors.length + 1;
+  animateCount(document.getElementById('stat-pending'), pendingCount, 500);
+  animateCount(document.getElementById('stat-published'), dash.published, 800);
+  animateCount(document.getElementById('stat-contributors'), dash.contributors.length + 1, 650);
   document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
 
   // Pending cards
@@ -1144,6 +1175,7 @@ const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5
 function toggleDark(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme',next);}
 (function(){const s=localStorage.getItem('taqa-theme');if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
 </script>
+<script src="shared.js"></script>
 <script>
 (function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:linear-gradient(90deg,#00686A,#00BFB2);animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--border,rgba(0,0,0,0.08));background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:rgba(0,104,106,0.06);border-color:rgba(0,104,106,0.3);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();
 </script>
