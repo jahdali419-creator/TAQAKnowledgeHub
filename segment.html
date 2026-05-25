@@ -135,10 +135,7 @@ html[data-theme="dark"] .tabs-outer{border-color:rgba(255,255,255,0.06);}
 .content-outer{padding:0 48px 80px;max-width:1200px;margin:0 auto;}
 .tab-panel{display:none;}
 .tab-panel.active{display:block;animation:fadeIn 0.35s ease;}
-.seg-all-mode .tab-panel{display:block !important;margin-bottom:52px;}
-.seg-all-mode .tab-panel:last-child{margin-bottom:0;}
 .section-head{display:none;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--glass-border);}
-.seg-all-mode .section-head{display:flex;}
 .sh-pill{padding:3px 10px;border-radius:6px;font-size:10.5px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;flex-shrink:0;}
 .sh-pill.sop{background:rgba(0,104,106,0.12);color:#00BFB2;border:1px solid rgba(0,191,178,0.2);}
 .sh-pill.manual{background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.2);}
@@ -505,6 +502,14 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div id="recent-strip" class="recent-strip" style="display:none;">
     <div class="recent-strip-label">Your Recent</div>
     <div class="recent-cards" id="recent-cards"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-all">
+    <div class="doc-toolbar">
+      <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search all documents..." oninput="filterDocs(this,'all')"></div>
+      <span class="doc-count-label">Showing <strong id="vis-all">–</strong> documents</span>
+    </div>
+    <div class="docs-grid" id="list-all"></div>
   </div>
 
   <div class="tab-panel active" id="panel-sops">
@@ -1114,10 +1119,13 @@ function _renderPage(type){
   const items=st.filtered;
   const start=st.page*PAGE_SIZE;
   const slice=items.slice(start,start+PAGE_SIZE);
-  const build=(t,i)=>st.isSoftware?buildSoftwareCard(t,i):st.isAlert?buildAlertCard(t,i):buildDocCard(t,LIST_TYPE_MAP[type]||type,i);
+  const build=(t,i)=>{
+    if(typeof t==='object'){return t.isSoftware?buildSoftwareCard(t.title,i):t.isAlert?buildAlertCard(t.title,i):buildDocCard(t.title,t.type,i);}
+    return st.isSoftware?buildSoftwareCard(t,i):st.isAlert?buildAlertCard(t,i):buildDocCard(t,LIST_TYPE_MAP[type]||type,i);
+  };
 
   if(items.length===0){
-    const tl={sops:'procedures',manuals:'manuals',policies:'policies',lessons:'lessons learned'};
+    const tl={sops:'procedures',manuals:'manuals',policies:'policies',lessons:'lessons learned',all:'documents'};
     el.innerHTML=st.isAlert
       ?`<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,191,178,0.3);font-family:'Urbanist',sans-serif;letter-spacing:2px;">CLEAR</div><h3>No active alerts</h3><p>This segment currently has no outstanding technical alerts.</p></div>`
       :`<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,191,178,0.15);font-family:'Urbanist',sans-serif;letter-spacing:2px;">—</div><h3>No ${tl[type]||type} uploaded yet</h3><p>Be the first to contribute to this segment.</p><a href="upload.html" class="empty-state-upload">+ Upload Document</a></div>`;
@@ -1258,11 +1266,24 @@ function openTab(name) {
   history.replaceState({}, '', url.toString());
 
   if (name === 'all') {
-    _contentOuter.classList.add('seg-all-mode');
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => { p.classList.remove('active'); p.style.animation = ''; });
+    const allPanel = document.getElementById('panel-all');
+    if (allPanel) allPanel.classList.add('active');
+    const combined = [
+      ..._st('sops').all.map(t=>({title:t,type:'sop'})),
+      ..._st('manuals').all.map(t=>({title:t,type:'manual'})),
+      ..._st('policies').all.map(t=>({title:t,type:'policy'})),
+      ..._st('alerts').all.map(t=>({title:t,type:'alert',isAlert:true})),
+      ..._st('lessons').all.map(t=>({title:t,type:'lesson'})),
+      ..._st('software').all.map(t=>({title:t,type:'software',isSoftware:true})),
+    ];
+    const stA=_st('all');
+    stA.all=combined;stA.filtered=[...combined];stA.page=0;stA.isAlert=false;stA.isSoftware=false;
+    const el=document.getElementById('list-all');
+    if(el)el.innerHTML=SKEL+SKEL+SKEL;
+    setTimeout(()=>_renderPage('all'),420);
     if (bcTab) bcTab.textContent = 'All Documents';
   } else {
-    _contentOuter.classList.remove('seg-all-mode');
     document.querySelectorAll('.tab-panel').forEach(p => {
       p.classList.remove('active');
       p.style.animation = '';
@@ -1322,7 +1343,7 @@ function filterDocs(input,type){
     const q=input.value.trim().toLowerCase();
     const st=_st(type);
     if(st.observer){st.observer.disconnect();st.observer=null;}
-    st.filtered=q?st.all.filter(t=>t.toLowerCase().includes(q)):[...st.all];
+    st.filtered=q?st.all.filter(t=>(typeof t==='object'?t.title:t).toLowerCase().includes(q)):[...st.all];
     st.page=0;
     const el=document.getElementById('list-'+type);
     if(el)el.innerHTML=SKEL+SKEL;
