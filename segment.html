@@ -134,6 +134,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .tab-panel.active{display:block;animation:fadeIn 0.35s ease;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 @keyframes fadeOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-4px);}}
+.search-hl{background:rgba(0,191,178,0.22);color:var(--primary,#00686A);border-radius:2px;padding:0 1px;}
+html[data-theme="dark"] .search-hl{background:rgba(0,191,178,0.18);color:#4DD9D3;}
 .copy-link-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:8px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.55);font-size:11.5px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;line-height:1;}
 .copy-link-btn:hover{background:rgba(255,255,255,0.13);color:#fff;}
 
@@ -932,6 +934,7 @@ document.getElementById('seg-hero-banner').style.backgroundImage =
 // ── Populate Header ──
 document.title = seg.name + ' — TAQA Knowledge Hub';
 document.getElementById('breadcrumb-name').textContent = seg.name;
+(function(){try{var r=JSON.parse(localStorage.getItem('taqa-recent')||'[]');r=r.filter(function(x){return x.id!==segId;});r.unshift({id:segId,name:seg.name,tag:seg.tag});localStorage.setItem('taqa-recent',JSON.stringify(r.slice(0,4)));}catch(e){}})();
 document.getElementById('seg-tag').textContent = seg.tag;
 document.getElementById('seg-name').textContent = seg.name;
 document.getElementById('seg-desc').textContent = seg.desc;
@@ -1169,15 +1172,29 @@ function copySegLink() {
   });
 }
 
-// ── Filter ──
+// ── Filter + Highlight ──
 function filterDocs(input, type) {
-  const q = input.value.toLowerCase();
+  const q = input.value.trim();
+  const ql = q.toLowerCase();
   const cards = document.querySelectorAll('#list-'+type+' > div');
   let vis = 0;
   cards.forEach(c => {
-    const match = c.textContent.toLowerCase().includes(q);
+    const titleEl = c.querySelector('.doc-info-title');
+    if(titleEl && !titleEl.dataset.orig) titleEl.dataset.orig = titleEl.innerHTML;
+    const match = !ql || c.textContent.toLowerCase().includes(ql);
     c.style.display = match ? '' : 'none';
-    if (match) vis++;
+    if(titleEl) {
+      if(match && ql) {
+        const safeQ = ql.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+        titleEl.innerHTML = (titleEl.dataset.orig).replace(
+          new RegExp('('+safeQ+')', 'gi'),
+          '<mark class="search-hl">$1</mark>'
+        );
+      } else {
+        if(titleEl.dataset.orig) titleEl.innerHTML = titleEl.dataset.orig;
+      }
+    }
+    if(match) vis++;
   });
   const el = document.getElementById('vis-'+type);
   if(el) el.textContent = vis;

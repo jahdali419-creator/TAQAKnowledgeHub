@@ -1596,6 +1596,29 @@ document.addEventListener('click',function(e){
 });
 
 </script>
+<script>
+(function(){
+  var recent;
+  try{recent=JSON.parse(localStorage.getItem('taqa-recent')||'[]');}catch(e){recent=[];}
+  if(!recent||!recent.length)return;
+  var s=document.createElement('style');
+  s.textContent=
+    '.rv-strip{display:flex;align-items:center;gap:10px;padding:0 0 18px;flex-wrap:wrap;}'+
+    '.rv-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.22);flex-shrink:0;white-space:nowrap;}'+
+    '.rv-chip{display:inline-flex;align-items:center;gap:7px;padding:5px 12px 5px 8px;border-radius:50px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);font-size:12px;font-weight:500;color:rgba(255,255,255,0.6);text-decoration:none;transition:all 0.2s;}'+
+    '.rv-chip:hover{background:rgba(0,191,178,0.1);border-color:rgba(0,191,178,0.3);color:#4DD9D3;}'+
+    '.rv-chip-tag{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:rgba(0,191,178,0.65);background:rgba(0,191,178,0.1);border-radius:20px;padding:1px 7px;}';
+  document.head.appendChild(s);
+  var chips=recent.map(function(r){
+    return '<a href="segment.html?id='+r.id+'" class="rv-chip"><span class="rv-chip-tag">'+r.tag+'</span>'+r.name+'</a>';
+  }).join('');
+  var strip=document.createElement('div');
+  strip.className='rv-strip';
+  strip.innerHTML='<span class="rv-label">Recently visited</span>'+chips;
+  var grid=document.querySelector('.cmd-grid');
+  if(grid&&grid.parentNode)grid.parentNode.insertBefore(strip,grid);
+})();
+</script>
 <script src="shared.js"></script>
 <script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:linear-gradient(90deg,#00686A,#00BFB2);animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
