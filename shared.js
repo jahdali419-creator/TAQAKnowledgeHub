@@ -248,8 +248,13 @@ window.showToast=function(msg,type){
   var ts=localStorage.getItem(KEY);
   if(ts&&(Date.now()-parseInt(ts,10))<30*24*60*60*1000)return;
 
-  var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
-  var isSafari=isIOS&&/safari/i.test(navigator.userAgent)&&!/crios|fxios/i.test(navigator.userAgent);
+  var ua=navigator.userAgent;
+  // iPhone only (not iPad/iPod)
+  var isIPhone=/iphone/i.test(ua);
+  // True Safari: must have "Version/", must have "Safari", must NOT have any other browser engine marker
+  var isSafariIPhone=isIPhone&&/version\//i.test(ua)&&/safari/i.test(ua)&&!/crios|fxios|edgios|opios|opt\/|gsa\//i.test(ua);
+  // If it's an iPhone but NOT Safari, skip entirely — other iOS browsers can't add to home screen
+  if(isIPhone&&!isSafariIPhone)return;
   var deferredPrompt=null;
 
   var s=document.createElement('style');
@@ -327,7 +332,7 @@ window.showToast=function(msg,type){
     '<button class="pwa-install-btn" id="pwa-install-btn">Install App</button>'+
     '<button class="pwa-later" id="pwa-later">Maybe later</button>';
 
-  sheet.innerHTML=isIOS?iosContent:androidContent;
+  sheet.innerHTML=isSafariIPhone?iosContent:androidContent;
   document.body.appendChild(sheet);
 
   function dismiss(){
@@ -345,8 +350,8 @@ window.showToast=function(msg,type){
     if(document.getElementById('pwa-later')&&e.target===document.getElementById('pwa-later'))dismiss();
   });
 
-  if(isIOS){
-    if(isSafari)setTimeout(showSheet,2500);
+  if(isSafariIPhone){
+    setTimeout(showSheet,2500);
   } else {
     window.addEventListener('beforeinstallprompt',function(e){
       e.preventDefault();
