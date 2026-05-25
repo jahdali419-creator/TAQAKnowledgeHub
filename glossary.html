@@ -216,9 +216,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   background:var(--glass-2);border:1px solid rgba(0,104,106,0.16);
   border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:12px;
   box-shadow:0 12px 40px rgba(0,0,0,0.13);min-width:256px;max-width:360px;
-  transform:translateY(20px);opacity:0;transition:all 0.35s cubic-bezier(.4,0,.2,1);
+  transform:translateY(20px);opacity:0;visibility:hidden;
+  transition:opacity 0.35s cubic-bezier(.4,0,.2,1),transform 0.35s cubic-bezier(.4,0,.2,1),visibility 0s linear 0.35s;
   pointer-events:none;}
-.toast.show{transform:none;opacity:1;pointer-events:auto;}
+.toast.show{transform:none;opacity:1;visibility:visible;pointer-events:auto;
+  transition:opacity 0.35s cubic-bezier(.4,0,.2,1),transform 0.35s cubic-bezier(.4,0,.2,1),visibility 0s linear 0s;}
 .toast-icon{width:36px;height:36px;border-radius:50%;background:var(--gradient);
   display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .toast-body{flex:1;}
@@ -438,11 +440,9 @@ html[data-theme="dark"] .term-card::after{background:linear-gradient(105deg,tran
 
 <!-- ── Toast ── -->
 <div class="toast" id="toast">
-  <div class="toast-icon" id="toast-icon">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </div>
+  <div class="toast-icon" id="toast-icon"></div>
   <div class="toast-body">
-    <div class="toast-title" id="toast-title">Done</div>
+    <div class="toast-title" id="toast-title"></div>
     <div class="toast-sub" id="toast-sub"></div>
   </div>
 </div>
