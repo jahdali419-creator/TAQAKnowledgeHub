@@ -249,12 +249,9 @@ window.showToast=function(msg,type){
   if(ts&&(Date.now()-parseInt(ts,10))<30*24*60*60*1000)return;
 
   var ua=navigator.userAgent;
-  // iPhone only (not iPad/iPod)
   var isIPhone=/iphone/i.test(ua);
-  // True Safari: must have "Version/", must have "Safari", must NOT have any other browser engine marker
+  // True Safari on iPhone: has Version/, has Safari, no other browser markers
   var isSafariIPhone=isIPhone&&/version\//i.test(ua)&&/safari/i.test(ua)&&!/crios|fxios|edgios|opios|opt\/|gsa\//i.test(ua);
-  // If it's an iPhone but NOT Safari, skip entirely — other iOS browsers can't add to home screen
-  if(isIPhone&&!isSafariIPhone)return;
   var deferredPrompt=null;
 
   var s=document.createElement('style');
@@ -304,26 +301,45 @@ window.showToast=function(msg,type){
   var sheet=document.createElement('div');
   sheet.id='pwa-sheet';
 
-  var iosContent=
+  var APP_ICON='<div class="pwa-app-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>';
+
+  // Safari on iPhone: show 3-step install guide
+  var iosSafariContent=
     '<div class="pwa-handle"></div>'+
-    '<div class="pwa-row">'+
-      '<div class="pwa-app-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>'+
+    '<div class="pwa-row">'+APP_ICON+
       '<div class="pwa-text-block">'+
         '<div class="pwa-title">Install The One</div>'+
         '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
       '</div>'+
     '</div>'+
     '<div class="pwa-steps">'+
-      '<div class="pwa-step"><div class="pwa-step-n">1</div><div class="pwa-step-t">Tap the <strong>Share</strong> button in Safari <strong>(↑)</strong></div></div>'+
-      '<div class="pwa-step"><div class="pwa-step-n">2</div><div class="pwa-step-t">Scroll and tap <strong>"Add to Home Screen"</strong></div></div>'+
-      '<div class="pwa-step"><div class="pwa-step-n">3</div><div class="pwa-step-t">Tap <strong>"Add"</strong> — done!</div></div>'+
+      '<div class="pwa-step"><div class="pwa-step-n">1</div><div class="pwa-step-t">Tap the <strong>Share</strong> button at the bottom <strong>(↑)</strong></div></div>'+
+      '<div class="pwa-step"><div class="pwa-step-n">2</div><div class="pwa-step-t">Scroll down and tap <strong>"Add to Home Screen"</strong></div></div>'+
+      '<div class="pwa-step"><div class="pwa-step-n">3</div><div class="pwa-step-t">Tap <strong>"Add"</strong> — the app will appear on your home screen</div></div>'+
     '</div>'+
     '<button class="pwa-later" id="pwa-later">Maybe later</button>';
 
+  // Other iPhone browsers (Chrome, Firefox, Edge…): inform them Safari is required
+  var iosOtherContent=
+    '<div class="pwa-handle"></div>'+
+    '<div class="pwa-row">'+APP_ICON+
+      '<div class="pwa-text-block">'+
+        '<div class="pwa-title">Install The One</div>'+
+        '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="pwa-steps">'+
+      '<div class="pwa-step"><div class="pwa-step-n" style="font-size:14px;">!</div>'+
+        '<div class="pwa-step-t"><strong>Open this page in Safari</strong> to install the app.<br>'+
+        '<span style="font-size:11.5px;margin-top:3px;display:block;color:#94a3b8;">Apple only allows app installation through Safari — this is an Apple restriction, not ours.</span></div>'+
+      '</div>'+
+    '</div>'+
+    '<button class="pwa-later" id="pwa-later">Got it</button>';
+
+  // Android: native install button
   var androidContent=
     '<div class="pwa-handle"></div>'+
-    '<div class="pwa-row">'+
-      '<div class="pwa-app-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>'+
+    '<div class="pwa-row">'+APP_ICON+
       '<div class="pwa-text-block">'+
         '<div class="pwa-title">Install The One</div>'+
         '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
@@ -332,7 +348,8 @@ window.showToast=function(msg,type){
     '<button class="pwa-install-btn" id="pwa-install-btn">Install App</button>'+
     '<button class="pwa-later" id="pwa-later">Maybe later</button>';
 
-  sheet.innerHTML=isSafariIPhone?iosContent:androidContent;
+  var content=isSafariIPhone?iosSafariContent:(isIPhone?iosOtherContent:androidContent);
+  sheet.innerHTML=content;
   document.body.appendChild(sheet);
 
   function dismiss(){
@@ -350,7 +367,8 @@ window.showToast=function(msg,type){
     if(document.getElementById('pwa-later')&&e.target===document.getElementById('pwa-later'))dismiss();
   });
 
-  if(isSafariIPhone){
+  if(isIPhone){
+    // Show to all iPhone users — Safari gets install steps, others get "open in Safari" guidance
     setTimeout(showSheet,2500);
   } else {
     window.addEventListener('beforeinstallprompt',function(e){
