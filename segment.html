@@ -1014,7 +1014,8 @@ function buildDocCard(title, type, idx) {
   const safeTitle = title.replace(/'/g,"&#39;").replace(/"/g,"&quot;");
   const safeType = typeClass;
   const newBadge = idx === 0 ? '<span class="doc-new-badge">New</span>' : idx === 1 ? '<span class="doc-new-badge updated">Updated</span>' : '';
-  const icon = type === 'sop' ? `<div class="doc-type-icon sop">SOP</div>` : '';
+  const _ti={sop:'SOP',manual:'MNL',policy:'POL',lesson:'LSN',alert:'ALT'};
+  const icon=`<div class="doc-type-icon ${type}">${_ti[type]||type.slice(0,3).toUpperCase()}</div>`;
   return `
   <div class="doc-card">
     ${icon}
@@ -1060,25 +1061,67 @@ function buildAlertCard(text, idx) {
 
 const SKEL = `<div class="skeleton-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>`;
 
-function renderList(type, items, isAlert) {
-  const el = document.getElementById('list-'+type);
-  const vis = document.getElementById('vis-'+type);
-  el.innerHTML = SKEL + SKEL + SKEL;
-  setTimeout(() => {
-    if (!items || items.length === 0) {
-      const typeLabels = {sops:'procedures',manuals:'manuals',policies:'policies',lessons:'lessons learned'};
-      const label = typeLabels[type] || type;
-      const emptyHTML = isAlert
-        ? `<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,191,178,0.3);font-family:'Urbanist',sans-serif;letter-spacing:2px;">CLEAR</div><h3>No active alerts</h3><p>This segment currently has no outstanding technical alerts.</p></div>`
-        : `<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,191,178,0.15);font-family:'Urbanist',sans-serif;letter-spacing:2px;">—</div><h3>No ${label} uploaded yet</h3><p>Be the first to contribute to this segment.</p><a href="upload.html" class="empty-state-upload">+ Upload Document</a></div>`;
-      el.innerHTML = emptyHTML;
-      if(vis) vis.textContent = '0';
+// ── Paginated rendering — 100K-ready ──
+const PAGE_SIZE = 20;
+const DOCS_STATE = {};
+function _st(type){
+  if(!DOCS_STATE[type])DOCS_STATE[type]={all:[],filtered:[],page:0,observer:null,isAlert:false,isSoftware:false};
+  return DOCS_STATE[type];
+}
+
+function _renderPage(type){
+  const st=_st(type);
+  const el=document.getElementById('list-'+type);
+  if(!el)return;
+  const vis=document.getElementById('vis-'+type);
+  const items=st.filtered;
+  const start=st.page*PAGE_SIZE;
+  const slice=items.slice(start,start+PAGE_SIZE);
+  const build=(t,i)=>st.isSoftware?buildSoftwareCard(t,i):st.isAlert?buildAlertCard(t,i):buildDocCard(t,LIST_TYPE_MAP[type]||type,i);
+
+  if(start===0){
+    if(items.length===0){
+      const tl={sops:'procedures',manuals:'manuals',policies:'policies',lessons:'lessons learned'};
+      el.innerHTML=st.isAlert
+        ?`<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,191,178,0.3);font-family:'Urbanist',sans-serif;letter-spacing:2px;">CLEAR</div><h3>No active alerts</h3><p>This segment currently has no outstanding technical alerts.</p></div>`
+        :`<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,191,178,0.15);font-family:'Urbanist',sans-serif;letter-spacing:2px;">—</div><h3>No ${tl[type]||type} uploaded yet</h3><p>Be the first to contribute to this segment.</p><a href="upload.html" class="empty-state-upload">+ Upload Document</a></div>`;
+      if(vis)vis.textContent='0';
       return;
     }
-    el.innerHTML = items.map((t,i) => isAlert ? buildAlertCard(t,i) : buildDocCard(t, LIST_TYPE_MAP[type] || type, i)).join('');
-    if(vis) vis.textContent = items.length;
-    if(isAlert) { const dot = document.getElementById('alert-pulse-dot'); if(dot) dot.style.display='inline-block'; }
-  }, 420);
+    el.innerHTML=slice.map((t,i)=>build(t,i)).join('');
+  } else {
+    const old=el.querySelector('.load-sentinel');
+    if(old)old.remove();
+    el.insertAdjacentHTML('beforeend',slice.map((t,i)=>build(t,start+i)).join(''));
+  }
+
+  if(vis)vis.textContent=items.length;
+  if(st.isAlert&&items.length>0){const dot=document.getElementById('alert-pulse-dot');if(dot)dot.style.display='inline-block';}
+
+  if(start+PAGE_SIZE<items.length){
+    const sen=document.createElement('div');
+    sen.className='load-sentinel';
+    sen.style.cssText='height:1px;';
+    el.appendChild(sen);
+    if(st.observer)st.observer.disconnect();
+    st.observer=new IntersectionObserver(entries=>{
+      if(entries[0].isIntersecting){
+        st.observer.disconnect();st.observer=null;
+        st.page++;
+        _renderPage(type);
+      }
+    },{rootMargin:'300px'});
+    st.observer.observe(sen);
+  }
+}
+
+function renderList(type,items,isAlert){
+  const st=_st(type);
+  st.all=items||[];st.filtered=[...st.all];st.page=0;st.isAlert=!!isAlert;st.isSoftware=false;
+  if(st.observer){st.observer.disconnect();st.observer=null;}
+  const el=document.getElementById('list-'+type);
+  if(el)el.innerHTML=SKEL+SKEL+SKEL;
+  setTimeout(()=>_renderPage(type),420);
 }
 
 renderList('sops', seg.docs.sops, false);
@@ -1114,29 +1157,23 @@ function buildSoftwareCard(raw, idx) {
   </div>`;
 }
 
-function renderSoftware(items) {
-  const el = document.getElementById('list-software');
-  const vis = document.getElementById('vis-software');
-  el.innerHTML = SKEL + SKEL;
-  setTimeout(() => {
-    if (!items || items.length === 0) {
-      el.innerHTML = `<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(168,85,247,0.2);font-family:'Urbanist',sans-serif;">ZIP</div><h3>No software uploaded yet</h3><p>Upload installer packages or tools relevant to this segment.</p><a href="upload.html" class="empty-state-upload">+ Upload Software</a></div>`;
-      if(vis) vis.textContent = '0';
-      return;
+function renderSoftware(items){
+  const st=_st('software');
+  st.all=items||[];st.filtered=[...st.all];st.page=0;st.isAlert=false;st.isSoftware=true;
+  if(st.observer){st.observer.disconnect();st.observer=null;}
+  const el=document.getElementById('list-software');
+  const vis=document.getElementById('vis-software');
+  if(el)el.innerHTML=SKEL+SKEL;
+  setTimeout(()=>{
+    if(!items||items.length===0){
+      if(el)el.innerHTML=`<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(168,85,247,0.2);font-family:'Urbanist',sans-serif;">ZIP</div><h3>No software uploaded yet</h3><p>Upload installer packages or tools relevant to this segment.</p><a href="upload.html" class="empty-state-upload">+ Upload Software</a></div>`;
+      if(vis)vis.textContent='0';return;
     }
-    el.innerHTML = items.map((t,i) => buildSoftwareCard(t,i)).join('');
-    if(vis) vis.textContent = items.length;
-  }, 420);
+    _renderPage('software');
+  },420);
 }
 
 // Fix type mapping for render
-document.getElementById('list-sops').querySelectorAll('.doc-type-icon').forEach(el=>{ el.className='doc-type-icon sop'; el.textContent='SOP';});
-document.getElementById('list-manuals').querySelectorAll('.doc-type-icon').forEach(el=>{ el.className='doc-type-icon manual'; el.textContent='MNL';});
-document.getElementById('list-policies').querySelectorAll('.doc-type-icon').forEach(el=>{ el.className='doc-type-icon policy'; el.textContent='POL';});
-document.getElementById('list-lessons').querySelectorAll('.doc-type-icon').forEach(el=>{ el.className='doc-type-icon lesson'; el.textContent='LSN';});
-document.getElementById('list-policies').querySelectorAll('.doc-type-badge').forEach(el=>{ el.className='doc-type-badge policy'; el.textContent='Policy';});
-document.getElementById('list-manuals').querySelectorAll('.doc-type-badge').forEach(el=>{ el.className='doc-type-badge manual'; el.textContent='Manual';});
-document.getElementById('list-lessons').querySelectorAll('.doc-type-badge').forEach(el=>{ el.className='doc-type-badge lesson'; el.textContent='Lesson Learned';});
 
 // ── Tab Switching ──
 const TAB_LABELS = {sops:'SOPs', manuals:'Manuals', policies:'Policies', alerts:'Alerts', lessons:'Lessons Learned', software:'Software & Tools'};
@@ -1172,32 +1209,28 @@ function copySegLink() {
   });
 }
 
-// ── Filter + Highlight ──
-function filterDocs(input, type) {
-  const q = input.value.trim();
-  const ql = q.toLowerCase();
-  const cards = document.querySelectorAll('#list-'+type+' > div');
-  let vis = 0;
-  cards.forEach(c => {
-    const titleEl = c.querySelector('.doc-info-title');
-    if(titleEl && !titleEl.dataset.orig) titleEl.dataset.orig = titleEl.innerHTML;
-    const match = !ql || c.textContent.toLowerCase().includes(ql);
-    c.style.display = match ? '' : 'none';
-    if(titleEl) {
-      if(match && ql) {
-        const safeQ = ql.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-        titleEl.innerHTML = (titleEl.dataset.orig).replace(
-          new RegExp('('+safeQ+')', 'gi'),
-          '<mark class="search-hl">$1</mark>'
-        );
-      } else {
-        if(titleEl.dataset.orig) titleEl.innerHTML = titleEl.dataset.orig;
+// ── Filter + Highlight (debounced, data-layer — not DOM scan) ──
+const _ftm={};
+function filterDocs(input,type){
+  clearTimeout(_ftm[type]);
+  _ftm[type]=setTimeout(()=>{
+    const q=input.value.trim().toLowerCase();
+    const st=_st(type);
+    if(st.observer){st.observer.disconnect();st.observer=null;}
+    st.filtered=q?st.all.filter(t=>t.toLowerCase().includes(q)):[...st.all];
+    st.page=0;
+    const el=document.getElementById('list-'+type);
+    if(el)el.innerHTML=SKEL+SKEL;
+    setTimeout(()=>{
+      _renderPage(type);
+      if(q){
+        const safeQ=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+        document.querySelectorAll('#list-'+type+' .doc-info-title').forEach(t=>{
+          t.innerHTML=t.textContent.replace(new RegExp('('+safeQ+')','gi'),'<mark class="search-hl">$1</mark>');
+        });
       }
-    }
-    if(match) vis++;
-  });
-  const el = document.getElementById('vis-'+type);
-  if(el) el.textContent = vis;
+    },150);
+  },200);
 }
 
 // ── Canvas ──
