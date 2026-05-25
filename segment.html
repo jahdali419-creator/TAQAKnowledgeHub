@@ -1117,8 +1117,10 @@ function _renderPage(type){
   if(!el)return;
   const vis=document.getElementById('vis-'+type);
   const items=st.filtered;
-  const start=st.page*PAGE_SIZE;
-  const slice=items.slice(start,start+PAGE_SIZE);
+  // When a search is active, show ALL matches (no pagination)
+  const searching=st.filtered.length<st.all.length&&st.all.length>0;
+  const start=searching?0:st.page*PAGE_SIZE;
+  const slice=searching?items:items.slice(start,start+PAGE_SIZE);
   const build=(t,i)=>{
     if(typeof t==='object'){return t.isSoftware?buildSoftwareCard(t.title,i):t.isAlert?buildAlertCard(t.title,i):buildDocCard(t.title,t.type,i);}
     return st.isSoftware?buildSoftwareCard(t,i):st.isAlert?buildAlertCard(t,i):buildDocCard(t,LIST_TYPE_MAP[type]||type,i);
@@ -1213,6 +1215,9 @@ function _renderPagination(type){
     listEl.parentNode.insertBefore(pgEl,listEl.nextSibling);
   }
   const st=_st(type);
+  // Hide pagination while a search query is active
+  const searching=st.filtered.length<st.all.length&&st.all.length>0;
+  if(searching){pgEl.innerHTML='';return;}
   const total=Math.ceil(st.filtered.length/PAGE_SIZE);
   if(total<=1){pgEl.innerHTML='';return;}
   const cur=st.page;
