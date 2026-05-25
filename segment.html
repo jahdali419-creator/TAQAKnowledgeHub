@@ -148,6 +148,25 @@ html[data-theme="dark"] .search-hl{background:rgba(0,191,178,0.18);color:#4DD9D3
   transition:border-color 0.25s;
 }
 .doc-search:focus-within{border-color:var(--glass-border-hover);}
+
+/* ── Pagination ── */
+.pg-wrap{display:flex;align-items:center;justify-content:center;gap:4px;padding:24px 0 12px;flex-wrap:wrap;}
+.pg-btn{min-width:36px;height:36px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text-muted);font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0 10px;transition:all 0.18s;font-family:'Inter',sans-serif;white-space:nowrap;}
+.pg-btn:hover:not(:disabled):not(.pg-dots){border-color:var(--glass-border-hover);color:var(--primary);}
+.pg-btn.active{background:var(--gradient);color:#fff;border-color:transparent;font-weight:600;box-shadow:0 2px 10px rgba(0,104,106,0.35);}
+.pg-btn:disabled{opacity:0.3;cursor:not-allowed;pointer-events:none;}
+.pg-btn.pg-dots{border:none;background:none;cursor:default;letter-spacing:1px;}
+.pg-btn.pg-nav{padding:0 14px;gap:5px;font-weight:500;}
+.pg-nums{display:flex;gap:4px;align-items:center;}
+.pg-info{display:none;font-size:13px;font-weight:600;color:var(--text-muted);padding:0 6px;}
+html[data-theme="dark"] .pg-btn{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1);color:#94a3b8;}
+html[data-theme="dark"] .pg-btn:hover:not(:disabled):not(.pg-dots){border-color:rgba(0,191,178,0.4);color:#00BFB2;}
+@media(max-width:600px){
+  .pg-nums{display:none;}
+  .pg-info{display:block;}
+  .pg-btn.pg-nav{min-width:80px;height:42px;font-size:14px;}
+  .pg-wrap{gap:8px;padding:20px 0 8px;}
+}
 .doc-search input{background:transparent;border:none;outline:none;color:var(--text);font-size:13.5px;font-family:'Inter',sans-serif;width:100%;}
 .doc-search input::placeholder{color:var(--text-muted);}
 .doc-count-label{font-size:13px;color:var(--text-muted);}
@@ -1079,46 +1098,29 @@ function _renderPage(type){
   const slice=items.slice(start,start+PAGE_SIZE);
   const build=(t,i)=>st.isSoftware?buildSoftwareCard(t,i):st.isAlert?buildAlertCard(t,i):buildDocCard(t,LIST_TYPE_MAP[type]||type,i);
 
-  if(start===0){
-    if(items.length===0){
-      const tl={sops:'procedures',manuals:'manuals',policies:'policies',lessons:'lessons learned'};
-      el.innerHTML=st.isAlert
-        ?`<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,191,178,0.3);font-family:'Urbanist',sans-serif;letter-spacing:2px;">CLEAR</div><h3>No active alerts</h3><p>This segment currently has no outstanding technical alerts.</p></div>`
-        :`<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,191,178,0.15);font-family:'Urbanist',sans-serif;letter-spacing:2px;">—</div><h3>No ${tl[type]||type} uploaded yet</h3><p>Be the first to contribute to this segment.</p><a href="upload.html" class="empty-state-upload">+ Upload Document</a></div>`;
-      if(vis)vis.textContent='0';
-      return;
-    }
-    el.innerHTML=slice.map((t,i)=>build(t,i)).join('');
-  } else {
-    const old=el.querySelector('.load-sentinel');
-    if(old)old.remove();
-    el.insertAdjacentHTML('beforeend',slice.map((t,i)=>build(t,start+i)).join(''));
+  if(items.length===0){
+    const tl={sops:'procedures',manuals:'manuals',policies:'policies',lessons:'lessons learned'};
+    el.innerHTML=st.isAlert
+      ?`<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,191,178,0.3);font-family:'Urbanist',sans-serif;letter-spacing:2px;">CLEAR</div><h3>No active alerts</h3><p>This segment currently has no outstanding technical alerts.</p></div>`
+      :`<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,191,178,0.15);font-family:'Urbanist',sans-serif;letter-spacing:2px;">—</div><h3>No ${tl[type]||type} uploaded yet</h3><p>Be the first to contribute to this segment.</p><a href="upload.html" class="empty-state-upload">+ Upload Document</a></div>`;
+    if(vis)vis.textContent='0';
+    _renderPagination(type);
+    return;
   }
 
+  el.innerHTML=slice.map((t,i)=>build(t,start+i)).join('');
   if(vis)vis.textContent=items.length;
   if(st.isAlert&&items.length>0){const dot=document.getElementById('alert-pulse-dot');if(dot)dot.style.display='inline-block';}
-
-  if(start+PAGE_SIZE<items.length){
-    const sen=document.createElement('div');
-    sen.className='load-sentinel';
-    sen.style.cssText='height:1px;';
-    el.appendChild(sen);
-    if(st.observer)st.observer.disconnect();
-    st.observer=new IntersectionObserver(entries=>{
-      if(entries[0].isIntersecting){
-        st.observer.disconnect();st.observer=null;
-        st.page++;
-        _renderPage(type);
-      }
-    },{rootMargin:'300px'});
-    st.observer.observe(sen);
-  }
+  _renderPagination(type);
 }
 
 function renderList(type,items,isAlert){
   const st=_st(type);
-  st.all=items||[];st.filtered=[...st.all];st.page=0;st.isAlert=!!isAlert;st.isSoftware=false;
-  if(st.observer){st.observer.disconnect();st.observer=null;}
+  st.all=items||[];st.filtered=[...st.all];st.isAlert=!!isAlert;st.isSoftware=false;
+  // Restore page from URL only for the initially active tab
+  const urlP=parseInt(new URL(location.href).searchParams.get('page')||'1',10)-1;
+  const total=Math.ceil(st.filtered.length/PAGE_SIZE);
+  st.page=(type===startTab&&urlP>0&&urlP<total)?urlP:0;
   const el=document.getElementById('list-'+type);
   if(el)el.innerHTML=SKEL+SKEL+SKEL;
   setTimeout(()=>_renderPage(type),420);
@@ -1173,7 +1175,54 @@ function renderSoftware(items){
   },420);
 }
 
-// Fix type mapping for render
+// ── Numbered Pagination ──
+function _renderPagination(type){
+  const listEl=document.getElementById('list-'+type);
+  if(!listEl)return;
+  let pgEl=document.getElementById('pg-'+type);
+  if(!pgEl){
+    pgEl=document.createElement('div');
+    pgEl.id='pg-'+type;
+    pgEl.className='pg-wrap';
+    listEl.parentNode.insertBefore(pgEl,listEl.nextSibling);
+  }
+  const st=_st(type);
+  const total=Math.ceil(st.filtered.length/PAGE_SIZE);
+  if(total<=1){pgEl.innerHTML='';return;}
+  const cur=st.page;
+
+  let pages=[];
+  if(total<=7){for(let i=0;i<total;i++)pages.push(i);}
+  else if(cur<=3){pages=[0,1,2,3,4,'…',total-1];}
+  else if(cur>=total-4){pages=[0,'…',total-5,total-4,total-3,total-2,total-1];}
+  else{pages=[0,'…',cur-1,cur,cur+1,'…',total-1];}
+
+  const numsHtml=pages.map(p=>
+    p==='…'
+      ?'<span class="pg-btn pg-dots">…</span>'
+      :`<button class="pg-btn${p===cur?' active':''}" onclick="goPage('${type}',${p})">${p+1}</button>`
+  ).join('');
+
+  pgEl.innerHTML=
+    `<button class="pg-btn pg-nav"${cur===0?' disabled':''} onclick="goPage('${type}',${cur-1})">← Prev</button>`+
+    `<div class="pg-nums">${numsHtml}</div>`+
+    `<span class="pg-info">Page ${cur+1} of ${total}</span>`+
+    `<button class="pg-btn pg-nav"${cur===total-1?' disabled':''} onclick="goPage('${type}',${cur+1})">Next →</button>`;
+}
+
+function goPage(type,page){
+  const st=_st(type);
+  const total=Math.ceil(st.filtered.length/PAGE_SIZE);
+  if(page<0||page>=total)return;
+  st.page=page;
+  const url=new URL(location.href);
+  url.searchParams.set('tab',type);
+  url.searchParams.set('page',page+1);
+  history.replaceState({},'',url.toString());
+  const listEl=document.getElementById('list-'+type);
+  if(listEl){const y=listEl.getBoundingClientRect().top+window.scrollY-90;window.scrollTo({top:Math.max(0,y),behavior:'smooth'});}
+  _renderPage(type);
+}
 
 // ── Tab Switching ──
 const TAB_LABELS = {sops:'SOPs', manuals:'Manuals', policies:'Policies', alerts:'Alerts', lessons:'Lessons Learned', software:'Software & Tools'};
@@ -1185,6 +1234,13 @@ function openTab(name) {
   document.querySelector('[data-tab="'+name+'"]').classList.add('active');
   const bcTab = document.getElementById('breadcrumb-tab');
   if(bcTab) bcTab.textContent = TAB_LABELS[name] || name;
+  // Reset page for the new tab and sync URL
+  const st=_st(name);
+  st.page=0;
+  const url=new URL(location.href);
+  url.searchParams.set('tab',name);
+  url.searchParams.delete('page');
+  history.replaceState({},'',url.toString());
   if(cur) {
     cur.style.animation = 'fadeOut 0.15s ease forwards';
     setTimeout(function(){
