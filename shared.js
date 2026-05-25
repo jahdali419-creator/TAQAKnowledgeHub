@@ -150,3 +150,88 @@ window.showToast=function(msg,type){
   window.addEventListener('online',function(){banner.style.display='none';if(window.showToast)window.showToast('Back online!');});
   if(!navigator.onLine)banner.style.display='flex';
 })();
+
+// ── Mobile nav hamburger (injected on all pages that have a nav) ──
+(function(){
+  var s=document.createElement('style');
+  s.textContent=
+    '.nav-hamburger{display:none;background:none;border:1px solid rgba(0,0,0,0.1);border-radius:7px;padding:7px 9px;cursor:pointer;flex-direction:column;gap:4px;align-items:center;justify-content:center;flex-shrink:0;}'+
+    'html[data-theme="dark"] .nav-hamburger{border-color:rgba(255,255,255,0.15);}'+
+    '.nav-hamburger span{display:block;width:17px;height:2px;background:#64748b;border-radius:2px;transition:all 0.25s;}'+
+    '.nav-mobile-menu{display:none;position:fixed;left:0;right:0;z-index:998;background:rgba(255,255,255,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,0.08);padding:8px 20px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.1);}'+
+    '.nav-mobile-menu.open{display:block;}'+
+    '.nav-mobile-menu a{display:block;padding:13px 0;font-size:15px;font-weight:500;color:#1c2b3a;text-decoration:none;border-bottom:1px solid rgba(0,0,0,0.07);transition:color 0.2s;}'+
+    '.nav-mobile-menu a:last-child{border-bottom:none;}'+
+    '.nav-mobile-menu a.active,.nav-mobile-menu a:hover{color:#00686A;}'+
+    'html[data-theme="dark"] .nav-mobile-menu{background:rgba(14,24,36,0.97);border-color:#243044;}'+
+    'html[data-theme="dark"] .nav-mobile-menu a{color:#e2e8f0;border-color:#243044;}'+
+    '@media(max-width:640px){'+
+      '.nav-hamburger{display:flex!important;}'+
+      '.nav-links{display:none!important;}'+
+      '.nav-right a.btn,.nav-right .btn-primary,.nav-right .btn-outline,.nav-right .btn-ghost{display:none!important;}'+
+    '}';
+  document.head.appendChild(s);
+
+  // Inject hamburger into .nav-right (index.html already has one — skip)
+  if(!document.getElementById('nav-hamburger')){
+    var nr=document.querySelector('.nav-right');
+    if(nr){
+      var hb=document.createElement('button');
+      hb.id='nav-hamburger';hb.className='nav-hamburger';hb.setAttribute('aria-label','Menu');
+      hb.innerHTML='<span></span><span></span><span></span>';
+      nr.insertBefore(hb,nr.firstChild);
+    }
+  }
+
+  // Inject mobile dropdown menu (index.html already has one — skip)
+  if(!document.getElementById('nav-mobile-menu')){
+    var nav=document.querySelector('nav');
+    if(nav){
+      var p=location.pathname;
+      var items=[
+        {href:'index.html',label:'Home'},
+        {href:'ai-search.html',label:'Document Search'},
+        {href:'glossary.html',label:'Field Glossary'},
+        {href:'upload.html',label:'Upload'},
+        {href:'support-ticket.html',label:'Ask Expert'}
+      ];
+      var menu=document.createElement('div');
+      menu.id='nav-mobile-menu';menu.className='nav-mobile-menu';
+      items.forEach(function(l){
+        var a=document.createElement('a');
+        a.href=l.href;a.textContent=l.label;
+        var key=l.href.replace('.html','');
+        var active=(l.href==='index.html')
+          ?(p.endsWith('/')||p.endsWith('/index.html'))
+          :(p.indexOf('/'+key+'.html')>-1);
+        if(active)a.className='active';
+        menu.appendChild(a);
+      });
+      nav.parentNode.insertBefore(menu,nav.nextSibling);
+    }
+  }
+
+  // Toggle (overrides index.html's identical version safely)
+  window.toggleMobileNav=function(){
+    var menu=document.getElementById('nav-mobile-menu');
+    var nav=document.querySelector('nav');
+    if(menu){
+      if(nav&&!menu.style.top)menu.style.top=nav.offsetHeight+'px';
+      menu.classList.toggle('open');
+    }
+  };
+
+  // Wire hamburger click
+  document.addEventListener('click',function(e){
+    var hb=document.getElementById('nav-hamburger');
+    if(hb&&(hb===e.target||hb.contains(e.target)))window.toggleMobileNav();
+  });
+
+  // Close when clicking outside
+  document.addEventListener('click',function(e){
+    var menu=document.getElementById('nav-mobile-menu');
+    var hb=document.getElementById('nav-hamburger');
+    if(menu&&menu.classList.contains('open')&&!menu.contains(e.target)&&hb&&!hb.contains(e.target))
+      menu.classList.remove('open');
+  });
+})();
