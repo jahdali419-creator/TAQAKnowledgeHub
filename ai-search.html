@@ -373,6 +373,59 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .stat-sep{display:none;}
   .prompt-chip{font-size:12px;padding:5px 12px;}
 }
+
+/* ── Instant Results Panel ── */
+.ir-panel{
+  position:relative;z-index:2;
+  background:rgba(255,255,255,0.99);
+  border:1.5px solid rgba(0,191,178,0.38);
+  border-top:none;
+  border-radius:0 0 18px 18px;
+  box-shadow:0 14px 44px rgba(0,0,0,0.13);
+  margin-top:-2px;
+  overflow:hidden;
+  text-align:left;
+  display:none;
+}
+.ir-panel.open{display:block;}
+.ir-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 16px 7px;
+  font-size:10.5px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;
+  color:var(--text-muted);
+  border-bottom:1px solid rgba(0,0,0,0.06);
+}
+.ir-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 16px;
+  cursor:pointer;text-decoration:none;
+  transition:background 0.15s;
+  border-bottom:1px solid rgba(0,0,0,0.04);
+}
+.ir-item:last-of-type{border-bottom:none;}
+.ir-item:hover{background:rgba(0,191,178,0.05);}
+.ir-badge{
+  flex-shrink:0;padding:2px 8px;border-radius:5px;
+  font-size:10px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;
+  min-width:54px;text-align:center;
+}
+.ir-body{flex:1;min-width:0;}
+.ir-title{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ir-title mark{background:rgba(0,191,178,0.22);color:var(--primary);border-radius:2px;padding:0 1px;font-style:normal;}
+.ir-seg{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.ir-arrow{font-size:15px;color:var(--text-muted);flex-shrink:0;transition:color 0.15s;}
+.ir-item:hover .ir-arrow{color:var(--primary-light);}
+.ir-footer{
+  padding:9px 16px;font-size:11.5px;color:var(--text-muted);
+  text-align:center;border-top:1px solid rgba(0,0,0,0.06);
+  background:rgba(0,0,0,0.015);
+}
+html[data-theme="dark"] .ir-panel{background:rgba(20,32,50,0.99);border-color:rgba(0,191,178,0.25);}
+html[data-theme="dark"] .ir-header{border-color:rgba(255,255,255,0.06);}
+html[data-theme="dark"] .ir-item{border-color:rgba(255,255,255,0.04);}
+html[data-theme="dark"] .ir-item:hover{background:rgba(0,191,178,0.07);}
+html[data-theme="dark"] .ir-title{color:#dde4ef;}
+html[data-theme="dark"] .ir-footer{background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.06);}
 </style>
 </head>
 <body>
@@ -406,12 +459,12 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div style="font-size:10px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;color:var(--primary);margin-bottom:10px;position:relative;z-index:1;">Part of <em style="font-style:italic;color:#00686A;font-weight:700;">The One</em> Platform</div>
   <div class="ai-badge hw hw-1"><span class="ai-spark">✦</span> AI-Powered Document Intelligence</div>
   <h1 class="hub-title"><span class="hw hw-2 hw-i">Ask</span> <span class="hw hw-3 hw-i">Anything</span> <span class="hw hw-4 hw-i">About</span><br><span class="hw hw-5 hw-i"><span class="grad">TAQA Operations</span></span></h1>
-  <p class="hub-sub hw hw-6">Answers sourced directly from 492 operational documents across all ten TAQA business segments.</p>
+  <p class="hub-sub hw hw-6">Answers sourced directly from 523 operational documents across all eleven TAQA business segments.</p>
 
   <div class="stats-pills hw hw-7">
-    <div class="stat-pill"><span class="stat-dot"></span>492 Documents</div>
+    <div class="stat-pill"><span class="stat-dot"></span>523 Documents</div>
     <span class="stat-sep">·</span>
-    <div class="stat-pill"><span class="stat-dot"></span>10 Segments</div>
+    <div class="stat-pill"><span class="stat-dot"></span>11 Segments</div>
     <span class="stat-sep">·</span>
     <div class="stat-pill"><span class="stat-dot"></span>SOPs · Manuals · Alerts</div>
   </div>
@@ -435,6 +488,8 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
       <span class="char-count" id="char-count">0 / 500</span>
     </div>
   </div>
+  <!-- ── Instant Results (injected below search card) ── -->
+  <div id="ir-panel" class="ir-panel" role="listbox" aria-label="Document matches"></div>
 </div>
 
 <!-- ── Suggested Prompts ── -->
@@ -459,7 +514,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="thinking-block" id="thinking-block">
     <div class="thinking-avatar">✦</div>
     <div>
-      <div class="thinking-label">Searching 492 documents...</div>
+      <div class="thinking-label">Searching 523 documents...</div>
       <div class="thinking-dots">
         <div class="thinking-dot"></div>
         <div class="thinking-dot"></div>
@@ -747,6 +802,86 @@ document.addEventListener('click',function(e){
 });
 </script>
 <script src="shared.js"></script>
+<script src="search-index.js"></script>
+<script>
+// ── Instant Document Search ──
+(function(){
+  var TYPE_CFG={
+    sop:{bg:'#dbeafe',color:'#1d4ed8',label:'SOP'},
+    manual:{bg:'#ede9fe',color:'#6d28d9',label:'Manual'},
+    policy:{bg:'#dcfce7',color:'#15803d',label:'Policy'},
+    alert:{bg:'#fee2e2',color:'#b91c1c',label:'Alert'},
+    lesson:{bg:'#fef3c7',color:'#b45309',label:'Lesson'},
+    software:{bg:'#d1fae5',color:'#065f46',label:'Software'}
+  };
+  var TAB_MAP={sop:'sops',manual:'manuals',policy:'policies',alert:'alerts',lesson:'lessons',software:'software'};
+
+  function esc(s){return s.replace(/[&<>"']/g,function(c){{return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}})}
+
+  function highlight(str,q){
+    if(!q)return esc(str);
+    var re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+    return esc(str).replace(re,'<mark>$1</mark>');
+  }
+
+  var panel=document.getElementById('ir-panel');
+  var inp=document.getElementById('query-input');
+  var timer=null;
+
+  function renderResults(q){
+    if(!panel||!window.TAQA_SEARCH_INDEX)return;
+    if(!q||q.length<2){panel.classList.remove('open');return;}
+    var ql=q.toLowerCase();
+    var all=TAQA_SEARCH_INDEX.filter(function(d){return d.t.toLowerCase().indexOf(ql)>-1;});
+    var shown=all.slice(0,8);
+    if(!shown.length){panel.classList.remove('open');return;}
+    var html=
+      '<div class="ir-header"><span>Document Matches</span><span>'+
+      (all.length>8?'Top 8 of '+all.length:all.length+' found')+'</span></div>'+
+      shown.map(function(d){
+        var c=TYPE_CFG[d.tp]||{bg:'#e2e8f0',color:'#475569',label:d.tp};
+        var href='segment.html?id='+d.s+'&tab='+(TAB_MAP[d.tp]||d.tp);
+        return '<a class="ir-item" href="'+href+'" role="option">'+
+          '<span class="ir-badge" style="background:'+c.bg+';color:'+c.color+'">'+c.label+'</span>'+
+          '<div class="ir-body">'+
+            '<div class="ir-title">'+highlight(d.t,q)+'</div>'+
+            '<div class="ir-seg">'+esc(d.sn)+'</div>'+
+          '</div>'+
+          '<span class="ir-arrow">›</span>'+
+        '</a>';
+      }).join('')+
+      '<div class="ir-footer">Press <strong>Enter</strong> to ask AI about this</div>';
+    panel.innerHTML=html;
+    panel.classList.add('open');
+  }
+
+  if(inp){
+    inp.addEventListener('input',function(){
+      clearTimeout(timer);
+      var q=inp.value.trim();
+      timer=setTimeout(function(){renderResults(q);},150);
+    });
+    inp.addEventListener('keydown',function(e){
+      if(e.key==='Escape'&&panel){panel.classList.remove('open');}
+    });
+  }
+
+  document.addEventListener('click',function(e){
+    if(!panel)return;
+    var card=document.querySelector('.search-card');
+    if(card&&card.contains(e.target))return;
+    if(panel.contains(e.target))return;
+    panel.classList.remove('open');
+  });
+
+  // Hide panel when query is submitted
+  var origSubmit=window.submitQuery;
+  window.submitQuery=function(){
+    if(panel)panel.classList.remove('open');
+    if(origSubmit)origSubmit();
+  };
+})();
+</script>
 <script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:linear-gradient(90deg,#00686A,#00BFB2);animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
 </body>

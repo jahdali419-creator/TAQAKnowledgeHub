@@ -235,3 +235,135 @@ window.showToast=function(msg,type){
       menu.classList.remove('open');
   });
 })();
+
+// ── PWA Install Prompt (mobile only) ──
+(function(){
+  // Skip if already installed in standalone mode
+  if(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)return;
+  if(window.navigator.standalone)return;
+  // Skip on desktop
+  if(window.innerWidth>=768)return;
+  // Skip if dismissed within 30 days
+  var KEY='taqa-install-dismissed';
+  var ts=localStorage.getItem(KEY);
+  if(ts&&(Date.now()-parseInt(ts,10))<30*24*60*60*1000)return;
+
+  var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  var isSafari=isIOS&&/safari/i.test(navigator.userAgent)&&!/crios|fxios/i.test(navigator.userAgent);
+  var deferredPrompt=null;
+
+  var s=document.createElement('style');
+  s.textContent=
+    '#pwa-overlay{position:fixed;inset:0;z-index:99997;background:rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.3s;}'+
+    '#pwa-overlay.pwa-open{opacity:1;pointer-events:auto;}'+
+    '#pwa-sheet{position:fixed;bottom:0;left:0;right:0;z-index:99998;'+
+    'background:rgba(255,255,255,0.99);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);'+
+    'border-top:1px solid rgba(0,0,0,0.07);border-radius:24px 24px 0 0;'+
+    'padding:16px 24px 36px;box-shadow:0 -8px 40px rgba(0,0,0,0.18);'+
+    'transform:translateY(100%);transition:transform 0.4s cubic-bezier(.32,1.12,.64,1);pointer-events:none;}'+
+    '#pwa-sheet.pwa-open{transform:translateY(0);pointer-events:auto;}'+
+    'html[data-theme="dark"] #pwa-sheet{background:rgba(11,20,34,0.99);border-color:rgba(255,255,255,0.07);}'+
+    '.pwa-handle{width:36px;height:4px;border-radius:2px;background:rgba(0,0,0,0.12);margin:0 auto 22px;}'+
+    'html[data-theme="dark"] .pwa-handle{background:rgba(255,255,255,0.1);}'+
+    '.pwa-row{display:flex;align-items:flex-start;gap:16px;margin-bottom:22px;}'+
+    '.pwa-app-icon{width:52px;height:52px;border-radius:14px;flex-shrink:0;'+
+    'background:linear-gradient(135deg,#00686A,#00BFB2);display:flex;align-items:center;justify-content:center;'+
+    'box-shadow:0 6px 20px rgba(0,104,106,0.38);}'+
+    '.pwa-app-icon svg{color:#fff;}'+
+    '.pwa-text-block{flex:1;}'+
+    '.pwa-title{font-family:"Urbanist",sans-serif;font-size:18px;font-weight:800;color:#1a2235;margin-bottom:4px;line-height:1.2;}'+
+    'html[data-theme="dark"] .pwa-title{color:#dde4ef;}'+
+    '.pwa-sub{font-size:13px;color:#64748b;line-height:1.5;}'+
+    '.pwa-steps{margin-bottom:20px;}'+
+    '.pwa-step{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.06);}'+
+    '.pwa-step:last-child{border-bottom:none;}'+
+    'html[data-theme="dark"] .pwa-step{border-color:rgba(255,255,255,0.06);}'+
+    '.pwa-step-n{width:26px;height:26px;border-radius:50%;background:rgba(0,104,106,0.1);flex-shrink:0;'+
+    'display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#00686A;}'+
+    '.pwa-step-t{font-size:13px;color:#64748b;line-height:1.45;}'+
+    '.pwa-step-t strong{color:#1a2235;}'+
+    'html[data-theme="dark"] .pwa-step-t strong{color:#dde4ef;}'+
+    '.pwa-install-btn{display:block;width:100%;padding:15px;border-radius:14px;text-align:center;'+
+    'font-size:15px;font-weight:700;color:#fff;border:none;cursor:pointer;font-family:"Inter",sans-serif;'+
+    'background:linear-gradient(135deg,#00686A,#00BFB2);box-shadow:0 6px 20px rgba(0,104,106,0.38);'+
+    'transition:transform 0.2s,box-shadow 0.2s;margin-bottom:10px;}'+
+    '.pwa-install-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,104,106,0.5);}'+
+    '.pwa-later{display:block;width:100%;padding:13px;background:none;border:none;'+
+    'font-size:13.5px;color:#64748b;cursor:pointer;font-family:"Inter",sans-serif;text-align:center;}';
+  document.head.appendChild(s);
+
+  var overlay=document.createElement('div');
+  overlay.id='pwa-overlay';
+  document.body.appendChild(overlay);
+
+  var sheet=document.createElement('div');
+  sheet.id='pwa-sheet';
+
+  var iosContent=
+    '<div class="pwa-handle"></div>'+
+    '<div class="pwa-row">'+
+      '<div class="pwa-app-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>'+
+      '<div class="pwa-text-block">'+
+        '<div class="pwa-title">Install The One</div>'+
+        '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="pwa-steps">'+
+      '<div class="pwa-step"><div class="pwa-step-n">1</div><div class="pwa-step-t">Tap the <strong>Share</strong> button in Safari <strong>(↑)</strong></div></div>'+
+      '<div class="pwa-step"><div class="pwa-step-n">2</div><div class="pwa-step-t">Scroll and tap <strong>"Add to Home Screen"</strong></div></div>'+
+      '<div class="pwa-step"><div class="pwa-step-n">3</div><div class="pwa-step-t">Tap <strong>"Add"</strong> — done!</div></div>'+
+    '</div>'+
+    '<button class="pwa-later" id="pwa-later">Maybe later</button>';
+
+  var androidContent=
+    '<div class="pwa-handle"></div>'+
+    '<div class="pwa-row">'+
+      '<div class="pwa-app-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>'+
+      '<div class="pwa-text-block">'+
+        '<div class="pwa-title">Install The One</div>'+
+        '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
+      '</div>'+
+    '</div>'+
+    '<button class="pwa-install-btn" id="pwa-install-btn">Install App</button>'+
+    '<button class="pwa-later" id="pwa-later">Maybe later</button>';
+
+  sheet.innerHTML=isIOS?iosContent:androidContent;
+  document.body.appendChild(sheet);
+
+  function dismiss(){
+    sheet.classList.remove('pwa-open');
+    overlay.classList.remove('pwa-open');
+    localStorage.setItem(KEY,Date.now().toString());
+  }
+  function showSheet(){
+    sheet.classList.add('pwa-open');
+    overlay.classList.add('pwa-open');
+  }
+
+  overlay.addEventListener('click',dismiss);
+  document.addEventListener('click',function(e){
+    if(document.getElementById('pwa-later')&&e.target===document.getElementById('pwa-later'))dismiss();
+  });
+
+  if(isIOS){
+    if(isSafari)setTimeout(showSheet,2500);
+  } else {
+    window.addEventListener('beforeinstallprompt',function(e){
+      e.preventDefault();
+      deferredPrompt=e;
+      setTimeout(showSheet,2000);
+      document.addEventListener('click',function(e2){
+        var btn=document.getElementById('pwa-install-btn');
+        if(btn&&e2.target===btn){
+          if(deferredPrompt){
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(function(r){
+              if(r.outcome==='accepted')dismiss();
+              deferredPrompt=null;
+            });
+          }
+        }
+      });
+    });
+  }
+})();
