@@ -280,13 +280,26 @@ html[data-theme="dark"] .term-card::after{background:linear-gradient(105deg,tran
   .cat-btn{white-space:nowrap;flex-shrink:0;}
   .page-hero{padding:100px 20px 48px;}
   .hero-stats{gap:12px;flex-wrap:wrap;}
-  .glossary-search-wrap{width:100%;}
-  .glossary-search-bar{flex-wrap:nowrap;}
-  .btn-go{padding:10px 14px;font-size:13px;}
+  .glossary-search-wrap{width:100%;max-width:100%;}
+  /* allow input to shrink in flex so search bar never bleeds past screen */
+  #glossary-input{min-width:0;flex:1 1 auto;}
+  .glossary-search-bar{flex-wrap:nowrap;overflow:hidden;width:100%;}
+  .btn-go{padding:10px 14px;font-size:13px;flex-shrink:0;}
+  /* contain the whole layout and sidebar */
+  .glossary-layout{overflow-x:hidden;width:100%;}
+  .glossary-sidebar{width:100%;max-width:100%;overflow-x:hidden;}
+  .sidebar-card{width:100%;max-width:100%;overflow-x:hidden;padding:16px;}
+  /* form fields must never exceed their container */
+  .sf-input,.sf-select,.sf-textarea,.btn-submit{
+    width:100%!important;max-width:100%!important;
+    min-width:0!important;box-sizing:border-box!important;}
 }
 @media(max-width:480px){
-  .glossary-layout{padding:16px 16px 60px;}
+  .glossary-layout{padding:12px 12px 60px;}
   .term-card{padding:14px 16px;}
+  .sidebar-card{padding:14px;}
+  /* prevent font-size from triggering iOS auto-zoom on focus */
+  .sf-input,.sf-select,.sf-textarea{font-size:16px!important;}
 }
 </style>
 </head>
