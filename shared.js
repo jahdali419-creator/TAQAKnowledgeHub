@@ -1,3 +1,10 @@
+// ── Global mobile overflow fix ──
+(function(){
+  var s=document.createElement('style');
+  s.textContent='html,body{overflow-x:hidden;max-width:100%;}*{box-sizing:border-box;}';
+  document.head.appendChild(s);
+})();
+
 // ── Toast ──
 (function(){
   var s=document.createElement('style');
