@@ -57,14 +57,27 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 /* ── Segment Hero Banner ── */
 .seg-hero-banner{
   position:relative; overflow:hidden;
-  background-size:cover; background-position:center 40%;
 }
+.hero-bg-img{
+  position:absolute; inset:0; z-index:0;
+  background-size:cover; background-position:center 40%;
+  animation:heroKenBurns 24s ease-in-out infinite alternate;
+  will-change:transform;
+}
+@keyframes heroKenBurns{
+  0%   { transform:scale(1.0)  translate(0%,   0%);   }
+  33%  { transform:scale(1.06) translate(-1%,  -0.5%); }
+  66%  { transform:scale(1.04) translate(0.8%, 0.4%);  }
+  100% { transform:scale(1.08) translate(-0.5%,0.8%);  }
+}
+@media(prefers-reduced-motion:reduce){.hero-bg-img{animation:none;}}
 .seg-hero-banner::before{
   content:''; position:absolute; inset:0;
   background:linear-gradient(110deg,rgba(6,18,26,0.92) 0%,rgba(6,18,26,0.76) 50%,rgba(6,18,26,0.42) 100%);
-  z-index:0;
+  z-index:1;
 }
-.seg-hero-banner > *{position:relative;z-index:1;}
+.seg-hero-banner > *{position:relative;z-index:2;}
+.seg-hero-banner > .hero-bg-img{z-index:0;}
 
 /* ── Breadcrumb ── */
 .breadcrumb{padding:88px 48px 8px;max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:8px;font-size:13px;}
@@ -482,6 +495,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 </nav>
 
 <div class="seg-hero-banner" id="seg-hero-banner">
+  <div class="hero-bg-img" id="hero-bg-img"></div>
 
   <div class="breadcrumb">
     <a href="index.html">Home</a>
@@ -1021,7 +1035,7 @@ const SEGMENT_IMAGES = {
   'hr':              'taqa-hero-4.jpg',
   'well-testing':    'taqa-hero-3.jpeg',
 };
-document.getElementById('seg-hero-banner').style.backgroundImage =
+document.getElementById('hero-bg-img').style.backgroundImage =
   `url('${SEGMENT_IMAGES[segId] || 'taqa-hero.webp'}')`;
 
 // ── Populate Header ──
