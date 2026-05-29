@@ -1561,8 +1561,12 @@ function toggleDark() {
 // ── Mobile Nav ──
 function toggleMobileNav() {
   const menu = document.getElementById('nav-mobile-menu');
-  menu.classList.toggle('open');
+  if (menu) menu.classList.toggle('open');
 }
+document.getElementById('nav-hamburger').addEventListener('click', function(e) {
+  e.stopPropagation();
+  toggleMobileNav();
+});
 document.addEventListener('click', function(e) {
   const menu = document.getElementById('nav-mobile-menu');
   const btn = document.getElementById('nav-hamburger');
