@@ -758,6 +758,23 @@ html[data-theme="dark"] .scroll-top-btn { background:rgba(14,24,36,0.92); border
 html[data-theme="dark"] .stats-strip { background:#19263a; border-color:#243044; }
 html[data-theme="dark"] .stats-strip-divider { background:#243044; }
 
+/* ── Continue Reading Strip ── */
+.continue-strip{background:var(--bg-white);border-bottom:1px solid var(--border);padding:12px 48px;}
+.continue-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.continue-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--primary);flex-shrink:0;}
+.continue-card{display:flex;align-items:center;gap:12px;padding:8px 16px;background:rgba(0,104,106,0.04);border:1px solid rgba(0,104,106,0.15);border-radius:8px;text-decoration:none;transition:border-color 0.2s,background 0.2s;flex:1;min-width:0;max-width:480px;}
+.continue-card:hover{border-color:rgba(0,104,106,0.3);background:rgba(0,104,106,0.08);}
+.continue-icon{width:32px;height:32px;border-radius:7px;background:rgba(0,104,106,0.12);color:var(--primary);font-size:9px;font-weight:700;font-family:'Urbanist',sans-serif;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.continue-info{flex:1;min-width:0;}
+.continue-title{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.continue-meta{font-size:11px;color:var(--text-muted);margin-top:1px;}
+.continue-arr{font-size:14px;color:var(--primary);flex-shrink:0;}
+html[data-theme="dark"] .continue-strip{background:#19263a;border-color:#243044;}
+html[data-theme="dark"] .continue-card{background:rgba(0,191,178,0.04);border-color:rgba(0,191,178,0.15);}
+html[data-theme="dark"] .continue-card:hover{background:rgba(0,191,178,0.08);}
+html[data-theme="dark"] .continue-icon{background:rgba(0,191,178,0.12);color:#00BFB2;}
+@media(max-width:640px){.continue-strip{padding:10px 20px;}.continue-card{max-width:100%;}}
+
 /* ── Section Headline ── */
 .section-headline { margin-bottom:20px; }
 .section-hl-tag {
@@ -1001,6 +1018,21 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
       <span class="stats-strip-num" data-target="1">0</span>
       <span class="stats-strip-label">Platform</span>
     </div>
+  </div>
+</div>
+
+<!-- ── Continue Reading ── -->
+<div class="continue-strip reveal" id="continue-strip" style="display:none">
+  <div class="continue-inner">
+    <span class="continue-lbl">Continue Reading</span>
+    <a class="continue-card" id="continue-card" href="#">
+      <div class="continue-icon" id="continue-icon">DOC</div>
+      <div class="continue-info">
+        <div class="continue-title" id="continue-title"></div>
+        <div class="continue-meta" id="continue-meta"></div>
+      </div>
+      <span class="continue-arr">→</span>
+    </a>
   </div>
 </div>
 
@@ -1621,6 +1653,28 @@ document.addEventListener('click',function(e){
   strip.innerHTML='<span class="rv-label">Recently visited</span>'+chips;
   var grid=document.querySelector('.cmd-grid');
   if(grid&&grid.parentNode)grid.parentNode.insertBefore(strip,grid);
+})();
+</script>
+<script>
+// ── Continue Reading ──
+(function(){
+  try {
+    var events = JSON.parse(localStorage.getItem('taqa-analytics') || '[]');
+    var lastOpen = null;
+    for(var i = events.length-1; i >= 0; i--){
+      if(events[i].e === 'open'){ lastOpen = events[i]; break; }
+    }
+    if(!lastOpen) return;
+    var type = (lastOpen.x && lastOpen.x.type) || 'sop';
+    var seg  = (lastOpen.x && lastOpen.x.seg)  || '';
+    var labels = {sop:'SOP',manual:'MNL',policy:'POL',lesson:'LSN',alert:'ALT',software:'ZIP'};
+    var segName = seg ? seg.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}) : 'Document';
+    document.getElementById('continue-title').textContent = lastOpen.k;
+    document.getElementById('continue-meta').textContent  = segName + ' · ' + (labels[type] || 'DOC');
+    document.getElementById('continue-icon').textContent  = labels[type] || 'DOC';
+    document.getElementById('continue-card').href = 'viewer.html?seg=' + (seg||'') + '&type=' + type + '&title=' + encodeURIComponent(lastOpen.k);
+    document.getElementById('continue-strip').style.display = '';
+  } catch(e) {}
 })();
 </script>
 <script src="shared.js"></script>

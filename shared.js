@@ -533,7 +533,10 @@ window.showToast=function(msg,type){
     }
     panel.innerHTML='<div class="bm-ph">'+
       '<span class="bm-pt">🔖 Bookmarks ('+items.length+')</span>'+
-      '<button class="bm-clr" id="bm-clr">Clear all</button></div>'+
+      '<div style="display:flex;gap:6px;">'+
+      '<button class="bm-clr" id="bm-exp" title="Export list as text">Export</button>'+
+      '<button class="bm-clr" id="bm-clr">Clear</button>'+
+      '</div></div>'+
       '<div class="bm-list">'+
       items.map(function(it){
         var bg=TC[it.type]||TC.sop,tc=TT[it.type]||TT.sop,lbl=TS[it.type]||'DOC';
@@ -555,6 +558,18 @@ window.showToast=function(msg,type){
         renderBmPanel();
         document.querySelectorAll('.bm-btn.bm-on').forEach(function(b){b.textContent='☆';b.classList.remove('bm-on');});
       }
+      if(e.target.id==='bm-exp'){
+        var its=window.TAQA_Bookmarks.getAll();
+        var lines=['TAQA Knowledge Hub — Bookmarks','Exported: '+new Date().toLocaleDateString(),''];
+        its.forEach(function(it,i){lines.push((i+1)+'. '+it.title+' | '+(it.segName||'')+' | '+(it.type||'').toUpperCase());});
+        try{
+          var blob=new Blob([lines.join('\n')],{type:'text/plain'});
+          var url=URL.createObjectURL(blob);
+          var a=document.createElement('a');a.href=url;a.download='taqa-bookmarks.txt';a.click();
+          URL.revokeObjectURL(url);
+        }catch(err){}
+        if(window.showToast)window.showToast('Bookmarks exported','success');
+      }
     },{once:false});
   }
   window.updateBmBadge=updateBmBadge;
@@ -564,4 +579,27 @@ window.showToast=function(msg,type){
     if(!panel.contains(e.target)&&!fab.contains(e.target))panel.classList.remove('open');
   });
   setTimeout(updateBmBadge,200);
+})();
+
+// ── Keyboard "/" focuses first visible search input ──
+document.addEventListener('keydown',function(e){
+  if(e.key!=='/'||e.metaKey||e.ctrlKey||e.altKey)return;
+  var a=document.activeElement;
+  if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.contentEditable==='true'))return;
+  var inputs=document.querySelectorAll('input[type="text"],input[type="search"],textarea');
+  for(var i=0;i<inputs.length;i++){
+    var inp=inputs[i];
+    if(inp.offsetParent!==null&&!inp.disabled&&!inp.readOnly){
+      e.preventDefault();inp.focus();
+      try{inp.select();}catch(err){}
+      break;
+    }
+  }
+});
+
+// ── Focus ring CSS ──
+(function(){
+  var s=document.createElement('style');
+  s.textContent=':focus-visible{outline:2px solid #00BFB2!important;outline-offset:3px!important;border-radius:4px!important;}';
+  document.head.appendChild(s);
 })();

@@ -184,6 +184,13 @@ html[data-theme="dark"] .pg-btn:hover:not(:disabled):not(.pg-dots){border-color:
 .doc-search input::placeholder{color:var(--text-muted);}
 .doc-count-label{font-size:13px;color:var(--text-muted);}
 .doc-count-label strong{color:var(--text);}
+/* Sort buttons */
+.sort-row{display:flex;gap:4px;flex-shrink:0;}
+.sort-btn{padding:5px 11px;border-radius:6px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;font-size:11px;font-weight:500;color:var(--text-muted);font-family:'Inter',sans-serif;transition:all 0.2s;white-space:nowrap;}
+.sort-btn.sort-on{background:rgba(0,104,106,0.08);border-color:rgba(0,104,106,0.25);color:var(--primary);font-weight:600;}
+.sort-btn:hover{border-color:rgba(0,104,106,0.25);color:var(--primary);}
+/* Mark as Read badge */
+.doc-read-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:#22c55e;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:middle;}
 
 /* ── Document Cards ── */
 .docs-grid{display:flex;flex-direction:column;gap:10px;}
@@ -544,6 +551,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-all">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search all documents..." oninput="filterDocs(this,'all')"></div>
+      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'all','default')">Default</button><button class="sort-btn" onclick="setSort(this,'all','az')">A–Z</button></div>
       <span class="doc-count-label">Showing <strong id="vis-all">–</strong> documents</span>
     </div>
     <div class="docs-grid" id="list-all"></div>
@@ -552,6 +560,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel active" id="panel-sops">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search SOPs..." oninput="filterDocs(this,'sops')"></div>
+      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'sops','default')">Default</button><button class="sort-btn" onclick="setSort(this,'sops','az')">A–Z</button></div>
       <span class="doc-count-label">Showing <strong id="vis-sops">–</strong> procedures</span>
     </div>
     <div class="docs-grid" id="list-sops"></div>
@@ -560,6 +569,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-manuals">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search manuals..." oninput="filterDocs(this,'manuals')"></div>
+      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'manuals','default')">Default</button><button class="sort-btn" onclick="setSort(this,'manuals','az')">A–Z</button></div>
       <span class="doc-count-label">Showing <strong id="vis-manuals">–</strong> manuals</span>
     </div>
     <div class="docs-grid" id="list-manuals"></div>
@@ -568,6 +578,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-policies">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search policies..." oninput="filterDocs(this,'policies')"></div>
+      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'policies','default')">Default</button><button class="sort-btn" onclick="setSort(this,'policies','az')">A–Z</button></div>
       <span class="doc-count-label">Showing <strong id="vis-policies">–</strong> policies</span>
     </div>
     <div class="docs-grid" id="list-policies"></div>
@@ -576,6 +587,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-alerts">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search alerts..." oninput="filterDocs(this,'alerts')"></div>
+      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'alerts','default')">Default</button><button class="sort-btn" onclick="setSort(this,'alerts','az')">A–Z</button></div>
       <span class="doc-count-label">Showing <strong id="vis-alerts">–</strong> alerts</span>
     </div>
     <div class="docs-grid" id="list-alerts"></div>
@@ -584,6 +596,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-lessons">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search lessons..." oninput="filterDocs(this,'lessons')"></div>
+      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'lessons','default')">Default</button><button class="sort-btn" onclick="setSort(this,'lessons','az')">A–Z</button></div>
       <span class="doc-count-label">Showing <strong id="vis-lessons">–</strong> lessons</span>
     </div>
     <div class="docs-grid" id="list-lessons"></div>
@@ -592,6 +605,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-software">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search software & tools..." oninput="filterDocs(this,'software')"></div>
+      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'software','default')">Default</button><button class="sort-btn" onclick="setSort(this,'software','az')">A–Z</button></div>
       <span class="doc-count-label">Showing <strong id="vis-software">–</strong> tools</span>
     </div>
     <div class="docs-grid" id="list-software"></div>
@@ -1101,7 +1115,7 @@ function buildDocCard(title, type, idx) {
   <div class="doc-card">
     ${icon}
     <div>
-      <div class="doc-info-title">${title}${newBadge}</div>
+      <div class="doc-info-title">${title}${newBadge}${isDocRead(title)?'<span class="doc-read-badge">✓ Read</span>':''}</div>
       <div class="doc-summary">${summary}</div>
       <div class="doc-info-meta">
         <span class="doc-type-badge ${typeClass}">${labels[type] || type}</span>
@@ -1111,7 +1125,7 @@ function buildDocCard(title, type, idx) {
       </div>
     </div>
     <div class="doc-actions">
-      <a class="doc-action-btn primary-action" href="${viewerHref}" onclick="saveRecent('${safeTitle}','${safeType}');if(window.TAQA_Track)window.TAQA_Track('open','${safeTitle}',{type:'${safeType}',seg:'${segId}'})">
+      <a class="doc-action-btn primary-action" href="${viewerHref}" onclick="saveRecent('${safeTitle}','${safeType}');markDocRead('${safeTitle}');if(window.TAQA_Track)window.TAQA_Track('open','${safeTitle}',{type:'${safeType}',seg:'${segId}'})">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         View
       </a>
@@ -1390,6 +1404,44 @@ function copySegLink() {
 
 // ── Filter + Highlight (debounced, data-layer — not DOM scan) ──
 const _ftm={};
+// ── Sort ──
+const SORT_STATE = {};
+function setSort(btn, type, mode) {
+  SORT_STATE[type] = mode;
+  btn.closest('.sort-row').querySelectorAll('.sort-btn').forEach(b => b.classList.remove('sort-on'));
+  btn.classList.add('sort-on');
+  const st = _st(type);
+  applySortToState(type);
+  st.page = 0;
+  _renderPage(type);
+}
+function applySortToState(type) {
+  const mode = SORT_STATE[type] || 'default';
+  const st = _st(type);
+  if (mode === 'az') {
+    st.filtered.sort((a, b) => {
+      const ta = (typeof a === 'object' ? a.title : a).toLowerCase();
+      const tb = (typeof b === 'object' ? b.title : b).toLowerCase();
+      return ta < tb ? -1 : ta > tb ? 1 : 0;
+    });
+  }
+}
+
+// ── Mark as Read ──
+function markDocRead(title) {
+  try {
+    const r = JSON.parse(localStorage.getItem('taqa-read-docs') || '{}');
+    r[title] = Date.now();
+    localStorage.setItem('taqa-read-docs', JSON.stringify(r));
+  } catch(e) {}
+}
+function isDocRead(title) {
+  try {
+    const r = JSON.parse(localStorage.getItem('taqa-read-docs') || '{}');
+    return !!r[title];
+  } catch(e) { return false; }
+}
+
 function filterDocs(input,type){
   clearTimeout(_ftm[type]);
   _ftm[type]=setTimeout(()=>{
@@ -1397,6 +1449,7 @@ function filterDocs(input,type){
     const st=_st(type);
     if(st.observer){st.observer.disconnect();st.observer=null;}
     st.filtered=q?st.all.filter(t=>(typeof t==='object'?t.title:t).toLowerCase().includes(q)):[...st.all];
+    applySortToState(type);
     st.page=0;
     const el=document.getElementById('list-'+type);
     if(el)el.innerHTML=SKEL+SKEL;
@@ -1589,6 +1642,13 @@ function showDocQR(title, type) {
   document.getElementById('qr-overlay').classList.add('open');
 }
 function closeQR() { document.getElementById('qr-overlay').classList.remove('open'); }
+// Swipe-down to close QR
+(function(){
+  var ov=document.getElementById('qr-overlay'),sy=0;
+  if(!ov)return;
+  ov.addEventListener('touchstart',function(e){sy=e.touches[0].clientY;},{passive:true});
+  ov.addEventListener('touchend',function(e){if(e.changedTouches[0].clientY-sy>60)closeQR();},{passive:true});
+})();
 function copyQRUrl() {
   const v = document.getElementById('qr-url-in').value;
   navigator.clipboard.writeText(v).then(() => { if(window.showToast) window.showToast('Link copied!'); });

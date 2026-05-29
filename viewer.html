@@ -149,6 +149,39 @@ html[data-theme="dark"] .pdf-icon{background:rgba(25,38,58,0.9);border-color:rgb
 html[data-theme="dark"] .pdf-placeholder-title{color:#dde4ef;}
 html[data-theme="dark"] .qr-inline-url{background:rgba(255,255,255,0.04);}
 
+/* Read progress bar */
+#read-progress-bar{position:fixed;top:68px;left:0;height:3px;z-index:999;
+  background:var(--gradient);width:0;transition:width 0.1s linear;pointer-events:none;}
+
+/* Print view */
+@media print{
+  nav,.bc,.doc-actions-row,.qr-inline-box,.pdf-wrap,#read-progress-bar,
+  footer,.bm-fab,.bm-panel,.toast-wrap{display:none!important;}
+  body{background:#fff!important;animation:none!important;}
+  .page-wrapper{padding-top:0!important;}
+  .doc-view{padding:16px!important;max-width:100%!important;}
+  .doc-header,.content-card{background:#fff!important;border:1px solid #ddd!important;box-shadow:none!important;}
+  .meta-cell{background:#f8f9fa!important;border:1px solid #ddd!important;}
+  .section-label{color:#00686A!important;}
+  .section-label::after{background:#ddd!important;}
+}
+
+/* Related documents */
+.related-section{background:var(--glass-2);border:1px solid var(--glass-border);border-radius:18px;
+  padding:22px 28px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.related-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px;}
+.related-card{background:rgba(0,104,106,0.03);border:1px solid var(--glass-border);border-radius:12px;
+  padding:12px 14px;text-decoration:none;display:flex;align-items:center;gap:12px;
+  transition:border-color 0.2s,background 0.2s;}
+.related-card:hover{border-color:rgba(0,104,106,0.3);background:rgba(0,104,106,0.06);}
+.related-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;font-family:'Urbanist',sans-serif;flex-shrink:0;}
+.related-title{font-size:12px;font-weight:600;color:var(--text);line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+html[data-theme="dark"] .related-section{background:#19263a;border-color:#243044;}
+html[data-theme="dark"] .related-card{background:rgba(0,191,178,0.03);border-color:#243044;}
+html[data-theme="dark"] .related-card:hover{background:rgba(0,191,178,0.06);border-color:rgba(0,191,178,0.2);}
+
 /* Page exit */
 @keyframes pageFadeOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-5px);}}
 body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
@@ -173,6 +206,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 </style>
 </head>
 <body>
+<div id="read-progress-bar" aria-hidden="true"></div>
 <div class="page-wrapper">
 
 <nav>
@@ -217,6 +251,10 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
       Download PDF
     </button>
     <button class="doc-act-btn doc-act-bm" id="bm-doc-btn" onclick="toggleViewerBm()">☆ Bookmark</button>
+    <button class="doc-act-btn doc-act-ghost" onclick="window.print()" title="Print this document" aria-label="Print">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Print
+    </button>
     <a class="doc-act-btn doc-act-ghost" id="back-btn" href="#">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       Back
@@ -256,6 +294,11 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
       <p>Scan to open this document on any device, or copy the link below.</p>
       <div class="qr-inline-url" id="qr-inline-url"></div>
     </div>
+  </div>
+
+  <div class="related-section" id="related-section" style="display:none">
+    <div class="section-label">Related Documents</div>
+    <div class="related-grid" id="related-grid"></div>
   </div>
 
 </div>
@@ -402,6 +445,39 @@ const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5
 function toggleDark(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme',next);}
 (function(){const s=localStorage.getItem('taqa-theme');if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
 
+// Read progress bar
+(function(){
+  var bar = document.getElementById('read-progress-bar');
+  if(!bar) return;
+  function update(){
+    var scrolled = document.documentElement.scrollTop || document.body.scrollTop;
+    var total = (document.documentElement.scrollHeight || document.body.scrollHeight) - window.innerHeight;
+    bar.style.width = (total > 0 ? Math.min(100, (scrolled / total) * 100) : 0) + '%';
+  }
+  window.addEventListener('scroll', update, {passive:true});
+})();
+
+// Related documents (rendered after search-index loads)
+function renderRelated(){
+  var idx = window.TAQA_SEARCH_INDEX;
+  if(!idx || !segId || !docType) return;
+  var related = idx.filter(function(d){ return d.s===segId && d.tp===docType && d.t!==docTitle; }).slice(0,4);
+  if(!related.length) return;
+  var TC={sop:'rgba(0,104,106,0.12)',manual:'rgba(59,130,246,0.1)',policy:'rgba(245,158,11,0.1)',lesson:'rgba(34,197,94,0.1)',alert:'rgba(255,103,32,0.1)',software:'rgba(56,189,248,0.12)'};
+  var TT={sop:'#00BFB2',manual:'#60a5fa',policy:'#f59e0b',lesson:'#4ade80',alert:'#FF6720',software:'#38bdf8'};
+  var TS={sop:'SOP',manual:'MNL',policy:'POL',lesson:'LSN',alert:'ALT',software:'ZIP'};
+  var grid = document.getElementById('related-grid');
+  var section = document.getElementById('related-section');
+  grid.innerHTML = related.map(function(d){
+    var href = 'viewer.html?seg='+d.s+'&type='+d.tp+'&title='+encodeURIComponent(d.t);
+    return '<a class="related-card" href="'+href+'">'+
+      '<div class="related-icon" style="background:'+(TC[d.tp]||TC.sop)+';color:'+(TT[d.tp]||TT.sop)+'">'+(TS[d.tp]||'DOC')+'</div>'+
+      '<div class="related-title">'+d.t+'</div></a>';
+  }).join('');
+  section.style.display = '';
+}
+setTimeout(renderRelated, 600);
+
 // Page exit transition
 document.addEventListener('click',function(e){
   const a=e.target.closest('a[href]');
@@ -414,6 +490,7 @@ document.addEventListener('click',function(e){
   setTimeout(()=>window.location.href=h,270);
 });
 </script>
+<script src="search-index.js"></script>
 <script src="shared.js"></script>
 <script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:linear-gradient(90deg,#00686A,#00BFB2);animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>

@@ -80,9 +80,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 /* Empty */
 .an-empty{text-align:center;padding:32px;color:var(--text-muted);font-size:13px;}
 
-/* Clear btn */
-.clear-data-btn{padding:7px 16px;border-radius:8px;border:1px solid rgba(239,68,68,0.2);background:rgba(239,68,68,0.05);color:#ef4444;font-size:12px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;margin-top:16px;}
+/* Clear / export btns */
+.data-btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+.clear-data-btn{padding:7px 16px;border-radius:8px;border:1px solid rgba(239,68,68,0.2);background:rgba(239,68,68,0.05);color:#ef4444;font-size:12px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;}
 .clear-data-btn:hover{background:rgba(239,68,68,0.1);}
+.export-data-btn{padding:7px 16px;border-radius:8px;border:1px solid rgba(0,104,106,0.2);background:rgba(0,104,106,0.05);color:var(--primary);font-size:12px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;}
+.export-data-btn:hover{background:rgba(0,104,106,0.1);}
 
 /* Dark mode */
 html[data-theme="dark"]{--dark:#0e1824;--glass:rgba(25,38,58,0.88);--glass-border:rgba(255,255,255,0.07);--text:#dde4ef;--text-muted:#7e94ab;}
@@ -172,7 +175,10 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
     <div id="activity-list"><div class="an-empty">No recent activity.</div></div>
   </div>
 
-  <button class="clear-data-btn" onclick="clearAnalytics()">🗑 Clear all analytics data</button>
+  <div class="data-btn-row">
+    <button class="export-data-btn" onclick="exportCSV()">⬇ Export as CSV</button>
+    <button class="clear-data-btn" onclick="clearAnalytics()">🗑 Clear all data</button>
+  </div>
 </div>
 
 <footer style="height:4px;position:relative;margin-top:auto;"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#00686A,#00BFB2);"></div></footer>
@@ -257,6 +263,26 @@ function renderAnalytics() {
       const w = b.style.width; b.style.width = '0'; setTimeout(() => { b.style.width = w; }, 50);
     });
   }, 50);
+}
+
+function exportCSV() {
+  var events = getEvents();
+  if (!events.length) { if(window.showToast) window.showToast('No data to export', 'info'); return; }
+  var rows = [['Event','Key','Extra','Timestamp']];
+  events.forEach(function(ev) {
+    rows.push([ev.e, ev.k, ev.x ? JSON.stringify(ev.x) : '', new Date(ev.t).toISOString()]);
+  });
+  var csv = rows.map(function(r){
+    return r.map(function(c){ return '"'+(c||'').toString().replace(/"/g,'""')+'"'; }).join(',');
+  }).join('\n');
+  try {
+    var blob = new Blob([csv], {type:'text/csv'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'taqa-analytics-'+new Date().toISOString().split('T')[0]+'.csv'; a.click();
+    URL.revokeObjectURL(url);
+    if(window.showToast) window.showToast('Analytics exported as CSV', 'success');
+  } catch(e) { if(window.showToast) window.showToast('Export failed', 'error'); }
 }
 
 function clearAnalytics() {
