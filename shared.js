@@ -1,7 +1,23 @@
 // ── Global mobile overflow fix ──
 (function(){
   var s=document.createElement('style');
-  s.textContent='html,body{overflow-x:hidden;max-width:100%;}*{box-sizing:border-box;}';
+  s.textContent=
+    'html{overflow-x:hidden;max-width:100vw;}'+
+    'body{overflow-x:hidden;width:100%;max-width:100%;}'+
+    '*{box-sizing:border-box;}'+
+    /* clamp decorative wide elements that bleed past viewport */
+    '.hub-glow,.bg-blob,.bg-blob-1,.bg-blob-2,.bg-blob-3{max-width:100vw!important;overflow:hidden;}'+
+    'img,svg:not([class*="icon"]):not(#stp-ring){max-width:100%;}'+
+    '@media(max-width:768px){'+
+      /* prevent any child from being wider than screen */
+      '.page-wrapper>*,.main-wrapper,.main-inner,.search-hub,'+
+      '.results-section,.prompts-section,.chat-log,'+
+      '.seg-panel,.doc-list,.doc-toolbar{max-width:100vw!important;overflow-x:hidden!important;}'+
+      /* stats strips that use flex but don't wrap */
+      '.stats-strip-inner,.stat-pill-row{flex-wrap:wrap!important;}'+
+      /* hero sections: contain text */
+      'h1,h2,h3,p{word-break:break-word;overflow-wrap:break-word;}'+
+    '}';
   document.head.appendChild(s);
 })();
 

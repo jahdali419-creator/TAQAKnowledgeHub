@@ -1558,22 +1558,9 @@ function toggleDark() {
 })();
 
 
-// ── Mobile Nav ──
-function toggleMobileNav() {
-  const menu = document.getElementById('nav-mobile-menu');
-  if (menu) menu.classList.toggle('open');
-}
-document.getElementById('nav-hamburger').addEventListener('click', function(e) {
-  e.stopPropagation();
-  toggleMobileNav();
-});
-document.addEventListener('click', function(e) {
-  const menu = document.getElementById('nav-mobile-menu');
-  const btn = document.getElementById('nav-hamburger');
-  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
-    menu.classList.remove('open');
-  }
-});
+// ── Mobile Nav — handled entirely by shared.js ──
+// shared.js wires the hamburger click and close-on-outside-click via document listeners.
+// Do not add a second handler here — it causes double-toggle on some iOS browsers.
 
 // ── Scroll Hint Hide ──
 (function(){
