@@ -17,6 +17,22 @@
       '.stats-strip-inner,.stat-pill-row{flex-wrap:wrap!important;}'+
       /* hero sections: contain text */
       'h1,h2,h3,p{word-break:break-word;overflow-wrap:break-word;}'+
+    '}'+
+    /* ── Compact gray bar text on mobile ── */
+    '@media(max-width:640px){'+
+      '.stat-pill,.filter-chip,.filter-label,.cat-pill,.alpha-btn,'+
+      '.prompts-tag,.prompt-chip,.char-count,.stat-sep,'+
+      '.seg-filters span,.source-card-seg,.source-card-type,'+
+      '.ir-seg,.ir-header,.ir-footer,.auto-bc,'+
+      '.hero-stat,.badge,.tag,.label-pill,'+
+      '.search-meta,.doc-meta,.doc-tag,.doc-type,'+
+      '.sidebar-label,.section-label,.list-meta{'+
+        'font-size:10px!important;'+
+      '}'+
+      '.stat-pill{padding:3px 9px!important;}'+
+      '.filter-chip{padding:3px 9px!important;}'+
+      '.cat-pill{padding:3px 10px!important;}'+
+      '.prompt-chip{font-size:11px!important;padding:5px 11px!important;}'+
     '}';
   document.head.appendChild(s);
 })();
