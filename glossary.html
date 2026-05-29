@@ -267,54 +267,55 @@ html[data-theme="dark"] #glossary-input::placeholder{color:#4b5563;}
 html[data-theme="dark"] .term-card::after{background:linear-gradient(105deg,transparent 0%,rgba(255,255,255,0.05) 50%,transparent 100%);}
 
 /* ── Responsive ── */
-/* clip any element that tries to exceed the viewport width */
-.page-wrapper{overflow-x:hidden;max-width:100vw;}
-
 @media(max-width:960px){
   nav{padding:0 20px;}
   .page-hero{padding:100px 20px 60px;}
-  /* single-column layout — sidebar goes to BOTTOM (after terms) */
-  .glossary-layout{
-    grid-template-columns:1fr;
-    padding:24px 20px 60px;
-    overflow-x:hidden;
-    width:100%;
-  }
-  /* sidebar naturally follows main in DOM order — no order override */
-  .glossary-sidebar{
-    order:2;
-    width:100%;
-    max-width:100%;
-    overflow-x:hidden;
-  }
-  .glossary-main{order:1;}
+  .glossary-layout{grid-template-columns:1fr;padding:24px 20px 60px;}
+  /*
+    KEY FIX: grid items default min-width is min-content.
+    Without min-width:0, a grid item expands to fit all its content
+    (e.g. the no-wrap pill row = ~840px) and pushes the page wider.
+    min-width:0 lets the column stay at 1fr and the content scrolls inside.
+  */
+  .glossary-main{min-width:0;order:1;}
+  .glossary-sidebar{min-width:0;order:2;}
 }
 @media(max-width:640px){
   .nav-right .btn,.nav-right a.btn{display:none!important;}
-  .terms-grid{grid-template-columns:1fr;}
-  .cat-filter{gap:5px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px;}
   .page-hero{padding:90px 16px 44px;}
   .hero-stats{gap:10px;flex-wrap:wrap;justify-content:center;}
-  /* search bar: allow input to shrink, never overflow */
-  .glossary-search-wrap{width:100%;max-width:100%;overflow:hidden;}
-  .glossary-search-bar{width:100%;overflow:hidden;flex-wrap:nowrap;}
+
+  /* Search bar: input must have min-width:0 to shrink in flex */
+  .glossary-search-wrap{width:100%;max-width:100%;}
   #glossary-input{min-width:0;flex:1 1 0;}
   .btn-go{padding:10px 12px;font-size:13px;flex-shrink:0;white-space:nowrap;}
   .glossary-clear{flex-shrink:0;}
-  /* sidebar cards */
-  .sidebar-card{padding:16px;overflow-x:hidden;}
-  /* form fields — full width, never wider than card */
-  .submit-form{width:100%;}
+
+  /* Category pills: single scrollable row, pills never shrink or wrap */
+  .cat-filter{
+    display:flex;flex-wrap:nowrap;gap:6px;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;padding-bottom:6px;
+  }
+  .cat-filter::-webkit-scrollbar{display:none;}
+  .cat-pill{flex-shrink:0;white-space:nowrap;}
+
+  /* Terms: single column */
+  .terms-grid{grid-template-columns:1fr;}
+
+  /* Sidebar: constrain but don't block scrollable children */
+  .sidebar-card{padding:16px;}
+  .submit-form,.sf-row{width:100%;}
   .sf-input,.sf-select,.sf-textarea,.btn-submit{
     width:100%!important;max-width:100%!important;
     min-width:0!important;box-sizing:border-box!important;
   }
 }
 @media(max-width:480px){
-  .glossary-layout{padding:12px 12px 60px;}
+  .glossary-layout{padding:12px 14px 60px;}
   .term-card{padding:14px 16px;}
   .sidebar-card{padding:14px;}
-  /* 16px prevents iOS Safari auto-zoom on input focus */
+  /* 16px stops iOS Safari from auto-zooming when tapping an input */
   .sf-input,.sf-select,.sf-textarea{font-size:16px!important;}
   .page-hero-content p{font-size:13.5px;}
 }
