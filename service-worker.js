@@ -1,4 +1,4 @@
-const CACHE = 'taqa-hub-v25';
+const CACHE = 'taqa-hub-v26';
 const ASSETS = [
   '/TAQAKnowledgeHub/',
   '/TAQAKnowledgeHub/index.html',

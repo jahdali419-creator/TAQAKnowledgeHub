@@ -442,6 +442,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .doc-toolbar{flex-direction:column;align-items:stretch;gap:10px;}
   .doc-search{max-width:100%;}
   .doc-count-label{font-size:12px;}
+  .sort-row{justify-content:flex-start;}
   .doc-card-title{font-size:13.5px;}
   .doc-summary{-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;}
   .alert-card{flex-direction:column;gap:12px;}
@@ -1424,6 +1425,10 @@ function applySortToState(type) {
       const tb = (typeof b === 'object' ? b.title : b).toLowerCase();
       return ta < tb ? -1 : ta > tb ? 1 : 0;
     });
+  } else {
+    // Restore original order: keep only items currently in filtered, in st.all order
+    const kept = new Set(st.filtered.map(t => typeof t === 'object' ? t.title : t));
+    st.filtered = st.all.filter(t => kept.has(typeof t === 'object' ? t.title : t));
   }
 }
 
