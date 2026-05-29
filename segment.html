@@ -184,9 +184,8 @@ html[data-theme="dark"] .pg-btn:hover:not(:disabled):not(.pg-dots){border-color:
 .doc-search input::placeholder{color:var(--text-muted);}
 .doc-count-label{font-size:13px;color:var(--text-muted);}
 .doc-count-label strong{color:var(--text);}
-/* Sort buttons */
-.sort-row{display:flex;gap:4px;flex-shrink:0;}
-.sort-btn{padding:5px 11px;border-radius:6px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;font-size:11px;font-weight:500;color:var(--text-muted);font-family:'Inter',sans-serif;transition:all 0.2s;white-space:nowrap;}
+/* Sort toggle button */
+.sort-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;font-size:11px;font-weight:500;color:var(--text-muted);font-family:'Inter',sans-serif;transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
 .sort-btn.sort-on{background:rgba(0,104,106,0.08);border-color:rgba(0,104,106,0.25);color:var(--primary);font-weight:600;}
 .sort-btn:hover{border-color:rgba(0,104,106,0.25);color:var(--primary);}
 /* Mark as Read badge */
@@ -442,7 +441,6 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .doc-toolbar{flex-direction:column;align-items:stretch;gap:10px;}
   .doc-search{max-width:100%;}
   .doc-count-label{font-size:12px;}
-  .sort-row{justify-content:flex-start;}
   .doc-card-title{font-size:13.5px;}
   .doc-summary{-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;}
   .alert-card{flex-direction:column;gap:12px;}
@@ -552,7 +550,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-all">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search all documents..." oninput="filterDocs(this,'all')"></div>
-      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'all','default')">Default</button><button class="sort-btn" onclick="setSort(this,'all','az')">A–Z</button></div>
+      <button class="sort-btn" onclick="toggleSort(this,'all')" title="Toggle A–Z sort">A–Z</button>
       <span class="doc-count-label">Showing <strong id="vis-all">–</strong> documents</span>
     </div>
     <div class="docs-grid" id="list-all"></div>
@@ -561,7 +559,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel active" id="panel-sops">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search SOPs..." oninput="filterDocs(this,'sops')"></div>
-      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'sops','default')">Default</button><button class="sort-btn" onclick="setSort(this,'sops','az')">A–Z</button></div>
+      <button class="sort-btn" onclick="toggleSort(this,'sops')" title="Toggle A–Z sort">A–Z</button>
       <span class="doc-count-label">Showing <strong id="vis-sops">–</strong> procedures</span>
     </div>
     <div class="docs-grid" id="list-sops"></div>
@@ -570,7 +568,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-manuals">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search manuals..." oninput="filterDocs(this,'manuals')"></div>
-      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'manuals','default')">Default</button><button class="sort-btn" onclick="setSort(this,'manuals','az')">A–Z</button></div>
+      <button class="sort-btn" onclick="toggleSort(this,'manuals')" title="Toggle A–Z sort">A–Z</button>
       <span class="doc-count-label">Showing <strong id="vis-manuals">–</strong> manuals</span>
     </div>
     <div class="docs-grid" id="list-manuals"></div>
@@ -579,7 +577,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-policies">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search policies..." oninput="filterDocs(this,'policies')"></div>
-      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'policies','default')">Default</button><button class="sort-btn" onclick="setSort(this,'policies','az')">A–Z</button></div>
+      <button class="sort-btn" onclick="toggleSort(this,'policies')" title="Toggle A–Z sort">A–Z</button>
       <span class="doc-count-label">Showing <strong id="vis-policies">–</strong> policies</span>
     </div>
     <div class="docs-grid" id="list-policies"></div>
@@ -588,7 +586,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-alerts">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search alerts..." oninput="filterDocs(this,'alerts')"></div>
-      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'alerts','default')">Default</button><button class="sort-btn" onclick="setSort(this,'alerts','az')">A–Z</button></div>
+      <button class="sort-btn" onclick="toggleSort(this,'alerts')" title="Toggle A–Z sort">A–Z</button>
       <span class="doc-count-label">Showing <strong id="vis-alerts">–</strong> alerts</span>
     </div>
     <div class="docs-grid" id="list-alerts"></div>
@@ -597,7 +595,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-lessons">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search lessons..." oninput="filterDocs(this,'lessons')"></div>
-      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'lessons','default')">Default</button><button class="sort-btn" onclick="setSort(this,'lessons','az')">A–Z</button></div>
+      <button class="sort-btn" onclick="toggleSort(this,'lessons')" title="Toggle A–Z sort">A–Z</button>
       <span class="doc-count-label">Showing <strong id="vis-lessons">–</strong> lessons</span>
     </div>
     <div class="docs-grid" id="list-lessons"></div>
@@ -606,7 +604,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-software">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search software & tools..." oninput="filterDocs(this,'software')"></div>
-      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'software','default')">Default</button><button class="sort-btn" onclick="setSort(this,'software','az')">A–Z</button></div>
+      <button class="sort-btn" onclick="toggleSort(this,'software')" title="Toggle A–Z sort">A–Z</button>
       <span class="doc-count-label">Showing <strong id="vis-software">–</strong> tools</span>
     </div>
     <div class="docs-grid" id="list-software"></div>
@@ -1407,10 +1405,11 @@ function copySegLink() {
 const _ftm={};
 // ── Sort ──
 const SORT_STATE = {};
-function setSort(btn, type, mode) {
-  SORT_STATE[type] = mode;
-  btn.closest('.sort-row').querySelectorAll('.sort-btn').forEach(b => b.classList.remove('sort-on'));
-  btn.classList.add('sort-on');
+function toggleSort(btn, type) {
+  const current = SORT_STATE[type] || 'default';
+  const next = current === 'az' ? 'default' : 'az';
+  SORT_STATE[type] = next;
+  btn.classList.toggle('sort-on', next === 'az');
   const st = _st(type);
   applySortToState(type);
   st.page = 0;
