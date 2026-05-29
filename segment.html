@@ -219,21 +219,23 @@ html[data-theme="dark"] .pg-btn:hover:not(:disabled):not(.pg-dots){border-color:
 .doc-type-badge.alert{background:rgba(255,103,32,0.1);color:var(--accent);border:1px solid rgba(255,103,32,0.15);}
 .doc-type-badge.lesson{background:rgba(34,197,94,0.1);color:#4ade80;border:1px solid rgba(34,197,94,0.15);}
 .doc-actions{
-  display:flex;flex-direction:column;gap:8px;align-items:stretch;
-  min-width:100px;
+  display:flex;flex-direction:column;gap:6px;align-items:stretch;
+  min-width:92px;
 }
 .doc-action-btn{
-  width:100%;padding:8px 14px;border-radius:7px;
+  width:100%;padding:8px 12px;border-radius:8px;
   border:1px solid var(--glass-border);background:transparent;
-  cursor:pointer;color:var(--text-muted);font-size:12.5px;font-weight:500;
+  cursor:pointer;color:var(--text-muted);font-size:12px;font-weight:500;
   font-family:'Inter',sans-serif;
-  display:flex;align-items:center;justify-content:center;
-  transition:all 0.25s;white-space:nowrap;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  transition:all 0.22s;white-space:nowrap;
 }
 .doc-action-btn:hover{background:var(--glass-2);border-color:var(--glass-border-hover);color:var(--primary-light);}
 .doc-action-btn.primary-action{background:rgba(0,104,106,0.08);border-color:rgba(0,104,106,0.2);color:var(--primary);font-weight:600;}
 .doc-action-btn.primary-action:hover{background:rgba(0,104,106,0.16);}
-.bm-btn{font-size:15px;min-width:36px;padding:8px 10px;}
+.doc-act-pair{display:flex;gap:6px;}
+.doc-act-pair .doc-action-btn{flex:1;padding:7px 6px;}
+.bm-btn{font-size:14px;}
 .bm-btn.bm-on{color:#f59e0b!important;border-color:rgba(245,158,11,0.3)!important;background:rgba(245,158,11,0.08)!important;}
 /* ── QR Modal ── */
 .qr-overlay{position:fixed;inset:0;z-index:900;background:rgba(10,20,32,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity 0.25s;display:flex;align-items:center;justify-content:center;}
@@ -1109,10 +1111,16 @@ function buildDocCard(title, type, idx) {
       </div>
     </div>
     <div class="doc-actions">
-      <a class="doc-action-btn primary-action" href="${viewerHref}" onclick="saveRecent('${safeTitle}','${safeType}');if(window.TAQA_Track)window.TAQA_Track('open','${safeTitle}',{type:'${safeType}',seg:'${segId}'})">View</a>
-      <button class="doc-action-btn bm-btn${isBm?' bm-on':''}" data-title="${safeTitle}" data-type="${safeType}" onclick="toggleDocBm(this)" title="${isBm?'Remove bookmark':'Bookmark'}">${isBm?'★':'☆'}</button>
-      <button class="doc-action-btn" onclick="showDocQR('${safeTitle}','${safeType}')" title="QR Code">QR</button>
-      <button class="doc-action-btn" onclick="copyDocLink(this,'${safeTitle}')" title="Copy link">Share</button>
+      <a class="doc-action-btn primary-action" href="${viewerHref}" onclick="saveRecent('${safeTitle}','${safeType}');if(window.TAQA_Track)window.TAQA_Track('open','${safeTitle}',{type:'${safeType}',seg:'${segId}'})">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        View
+      </a>
+      <div class="doc-act-pair">
+        <button class="doc-action-btn bm-btn${isBm?' bm-on':''}" data-title="${safeTitle}" data-type="${safeType}" onclick="toggleDocBm(this)" title="${isBm?'Remove bookmark':'Bookmark'}">${isBm?'★':'☆'}</button>
+        <button class="doc-action-btn" onclick="showDocQR('${safeTitle}','${safeType}')" title="QR Code">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="5" y="5" width="3" height="3"/><rect x="16" y="5" width="3" height="3"/><rect x="16" y="16" width="3" height="3"/><rect x="5" y="16" width="3" height="3"/></svg>
+        </button>
+      </div>
     </div>
   </div>`;
 }
@@ -1219,8 +1227,10 @@ function buildSoftwareCard(raw, idx) {
       </div>
     </div>
     <div class="doc-actions">
-      <button class="doc-action-btn primary-action" title="Download">Download</button>
-      <button class="doc-action-btn" onclick="copyDocLink(this,'${safeName}')" title="Copy Link">Copy Link</button>
+      <button class="doc-action-btn primary-action" title="Download">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download
+      </button>
     </div>
   </div>`;
 }
