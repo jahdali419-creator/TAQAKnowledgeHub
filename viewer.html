@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document Viewer — TAQA Knowledge Hub</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00686A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The One">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#00686A;--primary-light:#00BFB2;--accent:#FF6720;
+  --dark:#f4f5f7;--glass:rgba(255,255,255,0.88);--glass-2:rgba(255,255,255,0.98);
+  --glass-border:rgba(0,0,0,0.08);--text:#1a2235;--text-muted:#64748b;
+  --gradient:linear-gradient(135deg,#00686A,#00BFB2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+@keyframes pageFadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;animation:pageFadeIn 0.4s cubic-bezier(.4,0,.2,1);}
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--glass-border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
+.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.nav-brand-icon{width:40px;height:40px;border-radius:11px;background:var(--gradient);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  position:relative;overflow:hidden;box-shadow:0 4px 18px rgba(0,104,106,0.38);}
+.nav-brand-icon::before{content:'';position:absolute;top:-10px;left:-6px;width:32px;height:32px;background:rgba(255,255,255,0.13);border-radius:50%;}
+.nav-brand-text{font-family:'Urbanist',sans-serif;font-size:15px;}
+.nav-brand-name{font-weight:800;color:var(--primary);}
+.nav-brand-hub{font-weight:500;color:#64748b;}
+.nav-subtitle{font-size:11px;color:var(--text-muted);display:block;margin-top:-1px;}
+.nav-right{display:flex;gap:10px;align-items:center;}
+.btn{padding:8px 18px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
+  transition:all 0.25s;border:none;font-family:'Inter',sans-serif;text-decoration:none;
+  display:inline-flex;align-items:center;gap:7px;}
+.btn-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--text-muted);}
+.btn-ghost:hover{border-color:rgba(0,104,106,0.3);color:var(--primary);}
+.btn-primary{background:var(--gradient);color:#fff;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,104,106,0.4);}
+.dark-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:all 0.2s;padding:0;flex-shrink:0;}
+.dark-toggle:hover{border-color:var(--primary);color:var(--primary);background:rgba(0,104,106,0.06);}
+
+.page-wrapper{padding-top:68px;min-height:100vh;display:flex;flex-direction:column;}
+
+/* Breadcrumb */
+.bc{padding:16px 48px 0;max-width:900px;margin:0 auto;width:100%;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-muted);}
+.bc a{color:var(--text-muted);text-decoration:none;transition:color 0.2s;}
+.bc a:hover{color:var(--primary);}
+.bc-sep{opacity:0.4;}
+.bc-cur{color:var(--text);font-weight:500;}
+
+/* Doc view */
+.doc-view{max-width:900px;margin:0 auto;width:100%;padding:20px 48px 80px;}
+
+/* Header card */
+.doc-header{background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:20px;padding:28px 32px;margin-bottom:24px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.07);}
+.doc-header-top{display:flex;align-items:flex-start;gap:18px;margin-bottom:20px;}
+.doc-type-icon-lg{width:56px;height:56px;border-radius:14px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Urbanist',sans-serif;font-size:11px;font-weight:800;letter-spacing:0.6px;text-transform:uppercase;}
+.doc-header-info{flex:1;min-width:0;}
+.doc-title{font-family:'Urbanist',sans-serif;font-size:22px;font-weight:800;line-height:1.25;color:var(--text);margin-bottom:10px;}
+.doc-badges{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;}
+.badge{padding:3px 11px;border-radius:50px;font-size:11px;font-weight:600;}
+.badge.sop{background:rgba(0,104,106,0.12);color:#00BFB2;border:1px solid rgba(0,191,178,0.2);}
+.badge.manual{background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.2);}
+.badge.policy{background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.2);}
+.badge.alert{background:rgba(255,103,32,0.1);color:#FF6720;border:1px solid rgba(255,103,32,0.2);}
+.badge.lesson{background:rgba(34,197,94,0.1);color:#4ade80;border:1px solid rgba(34,197,94,0.2);}
+.badge.software{background:rgba(56,189,248,0.12);color:#38bdf8;border:1px solid rgba(56,189,248,0.22);}
+.badge.seg{background:rgba(0,104,106,0.06);color:var(--primary);border:1px solid rgba(0,104,106,0.15);}
+
+/* Meta grid */
+.meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.meta-cell{background:rgba(0,104,106,0.04);border:1px solid var(--glass-border);border-radius:10px;padding:12px 14px;}
+.meta-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;font-weight:600;}
+.meta-val{font-size:13px;font-weight:600;color:var(--text);}
+
+/* Action row */
+.doc-actions-row{display:flex;gap:10px;flex-wrap:wrap;}
+.doc-act-btn{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;
+  font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:7px;transition:all 0.22s;text-decoration:none;}
+.doc-act-primary{background:var(--gradient);color:#fff;border:none;box-shadow:0 4px 16px rgba(0,104,106,0.3);}
+.doc-act-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,104,106,0.4);}
+.doc-act-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--text-muted);}
+.doc-act-ghost:hover{border-color:rgba(0,104,106,0.3);color:var(--primary);}
+.doc-act-bm{background:transparent;border:1px solid var(--glass-border);color:var(--text-muted);font-size:15px;}
+.doc-act-bm.on{border-color:rgba(245,158,11,0.35);color:#f59e0b;background:rgba(245,158,11,0.08);}
+.doc-act-bm:hover{border-color:rgba(245,158,11,0.35);color:#f59e0b;}
+
+/* Content card */
+.content-card{background:var(--glass-2);border:1px solid var(--glass-border);border-radius:18px;
+  padding:28px 32px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.section-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+  color:var(--primary-light);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.section-label::after{content:'';flex:1;height:1px;background:rgba(0,191,178,0.15);}
+.section-text{font-size:14px;color:var(--text-muted);line-height:1.78;}
+
+/* PDF placeholder */
+.pdf-wrap{background:var(--glass-2);border:1px solid var(--glass-border);border-radius:18px;
+  padding:0;margin-bottom:20px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.pdf-toolbar{display:flex;align-items:center;gap:10px;padding:12px 20px;
+  border-bottom:1px solid var(--glass-border);background:rgba(0,104,106,0.03);}
+.pdf-tb-label{font-size:11.5px;font-weight:600;color:var(--text-muted);flex:1;}
+.pdf-tb-badge{padding:2px 10px;border-radius:50px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);color:#f59e0b;font-size:10.5px;font-weight:600;}
+.pdf-preview{background:linear-gradient(160deg,#f0f7ff 0%,#f4f5f7 100%);min-height:320px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px 24px;text-align:center;}
+.pdf-icon{width:64px;height:80px;background:rgba(255,255,255,0.9);border-radius:6px;
+  border:1px solid rgba(0,104,106,0.15);display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-end;padding-bottom:10px;box-shadow:0 4px 20px rgba(0,0,0,0.08);
+  position:relative;overflow:hidden;}
+.pdf-icon::before{content:'';position:absolute;top:0;right:0;width:18px;height:18px;
+  background:linear-gradient(225deg,rgba(0,104,106,0.15) 0%,rgba(0,104,106,0.15) 50%,transparent 50%);}
+.pdf-icon-label{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--primary);}
+.pdf-placeholder-title{font-family:'Urbanist',sans-serif;font-size:15px;font-weight:700;color:#1a2235;}
+.pdf-placeholder-sub{font-size:13px;color:#64748b;max-width:320px;line-height:1.6;}
+.pdf-req-btn{padding:10px 22px;border-radius:10px;background:var(--gradient);color:#fff;border:none;
+  font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;
+  display:inline-flex;align-items:center;gap:7px;margin-top:4px;
+  box-shadow:0 4px 16px rgba(0,104,106,0.3);}
+.pdf-req-btn:hover{transform:translateY(-1px);}
+
+/* QR inline */
+.qr-inline-box{background:var(--glass-2);border:1px solid var(--glass-border);border-radius:18px;
+  padding:24px;margin-bottom:20px;display:flex;align-items:center;gap:24px;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.qr-inline-img{width:100px;height:100px;border-radius:8px;border:2px solid #f4f5f7;flex-shrink:0;}
+.qr-inline-info h4{font-family:'Urbanist',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.qr-inline-info p{font-size:12.5px;color:var(--text-muted);line-height:1.5;margin-bottom:10px;}
+.qr-inline-url{font-size:10.5px;color:var(--text-muted);word-break:break-all;background:rgba(0,0,0,0.03);
+  border-radius:6px;padding:6px 10px;font-family:'Inter',sans-serif;}
+
+/* Dark mode */
+html[data-theme="dark"]{--dark:#0e1824;--glass:rgba(25,38,58,0.88);--glass-border:rgba(255,255,255,0.07);--text:#dde4ef;--text-muted:#7e94ab;}
+html[data-theme="dark"] body{background:#0e1824;}
+html[data-theme="dark"] nav{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.06);}
+html[data-theme="dark"] .nav-brand-name{color:#dde4ef;}
+html[data-theme="dark"] .nav-brand-hub{color:#7e94ab;}
+html[data-theme="dark"] .dark-toggle{border-color:rgba(255,255,255,0.1);color:#7e94ab;}
+html[data-theme="dark"] .doc-header,.doc-view .content-card,.doc-view .pdf-wrap,.doc-view .qr-inline-box{background:#19263a;border-color:#243044;}
+html[data-theme="dark"] .meta-cell{background:rgba(0,191,178,0.04);border-color:#243044;}
+html[data-theme="dark"] .pdf-preview{background:linear-gradient(160deg,#0e1824 0%,#111e2d 100%);}
+html[data-theme="dark"] .pdf-icon{background:rgba(25,38,58,0.9);border-color:rgba(0,191,178,0.15);}
+html[data-theme="dark"] .pdf-placeholder-title{color:#dde4ef;}
+html[data-theme="dark"] .qr-inline-url{background:rgba(255,255,255,0.04);}
+
+/* Page exit */
+@keyframes pageFadeOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-5px);}}
+body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
+
+@media(max-width:768px){
+  nav{padding:0 20px;}
+  .bc{padding:12px 20px 0;}
+  .doc-view{padding:16px 20px 60px;}
+  .doc-header{padding:20px;}
+  .meta-grid{grid-template-columns:1fr 1fr;}
+  .content-card{padding:20px;}
+  .qr-inline-box{flex-direction:column;align-items:center;text-align:center;}
+  .doc-title{font-size:18px;}
+  .doc-actions-row{gap:8px;}
+  .doc-act-btn{padding:9px 14px;font-size:12.5px;}
+}
+@media(max-width:480px){
+  .nav-right .btn{display:none!important;}
+  .meta-grid{grid-template-columns:1fr 1fr;}
+  .pdf-preview{min-height:240px;}
+}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<nav>
+  <a href="index.html" class="nav-brand">
+    <div class="nav-brand-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </div>
+    <span class="nav-brand-text"><span class="nav-brand-name">TAQA</span> <span class="nav-brand-hub">Knowledge Hub</span><span class="nav-subtitle"><em style="color:#00686A;font-style:italic;">The One</em> Platform</span></span>
+  </a>
+  <div class="nav-right">
+    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode">
+      <svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>
+    </button>
+    <a href="ai-search.html" class="btn btn-ghost">AI Search</a>
+    <a href="upload.html" class="btn btn-primary">+ Upload</a>
+  </div>
+</nav>
+
+<div class="bc" id="bc">
+  <a href="index.html">Home</a>
+  <span class="bc-sep">/</span>
+  <a href="#" id="bc-seg">Segment</a>
+  <span class="bc-sep">/</span>
+  <span class="bc-cur" id="bc-title">Document</span>
+</div>
+
+<div class="doc-view">
+  <div class="doc-header">
+    <div class="doc-header-top">
+      <div class="doc-type-icon-lg" id="doc-icon"></div>
+      <div class="doc-header-info">
+        <div class="doc-title" id="doc-title">Loading…</div>
+        <div class="doc-badges" id="doc-badges"></div>
+      </div>
+    </div>
+    <div class="meta-grid" id="meta-grid"></div>
+  </div>
+
+  <div class="doc-actions-row" style="margin-bottom:24px;" id="doc-actions-row">
+    <button class="doc-act-btn doc-act-primary" id="dl-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download PDF
+    </button>
+    <button class="doc-act-btn doc-act-bm" id="bm-doc-btn" onclick="toggleViewerBm()">☆ Bookmark</button>
+    <button class="doc-act-btn doc-act-ghost" onclick="shareDoc()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Share
+    </button>
+    <a class="doc-act-btn doc-act-ghost" id="back-btn" href="#">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </a>
+  </div>
+
+  <div class="content-card">
+    <div class="section-label">Document Summary</div>
+    <div class="section-text" id="doc-summary"></div>
+  </div>
+
+  <div class="content-card">
+    <div class="section-label">Scope &amp; Application</div>
+    <div class="section-text" id="doc-scope"></div>
+  </div>
+
+  <div class="pdf-wrap">
+    <div class="pdf-toolbar">
+      <span class="pdf-tb-label" id="pdf-toolbar-label">PDF Document</span>
+      <span class="pdf-tb-badge">Backend Required</span>
+    </div>
+    <div class="pdf-preview">
+      <div class="pdf-icon"><span class="pdf-icon-label">PDF</span></div>
+      <div class="pdf-placeholder-title" id="pdf-doc-name">Document</div>
+      <div class="pdf-placeholder-sub">Full PDF preview will be available once connected to document storage. Download the file to view offline.</div>
+      <button class="pdf-req-btn" onclick="requestAccess()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download PDF
+      </button>
+    </div>
+  </div>
+
+  <div class="qr-inline-box" id="qr-section">
+    <img class="qr-inline-img" id="qr-inline-img" alt="QR" />
+    <div class="qr-inline-info">
+      <h4>Share this document</h4>
+      <p>Scan the QR code to open this document on any device, or copy the link below.</p>
+      <div class="qr-inline-url" id="qr-inline-url"></div>
+    </div>
+  </div>
+
+</div>
+<footer style="height:4px;position:relative;margin-top:auto;"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#00686A,#00BFB2);"></div></footer>
+</div>
+
+<script>
+const SEGS = {
+  'coiled-tubing':{name:'Coiled Tubing',tag:'Operations'},
+  'fracturing':{name:'Fracturing',tag:'Stimulation'},
+  'wireline':{name:'Wireline',tag:'Logging'},
+  'drilling':{name:'Drilling',tag:'Drilling Ops'},
+  'cementing':{name:'Cementing',tag:'Well Construction'},
+  'inspection':{name:'Inspection Services',tag:'Compliance'},
+  'well-safety':{name:'Well Safety',tag:'Safety Critical'},
+  'qhse':{name:'QHSE',tag:'Quality & Safety'},
+  'hr':{name:'Human Resources',tag:'HR & People'},
+  'tws-maintenance':{name:'TWS Maintenance',tag:'Maintenance'},
+  'well-testing':{name:'Well Testing',tag:'Production Testing'}
+};
+
+const TYPE_COLORS={sop:'rgba(0,104,106,0.12)',manual:'rgba(59,130,246,0.1)',policy:'rgba(245,158,11,0.1)',lesson:'rgba(34,197,94,0.1)',alert:'rgba(255,103,32,0.1)',software:'rgba(56,189,248,0.12)'};
+const TYPE_TC={sop:'#00BFB2',manual:'#60a5fa',policy:'#f59e0b',lesson:'#4ade80',alert:'#FF6720',software:'#38bdf8'};
+const TYPE_LABELS={sop:'SOP',manual:'Manual',policy:'Policy',lesson:'Lesson Learned',alert:'Alert',software:'Software'};
+const TYPE_SHORT={sop:'SOP',manual:'MNL',policy:'POL',lesson:'LSN',alert:'ALT',software:'ZIP'};
+const SCOPES={
+  sop:'Applies to all field personnel, supervisors, and engineers involved in the specified operation. Must be reviewed before commencing any related activity.',
+  manual:'For use by qualified equipment operators, engineers, and maintenance personnel. Serves as the primary technical reference for this system.',
+  policy:'Applicable to all TAQA employees, contractors, and third-party personnel conducting activities within the scope of this segment.',
+  lesson:'Shared across relevant segments for awareness and preventive action. All supervisors must review and brief their teams.',
+  alert:'Requires immediate acknowledgment from all segment supervisors. Applicable to ongoing and planned operations until further notice.',
+  software:'For authorised users with a valid TAQA software licence. Contact IT for installation support and licence queries.'
+};
+const AUTHORS=['Mohammed Al-Ghamdi','Ahmed Al-Zahrani','Saud Al-Harbi','Faisal Al-Otaibi','Khalid Al-Shehri','Omar Al-Dosari'];
+const VERSIONS=['Rev 1.0','Rev 2.1','v3.0','v4.2','Rev 5.0','v2.3'];
+const DATES=['Jan 2026','Feb 2026','Mar 2026','Apr 2026','May 2026'];
+const SIZES=['1.2 MB','845 KB','2.1 MB','3.4 MB','560 KB','1.8 MB','920 KB'];
+function rnd(a){return a[Math.abs(hashStr(docTitle||'x'))%a.length];}
+function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=((h<<5)-h)+s.charCodeAt(i);return h;}
+
+function getDocSummary(title, type) {
+  const t = (title||'').toLowerCase();
+  if(type==='lesson') return 'Documents the sequence of events, root cause analysis, contributing factors, and the corrective and preventive actions implemented following this incident or observation.';
+  if(t.includes('pre-job')||t.includes('safety meeting')||t.includes('safety check')) return 'Defines the mandatory pre-operation checks, hazard assessments, toolbox talk requirements, and authorization sign-offs before commencing field activities.';
+  if(t.includes('emergency')||t.includes('shutdown')||t.includes('response')) return 'Outlines the immediate response sequence, personnel responsibilities, notification chain, and recovery steps to be followed during emergency scenarios.';
+  if(t.includes('rig-up')||t.includes('rig-down')) return 'Provides step-by-step instructions for equipment rig-up and rig-down, including connection verification, torque specifications, and pre-operation function checks.';
+  if(t.includes('pressure test')||t.includes('testing')||t.includes('certification')) return 'Specifies test criteria, acceptance limits, equipment setup, test sequences, and documentation requirements for pressure or functional testing activities.';
+  if(t.includes('bop')||t.includes('well control')||t.includes('kill')||t.includes('shut-in')) return 'Covers well control response actions, BOP operating procedures, kill weight calculations, and responsibilities for supervisors and drilling crew during well control events.';
+  if(t.includes('h2s')||t.includes('hydrogen sulfide')) return 'Details H2S detection thresholds, alarm response levels, PPE requirements, evacuation protocols, and personnel accountability procedures in H2S-risk environments.';
+  if(t.includes('inspection')||t.includes('ndt')||t.includes('mpi')) return 'Defines inspection methods, equipment acceptance criteria, rejection standards, calibration requirements, and documentation procedures for inspection activities.';
+  if(t.includes('maintenance')||t.includes('overhaul')) return 'Describes preventive and corrective maintenance tasks, intervals, torque values, replacement criteria, and return-to-service verification steps.';
+  if(type==='sop') return 'Provides a step-by-step operational procedure covering prerequisites, required equipment and personnel, execution sequence, quality checkpoints, and completion criteria.';
+  if(type==='manual') return 'Serves as the primary technical reference for equipment operation, system design, maintenance requirements, and troubleshooting guidance for field and engineering personnel.';
+  if(type==='policy') return 'Defines organizational requirements, roles and responsibilities, minimum standards, and compliance obligations applicable to all personnel conducting these activities.';
+  return 'Contains operational guidance, technical specifications, and procedural requirements for field personnel and supervisors involved in these activities.';
+}
+
+const params = new URLSearchParams(location.search);
+const segId = params.get('seg') || 'drilling';
+const docType = params.get('type') || 'sop';
+const docTitle = decodeURIComponent(params.get('title') || 'Document');
+const segInfo = SEGS[segId] || {name:'TAQA',tag:'Segment'};
+const typeColor = TYPE_COLORS[docType] || TYPE_COLORS.sop;
+const typeText = TYPE_TC[docType] || TYPE_TC.sop;
+const typeLabel = TYPE_LABELS[docType] || docType;
+const typeShort = TYPE_SHORT[docType] || 'DOC';
+
+document.title = docTitle + ' — TAQA Knowledge Hub';
+
+// Breadcrumb
+document.getElementById('bc-seg').textContent = segInfo.name;
+document.getElementById('bc-seg').href = 'segment.html?id=' + segId;
+document.getElementById('bc-title').textContent = docTitle.length > 50 ? docTitle.slice(0,50)+'…' : docTitle;
+
+// Back button
+document.getElementById('back-btn').href = 'segment.html?id=' + segId + '&tab=' + docType + 's';
+
+// Type icon
+const iconEl = document.getElementById('doc-icon');
+iconEl.style.background = typeColor;
+iconEl.style.color = typeText;
+iconEl.style.border = '1px solid ' + typeText + '33';
+iconEl.textContent = typeShort;
+
+// Title
+document.getElementById('doc-title').textContent = docTitle;
+
+// Badges
+document.getElementById('doc-badges').innerHTML =
+  '<span class="badge ' + docType + '">' + typeLabel + '</span>' +
+  '<span class="badge seg">' + segInfo.name + '</span>' +
+  '<span class="badge seg">' + segInfo.tag + '</span>';
+
+// Meta grid
+const vi = Math.abs(hashStr(docTitle)) % VERSIONS.length;
+const di = Math.abs(hashStr(docTitle + '1')) % DATES.length;
+const ai = Math.abs(hashStr(docTitle + '2')) % AUTHORS.length;
+const si = Math.abs(hashStr(docTitle + '3')) % SIZES.length;
+document.getElementById('meta-grid').innerHTML =
+  '<div class="meta-cell"><div class="meta-label">Type</div><div class="meta-val">' + typeLabel + '</div></div>' +
+  '<div class="meta-cell"><div class="meta-label">Revision</div><div class="meta-val">' + VERSIONS[vi] + '</div></div>' +
+  '<div class="meta-cell"><div class="meta-label">Issued</div><div class="meta-val">' + DATES[di] + '</div></div>' +
+  '<div class="meta-cell"><div class="meta-label">Author</div><div class="meta-val">' + AUTHORS[ai] + '</div></div>';
+
+// Summary & Scope
+document.getElementById('doc-summary').textContent = getDocSummary(docTitle, docType);
+document.getElementById('doc-scope').textContent = SCOPES[docType] || SCOPES.sop;
+
+// PDF section
+document.getElementById('pdf-doc-name').textContent = docTitle;
+document.getElementById('pdf-toolbar-label').textContent = docTitle + '.pdf';
+
+// QR section
+const docUrl = location.origin + location.pathname.replace(/viewer\.html.*/,'') + 'viewer.html?seg=' + segId + '&type=' + docType + '&title=' + encodeURIComponent(docTitle);
+document.getElementById('qr-inline-img').src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(docUrl);
+document.getElementById('qr-inline-url').textContent = docUrl;
+
+// Bookmark state
+function updateBmBtn() {
+  const btn = document.getElementById('bm-doc-btn');
+  const isBm = window.TAQA_Bookmarks && window.TAQA_Bookmarks.has(docTitle, segId);
+  btn.textContent = (isBm ? '★' : '☆') + ' Bookmark';
+  btn.classList.toggle('on', !!isBm);
+}
+function toggleViewerBm() {
+  if (!window.TAQA_Bookmarks) return;
+  const added = window.TAQA_Bookmarks.toggle({title:docTitle, type:docType, segId, segName:segInfo.name});
+  updateBmBtn();
+  if (window.updateBmBadge) window.updateBmBadge();
+  if (window.showToast) window.showToast(added ? 'Bookmarked!' : 'Bookmark removed', added ? 'success' : 'info');
+}
+setTimeout(updateBmBtn, 300);
+
+function shareDoc() {
+  navigator.clipboard.writeText(docUrl).then(() => { if(window.showToast) window.showToast('Link copied!'); });
+}
+function requestAccess() {
+  if(window.showToast) window.showToast('Download request sent to document administrator.', 'info');
+}
+
+// Dark mode
+const MOON='M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
+const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
+function toggleDark(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme',next);}
+(function(){const s=localStorage.getItem('taqa-theme');if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
+
+// Page exit transition
+document.addEventListener('click',function(e){
+  const a=e.target.closest('a[href]');
+  if(!a)return;
+  const h=a.getAttribute('href');
+  if(!h||h.startsWith('#')||h.startsWith('http')||h.startsWith('mailto'))return;
+  if(a.target==='_blank')return;
+  e.preventDefault();
+  document.body.classList.add('page-exit');
+  setTimeout(()=>window.location.href=h,270);
+});
+</script>
+<script src="shared.js"></script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:linear-gradient(90deg,#00686A,#00BFB2);animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
+</body>
+</html>

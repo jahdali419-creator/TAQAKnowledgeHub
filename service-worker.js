@@ -1,14 +1,17 @@
-const CACHE = 'taqa-hub-v22';
+const CACHE = 'taqa-hub-v23';
 const ASSETS = [
   '/TAQAKnowledgeHub/',
   '/TAQAKnowledgeHub/index.html',
   '/TAQAKnowledgeHub/shared.js',
+  '/TAQAKnowledgeHub/fixes.js',
   '/TAQAKnowledgeHub/search-index.js',
   '/TAQAKnowledgeHub/ai-search.html',
   '/TAQAKnowledgeHub/glossary.html',
   '/TAQAKnowledgeHub/segment.html',
   '/TAQAKnowledgeHub/upload.html',
   '/TAQAKnowledgeHub/support-ticket.html',
+  '/TAQAKnowledgeHub/viewer.html',
+  '/TAQAKnowledgeHub/analytics.html',
   '/TAQAKnowledgeHub/taqa-hero.webp',
   '/TAQAKnowledgeHub/taqa-hero-2.jpg',
   '/TAQAKnowledgeHub/taqa-hero-3.jpeg',

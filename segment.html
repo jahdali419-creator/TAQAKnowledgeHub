@@ -233,6 +233,21 @@ html[data-theme="dark"] .pg-btn:hover:not(:disabled):not(.pg-dots){border-color:
 .doc-action-btn:hover{background:var(--glass-2);border-color:var(--glass-border-hover);color:var(--primary-light);}
 .doc-action-btn.primary-action{background:rgba(0,104,106,0.08);border-color:rgba(0,104,106,0.2);color:var(--primary);font-weight:600;}
 .doc-action-btn.primary-action:hover{background:rgba(0,104,106,0.16);}
+.bm-btn{font-size:15px;min-width:36px;padding:8px 10px;}
+.bm-btn.bm-on{color:#f59e0b!important;border-color:rgba(245,158,11,0.3)!important;background:rgba(245,158,11,0.08)!important;}
+/* ── QR Modal ── */
+.qr-overlay{position:fixed;inset:0;z-index:900;background:rgba(10,20,32,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity 0.25s;display:flex;align-items:center;justify-content:center;}
+.qr-overlay.open{opacity:1;pointer-events:auto;}
+.qr-box{width:min(300px,88vw);background:rgba(255,255,255,0.98);border-radius:20px;padding:24px 20px 20px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.22);transform:scale(0.9);transition:transform 0.28s cubic-bezier(.32,1.12,.64,1);}
+.qr-overlay.open .qr-box{transform:scale(1);}
+.qr-doc-title{font-family:'Urbanist',sans-serif;font-size:13px;font-weight:700;color:#1a2235;margin-bottom:14px;line-height:1.4;max-height:3.2em;overflow:hidden;}
+.qr-img{width:170px;height:170px;border-radius:10px;margin:0 auto 14px;display:block;border:3px solid #f4f5f7;}
+.qr-url-row{display:flex;gap:7px;margin-bottom:8px;}
+.qr-url-in{flex:1;padding:7px 10px;border:1px solid rgba(0,0,0,0.1);border-radius:7px;font-size:10.5px;color:#64748b;background:#f8fafc;font-family:'Inter',sans-serif;min-width:0;}
+.qr-copy{padding:7px 12px;border-radius:7px;border:none;background:#00686A;color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.qr-close{display:block;width:100%;padding:9px;border-radius:9px;border:1px solid rgba(0,0,0,0.1);background:transparent;color:#64748b;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;}
+html[data-theme="dark"] .qr-box{background:rgba(20,32,50,0.99);}
+html[data-theme="dark"] .qr-doc-title{color:#dde4ef;}
 
 /* ── Alert Cards ── */
 .alert-card{
@@ -1078,6 +1093,8 @@ function buildDocCard(title, type, idx) {
   const newBadge = idx === 0 ? '<span class="doc-new-badge">New</span>' : idx === 1 ? '<span class="doc-new-badge updated">Updated</span>' : '';
   const _ti={sop:'SOP',manual:'MNL',policy:'POL',lesson:'LSN',alert:'ALT'};
   const icon=`<div class="doc-type-icon ${type}">${_ti[type]||type.slice(0,3).toUpperCase()}</div>`;
+  const isBm = window.TAQA_Bookmarks ? window.TAQA_Bookmarks.has(title, segId) : false;
+  const viewerHref = `viewer.html?seg=${segId}&type=${safeType}&title=${encodeURIComponent(title)}`;
   return `
   <div class="doc-card">
     ${icon}
@@ -1092,9 +1109,10 @@ function buildDocCard(title, type, idx) {
       </div>
     </div>
     <div class="doc-actions">
-      <button class="doc-action-btn" onclick="openDocModal('${safeTitle}','${safeType}');saveRecent('${safeTitle}','${safeType}')" title="Preview">View</button>
-      <button class="doc-action-btn primary-action" title="Download">Download</button>
-      <button class="doc-action-btn" onclick="copyDocLink(this,'${safeTitle}')" title="Copy Link">Copy Link</button>
+      <a class="doc-action-btn primary-action" href="${viewerHref}" onclick="saveRecent('${safeTitle}','${safeType}');if(window.TAQA_Track)window.TAQA_Track('open','${safeTitle}',{type:'${safeType}',seg:'${segId}'})">View</a>
+      <button class="doc-action-btn bm-btn${isBm?' bm-on':''}" data-title="${safeTitle}" data-type="${safeType}" onclick="toggleDocBm(this)" title="${isBm?'Remove bookmark':'Bookmark'}">${isBm?'★':'☆'}</button>
+      <button class="doc-action-btn" onclick="showDocQR('${safeTitle}','${safeType}')" title="QR Code">QR</button>
+      <button class="doc-action-btn" onclick="copyDocLink(this,'${safeTitle}')" title="Copy link">Share</button>
     </div>
   </div>`;
 }
@@ -1536,10 +1554,52 @@ document.addEventListener('keydown', e => {
     if (panel) { const inp = panel.querySelector('input'); if (inp) inp.focus(); }
   }
 });
+
+// ── Bookmark toggle ──
+function toggleDocBm(btn) {
+  if (!window.TAQA_Bookmarks) return;
+  const title = btn.dataset.title;
+  const type = btn.dataset.type;
+  const added = window.TAQA_Bookmarks.toggle({title, type, segId, segName: seg.name});
+  btn.textContent = added ? '★' : '☆';
+  btn.classList.toggle('bm-on', added);
+  if (window.updateBmBadge) window.updateBmBadge();
+  if (window.showToast) window.showToast(added ? 'Bookmarked!' : 'Bookmark removed', added ? 'success' : 'info');
+}
+
+// ── QR Code modal ──
+function showDocQR(title, type) {
+  const base = location.origin + location.pathname.replace(/[^/]*$/, '');
+  const url = base + 'viewer.html?seg=' + segId + '&type=' + type + '&title=' + encodeURIComponent(title);
+  document.getElementById('qr-doc-title').textContent = title;
+  const inp = document.getElementById('qr-url-in');
+  if (inp) inp.value = url;
+  const img = document.getElementById('qr-img');
+  if (img) img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(url);
+  document.getElementById('qr-overlay').classList.add('open');
+}
+function closeQR() { document.getElementById('qr-overlay').classList.remove('open'); }
+function copyQRUrl() {
+  const v = document.getElementById('qr-url-in').value;
+  navigator.clipboard.writeText(v).then(() => { if(window.showToast) window.showToast('Link copied!'); });
+}
 </script>
 <script src="shared.js"></script>
 <script src="fixes.js"></script>
 <script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:linear-gradient(90deg,#00686A,#00BFB2);animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
+
+<!-- ── QR Modal ── -->
+<div class="qr-overlay" id="qr-overlay" onclick="if(event.target===this)closeQR()">
+  <div class="qr-box">
+    <div class="qr-doc-title" id="qr-doc-title"></div>
+    <img class="qr-img" id="qr-img" alt="QR Code" />
+    <div class="qr-url-row">
+      <input class="qr-url-in" id="qr-url-in" readonly />
+      <button class="qr-copy" onclick="copyQRUrl()">Copy</button>
+    </div>
+    <button class="qr-close" onclick="closeQR()">Close</button>
+  </div>
+</div>
 </body>
 </html>

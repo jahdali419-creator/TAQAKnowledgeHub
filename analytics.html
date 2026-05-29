@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analytics — TAQA Knowledge Hub</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00686A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The One">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#00686A;--primary-light:#00BFB2;
+  --dark:#f4f5f7;--glass:rgba(255,255,255,0.88);--glass-2:rgba(255,255,255,0.98);
+  --glass-border:rgba(0,0,0,0.08);--text:#1a2235;--text-muted:#64748b;
+  --gradient:linear-gradient(135deg,#00686A,#00BFB2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+@keyframes pageFadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;animation:pageFadeIn 0.4s cubic-bezier(.4,0,.2,1);}
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--glass-border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
+.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.nav-brand-icon{width:40px;height:40px;border-radius:11px;background:var(--gradient);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;overflow:hidden;box-shadow:0 4px 18px rgba(0,104,106,0.38);}
+.nav-brand-icon::before{content:'';position:absolute;top:-10px;left:-6px;width:32px;height:32px;background:rgba(255,255,255,0.13);border-radius:50%;}
+.nav-brand-text{font-family:'Urbanist',sans-serif;font-size:15px;}
+.nav-brand-name{font-weight:800;color:var(--primary);}
+.nav-brand-hub{font-weight:500;color:#64748b;}
+.nav-subtitle{font-size:11px;color:var(--text-muted);display:block;margin-top:-1px;}
+.nav-right{display:flex;gap:10px;align-items:center;}
+.btn{padding:8px 18px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;transition:all 0.25s;border:none;font-family:'Inter',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:7px;}
+.btn-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--text-muted);}
+.btn-ghost:hover{border-color:rgba(0,104,106,0.3);color:var(--primary);}
+.btn-primary{background:var(--gradient);color:#fff;}
+.dark-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:all 0.2s;padding:0;flex-shrink:0;}
+.dark-toggle:hover{border-color:var(--primary);color:var(--primary);background:rgba(0,104,106,0.06);}
+
+.page-wrapper{padding-top:68px;min-height:100vh;display:flex;flex-direction:column;}
+.page-inner{max-width:1100px;margin:0 auto;width:100%;padding:32px 48px 80px;}
+
+.page-header{margin-bottom:32px;}
+.page-header h1{font-family:'Urbanist',sans-serif;font-size:28px;font-weight:800;color:var(--text);margin-bottom:6px;}
+.page-header p{font-size:14px;color:var(--text-muted);}
+
+/* Overview cards */
+.overview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px;}
+.ov-card{background:var(--glass-2);border:1px solid var(--glass-border);border-radius:16px;padding:22px 24px;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.ov-card-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px;}
+.ov-card-num{font-family:'Urbanist',sans-serif;font-size:32px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px;}
+.ov-card-label{font-size:12.5px;color:var(--text-muted);font-weight:500;}
+
+/* Sections */
+.an-section{background:var(--glass-2);border:1px solid var(--glass-border);border-radius:16px;padding:22px 24px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.an-section-title{font-family:'Urbanist',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.an-section-title span{font-size:16px;}
+
+/* Bar chart rows */
+.bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.bar-row:last-child{margin-bottom:0;}
+.bar-label{font-size:12.5px;color:var(--text);width:200px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;}
+.bar-track{flex:1;height:8px;background:rgba(0,0,0,0.06);border-radius:4px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:4px;background:var(--gradient);transition:width 0.6s cubic-bezier(.4,0,.2,1);}
+.bar-count{font-size:11.5px;color:var(--text-muted);width:28px;text-align:right;flex-shrink:0;font-weight:600;}
+
+/* Recent activity */
+.activity-list{display:flex;flex-direction:column;gap:8px;}
+.activity-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(0,104,106,0.03);border-radius:10px;border:1px solid rgba(0,0,0,0.05);}
+.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.activity-dot.view{background:#00BFB2;}
+.activity-dot.open{background:#60a5fa;}
+.activity-dot.search{background:#f59e0b;}
+.activity-text{flex:1;font-size:12.5px;color:var(--text);}
+.activity-time{font-size:11px;color:var(--text-muted);flex-shrink:0;}
+
+/* Empty */
+.an-empty{text-align:center;padding:32px;color:var(--text-muted);font-size:13px;}
+
+/* Clear btn */
+.clear-data-btn{padding:7px 16px;border-radius:8px;border:1px solid rgba(239,68,68,0.2);background:rgba(239,68,68,0.05);color:#ef4444;font-size:12px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;margin-top:16px;}
+.clear-data-btn:hover{background:rgba(239,68,68,0.1);}
+
+/* Dark mode */
+html[data-theme="dark"]{--dark:#0e1824;--glass:rgba(25,38,58,0.88);--glass-border:rgba(255,255,255,0.07);--text:#dde4ef;--text-muted:#7e94ab;}
+html[data-theme="dark"] body{background:#0e1824;}
+html[data-theme="dark"] nav{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.06);}
+html[data-theme="dark"] .nav-brand-name{color:#dde4ef;}html[data-theme="dark"] .nav-brand-hub{color:#7e94ab;}
+html[data-theme="dark"] .dark-toggle{border-color:rgba(255,255,255,0.1);color:#7e94ab;}
+html[data-theme="dark"] .ov-card,.an-section{background:#19263a;border-color:#243044;}
+html[data-theme="dark"] .activity-item{background:rgba(0,191,178,0.04);border-color:rgba(255,255,255,0.05);}
+html[data-theme="dark"] .bar-track{background:rgba(255,255,255,0.06);}
+
+@keyframes pageFadeOut{from{opacity:1;}to{opacity:0;transform:translateY(-5px);}}
+body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
+
+@media(max-width:768px){
+  nav{padding:0 20px;}
+  .page-inner{padding:20px 20px 60px;}
+  .overview-grid{grid-template-columns:1fr;}
+  .bar-label{width:140px;}
+}
+@media(max-width:480px){
+  .nav-right .btn{display:none!important;}
+  .bar-label{width:100px;}
+}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<nav>
+  <a href="index.html" class="nav-brand">
+    <div class="nav-brand-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </div>
+    <span class="nav-brand-text"><span class="nav-brand-name">TAQA</span> <span class="nav-brand-hub">Knowledge Hub</span><span class="nav-subtitle"><em style="color:#00686A;font-style:italic;">The One</em> Platform</span></span>
+  </a>
+  <div class="nav-right">
+    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode">
+      <svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>
+    </button>
+    <a href="ai-search.html" class="btn btn-ghost">AI Search</a>
+    <a href="upload.html" class="btn btn-primary">+ Upload</a>
+  </div>
+</nav>
+
+<div class="page-inner">
+  <div class="page-header">
+    <h1>📊 Usage Analytics</h1>
+    <p>Local usage data stored on this device — page views, document opens, and searches.</p>
+  </div>
+
+  <div class="overview-grid">
+    <div class="ov-card">
+      <div class="ov-card-icon" style="background:rgba(0,104,106,0.1);">📄</div>
+      <div class="ov-card-num" id="total-views">0</div>
+      <div class="ov-card-label">Total Page Views</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-card-icon" style="background:rgba(59,130,246,0.1);">📂</div>
+      <div class="ov-card-num" id="total-opens">0</div>
+      <div class="ov-card-label">Documents Opened</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-card-icon" style="background:rgba(245,158,11,0.1);">🔍</div>
+      <div class="ov-card-num" id="total-searches">0</div>
+      <div class="ov-card-label">Searches Made</div>
+    </div>
+  </div>
+
+  <div class="an-section">
+    <div class="an-section-title"><span>📄</span> Top Pages Visited</div>
+    <div id="pages-list"><div class="an-empty">No page view data yet.</div></div>
+  </div>
+
+  <div class="an-section">
+    <div class="an-section-title"><span>📂</span> Most Opened Documents</div>
+    <div id="docs-list"><div class="an-empty">No document opens recorded yet.</div></div>
+  </div>
+
+  <div class="an-section">
+    <div class="an-section-title"><span>🔍</span> Top Search Queries</div>
+    <div id="search-list"><div class="an-empty">No searches recorded yet.</div></div>
+  </div>
+
+  <div class="an-section">
+    <div class="an-section-title"><span>🕐</span> Recent Activity</div>
+    <div id="activity-list"><div class="an-empty">No recent activity.</div></div>
+  </div>
+
+  <button class="clear-data-btn" onclick="clearAnalytics()">🗑 Clear all analytics data</button>
+</div>
+
+<footer style="height:4px;position:relative;margin-top:auto;"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#00686A,#00BFB2);"></div></footer>
+</div>
+
+<script>
+const PAGE_LABELS = {
+  'index.html':'Home', 'ai-search.html':'AI Search', 'glossary.html':'Field Glossary',
+  'upload.html':'Upload', 'support-ticket.html':'Ask Expert', 'segment.html':'Segment',
+  'viewer.html':'Document Viewer', 'analytics.html':'Analytics', 'dashboard.html':'Dashboard'
+};
+
+function getEvents() {
+  try { return JSON.parse(localStorage.getItem('taqa-analytics') || '[]'); } catch(e) { return []; }
+}
+
+function buildBars(entries, maxShown) {
+  if (!entries.length) return '<div class="an-empty">No data yet.</div>';
+  const maxCount = entries[0][1];
+  return entries.slice(0, maxShown).map(([label, count]) => {
+    const pct = maxCount > 0 ? Math.round((count / maxCount) * 100) : 0;
+    return `<div class="bar-row">
+      <div class="bar-label" title="${label}">${label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+      <div class="bar-count">${count}</div>
+    </div>`;
+  }).join('');
+}
+
+function timeSince(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
+}
+
+function renderAnalytics() {
+  const events = getEvents();
+  const views = {}, opens = {}, searches = {};
+
+  events.forEach(ev => {
+    if (ev.e === 'view') views[ev.k] = (views[ev.k]||0) + 1;
+    else if (ev.e === 'open') opens[ev.k] = (opens[ev.k]||0) + 1;
+    else if (ev.e === 'search') searches[ev.k] = (searches[ev.k]||0) + 1;
+  });
+
+  const sortDesc = obj => Object.entries(obj).sort((a,b) => b[1]-a[1]);
+
+  const viewEntries = sortDesc(views);
+  const openEntries = sortDesc(opens);
+  const searchEntries = sortDesc(searches);
+
+  document.getElementById('total-views').textContent = Object.values(views).reduce((s,n)=>s+n,0);
+  document.getElementById('total-opens').textContent = Object.values(opens).reduce((s,n)=>s+n,0);
+  document.getElementById('total-searches').textContent = Object.values(searches).reduce((s,n)=>s+n,0);
+
+  // Pages: map filename to readable name
+  const pageEntries = viewEntries.map(([k,v]) => [PAGE_LABELS[k] || k, v]);
+  document.getElementById('pages-list').innerHTML = buildBars(pageEntries, 8);
+  document.getElementById('docs-list').innerHTML = buildBars(openEntries, 8);
+  document.getElementById('search-list').innerHTML = buildBars(searchEntries, 8);
+
+  // Recent activity (last 15)
+  const recent = [...events].reverse().slice(0, 15);
+  if (!recent.length) {
+    document.getElementById('activity-list').innerHTML = '<div class="an-empty">No recent activity.</div>';
+  } else {
+    const typeLabel = {view:'Page visit', open:'Document opened', search:'Search'};
+    const dotClass = {view:'view', open:'open', search:'search'};
+    document.getElementById('activity-list').innerHTML = '<div class="activity-list">' +
+      recent.map(ev => `<div class="activity-item">
+        <div class="activity-dot ${dotClass[ev.e]||'view'}"></div>
+        <div class="activity-text"><strong>${typeLabel[ev.e]||ev.e}:</strong> ${ev.k}</div>
+        <div class="activity-time">${timeSince(ev.t)}</div>
+      </div>`).join('') + '</div>';
+  }
+
+  // Animate bars
+  setTimeout(() => {
+    document.querySelectorAll('.bar-fill').forEach(b => {
+      const w = b.style.width; b.style.width = '0'; setTimeout(() => { b.style.width = w; }, 50);
+    });
+  }, 50);
+}
+
+function clearAnalytics() {
+  if (!confirm('Clear all analytics data? This cannot be undone.')) return;
+  try { localStorage.removeItem('taqa-analytics'); } catch(e) {}
+  renderAnalytics();
+  if (window.showToast) window.showToast('Analytics data cleared', 'info');
+}
+
+renderAnalytics();
+
+const MOON='M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
+const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
+function toggleDark(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme',next);}
+(function(){const s=localStorage.getItem('taqa-theme');if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
+document.addEventListener('click',function(e){const a=e.target.closest('a[href]');if(!a)return;const h=a.getAttribute('href');if(!h||h.startsWith('#')||h.startsWith('http')||h.startsWith('mailto'))return;if(a.target==='_blank')return;e.preventDefault();document.body.classList.add('page-exit');setTimeout(()=>window.location.href=h,270);});
+</script>
+<script src="shared.js"></script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:linear-gradient(90deg,#00686A,#00BFB2);animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
+</body>
+</html>

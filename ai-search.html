@@ -833,7 +833,19 @@ document.addEventListener('click',function(e){
     if(!panel||!window.TAQA_SEARCH_INDEX)return;
     if(!q||q.length<2){panel.classList.remove('open');return;}
     var ql=q.toLowerCase();
-    var all=TAQA_SEARCH_INDEX.filter(function(d){return d.t.toLowerCase().indexOf(ql)>-1;});
+    // Track search
+    if(window.TAQA_Track)window.TAQA_Track('search',q);
+    // Scored: title exact(10) > title-start(6) > title-contains(4) > segment(2) > type(1)
+    var scored=TAQA_SEARCH_INDEX.map(function(d){
+      var sc=0,tl=d.t.toLowerCase(),sl=d.sn.toLowerCase(),tp=d.tp.toLowerCase();
+      if(tl===ql)sc+=10;
+      else if(tl.indexOf(ql)===0)sc+=6;
+      else if(tl.indexOf(ql)>-1)sc+=4;
+      if(sl.indexOf(ql)>-1)sc+=2;
+      if(tp.indexOf(ql)>-1)sc+=1;
+      return{d:d,sc:sc};
+    }).filter(function(x){return x.sc>0;}).sort(function(a,b){return b.sc-a.sc;});
+    var all=scored.map(function(x){return x.d;});
     var shown=all.slice(0,8);
     if(!shown.length){panel.classList.remove('open');return;}
     var html=

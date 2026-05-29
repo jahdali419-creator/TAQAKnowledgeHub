@@ -429,3 +429,139 @@ window.showToast=function(msg,type){
     });
   }
 })();
+
+// ── Analytics ──
+(function(){
+  var KEY='taqa-analytics';
+  window.TAQA_Track=function(event,key,extra){
+    try{
+      var d=JSON.parse(localStorage.getItem(KEY)||'[]');
+      d.push({e:event,k:key,x:extra||null,t:Date.now()});
+      if(d.length>600)d=d.slice(-600);
+      localStorage.setItem(KEY,JSON.stringify(d));
+    }catch(e){}
+  };
+  window.TAQA_Analytics={
+    get:function(){try{return JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){return[];}},
+    clear:function(){try{localStorage.removeItem(KEY);}catch(e){}}
+  };
+  var p=location.pathname.split('/').pop()||'index.html';
+  window.TAQA_Track('view',p);
+})();
+
+// ── Bookmarks ──
+(function(){
+  var KEY='taqa-bookmarks';
+  function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){return[];}}
+  function save(a){try{localStorage.setItem(KEY,JSON.stringify(a));}catch(e){}}
+  window.TAQA_Bookmarks={
+    add:function(item){
+      var a=load().filter(function(i){return!(i.title===item.title&&i.segId===item.segId);});
+      item.ts=Date.now();a.unshift(item);save(a.slice(0,50));
+    },
+    remove:function(title,segId){
+      save(load().filter(function(i){return!(i.title===title&&i.segId===segId);}));
+    },
+    toggle:function(item){
+      if(this.has(item.title,item.segId)){this.remove(item.title,item.segId);return false;}
+      this.add(item);return true;
+    },
+    has:function(title,segId){
+      return load().some(function(i){return i.title===title&&i.segId===segId;});
+    },
+    getAll:function(){return load();}
+  };
+  var s=document.createElement('style');
+  s.textContent=
+    '.bm-fab{position:fixed;bottom:88px;right:28px;z-index:499;width:44px;height:44px;border-radius:50%;'+
+    'background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);'+
+    'border:1px solid rgba(0,0,0,0.09);box-shadow:0 4px 20px rgba(0,0,0,0.1);'+
+    'cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;line-height:1;transition:transform 0.2s,box-shadow 0.2s;padding:0;}'+
+    '.bm-fab:hover{transform:scale(1.1);box-shadow:0 8px 28px rgba(0,104,106,0.28);}'+
+    '.bm-cnt{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 3px;'+
+    'border-radius:50px;background:#00686A;color:#fff;font-size:9px;font-weight:700;'+
+    'display:none;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;}'+
+    '.bm-panel{position:fixed;bottom:144px;right:28px;z-index:498;width:min(320px,calc(100vw - 40px));max-height:420px;'+
+    'background:rgba(255,255,255,0.99);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);'+
+    'border:1px solid rgba(0,0,0,0.08);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,0.16);'+
+    'display:none;flex-direction:column;overflow:hidden;'+
+    'animation:bmIn 0.22s cubic-bezier(.34,1.56,.64,1);}'+
+    '@keyframes bmIn{from{opacity:0;transform:scale(0.9) translateY(10px);}to{opacity:1;transform:none;}}'+
+    '.bm-panel.open{display:flex;}'+
+    '.bm-ph{padding:12px 14px 10px;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}'+
+    '.bm-pt{font-family:"Urbanist",sans-serif;font-size:13px;font-weight:700;color:#1a2235;}'+
+    '.bm-clr{font-size:11px;color:#94a3b8;cursor:pointer;background:none;border:none;padding:0;font-family:"Inter",sans-serif;}'+
+    '.bm-clr:hover{color:#ef4444;}'+
+    '.bm-list{flex:1;overflow-y:auto;padding:4px 0;}'+
+    '.bm-item{display:flex;align-items:center;gap:10px;padding:9px 14px;text-decoration:none;transition:background 0.15s;}'+
+    '.bm-item:hover{background:rgba(0,104,106,0.04);}'+
+    '.bm-ico{width:30px;height:30px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-family:"Urbanist",sans-serif;}'+
+    '.bm-inf{flex:1;min-width:0;}'+
+    '.bm-t{font-size:12px;font-weight:600;color:#1a2235;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'+
+    '.bm-m{font-size:10.5px;color:#64748b;margin-top:1px;}'+
+    '.bm-x{background:none;border:none;color:#cbd5e1;cursor:pointer;font-size:16px;padding:2px;flex-shrink:0;line-height:1;}'+
+    '.bm-x:hover{color:#ef4444;}'+
+    '.bm-empty{text-align:center;padding:28px 16px;color:#94a3b8;font-size:12.5px;line-height:1.6;}'+
+    'html[data-theme="dark"] .bm-fab{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.08);}'+
+    'html[data-theme="dark"] .bm-panel{background:rgba(20,32,50,0.99);border-color:rgba(255,255,255,0.07);}'+
+    'html[data-theme="dark"] .bm-pt{color:#dde4ef;}'+
+    'html[data-theme="dark"] .bm-ph{border-color:rgba(255,255,255,0.06);}'+
+    'html[data-theme="dark"] .bm-t{color:#dde4ef;}'+
+    'html[data-theme="dark"] .bm-item:hover{background:rgba(0,191,178,0.06);}';
+  document.head.appendChild(s);
+  var fab=document.createElement('button');
+  fab.className='bm-fab';fab.title='Bookmarks';fab.setAttribute('aria-label','Bookmarks');
+  fab.innerHTML='🔖<span class="bm-cnt" id="bm-cnt"></span>';
+  document.body.appendChild(fab);
+  var panel=document.createElement('div');panel.className='bm-panel';panel.id='bm-panel';
+  document.body.appendChild(panel);
+  var TC={sop:'rgba(0,104,106,0.12)',manual:'rgba(59,130,246,0.1)',policy:'rgba(245,158,11,0.1)',lesson:'rgba(34,197,94,0.1)',alert:'rgba(255,103,32,0.1)',software:'rgba(56,189,248,0.12)'};
+  var TT={sop:'#00BFB2',manual:'#60a5fa',policy:'#f59e0b',lesson:'#4ade80',alert:'#FF6720',software:'#38bdf8'};
+  var TS={sop:'SOP',manual:'MNL',policy:'POL',lesson:'LSN',alert:'ALT',software:'ZIP'};
+  function updateBmBadge(){
+    var n=window.TAQA_Bookmarks.getAll().length;
+    var b=document.getElementById('bm-cnt');
+    if(b){b.textContent=n;b.style.display=n>0?'flex':'none';}
+  }
+  function renderBmPanel(){
+    var items=window.TAQA_Bookmarks.getAll();
+    updateBmBadge();
+    if(!items.length){
+      panel.innerHTML='<div class="bm-ph"><span class="bm-pt">🔖 Bookmarks</span></div>'+
+        '<div class="bm-empty">No bookmarks yet.<br>Tap ★ on any document to save it.</div>';
+      return;
+    }
+    panel.innerHTML='<div class="bm-ph">'+
+      '<span class="bm-pt">🔖 Bookmarks ('+items.length+')</span>'+
+      '<button class="bm-clr" id="bm-clr">Clear all</button></div>'+
+      '<div class="bm-list">'+
+      items.map(function(it){
+        var bg=TC[it.type]||TC.sop,tc=TT[it.type]||TT.sop,lbl=TS[it.type]||'DOC';
+        return '<a class="bm-item" href="viewer.html?seg='+it.segId+'&type='+it.type+'&title='+encodeURIComponent(it.title)+'">'+
+          '<div class="bm-ico" style="background:'+bg+';color:'+tc+'">'+lbl+'</div>'+
+          '<div class="bm-inf"><div class="bm-t">'+it.title+'</div><div class="bm-m">'+it.segName+' · '+lbl+'</div></div>'+
+          '<button class="bm-x" data-t="'+it.title.replace(/"/g,'&quot;')+'" data-s="'+it.segId+'" title="Remove">×</button>'+
+        '</a>';
+      }).join('')+'</div>';
+    panel.addEventListener('click',function(e){
+      var x=e.target.closest('.bm-x');
+      if(x){e.preventDefault();e.stopPropagation();
+        window.TAQA_Bookmarks.remove(x.dataset.t,x.dataset.s);
+        renderBmPanel();
+        document.querySelectorAll('.bm-btn[data-title="'+x.dataset.t.replace(/"/g,'&quot;')+'"]').forEach(function(b){b.textContent='☆';b.classList.remove('bm-on');});
+      }
+      if(e.target.id==='bm-clr'){
+        try{localStorage.removeItem('taqa-bookmarks');}catch(err){}
+        renderBmPanel();
+        document.querySelectorAll('.bm-btn.bm-on').forEach(function(b){b.textContent='☆';b.classList.remove('bm-on');});
+      }
+    },{once:false});
+  }
+  window.updateBmBadge=updateBmBadge;
+  window.renderBmPanel=renderBmPanel;
+  fab.addEventListener('click',function(e){e.stopPropagation();renderBmPanel();panel.classList.toggle('open');});
+  document.addEventListener('click',function(e){
+    if(!panel.contains(e.target)&&!fab.contains(e.target))panel.classList.remove('open');
+  });
+  setTimeout(updateBmBadge,200);
+})();
