@@ -136,26 +136,28 @@
     injectStyles(`
       .ai-safety-banner {
         display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        background: rgba(245,158,11,0.08);
-        border: 1px solid rgba(245,158,11,0.25);
+        align-items: center;
+        gap: 6px;
+        background: rgba(245,158,11,0.07);
+        border: 1px solid rgba(245,158,11,0.22);
         border-left: 3px solid #f59e0b;
-        border-radius: 10px;
-        padding: 12px 16px;
-        margin: 0 auto 20px;
-        max-width: 860px;
-        font-size: 12.5px;
+        border-radius: 8px;
+        padding: 6px 12px;
+        margin: 0 auto 12px;
+        max-width: 700px;
+        font-size: 11px;
         color: #92670a;
-        line-height: 1.5;
+        line-height: 1.4;
+        position: relative;
+        z-index: 1;
       }
       html[data-theme="dark"] .ai-safety-banner {
-        background: rgba(245,158,11,0.06);
-        color: #d4a017;
-        border-color: rgba(245,158,11,0.2);
+        background: rgba(245,158,11,0.05);
+        color: #c9930f;
+        border-color: rgba(245,158,11,0.18);
       }
-      .ai-safety-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-      .ai-safety-text strong { display: block; font-weight: 700; margin-bottom: 2px; }
+      .ai-safety-icon { font-size: 12px; flex-shrink: 0; }
+      .ai-safety-text strong { font-weight: 700; }
       .seg-chip-active-real {
         background: var(--primary, #00686A) !important;
         color: #fff !important;
@@ -171,17 +173,14 @@
       banner.innerHTML = `
         <span class="ai-safety-icon">⚠️</span>
         <div class="ai-safety-text">
-          <strong>AI responses are not a substitute for approved documents.</strong>
-          Answers are generated from document metadata. Always verify against the official
-          approved source document before acting on any procedure or specification —
-          especially in safety-critical or well-control situations.
+          <strong>AI answers are not a substitute for approved documents.</strong> Always verify against the official source before acting.
         </div>
       `;
 
-      // Insert before the search textarea or at top of main content
-      const searchArea = document.querySelector('textarea, .search-container, .ai-input-area, main, .page-main, .content-wrap');
-      if (searchArea) {
-        searchArea.parentNode.insertBefore(banner, searchArea);
+      // Insert directly above the search card
+      const searchCard = document.querySelector('.search-card');
+      if (searchCard) {
+        searchCard.parentNode.insertBefore(banner, searchCard);
       } else {
         const hero = document.querySelector('.hero, .page-hero, h1');
         if (hero) hero.insertAdjacentElement('afterend', banner);
