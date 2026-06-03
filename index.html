@@ -1777,6 +1777,202 @@ document.addEventListener('click',function(e){
   } catch(e) {}
 })();
 </script>
+<!-- ── First-Time Tour ── -->
+<div id="tour-backdrop"></div>
+<div id="tour-spot"></div>
+<div id="tour-card">
+  <button id="tour-close" aria-label="Close tour">✕</button>
+  <div id="tc-step"></div>
+  <div id="tc-title"></div>
+  <p id="tc-desc"></p>
+  <div id="tc-footer">
+    <div id="tc-dots"></div>
+    <div id="tc-btns">
+      <button id="tc-skip">Skip tour</button>
+      <button id="tc-next">Next →</button>
+    </div>
+  </div>
+</div>
+
+<style>
+#tour-backdrop{position:fixed;inset:0;background:rgba(6,18,26,0.7);z-index:9990;display:none;pointer-events:all;}
+#tour-spot{
+  position:fixed;border-radius:12px;
+  border:2.5px solid #00BFB2;
+  box-shadow:0 0 0 4px rgba(0,191,178,0.18), 0 0 0 9999px rgba(6,18,26,0.68);
+  z-index:9992;pointer-events:none;
+  transition:top .4s cubic-bezier(.4,0,.2,1),left .4s cubic-bezier(.4,0,.2,1),width .4s cubic-bezier(.4,0,.2,1),height .4s cubic-bezier(.4,0,.2,1),opacity .3s;
+  opacity:0;
+}
+#tour-spot.on{opacity:1;}
+#tour-card{
+  position:fixed;z-index:9995;
+  background:#fff;border-radius:18px;
+  padding:22px 22px 16px;
+  width:min(320px,calc(100vw - 32px));
+  box-shadow:0 24px 64px rgba(0,0,0,0.28);
+  transition:top .4s cubic-bezier(.4,0,.2,1),left .4s cubic-bezier(.4,0,.2,1),opacity .25s;
+  display:none;
+}
+html[data-theme="dark"] #tour-card{background:#1e2a3a;box-shadow:0 24px 64px rgba(0,0,0,0.5);}
+#tour-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:15px;color:#94a3b8;cursor:pointer;line-height:1;padding:4px;}
+#tour-close:hover{color:#64748b;}
+#tc-step{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#00BFB2;margin-bottom:6px;}
+#tc-title{font-family:'Urbanist',sans-serif;font-size:17px;font-weight:800;color:#1a2235;margin-bottom:8px;line-height:1.3;}
+html[data-theme="dark"] #tc-title{color:#e2e8f0;}
+#tc-desc{font-size:13.5px;color:#64748b;line-height:1.65;margin:0 0 18px;}
+html[data-theme="dark"] #tc-desc{color:#94a3b8;}
+#tc-footer{display:flex;align-items:center;justify-content:space-between;}
+#tc-dots{display:flex;gap:5px;}
+.t-dot{width:7px;height:7px;border-radius:50%;background:#e2e8f0;transition:background .2s,transform .2s;}
+.t-dot.on{background:#00686A;transform:scale(1.25);}
+html[data-theme="dark"] .t-dot{background:#2d3f55;}
+html[data-theme="dark"] .t-dot.on{background:#00BFB2;}
+#tc-btns{display:flex;gap:8px;align-items:center;}
+#tc-skip{background:none;border:none;font-size:13px;color:#94a3b8;cursor:pointer;padding:7px 10px;border-radius:8px;font-family:'Inter',sans-serif;transition:color .2s;}
+#tc-skip:hover{color:#64748b;}
+#tc-next{background:linear-gradient(135deg,#00686A,#00BFB2);color:#fff;border:none;padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .2s;}
+#tc-next:hover{opacity:.88;}
+</style>
+
+<script>
+(function(){
+  if(localStorage.getItem('taqa-tour-done')) return;
+
+  var STEPS=[
+    {
+      title:'Welcome to TAQA Knowledge Hub',
+      desc:'Your single platform for all field documents, procedures, and expert support across 11 operational segments. Let us show you around.',
+      target:null
+    },
+    {
+      title:'Browse Your Segment',
+      desc:'All 11 operational segments are here — Drilling, Coiled Tubing, QHSE and more. Tap any card to access its SOPs, manuals, policies, and alerts.',
+      target:'.segments-grid'
+    },
+    {
+      title:'Search Any Document',
+      desc:"Can't find a document in your segment? Use Document Search to search across all documents instantly by keyword, type, or segment filter.",
+      target:'.nav-links a[href="ai-search.html"]',
+      mobileLabel:'Accessible from the menu ☰ → Document Search'
+    },
+    {
+      title:'Field Glossary',
+      desc:"Don't know an abbreviation? The Field Glossary has every acronym and technical term used across TAQA operations.",
+      target:'.nav-links a[href="glossary.html"]',
+      mobileLabel:'Accessible from the menu ☰ → Field Glossary'
+    },
+    {
+      title:'Ask an Expert',
+      desc:'Stuck on a field problem? Submit a ticket directly to your segment expert and get a response within your chosen SLA. Critical issues are escalated immediately.',
+      target:'.nav-links a[href="support-ticket.html"]',
+      mobileLabel:'Accessible from the menu ☰ → Ask Expert'
+    }
+  ];
+
+  var cur=0;
+  var spot=document.getElementById('tour-spot');
+  var card=document.getElementById('tour-card');
+  var backdrop=document.getElementById('tour-backdrop');
+
+  function isMob(){return window.innerWidth<=640;}
+
+  function dots(){
+    var d=document.getElementById('tc-dots');
+    d.innerHTML='';
+    STEPS.forEach(function(_,i){
+      var el=document.createElement('div');
+      el.className='t-dot'+(i===cur?' on':'');
+      d.appendChild(el);
+    });
+  }
+
+  function placeCard(rect){
+    var cw=card.offsetWidth||320;
+    var ch=card.offsetHeight||200;
+    var vw=window.innerWidth;
+    var vh=window.innerHeight;
+    var P=16;
+    if(isMob()||!rect){
+      card.style.left='50%';
+      card.style.transform='translateX(-50%)';
+      card.style.bottom=(P+16)+'px';
+      card.style.top='';
+      return;
+    }
+    card.style.transform='';
+    card.style.bottom='';
+    if(rect.bottom+ch+P<vh){
+      card.style.top=(rect.bottom+P)+'px';
+      card.style.left=Math.min(Math.max(rect.left,P),vw-cw-P)+'px';
+    } else if(rect.top-ch-P>0){
+      card.style.top=(rect.top-ch-P)+'px';
+      card.style.left=Math.min(Math.max(rect.left,P),vw-cw-P)+'px';
+    } else {
+      card.style.top=Math.min(Math.max(rect.top,P),vh-ch-P)+'px';
+      card.style.left=Math.min(rect.right+P,vw-cw-P)+'px';
+    }
+  }
+
+  function show(idx){
+    cur=idx;
+    var step=STEPS[idx];
+    var isLast=idx===STEPS.length-1;
+    document.getElementById('tc-step').textContent=(idx+1)+' of '+STEPS.length;
+    document.getElementById('tc-title').textContent=step.title;
+    document.getElementById('tc-next').textContent=isLast?'Done ✓':'Next →';
+    dots();
+
+    var mob=isMob();
+    var desc=step.desc;
+    if(mob&&step.mobileLabel) desc+='\n\n'+step.mobileLabel;
+    document.getElementById('tc-desc').textContent=desc;
+
+    var el=step.target?document.querySelector(step.target):null;
+    var hidden=el&&(getComputedStyle(el).display==='none'||getComputedStyle(el).visibility==='hidden');
+    if(hidden) el=null;
+
+    card.style.display='block';
+
+    if(el){
+      el.scrollIntoView({behavior:'smooth',block:'center'});
+      backdrop.style.display='none';
+      spot.classList.remove('on');
+      setTimeout(function(){
+        var r=el.getBoundingClientRect();
+        var P=8;
+        spot.style.top=(r.top-P)+'px';
+        spot.style.left=(r.left-P)+'px';
+        spot.style.width=(r.width+P*2)+'px';
+        spot.style.height=(r.height+P*2)+'px';
+        spot.classList.add('on');
+        placeCard(r);
+      },350);
+    } else {
+      spot.classList.remove('on');
+      backdrop.style.display='block';
+      placeCard(null);
+    }
+  }
+
+  function end(){
+    card.style.display='none';
+    spot.classList.remove('on');
+    backdrop.style.display='none';
+    localStorage.setItem('taqa-tour-done','1');
+  }
+
+  document.getElementById('tc-skip').onclick=end;
+  document.getElementById('tour-close').onclick=end;
+  document.getElementById('tc-next').onclick=function(){
+    if(cur<STEPS.length-1) show(cur+1); else end();
+  };
+  backdrop.addEventListener('click',function(e){if(e.target===backdrop)end();});
+
+  setTimeout(function(){show(0);},900);
+})();
+</script>
+
 <script src="shared.js"></script>
 <script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:linear-gradient(90deg,#00686A,#00BFB2);animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
