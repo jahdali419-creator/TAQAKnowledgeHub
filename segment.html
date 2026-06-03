@@ -49,6 +49,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .nav-links a:hover{background:#f0f1f3;color:var(--text);}
 .nav-links a.active{background:transparent;color:var(--primary);font-weight:600;}
 .nav-links a.active::after{content:'';position:absolute;bottom:3px;left:15px;right:15px;height:2px;background:var(--primary);border-radius:2px;}
+.nav-dropdown{position:relative;list-style:none;}
+.nav-dropdown-btn{display:flex;align-items:center;gap:5px;padding:7px 15px;border-radius:6px;border:none;background:transparent;cursor:pointer;font-size:13.5px;font-weight:500;color:var(--text-muted);font-family:'Inter',sans-serif;transition:background 0.2s,color 0.2s;}
+.nav-dropdown-btn:hover,.nav-dropdown-li.open .nav-dropdown-btn{background:#f0f1f3;color:var(--text);}
+.nav-dropdown-arrow{transition:transform 0.22s;flex-shrink:0;}
+.nav-dropdown-li.open .nav-dropdown-arrow{transform:rotate(180deg);}
+.nav-dropdown-panel{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(-6px);min-width:480px;background:#fff;border:1px solid rgba(0,0,0,0.09);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.13);padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:4px;opacity:0;pointer-events:none;transition:opacity 0.18s,transform 0.18s;z-index:2000;}
+.nav-dropdown-li:hover .nav-dropdown-panel,.nav-dropdown-li.open .nav-dropdown-panel{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0);}
+.seg-dd-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;text-decoration:none;transition:background 0.15s;}
+.seg-dd-item:hover{background:#f4f5f7;}
+.seg-dd-icon{font-size:18px;flex-shrink:0;width:28px;text-align:center;}
+.seg-dd-name{font-size:13px;font-weight:600;color:#1a2235;flex:1;}
+.seg-dd-tag{font-size:10px;font-weight:600;color:#00686A;background:rgba(0,104,106,0.08);padding:2px 7px;border-radius:20px;white-space:nowrap;}
 .nav-right{display:flex;gap:10px;align-items:center;}
 .btn{padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
   transition:all 0.25s;border:none;font-family:'Inter',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:7px;}
@@ -484,6 +496,25 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <ul class="nav-links">
     <div class="nav-pill" id="nav-pill"></div>
     <li><a href="index.html">Home</a></li>
+    <li class="nav-dropdown nav-dropdown-li" id="seg-dropdown-li">
+      <button class="nav-dropdown-btn" id="seg-dropdown-btn" aria-haspopup="true" aria-expanded="false">
+        Segments
+        <svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="nav-dropdown-panel" role="menu">
+        <a href="segment.html?id=coiled-tubing" class="seg-dd-item"><span class="seg-dd-icon">🔄</span><span class="seg-dd-name">Coiled Tubing</span><span class="seg-dd-tag">Operations</span></a>
+        <a href="segment.html?id=fracturing" class="seg-dd-item"><span class="seg-dd-icon">💥</span><span class="seg-dd-name">Fracturing</span><span class="seg-dd-tag">Stimulation</span></a>
+        <a href="segment.html?id=wireline" class="seg-dd-item"><span class="seg-dd-icon">📡</span><span class="seg-dd-name">Wireline</span><span class="seg-dd-tag">Logging</span></a>
+        <a href="segment.html?id=drilling" class="seg-dd-item"><span class="seg-dd-icon">⛏️</span><span class="seg-dd-name">Drilling</span><span class="seg-dd-tag">Well Operations</span></a>
+        <a href="segment.html?id=cementing" class="seg-dd-item"><span class="seg-dd-icon">🏗️</span><span class="seg-dd-name">Cementing</span><span class="seg-dd-tag">Well Integrity</span></a>
+        <a href="segment.html?id=inspection" class="seg-dd-item"><span class="seg-dd-icon">🔬</span><span class="seg-dd-name">Inspection Services</span><span class="seg-dd-tag">Compliance</span></a>
+        <a href="segment.html?id=well-safety" class="seg-dd-item"><span class="seg-dd-icon">🛡️</span><span class="seg-dd-name">Well Safety</span><span class="seg-dd-tag">HSE Critical</span></a>
+        <a href="segment.html?id=qhse" class="seg-dd-item"><span class="seg-dd-icon">✅</span><span class="seg-dd-name">QHSE</span><span class="seg-dd-tag">Quality & Safety</span></a>
+        <a href="segment.html?id=tws-maintenance" class="seg-dd-item"><span class="seg-dd-icon">🔧</span><span class="seg-dd-name">TWS Maintenance</span><span class="seg-dd-tag">Maintenance</span></a>
+        <a href="segment.html?id=hr" class="seg-dd-item"><span class="seg-dd-icon">👥</span><span class="seg-dd-name">Human Resources</span><span class="seg-dd-tag">HR & People</span></a>
+        <a href="segment.html?id=well-testing" class="seg-dd-item"><span class="seg-dd-icon">🧪</span><span class="seg-dd-name">Well Testing</span><span class="seg-dd-tag">Testing Services</span></a>
+      </div>
+    </li>
     <li><a href="ai-search.html">Document Search</a></li>
     <li><a href="glossary.html">Field Glossary</a></li>
     <li><a href="upload.html">Upload</a></li>
@@ -1506,6 +1537,14 @@ function draw(){ ctx.fillStyle='#f4f5f7';ctx.fillRect(0,0,W,H);
     ctx.fillStyle='rgba(0,104,106,0.12)';ctx.fill(); });
   requestAnimationFrame(draw); }
 draw();
+// ── Segments Dropdown ──
+(function(){
+  const li=document.getElementById('seg-dropdown-li'),btn=document.getElementById('seg-dropdown-btn');
+  if(!li||!btn)return;
+  btn.addEventListener('click',function(e){e.stopPropagation();const o=li.classList.toggle('open');btn.setAttribute('aria-expanded',o);});
+  document.addEventListener('click',function(){li.classList.remove('open');btn.setAttribute('aria-expanded','false');});
+  li.addEventListener('click',function(e){e.stopPropagation();});
+})();
 // ── Sliding Pill Nav ──
 const pill=document.getElementById('nav-pill'),navList=document.querySelector('.nav-links');
 function pillTo(el){const lr=navList.getBoundingClientRect(),ar=el.getBoundingClientRect();pill.style.left=(ar.left-lr.left)+'px';pill.style.width=ar.width+'px';pill.style.opacity='1';}

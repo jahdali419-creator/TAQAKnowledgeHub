@@ -84,6 +84,60 @@ nav {
   content:''; position:absolute; bottom:3px; left:15px; right:15px;
   height:2px; background:var(--primary); border-radius:2px;
 }
+/* ── Segments Dropdown ── */
+.nav-dropdown { position:relative; list-style:none; }
+.nav-dropdown-btn {
+  display:flex; align-items:center; gap:5px;
+  padding:7px 15px; border-radius:6px; border:none; background:transparent; cursor:pointer;
+  font-size:13.5px; font-weight:500; color:var(--text-muted); font-family:'Inter',sans-serif;
+  transition:background 0.2s, color 0.2s;
+}
+.nav-dropdown-btn:hover, .nav-dropdown-li.open .nav-dropdown-btn { background:#f0f1f3; color:var(--text); }
+.nav-dropdown-arrow { transition:transform 0.22s; flex-shrink:0; }
+.nav-dropdown-li.open .nav-dropdown-arrow { transform:rotate(180deg); }
+.nav-dropdown-panel {
+  position:absolute; top:calc(100% + 8px); left:50%; transform:translateX(-50%) translateY(-6px);
+  min-width:480px; background:#fff; border:1px solid var(--border);
+  border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,0.13);
+  padding:10px; display:grid; grid-template-columns:1fr 1fr; gap:4px;
+  opacity:0; pointer-events:none; transition:opacity 0.18s, transform 0.18s;
+  z-index:2000;
+}
+.nav-dropdown-li:hover .nav-dropdown-panel,
+.nav-dropdown-li.open .nav-dropdown-panel {
+  opacity:1; pointer-events:all; transform:translateX(-50%) translateY(0);
+}
+.seg-dd-item {
+  display:flex; align-items:center; gap:10px;
+  padding:8px 12px; border-radius:9px; text-decoration:none;
+  transition:background 0.15s;
+}
+.seg-dd-item:hover { background:#f4f5f7; }
+.seg-dd-icon { font-size:18px; flex-shrink:0; width:28px; text-align:center; }
+.seg-dd-name { font-size:13px; font-weight:600; color:var(--text); flex:1; }
+.seg-dd-tag { font-size:10px; font-weight:600; color:var(--primary); background:rgba(0,104,106,0.08); padding:2px 7px; border-radius:20px; white-space:nowrap; }
+html[data-theme="dark"] .nav-dropdown-panel { background:#1e2a3a; border-color:rgba(255,255,255,0.1); }
+html[data-theme="dark"] .seg-dd-item:hover { background:rgba(255,255,255,0.06); }
+html[data-theme="dark"] .seg-dd-name { color:#e2e8f0; }
+
+/* Mobile segments accordion */
+.mob-seg-toggle {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:13px 20px; font-size:15px; font-weight:500; color:var(--text);
+  text-decoration:none; border-top:1px solid var(--border); cursor:pointer;
+  background:none; border-left:none; border-right:none; border-bottom:none;
+  width:100%; font-family:'Inter',sans-serif;
+}
+.mob-seg-list { display:none; padding:4px 12px 8px; }
+.mob-seg-list.open { display:block; }
+.mob-seg-link {
+  display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:9px;
+  text-decoration:none; font-size:14px; color:var(--text-muted);
+  transition:background 0.15s;
+}
+.mob-seg-link:hover { background:#f4f5f7; color:var(--text); }
+.mob-seg-link span:first-child { font-size:17px; }
+
 .nav-actions { display:flex; gap:8px; align-items:center; }
 .btn {
   padding:8px 18px; border-radius:7px; font-size:13.5px; font-weight:500;
@@ -933,6 +987,25 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
   <ul class="nav-links">
     <div class="nav-pill" id="nav-pill"></div>
     <li><a href="index.html" class="active">Home</a></li>
+    <li class="nav-dropdown nav-dropdown-li" id="seg-dropdown-li">
+      <button class="nav-dropdown-btn" id="seg-dropdown-btn" aria-haspopup="true" aria-expanded="false">
+        Segments
+        <svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="nav-dropdown-panel" role="menu">
+        <a href="segment.html?id=coiled-tubing" class="seg-dd-item"><span class="seg-dd-icon">🔄</span><span class="seg-dd-name">Coiled Tubing</span><span class="seg-dd-tag">Operations</span></a>
+        <a href="segment.html?id=fracturing" class="seg-dd-item"><span class="seg-dd-icon">💥</span><span class="seg-dd-name">Fracturing</span><span class="seg-dd-tag">Stimulation</span></a>
+        <a href="segment.html?id=wireline" class="seg-dd-item"><span class="seg-dd-icon">📡</span><span class="seg-dd-name">Wireline</span><span class="seg-dd-tag">Logging</span></a>
+        <a href="segment.html?id=drilling" class="seg-dd-item"><span class="seg-dd-icon">⛏️</span><span class="seg-dd-name">Drilling</span><span class="seg-dd-tag">Well Operations</span></a>
+        <a href="segment.html?id=cementing" class="seg-dd-item"><span class="seg-dd-icon">🏗️</span><span class="seg-dd-name">Cementing</span><span class="seg-dd-tag">Well Integrity</span></a>
+        <a href="segment.html?id=inspection" class="seg-dd-item"><span class="seg-dd-icon">🔬</span><span class="seg-dd-name">Inspection Services</span><span class="seg-dd-tag">Compliance</span></a>
+        <a href="segment.html?id=well-safety" class="seg-dd-item"><span class="seg-dd-icon">🛡️</span><span class="seg-dd-name">Well Safety</span><span class="seg-dd-tag">HSE Critical</span></a>
+        <a href="segment.html?id=qhse" class="seg-dd-item"><span class="seg-dd-icon">✅</span><span class="seg-dd-name">QHSE</span><span class="seg-dd-tag">Quality & Safety</span></a>
+        <a href="segment.html?id=tws-maintenance" class="seg-dd-item"><span class="seg-dd-icon">🔧</span><span class="seg-dd-name">TWS Maintenance</span><span class="seg-dd-tag">Maintenance</span></a>
+        <a href="segment.html?id=hr" class="seg-dd-item"><span class="seg-dd-icon">👥</span><span class="seg-dd-name">Human Resources</span><span class="seg-dd-tag">HR & People</span></a>
+        <a href="segment.html?id=well-testing" class="seg-dd-item"><span class="seg-dd-icon">🧪</span><span class="seg-dd-name">Well Testing</span><span class="seg-dd-tag">Testing Services</span></a>
+      </div>
+    </li>
     <li><a href="ai-search.html">Document Search</a></li>
     <li><a href="glossary.html">Field Glossary</a></li>
     <li><a href="upload.html">Upload</a></li>
@@ -956,6 +1029,23 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
 <!-- ── Mobile Nav Menu ── -->
 <div class="nav-mobile-menu" id="nav-mobile-menu">
   <a href="index.html" class="active">Home</a>
+  <button class="mob-seg-toggle" id="mob-seg-toggle" onclick="document.getElementById('mob-seg-list').classList.toggle('open');this.querySelector('svg').style.transform=document.getElementById('mob-seg-list').classList.contains('open')?'rotate(180deg)':''">
+    Segments
+    <svg width="12" height="8" viewBox="0 0 10 6" fill="none" style="transition:transform 0.2s"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <div class="mob-seg-list" id="mob-seg-list">
+    <a href="segment.html?id=coiled-tubing" class="mob-seg-link"><span>🔄</span><span>Coiled Tubing</span></a>
+    <a href="segment.html?id=fracturing" class="mob-seg-link"><span>💥</span><span>Fracturing</span></a>
+    <a href="segment.html?id=wireline" class="mob-seg-link"><span>📡</span><span>Wireline</span></a>
+    <a href="segment.html?id=drilling" class="mob-seg-link"><span>⛏️</span><span>Drilling</span></a>
+    <a href="segment.html?id=cementing" class="mob-seg-link"><span>🏗️</span><span>Cementing</span></a>
+    <a href="segment.html?id=inspection" class="mob-seg-link"><span>🔬</span><span>Inspection Services</span></a>
+    <a href="segment.html?id=well-safety" class="mob-seg-link"><span>🛡️</span><span>Well Safety</span></a>
+    <a href="segment.html?id=qhse" class="mob-seg-link"><span>✅</span><span>QHSE</span></a>
+    <a href="segment.html?id=tws-maintenance" class="mob-seg-link"><span>🔧</span><span>TWS Maintenance</span></a>
+    <a href="segment.html?id=hr" class="mob-seg-link"><span>👥</span><span>Human Resources</span></a>
+    <a href="segment.html?id=well-testing" class="mob-seg-link"><span>🧪</span><span>Well Testing</span></a>
+  </div>
   <a href="ai-search.html">Document Search</a>
   <a href="glossary.html">Field Glossary</a>
   <a href="upload.html">Upload</a>
@@ -1573,6 +1663,20 @@ function pillToActive() {
 pillToActive();
 navList.querySelectorAll('a').forEach(a => a.addEventListener('mouseenter', () => pillTo(a)));
 navList.addEventListener('mouseleave', pillToActive);
+
+// ── Segments Dropdown ──
+(function(){
+  const li = document.getElementById('seg-dropdown-li');
+  const btn = document.getElementById('seg-dropdown-btn');
+  if (!li || !btn) return;
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    const open = li.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open);
+  });
+  document.addEventListener('click', function(){ li.classList.remove('open'); btn.setAttribute('aria-expanded','false'); });
+  li.addEventListener('click', function(e){ e.stopPropagation(); });
+})();
 
 // ── Dark Mode ──
 const MOON_PATH = 'M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
