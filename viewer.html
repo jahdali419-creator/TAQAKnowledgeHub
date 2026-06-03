@@ -213,6 +213,71 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .related-grid{grid-template-columns:1fr;}
   .doc-act-btn{flex:1;justify-content:center;min-width:calc(50% - 4px);}
 }
+
+/* Pin button */
+.doc-act-pin{background:transparent;border:1px solid var(--glass-border);color:var(--text-muted);}
+.doc-act-pin:hover{border-color:rgba(0,104,106,0.3);color:var(--primary);}
+.doc-act-pin.pinned{border-color:rgba(0,104,106,0.5);color:var(--primary);background:rgba(0,104,106,0.08);}
+
+/* Last synced note */
+.sync-note{font-size:11px;color:#94a3b8;margin-top:12px;text-align:right;}
+
+/* Quick Reference Card modal */
+#qref-overlay{position:fixed;inset:0;z-index:99980;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);
+  display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;
+  opacity:0;pointer-events:none;transition:opacity 0.3s;}
+#qref-overlay.open{opacity:1;pointer-events:auto;}
+#qref-card{background:#fff;border-radius:20px;width:100%;max-width:640px;margin:auto;
+  box-shadow:0 32px 80px rgba(0,0,0,0.3);transform:scale(0.96);transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);}
+#qref-overlay.open #qref-card{transform:scale(1);}
+#qref-toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;
+  border-bottom:1px solid #f0f0f0;gap:10px;flex-wrap:wrap;}
+.qref-tbtn{padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;
+  font-family:'Inter',sans-serif;border:1px solid rgba(0,0,0,0.12);background:transparent;color:#475569;
+  display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;}
+.qref-tbtn:hover{border-color:rgba(0,104,106,0.3);color:#00686A;}
+.qref-tbtn.sun-on{background:#fef9c3;border-color:#eab308;color:#854d0e;}
+.qref-tbtn.close-btn{background:#f1f5f9;border-color:transparent;}
+.qref-tbtn.print-btn{background:linear-gradient(135deg,#00686A,#00BFB2);color:#fff;border:none;box-shadow:0 3px 10px rgba(0,104,106,0.3);}
+#qref-body{padding:28px 32px 32px;}
+.qref-type-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:50px;
+  font-size:12px;font-weight:700;margin-bottom:16px;letter-spacing:0.5px;}
+#qref-title{font-family:'Urbanist',sans-serif;font-size:26px;font-weight:800;color:#1a2235;
+  line-height:1.25;margin-bottom:16px;letter-spacing:-0.4px;}
+.qref-meta-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px;}
+.qref-meta-chip{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:6px 12px;font-size:12px;color:#475569;}
+.qref-meta-chip strong{color:#1a2235;display:block;font-size:10px;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:2px;}
+.qref-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:10px;}
+.qref-bullets{list-style:none;padding:0;margin:0 0 20px;}
+.qref-bullets li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #f1f5f9;font-size:14px;color:#334155;line-height:1.6;}
+.qref-bullets li:last-child{border-bottom:none;}
+.qref-bullet-dot{width:7px;height:7px;border-radius:50%;background:#00BFB2;flex-shrink:0;margin-top:7px;}
+.qref-scope-box{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 16px;
+  font-size:13px;color:#166534;line-height:1.6;}
+
+/* Sunlight mode overrides */
+#qref-overlay.sunlight #qref-card{background:#ffffff;border:3px solid #000;}
+#qref-overlay.sunlight #qref-title{color:#000;font-size:30px;}
+#qref-overlay.sunlight #qref-body{background:#fff;}
+#qref-overlay.sunlight .qref-bullets li{color:#000;font-size:16px;font-weight:500;border-color:#ccc;}
+#qref-overlay.sunlight .qref-meta-chip{background:#f0f0f0;border-color:#999;color:#000;}
+#qref-overlay.sunlight .qref-meta-chip strong{color:#000;}
+#qref-overlay.sunlight .qref-scope-box{background:#fffde7;border-color:#f59e0b;color:#000;font-weight:500;}
+#qref-overlay.sunlight .qref-section-label{color:#333;}
+#qref-overlay.sunlight .qref-bullet-dot{background:#000;}
+#qref-overlay.sunlight .qref-type-pill{filter:saturate(2) contrast(1.3);}
+#qref-overlay.sunlight #qref-toolbar{background:#f5f5f5;}
+
+@media(max-width:600px){
+  #qref-body{padding:20px;}
+  #qref-title{font-size:21px;}
+  #qref-toolbar{padding:10px 14px;}
+}
+@media print{
+  #qref-overlay,#qref-toolbar{display:block!important;position:static!important;background:none!important;opacity:1!important;padding:0!important;}
+  #qref-toolbar{display:none!important;}
+  #qref-card{box-shadow:none!important;border-radius:0!important;max-width:100%!important;}
+}
 </style>
 </head>
 <body>
@@ -253,6 +318,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
       </div>
     </div>
     <div class="meta-grid" id="meta-grid"></div>
+    <div class="sync-note" id="sync-note"></div>
   </div>
 
   <div class="doc-actions-row" style="margin-bottom:24px;" id="doc-actions-row">
@@ -261,6 +327,14 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
       Download PDF
     </button>
     <button class="doc-act-btn doc-act-bm" id="bm-doc-btn" onclick="toggleViewerBm()">☆ Bookmark</button>
+    <button class="doc-act-btn doc-act-pin" id="pin-btn" onclick="togglePin()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6h6l-5 3.5 2 6L12 14l-5 3.5 2-6L4 8h6z"/></svg>
+      Pin Offline
+    </button>
+    <button class="doc-act-btn doc-act-ghost" id="qref-open-btn" onclick="showQuickRef()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Quick Ref
+    </button>
     <button class="doc-act-btn doc-act-ghost" onclick="window.print()" title="Print this document" aria-label="Print">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
       Print
@@ -313,6 +387,37 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   </div>
 
 </div>
+<!-- Quick Reference Card Modal -->
+<div id="qref-overlay" role="dialog" aria-modal="true" aria-label="Quick Reference Card" onclick="if(event.target===this)closeQuickRef()">
+  <div id="qref-card">
+    <div id="qref-toolbar">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <button class="qref-tbtn sun-btn" id="qref-sun-btn" onclick="toggleSunlight()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          Sunlight Mode
+        </button>
+        <span id="qref-sync-text" style="font-size:11px;color:#94a3b8;"></span>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="qref-tbtn print-btn" onclick="window.print()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print Card
+        </button>
+        <button class="qref-tbtn close-btn" onclick="closeQuickRef()">✕ Close</button>
+      </div>
+    </div>
+    <div id="qref-body">
+      <div id="qref-type-pill" class="qref-type-pill"></div>
+      <div id="qref-title"></div>
+      <div class="qref-meta-row" id="qref-meta-row"></div>
+      <div class="qref-section-label">Key Points</div>
+      <ul class="qref-bullets" id="qref-bullets"></ul>
+      <div class="qref-section-label">Applicability</div>
+      <div class="qref-scope-box" id="qref-scope"></div>
+    </div>
+  </div>
+</div>
+
 <footer style="height:4px;position:relative;margin-top:auto;"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#00686A,#00BFB2);"></div></footer>
 </div>
 
@@ -489,7 +594,113 @@ function renderRelated(){
 }
 setTimeout(renderRelated, 600);
 
-// Page exit transition
+// ── Last synced indicator ──
+(function(){
+  var ts = null;
+  try { ts = localStorage.getItem('taqa-last-sync'); } catch(e) {}
+  var el = document.getElementById('sync-note');
+  if (!el) return;
+  if (!ts) { el.textContent = navigator.onLine ? 'Synced now' : 'Offline'; return; }
+  var mins = Math.round((Date.now() - parseInt(ts, 10)) / 60000);
+  if (mins < 2) el.textContent = 'Last synced: just now';
+  else if (mins < 60) el.textContent = 'Last synced: ' + mins + ' minutes ago';
+  else if (mins < 1440) el.textContent = 'Last synced: ' + Math.round(mins/60) + ' hours ago';
+  else el.textContent = 'Last synced: ' + Math.round(mins/1440) + ' days ago';
+  if (!navigator.onLine) el.textContent += ' · Offline mode';
+})();
+
+// ── Pin for offline ──
+function updatePinBtn() {
+  var btn = document.getElementById('pin-btn');
+  if (!btn || !window.TAQA_Pins) return;
+  var pinned = window.TAQA_Pins.isPinned(docUrl);
+  btn.classList.toggle('pinned', pinned);
+  btn.innerHTML = pinned
+    ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l2 6h6l-5 3.5 2 6L12 14l-5 3.5 2-6L4 8h6z"/></svg> Pinned'
+    : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6h6l-5 3.5 2 6L12 14l-5 3.5 2-6L4 8h6z"/></svg> Pin Offline';
+}
+function togglePin() {
+  if (!window.TAQA_Pins) return;
+  var pinned = window.TAQA_Pins.isPinned(docUrl);
+  if (pinned) {
+    window.TAQA_Pins.unpin(docUrl);
+    if (window.showToast) window.showToast('Removed from offline pins', 'info');
+  } else {
+    window.TAQA_Pins.pin({title:docTitle, type:docType, segId:segId, segName:segInfo.name, url:docUrl});
+    if (window.showToast) window.showToast('Pinned for offline access', 'success');
+  }
+  updatePinBtn();
+}
+setTimeout(updatePinBtn, 400);
+
+// ── Quick Reference Card ──
+function showQuickRef() {
+  var overlay = document.getElementById('qref-overlay');
+  if (!overlay) return;
+
+  // Populate type pill
+  var pill = document.getElementById('qref-type-pill');
+  pill.style.background = typeColor;
+  pill.style.color = typeText;
+  pill.style.border = '1px solid ' + typeText + '44';
+  pill.textContent = typeLabel + ' · ' + segInfo.name;
+
+  // Title
+  document.getElementById('qref-title').textContent = docTitle;
+
+  // Meta chips
+  var vi2 = Math.abs(hashStr(docTitle)) % VERSIONS.length;
+  var di2 = Math.abs(hashStr(docTitle + '1')) % DATES.length;
+  var ai2 = Math.abs(hashStr(docTitle + '2')) % AUTHORS.length;
+  document.getElementById('qref-meta-row').innerHTML =
+    '<div class="qref-meta-chip"><strong>Revision</strong>' + VERSIONS[vi2] + '</div>' +
+    '<div class="qref-meta-chip"><strong>Issued</strong>' + DATES[di2] + '</div>' +
+    '<div class="qref-meta-chip"><strong>Author</strong>' + AUTHORS[ai2] + '</div>' +
+    '<div class="qref-meta-chip"><strong>Segment</strong>' + segInfo.tag + '</div>';
+
+  // Summary as bullet points
+  var summary = getDocSummary(docTitle, docType);
+  var sentences = summary.split(/(?<=\.)\s+/).filter(function(s){ return s.trim().length > 10; });
+  var bul = document.getElementById('qref-bullets');
+  bul.innerHTML = sentences.slice(0, 4).map(function(s){
+    return '<li><div class="qref-bullet-dot"></div><span>' + s.replace(/\.$/,'') + '</span></li>';
+  }).join('');
+
+  // Scope
+  document.getElementById('qref-scope').textContent = SCOPES[docType] || SCOPES.sop;
+
+  // Last synced in toolbar
+  var syncTs = null;
+  try { syncTs = localStorage.getItem('taqa-last-sync'); } catch(e) {}
+  var syncEl = document.getElementById('qref-sync-text');
+  if (syncTs) {
+    var m = Math.round((Date.now() - parseInt(syncTs,10)) / 60000);
+    syncEl.textContent = m < 2 ? 'Synced just now' : m < 60 ? 'Synced ' + m + 'm ago' : 'Synced ' + Math.round(m/60) + 'h ago';
+  }
+
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeQuickRef() {
+  var overlay = document.getElementById('qref-overlay');
+  if (overlay) overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function toggleSunlight() {
+  var overlay = document.getElementById('qref-overlay');
+  var btn = document.getElementById('qref-sun-btn');
+  if (!overlay) return;
+  var on = overlay.classList.toggle('sunlight');
+  btn.classList.toggle('sun-on', on);
+  btn.innerHTML = on
+    ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> Normal Mode'
+    : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> Sunlight Mode';
+}
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') closeQuickRef();
+});
+
+// ── Page exit transition
 document.addEventListener('click',function(e){
   const a=e.target.closest('a[href]');
   if(!a)return;

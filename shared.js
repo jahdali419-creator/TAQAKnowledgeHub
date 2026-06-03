@@ -845,6 +845,49 @@ document.addEventListener('keydown',function(e){
   setTimeout(showModal,2500);
 })();
 
+// ── Offline indicator banner ──
+(function(){
+  var s=document.createElement('style');
+  s.textContent=
+    '#offline-bar{position:fixed;top:68px;left:0;right:0;z-index:9000;background:rgba(234,88,12,0.97);'+
+    'backdrop-filter:blur(8px);color:#fff;font-size:13px;font-weight:600;text-align:center;'+
+    'padding:9px 56px 9px 20px;transform:translateY(-200%);transition:transform 0.3s;font-family:"Inter",sans-serif;}'+
+    '#offline-bar.show{transform:translateY(0);}'+
+    '#offline-bar .ob-x{position:absolute;right:14px;top:50%;transform:translateY(-50%);'+
+    'background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:4px;line-height:1;}';
+  document.head.appendChild(s);
+  var bar=document.createElement('div');bar.id='offline-bar';
+  bar.innerHTML='You\'re offline — pinned and visited documents are still available'+
+    '<button class="ob-x" aria-label="Dismiss">×</button>';
+  document.body.appendChild(bar);
+  bar.querySelector('.ob-x').addEventListener('click',function(){bar.classList.remove('show');});
+  function upd(){
+    bar.classList.toggle('show',!navigator.onLine);
+    if(navigator.onLine){try{localStorage.setItem('taqa-last-sync',Date.now().toString());}catch(e){}}
+  }
+  window.addEventListener('online',upd);
+  window.addEventListener('offline',upd);
+  if(navigator.onLine){try{localStorage.setItem('taqa-last-sync',Date.now().toString());}catch(e){}}
+  upd();
+})();
+
+// ── Pin management ──
+(function(){
+  var KEY='taqa-pins';
+  function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){return{};}}
+  function save(d){try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}}
+  window.TAQA_Pins={
+    pin:function(doc){
+      var p=load();
+      p[doc.url]={title:doc.title,type:doc.type,segId:doc.segId,segName:doc.segName,url:doc.url,ts:Date.now()};
+      save(p);
+    },
+    unpin:function(url){var p=load();delete p[url];save(p);},
+    isPinned:function(url){return!!load()[url];},
+    getAll:function(){return Object.values(load());}
+  };
+})();
+
 // ── Form draft auto-save ──
 (function(){
   var p=location.pathname;
