@@ -849,15 +849,15 @@ document.addEventListener('keydown',function(e){
 (function(){
   var s=document.createElement('style');
   s.textContent=
-    '#offline-bar{position:fixed;top:68px;left:0;right:0;z-index:9000;background:rgba(234,88,12,0.97);'+
-    'backdrop-filter:blur(8px);color:#fff;font-size:13px;font-weight:600;text-align:center;'+
-    'padding:9px 56px 9px 20px;transform:translateY(-200%);transition:transform 0.3s;font-family:"Inter",sans-serif;}'+
+    '#offline-bar{position:fixed;top:68px;left:0;right:0;z-index:999;background:rgba(71,85,105,0.93);'+
+    'color:#fff;font-size:12px;font-weight:500;text-align:center;'+
+    'padding:5px 36px 5px 16px;transform:translateY(-100%);transition:transform 0.25s ease;font-family:"Inter",sans-serif;}'+
     '#offline-bar.show{transform:translateY(0);}'+
-    '#offline-bar .ob-x{position:absolute;right:14px;top:50%;transform:translateY(-50%);'+
-    'background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:4px;line-height:1;}';
+    '#offline-bar .ob-x{position:absolute;right:10px;top:50%;transform:translateY(-50%);'+
+    'background:none;border:none;color:rgba(255,255,255,0.7);font-size:15px;cursor:pointer;padding:4px;line-height:1;}';
   document.head.appendChild(s);
   var bar=document.createElement('div');bar.id='offline-bar';
-  bar.innerHTML='You\'re offline — pinned and visited documents are still available'+
+  bar.innerHTML='Offline. Cached documents are available.'+
     '<button class="ob-x" aria-label="Dismiss">×</button>';
   document.body.appendChild(bar);
   bar.querySelector('.ob-x').addEventListener('click',function(){bar.classList.remove('show');});
