@@ -711,6 +711,140 @@ document.addEventListener('keydown',function(e){
   document.head.appendChild(s);
 })();
 
+// ── Registration Modal ──
+(function(){
+  var SCRIPT_URL='https://script.google.com/macros/s/AKfycby4Vd1-GGQb7V25TPg3L3LdSfg8QrqZWW7UlaAavmHtbqIkR6Iz4UY8yhtVmIwR9FHl6g/exec';
+  var REG_KEY='taqa-registered';
+  var existing=null;
+  try{existing=JSON.parse(localStorage.getItem(REG_KEY));}catch(e){}
+
+  function showWelcomeName(name){
+    var nr=document.querySelector('.nav-right');
+    if(nr&&!document.getElementById('reg-welcome')){
+      var w=document.createElement('span');
+      w.id='reg-welcome';
+      w.style.cssText='font-size:13px;color:#64748b;font-family:"Inter",sans-serif;white-space:nowrap;padding:0 4px;';
+      w.textContent='Hi, '+name.split(' ')[0];
+      nr.insertBefore(w,nr.firstChild);
+    }
+  }
+
+  if(existing&&existing.name){
+    document.addEventListener('DOMContentLoaded',function(){showWelcomeName(existing.name);});
+    return;
+  }
+
+  var skippedTs=null;
+  try{skippedTs=localStorage.getItem('taqa-reg-skipped');}catch(e){}
+  if(skippedTs&&(Date.now()-parseInt(skippedTs,10))<7*24*60*60*1000)return;
+
+  var s=document.createElement('style');
+  s.textContent=
+    '#reg-overlay{position:fixed;inset:0;z-index:99990;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);'+
+    'display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity 0.3s;pointer-events:none;}'+
+    '#reg-overlay.open{opacity:1;pointer-events:auto;}'+
+    '#reg-card{background:#fff;border-radius:24px;padding:40px 36px;max-width:440px;width:100%;'+
+    'box-shadow:0 24px 80px rgba(0,0,0,0.2);transform:translateY(20px) scale(0.97);'+
+    'transition:transform 0.35s cubic-bezier(.34,1.56,.64,1);}'+
+    '#reg-overlay.open #reg-card{transform:translateY(0) scale(1);}'+
+    'html[data-theme="dark"] #reg-card{background:#0e1828;border:1px solid rgba(255,255,255,0.08);}'+
+    '.reg-logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#00686A,#00BFB2);'+
+    'display:flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 6px 20px rgba(0,104,106,0.38);}'+
+    '.reg-h{font-family:"Urbanist",sans-serif;font-size:22px;font-weight:800;color:#1a2235;margin-bottom:8px;letter-spacing:-0.3px;}'+
+    'html[data-theme="dark"] .reg-h{color:#dde4ef;}'+
+    '.reg-sub{font-size:14px;color:#64748b;line-height:1.6;margin-bottom:28px;}'+
+    '.reg-field{margin-bottom:16px;}'+
+    '.reg-label{display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;letter-spacing:0.3px;}'+
+    'html[data-theme="dark"] .reg-label{color:#94a3b8;}'+
+    '.reg-input{width:100%;padding:12px 16px;border-radius:10px;border:1.5px solid rgba(0,0,0,0.12);'+
+    'font-size:15px;font-family:"Inter",sans-serif;color:#1a2235;background:#fff;'+
+    'transition:border-color 0.2s,box-shadow 0.2s;outline:none;}'+
+    '.reg-input:focus{border-color:#00BFB2;box-shadow:0 0 0 3px rgba(0,191,178,0.15);}'+
+    'html[data-theme="dark"] .reg-input{background:#1a2a3e;border-color:rgba(255,255,255,0.1);color:#dde4ef;}'+
+    '.reg-btn{width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,#00686A,#00BFB2);'+
+    'color:#fff;border:none;font-size:15px;font-weight:700;cursor:pointer;font-family:"Inter",sans-serif;'+
+    'margin-top:8px;box-shadow:0 6px 20px rgba(0,104,106,0.38);transition:transform 0.2s,box-shadow 0.2s;}'+
+    '.reg-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,104,106,0.5);}'+
+    '.reg-skip{display:block;text-align:center;margin-top:14px;font-size:13px;color:#94a3b8;'+
+    'cursor:pointer;background:none;border:none;width:100%;font-family:"Inter",sans-serif;padding:4px;}'+
+    '.reg-skip:hover{color:#64748b;}'+
+    '.reg-err{font-size:12px;color:#ef4444;margin-top:4px;display:none;}'+
+    '@media(max-width:480px){#reg-card{padding:28px 22px;border-radius:20px;}}';
+  document.head.appendChild(s);
+
+  var overlay=document.createElement('div');
+  overlay.id='reg-overlay';
+  var ICON='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>';
+  overlay.innerHTML=
+    '<div id="reg-card">'+
+      '<div class="reg-logo">'+ICON+'</div>'+
+      '<div class="reg-h">Welcome to TAQA Knowledge Hub</div>'+
+      '<div class="reg-sub">Enter your details to get started. This helps us know who is using the hub.</div>'+
+      '<div class="reg-field">'+
+        '<label class="reg-label" for="reg-name">Full Name</label>'+
+        '<input class="reg-input" id="reg-name" type="text" placeholder="e.g. Ahmed Al-Rashidi" autocomplete="name" />'+
+        '<div class="reg-err" id="reg-name-err">Please enter your full name</div>'+
+      '</div>'+
+      '<div class="reg-field">'+
+        '<label class="reg-label" for="reg-email">Work Email</label>'+
+        '<input class="reg-input" id="reg-email" type="email" placeholder="yourname@taqa.com" autocomplete="email" />'+
+        '<div class="reg-err" id="reg-email-err">Please enter a valid email address</div>'+
+      '</div>'+
+      '<button class="reg-btn" id="reg-submit">Get Started</button>'+
+      '<button class="reg-skip" id="reg-skip">Skip for now</button>'+
+    '</div>';
+  document.body.appendChild(overlay);
+
+  function showModal(){
+    overlay.classList.add('open');
+    setTimeout(function(){var n=document.getElementById('reg-name');if(n)n.focus();},400);
+  }
+  function hideModal(){overlay.classList.remove('open');}
+
+  function submitReg(){
+    var nameEl=document.getElementById('reg-name');
+    var emailEl=document.getElementById('reg-email');
+    var nameErr=document.getElementById('reg-name-err');
+    var emailErr=document.getElementById('reg-email-err');
+    var name=nameEl?nameEl.value.trim():'';
+    var email=emailEl?emailEl.value.trim():'';
+    var valid=true;
+    if(name.length<2){nameErr.style.display='block';valid=false;}
+    else{nameErr.style.display='none';}
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){
+      emailErr.style.display='block';valid=false;
+    }else{emailErr.style.display='none';}
+    if(!valid)return;
+    try{localStorage.setItem(REG_KEY,JSON.stringify({name:name,email:email,ts:Date.now()}));}catch(e){}
+    try{
+      fetch(SCRIPT_URL,{
+        method:'POST',mode:'no-cors',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({name:name,email:email,page:location.pathname})
+      });
+    }catch(err){}
+    hideModal();
+    if(window.showToast)window.showToast('Welcome, '+name.split(' ')[0]+'!','success');
+    showWelcomeName(name);
+  }
+
+  document.addEventListener('click',function(e){
+    if(e.target.id==='reg-submit')submitReg();
+    if(e.target.id==='reg-skip'){
+      try{localStorage.setItem('taqa-reg-skipped',Date.now().toString());}catch(e2){}
+      hideModal();
+    }
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Enter'&&overlay.classList.contains('open')){
+      var a=document.activeElement;
+      if(a&&(a.id==='reg-name'||a.id==='reg-email'))submitReg();
+    }
+  });
+
+  setTimeout(showModal,2500);
+})();
+
 // ── Form draft auto-save ──
 (function(){
   var p=location.pathname;
