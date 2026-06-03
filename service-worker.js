@@ -1,4 +1,4 @@
-const CACHE = 'taqa-hub-v36';
+const CACHE = 'taqa-hub-v37';
 
 const CORE = [
   '/TAQAKnowledgeHub/',
@@ -13,7 +13,8 @@ const CORE = [
   '/TAQAKnowledgeHub/upload.html',
   '/TAQAKnowledgeHub/support-ticket.html',
   '/TAQAKnowledgeHub/analytics.html',
-  '/TAQAKnowledgeHub/icons/icon.svg'
+  '/TAQAKnowledgeHub/icons/icon.svg',
+  '/TAQAKnowledgeHub/offline.html'
 ];
 
 const OPTIONAL = [
@@ -24,8 +25,11 @@ const OPTIONAL = [
   '/TAQAKnowledgeHub/taqa-hero-5.jpeg'
 ];
 
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
+
 self.addEventListener('install', e => {
-  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE).then(c =>
       // Core files must succeed; images are best-effort
@@ -62,8 +66,7 @@ self.addEventListener('fetch', e => {
           }
           return res;
         }).catch(() =>
-          // Offline fallback
-          caches.match('/TAQAKnowledgeHub/index.html')
+          caches.match('/TAQAKnowledgeHub/offline.html')
         );
       })
   );

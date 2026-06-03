@@ -1,3 +1,24 @@
+// ── JS error tracking (stores last 50 errors in localStorage) ──
+(function(){
+  var KEY='taqa-errors';
+  window.addEventListener('error',function(e){
+    try{
+      var errs=JSON.parse(localStorage.getItem(KEY)||'[]');
+      errs.push({msg:e.message,src:e.filename,line:e.lineno,col:e.colno,t:Date.now(),page:location.pathname});
+      if(errs.length>50) errs=errs.slice(-50);
+      localStorage.setItem(KEY,JSON.stringify(errs));
+    }catch(ex){}
+  });
+  window.addEventListener('unhandledrejection',function(e){
+    try{
+      var errs=JSON.parse(localStorage.getItem(KEY)||'[]');
+      errs.push({msg:'UnhandledRejection: '+(e.reason&&e.reason.message||String(e.reason)),t:Date.now(),page:location.pathname});
+      if(errs.length>50) errs=errs.slice(-50);
+      localStorage.setItem(KEY,JSON.stringify(errs));
+    }catch(ex){}
+  });
+})();
+
 // ── Global mobile overflow fix ──
 (function(){
   var s=document.createElement('style');
@@ -33,6 +54,31 @@
       '.filter-chip{padding:3px 9px!important;}'+
       '.cat-pill{padding:3px 10px!important;}'+
       '.prompt-chip{font-size:11px!important;padding:5px 11px!important;}'+
+    '}';
+  document.head.appendChild(s);
+})();
+
+// ── Touch target minimum size (44×44px) ──
+(function(){
+  var s=document.createElement('style');
+  s.textContent=
+    '.dark-toggle{min-width:44px!important;min-height:44px!important;}'+
+    '.bell-btn{min-width:44px!important;min-height:44px!important;}'+
+    '.file-remove,.photo-thumb-del,.annot-del,.bm-x,.qr-close{min-width:44px!important;min-height:44px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;}'+
+    '@media(max-width:768px){'+
+      '.btn,.nav-links a,.mob-seg-link{min-height:44px!important;display:inline-flex!important;align-items:center!important;}'+
+      '.annot-tool-btn{min-width:44px!important;min-height:44px!important;}'+
+    '}';
+  document.head.appendChild(s);
+})();
+
+// ── Reduce motion for users who prefer it ──
+(function(){
+  var s=document.createElement('style');
+  s.textContent=
+    '@media(prefers-reduced-motion:reduce){'+
+      '*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}'+
+      '.hero-bg-layer,.hero-bg-img,.bg-blob-1,.bg-blob-2,.bg-blob-3,.page-hero-bg{animation:none!important;}'+
     '}';
   document.head.appendChild(s);
 })();
@@ -188,6 +234,42 @@ window.showToast=function(msg,type){
   window.addEventListener('offline',function(){banner.style.display='flex';});
   window.addEventListener('online',function(){banner.style.display='none';if(window.showToast)window.showToast('Back online!');});
   if(!navigator.onLine)banner.style.display='flex';
+})();
+
+// ── SW update notification ──
+(function(){
+  if(!('serviceWorker' in navigator)) return;
+  var s=document.createElement('style');
+  s.textContent=
+    '#sw-update-bar{position:fixed;bottom:0;left:0;right:0;z-index:9996;background:linear-gradient(90deg,#00686A,#00BFB2);padding:11px 20px;display:none;align-items:center;justify-content:center;gap:12px;font-size:13.5px;font-weight:600;color:#fff;box-shadow:0 -4px 20px rgba(0,104,106,0.35);}'+
+    '#sw-update-bar button{background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.4);color:#fff;padding:6px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}'+
+    '#sw-update-bar button:hover{background:rgba(255,255,255,0.35);}';
+  document.head.appendChild(s);
+  var bar=document.createElement('div');
+  bar.id='sw-update-bar';
+  bar.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.68-7.58"/></svg> New version available — <button id="sw-reload-btn">Update now</button>';
+  document.body.appendChild(bar);
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    window.location.reload();
+  });
+  navigator.serviceWorker.ready.then(function(reg){
+    reg.addEventListener('updatefound', function(){
+      var nw=reg.installing;
+      nw.addEventListener('statechange', function(){
+        if(nw.state==='installed' && navigator.serviceWorker.controller){
+          bar.style.display='flex';
+        }
+      });
+    });
+  });
+  document.addEventListener('click',function(e){
+    if(e.target && e.target.id==='sw-reload-btn'){
+      navigator.serviceWorker.ready.then(function(reg){
+        if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
+        else window.location.reload();
+      });
+    }
+  });
 })();
 
 // ── Mobile nav hamburger (injected on all pages that have a nav) ──
@@ -437,9 +519,13 @@ window.showToast=function(msg,type){
     try{
       var d=JSON.parse(localStorage.getItem(KEY)||'[]');
       d.push({e:event,k:key,x:extra||null,t:Date.now()});
-      if(d.length>600)d=d.slice(-600);
+      if(d.length>300)d=d.slice(-300);
       localStorage.setItem(KEY,JSON.stringify(d));
-    }catch(e){}
+    }catch(e){
+      if(e&&e.name==='QuotaExceededError'){
+        try{localStorage.removeItem(KEY);}catch(ex){}
+      }
+    }
   };
   window.TAQA_Analytics={
     get:function(){try{return JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){return[];}},
@@ -602,4 +688,72 @@ document.addEventListener('keydown',function(e){
   var s=document.createElement('style');
   s.textContent=':focus-visible{outline:2px solid #00BFB2!important;outline-offset:3px!important;border-radius:4px!important;}';
   document.head.appendChild(s);
+})();
+
+// ── Form label accessibility (auto-associate label[for] with inputs) ──
+(function(){
+  document.addEventListener('DOMContentLoaded',function(){
+    var c=0;
+    document.querySelectorAll('.fl-wrap,.form-group').forEach(function(wrap){
+      var inp=wrap.querySelector('input:not([type=file]):not([type=submit]),textarea,select');
+      var lbl=wrap.querySelector('label');
+      if(!inp||!lbl) return;
+      if(!inp.id) inp.id='taqa-field-'+(++c);
+      lbl.setAttribute('for',inp.id);
+    });
+  });
+})();
+
+// ── iOS input zoom prevention (font-size 16px on mobile) ──
+(function(){
+  var s=document.createElement('style');
+  s.textContent='@media(max-width:768px){input,select,textarea{font-size:16px!important;}}';
+  document.head.appendChild(s);
+})();
+
+// ── Form draft auto-save ──
+(function(){
+  var p=location.pathname;
+  var isUpload=p.indexOf('upload')>-1;
+  var isTicket=p.indexOf('support-ticket')>-1;
+  if(!isUpload && !isTicket) return;
+  var KEY='taqa-draft-'+(isUpload?'upload':'ticket');
+
+  function getFields(){
+    return document.querySelectorAll('input:not([type=file]):not([type=submit]):not([type=button]),select,textarea');
+  }
+
+  function saveDraft(){
+    var data={};
+    getFields().forEach(function(f){
+      if(f.id || f.name) data[f.id||f.name]=f.value;
+    });
+    try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(e){}
+  }
+
+  function loadDraft(){
+    var raw; try{ raw=localStorage.getItem(KEY); }catch(e){ return; }
+    if(!raw) return;
+    var data; try{ data=JSON.parse(raw); }catch(e){ return; }
+    getFields().forEach(function(f){
+      var k=f.id||f.name;
+      if(k && data[k] != null && data[k] !== '') f.value=data[k];
+    });
+    if(Object.keys(data).some(function(k){return data[k]!=='';})){
+      if(window.showToast) window.showToast('Draft restored','info');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    loadDraft();
+    document.addEventListener('input', saveDraft);
+    document.addEventListener('change', saveDraft);
+    // Clear draft on successful submit
+    var forms=document.querySelectorAll('form');
+    forms.forEach(function(form){
+      form.addEventListener('submit', function(){
+        try{ localStorage.removeItem(KEY); }catch(e){}
+      });
+    });
+  });
 })();

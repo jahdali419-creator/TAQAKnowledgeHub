@@ -24,19 +24,10 @@
   // SHARED UTILITIES
   // ─────────────────────────────────────────────────────────
 
-  function showToast(msg, color) {
-    let t = document.querySelector('.dash-toast') || document.querySelector('.hub-toast');
-    if (!t) {
-      t = document.createElement('div');
-      t.className = 'dash-toast hub-toast';
-      t.innerHTML = '<span class="dash-toast-dot"></span><span class="hub-toast-msg"></span>';
-      document.body.appendChild(t);
-    }
-    if (color) t.style.background = color;
-    t.querySelector('.hub-toast-msg, .dash-toast-dot + *').textContent = msg;
-    t.classList.add('show');
-    clearTimeout(t._timer);
-    t._timer = setTimeout(() => t.classList.remove('show'), 3200);
+  function showToast(msg, type) {
+    if (window.showToast) { window.showToast(msg, type || 'info'); return; }
+    // fallback if shared.js not yet loaded
+    console.info('[TAQA]', msg);
   }
 
   function injectStyles(css) {
@@ -108,19 +99,15 @@
       // FIX 3: Fix approval workflow text — replace "Knowledge Team Lead" with reality
       document.querySelectorAll('p, span, div, li').forEach(el => {
         if (el.children.length === 0 && el.textContent.includes('Knowledge Team Lead')) {
-          el.innerHTML = el.innerHTML
-            .replace(/Knowledge Team Lead/g, 'your Segment Director (or their delegated expert)');
-        }
-        if (el.innerHTML && el.innerHTML.includes('Knowledge Team Lead')) {
-          el.innerHTML = el.innerHTML
+          el.textContent = el.textContent
             .replace(/Knowledge Team Lead/g, 'your Segment Director (or their delegated expert)');
         }
       });
 
       // Also fix the workflow step descriptions
       document.querySelectorAll('.step-label, .workflow-step, [class*="workflow"], [class*="step"]').forEach(el => {
-        if (el.textContent.includes('Knowledge Team')) {
-          el.innerHTML = el.innerHTML.replace(/Knowledge Team Lead/g, 'Segment Director');
+        if (el.children.length === 0 && el.textContent.includes('Knowledge Team')) {
+          el.textContent = el.textContent.replace(/Knowledge Team Lead/g, 'Segment Director');
         }
       });
 
@@ -493,7 +480,10 @@
         // Add reason to card
         const reasonEl = document.createElement('div');
         reasonEl.style.cssText = 'font-size:12px;color:#ef4444;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.15);border-radius:8px;padding:8px 12px;margin-top:10px;line-height:1.5;';
-        reasonEl.innerHTML = `<strong>Rejection reason:</strong> ${reason}`;
+        var strongEl = document.createElement('strong');
+        strongEl.textContent = 'Rejection reason:';
+        reasonEl.appendChild(strongEl);
+        reasonEl.appendChild(document.createTextNode(' ' + reason));
         rejectTargetCard.appendChild(reasonEl);
 
         // Decrement counter
@@ -769,8 +759,12 @@
           showToast('Please enter both name and email');
           return;
         }
-        if (!email.includes('@')) {
-          showToast('Please enter a valid TAQA email address');
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+          showToast('Please enter a valid email address');
+          return;
+        }
+        if (!email.toLowerCase().includes('@taqa.')) {
+          showToast('Please use your official TAQA email address');
           return;
         }
 
