@@ -1,4 +1,4 @@
-const CACHE = 'taqa-hub-v33';
+const CACHE = 'taqa-hub-v34';
 const ASSETS = [
   '/TAQAKnowledgeHub/',
   '/TAQAKnowledgeHub/index.html',
@@ -36,7 +36,7 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(cached =>
+    caches.match(e.request, {ignoreSearch: true}).then(cached =>
       cached || fetch(e.request).catch(() => caches.match('/TAQAKnowledgeHub/index.html'))
     )
   );
