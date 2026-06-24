@@ -1,4 +1,4 @@
-const CACHE = 'taqa-hub-v43';
+const CACHE = 'taqa-hub-v44';
 
 // Detect base path automatically — works on GitHub Pages and Azure
 const BASE = self.location.pathname.replace('service-worker.js', '');
