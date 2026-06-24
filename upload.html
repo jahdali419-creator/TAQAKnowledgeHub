@@ -694,6 +694,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 <script>
 function toggleSoftwareFields(val) {
   document.getElementById('software-fields').style.display = val === 'Software' ? '' : 'none';
+  autoFillRefId();
 }
 // ── Drag & Drop ──
 const dropZone = document.getElementById('drop-zone');
@@ -833,6 +834,49 @@ function submitUpload(e) {
   fileQueue.style.display = 'none';
 }
 
+// ── Reference ID Auto-Generation ──
+const SEG_ID_FORMATS = {
+  'coiled-tubing':   { SOP:'CT-{N}',     Manual:'CT-MAN-{N}',   Policy:'CT-POL-{N}',   'Technical Alert':'ALERT-CT-{N}',   'Lesson Learned':'LL-CT-{N}',   Software:'CT-SW-{N}'   },
+  'fracturing':      { SOP:'FRAC-{N}',   Manual:'FRAC-MAN-{N}', Policy:'FRAC-POL-{N}', 'Technical Alert':'ALERT-FRAC-{N}', 'Lesson Learned':'LL-FRAC-{N}', Software:'FRAC-SW-{N}' },
+  'wireline':        { SOP:'WL-{N}',     Manual:'WL-MAN-{N}',   Policy:'WL-POL-{N}',   'Technical Alert':'ALERT-WL-{N}',   'Lesson Learned':'LL-WL-{N}',   Software:'WL-SW-{N}'   },
+  'drilling':        { SOP:'DRL-{N}',    Manual:'DRL-MAN-{N}',  Policy:'DRL-POL-{N}',  'Technical Alert':'ALERT-DRL-{N}',  'Lesson Learned':'LL-DRL-{N}',  Software:'DRL-SW-{N}'  },
+  'cementing':       { SOP:'CEM-{N}',    Manual:'CEM-MAN-{N}',  Policy:'CEM-POL-{N}',  'Technical Alert':'ALERT-CEM-{N}',  'Lesson Learned':'LL-CEM-{N}',  Software:'CEM-SW-{N}'  },
+  'inspection':      { SOP:'INS-{N}',    Manual:'INS-MAN-{N}',  Policy:'INS-POL-{N}',  'Technical Alert':'ALERT-INS-{N}',  'Lesson Learned':'LL-INS-{N}',  Software:'INS-SW-{N}'  },
+  'well-safety':     { SOP:'WS-{N}',     Manual:'WS-MAN-{N}',   Policy:'WS-POL-{N}',   'Technical Alert':'ALERT-WS-{N}',   'Lesson Learned':'LL-WS-{N}',   Software:'WS-SW-{N}'   },
+  'qhse':            { SOP:'QHSE-{N}',   Manual:'QHSE-MAN-{N}', Policy:'QHSE-POL-{N}', 'Technical Alert':'ALERT-QHSE-{N}', 'Lesson Learned':'LL-QHSE-{N}', Software:'QHSE-SW-{N}' },
+  'hr':              { SOP:'HR-{N}',     Manual:'HR-MAN-{N}',   Policy:'HR-POL-{N}',   'Technical Alert':'ALERT-HR-{N}',   'Lesson Learned':'LL-HR-{N}',   Software:'HR-SW-{N}'   },
+  'tws-maintenance': { SOP:'TWS-{N}',    Manual:'TWS-MAN-{N}',  Policy:'TWS-POL-{N}',  'Technical Alert':'ALERT-TWS-{N}',  'Lesson Learned':'LL-TWS-{N}',  Software:'TWS-SW-{N}'  },
+  'well-testing':    { SOP:'WT-{N}',     Manual:'WT-MAN-{N}',   Policy:'WT-POL-{N}',   'Technical Alert':'ALERT-WT-{N}',   'Lesson Learned':'LL-WT-{N}',   Software:'WT-SW-{N}'   },
+  'cybersecurity':   { SOP:'CS-PROC-{N}',Manual:'CS-STD-{N}',   Policy:'CS-POL-{N}',   'Technical Alert':'CS-COMP-{N}',    'Lesson Learned':'CS-AWR-{N}',  Software:'CS-SW-{N}'   }
+};
+const DOC_TYPE_COUNT = { SOP:'sops', Manual:'manuals', Policy:'policies', 'Technical Alert':'alerts', 'Lesson Learned':'lessons', Software:'software' };
+
+let isAutoFilling = false;
+
+function generateRefId(segId, docType) {
+  const tpl = (SEG_ID_FORMATS[segId] || {})[docType];
+  if (!tpl) return '';
+  const seg = (typeof TAQA_SEGMENTS !== 'undefined') ? TAQA_SEGMENTS[segId] : null;
+  const count = seg ? (seg[DOC_TYPE_COUNT[docType]] || 0) : 0;
+  return tpl.replace('{N}', String(count + 1).padStart(3, '0'));
+}
+
+function autoFillRefId() {
+  const segId    = (document.getElementById('seg-select') || {}).value;
+  const docType  = (document.getElementById('doc-type-select') || {}).value;
+  const refField = document.getElementById('doc-ref-id');
+  const statusEl = document.getElementById('doc-id-status');
+  if (!segId || !docType || !refField) return;
+  if (refField.dataset.autofilled === 'user') return; // user typed manually — respect it
+  const id = generateRefId(segId, docType);
+  if (!id) return;
+  isAutoFilling = true;
+  refField.value = id;
+  refField.dataset.autofilled = 'auto';
+  statusEl.innerHTML = '<span class="id-ok">⚡ Auto-generated · edit if needed</span>';
+  isAutoFilling = false;
+}
+
 // ── Duplicate Detection ──
 let currentSegId = '';
 let docStatus = 'new';
@@ -870,6 +914,7 @@ function onSegmentChange(segId) {
   currentSegId = segId;
   populateSupersedes(segId);
   runDupChecks();
+  autoFillRefId();
 }
 
 function setDocStatus(status) {
@@ -887,8 +932,14 @@ function populateSupersedes(segId) {
 }
 
 function checkDocId() {
-  const refId = document.getElementById('doc-ref-id').value.trim().toUpperCase();
+  const refField = document.getElementById('doc-ref-id');
+  const refId = refField.value.trim().toUpperCase();
   const statusEl = document.getElementById('doc-id-status');
+  // Track manual edits so autoFillRefId won't override the user's own text.
+  // isAutoFilling guards against marking programmatic fills as "user" edits.
+  if (!isAutoFilling) {
+    refField.dataset.autofilled = refId ? 'user' : ''; // empty = allow auto-fill again
+  }
   if (!refId) { statusEl.innerHTML=''; return; }
   if (!currentSegId) { statusEl.innerHTML='<span class="id-warn">⚠ Select a segment to validate the ID</span>'; return; }
   const existingIds = segmentIds(currentSegId);
