@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>try{var _t=localStorage.getItem('taqa-theme');if(_t)document.documentElement.setAttribute('data-theme',_t);}catch(e){}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' https://api.qrserver.com https://www.google-analytics.com data: blob:; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://script.google.com; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
@@ -340,7 +341,7 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,191,178,0.2)
     <button class="bell-btn" id="nav-bell" onclick="document.getElementById('pending-list').scrollIntoView({behavior:'smooth'})" title="Pending approvals" aria-label="Pending approvals"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge">3</span></button>
     <a id="back-to-segment" href="segment.html" class="btn btn-ghost" style="font-size:13px;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5"/><path d="M12 5l-7 7 7 7"/></svg> Back to Segment</a>
     <span class="nav-role-badge">Segment Controller</span>
-    <button class="btn btn-ghost" style="font-size:13px;">Sign Out</button>
+    <button class="btn btn-ghost" style="font-size:13px;" onclick="localStorage.removeItem('taqa-registered');location.href='index.html'">Sign Out</button>
   </div>
 </nav>
 
@@ -1037,8 +1038,11 @@ function initDashboard() {
 
   // Stats
   pendingCount = dash.pending.length;
+  const realPublished=(typeof TAQA_SEGMENTS!=='undefined'&&TAQA_SEGMENTS[dashSegId]&&TAQA_SEGMENTS[dashSegId].docs)
+    ?Object.values(TAQA_SEGMENTS[dashSegId].docs).reduce((s,a)=>s+(Array.isArray(a)?a.length:0),0)
+    :dash.published;
   animateCount(document.getElementById('stat-pending'), pendingCount, 500);
-  animateCount(document.getElementById('stat-published'), dash.published, 800);
+  animateCount(document.getElementById('stat-published'), realPublished, 800);
   animateCount(document.getElementById('stat-contributors'), dash.contributors.length + 1, 650);
   document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
 
@@ -1110,8 +1114,8 @@ function initDashboard() {
   // Published documents — show count and link to dedicated documents page
   const pubCountEl = document.getElementById('pub-doc-count');
   const pubBigEl = document.getElementById('pub-docs-count-big');
-  if (pubCountEl) pubCountEl.textContent = dash.published + ' documents';
-  if (pubBigEl) animateCount(pubBigEl, dash.published, 800);
+  if (pubCountEl) pubCountEl.textContent = realPublished + ' documents';
+  if (pubBigEl) animateCount(pubBigEl, realPublished, 800);
   const viewBtn = document.getElementById('view-docs-btn');
   if (viewBtn) viewBtn.href = 'documents.html?id=' + dashSegId;
 }

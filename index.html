@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>try{var _t=localStorage.getItem('taqa-theme');if(_t)document.documentElement.setAttribute('data-theme',_t);}catch(e){}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' https://api.qrserver.com https://www.google-analytics.com data: blob:; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://script.google.com; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TAQA Knowledge Hub</title>
@@ -409,7 +410,7 @@ html[data-theme="dark"] .mob-seg-link { border-color:#243044; }
   border-top:none;
 }
 .seg-acc-item.open .seg-acc-panel {
-  max-height:130px;
+  max-height:300px;
   border-top:1px solid rgba(0,0,0,0.06);
   background:linear-gradient(to right, var(--seg-color) 3px, #fafbfc 3px);
 }
@@ -2011,6 +2012,40 @@ html[data-theme="dark"] .t-dot.on{background:#00BFB2;}
 })();
 </script>
 
+<script src="segments-data.js"></script>
+<script>
+(function(){
+  if(typeof TAQA_SEGMENTS==='undefined') return;
+  function _cnt(seg){if(!seg||!seg.docs)return 0;return Object.values(seg.docs).reduce(function(s,a){return s+(Array.isArray(a)?a.length:0);},0);}
+  var _segs=Object.values(TAQA_SEGMENTS);
+  var _totalDocs=_segs.reduce(function(s,seg){return s+_cnt(seg);},0);
+  var _totalAlerts=_segs.reduce(function(s,seg){return s+(seg.docs&&Array.isArray(seg.docs.alerts)?seg.docs.alerts.length:0);},0);
+  var _totalSegs=_segs.length;
+  // Update stats strip counters
+  document.querySelectorAll('.stats-strip-item').forEach(function(item){
+    var lbl=item.querySelector('.stats-strip-label');
+    var num=item.querySelector('[data-target]');
+    if(!lbl||!num)return;
+    var t=lbl.textContent.trim();
+    if(t.indexOf('Document')!==-1)num.dataset.target=_totalDocs;
+    else if(t.indexOf('Segment')!==-1)num.dataset.target=_totalSegs;
+  });
+  // Update sidebar stats list
+  document.querySelectorAll('.stat-row').forEach(function(row){
+    var lbl=row.querySelector('.stat-row-label');
+    var val=row.querySelector('.stat-row-value');
+    if(!lbl||!val)return;
+    var t=lbl.textContent.trim();
+    if(t.indexOf('Document')!==-1)val.dataset.target=_totalDocs;
+    else if(t.indexOf('Segment')!==-1)val.dataset.target=_totalSegs;
+    else if(t.indexOf('Alert')!==-1)val.dataset.target=_totalAlerts;
+    else if(t.indexOf('User')!==-1)row.style.display='none';
+  });
+  // Update live header count text
+  var cc=document.querySelector('.cmd-header-count');
+  if(cc)cc.textContent=_totalSegs+' Segments · '+_totalDocs+' Documents';
+})();
+</script>
 <script src="shared.js"></script>
 <script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:linear-gradient(90deg,#00686A,#00BFB2);animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
