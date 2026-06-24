@@ -857,8 +857,26 @@ function generateRefId(segId, docType) {
   const tpl = (SEG_ID_FORMATS[segId] || {})[docType];
   if (!tpl) return '';
   const seg = (typeof TAQA_SEGMENTS !== 'undefined') ? TAQA_SEGMENTS[segId] : null;
-  const count = seg ? (seg[DOC_TYPE_COUNT[docType]] || 0) : 0;
-  return tpl.replace('{N}', String(count + 1).padStart(3, '0'));
+  if (!seg) return '';
+
+  // Derive the exact prefix that appears before the number in each doc title
+  const prefix = tpl.replace('-{N}', '');
+  const docsKey = DOC_TYPE_COUNT[docType];
+  const docList = (seg.docs && seg.docs[docsKey]) ? seg.docs[docsKey] : [];
+
+  // Scan every title in that list for "PREFIX-NNN" and find the highest number
+  const escaped = prefix.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+  const pat = new RegExp('^' + escaped + '-(\\d+)', 'i');
+  let maxNum = 0;
+  docList.forEach(title => {
+    const m = title.match(pat);
+    if (m) maxNum = Math.max(maxNum, parseInt(m[1], 10));
+  });
+
+  // Fall back to the segment count when titles don't carry numbered prefixes
+  if (maxNum === 0) maxNum = seg[docsKey] || 0;
+
+  return tpl.replace('{N}', String(maxNum + 1).padStart(3, '0'));
 }
 
 function autoFillRefId() {
