@@ -159,6 +159,25 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .tc-full{font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:7px;line-height:1.35;}
 .tc-def{font-size:12px;color:var(--text-muted);line-height:1.62;margin-bottom:12px;}
+/* ── Card expand / collapse ── */
+.tc-def-wrap{overflow:hidden;max-height:76px;transition:max-height 0.42s cubic-bezier(.4,0,.2,1);}
+.term-card.expandable .tc-def-wrap{position:relative;}
+.term-card.expandable .tc-def-wrap::after{content:'';position:absolute;bottom:0;left:0;right:0;height:28px;
+  background:linear-gradient(transparent,rgba(255,255,255,0.92));pointer-events:none;transition:opacity 0.28s;}
+html[data-theme="dark"] .term-card.expandable .tc-def-wrap::after{background:linear-gradient(transparent,rgba(22,32,51,0.94));}
+.term-card.tc-open .tc-def-wrap{max-height:800px;}
+.term-card.tc-open .tc-def-wrap::after{opacity:0;}
+.term-card.expandable{cursor:pointer;user-select:none;}
+.term-card.tc-open{border-color:rgba(0,104,106,0.42)!important;
+  box-shadow:0 16px 48px rgba(0,104,106,0.14)!important;transform:translateY(-4px)!important;}
+html[data-theme="dark"] .term-card.tc-open{border-color:rgba(0,191,178,0.3)!important;
+  box-shadow:0 16px 48px rgba(0,191,178,0.10)!important;}
+.tc-expand{display:none;align-items:center;gap:5px;padding:8px 0 2px;
+  font-size:11px;font-weight:700;color:var(--primary);letter-spacing:0.3px;opacity:0.85;transition:opacity 0.2s;}
+.term-card.expandable .tc-expand{display:flex;}
+.term-card.expandable:hover .tc-expand{opacity:1;}
+.tc-chevron{flex-shrink:0;transition:transform 0.38s cubic-bezier(.34,1.56,.64,1);}
+.term-card.tc-open .tc-chevron{transform:rotate(180deg);}
 .tc-footer{display:flex;align-items:center;justify-content:space-between;}
 .tc-cat{padding:3px 10px;border-radius:50px;font-size:11px;font-weight:600;letter-spacing:0.3px;}
 .tc-community{font-size:11px;color:var(--accent);font-style:italic;}
@@ -172,6 +191,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .cat-maintenance{background:rgba(107,114,128,0.1);color:#4b5563;}
 .cat-general{background:rgba(0,104,106,0.1);color:var(--primary);}
 .cat-custom{background:rgba(255,103,32,0.1);color:var(--accent);}
+.cat-hr{background:rgba(244,63,94,0.10);color:#e11d48;}
+.cat-cybersecurity{background:rgba(99,102,241,0.10);color:#4338ca;}
 .hl{background:rgba(0,191,178,0.18);color:var(--primary);border-radius:3px;padding:0 2px;font-weight:600;}
 
 /* ── No results ── */
@@ -309,6 +330,11 @@ html[data-theme="dark"] .term-card::after{background:linear-gradient(105deg,tran
   /* Terms: single column */
   .terms-grid{grid-template-columns:1fr;}
 
+  /* Expandable cards on touch: no lift (full-width cards look odd lifting),
+     always show "Read more" hint since hover is unreliable on touch */
+  .term-card.tc-open{transform:none!important;}
+  .term-card.expandable .tc-expand{opacity:1;}
+
   /* Sidebar: constrain but don't block scrollable children */
   .sidebar-card{padding:16px;}
   .submit-form,.sf-row{width:100%;}
@@ -382,7 +408,7 @@ html[data-theme="dark"] .term-card::after{background:linear-gradient(105deg,tran
     </div>
     <div class="hero-stats">
       <span class="hstat"><strong id="stat-total">0</strong> Terms</span>
-      <span class="hstat"><strong>9</strong> Categories</span>
+      <span class="hstat"><strong>11</strong> Categories</span>
       <span class="hstat"><strong id="stat-custom">0</strong> Community Added</span>
     </div>
   </div>
@@ -404,6 +430,8 @@ html[data-theme="dark"] .term-card::after{background:linear-gradient(105deg,tran
       <span class="cat-pill" data-cat="logging" onclick="filterCat(this)">Logging &amp; Reservoir</span>
       <span class="cat-pill" data-cat="commercial" onclick="filterCat(this)">Commercial</span>
       <span class="cat-pill" data-cat="maintenance" onclick="filterCat(this)">Maintenance</span>
+      <span class="cat-pill" data-cat="hr" onclick="filterCat(this)">Human Resources</span>
+      <span class="cat-pill" data-cat="cybersecurity" onclick="filterCat(this)">Cybersecurity</span>
     </div>
 
     <div class="alpha-nav" id="alpha-nav"></div>
@@ -448,6 +476,8 @@ html[data-theme="dark"] .term-card::after{background:linear-gradient(105deg,tran
             <option value="commercial">Commercial</option>
             <option value="maintenance">Maintenance</option>
             <option value="general">General</option>
+            <option value="hr">Human Resources</option>
+            <option value="cybersecurity">Cybersecurity</option>
           </select>
         </div>
         <button class="btn-submit" onclick="submitTerm()">Submit Term</button>
@@ -657,17 +687,65 @@ const BUILT_IN = [
   {abbr:'FAT',full:'Factory Acceptance Test',def:'Testing performed at the vendor\'s facility before shipment to verify equipment meets specification and functions correctly in a controlled environment.',cat:'maintenance'},
   {abbr:'SAT',full:'Site Acceptance Test',def:'Testing performed at the installation site after delivery to confirm equipment operates correctly in its final location before handover to operations.',cat:'maintenance'},
   {abbr:'CBM',full:'Condition Based Maintenance',def:'Maintenance triggered by actual equipment condition measurements rather than fixed time intervals, using sensor data and diagnostics to determine when intervention is needed.',cat:'maintenance'},
+  /* Human Resources */
+  {abbr:'HRIS',full:'Human Resource Information System',def:'Software platform centralising employee data — payroll, benefits, recruitment, performance, and attendance — enabling HR teams to manage the full employee lifecycle from a single database.',cat:'hr'},
+  {abbr:'HRBP',full:'Human Resources Business Partner',def:'A senior HR professional embedded within a business unit who aligns HR strategy with operational needs, acting as a strategic advisor to line managers on people-related decisions.',cat:'hr'},
+  {abbr:'OKR',full:'Objectives and Key Results',def:'A goal-setting framework where Objectives are qualitative aspirational goals and Key Results are quantifiable measures of progress. Teams typically set 3–5 OKRs per quarter for alignment and accountability.',cat:'hr'},
+  {abbr:'ATS',full:'Applicant Tracking System',def:'Software that automates recruitment workflows — collecting applications, screening CVs, scheduling interviews, and tracking candidates through the hiring pipeline from job posting to offer letter.',cat:'hr'},
+  {abbr:'PIP',full:'Performance Improvement Plan',def:'A structured, time-bound plan co-created by a manager and an underperforming employee to address specific performance gaps, with clear expectations, milestones, and scheduled checkpoint reviews.',cat:'hr'},
+  {abbr:'IDP',full:'Individual Development Plan',def:'A personal growth roadmap created between an employee and their manager, outlining short- and long-term career goals, development activities, required training, and target completion timelines.',cat:'hr'},
+  {abbr:'TNA',full:'Training Needs Analysis',def:'A systematic process identifying the gap between current and required competencies across a team or organisation, used to prioritise L&D investment and design targeted training programmes.',cat:'hr'},
+  {abbr:'EAP',full:'Employee Assistance Programme',def:'A confidential employer-sponsored service providing employees and their families with counselling, mental health support, financial advice, and referrals to specialist services — typically free at point of use.',cat:'hr'},
+  {abbr:'FTE',full:'Full-Time Equivalent',def:'A unit measuring workforce capacity — one FTE equals one full-time employee working standard hours. Part-time employees are expressed as a fraction (e.g. 20 hrs/week = 0.5 FTE). Used in headcount and budget planning.',cat:'hr'},
+  {abbr:'OJT',full:'On-the-Job Training',def:'Workplace learning conducted while performing the actual job role, with experienced colleagues or supervisors coaching new employees directly in the work environment — the most common form of skills transfer.',cat:'hr'},
+  {abbr:'EVP',full:'Employee Value Proposition',def:'The total package of rewards, culture, career opportunities, and working conditions an employer offers in exchange for skills and commitment, used to attract, engage, and retain talent.',cat:'hr'},
+  {abbr:'WFP',full:'Workforce Planning',def:'The strategic process of analysing current workforce capability, forecasting future people needs, and developing action plans to close gaps through hiring, training, redeployment, or restructuring.',cat:'hr'},
+  {abbr:'EEO',full:'Equal Employment Opportunity',def:'The legal principle prohibiting discrimination in hiring, promotion, or treatment based on race, gender, age, religion, disability, or national origin. Governed by national employment law frameworks.',cat:'hr'},
+  {abbr:'PMS',full:'Performance Management System',def:'An integrated framework of goal-setting, continuous feedback, mid-year check-ins, and annual appraisals used to evaluate employee performance and link results to rewards, development, or corrective action.',cat:'hr'},
+  {abbr:'COLA',full:'Cost of Living Adjustment',def:'A periodic salary or allowance increase tied to inflation or the consumer price index, preserving employees\' real purchasing power as the cost of goods and services rises over time.',cat:'hr'},
+  {abbr:'SWP',full:'Strategic Workforce Planning',def:'A long-range approach (typically 3–5 years) aligning talent supply with business strategy — identifying critical roles, future skill needs, succession gaps, and sourcing strategies before they become urgent.',cat:'hr'},
+  {abbr:'JD',full:'Job Description',def:'A formal document defining the purpose, key responsibilities, reporting lines, required qualifications, and competencies for a specific role, used in recruitment, onboarding, and performance management.',cat:'hr'},
+  {abbr:'L&D',full:'Learning & Development',def:'The HR function responsible for employee training programmes, career development initiatives, coaching, mentoring, and building the organisational capabilities required to meet current and future business goals.',cat:'hr'},
+  {abbr:'TMP',full:'Talent Management Programme',def:'A holistic HR strategy covering the identification, development, engagement, and retention of high-potential employees, including succession planning, leadership pipelines, and career pathways.',cat:'hr'},
+  {abbr:'SLA',full:'Service Level Agreement',def:'In HR, a formal commitment between HR and the business defining expected response times and delivery standards for HR services such as recruitment, onboarding, and payroll processing.',cat:'hr'},
+  /* Cybersecurity */
+  {abbr:'IAM',full:'Identity & Access Management',def:'A security framework of policies and technologies ensuring the right users have appropriate access to technology resources. Encompasses authentication, authorisation, provisioning, SSO, MFA, and account lifecycle management.',cat:'cybersecurity'},
+  {abbr:'MFA',full:'Multi-Factor Authentication',def:'An authentication method requiring users to verify identity through two or more independent factors: something you know (password), something you have (OTP token), or something you are (biometric). Significantly reduces account compromise risk.',cat:'cybersecurity'},
+  {abbr:'SOC',full:'Security Operations Centre',def:'A centralised team continuously monitoring organisational systems for cybersecurity threats, investigating alerts, coordinating incident response, and managing security tools 24/7.',cat:'cybersecurity'},
+  {abbr:'SIEM',full:'Security Information & Event Management',def:'A platform aggregating and correlating log data from across IT infrastructure in real time, applying rules and analytics to detect anomalies, generate alerts, and support forensic investigation.',cat:'cybersecurity'},
+  {abbr:'VPN',full:'Virtual Private Network',def:'An encrypted tunnel between a user\'s device and a network endpoint, masking traffic from interception and enabling secure remote access to internal corporate systems over the public internet.',cat:'cybersecurity'},
+  {abbr:'EDR',full:'Endpoint Detection & Response',def:'Security software deployed on endpoints (laptops, servers, workstations) that continuously monitors for suspicious activity, detects threats via behavioural analytics, and provides automated or guided response capabilities.',cat:'cybersecurity'},
+  {abbr:'DLP',full:'Data Loss Prevention',def:'Tools and policies detecting and preventing unauthorised transmission of sensitive data outside the organisation — monitoring email, web uploads, USB transfers, clipboard activity, and cloud storage.',cat:'cybersecurity'},
+  {abbr:'APT',full:'Advanced Persistent Threat',def:'A sophisticated, long-duration targeted cyberattack where an intruder establishes an undetected presence in a network to exfiltrate data or disrupt operations over months or years — often state-sponsored.',cat:'cybersecurity'},
+  {abbr:'CVE',full:'Common Vulnerabilities & Exposures',def:'A publicly maintained dictionary of known cybersecurity vulnerabilities, each assigned a unique CVE ID and CVSS severity score. Used globally to track, prioritise, and communicate vulnerability remediation.',cat:'cybersecurity'},
+  {abbr:'WAF',full:'Web Application Firewall',def:'A security appliance or cloud service filtering HTTP/HTTPS traffic to and from a web application, blocking common attacks such as SQL injection, cross-site scripting (XSS), and OWASP Top-10 threats.',cat:'cybersecurity'},
+  {abbr:'PAM',full:'Privileged Access Management',def:'A security discipline controlling, monitoring, and auditing access by privileged accounts (admins, service accounts) to critical systems, enforcing least-privilege principles, session recording, and just-in-time access.',cat:'cybersecurity'},
+  {abbr:'ZTA',full:'Zero Trust Architecture',def:'A security model assuming no user, device, or network segment is inherently trusted. Every access request must be explicitly verified using identity, device health, and contextual signals before granting minimum required access.',cat:'cybersecurity'},
+  {abbr:'PII',full:'Personally Identifiable Information',def:'Any data that can identify a specific individual — name, national ID, email, location, biometric data. Subject to data protection regulations (PDPL, GDPR) requiring secure handling, restricted storage, and controlled disposal.',cat:'cybersecurity'},
+  {abbr:'PDPL',full:'Personal Data Protection Law',def:'Saudi Arabia\'s national data privacy law (effective 2023) governing collection, processing, and storage of personal data by entities operating in the Kingdom, enforced by the Saudi Data & AI Authority (SDAIA).',cat:'cybersecurity'},
+  {abbr:'NCA',full:'National Cybersecurity Authority',def:'The Saudi Arabian government body responsible for cybersecurity policy, regulation, and oversight — issuing the Essential Cybersecurity Controls (ECC) and Cybersecurity Standard for Critical Systems (CSCC) that all entities must comply with.',cat:'cybersecurity'},
+  {abbr:'OT',full:'Operational Technology',def:'Hardware and software monitoring or controlling physical processes, equipment, and infrastructure — including industrial control systems, SCADA, DCS, and PLCs. OT cybersecurity is critical for energy and industrial organisations.',cat:'cybersecurity'},
+  {abbr:'ICS',full:'Industrial Control System',def:'A broad category of systems controlling industrial processes — encompassing SCADA, DCS, RTUs, and PLCs. ICS security focuses on protecting operational continuity from cyber disruption, sabotage, or unauthorised access.',cat:'cybersecurity'},
+  {abbr:'RTO',full:'Recovery Time Objective',def:'The maximum acceptable downtime following a disruption before business operations must be restored. Drives DR infrastructure sizing and contractual service commitments in business continuity planning.',cat:'cybersecurity'},
+  {abbr:'RPO',full:'Recovery Point Objective',def:'The maximum acceptable data loss following a disruption, expressed as a time window. Determines backup frequency — an RPO of 1 hour requires backups to run at least every 60 minutes.',cat:'cybersecurity'},
+  {abbr:'SSO',full:'Single Sign-On',def:'An authentication scheme allowing users to log in once and access multiple applications without re-entering credentials, reducing password fatigue and centralising access control — most effective when combined with MFA.',cat:'cybersecurity'},
+  {abbr:'PKI',full:'Public Key Infrastructure',def:'A framework of policies, hardware, software, and procedures managing digital certificates and public-private key pairs, enabling encrypted communications, digital signatures, and identity verification across networks.',cat:'cybersecurity'},
+  {abbr:'TLS',full:'Transport Layer Security',def:'The cryptographic protocol (successor to SSL) securing data in transit between clients and servers. TLS 1.3 is the current standard, encrypting all web, API, email, and file-transfer communications.',cat:'cybersecurity'},
+  {abbr:'CIA',full:'Confidentiality, Integrity & Availability',def:'The three core principles of information security — Confidentiality (data accessible only to authorised parties), Integrity (data is accurate and unaltered), Availability (systems accessible when needed). Also called the CIA Triad.',cat:'cybersecurity'},
+  {abbr:'CSIRT',full:'Computer Security Incident Response Team',def:'A designated team responsible for coordinating the organisation\'s response to cybersecurity incidents — detection, containment, eradication, recovery, and post-incident review to prevent recurrence.',cat:'cybersecurity'},
 ];
 
 const CAT_LABELS = {
   drilling:'Drilling',wellcontrol:'Well Control',production:'Production',
   safety:'Safety & HSE',engineering:'Engineering',logging:'Logging & Reservoir',
-  commercial:'Commercial',maintenance:'Maintenance',general:'General',custom:'Community'
+  commercial:'Commercial',maintenance:'Maintenance',general:'General',
+  hr:'Human Resources',cybersecurity:'Cybersecurity',custom:'Community'
 };
 const CAT_CLS = {
   drilling:'cat-drilling',wellcontrol:'cat-wellcontrol',production:'cat-production',
   safety:'cat-safety',engineering:'cat-engineering',logging:'cat-logging',
-  commercial:'cat-commercial',maintenance:'cat-maintenance',general:'cat-general',custom:'cat-custom'
+  commercial:'cat-commercial',maintenance:'cat-maintenance',general:'cat-general',
+  hr:'cat-hr',cybersecurity:'cat-cybersecurity',custom:'cat-custom'
 };
 
 /* ── State ─────────────────────────────────────────────────────── */
@@ -726,17 +804,28 @@ function renderCards() {
   grid.innerHTML = filtered.map(t => {
     const catCls = CAT_CLS[t.cat] || 'cat-general';
     const catLabel = CAT_LABELS[t.cat] || t.cat;
-    const defShort = (t.def || '').length > 155 ? t.def.substring(0, 155) + '…' : (t.def || '');
-    return `<div class="term-card">
+    const fullDef = t.def || '';
+    const isLong = fullDef.length > 155;
+    return `<div class="term-card${isLong ? ' expandable' : ''}"${isLong ? ' onclick="toggleCard(this)"' : ''}>
       <div class="tc-abbr">${hl(t.abbr, q)}</div>
       <div class="tc-full">${hl(t.full, q)}</div>
-      <div class="tc-def">${hl(defShort, q)}</div>
+      <div class="tc-def-wrap"><div class="tc-def">${hl(fullDef, q)}</div></div>
+      ${isLong ? `<div class="tc-expand">
+        <svg class="tc-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        <span class="tc-expand-lbl">Read more</span>
+      </div>` : ''}
       <div class="tc-footer">
         <span class="tc-cat ${catCls}">${catLabel}</span>
         ${t.cat === 'custom' ? '<span class="tc-community">Community</span>' : ''}
       </div>
     </div>`;
   }).join('');
+}
+
+function toggleCard(card) {
+  const open = card.classList.toggle('tc-open');
+  const lbl = card.querySelector('.tc-expand-lbl');
+  if (lbl) lbl.textContent = open ? 'Read less' : 'Read more';
 }
 
 function buildAlphaNav() {
@@ -750,7 +839,7 @@ function buildAlphaNav() {
 }
 
 function buildCatStats() {
-  const cats = ['drilling','wellcontrol','production','safety','engineering','logging','commercial','maintenance'];
+  const cats = ['drilling','wellcontrol','production','safety','engineering','logging','commercial','maintenance','hr','cybersecurity'];
   const counts = Object.fromEntries(cats.map(c => [c, allTerms.filter(t => t.cat === c).length]));
   const max = Math.max(...Object.values(counts), 1);
   document.getElementById('cat-stat-list').innerHTML = cats.map(c =>

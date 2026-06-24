@@ -141,22 +141,34 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .action-result.approved-txt{color:#00BFB2;}
 .action-result.rejected-txt{color:#ef4444;}
 
-/* ── Published Docs ── */
-.pub-table{width:100%;border-collapse:collapse;margin-bottom:4px;}
-.pub-table th{font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;
-  color:var(--text-muted);padding:0 16px 10px;text-align:left;border-bottom:1px solid var(--border);}
-.pub-table td{padding:14px 16px;font-size:13px;color:var(--text);border-bottom:1px solid rgba(0,0,0,0.04);}
-.pub-table tr:hover td{background:rgba(0,104,106,0.02);}
-.pub-table tr:last-child td{border-bottom:none;}
-.pub-doc-title{font-weight:500;}
-.pub-doc-type-badge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;}
-.pub-type-sop{background:rgba(0,104,106,0.1);color:#00868a;}
-.pub-type-manual{background:rgba(59,130,246,0.1);color:#60a5fa;}
-.pub-type-policy{background:rgba(245,158,11,0.1);color:#f59e0b;}
-.pub-type-alert{background:rgba(255,103,32,0.1);color:#FF6720;}
-.pub-remove-btn{font-size:12px;color:#ef4444;background:none;border:none;cursor:pointer;
-  padding:4px 8px;border-radius:6px;font-family:'Inter',sans-serif;transition:background 0.15s;}
-.pub-remove-btn:hover{background:rgba(239,68,68,0.08);}
+/* ── Published Docs Link Card ── */
+.pub-docs-link-card{background:var(--bg-white);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.pub-docs-link-info{display:flex;align-items:center;gap:16px;}
+.pub-docs-link-icon{width:48px;height:48px;border-radius:12px;background:rgba(0,104,106,0.08);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pub-docs-link-count{font-family:'Urbanist',sans-serif;font-size:28px;font-weight:800;color:var(--text);line-height:1;}
+.pub-docs-link-sub{font-size:12.5px;color:var(--text-muted);margin-top:3px;}
+
+/* ── Admin Duplicate Detection ── */
+.dup-sim-panel{background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:12px 16px;margin-bottom:12px;}
+.dup-sim-hd{font-size:10.5px;font-weight:700;color:#d97706;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.dup-sim-item{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(245,158,11,0.1);}
+.dup-sim-item:last-child{border-bottom:none;padding-bottom:0;}
+.dup-sim-bar-wrap{width:36px;height:3px;background:rgba(245,158,11,0.2);border-radius:2px;flex-shrink:0;}
+.dup-sim-bar{height:100%;border-radius:2px;background:#f59e0b;}
+.dup-sim-title{font-size:12px;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dup-sim-pct{font-size:10px;font-weight:700;color:#d97706;white-space:nowrap;background:rgba(245,158,11,0.1);padding:2px 6px;border-radius:4px;}
+.dup-exact-banner{background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:11px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+.dup-exact-badge{font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(239,68,68,0.12);color:#ef4444;white-space:nowrap;letter-spacing:0.8px;flex-shrink:0;}
+.dup-exact-txt{font-size:12px;color:var(--text-muted);}
+.supersedes-row{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.2);border-radius:8px;margin-bottom:12px;max-width:100%;overflow:hidden;}
+.supersedes-label{font-size:10px;font-weight:700;color:#60a5fa;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;}
+.supersedes-doc-title{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pending-card.dup-flagged{border-left:3px solid rgba(239,68,68,0.55);}
+html[data-theme="dark"] .dup-sim-panel{background:rgba(245,158,11,0.04);border-color:rgba(245,158,11,0.15);}
+html[data-theme="dark"] .dup-exact-banner{background:rgba(239,68,68,0.05);border-color:rgba(239,68,68,0.2);}
+html[data-theme="dark"] .supersedes-row{background:rgba(59,130,246,0.05);border-color:rgba(59,130,246,0.15);}
 
 /* ── Right Column ── */
 .right-col{display:flex;flex-direction:column;gap:20px;}
@@ -255,8 +267,17 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
   .btn-approve,.btn-reject,.btn-preview-link{flex:1;text-align:center;justify-content:center;}
   .pub-table th:nth-child(3),.pub-table td:nth-child(3),
   .pub-table th:nth-child(4),.pub-table td:nth-child(4){display:none;}
+  .pub-table colgroup col:nth-child(1){width:60%;}
+  .pub-table colgroup col:nth-child(2){width:20%;}
+  .pub-table colgroup col:nth-child(5){width:20%;}
   .section-hd{flex-wrap:wrap;gap:8px;}
   .dash-breadcrumb{padding-left:20px;padding-right:20px;}
+  /* Duplicate detection panels: prevent text overflow on narrow screens */
+  .dup-sim-title{white-space:normal;word-break:break-word;}
+  .dup-sim-item{flex-wrap:wrap;}
+  .supersedes-doc-title{white-space:normal;word-break:break-word;}
+  .supersedes-row{flex-wrap:wrap;gap:5px;}
+  .dup-exact-banner{flex-wrap:wrap;}
 }
 @media(max-width:480px){
   .dash-outer{padding:16px 16px 60px;}
@@ -280,9 +301,8 @@ html[data-theme="dark"] .section-hd-count{background:#19263a;border-color:#24304
 html[data-theme="dark"] .widget{background:#19263a;border-color:#243044;}
 html[data-theme="dark"] .contributor-row{border-color:#243044;}
 html[data-theme="dark"] .activity-item{border-color:#243044;}
-html[data-theme="dark"] .pub-table th{border-color:#243044;color:#7e94ab;}
-html[data-theme="dark"] .pub-table td{border-color:#1e2d3f;}
-html[data-theme="dark"] .pub-table tr:hover td{background:rgba(0,104,106,0.06);}
+html[data-theme="dark"] .pub-docs-link-card{background:#19263a;border-color:#243044;}
+html[data-theme="dark"] .pub-docs-link-icon{background:rgba(0,191,178,0.1);}
 html[data-theme="dark"] div[style*="background:var(--bg-white)"]{background:#19263a!important;border-color:#243044!important;}
 html[data-theme="dark"] .modal-box{background:#19263a;border-color:#243044;}
 html[data-theme="dark"] .form-input,html[data-theme="dark"] .form-select{background:#111e2d;border-color:#243044;color:#dde4ef;}
@@ -450,61 +470,27 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,191,178,0.2)
       <!-- Published Documents -->
       <div class="section-hd" style="margin-top:36px;">
         <div class="section-hd-title">Published Documents</div>
-        <span class="section-hd-count">47 documents</span>
+        <span class="section-hd-count" id="pub-doc-count">— documents</span>
       </div>
-
-      <div style="background:var(--bg-white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
-        <table class="pub-table">
-          <thead>
-            <tr>
-              <th>Document</th>
-              <th>Type</th>
-              <th>Published</th>
-              <th>By</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="pub-docs-body">
-            <tr>
-              <td class="pub-doc-title">CT-SOP-001 Morning Safety Meeting Checklist</td>
-              <td><span class="pub-doc-type-badge pub-type-sop">SOP</span></td>
-              <td style="color:var(--text-muted);font-size:12px;">Apr 2026</td>
-              <td style="color:var(--text-muted);font-size:12px;">M. Jahdali</td>
-              <td><button class="pub-remove-btn" onclick="removeDoc(this)">Remove</button></td>
-            </tr>
-            <tr>
-              <td class="pub-doc-title">Nowsco CT Unit Operations Manual v4.1</td>
-              <td><span class="pub-doc-type-badge pub-type-manual">Manual</span></td>
-              <td style="color:var(--text-muted);font-size:12px;">Mar 2026</td>
-              <td style="color:var(--text-muted);font-size:12px;">K. Al-Otaibi</td>
-              <td><button class="pub-remove-btn" onclick="removeDoc(this)">Remove</button></td>
-            </tr>
-            <tr>
-              <td class="pub-doc-title">ALERT-CT-007: BOP Ram Seal Replacement</td>
-              <td><span class="pub-doc-type-badge pub-type-alert">Alert</span></td>
-              <td style="color:var(--text-muted);font-size:12px;">May 2026</td>
-              <td style="color:var(--text-muted);font-size:12px;">F. Al-Ghamdi</td>
-              <td><button class="pub-remove-btn" onclick="removeDoc(this)">Remove</button></td>
-            </tr>
-            <tr>
-              <td class="pub-doc-title">CT-SOP-003 Wellhead Rigging Procedure</td>
-              <td><span class="pub-doc-type-badge pub-type-sop">SOP</span></td>
-              <td style="color:var(--text-muted);font-size:12px;">Feb 2026</td>
-              <td style="color:var(--text-muted);font-size:12px;">O. Al-Harbi</td>
-              <td><button class="pub-remove-btn" onclick="removeDoc(this)">Remove</button></td>
-            </tr>
-            <tr>
-              <td class="pub-doc-title">CT Operations Safety Policy v2.0</td>
-              <td><span class="pub-doc-type-badge pub-type-policy">Policy</span></td>
-              <td style="color:var(--text-muted);font-size:12px;">Jan 2026</td>
-              <td style="color:var(--text-muted);font-size:12px;">M. Jahdali</td>
-              <td><button class="pub-remove-btn" onclick="removeDoc(this)">Remove</button></td>
-            </tr>
-            <tr>
-              <td style="color:var(--text-muted);font-size:12.5px;font-style:italic;" colspan="5">+ 42 more documents published</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="pub-docs-link-card">
+        <div class="pub-docs-link-info">
+          <div class="pub-docs-link-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <div>
+            <div class="pub-docs-link-count" id="pub-docs-count-big">—</div>
+            <div class="pub-docs-link-sub">documents published in this segment</div>
+          </div>
+        </div>
+        <a id="view-docs-btn" href="documents.html" class="btn btn-primary" style="white-space:nowrap;flex-shrink:0;">
+          View &amp; Manage
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+        </a>
       </div>
 
     </div><!-- /left col -->
@@ -641,11 +627,11 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,191,178,0.2)
     <div class="form-group">
       <label class="form-label">Assign Role</label>
       <select class="form-select" id="contrib-role" onchange="updateRoleHint()">
-        <option value="Editor">Editor — Can upload and submit documents for approval</option>
-        <option value="Viewer">Viewer — Can read documents only, cannot upload</option>
-        <option value="Owner">Owner — Full control, can approve and manage contributors</option>
+        <option value="Editor">Editor. Can upload and submit documents for approval</option>
+        <option value="Viewer">Viewer. Can read documents only</option>
+        <option value="Owner">Owner. Full control and manage contributors</option>
       </select>
-      <div class="role-hint" id="role-hint">This person can upload documents. All uploads will require your approval before going live.</div>
+      <div class="role-hint" id="role-hint">Can upload documents. All uploads need approval.</div>
     </div>
     <div class="modal-actions">
       <button class="btn-modal-cancel" onclick="closeAddContributor()">Cancel</button>
@@ -660,6 +646,7 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,191,178,0.2)
   <span id="dash-toast-msg">Done</span>
 </div>
 
+<script src="segments-data.js"></script>
 <script>
 let pendingCount = 0;
 
@@ -675,9 +662,9 @@ const DASH_DATA = {
   ],
   published:47,
   pending:[
-    {type:'Vendor Manual',title:'Halliburton CT-240 Coiled Tubing Unit — Maintenance Manual v3.2',submitter:'Khalid Al-Otaibi',when:'2 hours ago',size:'4.8 MB',preview:'Covers preventive and corrective maintenance for the CT-240 unit: hydraulic service intervals, injector head inspection, BOP function tests, and reel drum alignment.'},
-    {type:'Technical Alert',title:'ALERT-CT-009: Nitrogen Pump Pressure Relief Valve — Inspection Required',submitter:'Faisal Al-Ghamdi',when:'5 hours ago',size:'1.2 MB',preview:'A pressure relief valve failure was found on two CT units during routine inspection. All units must be inspected within 48 hours per attached checklist.'},
-    {type:'SOP Update',title:'CT-SOP-007 Wellhead Connection Procedure — Revision 4',submitter:'Omar Al-Harbi',when:'Yesterday',size:'2.1 MB',preview:'Revision 4 updates wellhead connection torque specifications after the Q1 2026 equipment audit. Sections 4.2 and 6.1 updated. Previous Rev 3 to be archived upon approval.'}
+    {type:'Vendor Manual',docId:'CT-MAN-012',title:'Halliburton CT-240 Coiled Tubing Unit — Maintenance Manual v3.2',submitter:'Khalid Al-Otaibi',when:'2 hours ago',size:'4.8 MB',preview:'Covers preventive and corrective maintenance for the CT-240 unit: hydraulic service intervals, injector head inspection, BOP function tests, and reel drum alignment.'},
+    {type:'Technical Alert',docId:'ALERT-CT-009',isExactDup:true,title:'ALERT-CT-009: Nitrogen Pump Pressure Relief Valve — Inspection Required',submitter:'Faisal Al-Ghamdi',when:'5 hours ago',size:'1.2 MB',preview:'A pressure relief valve failure was found on two CT units during routine inspection. All units must be inspected within 48 hours per attached checklist.'},
+    {type:'SOP Update',docId:'CT-SOP-007',isRevision:true,supersedes:'CT-SOP-007 Wellhead Connection Procedure — Revision 3',title:'CT-SOP-007 Wellhead Connection Procedure — Revision 4',submitter:'Omar Al-Harbi',when:'Yesterday',size:'2.1 MB',preview:'Revision 4 updates wellhead connection torque specifications after the Q1 2026 equipment audit. Sections 4.2 and 6.1 updated. Previous Rev 3 to be archived upon approval.'}
   ],
   pubDocs:[
     {title:'CT-SOP-001 Morning Safety Meeting Checklist',type:'sop',date:'Apr 2026',by:'M. Jahdali'},
@@ -858,6 +845,36 @@ const DASH_DATA = {
     {dot:'dot-green',text:'You published <strong>Well Control Manual v6.0</strong>',time:'5 days ago'}
   ]
 },
+'cybersecurity':{
+  name:'Cybersecurity',
+  owner:{name:'Mohammed Al Obaid',initials:'MO',title:'Cybersecurity Director',av:'av-purple'},
+  contributors:[
+    {name:'Afnan Al Khabty',initials:'AK',title:'Senior Cyber Security Analyst',role:'Editor',av:'av-teal'}
+  ],
+  published:30,
+  pending:[
+    /* Card 1 — Part match: title overlaps "CS-PROC-006 Privileged Account Management Procedure" (~57%) and "CS-PROC-008 Third-Party Access Procedure" (~29%) */
+    {type:'New Procedure',docId:'CS-PROC-011',title:'Vendor Access Control & Privileged Account Management Procedure',submitter:'Afnan Al Khabty',when:'1 hour ago',size:'1.8 MB',preview:'Establishes access controls for external vendor connections to TAQA IT and OT environments, including privileged account creation, time-limited access windows, real-time session monitoring, and automated revocation for third-party service providers.'},
+    /* Card 2 — Exact/full match: file hash matches the already-published "Data Privacy & Protection Policy" */
+    {type:'Policy',docId:'CS-POL-007',isExactDup:true,title:'Data Privacy & Protection Policy',submitter:'Afnan Al Khabty',when:'3 hours ago',size:'0.8 MB',preview:'Resubmission of the Data Privacy and Protection Policy with minor formatting corrections. File fingerprint matches the currently published version — likely an accidental reupload. No content changes detected.'},
+    /* Card 3 — Revision: supersedes Revision 3, also shows amber panel because title is similar to existing CS-PROC-001 */
+    {type:'SOP Update',docId:'CS-PROC-001',isRevision:true,supersedes:'CS-PROC-001 Incident Response Procedure — Revision 3',title:'CS-PROC-001 Incident Response Procedure — Revision 4',submitter:'Mohammed Al Obaid',when:'Yesterday',size:'2.4 MB',preview:'Revision 4 strengthens the incident escalation workflow, adds direct communication protocols with Saudi CERT, and updates forensic evidence preservation requirements following the NCA CSCC compliance review. Previous Revision 3 to be archived upon approval.'}
+  ],
+  pubDocs:[
+    {title:'CS-PROC-001 Incident Response Procedure',type:'sop',date:'May 2026',by:'A. Al Khabty'},
+    {title:'TAQA Cybersecurity Framework Standard v2.0',type:'manual',date:'Apr 2026',by:'M. Al Obaid'},
+    {title:'Information Security Policy',type:'policy',date:'Mar 2026',by:'M. Al Obaid'},
+    {title:'COMP-001: Annual Security Awareness Training Due',type:'alert',date:'May 2026',by:'A. Al Khabty'},
+    {title:'AWR-001: Phishing Simulation Results',type:'lesson',date:'Feb 2026',by:'A. Al Khabty'}
+  ],
+  activity:[
+    {dot:'dot-orange',text:'<strong>Afnan Al Khabty</strong> submitted CS-PROC-011 Vendor Access Procedure for review',time:'1 hour ago'},
+    {dot:'dot-orange',text:'<strong>Afnan Al Khabty</strong> submitted Data Privacy Policy — duplicate flag raised',time:'3 hours ago'},
+    {dot:'dot-orange',text:'<strong>Mohammed Al Obaid</strong> submitted CS-PROC-001 Revision 4 for review',time:'Yesterday'},
+    {dot:'dot-green',text:'You approved <strong>CS-STD-002 Identity &amp; Access Management Standard</strong>',time:'3 days ago'},
+    {dot:'dot-green',text:'You published <strong>Acceptable Use Policy</strong>',time:'4 days ago'}
+  ]
+},
 'qhse':{
   name:'QHSE',
   owner:{name:'Abdulaziz Al-Ghamdi',initials:'AG',title:'QHSE Manager',av:'av-orange'},
@@ -985,6 +1002,24 @@ function animateCount(el, target, duration) {
   requestAnimationFrame(step);
 }
 
+function buildSimilarDocs(title, segId, limit) {
+  if (typeof TAQA_SEGMENTS === 'undefined' || !TAQA_SEGMENTS[segId]) return [];
+  const seg = TAQA_SEGMENTS[segId];
+  const allTitles = [
+    ...(seg.docs.sops||[]),...(seg.docs.manuals||[]),...(seg.docs.policies||[]),
+    ...(seg.docs.alerts||[]),...(seg.docs.lessons||[])
+  ].map(t => String(t).replace(/^⚠️\s*/,''));
+  const stopW = new Set(['the','a','an','of','in','for','and','or','to','with','at','by','from','on','is','are','its','this','that','was','been']);
+  function kw(s){return s.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(w=>w.length>2&&!stopW.has(w));}
+  const wa = new Set(kw(title));
+  if (!wa.size) return [];
+  return allTitles
+    .map(t => { const wb=new Set(kw(t));const ov=[...wa].filter(w=>wb.has(w)).length;return {title:t,score:ov/Math.max(wa.size,wb.size,1)}; })
+    .filter(r => r.score >= 0.25 && r.title.toLowerCase() !== title.toLowerCase())
+    .sort((a,b) => b.score-a.score)
+    .slice(0, limit||3);
+}
+
 function initDashboard() {
   document.title = dash.name + ' — Control Panel · TAQA Knowledge Hub';
   document.getElementById('dash-seg-name').textContent = dash.name + ' Segment';
@@ -1012,24 +1047,40 @@ function initDashboard() {
   if (!dash.pending.length) {
     pendingList.innerHTML = '<div class="empty-pending"><div class="empty-pending-icon">✓</div><h3>All caught up!</h3><p>No documents awaiting review in this segment.</p></div>';
   } else {
-    pendingList.innerHTML = dash.pending.map((p, i) => `
-      <div class="pending-card" id="pcard-${i+1}">
+    pendingList.innerHTML = dash.pending.map((p, i) => {
+      const simDocs = buildSimilarDocs(p.title, dashSegId, 3);
+      const simPanel = simDocs.length ? `
+        <div class="dup-sim-panel">
+          <div class="dup-sim-hd"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Similar documents already in this segment</div>
+          ${simDocs.map(d=>`<div class="dup-sim-item"><div class="dup-sim-bar-wrap"><div class="dup-sim-bar" style="width:${Math.round(d.score*100)}%"></div></div><div class="dup-sim-title" title="${d.title}">${d.title}</div><span class="dup-sim-pct">${Math.round(d.score*100)}% match</span></div>`).join('')}
+        </div>` : '';
+      const exactBanner = p.isExactDup ? `
+        <div class="dup-exact-banner"><span class="dup-exact-badge">EXACT DUPLICATE</span><span class="dup-exact-txt">File fingerprint matches a document already published in this segment. Verify before approving.</span></div>` : '';
+      const supersRow = p.supersedes ? `
+        <div class="supersedes-row"><span class="supersedes-label">Replaces →</span><span class="supersedes-doc-title" title="${p.supersedes}">${p.supersedes}</span></div>` : '';
+      const docTypeLabel = p.docId
+        ? `<div class="pending-doc-type">${p.type} &nbsp;<span style="font-family:monospace;font-size:9.5px;font-weight:600;opacity:0.7;">${p.docId}</span></div>`
+        : `<div class="pending-doc-type">${p.type}</div>`;
+      return `
+      <div class="pending-card${p.isExactDup?' dup-flagged':''}" id="pcard-${i+1}">
         <div class="pending-card-top">
           <div class="pending-doc-info">
-            <div class="pending-doc-type">${p.type}</div>
+            ${docTypeLabel}
             <div class="pending-doc-title">${p.title}</div>
             <div class="pending-doc-meta">Submitted by <strong>${p.submitter}</strong> · ${p.when} · PDF · ${p.size}</div>
           </div>
           <span class="pending-status-badge badge-pending">Awaiting Review</span>
         </div>
         <div class="pending-doc-preview">${p.preview}</div>
+        ${exactBanner}${supersRow}${simPanel}
         <div class="pending-actions">
           <button class="btn-approve" onclick="approveDoc(${i+1})">✓ Approve</button>
           <button class="btn-reject" onclick="rejectDoc(${i+1})">✕ Reject</button>
           <button class="btn-preview-link">Preview Document</button>
           <span class="action-result" id="result-${i+1}"></span>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   }
 
   // Contributors
@@ -1056,17 +1107,13 @@ function initDashboard() {
       <div><div class="activity-text">${a.text}</div><div class="activity-time">${a.time}</div></div>
     </div>`).join('');
 
-  // Published docs
-  const tc = {sop:'pub-type-sop',manual:'pub-type-manual',policy:'pub-type-policy',alert:'pub-type-alert',lesson:'pub-type-manual'};
-  const tl = {sop:'SOP',manual:'Manual',policy:'Policy',alert:'Alert',lesson:'Lesson'};
-  const more = Math.max(0, dash.published - dash.pubDocs.length);
-  document.getElementById('pub-docs-body').innerHTML = dash.pubDocs.map(d =>
-    `<tr><td class="pub-doc-title">${d.title}</td>
-    <td><span class="pub-doc-type-badge ${tc[d.type]||'pub-type-sop'}">${tl[d.type]||d.type}</span></td>
-    <td style="color:var(--text-muted);font-size:12px;">${d.date}</td>
-    <td style="color:var(--text-muted);font-size:12px;">${d.by}</td>
-    <td><button class="pub-remove-btn" onclick="removeDoc(this)">Remove</button></td></tr>`
-  ).join('') + (more > 0 ? `<tr><td style="color:var(--text-muted);font-size:12.5px;font-style:italic;" colspan="5">+ ${more} more documents published</td></tr>` : '');
+  // Published documents — show count and link to dedicated documents page
+  const pubCountEl = document.getElementById('pub-doc-count');
+  const pubBigEl = document.getElementById('pub-docs-count-big');
+  if (pubCountEl) pubCountEl.textContent = dash.published + ' documents';
+  if (pubBigEl) animateCount(pubBigEl, dash.published, 800);
+  const viewBtn = document.getElementById('view-docs-btn');
+  if (viewBtn) viewBtn.href = 'documents.html?id=' + dashSegId;
 }
 
 initDashboard();
@@ -1123,9 +1170,9 @@ function rejectDoc(id) {
 }
 
 const ROLE_HINTS = {
-  Editor: 'This person can upload documents. All uploads will require your approval before going live.',
-  Viewer: 'This person can read and download documents only. They cannot upload or make changes.',
-  Owner: 'Full control — can approve documents, manage contributors, and remove content.'
+  Editor: 'Can upload documents. All uploads need approval.',
+  Viewer: 'Can read documents only. No uploads.',
+  Owner: 'Full control. Can approve documents and manage contributors.'
 };
 const AVATAR_COLORS = ['av-teal','av-blue','av-orange','av-purple',
   'style="background:linear-gradient(135deg,#ec4899,#f472b6)"',
@@ -1179,16 +1226,6 @@ function addContributor() {
   showToast(name + ' added as ' + role, '#00BFB2');
 }
 
-function removeDoc(btn) {
-  const row = btn.closest('tr');
-  const title = row.querySelector('.pub-doc-title').textContent;
-  if(confirm('Remove "' + title + '" from the segment? This cannot be undone.')) {
-    row.style.opacity = '0.3';
-    row.style.transition = 'opacity 0.3s';
-    setTimeout(() => row.remove(), 300);
-    showToast('Document removed from segment', '#f59e0b');
-  }
-}
 function updateBellCount(delta) {
   const n = Math.max(0, parseInt(localStorage.getItem('taqa-bell-count')||'0', 10) + delta);
   localStorage.setItem('taqa-bell-count', n);

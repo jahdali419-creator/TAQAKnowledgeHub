@@ -267,6 +267,41 @@ html[data-theme="dark"] .bg-blob-2{background:radial-gradient(circle,rgba(0,104,
 html[data-theme="dark"] .bg-blob-3{background:radial-gradient(circle,rgba(0,191,178,0.03) 0%,transparent 65%);}
 html[data-theme="dark"] .scroll-top-btn{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.1);}
 
+/* ── Duplicate Detection (user side) ── */
+.dup-warn-panel{background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:none;}
+.dup-warn-hd{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#d97706;margin-bottom:10px;}
+.dup-warn-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(245,158,11,0.12);}
+.dup-warn-item:last-child{border-bottom:none;padding-bottom:0;}
+.dup-warn-bar-wrap{width:38px;height:3px;background:rgba(245,158,11,0.2);border-radius:2px;flex-shrink:0;}
+.dup-warn-bar{height:100%;border-radius:2px;background:#f59e0b;}
+.dup-warn-title{font-size:12.5px;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dup-warn-pct{font-size:10.5px;font-weight:700;color:#d97706;white-space:nowrap;}
+.dup-warn-note{font-size:11.5px;color:var(--text-muted);margin-top:10px;padding-top:10px;border-top:1px solid rgba(245,158,11,0.15);}
+.dup-error-panel{background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:none;}
+.dup-error-hd{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#ef4444;margin-bottom:4px;}
+.dup-error-sub{font-size:12px;color:var(--text-muted);line-height:1.5;}
+.doc-id-row{position:relative;}
+.doc-id-status{font-size:11.5px;margin-top:5px;display:flex;align-items:center;gap:5px;min-height:18px;}
+.id-ok{color:#00868a;}
+.id-warn{color:#d97706;}
+.id-err{color:#ef4444;}
+.doc-status-toggle{display:flex;border:1px solid var(--glass-border);border-radius:10px;overflow:hidden;margin-bottom:0;}
+.status-btn{flex:1;padding:10px 14px;border:none;background:transparent;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;color:var(--text-muted);transition:all 0.2s;}
+.status-btn.active{background:var(--gradient);color:#fff;}
+.status-btn:not(.active):hover{background:rgba(0,104,106,0.07);color:var(--primary);}
+.supersedes-section{background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.18);border-radius:12px;padding:14px 18px;margin-top:12px;display:none;}
+.supersedes-hd{font-size:11px;font-weight:700;color:#60a5fa;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.hash-display{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(0,104,106,0.04);border:1px solid rgba(0,191,178,0.18);border-radius:8px;margin-top:10px;display:none;}
+.hash-display span{font-size:11px;color:var(--text-muted);white-space:nowrap;flex-shrink:0;}
+.hash-value{font-family:monospace;font-size:10px;color:var(--text);word-break:break-all;flex:1;}
+.hash-status-ok{font-size:11px;font-weight:600;color:#00868a;white-space:nowrap;}
+.hash-status-dup{font-size:11px;font-weight:600;color:#ef4444;white-space:nowrap;}
+html[data-theme="dark"] .dup-warn-panel{background:rgba(245,158,11,0.05);border-color:rgba(245,158,11,0.2);}
+html[data-theme="dark"] .dup-error-panel{background:rgba(239,68,68,0.05);border-color:rgba(239,68,68,0.2);}
+html[data-theme="dark"] .supersedes-section{background:rgba(59,130,246,0.04);border-color:rgba(59,130,246,0.15);}
+html[data-theme="dark"] .hash-display{background:rgba(0,104,106,0.06);border-color:rgba(0,191,178,0.12);}
+html[data-theme="dark"] .doc-status-toggle{border-color:rgba(255,255,255,0.1);}
+
 /* ── Page Exit Transition ── */
 @keyframes pageFadeOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-5px);}}
 body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
@@ -293,10 +328,16 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .form-row{grid-template-columns:1fr;}
   .page-header{padding-top:88px;padding-bottom:24px;}
   .upload-layout{padding-top:20px;}
+  /* Duplicate detection panels: prevent text overflow on narrow screens */
+  .dup-warn-title{white-space:normal;word-break:break-word;}
+  .dup-warn-item{flex-wrap:wrap;}
+  .hash-display{flex-wrap:wrap;gap:6px;}
+  .hash-value{word-break:break-all;}
 }
 @media(max-width:480px){
   .upload-layout{padding-left:16px;padding-right:16px;}
   .form-input,.form-select{font-size:16px;}
+  .dup-warn-panel,.dup-error-panel{padding:12px 14px;}
 }
 </style>
 </head>
@@ -365,31 +406,47 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
       <div id="file-list"></div>
     </div>
 
+    <!-- File hash display -->
+    <div class="hash-display" id="hash-display">
+      <span>File fingerprint:</span>
+      <span class="hash-value" id="hash-value">computing…</span>
+      <span id="hash-status"></span>
+    </div>
+
     <!-- ── Document Details ── -->
     <form id="upload-form" onsubmit="submitUpload(event)">
       <div class="form-section">
         <div class="form-section-title">Document Details</div>
         <div class="form-group">
+          <label class="form-label">Document Reference ID <span>*</span></label>
+          <div class="doc-id-row">
+            <input type="text" class="form-input" id="doc-ref-id" placeholder="e.g. CT-SOP-007, DRL-POL-003, ALERT-WS-001" oninput="checkDocId()" autocomplete="off">
+            <div class="doc-id-status" id="doc-id-status"></div>
+          </div>
+        </div>
+        <div class="form-group">
           <div class="fl-wrap">
-            <input type="text" class="form-input" placeholder=" " required>
+            <input type="text" class="form-input" id="doc-title-input" placeholder=" " required oninput="runDupChecks()">
             <label class="fl-label">Document Title<span class="req">*</span></label>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Segment <span>*</span></label>
-            <select class="form-select" required>
+            <select class="form-select" id="seg-select" required onchange="onSegmentChange(this.value)">
               <option value="" disabled selected>Select segment</option>
-              <option>Coiled Tubing</option>
-              <option>Fracturing</option>
-              <option>Wireline</option>
-              <option>Drilling</option>
-              <option>Cementing</option>
-              <option>Inspection Services</option>
-              <option>Well Safety</option>
-              <option>QHSE</option>
-              <option>TWS Maintenance</option>
-              <option>Human Resources</option>
+              <option value="coiled-tubing">Coiled Tubing</option>
+              <option value="fracturing">Fracturing</option>
+              <option value="wireline">Wireline</option>
+              <option value="drilling">Drilling</option>
+              <option value="cementing">Cementing</option>
+              <option value="inspection">Inspection Services</option>
+              <option value="well-safety">Well Safety</option>
+              <option value="cybersecurity">Cybersecurity</option>
+              <option value="qhse">QHSE</option>
+              <option value="tws-maintenance">TWS Maintenance</option>
+              <option value="hr">Human Resources</option>
+              <option value="well-testing">Well Testing</option>
             </select>
           </div>
           <div class="form-group">
@@ -403,6 +460,26 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
               <option>Lesson Learned</option>
               <option value="Software">Software / Tool</option>
             </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Document Status <span>*</span></label>
+          <div class="doc-status-toggle">
+            <button type="button" class="status-btn active" id="status-new" onclick="setDocStatus('new')">New Document</button>
+            <button type="button" class="status-btn" id="status-revision" onclick="setDocStatus('revision')">Revision / Update</button>
+          </div>
+        </div>
+        <div class="supersedes-section" id="supersedes-section">
+          <div class="supersedes-hd">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+            This revision replaces an existing document
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Supersedes (Document Being Replaced) <span>*</span></label>
+            <select class="form-select" id="supersedes-select">
+              <option value="" disabled selected>Select segment first, then choose document…</option>
+            </select>
+            <div style="font-size:11.5px;color:var(--text-muted);margin-top:5px;">The selected document will be archived when this revision is approved by the admin.</div>
           </div>
         </div>
         <div class="form-row">
@@ -503,6 +580,24 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
         </div>
       </div>
 
+      <!-- Exact duplicate warning -->
+      <div class="dup-error-panel" id="dup-error-panel">
+        <div class="dup-error-hd">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Exact duplicate detected
+        </div>
+        <div class="dup-error-sub" id="dup-error-msg">This file's fingerprint matches a document already in the segment. Please verify before submitting.</div>
+      </div>
+      <!-- Similar title warning -->
+      <div class="dup-warn-panel" id="dup-warn-panel">
+        <div class="dup-warn-hd">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Similar documents found in this segment
+        </div>
+        <div id="dup-warn-list"></div>
+        <div class="dup-warn-note">If this is a revision of one of the above, select <strong>Revision / Update</strong> and choose the document it replaces.</div>
+      </div>
+
       <div class="approval-note">
         <span class="approval-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#00BFB2" stroke-width="1.5"/><path d="M8 7v5M8 5v.5" stroke="#00BFB2" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         <div class="approval-text">
@@ -595,6 +690,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 <footer></footer>
 </div>
 
+<script src="segments-data.js"></script>
 <script>
 function toggleSoftwareFields(val) {
   document.getElementById('software-fields').style.display = val === 'Software' ? '' : 'none';
@@ -675,7 +771,10 @@ function addFiles(files) {
     }, 200);
   });
   fileQueue.style.display = selectedFiles.length ? 'block' : 'none';
-  if (added > 0) showToast('File Added', files[0].name.length > 32 ? files[0].name.substring(0,32)+'…' : files[0].name, ICON_ADD);
+  if (added > 0) {
+    showToast('File Added', files[0].name.length > 32 ? files[0].name.substring(0,32)+'…' : files[0].name, ICON_ADD);
+    computeAndCheckHash(files[0]);
+  }
 }
 
 function removeFile(id, name) {
@@ -712,6 +811,12 @@ function setUploadStep(n) {
 
 function submitUpload(e) {
   e.preventDefault();
+  if (!selectedFiles.length) {
+    showToast('No file selected', 'Please attach a document before submitting.', ICON_REMOVE);
+    const dz = document.getElementById('drop-zone');
+    if (dz) { dz.style.borderColor = '#ef4444'; setTimeout(() => dz.style.borderColor = '', 1800); }
+    return;
+  }
   setUploadStep(3);
   const ref = 'UPL-' + new Date().getFullYear() + '-' + Math.floor(1000+Math.random()*9000);
   document.getElementById('upload-ref').textContent = ref;
@@ -726,6 +831,123 @@ function submitUpload(e) {
   selectedFiles = [];
   fileList.innerHTML = '';
   fileQueue.style.display = 'none';
+}
+
+// ── Duplicate Detection ──
+let currentSegId = '';
+let docStatus = 'new';
+
+const STOP_WORDS = new Set(['the','a','an','of','in','for','and','or','to','with','at','by','from','on','is','are','its','this','that','was','been','rev','revision','version','update']);
+
+function segmentTitles(segId) {
+  if (typeof TAQA_SEGMENTS === 'undefined' || !TAQA_SEGMENTS[segId]) return [];
+  const seg = TAQA_SEGMENTS[segId];
+  return [
+    ...(seg.docs.sops||[]),...(seg.docs.manuals||[]),...(seg.docs.policies||[]),
+    ...(seg.docs.alerts||[]),...(seg.docs.lessons||[])
+  ].map(t => String(t).replace(/^⚠️\s*/,''));
+}
+
+function segmentIds(segId) {
+  const titles = segmentTitles(segId);
+  // extract leading IDs: uppercase alphanumeric-hyphen token at start of title
+  return titles.map(t => { const m=t.match(/^([A-Z0-9][A-Z0-9\-]+)\b/); return m?m[1]:null; }).filter(Boolean);
+}
+
+function kw(s){ return s.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(w=>w.length>2&&!STOP_WORDS.has(w)); }
+function titleSim(a,b){ const wa=new Set(kw(a)),wb=new Set(kw(b));const ov=[...wa].filter(w=>wb.has(w)).length;return ov/Math.max(wa.size,wb.size,1); }
+
+function findSimilarTitles(title, segId) {
+  if (!title.trim() || !segId) return [];
+  return segmentTitles(segId)
+    .map(t => ({ title:t, score:titleSim(title,t) }))
+    .filter(r => r.score >= 0.28 && r.title.toLowerCase() !== title.trim().toLowerCase())
+    .sort((a,b) => b.score-a.score)
+    .slice(0, 4);
+}
+
+function onSegmentChange(segId) {
+  currentSegId = segId;
+  populateSupersedes(segId);
+  runDupChecks();
+}
+
+function setDocStatus(status) {
+  docStatus = status;
+  document.getElementById('status-new').classList.toggle('active', status==='new');
+  document.getElementById('status-revision').classList.toggle('active', status==='revision');
+  document.getElementById('supersedes-section').style.display = status==='revision' ? '' : 'none';
+}
+
+function populateSupersedes(segId) {
+  const sel = document.getElementById('supersedes-select');
+  const titles = segmentTitles(segId);
+  sel.innerHTML = '<option value="" disabled selected>Choose the document being replaced…</option>' +
+    titles.map(t => `<option value="${t}">${t}</option>`).join('');
+}
+
+function checkDocId() {
+  const refId = document.getElementById('doc-ref-id').value.trim().toUpperCase();
+  const statusEl = document.getElementById('doc-id-status');
+  if (!refId) { statusEl.innerHTML=''; return; }
+  if (!currentSegId) { statusEl.innerHTML='<span class="id-warn">⚠ Select a segment to validate the ID</span>'; return; }
+  const existingIds = segmentIds(currentSegId);
+  const duplicate = existingIds.find(id => id === refId);
+  const similar = existingIds.filter(id => id !== refId && (id.startsWith(refId.split('-').slice(0,-1).join('-')) || refId.startsWith(id.split('-').slice(0,-1).join('-'))));
+  if (duplicate) {
+    statusEl.innerHTML = `<span class="id-err">✕ <strong>${refId}</strong> already exists in this segment. If this is a revision, select "Revision / Update" below.</span>`;
+  } else if (similar.length) {
+    statusEl.innerHTML = `<span class="id-warn">~ Related IDs found: ${similar.slice(0,3).join(', ')}</span>`;
+  } else {
+    statusEl.innerHTML = `<span class="id-ok">✓ ID available in this segment</span>`;
+  }
+}
+
+function runDupChecks() {
+  const title = (document.getElementById('doc-title-input')?.value||'').trim();
+  const warnPanel = document.getElementById('dup-warn-panel');
+  const warnList = document.getElementById('dup-warn-list');
+  if (!title || !currentSegId) { warnPanel.style.display='none'; return; }
+  const matches = findSimilarTitles(title, currentSegId);
+  if (matches.length) {
+    warnList.innerHTML = matches.map(m => `
+      <div class="dup-warn-item">
+        <div class="dup-warn-bar-wrap"><div class="dup-warn-bar" style="width:${Math.round(m.score*100)}%"></div></div>
+        <div class="dup-warn-title" title="${m.title}">${m.title}</div>
+        <span class="dup-warn-pct">${Math.round(m.score*100)}%</span>
+      </div>`).join('');
+    warnPanel.style.display = '';
+  } else {
+    warnPanel.style.display = 'none';
+  }
+}
+
+async function computeAndCheckHash(file) {
+  const hashDisplay = document.getElementById('hash-display');
+  const hashValue = document.getElementById('hash-value');
+  const hashStatus = document.getElementById('hash-status');
+  hashDisplay.style.display = 'flex';
+  hashValue.textContent = 'computing…';
+  hashStatus.textContent = '';
+  try {
+    const buf = await file.arrayBuffer();
+    const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+    const hex = Array.from(new Uint8Array(hashBuf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    hashValue.textContent = hex;
+    // Check against stored hashes in localStorage
+    const stored = JSON.parse(localStorage.getItem('taqa-doc-hashes')||'[]');
+    const match = stored.find(h => h.hash === hex);
+    if (match) {
+      hashStatus.innerHTML = `<span class="hash-status-dup">✕ Duplicate — matches "${match.title}"</span>`;
+      document.getElementById('dup-error-panel').style.display = '';
+      document.getElementById('dup-error-msg').textContent = `File fingerprint matches a document already in the library: "${match.title}"`;
+    } else {
+      hashStatus.innerHTML = '<span class="hash-status-ok">✓ Unique file</span>';
+      document.getElementById('dup-error-panel').style.display = 'none';
+    }
+  } catch(e) {
+    hashValue.textContent = 'unavailable';
+  }
 }
 
 // ── Canvas ──

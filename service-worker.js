@@ -1,4 +1,4 @@
-const CACHE = 'taqa-hub-v38';
+const CACHE = 'taqa-hub-v43';
 
 // Detect base path automatically — works on GitHub Pages and Azure
 const BASE = self.location.pathname.replace('service-worker.js', '');
@@ -10,6 +10,8 @@ const CORE = [
   BASE + 'viewer.html',
   BASE + 'shared.js',
   BASE + 'fixes.js',
+  BASE + 'segments-data.js',
+  BASE + 'documents.html',
   BASE + 'search-index.js',
   BASE + 'ai-search.html',
   BASE + 'glossary.html',
@@ -53,6 +55,23 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (!e.request.url.startsWith(self.location.origin)) return;
+
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request)
+        .then(res => {
+          if (res && res.ok) {
+            const clone = res.clone();
+            caches.open(CACHE).then(c => c.put(e.request, clone));
+          }
+          return res;
+        })
+        .catch(() =>
+          caches.match(e.request, { ignoreSearch: true }).then(cached => cached || caches.match(BASE + 'offline.html'))
+        )
+    );
+    return;
+  }
 
   e.respondWith(
     caches.match(e.request, { ignoreSearch: true })

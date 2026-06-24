@@ -552,6 +552,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
           <div class="seg-meta-item"><strong id="seg-total">–</strong> Total Documents</div>
           <div class="seg-meta-item"><strong id="seg-alerts">–</strong> Active Alerts</div>
           <div class="seg-meta-item">Updated <strong id="seg-updated">recently</strong></div>
+          <div class="seg-meta-item" id="seg-contributors-row" style="display:none;"><strong id="seg-contributors">–</strong></div>
         </div>
         <div style="margin-top:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
           <span style="font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);">Part of <em style="color:#4DD9D3;font-style:italic;font-weight:700;text-transform:none;letter-spacing:0;">The One</em> Platform</span>
@@ -566,10 +567,10 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
         </div>
       </div>
       <div class="seg-hero-stats">
-        <div class="mini-stat"><div class="mini-stat-num" id="ms-sops">–</div><div class="mini-stat-label">SOPs</div></div>
-        <div class="mini-stat"><div class="mini-stat-num" id="ms-manuals">–</div><div class="mini-stat-label">Manuals</div></div>
+        <div class="mini-stat"><div class="mini-stat-num" id="ms-sops">–</div><div class="mini-stat-label" id="ms-label-sops">SOPs</div></div>
+        <div class="mini-stat"><div class="mini-stat-num" id="ms-manuals">–</div><div class="mini-stat-label" id="ms-label-manuals">Manuals</div></div>
         <div class="mini-stat"><div class="mini-stat-num" id="ms-policies">–</div><div class="mini-stat-label">Policies</div></div>
-        <div class="mini-stat"><div class="mini-stat-num" id="ms-lessons">–</div><div class="mini-stat-label">Lessons</div></div>
+        <div class="mini-stat"><div class="mini-stat-num" id="ms-lessons">–</div><div class="mini-stat-label" id="ms-label-lessons">Lessons</div></div>
         <div class="mini-stat"><div class="mini-stat-num" id="ms-software" style="color:#38bdf8;">–</div><div class="mini-stat-label">Software</div></div>
       </div>
     </div>
@@ -1046,6 +1047,43 @@ const SEGMENTS = {
       software:['Saphir Well Test Analysis Software | v5.0 | Windows 10/11 | 345 MB',
         'OFM Well & Reservoir Analysis | v2019.1 | Windows 10/11 | 482 MB']
     }
+  },
+  'cybersecurity': {
+    name:'Cybersecurity', icon:'🔐', tag:'IT & Security',
+    desc:'Cybersecurity governance, policies, standards, operational procedures, security awareness programs, and compliance documentation for TAQA\'s IT and OT environments.',
+    sops:10, manuals:8, policies:12, alerts:5, lessons:6, software:2,
+    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Compliance', lessons:'Awareness'},
+    contributors:[{name:'Mohammed Al Obaid', role:'Cybersecurity Director'},{name:'Afnan Al Khabty', role:'Senior Cyber Security Analyst'}],
+    docs:{
+      sops:['CS-PROC-001 Incident Response Procedure','CS-PROC-002 Access Control Request Procedure',
+        'CS-PROC-003 Vulnerability Assessment Procedure','CS-PROC-004 Security Patch Management Procedure',
+        'CS-PROC-005 Data Backup & Recovery Procedure','CS-PROC-006 Privileged Account Management Procedure',
+        'CS-PROC-007 Security Monitoring & Logging Procedure','CS-PROC-008 Third-Party Access Procedure',
+        'CS-PROC-009 Penetration Testing Procedure','CS-PROC-010 Security Change Management Procedure'],
+      manuals:['TAQA Cybersecurity Framework Standard v2.0','Network Security Standard',
+        'Identity & Access Management Standard','Endpoint Security Standard',
+        'Cloud Security Standard','OT/ICS Security Standard',
+        'Data Classification & Handling Standard','Encryption & Key Management Standard'],
+      policies:['Information Security Policy','Acceptable Use Policy','Password & Authentication Policy',
+        'Data Privacy & Protection Policy','Email & Communication Security Policy',
+        'Remote Work & VPN Policy','Third-Party Vendor Security Policy',
+        'Bring Your Own Device (BYOD) Policy','Physical Security Policy',
+        'Cyber Incident Response Policy','Business Continuity & Disaster Recovery Policy',
+        'Software Licensing & Asset Management Policy'],
+      alerts:['⚠️ COMP-001: Annual security awareness training due — all staff must complete by July 2026',
+        '⚠️ COMP-002: ISO 27001 internal audit scheduled — prepare evidence packages',
+        '⚠️ COMP-003: NCA CSCC compliance review Q3 2026 — assess current posture',
+        '⚠️ COMP-004: Third-party vendor security assessments due — 12 vendors pending',
+        '⚠️ COMP-005: PDPL (Data Protection Law) compliance deadline — review data handling processes'],
+      lessons:['AWR-001: Phishing simulation results — 18% click rate identified, targeted training deployed',
+        'AWR-002: Social engineering awareness — lessons from simulated vishing campaign',
+        'AWR-003: USB drop test findings — physical security awareness gap addressed',
+        'AWR-004: Password hygiene campaign — results from enterprise-wide audit',
+        'AWR-005: Ransomware tabletop exercise — incident response gaps identified',
+        'AWR-006: Insider threat awareness — case study and preventive controls'],
+      software:['Microsoft Defender for Endpoint | v4.18 | Windows 10/11 | 245 MB',
+        'CyberArk Privileged Access Manager | v13.0 | Windows 10/11 | 380 MB']
+    }
   }
 };
 
@@ -1070,6 +1108,7 @@ const SEGMENT_IMAGES = {
   'tws-maintenance': 'taqa-hero-2.jpg',
   'hr':              'taqa-hero-4.jpg',
   'well-testing':    'taqa-hero-3.jpeg',
+  'cybersecurity':   'taqa-hero.webp',
 };
 document.getElementById('hero-bg-img').style.backgroundImage =
   `url('${SEGMENT_IMAGES[segId] || 'taqa-hero.webp'}')`;
@@ -1095,9 +1134,39 @@ document.getElementById('tc-alerts').textContent = seg.alerts;
 document.getElementById('tc-lessons').textContent = seg.lessons;
 document.getElementById('tc-software').textContent = seg.software||0;
 
+// ── Tab label & mini-stat overrides ──
+if(seg.tabLabels){
+  const labelMap = {sops:'ms-label-sops', manuals:'ms-label-manuals', lessons:'ms-label-lessons'};
+  document.querySelectorAll('#tab-bar .tab-btn').forEach(btn=>{
+    const t = btn.dataset.tab;
+    if(seg.tabLabels[t]){
+      const span = btn.querySelector('span');
+      btn.textContent = seg.tabLabels[t] + ' ';
+      if(span) btn.appendChild(span);
+    }
+  });
+  Object.keys(labelMap).forEach(k=>{
+    if(seg.tabLabels[k]){
+      const el = document.getElementById(labelMap[k]);
+      if(el) el.textContent = seg.tabLabels[k];
+    }
+  });
+}
+// ── Contributors ──
+if(seg.contributors && seg.contributors.length){
+  const row = document.getElementById('seg-contributors-row');
+  const el = document.getElementById('seg-contributors');
+  if(row && el){
+    el.innerHTML = seg.contributors.map(c=>`<span style="white-space:nowrap">${c.name} <span style="color:rgba(255,255,255,0.45);font-weight:400">${c.role}</span></span>`).join('<span style="color:rgba(255,255,255,0.25);margin:0 6px">·</span>');
+    row.style.display = '';
+  }
+}
+
 // ── Build Document Lists ──
-const AUTHORS = ['Mohammed Al-Ghamdi','Ahmed Al-Zahrani','Saud Al-Harbi','Faisal Al-Otaibi','Khalid Al-Shehri',
-  'Omar Al-Dosari','Nasser Al-Qahtani','Tariq Al-Mutairi','Saleh Al-Asmari'];
+const AUTHORS = seg.contributors
+  ? seg.contributors.map(c=>c.name)
+  : ['Mohammed Al-Ghamdi','Ahmed Al-Zahrani','Saud Al-Harbi','Faisal Al-Otaibi','Khalid Al-Shehri',
+    'Omar Al-Dosari','Nasser Al-Qahtani','Tariq Al-Mutairi','Saleh Al-Asmari'];
 const SIZES = ['1.2 MB','845 KB','2.1 MB','3.4 MB','560 KB','1.8 MB','920 KB','4.2 MB','1.1 MB','780 KB'];
 const MONTHS = ['Jan','Feb','Mar','Apr','May'];
 

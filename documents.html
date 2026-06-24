@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' https://api.qrserver.com https://www.google-analytics.com data: blob:; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://script.google.com; worker-src 'self'; manifest-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00686A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The One">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<title>Published Documents — TAQA Knowledge Hub</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-M1LKVLLY38"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-M1LKVLLY38');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<style>
+:root{
+  --primary:#00686A;--primary-light:#00BFB2;--accent:#FF6720;
+  --bg:#f4f5f7;--bg-white:#ffffff;
+  --glass:rgba(255,255,255,0.85);
+  --glass-border-hover:rgba(0,104,106,0.35);
+  --text:#1a2235;--text-muted:#64748b;--text-dim:#94a3b8;
+  --radius:14px;--gradient:linear-gradient(135deg,#00686A 0%,#00BFB2 100%);
+  --border:rgba(0,0,0,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+@keyframes pageFadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;animation:pageFadeIn 0.4s ease;}
+.page-wrapper{min-height:100vh;display:flex;flex-direction:column;}
+
+/* ── Nav ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,0.93);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
+.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.nav-brand-icon{width:40px;height:40px;border-radius:11px;background:var(--gradient);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  box-shadow:0 4px 18px rgba(0,104,106,0.38);}
+.nav-brand-icon svg{width:20px;height:20px;}
+.nav-brand-text{font-family:'Urbanist',sans-serif;font-size:15px;}
+.nav-brand-name{font-weight:800;color:var(--primary);}
+.nav-brand-hub{font-weight:500;color:#64748b;}
+.nav-links{display:flex;gap:2px;list-style:none;align-items:center;}
+.nav-links a{padding:7px 15px;border-radius:6px;text-decoration:none;font-size:13.5px;
+  font-weight:500;color:var(--text-muted);transition:background 0.2s,color 0.2s;}
+.nav-links a:hover{background:#f0f1f3;color:var(--text);}
+.nav-right{display:flex;gap:10px;align-items:center;}
+.nav-role-badge{padding:4px 12px;border-radius:20px;font-size:11.5px;font-weight:600;
+  background:rgba(0,104,106,0.1);color:var(--primary);border:1px solid rgba(0,104,106,0.2);letter-spacing:0.3px;}
+.btn{padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
+  border:none;font-family:'Inter',sans-serif;transition:all 0.2s;text-decoration:none;
+  display:inline-flex;align-items:center;gap:6px;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
+.btn-ghost:hover{border-color:var(--glass-border-hover);color:var(--primary);}
+.btn-primary{background:var(--gradient);color:#fff;box-shadow:0 4px 14px rgba(0,104,106,0.25);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,104,106,0.32);}
+.dark-toggle{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:transparent;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}
+.dark-toggle:hover{border-color:var(--glass-border-hover);color:var(--primary);}
+
+/* ── Hero ── */
+.docs-hero{margin-top:68px;background:linear-gradient(135deg,#06121a 0%,#0d2030 100%);
+  padding:40px 48px;position:relative;overflow:hidden;border-bottom:1px solid rgba(0,191,178,0.12);}
+.docs-hero::before{content:'';position:absolute;top:-80px;right:-80px;width:320px;height:320px;
+  border-radius:50%;background:radial-gradient(circle,rgba(0,191,178,0.08) 0%,transparent 70%);pointer-events:none;}
+.docs-hero::after{content:'';position:absolute;bottom:-60px;left:30%;width:200px;height:200px;
+  border-radius:50%;background:radial-gradient(circle,rgba(0,104,106,0.06) 0%,transparent 70%);pointer-events:none;}
+.docs-breadcrumb{padding-bottom:16px;font-size:11px;font-weight:500;color:rgba(255,255,255,0.35);
+  display:flex;align-items:center;gap:6px;max-width:1200px;margin:0 auto;position:relative;z-index:1;flex-wrap:wrap;}
+.docs-breadcrumb a{color:rgba(255,255,255,0.35);text-decoration:none;transition:color 0.2s;}
+.docs-breadcrumb a:hover{color:#00BFB2;}
+.docs-breadcrumb .bc-sep{opacity:0.35;}
+.docs-breadcrumb .bc-cur{color:rgba(0,191,178,0.85);font-weight:600;}
+.docs-hero-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;
+  justify-content:space-between;gap:32px;position:relative;z-index:1;flex-wrap:wrap;}
+.docs-hero-tag{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(0,191,178,0.7);margin-bottom:10px;display:block;}
+.docs-hero-title{font-family:'Urbanist',sans-serif;font-size:28px;font-weight:800;color:#fff;
+  margin-bottom:6px;letter-spacing:-0.3px;}
+.docs-hero-sub{font-size:13.5px;color:rgba(255,255,255,0.5);}
+.docs-hero-stats{display:flex;gap:28px;flex-wrap:wrap;}
+.docs-stat{text-align:center;}
+.docs-stat-num{font-family:'Urbanist',sans-serif;font-size:26px;font-weight:800;color:#fff;display:block;line-height:1;}
+.docs-stat-label{font-size:10px;color:rgba(255,255,255,0.35);margin-top:5px;text-transform:uppercase;letter-spacing:1px;}
+
+/* ── Main ── */
+.docs-outer{max-width:1200px;margin:0 auto;padding:32px 48px 80px;}
+.docs-table-card{background:var(--bg-white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+
+/* ── Search ── */
+.pub-table-search{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--border);}
+.pub-table-search svg{flex-shrink:0;color:var(--text-muted);}
+.pub-table-search-input{flex:1;border:none;background:transparent;font-size:14px;
+  font-family:'Inter',sans-serif;color:var(--text);outline:none;}
+.pub-table-search-input::placeholder{color:var(--text-muted);}
+.pub-search-clear{background:none;border:none;cursor:pointer;color:var(--text-muted);
+  padding:2px 6px;border-radius:4px;font-size:17px;line-height:1;display:none;transition:color 0.15s;}
+.pub-search-clear:hover{color:var(--text);}
+.pub-search-clear.show{display:block;}
+
+/* ── Filter pills ── */
+.pub-type-filters{display:flex;align-items:center;gap:6px;padding:12px 18px;
+  border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.pub-filter-pill{display:inline-flex;align-items:center;gap:4px;padding:5px 13px;border-radius:20px;
+  font-size:11px;font-weight:600;border:1px solid var(--border);background:transparent;
+  color:var(--text-muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;white-space:nowrap;}
+.pub-filter-pill:hover{border-color:var(--primary);color:var(--primary);}
+.pub-filter-pill.active{background:rgba(0,104,106,0.1);border-color:var(--primary);color:var(--primary);}
+.pub-filter-pill[data-filter="all"].active{background:var(--text);border-color:var(--text);color:#fff;}
+.pill-count{font-size:10px;opacity:0.6;font-weight:500;}
+
+/* ── Table ── */
+.pub-table{width:100%;border-collapse:collapse;table-layout:fixed;}
+.pub-table colgroup col:nth-child(1){width:48%;}
+.pub-table colgroup col:nth-child(2){width:12%;}
+.pub-table colgroup col:nth-child(3){width:13%;}
+.pub-table colgroup col:nth-child(4){width:16%;}
+.pub-table colgroup col:nth-child(5){width:11%;}
+.pub-table th{font-size:10.5px;font-weight:700;letter-spacing:0.9px;text-transform:uppercase;
+  color:var(--text-muted);padding:10px 18px;text-align:left;border-bottom:1px solid var(--border);
+  white-space:nowrap;background:rgba(0,0,0,0.013);}
+.pub-table td{padding:12px 18px;font-size:13px;color:var(--text);
+  border-bottom:1px solid rgba(0,0,0,0.04);vertical-align:middle;}
+.pub-table tbody tr:hover td{background:rgba(0,104,106,0.03);}
+.pub-table tbody tr:last-child td{border-bottom:none;}
+.pub-doc-title{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0;}
+.pub-doc-type-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;
+  font-size:10px;font-weight:700;letter-spacing:0.3px;white-space:nowrap;}
+.pub-type-sop{background:rgba(0,168,132,0.12);color:#009e7a;}
+.pub-type-manual{background:rgba(59,130,246,0.12);color:#3b82f6;}
+.pub-type-policy{background:rgba(245,158,11,0.12);color:#d97706;}
+.pub-type-alert{background:rgba(255,103,32,0.12);color:#e55a18;}
+.pub-type-lesson{background:rgba(139,92,246,0.12);color:#7c3aed;}
+.pub-table-date{color:var(--text-muted);font-size:12px;white-space:nowrap;}
+.pub-table-by{color:var(--text);font-size:12.5px;font-weight:500;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;max-width:0;}
+.pub-remove-btn{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:#ef4444;
+  background:rgba(239,68,68,0);border:1px solid transparent;cursor:pointer;
+  padding:4px 10px;border-radius:6px;font-family:'Inter',sans-serif;font-weight:500;
+  transition:all 0.15s;white-space:nowrap;}
+.pub-remove-btn:hover{background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.2);}
+.pub-table th.sortable{cursor:pointer;user-select:none;}
+.pub-table th.sortable:hover{color:var(--text);}
+.pub-table th.sortable::after{content:'⇅';margin-left:5px;opacity:0.25;font-size:9px;font-weight:400;letter-spacing:0;}
+.pub-table th.sort-asc::after{content:'↑';opacity:1;color:var(--primary);}
+.pub-table th.sort-desc::after{content:'↓';opacity:1;color:var(--primary);}
+
+/* ── Table footer ── */
+.pub-table-footer{display:flex;align-items:center;justify-content:space-between;
+  padding:12px 18px;border-top:1px solid var(--border);background:rgba(0,0,0,0.01);}
+.pub-more-label{font-size:12px;color:var(--text-muted);}
+.pub-more-count{font-weight:600;color:var(--text);}
+.pub-no-results{padding:48px 18px;text-align:center;font-size:13.5px;color:var(--text-muted);display:none;}
+.pub-no-results svg{display:block;margin:0 auto 12px;opacity:0.2;}
+.pub-show-all-btn{font-size:12.5px;font-weight:600;color:var(--primary);background:none;
+  border:none;cursor:pointer;padding:4px 0;font-family:'Inter',sans-serif;}
+.pub-show-all-btn:hover{text-decoration:underline;}
+
+/* ── Page footer ── */
+footer{padding:0;background:transparent;position:relative;margin-top:auto;height:4px;}
+footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--primary) 0%,#00BFB2 100%);}
+
+/* ── Toast ── */
+.dash-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:#1a2235;color:#fff;padding:12px 24px;border-radius:50px;font-size:13.5px;font-weight:500;
+  box-shadow:0 8px 32px rgba(0,0,0,0.2);opacity:0;transition:all 0.3s;z-index:9999;pointer-events:none;
+  display:flex;align-items:center;gap:10px;}
+.dash-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.dash-toast-dot{width:8px;height:8px;border-radius:50%;background:#00BFB2;flex-shrink:0;}
+
+/* ── Dark Mode ── */
+html[data-theme="dark"]{--bg:#0e1824;--bg-white:#19263a;--border:#243044;--text:#dde4ef;--text-muted:#7e94ab;--text-dim:#4d6070;}
+html[data-theme="dark"] body{background:#0e1824;}
+html[data-theme="dark"] nav{background:rgba(14,24,36,0.95)!important;border-color:#243044;}
+html[data-theme="dark"] .dark-toggle{border-color:#243044;color:#7e94ab;}
+html[data-theme="dark"] .btn-ghost{border-color:#243044;color:#7e94ab;}
+html[data-theme="dark"] .nav-role-badge{background:rgba(0,191,178,0.12);border-color:rgba(0,191,178,0.2);}
+html[data-theme="dark"] .docs-hero{background:linear-gradient(135deg,#050d14 0%,#091520 100%);}
+html[data-theme="dark"] .docs-table-card{background:#19263a;border-color:#243044;}
+html[data-theme="dark"] .pub-table th{border-color:#243044;color:#7e94ab;background:rgba(255,255,255,0.02);}
+html[data-theme="dark"] .pub-table td{border-color:#1e2d3f;}
+html[data-theme="dark"] .pub-table tbody tr:hover td{background:rgba(0,104,106,0.07);}
+html[data-theme="dark"] .pub-table-search{border-color:#243044;}
+html[data-theme="dark"] .pub-table-search-input{color:#dde4ef;}
+html[data-theme="dark"] .pub-type-filters{border-color:#243044;}
+html[data-theme="dark"] .pub-filter-pill{border-color:#243044;color:#7e94ab;}
+html[data-theme="dark"] .pub-filter-pill.active{background:rgba(0,191,178,0.12);border-color:#00BFB2;color:#00BFB2;}
+html[data-theme="dark"] .pub-filter-pill[data-filter="all"].active{background:#dde4ef;color:#0e1824;border-color:#dde4ef;}
+html[data-theme="dark"] .pub-table-footer{border-color:#243044;background:rgba(255,255,255,0.01);}
+
+/* ── Responsive ── */
+@media(max-width:900px){
+  nav{padding:0 20px;}
+  .docs-outer{padding:24px 20px 60px;}
+  .docs-hero{padding:32px 20px;}
+  .docs-hero-stats{gap:18px;}
+  .docs-stat-num{font-size:20px;}
+}
+@media(max-width:640px){
+  .nav-links{display:none;}
+  .docs-hero-inner{flex-direction:column;align-items:flex-start;gap:16px;}
+  .docs-hero-title{font-size:20px;}
+  .docs-hero-stats{gap:14px;}
+  .pub-table th:nth-child(3),.pub-table td:nth-child(3),
+  .pub-table th:nth-child(4),.pub-table td:nth-child(4){display:none;}
+  .pub-table colgroup col:nth-child(1){width:60%;}
+  .pub-table colgroup col:nth-child(2){width:20%;}
+  .pub-table colgroup col:nth-child(5){width:20%;}
+}
+@media(max-width:480px){
+  .docs-outer{padding:16px 16px 60px;}
+  .pub-table td,.pub-table th{padding:10px 12px;}
+  .nav-right .btn{font-size:12px;padding:7px 14px;}
+}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<!-- Nav -->
+<nav>
+  <a href="index.html" class="nav-brand">
+    <div class="nav-brand-icon">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M12 3L4 7v5c0 4.5 3.5 8.7 8 9.9 4.5-1.2 8-5.4 8-9.9V7l-8-4z" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
+        <path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="nav-brand-text">
+      <span class="nav-brand-name">TAQA</span><span class="nav-brand-hub"> Knowledge Hub</span>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="ai-search.html">Document Search</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="upload.html">Upload</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode">
+      <svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor">
+        <path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/>
+      </svg>
+    </button>
+    <a id="back-to-dashboard" href="dashboard.html" class="btn btn-ghost" style="font-size:13px;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5"/><path d="M12 5l-7 7 7 7"/></svg>
+      Dashboard
+    </a>
+    <span class="nav-role-badge">Segment Controller</span>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="docs-hero">
+  <div class="docs-breadcrumb">
+    <a href="index.html">Home</a>
+    <span class="bc-sep">›</span>
+    <a id="bc-seg-link" href="#">Segment</a>
+    <span class="bc-sep">›</span>
+    <a id="bc-dash-link" href="#">Dashboard</a>
+    <span class="bc-sep">›</span>
+    <span class="bc-cur">Published Documents</span>
+  </div>
+  <div class="docs-hero-inner">
+    <div>
+      <span class="docs-hero-tag">Document Library</span>
+      <div class="docs-hero-title" id="docs-seg-name">Published Documents</div>
+      <div class="docs-hero-sub" id="docs-seg-sub">Loading…</div>
+    </div>
+    <div class="docs-hero-stats">
+      <div class="docs-stat"><span class="docs-stat-num" id="stat-total">—</span><div class="docs-stat-label">Total</div></div>
+      <div class="docs-stat"><span class="docs-stat-num" id="stat-sops">—</span><div class="docs-stat-label" id="stat-label-sops">SOPs</div></div>
+      <div class="docs-stat"><span class="docs-stat-num" id="stat-manuals">—</span><div class="docs-stat-label" id="stat-label-manuals">Manuals</div></div>
+      <div class="docs-stat"><span class="docs-stat-num" id="stat-policies">—</span><div class="docs-stat-label">Policies</div></div>
+      <div class="docs-stat"><span class="docs-stat-num" id="stat-alerts">—</span><div class="docs-stat-label" id="stat-label-alerts">Alerts</div></div>
+      <div class="docs-stat"><span class="docs-stat-num" id="stat-lessons">—</span><div class="docs-stat-label" id="stat-label-lessons">Lessons</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="docs-outer">
+  <div class="docs-table-card">
+    <!-- Search -->
+    <div class="pub-table-search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="pub-table-search-input" id="pub-search" type="text" placeholder="Search documents by title, type, or author…" oninput="onSearch()">
+      <button class="pub-search-clear" id="pub-search-clear" onclick="clearSearch()" title="Clear">×</button>
+    </div>
+    <!-- Filter pills -->
+    <div class="pub-type-filters" id="pub-type-filters">
+      <button class="pub-filter-pill active" data-filter="all" onclick="setPubFilter('all',this)">All <span class="pill-count" id="pill-count-all"></span></button>
+      <button class="pub-filter-pill" data-filter="sop" onclick="setPubFilter('sop',this)" id="pill-sop">SOP <span class="pill-count" id="pill-count-sop"></span></button>
+      <button class="pub-filter-pill" data-filter="manual" onclick="setPubFilter('manual',this)" id="pill-manual">Manual <span class="pill-count" id="pill-count-manual"></span></button>
+      <button class="pub-filter-pill" data-filter="policy" onclick="setPubFilter('policy',this)" id="pill-policy">Policy <span class="pill-count" id="pill-count-policy"></span></button>
+      <button class="pub-filter-pill" data-filter="alert" onclick="setPubFilter('alert',this)" id="pill-alert">Alert <span class="pill-count" id="pill-count-alert"></span></button>
+      <button class="pub-filter-pill" data-filter="lesson" onclick="setPubFilter('lesson',this)" id="pill-lesson">Lesson <span class="pill-count" id="pill-count-lesson"></span></button>
+    </div>
+    <!-- Table -->
+    <table class="pub-table">
+      <colgroup><col><col><col><col><col></colgroup>
+      <thead>
+        <tr>
+          <th class="sortable" data-col="doc" onclick="sortPubTable('doc',this)">Document</th>
+          <th class="sortable" data-col="type" onclick="sortPubTable('type',this)">Type</th>
+          <th class="sortable" data-col="date" onclick="sortPubTable('date',this)">Published</th>
+          <th class="sortable" data-col="by" onclick="sortPubTable('by',this)">By</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="pub-docs-body"></tbody>
+    </table>
+    <div class="pub-no-results" id="pub-no-results">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      No documents match your search.
+    </div>
+    <!-- Footer -->
+    <div class="pub-table-footer">
+      <span class="pub-more-label">Showing <span class="pub-more-count" id="pub-showing">0</span> of <span class="pub-more-count" id="pub-total">0</span> documents</span>
+      <button class="pub-show-all-btn" id="pub-show-all-btn" onclick="pubShowAll=true;applyPubFilters()" style="display:none">Show all documents</button>
+    </div>
+  </div>
+</div>
+
+<footer></footer>
+</div>
+
+<!-- Toast -->
+<div class="dash-toast" id="dash-toast">
+  <div class="dash-toast-dot"></div>
+  <span id="dash-toast-msg">Done</span>
+</div>
+
+<script src="segments-data.js"></script>
+<script>
+// Abbreviated owner/contributor names per segment for "By" column
+const OWNERS_DATA = {
+  'coiled-tubing':  ['M. Jahdali','K. Al-Otaibi','F. Al-Ghamdi','O. Al-Harbi'],
+  'fracturing':     ['S. Al-Qahtani','A. Al-Mutairi','W. Al-Harbi','T. Al-Asmari'],
+  'wireline':       ['N. Al-Dosari','S. Al-Zahrani','M. Al-Otaibi'],
+  'drilling':       ['I. Al-Shehri','S. Al-Qahtani','N. Al-Ghamdi','B. Al-Harbi'],
+  'cementing':      ['T. Al-Malki','H. Al-Shimmari','R. Al-Turki'],
+  'inspection':     ['W. Al-Zahrani','F. Al-Bishi','M. Al-Otaibi','S. Al-Dossary'],
+  'well-safety':    ['S. Al-Harbi','Y. Al-Anzi','G. Al-Malki','A. Al-Qahtani'],
+  'cybersecurity':  ['M. Al Obaid','A. Al Khabty'],
+  'qhse':           ['A. Al-Ghamdi','H. Al-Rashidi','L. Al-Otaibi','K. Al-Binsaif'],
+  'hr':             ['R. Al-Otaibi','A. Al-Zahrani','S. Al-Shehri'],
+  'tws-maintenance':['F. Al-Amri','K. Al-Otaibi','R. Al-Ghamdi','H. Al-Shamrani'],
+  'well-testing':   ['T. Al-Rashidi','Y. Al-Subaie','B. Al-Shammari']
+};
+
+const PREVIEW_COUNT = 25;
+let pubActiveFilter = 'all';
+let pubSortCol = null;
+let pubSortDir = 'asc';
+let pubShowAll = true; // show all by default on this dedicated page
+
+const docParams = new URLSearchParams(window.location.search);
+const docSegId = docParams.get('id') || 'coiled-tubing';
+
+function buildAllDocs(segId) {
+  const seg = typeof TAQA_SEGMENTS !== 'undefined' ? TAQA_SEGMENTS[segId] : null;
+  if (!seg) return [];
+  const pool = OWNERS_DATA[segId] || ['M. Jahdali'];
+  const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let mi = 4, yr = 2026, cnt = 0;
+  function nextDate() {
+    const d = MO[mi] + ' ' + yr; cnt++;
+    if (cnt % 4 === 0) { mi--; if (mi < 0) { mi = 11; yr--; } }
+    return d;
+  }
+  const docs = []; let ai = 0;
+  const add = (arr, type) => (arr || []).forEach(t => {
+    docs.push({ title: String(t).replace(/^⚠️\s*/, ''), type, date: nextDate(), by: pool[ai++ % pool.length] });
+  });
+  add(seg.docs.sops, 'sop');
+  add(seg.docs.manuals, 'manual');
+  add(seg.docs.policies, 'policy');
+  add(seg.docs.alerts, 'alert');
+  add(seg.docs.lessons, 'lesson');
+  return docs;
+}
+
+function getTypeLabels(segId) {
+  const seg = typeof TAQA_SEGMENTS !== 'undefined' ? TAQA_SEGMENTS[segId] : null;
+  const lbl = seg?.tabLabels || {};
+  return {
+    sop:    lbl.sops    || 'SOP',
+    manual: lbl.manuals || 'Manual',
+    policy: lbl.policies|| 'Policy',
+    alert:  lbl.alerts  || 'Alert',
+    lesson: lbl.lessons || 'Lesson'
+  };
+}
+
+function renderPubTable(docs, tl) {
+  const tc = { sop:'pub-type-sop', manual:'pub-type-manual', policy:'pub-type-policy', alert:'pub-type-alert', lesson:'pub-type-lesson' };
+  const ri = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>`;
+  document.getElementById('pub-docs-body').innerHTML = docs.map(d =>
+    `<tr data-type="${d.type}">
+      <td class="pub-doc-title" title="${d.title}">${d.title}</td>
+      <td><span class="pub-doc-type-badge ${tc[d.type]||'pub-type-sop'}">${tl[d.type]||d.type}</span></td>
+      <td class="pub-table-date">${d.date}</td>
+      <td class="pub-table-by">${d.by}</td>
+      <td><button class="pub-remove-btn" onclick="removeDoc(this)">${ri}Remove</button></td>
+    </tr>`
+  ).join('');
+  const tot = document.getElementById('pub-total');
+  if (tot) tot.textContent = docs.length;
+}
+
+function initPubPills(tl) {
+  const pillMap = { sop:'pill-sop', manual:'pill-manual', policy:'pill-policy', alert:'pill-alert', lesson:'pill-lesson' };
+  Object.keys(pillMap).forEach(k => {
+    const pill = document.getElementById(pillMap[k]);
+    if (!pill) return;
+    const countSpan = pill.querySelector('.pill-count');
+    pill.textContent = tl[k] + ' ';
+    if (countSpan) pill.appendChild(countSpan);
+  });
+}
+
+function updatePillCounts(docs) {
+  const counts = { all: docs.length, sop: 0, manual: 0, policy: 0, alert: 0, lesson: 0 };
+  docs.forEach(d => { if (counts[d.type] !== undefined) counts[d.type]++; });
+  Object.keys(counts).forEach(k => {
+    const el = document.getElementById('pill-count-' + k);
+    if (el) el.textContent = counts[k] ? '(' + counts[k] + ')' : '';
+  });
+}
+
+function updateHeroStats(docs, tl) {
+  const counts = { sop: 0, manual: 0, policy: 0, alert: 0, lesson: 0 };
+  docs.forEach(d => { if (counts[d.type] !== undefined) counts[d.type]++; });
+  document.getElementById('stat-total').textContent    = docs.length;
+  document.getElementById('stat-sops').textContent     = counts.sop;
+  document.getElementById('stat-manuals').textContent  = counts.manual;
+  document.getElementById('stat-policies').textContent = counts.policy;
+  document.getElementById('stat-alerts').textContent   = counts.alert;
+  document.getElementById('stat-lessons').textContent  = counts.lesson;
+  document.getElementById('stat-label-sops').textContent    = tl.sop;
+  document.getElementById('stat-label-manuals').textContent = tl.manual;
+  document.getElementById('stat-label-alerts').textContent  = tl.alert;
+  document.getElementById('stat-label-lessons').textContent = tl.lesson;
+}
+
+function applyPubFilters() {
+  const q = (document.getElementById('pub-search')?.value || '').trim().toLowerCase();
+  const searching = q.length > 0;
+  const rows = Array.from(document.querySelectorAll('#pub-docs-body tr'));
+  const passing = rows.filter(r =>
+    (pubActiveFilter === 'all' || r.dataset.type === pubActiveFilter) &&
+    (!q || r.textContent.toLowerCase().includes(q))
+  );
+  let shown = 0;
+  rows.forEach(row => {
+    const pass = passing.includes(row);
+    const inWindow = pubShowAll || searching || shown < PREVIEW_COUNT;
+    const show = pass && inWindow;
+    row.style.display = show ? '' : 'none';
+    if (show) shown++;
+  });
+  const noR = document.getElementById('pub-no-results');
+  if (noR) noR.style.display = shown === 0 ? 'block' : 'none';
+  const showEl = document.getElementById('pub-showing');
+  if (showEl) showEl.textContent = shown;
+  const btn = document.getElementById('pub-show-all-btn');
+  if (btn) {
+    const hidden = passing.length - shown;
+    if (!pubShowAll && !searching && hidden > 0) {
+      btn.textContent = 'Show all ' + passing.length + ' documents';
+      btn.style.display = '';
+    } else {
+      btn.style.display = 'none';
+    }
+  }
+  const clr = document.getElementById('pub-search-clear');
+  if (clr) clr.classList.toggle('show', searching);
+}
+
+function onSearch() { pubShowAll = true; applyPubFilters(); }
+
+function clearSearch() {
+  document.getElementById('pub-search').value = '';
+  pubShowAll = true;
+  applyPubFilters();
+  document.getElementById('pub-search').focus();
+}
+
+function setPubFilter(type, pill) {
+  pubActiveFilter = type; pubShowAll = true;
+  document.querySelectorAll('.pub-filter-pill').forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+  applyPubFilters();
+}
+
+function sortPubTable(col, th) {
+  const tbody = document.getElementById('pub-docs-body');
+  if (!tbody) return;
+  if (pubSortCol === col) { pubSortDir = pubSortDir === 'asc' ? 'desc' : 'asc'; }
+  else { pubSortCol = col; pubSortDir = 'asc'; }
+  document.querySelectorAll('.pub-table th.sortable').forEach(h => h.classList.remove('sort-asc','sort-desc'));
+  th.classList.add(pubSortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+  const ci = { doc:0, type:1, date:2, by:3 }[col];
+  const M = {Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
+  const pd = s => { const [m,y] = s.split(' '); return (parseInt(y)||0)*12+(M[m]||0); };
+  Array.from(tbody.querySelectorAll('tr'))
+    .sort((a,b) => {
+      let av = a.cells[ci]?.textContent.trim()||'', bv = b.cells[ci]?.textContent.trim()||'';
+      const va = col==='date'?pd(av):av.toLowerCase(), vb = col==='date'?pd(bv):bv.toLowerCase();
+      return (va<vb?-1:va>vb?1:0)*(pubSortDir==='asc'?1:-1);
+    })
+    .forEach(r => tbody.appendChild(r));
+  applyPubFilters();
+}
+
+function removeDoc(btn) {
+  const row = btn.closest('tr');
+  const title = row.querySelector('.pub-doc-title').textContent;
+  if (confirm('Remove "' + title + '" from the segment?')) {
+    row.style.opacity = '0.3';
+    row.style.transition = 'opacity 0.3s';
+    setTimeout(() => {
+      row.remove();
+      applyPubFilters();
+      const t = document.getElementById('pub-total');
+      if (t) t.textContent = parseInt(t.textContent||0) - 1;
+      const st = document.getElementById('stat-total');
+      if (st) st.textContent = parseInt(st.textContent||0) - 1;
+      showToast('Document removed from segment');
+    }, 300);
+  }
+}
+
+function showToast(msg, color) {
+  const t = document.getElementById('dash-toast');
+  const dot = t.querySelector('.dash-toast-dot');
+  document.getElementById('dash-toast-msg').textContent = msg;
+  if (color) dot.style.background = color;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function initDocPage() {
+  const seg = typeof TAQA_SEGMENTS !== 'undefined' ? TAQA_SEGMENTS[docSegId] : null;
+  const segName = seg ? seg.name : docSegId.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  const tl = getTypeLabels(docSegId);
+
+  document.title = segName + ' — Published Documents · TAQA Knowledge Hub';
+  document.getElementById('docs-seg-name').textContent = segName + ' — Published Documents';
+  document.getElementById('docs-seg-sub').textContent = 'Complete document library for the ' + segName + ' segment';
+  document.getElementById('bc-seg-link').textContent = segName;
+  document.getElementById('bc-seg-link').href = 'segment.html?id=' + docSegId;
+  document.getElementById('bc-dash-link').href = 'dashboard.html?id=' + docSegId;
+  document.getElementById('back-to-dashboard').href = 'dashboard.html?id=' + docSegId;
+
+  const docs = buildAllDocs(docSegId);
+  renderPubTable(docs, tl);
+  initPubPills(tl);
+  updatePillCounts(docs);
+  updateHeroStats(docs, tl);
+  applyPubFilters();
+}
+
+initDocPage();
+
+// ── Dark Mode ──
+const MOON='M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
+const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
+function toggleDark(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme',next);}
+(function(){const s=localStorage.getItem('taqa-theme');if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
+</script>
+<script src="shared.js"></script>
+<script src="fixes.js"></script>
+<script>
+(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:linear-gradient(90deg,#00686A,#00BFB2);animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();
+</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
+</body>
+</html>

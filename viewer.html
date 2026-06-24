@@ -476,6 +476,7 @@ const params = new URLSearchParams(location.search);
 const segId = (params.get('seg') || 'drilling').replace(/[^a-z0-9-]/g,'').slice(0,60) || 'drilling';
 const docType = (params.get('type') || 'sop').replace(/[^a-z0-9-]/g,'').slice(0,20) || 'sop';
 const docTitle = decodeURIComponent(params.get('title') || 'Document').replace(/<[^>]*>/g,'').trim().slice(0,300) || 'Document';
+const docId = decodeURIComponent(params.get('doc') || '').replace(/[^A-Za-z0-9-_]/g,'').slice(0,120);
 const segInfo = SEGS[segId] || {name:'TAQA',tag:'Segment'};
 const typeColor = TYPE_COLORS[docType] || TYPE_COLORS.sop;
 const typeText = TYPE_TC[docType] || TYPE_TC.sop;
@@ -504,9 +505,9 @@ document.getElementById('doc-title').textContent = docTitle;
 
 // Badges
 document.getElementById('doc-badges').innerHTML =
-  '<span class="badge ' + docType + '">' + typeLabel + '</span>' +
   '<span class="badge seg">' + segInfo.name + '</span>' +
-  '<span class="badge seg">' + segInfo.tag + '</span>';
+  '<span class="badge seg">' + segInfo.tag + '</span>' +
+  (docId ? '<span class="badge docid">Document ID: ' + docId + '</span>' : '');
 
 // Meta grid
 const vi = Math.abs(hashStr(docTitle)) % VERSIONS.length;
@@ -514,10 +515,10 @@ const di = Math.abs(hashStr(docTitle + '1')) % DATES.length;
 const ai = Math.abs(hashStr(docTitle + '2')) % AUTHORS.length;
 const si = Math.abs(hashStr(docTitle + '3')) % SIZES.length;
 document.getElementById('meta-grid').innerHTML =
-  '<div class="meta-cell"><div class="meta-label">Type</div><div class="meta-val">' + typeLabel + '</div></div>' +
   '<div class="meta-cell"><div class="meta-label">Revision</div><div class="meta-val">' + VERSIONS[vi] + '</div></div>' +
   '<div class="meta-cell"><div class="meta-label">Issued</div><div class="meta-val">' + DATES[di] + '</div></div>' +
-  '<div class="meta-cell"><div class="meta-label">Author</div><div class="meta-val">' + AUTHORS[ai] + '</div></div>';
+  '<div class="meta-cell"><div class="meta-label">Author</div><div class="meta-val">' + AUTHORS[ai] + '</div></div>' +
+  (docId ? '<div class="meta-cell"><div class="meta-label">Document ID</div><div class="meta-val">' + docId + '</div></div>' : '');
 
 // Summary & Scope
 document.getElementById('doc-summary').textContent = getDocSummary(docTitle, docType);
@@ -528,7 +529,8 @@ document.getElementById('pdf-doc-name').textContent = docTitle;
 document.getElementById('pdf-toolbar-label').textContent = docTitle + '.pdf';
 
 // QR section
-const docUrl = location.origin + location.pathname.replace(/viewer\.html.*/,'') + 'viewer.html?seg=' + segId + '&type=' + docType + '&title=' + encodeURIComponent(docTitle);
+let docUrl = location.origin + location.pathname.replace(/viewer\.html.*/,'') + 'viewer.html?seg=' + segId + '&type=' + docType + '&title=' + encodeURIComponent(docTitle);
+if (docId) docUrl += '&doc=' + encodeURIComponent(docId);
 document.getElementById('qr-inline-img').src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(docUrl);
 document.getElementById('qr-inline-url').textContent = docUrl;
 
