@@ -466,15 +466,19 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 }
 @media(max-width:640px){
   .nav-right .btn,.nav-right a.btn{display:none!important;}
-  /* Hero: shrink title and description (correct element selectors) */
+  /* Breadcrumb: 72px clears the 64px mobile nav with 8px margin (not 88px) */
+  .breadcrumb{padding-top:72px;font-size:11px;}
+  /* Icon: hide on mobile — it stacks and eats ~80px of vertical space */
+  .seg-hero-icon{display:none;}
+  /* Hero: correct element selectors (not .seg-hero-title/.seg-hero-sub) */
   .seg-hero h1{font-size:clamp(22px,5.5vw,30px);letter-spacing:-0.4px;}
-  .seg-hero-desc{font-size:13.5px;line-height:1.62;margin-bottom:16px;}
-  .seg-hero-icon{width:64px;height:64px;font-size:36px;border-radius:14px;margin-bottom:14px;}
+  /* Description: 2-line clamp so it never dominates the hero on a small screen */
+  .seg-hero-desc{font-size:13.5px;line-height:1.62;margin-bottom:14px;
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;}
   .seg-hero-tag{font-size:10px;margin-bottom:10px;}
   .seg-hero-meta{gap:12px;}
   .seg-meta-item{font-size:12px;}
-  .seg-hero{padding-bottom:32px;}
-  .breadcrumb{font-size:11px;}
+  .seg-hero{padding-bottom:28px;}
   .doc-toolbar{flex-direction:column;align-items:stretch;gap:10px;}
   .doc-search{max-width:100%;}
   .doc-count-label{font-size:12px;}
@@ -486,11 +490,10 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .manage-btn{font-size:10.5px;padding:5px 10px;}
 }
 @media(max-width:480px){
-  /* Keep 20px side padding (don't override the 768px rule with 0) */
-  .seg-hero{padding-top:14px;padding-bottom:24px;}
+  .breadcrumb{padding-top:68px;}
+  .seg-hero{padding-top:10px;padding-bottom:20px;}
   .seg-hero h1{font-size:22px;}
-  .seg-hero-desc{font-size:13px;margin-bottom:12px;}
-  .seg-hero-icon{width:52px;height:52px;font-size:28px;margin-bottom:12px;}
+  .seg-hero-desc{font-size:13px;}
   .doc-actions{flex-wrap:wrap;}
   .doc-action-btn.primary-action{flex:1;}
 }
