@@ -278,6 +278,33 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   #qref-toolbar{display:none!important;}
   #qref-card{box-shadow:none!important;border-radius:0!important;max-width:100%!important;}
 }
+
+/* ── Version History Timeline ── */
+.rev-hist-hd{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;}
+.rev-count-badge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:50px;background:rgba(99,102,241,0.12);color:#818cf8;border:1px solid rgba(99,102,241,0.22);}
+.rev-toggle-btn{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px;transition:transform 0.32s cubic-bezier(.34,1.56,.64,1);}
+.rev-toggle-btn.open{transform:rotate(180deg);}
+.rev-timeline{margin-top:18px;display:flex;flex-direction:column;position:relative;padding-left:4px;}
+.rev-timeline::before{content:'';position:absolute;left:15px;top:10px;bottom:10px;width:2px;background:linear-gradient(to bottom,rgba(99,102,241,0.35),rgba(0,191,178,0.15));border-radius:2px;}
+.rev-row{display:grid;grid-template-columns:32px 1fr;gap:12px;margin-bottom:18px;position:relative;}
+.rev-row:last-child{margin-bottom:0;}
+.rev-dot{width:14px;height:14px;border-radius:50%;border:2px solid rgba(99,102,241,0.35);background:var(--bg-white,#fff);flex-shrink:0;margin-top:4px;}
+.rev-row.rev-current .rev-dot{background:#818cf8;border-color:#818cf8;box-shadow:0 0 0 3px rgba(99,102,241,0.15);}
+.rev-chip-row{display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:wrap;}
+.rev-chip{font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:50px;background:rgba(99,102,241,0.09);color:#818cf8;border:1px solid rgba(99,102,241,0.2);}
+.rev-row.rev-current .rev-chip{background:rgba(99,102,241,0.18);color:#a5b4fc;}
+.rev-current-tag{font-size:9.5px;font-weight:700;padding:1px 7px;border-radius:50px;background:rgba(0,191,178,0.12);color:#00BFB2;border:1px solid rgba(0,191,178,0.25);letter-spacing:0.4px;text-transform:uppercase;}
+.rev-meta{font-size:11.5px;color:var(--text-muted);}
+.rev-note{font-size:12.5px;color:var(--text-muted);line-height:1.65;margin-top:4px;}
+.rev-row.rev-current .rev-note{color:var(--text);}
+html[data-theme="dark"] .rev-dot{background:#19263a;}
+html[data-theme="dark"] .rev-row.rev-current .rev-dot{background:#818cf8;}
+@media(max-width:600px){
+  .rev-timeline{padding-left:0;}
+  .rev-timeline::before{left:11px;}
+  .rev-row{grid-template-columns:26px 1fr;gap:10px;}
+  .rev-note{font-size:12px;}
+}
 </style>
 </head>
 <body>
@@ -381,6 +408,17 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
     </div>
   </div>
 
+  <div class="content-card" id="rev-history-section" style="display:none">
+    <div class="rev-hist-hd" onclick="toggleRevHistory()">
+      <div class="section-label" style="margin:0">Version History</div>
+      <span class="rev-count-badge" id="rev-count-badge"></span>
+      <button class="rev-toggle-btn open" id="rev-toggle-btn" aria-label="Toggle version history">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+    </div>
+    <div class="rev-timeline" id="rev-timeline"></div>
+  </div>
+
   <div class="related-section" id="related-section" style="display:none">
     <div class="section-label">Related Documents</div>
     <div class="related-grid" id="related-grid"></div>
@@ -421,6 +459,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 <footer style="height:4px;position:relative;margin-top:auto;"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#00686A,#00BFB2);"></div></footer>
 </div>
 
+<script src="segments-data.js"></script>
 <script>
 const SEGS = {
   'coiled-tubing':{name:'Coiled Tubing',tag:'Operations'},
@@ -433,7 +472,8 @@ const SEGS = {
   'qhse':{name:'QHSE',tag:'Quality & Safety'},
   'hr':{name:'Human Resources',tag:'HR & People'},
   'tws-maintenance':{name:'TWS Maintenance',tag:'Maintenance'},
-  'well-testing':{name:'Well Testing',tag:'Production Testing'}
+  'well-testing':{name:'Well Testing',tag:'Production Testing'},
+  'cybersecurity':{name:'Cybersecurity',tag:'IT & Security'}
 };
 
 const TYPE_COLORS={sop:'rgba(0,104,106,0.12)',manual:'rgba(59,130,246,0.1)',policy:'rgba(245,158,11,0.1)',lesson:'rgba(34,197,94,0.1)',alert:'rgba(255,103,32,0.1)',software:'rgba(56,189,248,0.12)'};
@@ -509,20 +549,54 @@ document.getElementById('doc-badges').innerHTML =
   '<span class="badge seg">' + segInfo.tag + '</span>' +
   (docId ? '<span class="badge docid">Document ID: ' + docId + '</span>' : '');
 
-// Meta grid
+// Meta grid — use real revision data when available
 const vi = Math.abs(hashStr(docTitle)) % VERSIONS.length;
 const di = Math.abs(hashStr(docTitle + '1')) % DATES.length;
 const ai = Math.abs(hashStr(docTitle + '2')) % AUTHORS.length;
 const si = Math.abs(hashStr(docTitle + '3')) % SIZES.length;
+const _segRevMap = (typeof TAQA_SEGMENTS !== 'undefined' && TAQA_SEGMENTS[segId]) ? (TAQA_SEGMENTS[segId].docRevisions || {}) : {};
+const _revData = _segRevMap[docTitle] || null;
+const _curRev = _revData ? _revData.history.find(r => r.rev === _revData.current) : null;
 document.getElementById('meta-grid').innerHTML =
-  '<div class="meta-cell"><div class="meta-label">Revision</div><div class="meta-val">' + VERSIONS[vi] + '</div></div>' +
-  '<div class="meta-cell"><div class="meta-label">Issued</div><div class="meta-val">' + DATES[di] + '</div></div>' +
-  '<div class="meta-cell"><div class="meta-label">Author</div><div class="meta-val">' + AUTHORS[ai] + '</div></div>' +
+  '<div class="meta-cell"><div class="meta-label">Revision</div><div class="meta-val">' + (_curRev ? 'Rev ' + _curRev.rev : VERSIONS[vi]) + '</div></div>' +
+  '<div class="meta-cell"><div class="meta-label">Issued</div><div class="meta-val">' + (_curRev ? _curRev.date : DATES[di]) + '</div></div>' +
+  '<div class="meta-cell"><div class="meta-label">Author</div><div class="meta-val">' + (_curRev ? _curRev.author : AUTHORS[ai]) + '</div></div>' +
   (docId ? '<div class="meta-cell"><div class="meta-label">Document ID</div><div class="meta-val">' + docId + '</div></div>' : '');
 
 // Summary & Scope
 document.getElementById('doc-summary').textContent = getDocSummary(docTitle, docType);
 document.getElementById('doc-scope').textContent = SCOPES[docType] || SCOPES.sop;
+
+// Version History
+function renderRevHistory() {
+  if (typeof TAQA_SEGMENTS === 'undefined') return;
+  const seg = TAQA_SEGMENTS[segId];
+  if (!seg || !seg.docRevisions) return;
+  const revData = seg.docRevisions[docTitle];
+  if (!revData || !revData.history || !revData.history.length) return;
+  document.getElementById('rev-count-badge').textContent = revData.history.length + ' revision' + (revData.history.length > 1 ? 's' : '');
+  document.getElementById('rev-timeline').innerHTML = revData.history.map(r => `
+    <div class="rev-row ${r.rev === revData.current ? 'rev-current' : ''}">
+      <div><div class="rev-dot"></div></div>
+      <div>
+        <div class="rev-chip-row">
+          <span class="rev-chip">Rev ${r.rev}</span>
+          ${r.rev === revData.current ? '<span class="rev-current-tag">Current</span>' : ''}
+          <span class="rev-meta">${r.date} &nbsp;·&nbsp; ${r.author}</span>
+        </div>
+        <div class="rev-note">${r.note}</div>
+      </div>
+    </div>`).join('');
+  document.getElementById('rev-history-section').style.display = '';
+}
+function toggleRevHistory() {
+  const tl = document.getElementById('rev-timeline');
+  const btn = document.getElementById('rev-toggle-btn');
+  const hidden = tl.style.display === 'none';
+  tl.style.display = hidden ? '' : 'none';
+  btn.classList.toggle('open', hidden);
+}
+renderRevHistory();
 
 // PDF section
 document.getElementById('pdf-doc-name').textContent = docTitle;

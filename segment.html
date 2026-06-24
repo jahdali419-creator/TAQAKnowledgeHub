@@ -158,6 +158,7 @@ html[data-theme="dark"] .tabs-outer{border-color:rgba(255,255,255,0.06);}
 .manage-btn:hover{background:rgba(0,191,178,0.22);}
 .doc-new-badge{display:inline-block;padding:1px 7px;border-radius:50px;font-size:9.5px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;background:rgba(34,197,94,0.12);color:#4ade80;border:1px solid rgba(34,197,94,0.25);margin-left:6px;vertical-align:middle;}
 .doc-new-badge.updated{background:rgba(0,191,178,0.1);color:#00BFB2;border-color:rgba(0,191,178,0.22);}
+.doc-rev-badge{display:inline-block;padding:1px 7px;border-radius:50px;font-size:9.5px;font-weight:700;letter-spacing:0.3px;background:rgba(99,102,241,0.1);color:#818cf8;border:1px solid rgba(99,102,241,0.25);margin-left:6px;vertical-align:middle;}
 .empty-state-upload{display:inline-block;margin-top:14px;padding:8px 20px;border-radius:9px;background:rgba(0,104,106,0.1);border:1px solid rgba(0,191,178,0.2);color:var(--primary-light);font-size:13px;font-weight:500;text-decoration:none;transition:background 0.2s;}
 .empty-state-upload:hover{background:rgba(0,104,106,0.18);}
 
@@ -1242,6 +1243,9 @@ function buildDocCard(title, type, idx) {
   const safeTitle = title.replace(/'/g,"&#39;").replace(/"/g,"&quot;");
   const safeType = typeClass;
   const newBadge = idx === 0 ? '<span class="doc-new-badge">New</span>' : idx === 1 ? '<span class="doc-new-badge updated">Updated</span>' : '';
+  const segRevs = (typeof TAQA_SEGMENTS !== 'undefined' && TAQA_SEGMENTS[segId]) ? (TAQA_SEGMENTS[segId].docRevisions || {}) : {};
+  const revInfo = segRevs[title];
+  const revBadge = revInfo ? `<span class="doc-rev-badge">Rev ${revInfo.current}</span>` : '';
   const _ti={sop:'SOP',manual:'MNL',policy:'POL',lesson:'LSN',alert:'ALT'};
   const icon=`<div class="doc-type-icon ${type}">${_ti[type]||type.slice(0,3).toUpperCase()}</div>`;
   const isBm = window.TAQA_Bookmarks ? window.TAQA_Bookmarks.has(title, segId) : false;
@@ -1250,7 +1254,7 @@ function buildDocCard(title, type, idx) {
   <div class="doc-card">
     ${icon}
     <div>
-      <div class="doc-info-title">${title}${newBadge}${isDocRead(title)?'<span class="doc-read-badge">✓ Read</span>':''}</div>
+      <div class="doc-info-title">${title}${revBadge}${newBadge}${isDocRead(title)?'<span class="doc-read-badge">✓ Read</span>':''}</div>
       <div class="doc-summary">${summary}</div>
       <div class="doc-info-meta">
         <span class="doc-type-badge ${typeClass}">${labels[type] || type}</span>

@@ -358,6 +358,32 @@ const TAQA_SEGMENTS = {
         'AWR-005: Ransomware tabletop exercise — incident response gaps identified',
         'AWR-006: Insider threat awareness — case study and preventive controls'],
       software:['Microsoft Defender for Endpoint | v4.18','CyberArk Privileged Access Manager | v13.0']
+    },
+    docRevisions: {
+      'CS-PROC-001 Incident Response Procedure': {
+        current: 4,
+        history: [
+          { rev:4, date:'May 2026',  author:'Mohammed Al Obaid',  note:'Strengthened escalation workflow; added direct communication protocol with Saudi CERT and mandatory 2-hour containment deadline for Critical (P1) incidents.' },
+          { rev:3, date:'Jan 2026',  author:'Afnan Al Khabty',    note:'Integrated NCA Essential Cybersecurity Controls v2.0 requirements; added OT/ICS environment-specific response steps.' },
+          { rev:2, date:'Aug 2025',  author:'Mohammed Al Obaid',  note:'Updated incident classification matrix (P1–P4); revised external notification thresholds and CIRT activation criteria.' },
+          { rev:1, date:'Mar 2025',  author:'Afnan Al Khabty',    note:'Initial release — baseline incident response procedure aligned with ISO/IEC 27035 and NIST SP 800-61.' }
+        ]
+      },
+      'TAQA Cybersecurity Framework Standard v2.0': {
+        current: 2,
+        history: [
+          { rev:2, date:'Apr 2026',  author:'Mohammed Al Obaid',  note:'Added OT/ICS security controls section; aligned with NERC CIP standards and NCA Operational Technology security guidelines.' },
+          { rev:1, date:'Sep 2025',  author:'Mohammed Al Obaid',  note:'Initial framework standard — covers governance, risk management, compliance and technical security control domains.' }
+        ]
+      },
+      'Information Security Policy': {
+        current: 3,
+        history: [
+          { rev:3, date:'Mar 2026',  author:'Mohammed Al Obaid',  note:'Updated to reflect Saudi PDPL (Personal Data Protection Law) requirements; expanded cloud and SaaS security scope.' },
+          { rev:2, date:'Oct 2025',  author:'Afnan Al Khabty',    note:'Added remote access security controls; mandated MFA for all corporate systems and privileged accounts.' },
+          { rev:1, date:'Apr 2025',  author:'Mohammed Al Obaid',  note:'Initial policy release — establishes information security governance, responsibilities, and baseline controls.' }
+        ]
+      }
     }
   }
 };
