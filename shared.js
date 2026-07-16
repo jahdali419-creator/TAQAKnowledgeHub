@@ -314,7 +314,8 @@ window.showToast=function(msg,type){
         {href:'ai-search.html',label:'Document Search'},
         {href:'glossary.html',label:'Field Glossary'},
         {href:'upload.html',label:'Upload'},
-        {href:'support-ticket.html',label:'Ask Expert'}
+        {href:'support-ticket.html',label:'Ask Expert'},
+        {href:'image-creator.html',label:'Image Creator'}
       ];
       var menu=document.createElement('div');
       menu.id='nav-mobile-menu';menu.className='nav-mobile-menu';

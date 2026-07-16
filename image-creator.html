@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' https://www.google-analytics.com data: blob:; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com; worker-src 'self'; manifest-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Creator — TAQA Knowledge Hub</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-M1LKVLLY38"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-M1LKVLLY38');</script>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00686A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The One">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<style>
+:root{
+  --primary:#00686A;--primary-light:#00BFB2;--accent:#FF6720;
+  --dark:#f4f5f7;--glass:rgba(255,255,255,0.88);--glass-2:rgba(255,255,255,0.98);
+  --glass-border:rgba(0,0,0,0.08);--glass-border-hover:rgba(0,104,106,0.35);
+  --text:#1a2235;--text-muted:#64748b;--gradient:linear-gradient(135deg,#00686A,#00BFB2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+@keyframes pageFadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;animation:pageFadeIn 0.45s cubic-bezier(.4,0,.2,1);}
+.page-wrapper{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
+
+/* ── Nav ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--glass-border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
+.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.nav-brand-text{font-family:'Urbanist',sans-serif;font-size:15px;}
+.nav-brand-name{font-weight:800;color:var(--primary);}
+.nav-brand-hub{font-weight:500;color:#64748b;}
+.nav-subtitle{font-size:11px;color:var(--text-muted);display:block;margin-top:-1px;}
+.nav-links{display:flex;gap:2px;list-style:none;position:relative;}
+.nav-links a{padding:7px 15px;border-radius:6px;text-decoration:none;font-size:13.5px;font-weight:500;color:var(--text-muted);transition:background 0.2s,color 0.2s;position:relative;z-index:1;}
+.nav-links a:hover{background:#f0f1f3;color:var(--text);}
+.nav-links a.active{background:transparent;color:var(--primary);font-weight:600;}
+.nav-pill{position:absolute;top:50%;transform:translateY(-50%);height:34px;background:rgba(0,104,106,0.1);border-radius:8px;transition:left 0.28s cubic-bezier(.4,0,.2,1),width 0.28s cubic-bezier(.4,0,.2,1),opacity 0.2s;pointer-events:none;z-index:0;opacity:0;}
+.nav-right{display:flex;gap:10px;}
+.btn{padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
+  transition:all 0.25s;border:none;font-family:'Inter',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:7px;}
+.btn-primary{background:var(--gradient);color:#fff;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,104,106,0.4);}
+.dark-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:border-color 0.2s,color 0.2s,background 0.2s;flex-shrink:0;padding:0;}
+.dark-toggle:hover{border-color:var(--primary);color:var(--primary);background:rgba(0,104,106,0.06);}
+
+/* ── Page Header ── */
+.creator-header{max-width:1280px;margin:0 auto;width:100%;padding:100px 32px 22px;text-align:center;position:relative;}
+.creator-kicker{font-size:10px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;color:var(--primary);margin-bottom:10px;}
+.creator-kicker em{font-style:italic;color:#00686A;font-weight:700;}
+.creator-badge{display:inline-flex;align-items:center;gap:9px;padding:6px 18px;margin-bottom:18px;
+  background:linear-gradient(135deg,rgba(0,104,106,0.09),rgba(0,191,178,0.06));
+  border:1px solid rgba(0,191,178,0.28);border-radius:50px;
+  font-size:11.5px;color:var(--primary-light);font-weight:500;letter-spacing:0.3px;
+  box-shadow:0 2px 16px rgba(0,191,178,0.12);}
+.creator-title{font-family:'Urbanist',sans-serif;font-size:clamp(28px,4.5vw,44px);font-weight:800;letter-spacing:-1.2px;line-height:1.1;margin-bottom:12px;}
+.creator-title .grad{background:var(--gradient);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.creator-sub{font-size:14.5px;color:var(--text-muted);line-height:1.7;max-width:520px;margin:0 auto;}
+
+/* ── Workspace ── */
+.workspace{max-width:1280px;margin:0 auto;width:100%;padding:10px 32px 70px;
+  display:grid;grid-template-columns:380px 1fr;gap:24px;align-items:start;flex:1;}
+
+/* ── Controls Panel ── */
+.controls{background:var(--glass-2);border:1px solid var(--glass-border);border-radius:18px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.06);overflow:hidden;}
+.ctrl-section{padding:18px 20px;border-bottom:1px solid rgba(0,0,0,0.055);}
+.ctrl-section:last-child{border-bottom:none;}
+.ctrl-label{font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:11px;display:flex;align-items:center;gap:8px;}
+.ctrl-label .num{width:17px;height:17px;border-radius:5px;background:var(--gradient);color:#fff;font-size:10px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;letter-spacing:0;}
+
+.chip-grid{display:flex;flex-wrap:wrap;gap:7px;}
+.chip{padding:6px 13px;border-radius:50px;font-size:12px;font-weight:500;
+  background:transparent;border:1px solid var(--glass-border);color:var(--text-muted);
+  cursor:pointer;transition:all 0.2s;white-space:nowrap;font-family:'Inter',sans-serif;}
+.chip:hover{border-color:var(--glass-border-hover);color:var(--text);transform:translateY(-1px);}
+.chip.active{background:rgba(0,104,106,0.1);border-color:rgba(0,191,178,0.35);color:var(--primary);font-weight:600;}
+
+/* Background swatches */
+.bg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.bg-swatch{height:46px;border-radius:10px;cursor:pointer;border:2px solid transparent;
+  transition:all 0.2s;position:relative;overflow:hidden;background-size:cover;background-position:center;}
+.bg-swatch:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,0.14);}
+.bg-swatch.active{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(0,191,178,0.22);}
+.bg-swatch span{position:absolute;left:0;right:0;bottom:0;font-size:8.5px;font-weight:600;letter-spacing:0.3px;
+  color:#fff;background:rgba(0,0,0,0.32);padding:2px 0 3px;text-align:center;backdrop-filter:blur(3px);}
+.bg-swatch.sw-light span{color:#1a2235;background:rgba(255,255,255,0.5);}
+.upload-btn{margin-top:9px;width:100%;padding:9px;border-radius:10px;border:1.5px dashed var(--glass-border-hover);
+  background:rgba(0,104,106,0.03);color:var(--primary);font-size:12px;font-weight:600;cursor:pointer;
+  transition:all 0.2s;font-family:'Inter',sans-serif;}
+.upload-btn:hover{background:rgba(0,104,106,0.08);border-color:var(--primary);}
+
+/* Text inputs */
+.field{margin-bottom:11px;}
+.field:last-child{margin-bottom:0;}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:5px;}
+.field input[type="text"],.field textarea,.field select{
+  width:100%;padding:9px 12px;border-radius:9px;border:1px solid var(--glass-border);
+  background:rgba(255,255,255,0.7);color:var(--text);font-size:13px;font-family:'Inter',sans-serif;
+  outline:none;transition:border-color 0.2s,box-shadow 0.2s;resize:vertical;}
+.field textarea{min-height:52px;line-height:1.5;}
+.field input:focus,.field textarea:focus,.field select:focus{
+  border-color:rgba(0,191,178,0.45);box-shadow:0 0 0 3px rgba(0,191,178,0.09);}
+
+/* Toggles & slider */
+.opt-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;}
+.opt-row-label{font-size:12.5px;font-weight:500;color:var(--text);}
+.switch{position:relative;width:38px;height:21px;flex-shrink:0;cursor:pointer;}
+.switch input{opacity:0;width:0;height:0;}
+.switch .track{position:absolute;inset:0;border-radius:50px;background:rgba(0,0,0,0.12);transition:background 0.22s;}
+.switch .track::after{content:'';position:absolute;top:2.5px;left:2.5px;width:16px;height:16px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.25);transition:transform 0.22s;}
+.switch input:checked + .track{background:var(--primary);}
+.switch input:checked + .track::after{transform:translateX(17px);}
+.slider-row{display:flex;align-items:center;gap:12px;padding:7px 0;}
+.slider-row input[type="range"]{flex:1;accent-color:var(--primary);height:4px;cursor:pointer;}
+.slider-val{font-size:11px;color:var(--text-muted);min-width:34px;text-align:right;font-variant-numeric:tabular-nums;}
+.align-toggle{display:flex;gap:6px;}
+.align-btn{width:34px;height:30px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:all 0.2s;}
+.align-btn.active{background:rgba(0,104,106,0.1);border-color:rgba(0,191,178,0.35);color:var(--primary);}
+
+/* ── Preview Panel ── */
+.preview-col{position:sticky;top:88px;display:flex;flex-direction:column;gap:14px;}
+.preview-card{background:var(--glass-2);border:1px solid var(--glass-border);border-radius:18px;
+  box-shadow:0 4px 28px rgba(0,0,0,0.08);padding:22px;display:flex;align-items:center;justify-content:center;
+  min-height:320px;position:relative;}
+.preview-card canvas{max-width:100%;max-height:62vh;border-radius:10px;
+  box-shadow:0 10px 40px rgba(0,0,0,0.18);display:block;}
+.preview-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.preview-dims{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--text-muted);font-weight:500;}
+.preview-dims .dot{width:6px;height:6px;border-radius:50%;background:var(--primary-light);}
+.preview-actions{display:flex;gap:9px;flex-wrap:wrap;}
+.btn-download{background:var(--gradient);color:#fff;padding:10px 24px;border-radius:10px;font-size:13.5px;
+  font-weight:600;border:none;cursor:pointer;font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:8px;
+  transition:transform 0.22s,box-shadow 0.22s;box-shadow:0 4px 16px rgba(0,104,106,0.32);}
+.btn-download:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,104,106,0.45);}
+.btn-secondary{background:transparent;color:var(--primary);padding:10px 20px;border-radius:10px;font-size:13px;
+  font-weight:600;border:1px solid rgba(0,191,178,0.35);cursor:pointer;font-family:'Inter',sans-serif;
+  display:inline-flex;align-items:center;gap:7px;transition:all 0.2s;}
+.btn-secondary:hover{background:rgba(0,104,106,0.07);border-color:var(--primary);}
+
+/* Toast */
+.ic-toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(16px);z-index:2000;
+  background:#1a2235;color:#fff;padding:11px 22px;border-radius:50px;font-size:13px;font-weight:500;
+  box-shadow:0 10px 32px rgba(0,0,0,0.3);opacity:0;pointer-events:none;transition:opacity 0.3s,transform 0.3s;
+  display:flex;align-items:center;gap:9px;}
+.ic-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.ic-toast .tick{color:var(--primary-light);font-weight:700;}
+
+/* ── Footer ── */
+footer{border-top:none;padding:0;background:transparent;position:relative;margin-top:auto;height:4px;}
+footer::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#00686A 0%,#00BFB2 100%);}
+
+/* Background blobs */
+.bg-blobs{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.bg-blob{position:absolute;border-radius:50%;filter:blur(100px);}
+.bg-blob-1{width:720px;height:720px;top:-220px;left:-200px;background:radial-gradient(circle,rgba(0,191,178,0.13) 0%,transparent 65%);}
+.bg-blob-2{width:580px;height:580px;top:38%;right:-160px;background:radial-gradient(circle,rgba(0,104,106,0.10) 0%,transparent 65%);}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(0,104,106,0.28);border-radius:3px;}
+
+/* ── Dark theme ── */
+html[data-theme="dark"]{--dark:#0e1824;--glass:rgba(25,38,58,0.88);--glass-2:rgba(25,38,58,0.95);--glass-border:rgba(255,255,255,0.07);--text:#dde4ef;--text-muted:#7e94ab;}
+html[data-theme="dark"] body{background:#0e1824;}
+html[data-theme="dark"] nav{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.06);}
+html[data-theme="dark"] .nav-brand-name{color:#dde4ef;}html[data-theme="dark"] .nav-brand-hub{color:#7e94ab;}
+html[data-theme="dark"] .nav-pill{background:rgba(0,191,178,0.12);}
+html[data-theme="dark"] .nav-links a:hover{background:rgba(255,255,255,0.05);}
+html[data-theme="dark"] .dark-toggle{border-color:rgba(255,255,255,0.1);color:#7e94ab;}
+html[data-theme="dark"] .controls,html[data-theme="dark"] .preview-card{background:rgba(25,38,58,0.95);border-color:rgba(255,255,255,0.08);}
+html[data-theme="dark"] .ctrl-section{border-color:rgba(255,255,255,0.06);}
+html[data-theme="dark"] .chip{border-color:rgba(255,255,255,0.1);color:#7e94ab;}
+html[data-theme="dark"] .chip.active{background:rgba(0,104,106,0.2);border-color:rgba(0,191,178,0.3);color:#00BFB2;}
+html[data-theme="dark"] .field input[type="text"],html[data-theme="dark"] .field textarea,html[data-theme="dark"] .field select{background:rgba(14,24,36,0.6);border-color:rgba(255,255,255,0.1);color:#dde4ef;}
+html[data-theme="dark"] .switch .track{background:rgba(255,255,255,0.14);}
+html[data-theme="dark"] .switch input:checked + .track{background:var(--primary-light);}
+html[data-theme="dark"] .align-btn{border-color:rgba(255,255,255,0.1);}
+html[data-theme="dark"] .align-btn.active{background:rgba(0,104,106,0.2);border-color:rgba(0,191,178,0.3);color:#00BFB2;}
+html[data-theme="dark"] .upload-btn{background:rgba(0,191,178,0.05);color:#00BFB2;}
+html[data-theme="dark"] .bg-blob-1{background:radial-gradient(circle,rgba(0,191,178,0.05) 0%,transparent 65%);}
+html[data-theme="dark"] .bg-blob-2{background:radial-gradient(circle,rgba(0,104,106,0.04) 0%,transparent 65%);}
+html[data-theme="dark"] .ic-toast{background:#19263a;border:1px solid rgba(255,255,255,0.1);}
+
+/* ── Page Exit Transition ── */
+@keyframes pageFadeOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-5px);}}
+body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
+
+/* ── Responsive ── */
+@media(max-width:960px){
+  .workspace{grid-template-columns:1fr;padding:10px 20px 60px;}
+  .preview-col{position:relative;top:0;order:-1;}
+  .creator-header{padding:92px 20px 16px;}
+}
+@media(max-width:640px){
+  nav{padding:0 20px;}.nav-links{display:none;}
+  .nav-right .btn,.nav-right a.btn{display:none!important;}
+  .preview-card{padding:14px;min-height:200px;}
+  .preview-actions{width:100%;}
+  .btn-download{flex:1;justify-content:center;}
+  .bg-grid{grid-template-columns:repeat(4,1fr);}
+}
+</style>
+</head>
+<body>
+<div class="bg-blobs" aria-hidden="true"><div class="bg-blob bg-blob-1"></div><div class="bg-blob bg-blob-2"></div></div>
+<div class="page-wrapper">
+
+<nav>
+  <a href="index.html" class="nav-brand">
+    <span class="nav-brand-text"><span class="nav-brand-name">TAQA</span> <span class="nav-brand-hub">Knowledge Hub</span><span class="nav-subtitle" style="white-space:nowrap"><em style="color:#00686A; font-style:italic;">The One</em> <span style="color:#94a3b8;">Platform</span></span></span>
+  </a>
+  <ul class="nav-links">
+    <div class="nav-pill" id="nav-pill"></div>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="ai-search.html">Document Search</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="upload.html">Upload</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+    <li><a href="image-creator.html" class="active">Image Creator</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode"><svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <button class="bell-btn" id="nav-bell" onclick="location.href='dashboard.html'" title="Pending approvals" aria-label="Pending approvals"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge">3</span></button>
+    <a href="upload.html" class="btn btn-primary">+ Upload</a>
+  </div>
+</nav>
+
+<!-- ── Header ── -->
+<div class="creator-header">
+  <div class="creator-kicker">Part of <em>The One</em> Platform</div>
+  <div class="creator-badge">🎨 On-Brand Visuals in Seconds</div>
+  <h1 class="creator-title">TAQA <span class="grad">Image Creator</span></h1>
+  <p class="creator-sub">Design branded announcements, safety alerts, banners and social visuals — all in the official TAQA theme. No design tools needed. Created images download straight to your device.</p>
+</div>
+
+<!-- ── Workspace ── -->
+<div class="workspace">
+
+  <!-- Controls -->
+  <aside class="controls">
+
+    <div class="ctrl-section">
+      <div class="ctrl-label"><span class="num">1</span> Template</div>
+      <div class="chip-grid" id="template-chips">
+        <button class="chip active" data-tpl="announcement">📢 Announcement</button>
+        <button class="chip" data-tpl="safety">⚠️ Safety Alert</button>
+        <button class="chip" data-tpl="banner">🏷️ Segment Banner</button>
+        <button class="chip" data-tpl="quote">❝ Quote</button>
+        <button class="chip" data-tpl="training">🎓 Training / Event</button>
+      </div>
+    </div>
+
+    <div class="ctrl-section">
+      <div class="ctrl-label"><span class="num">2</span> Format</div>
+      <div class="chip-grid" id="format-chips">
+        <button class="chip active" data-fmt="wide">Presentation 16:9</button>
+        <button class="chip" data-fmt="square">Square 1:1</button>
+        <button class="chip" data-fmt="story">Story 9:16</button>
+        <button class="chip" data-fmt="banner">Wide Banner</button>
+      </div>
+    </div>
+
+    <div class="ctrl-section">
+      <div class="ctrl-label"><span class="num">3</span> Background</div>
+      <div class="bg-grid" id="bg-grid">
+        <div class="bg-swatch active" data-bg="teal" style="background:linear-gradient(135deg,#00686A,#00BFB2);"><span>Teal</span></div>
+        <div class="bg-swatch" data-bg="deep" style="background:linear-gradient(135deg,#012F31,#00686A);"><span>Deep</span></div>
+        <div class="bg-swatch" data-bg="midnight" style="background:linear-gradient(135deg,#0e1824,#1d3049);"><span>Midnight</span></div>
+        <div class="bg-swatch sw-light" data-bg="light" style="background:linear-gradient(135deg,#f5f6f8,#e5f4f3);"><span>Light</span></div>
+        <div class="bg-swatch" data-bg="alert" style="background:linear-gradient(135deg,#7f1d1d,#C0392B);"><span>Alert</span></div>
+        <div class="bg-swatch" data-bg="photo1" style="background-image:url('taqa-hero.webp');"><span>Field 1</span></div>
+        <div class="bg-swatch" data-bg="photo2" style="background-image:url('taqa-hero-2.jpg');"><span>Field 2</span></div>
+        <div class="bg-swatch" data-bg="photo4" style="background-image:url('taqa-hero-4.jpg');"><span>Field 3</span></div>
+      </div>
+      <button class="upload-btn" onclick="document.getElementById('bg-upload').click()">＋ Upload your own image</button>
+      <input type="file" id="bg-upload" accept="image/*" style="display:none;">
+    </div>
+
+    <div class="ctrl-section">
+      <div class="ctrl-label"><span class="num">4</span> Content</div>
+      <div class="field">
+        <label for="in-kicker">Badge / Kicker</label>
+        <input type="text" id="in-kicker" maxlength="40" value="ANNOUNCEMENT">
+      </div>
+      <div class="field">
+        <label for="in-title">Title</label>
+        <textarea id="in-title" maxlength="90" rows="2">New SOPs Now Live on The One Platform</textarea>
+      </div>
+      <div class="field">
+        <label for="in-subtitle">Subtitle</label>
+        <textarea id="in-subtitle" maxlength="160" rows="2">All updated procedures are available in the Knowledge Hub. Review the changes before your next shift.</textarea>
+      </div>
+      <div class="field">
+        <label for="in-segment">Segment Tag</label>
+        <select id="in-segment">
+          <option value="">None</option>
+          <option>Coiled Tubing</option><option>Fracturing</option><option>Wireline</option>
+          <option>Drilling</option><option>Cementing</option><option>Inspection Services</option>
+          <option>Well Safety</option><option>QHSE</option><option>TWS Maintenance</option>
+          <option>Human Resources</option><option>Well Testing</option><option>Cybersecurity</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="in-footer">Footer Line</label>
+        <input type="text" id="in-footer" maxlength="70" value="TAQA Knowledge Hub · The One Platform">
+      </div>
+    </div>
+
+    <div class="ctrl-section">
+      <div class="ctrl-label"><span class="num">5</span> Style</div>
+      <div class="opt-row">
+        <span class="opt-row-label">Alignment</span>
+        <div class="align-toggle">
+          <button class="align-btn" data-align="left" title="Align left" aria-label="Align left"><svg width="14" height="12" viewBox="0 0 14 12" fill="currentColor"><rect width="14" height="2" rx="1"/><rect y="5" width="9" height="2" rx="1"/><rect y="10" width="12" height="2" rx="1"/></svg></button>
+          <button class="align-btn active" data-align="center" title="Align center" aria-label="Align center"><svg width="14" height="12" viewBox="0 0 14 12" fill="currentColor"><rect width="14" height="2" rx="1"/><rect x="2.5" y="5" width="9" height="2" rx="1"/><rect x="1" y="10" width="12" height="2" rx="1"/></svg></button>
+        </div>
+      </div>
+      <div class="slider-row">
+        <span class="opt-row-label" style="flex-shrink:0;">Title size</span>
+        <input type="range" id="in-size" min="70" max="130" value="100">
+        <span class="slider-val" id="size-val">100%</span>
+      </div>
+      <div class="opt-row">
+        <span class="opt-row-label">TAQA logo mark</span>
+        <label class="switch"><input type="checkbox" id="opt-logo" checked><span class="track"></span></label>
+      </div>
+      <div class="opt-row">
+        <span class="opt-row-label">Pattern overlay</span>
+        <label class="switch"><input type="checkbox" id="opt-pattern" checked><span class="track"></span></label>
+      </div>
+      <div class="opt-row">
+        <span class="opt-row-label">Brand gradient bar</span>
+        <label class="switch"><input type="checkbox" id="opt-bar" checked><span class="track"></span></label>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Preview -->
+  <main class="preview-col">
+    <div class="preview-card">
+      <canvas id="art" width="1920" height="1080" aria-label="Image preview"></canvas>
+    </div>
+    <div class="preview-meta">
+      <div class="preview-dims"><span class="dot"></span><span id="dims-label">1920 × 1080 px · PNG</span></div>
+      <div class="preview-actions">
+        <button class="btn-secondary" onclick="copyImage()"><svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2v2a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2V2zm2 4H2v8h8v-2H6a2 2 0 0 1-2-2V6zm0-2h4a2 2 0 0 1 2 2v4h2V2H6v2z"/></svg> Copy</button>
+        <button class="btn-download" onclick="downloadImage()"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.75.75 0 0 1 .75.75v7.44l2.47-2.47a.75.75 0 1 1 1.06 1.06l-3.75 3.75a.75.75 0 0 1-1.06 0L3.72 7.78a.75.75 0 0 1 1.06-1.06l2.47 2.47V1.75A.75.75 0 0 1 8 1z"/><path d="M2 12.25a.75.75 0 0 1 .75.75v1c0 .14.11.25.25.25h10a.25.25 0 0 0 .25-.25v-1a.75.75 0 0 1 1.5 0v1A1.75 1.75 0 0 1 13 15.75H3A1.75 1.75 0 0 1 1.25 14v-1a.75.75 0 0 1 .75-.75z"/></svg> Download PNG</button>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<footer></footer>
+</div>
+
+<div class="ic-toast" id="ic-toast"><span class="tick">✓</span><span id="ic-toast-msg">Done</span></div>
+
+<script>
+/* ═══════════════ TAQA Image Creator ═══════════════
+   Fully client-side: everything is drawn on a <canvas>
+   in the official TAQA theme and exported as PNG.      */
+
+var TEAL = '#00686A', TEAL_LIGHT = '#00BFB2';
+
+var FORMATS = {
+  wide:   { w:1920, h:1080, label:'Presentation 16:9' },
+  square: { w:1080, h:1080, label:'Square 1:1' },
+  story:  { w:1080, h:1920, label:'Story 9:16' },
+  banner: { w:1920, h:720,  label:'Wide Banner' }
+};
+
+/* Backgrounds: gradient stops or photo source + text colors tuned for contrast */
+var BACKGROUNDS = {
+  teal:     { type:'gradient', stops:['#00686A','#00BFB2'], text:'#ffffff', muted:'rgba(255,255,255,0.82)', pill:'rgba(255,255,255,0.16)', pillBorder:'rgba(255,255,255,0.35)', pillText:'#ffffff', dark:true },
+  deep:     { type:'gradient', stops:['#012F31','#00686A'], text:'#ffffff', muted:'rgba(255,255,255,0.78)', pill:'rgba(0,191,178,0.18)', pillBorder:'rgba(0,191,178,0.5)', pillText:'#7FF3EA', dark:true },
+  midnight: { type:'gradient', stops:['#0e1824','#1d3049'], text:'#ffffff', muted:'rgba(221,228,239,0.75)', pill:'rgba(0,191,178,0.15)', pillBorder:'rgba(0,191,178,0.45)', pillText:'#00BFB2', dark:true },
+  light:    { type:'gradient', stops:['#f7f8fa','#e2f2f1'], text:'#123334', muted:'#5b6b7d', pill:'rgba(0,104,106,0.08)', pillBorder:'rgba(0,104,106,0.3)', pillText:'#00686A', dark:false },
+  alert:    { type:'gradient', stops:['#6f1414','#C0392B'], text:'#ffffff', muted:'rgba(255,235,230,0.85)', pill:'rgba(255,255,255,0.16)', pillBorder:'rgba(255,255,255,0.4)', pillText:'#ffffff', dark:true },
+  photo1:   { type:'photo', src:'taqa-hero.webp',   text:'#ffffff', muted:'rgba(255,255,255,0.85)', pill:'rgba(0,191,178,0.22)', pillBorder:'rgba(0,191,178,0.55)', pillText:'#9FFDF5', dark:true },
+  photo2:   { type:'photo', src:'taqa-hero-2.jpg',  text:'#ffffff', muted:'rgba(255,255,255,0.85)', pill:'rgba(0,191,178,0.22)', pillBorder:'rgba(0,191,178,0.55)', pillText:'#9FFDF5', dark:true },
+  photo4:   { type:'photo', src:'taqa-hero-4.jpg',  text:'#ffffff', muted:'rgba(255,255,255,0.85)', pill:'rgba(0,191,178,0.22)', pillBorder:'rgba(0,191,178,0.55)', pillText:'#9FFDF5', dark:true },
+  custom:   { type:'photo', src:null,               text:'#ffffff', muted:'rgba(255,255,255,0.85)', pill:'rgba(0,191,178,0.22)', pillBorder:'rgba(0,191,178,0.55)', pillText:'#9FFDF5', dark:true }
+};
+
+/* Templates prefill content + pick a matching background */
+var TEMPLATES = {
+  announcement: { kicker:'ANNOUNCEMENT', title:'New SOPs Now Live on The One Platform',
+    subtitle:'All updated procedures are available in the Knowledge Hub. Review the changes before your next shift.',
+    bg:'teal', segment:'' },
+  safety: { kicker:'SAFETY ALERT', title:'H2S Levels Elevated — Updated PPE In Effect',
+    subtitle:'SCBA mandatory at ≥10 ppm. All personnel must review WS-008 before entering the affected area.',
+    bg:'alert', segment:'Well Safety' },
+  banner: { kicker:'BUSINESS SEGMENT', title:'Coiled Tubing Services',
+    subtitle:'SOPs, technical manuals, alerts and lessons learned — everything in one place.',
+    bg:'deep', segment:'Coiled Tubing' },
+  quote: { kicker:'THE ONE PLATFORM', title:'“Every document. Every discipline. One platform.”',
+    subtitle:'Your single source of truth for all TAQA operations.',
+    bg:'midnight', segment:'' },
+  training: { kicker:'TRAINING SESSION', title:'Well Control Refresher — Register Now',
+    subtitle:'Thursday 10:00 AM · TAQA Learning Center · Open to all field personnel.',
+    bg:'photo1', segment:'' }
+};
+
+var state = {
+  template:'announcement', format:'wide', bg:'teal',
+  kicker:'ANNOUNCEMENT', title:'New SOPs Now Live on The One Platform',
+  subtitle:'All updated procedures are available in the Knowledge Hub. Review the changes before your next shift.',
+  segment:'', footer:'TAQA Knowledge Hub · The One Platform',
+  align:'center', sizeMult:1, logo:true, pattern:true, bar:true
+};
+
+var canvas = document.getElementById('art');
+var ctx = canvas.getContext('2d');
+var photoCache = {};   // src -> Image
+var customImage = null;
+
+/* ── Drawing helpers ── */
+function roundRect(c,x,y,w,h,r){
+  c.beginPath();
+  c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath();
+}
+function wrapLines(c,text,maxWidth){
+  var words = text.split(/\s+/).filter(Boolean), lines=[], line='';
+  for (var i=0;i<words.length;i++){
+    var test = line ? line+' '+words[i] : words[i];
+    if (c.measureText(test).width > maxWidth && line){ lines.push(line); line = words[i]; }
+    else line = test;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+function drawCover(c,img,W,H){
+  var s = Math.max(W/img.width, H/img.height);
+  var dw = img.width*s, dh = img.height*s;
+  c.drawImage(img,(W-dw)/2,(H-dh)/2,dw,dh);
+}
+/* TAQA "One" logo mark, replicating icons/icon.svg */
+function drawLogo(c,x,y,size){
+  var g = c.createLinearGradient(x,y,x+size,y+size);
+  g.addColorStop(0,TEAL); g.addColorStop(1,TEAL_LIGHT);
+  roundRect(c,x,y,size,size,size*0.22);
+  c.fillStyle = g; c.fill();
+  c.fillStyle = '#ffffff';
+  c.font = '800 '+(size*0.34)+'px Urbanist, Arial, sans-serif';
+  c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.fillText('One', x+size/2, y+size*0.54);
+}
+
+/* ── Main render ── */
+function render(){
+  var fmt = FORMATS[state.format];
+  var bg  = BACKGROUNDS[state.bg];
+  var W = fmt.w, H = fmt.h;
+  if (canvas.width !== W || canvas.height !== H){ canvas.width = W; canvas.height = H; }
+  var S = Math.min(W,H)/1080;          // scale factor relative to a 1080p short side
+  var m = Math.min(W,H)*0.085;         // outer margin
+
+  ctx.clearRect(0,0,W,H);
+
+  /* 1 ── Background */
+  if (bg.type === 'photo'){
+    var img = state.bg === 'custom' ? customImage : photoCache[bg.src];
+    if (img && img.complete && img.naturalWidth){
+      drawCover(ctx,img,W,H);
+      // teal duotone overlay for legibility
+      var ov = ctx.createLinearGradient(0,0,W,H);
+      ov.addColorStop(0,'rgba(1,38,40,0.88)');
+      ov.addColorStop(0.55,'rgba(0,72,74,0.62)');
+      ov.addColorStop(1,'rgba(0,104,106,0.45)');
+      ctx.fillStyle = ov; ctx.fillRect(0,0,W,H);
+    } else {
+      // photo still loading — teal fallback
+      var fb = ctx.createLinearGradient(0,0,W,H);
+      fb.addColorStop(0,'#00686A'); fb.addColorStop(1,'#00BFB2');
+      ctx.fillStyle = fb; ctx.fillRect(0,0,W,H);
+    }
+  } else {
+    var lg = ctx.createLinearGradient(0,0,W,H);
+    lg.addColorStop(0,bg.stops[0]); lg.addColorStop(1,bg.stops[1]);
+    ctx.fillStyle = lg; ctx.fillRect(0,0,W,H);
+  }
+
+  /* soft radial glow, echoing the site's hub-glow */
+  var glow = ctx.createRadialGradient(W*0.82,H*0.1,0,W*0.82,H*0.1,Math.max(W,H)*0.7);
+  glow.addColorStop(0, bg.dark ? 'rgba(0,191,178,0.16)' : 'rgba(0,191,178,0.12)');
+  glow.addColorStop(1,'transparent');
+  ctx.fillStyle = glow; ctx.fillRect(0,0,W,H);
+
+  /* 2 ── Pattern overlay (dot grid, brand motif) */
+  if (state.pattern){
+    ctx.save();
+    ctx.fillStyle = bg.dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,104,106,0.08)';
+    var gap = 46*S, r = 2.1*S;
+    for (var px = gap/2; px < W*0.42; px += gap)
+      for (var py = H - gap/2; py > H*0.55; py -= gap)
+        { ctx.beginPath(); ctx.arc(px,py,r,0,Math.PI*2); ctx.fill(); }
+    // large circle outlines top-right
+    ctx.strokeStyle = bg.dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,104,106,0.10)';
+    ctx.lineWidth = 2*S;
+    ctx.beginPath(); ctx.arc(W*0.94,H*0.06,220*S,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(W*0.94,H*0.06,300*S,0,Math.PI*2); ctx.stroke();
+    ctx.restore();
+  }
+
+  /* 3 ── Layout metrics */
+  var centered = state.align === 'center';
+  var tx = centered ? W/2 : m;
+  ctx.textAlign = centered ? 'center' : 'left';
+  var maxTextW = W - m*2;
+  if (state.format === 'banner') maxTextW = W - m*2 - (state.logo ? 90*S : 0);
+
+  var kickerSize = 26*S, titleSize = 84*S*state.sizeMult, subSize = 34*S, footSize = 26*S;
+  if (state.format === 'banner') titleSize *= 0.88;
+
+  /* measure block height to vertically center */
+  ctx.font = '800 '+titleSize+'px Urbanist, Arial, sans-serif';
+  var titleLines = wrapLines(ctx, state.title || ' ', maxTextW);
+  ctx.font = '400 '+subSize+'px Inter, Arial, sans-serif';
+  var subLines = state.subtitle ? wrapLines(ctx, state.subtitle, maxTextW*0.92) : [];
+
+  var titleLH = titleSize*1.14, subLH = subSize*1.5;
+  var blockH = 0;
+  var hasKicker = !!state.kicker;
+  if (hasKicker) blockH += kickerSize + 26*S + 34*S;      // pill height + gap
+  blockH += titleLines.length*titleLH;
+  if (subLines.length) blockH += 26*S + subLines.length*subLH;
+
+  var footerZone = (state.logo || state.footer || state.segment) ? 120*S : 40*S;
+  var y = Math.max(m, (H - footerZone - blockH)/2 + (hasKicker ? 0 : 10*S));
+
+  /* 4 ── Kicker pill */
+  if (hasKicker){
+    var kText = state.kicker.toUpperCase();
+    ctx.font = '700 '+kickerSize+'px Inter, Arial, sans-serif';
+    var kw = ctx.measureText(kText).width;
+    var padX = 30*S, pillH = kickerSize + 30*S;
+    var pillX = centered ? W/2 - kw/2 - padX : m;
+    roundRect(ctx, pillX, y, kw + padX*2, pillH, pillH/2);
+    ctx.fillStyle = bg.pill; ctx.fill();
+    ctx.strokeStyle = bg.pillBorder; ctx.lineWidth = 2.2*S; ctx.stroke();
+    ctx.fillStyle = bg.pillText;
+    ctx.textBaseline = 'middle';
+    ctx.fillText(kText, centered ? W/2 : m + padX, y + pillH/2 + 1.5*S);
+    y += pillH + 34*S;
+  }
+
+  /* 5 ── Title */
+  ctx.textBaseline = 'alphabetic';
+  ctx.font = '800 '+titleSize+'px Urbanist, Arial, sans-serif';
+  ctx.fillStyle = bg.text;
+  ctx.save();
+  if (bg.type === 'photo'){ ctx.shadowColor = 'rgba(0,20,22,0.45)'; ctx.shadowBlur = 18*S; ctx.shadowOffsetY = 3*S; }
+  for (var i=0;i<titleLines.length;i++){
+    y += titleLH;
+    ctx.fillText(titleLines[i], tx, y - titleLH*0.24);
+  }
+  ctx.restore();
+
+  /* 6 ── Subtitle */
+  if (subLines.length){
+    y += 26*S;
+    ctx.font = '400 '+subSize+'px Inter, Arial, sans-serif';
+    ctx.fillStyle = bg.muted;
+    for (var j=0;j<subLines.length;j++){
+      y += subLH;
+      ctx.fillText(subLines[j], tx, y - subLH*0.3);
+    }
+  }
+
+  /* 7 ── Footer row: logo + footer text (left/center) + segment tag */
+  var fy = H - m*0.75 - (state.bar ? 10*S : 0);
+  var logoSize = 74*S;
+  ctx.textBaseline = 'middle';
+
+  if (centered){
+    // centered stack: logo above footer text
+    var cy = fy - (state.footer ? 26*S : 0);
+    if (state.logo){ drawLogo(ctx, W/2 - logoSize/2, cy - logoSize - 14*S, logoSize); }
+    if (state.footer){
+      ctx.font = '600 '+footSize+'px Inter, Arial, sans-serif';
+      ctx.fillStyle = bg.muted; ctx.textAlign = 'center';
+      ctx.fillText(state.footer, W/2, fy - 6*S);
+    }
+    if (state.segment){
+      drawSegTag(ctx, state.segment, W - m, fy - 8*S, S, bg, 'right');
+    }
+  } else {
+    var lx = m;
+    if (state.logo){ drawLogo(ctx, lx, fy - logoSize + 8*S, logoSize); lx += logoSize + 22*S; }
+    if (state.footer){
+      ctx.font = '600 '+footSize+'px Inter, Arial, sans-serif';
+      ctx.fillStyle = bg.muted; ctx.textAlign = 'left';
+      ctx.fillText(state.footer, lx, fy - logoSize/2 + 8*S);
+    }
+    if (state.segment){
+      drawSegTag(ctx, state.segment, W - m, fy - logoSize/2 + 8*S, S, bg, 'right');
+    }
+  }
+
+  /* 8 ── Brand gradient bar */
+  if (state.bar){
+    var barH = 14*S;
+    var bgd = ctx.createLinearGradient(0,0,W,0);
+    bgd.addColorStop(0,TEAL); bgd.addColorStop(1,TEAL_LIGHT);
+    ctx.fillStyle = bgd; ctx.fillRect(0,H-barH,W,barH);
+  }
+}
+
+function drawSegTag(c,text,rightX,cy,S,bg,anchor){
+  var fs = 24*S;
+  c.font = '700 '+fs+'px Inter, Arial, sans-serif';
+  var tw = c.measureText(text.toUpperCase()).width;
+  var padX = 22*S, h = fs + 22*S;
+  var x = anchor === 'right' ? rightX - tw - padX*2 : rightX;
+  roundRect(c, x, cy - h/2, tw + padX*2, h, h/2);
+  c.fillStyle = bg.pill; c.fill();
+  c.strokeStyle = bg.pillBorder; c.lineWidth = 2*S; c.stroke();
+  c.fillStyle = bg.pillText; c.textAlign = 'left'; c.textBaseline = 'middle';
+  c.fillText(text.toUpperCase(), x + padX, cy + 1*S);
+}
+
+/* ── Photo loading ── */
+function ensurePhoto(src){
+  if (!src || photoCache[src]) return;
+  var img = new Image();
+  img.onload = render;
+  img.src = src;
+  photoCache[src] = img;
+}
+
+/* ── Controls wiring ── */
+function chips(containerId, attr, onPick){
+  var box = document.getElementById(containerId);
+  box.addEventListener('click', function(e){
+    var chip = e.target.closest('[data-'+attr+']');
+    if (!chip) return;
+    box.querySelectorAll('.chip,.bg-swatch').forEach(function(c){ c.classList.remove('active'); });
+    chip.classList.add('active');
+    onPick(chip.getAttribute('data-'+attr));
+  });
+}
+
+chips('template-chips','tpl', function(tpl){
+  state.template = tpl;
+  var t = TEMPLATES[tpl];
+  state.kicker = t.kicker; state.title = t.title; state.subtitle = t.subtitle;
+  state.bg = t.bg; state.segment = t.segment;
+  document.getElementById('in-kicker').value = t.kicker;
+  document.getElementById('in-title').value = t.title;
+  document.getElementById('in-subtitle').value = t.subtitle;
+  document.getElementById('in-segment').value = t.segment;
+  document.querySelectorAll('#bg-grid .bg-swatch').forEach(function(s){
+    s.classList.toggle('active', s.getAttribute('data-bg') === t.bg);
+  });
+  if (BACKGROUNDS[t.bg].type === 'photo') ensurePhoto(BACKGROUNDS[t.bg].src);
+  render();
+  track('template_'+tpl);
+});
+
+chips('format-chips','fmt', function(fmt){
+  state.format = fmt;
+  var f = FORMATS[fmt];
+  document.getElementById('dims-label').textContent = f.w+' × '+f.h+' px · PNG';
+  render();
+});
+
+chips('bg-grid','bg', function(bgKey){
+  state.bg = bgKey;
+  if (BACKGROUNDS[bgKey].type === 'photo') ensurePhoto(BACKGROUNDS[bgKey].src);
+  render();
+});
+
+/* text inputs */
+[['in-kicker','kicker'],['in-title','title'],['in-subtitle','subtitle'],['in-footer','footer']].forEach(function(pair){
+  document.getElementById(pair[0]).addEventListener('input', function(){
+    state[pair[1]] = this.value; render();
+  });
+});
+document.getElementById('in-segment').addEventListener('change', function(){
+  state.segment = this.value; render();
+});
+
+/* style controls */
+document.querySelectorAll('.align-btn').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.align-btn').forEach(function(x){ x.classList.remove('active'); });
+    b.classList.add('active');
+    state.align = b.getAttribute('data-align'); render();
+  });
+});
+document.getElementById('in-size').addEventListener('input', function(){
+  state.sizeMult = this.value/100;
+  document.getElementById('size-val').textContent = this.value+'%';
+  render();
+});
+[['opt-logo','logo'],['opt-pattern','pattern'],['opt-bar','bar']].forEach(function(pair){
+  document.getElementById(pair[0]).addEventListener('change', function(){
+    state[pair[1]] = this.checked; render();
+  });
+});
+
+/* custom background upload */
+document.getElementById('bg-upload').addEventListener('change', function(){
+  var file = this.files && this.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    var img = new Image();
+    img.onload = function(){
+      customImage = img;
+      state.bg = 'custom';
+      document.querySelectorAll('#bg-grid .bg-swatch').forEach(function(s){ s.classList.remove('active'); });
+      render();
+      toast('Custom background applied');
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+/* ── Export ── */
+function fileName(){
+  var f = FORMATS[state.format];
+  return 'taqa-'+state.template+'-'+f.w+'x'+f.h+'.png';
+}
+function downloadImage(){
+  canvas.toBlob(function(blob){
+    if (!blob){ toast('Export failed — try again'); return; }
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = fileName();
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+    toast('Image downloaded');
+    track('download');
+  }, 'image/png');
+}
+function copyImage(){
+  if (!navigator.clipboard || !window.ClipboardItem){ toast('Copy not supported — use Download'); return; }
+  canvas.toBlob(function(blob){
+    if (!blob){ toast('Copy failed — use Download'); return; }
+    navigator.clipboard.write([new ClipboardItem({'image/png':blob})])
+      .then(function(){ toast('Copied to clipboard'); track('copy'); })
+      .catch(function(){ toast('Copy blocked — use Download'); });
+  }, 'image/png');
+}
+
+/* ── Toast ── */
+var toastTimer = null;
+function toast(msg){
+  var t = document.getElementById('ic-toast');
+  document.getElementById('ic-toast-msg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2400);
+}
+function track(action){
+  if (typeof gtag === 'function') gtag('event','image_creator',{action:action});
+}
+
+/* ── First paint: wait for brand fonts so the canvas text is correct ── */
+render();
+if (document.fonts && document.fonts.load){
+  Promise.all([
+    document.fonts.load('800 84px Urbanist'),
+    document.fonts.load('700 26px Inter'),
+    document.fonts.load('600 26px Inter'),
+    document.fonts.load('400 34px Inter')
+  ]).then(render).catch(function(){});
+  document.fonts.ready.then(render);
+}
+
+/* ── Sliding Pill Nav ── */
+var pill=document.getElementById('nav-pill'),navList=document.querySelector('.nav-links');
+function pillTo(el){var lr=navList.getBoundingClientRect(),ar=el.getBoundingClientRect();pill.style.left=(ar.left-lr.left)+'px';pill.style.width=ar.width+'px';pill.style.opacity='1';}
+function pillToActive(){var a=navList.querySelector('a.active');if(a)pillTo(a);else pill.style.opacity='0';}
+pillToActive();navList.querySelectorAll('a').forEach(function(a){a.addEventListener('mouseenter',function(){pillTo(a);});});navList.addEventListener('mouseleave',pillToActive);
+
+/* ── Dark Mode ── */
+var MOON='M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
+var SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
+function toggleDark(){var isDark=document.documentElement.getAttribute('data-theme')==='dark';var next=isDark?'light':'dark';document.documentElement.setAttribute('data-theme',next);var p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme',next);}
+(function(){var s=localStorage.getItem('taqa-theme');if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');var p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
+
+/* ── Page Exit Transition ── */
+document.addEventListener('click',function(e){
+  var a=e.target.closest('a[href]');
+  if(!a)return;
+  var h=a.getAttribute('href');
+  if(!h||h.startsWith('#')||h.startsWith('http')||h.startsWith('mailto'))return;
+  if(a.target==='_blank')return;
+  e.preventDefault();
+  document.body.classList.add('page-exit');
+  setTimeout(function(){window.location.href=h;},270);
+});
+</script>
+<script src="shared.js"></script>
+<script src="fixes.js"></script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:linear-gradient(90deg,#00686A,#00BFB2);animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
+</body>
+</html>
