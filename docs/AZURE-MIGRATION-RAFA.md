@@ -180,25 +180,41 @@ usage shows whether it's actually needed.
 
 ---
 
-## 4. Housekeeping before go-live
+## 4. External dependencies — already removed
 
-Three things in the current code send data outside TAQA. They exist because the
-site was built as a standalone prototype. I am removing them — flagging so
-nothing surprises you in security review.
+The site was built as a standalone prototype and originally made calls to four
+outside services. **All four have been removed.** Noting them here so the
+history is visible if security review asks.
 
-| What | Where it goes | Fix |
+| What it was | Where it sent data | What replaced it |
 |---|---|---|
-| Sign-up form posts name + email | Google Apps Script | Delete it — Entra ID login replaces it entirely |
-| Page analytics | Google Analytics | Remove; replace with a D&T-approved tool |
-| QR code generation | `api.qrserver.com` | Generate in the browser instead, no external call |
-| Google Fonts stylesheet | Google | Already have the fonts locally — just drop the reference |
+| Sign-up form posting name + email | Google Apps Script | External call deleted. The name is kept in the user's own browser only, and Entra ID sign-in replaces the form entirely at Step 5 |
+| Page analytics | Google Analytics / Tag Manager | Removed completely. Replacement to be a D&T-approved tool |
+| QR code generation | `api.qrserver.com` | Generated inside the browser using a bundled MIT-licensed library. Verified: the generated codes decode to the correct URL |
+| Web fonts | Google Fonts CDN | Urbanist and Inter are now self-hosted (398 KB, Latin subset). Typography is unchanged |
 
-Also: the site currently deploys to **GitHub Pages** as well as Azure. That
-second public copy should be switched off when we move — I'll remove the
-workflow at handover.
+**The site now makes zero outbound requests to any third party.** This was
+verified by loading all ten pages in a browser and recording every network
+request — the only traffic is to the site's own origin.
 
-Timing: I can close all of these before your migration starts, so you inherit
-clean code. Just say the word.
+The Content-Security-Policy on every page has been tightened to match:
+
+```
+default-src 'self'; script-src 'self' 'unsafe-inline';
+style-src 'self' 'unsafe-inline'; font-src 'self' data:;
+img-src 'self' data: blob:; connect-src 'self';
+worker-src 'self'; manifest-src 'self'
+```
+
+Anything that tries to call out to a third party will now be blocked by the
+browser itself, not just absent from the code.
+
+### One item left, and it's your decision
+
+The site currently deploys to **GitHub Pages as well as Azure** — a second
+public copy outside TAQA hosting. I've left that workflow in place rather than
+switching it off unilaterally, since it's the live URL people may be using
+today. Say the word at handover and it goes.
 
 ---
 

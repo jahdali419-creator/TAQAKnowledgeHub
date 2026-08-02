@@ -151,22 +151,26 @@ These do not depend on D&T and are proceeding in parallel.
 
 ---
 
-## 6. Compliance items flagged proactively
+## 6. Compliance items
 
-These are in the current code and D&T review will surface them. Raising them first, with the fix
-already identified, so they are handled as planned work rather than as audit findings.
+Raised proactively rather than left for D&T review to surface. The four code-level items have
+already been closed; the two remaining depend on D&T action.
 
-| # | Item | Risk | Proposed fix | Owner |
-|---|---|---|---|---|
-| **CMP-01** | The user registration form posts to an external Google Apps Script endpoint | Internal names and email addresses leave the TAQA tenant | Remove entirely — Entra ID sign-in (DT-07) makes the form redundant, since identity comes from the tenant | Learning Center, at Phase 1 |
-| **CMP-02** | Google Analytics / Google Tag Manager is loaded on the pages | Usage telemetry sent to a third party outside the tenant | Remove and replace with a D&T-approved analytics solution (DT-17) | Learning Center + D&T |
-| **CMP-03** | QR codes are generated via the external `api.qrserver.com` service | Document references sent to a third-party service | Generate QR codes locally in the browser, no external call | Learning Center |
-| **CMP-04** | The site is currently publicly reachable with no sign-in | Anyone with the URL can browse it | Closed by DT-07. Until then the Hub must not hold real operational documents | D&T, Phase 1 |
-| **CMP-05** | GitHub Pages deployment runs alongside Azure | A second public copy outside TAQA hosting | Retire the GitHub Pages workflow at repository transfer (DT-03) | D&T + Learning Center |
+| # | Item | Risk | Status |
+|---|---|---|---|
+| **CMP-01** | User registration form posted to an external Google Apps Script endpoint | Internal names and email addresses left the TAQA tenant | **Closed.** External call removed. Name is stored in the user's own browser only. Entra ID sign-in (DT-07) replaces the form entirely |
+| **CMP-02** | Google Analytics / Tag Manager loaded on every page | Usage telemetry sent to a third party | **Closed.** Removed completely. Replacement to be a D&T-approved tool (DT-17) |
+| **CMP-03** | QR codes generated via the external `api.qrserver.com` service | Document references sent to a third party | **Closed.** Generated in the browser via a bundled MIT-licensed library. Output verified to decode correctly |
+| **CMP-06** | Web fonts loaded from the Google Fonts CDN | Every page view requested assets from Google | **Closed.** Urbanist and Inter self-hosted (398 KB, Latin subset). Appearance unchanged |
+| **CMP-04** | The site is publicly reachable with no sign-in | Anyone with the URL can browse it | **Open — D&T.** Closed by DT-07. Until then the Hub must not hold real operational documents |
+| **CMP-05** | GitHub Pages deployment runs alongside Azure | A second public copy outside TAQA hosting | **Open — decision.** Retire the workflow at repository transfer (DT-03). Left running for now as it may be the URL in current use |
 
-**Note on sequencing:** CMP-01 to CMP-03 can be closed immediately, before any D&T assignment,
-and I will proceed with them. CMP-04 is the reason no real operational content has been loaded
-into the platform yet.
+**Verification:** all ten pages were loaded in a browser with network traffic recorded. The site
+now makes **zero requests to any third-party host**. The Content-Security-Policy on every page has
+been tightened to `'self'` only, so any future third-party call is blocked by the browser rather
+than merely absent from the code.
+
+CMP-04 is the reason no real operational content has been loaded into the platform yet.
 
 ---
 

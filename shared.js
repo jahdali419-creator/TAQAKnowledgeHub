@@ -712,8 +712,9 @@ document.addEventListener('keydown',function(e){
 })();
 
 // ── Registration Modal ──
+// Name and email stay in this browser only — nothing is sent anywhere.
+// Replaced by Entra ID sign-in once the platform moves to TAQA Azure.
 (function(){
-  var SCRIPT_URL='https://script.google.com/macros/s/AKfycby4Vd1-GGQb7V25TPg3L3LdSfg8QrqZWW7UlaAavmHtbqIkR6Iz4UY8yhtVmIwR9FHl6g/exec';
   var REG_KEY='taqa-registered';
   var existing=null;
   try{existing=JSON.parse(localStorage.getItem(REG_KEY));}catch(e){}
@@ -816,13 +817,6 @@ document.addEventListener('keydown',function(e){
     }else{emailErr.style.display='none';}
     if(!valid)return;
     try{localStorage.setItem(REG_KEY,JSON.stringify({name:name,email:email,ts:Date.now()}));}catch(e){}
-    try{
-      fetch(SCRIPT_URL,{
-        method:'POST',mode:'no-cors',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({name:name,email:email,page:location.pathname})
-      });
-    }catch(err){}
     hideModal();
     if(window.showToast)window.showToast('Welcome, '+name.split(' ')[0]+'!','success');
     showWelcomeName(name);

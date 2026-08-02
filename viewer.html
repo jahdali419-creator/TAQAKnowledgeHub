@@ -3,21 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <script>try{var _t=localStorage.getItem('taqa-theme');if(_t)document.documentElement.setAttribute('data-theme',_t);}catch(e){}</script>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' https://api.qrserver.com https://www.google-analytics.com data: blob:; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://script.google.com; worker-src 'self'; manifest-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Document Viewer — TAQA Knowledge Hub</title>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-M1LKVLLY38"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-M1LKVLLY38');</script>
+<script src="qrcode.js"></script>
+<script src="qr.js"></script>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#00686A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="The One">
 <link rel="apple-touch-icon" href="icons/icon.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="fonts/fonts.css">
+<noscript></noscript>
 <style>
 :root{
   --primary:#00686A;--primary-light:#00BFB2;--accent:#FF6720;
@@ -606,7 +604,7 @@ document.getElementById('pdf-toolbar-label').textContent = docTitle + '.pdf';
 // QR section
 let docUrl = location.origin + location.pathname.replace(/viewer\.html.*/,'') + 'viewer.html?seg=' + segId + '&type=' + docType + '&title=' + encodeURIComponent(docTitle);
 if (docId) docUrl += '&doc=' + encodeURIComponent(docId);
-document.getElementById('qr-inline-img').src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(docUrl);
+document.getElementById('qr-inline-img').src = window.TAQA_QR ? window.TAQA_QR(docUrl, 4) : '';
 document.getElementById('qr-inline-url').textContent = docUrl;
 
 // Bookmark state
