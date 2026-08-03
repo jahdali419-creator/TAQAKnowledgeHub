@@ -755,13 +755,13 @@ function addFiles(files) {
     div.className = 'file-item';
     div.id = id;
     div.innerHTML = `
-      <div class="file-item-icon ${getIconInfo(f.name)[1]}">${getIconInfo(f.name)[0]}</div>
+      <div class="file-item-icon ${esc(getIconInfo(f.name)[1])}">${getIconInfo(f.name)[0]}</div>
       <div>
-        <div class="file-item-name">${f.name}</div>
+        <div class="file-item-name">${esc(f.name)}</div>
         <div class="file-item-size">${fmtSize(f.size)}</div>
         <div class="progress-bar-wrap"><div class="progress-bar" id="pb-${id}"></div></div>
       </div>
-      <button class="file-remove" onclick="removeFile('${id}','${f.name}')">✕</button>`;
+      <button class="file-remove" data-fname="${esc(f.name)}" onclick="removeFile('${id}', this.dataset.fname)">✕</button>`;
     fileList.appendChild(div);
     setTimeout(() => {
       const pb = document.getElementById('pb-'+id);
@@ -914,6 +914,13 @@ function segmentIds(segId) {
 }
 
 function kw(s){ return s.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(w=>w.length>2&&!STOP_WORDS.has(w)); }
+// Escape user-controlled text before it goes into innerHTML.
+// Filenames and reference IDs are attacker-controllable and must never be trusted.
+function esc(v){
+  return String(v == null ? '' : v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 function titleSim(a,b){ const wa=new Set(kw(a)),wb=new Set(kw(b));const ov=[...wa].filter(w=>wb.has(w)).length;return ov/Math.max(wa.size,wb.size,1); }
 
 function findSimilarTitles(title, segId) {
@@ -961,7 +968,7 @@ function checkDocId() {
   const duplicate = existingIds.find(id => id === refId);
   const similar = existingIds.filter(id => id !== refId && (id.startsWith(refId.split('-').slice(0,-1).join('-')) || refId.startsWith(id.split('-').slice(0,-1).join('-'))));
   if (duplicate) {
-    statusEl.innerHTML = `<span class="id-err">✕ <strong>${refId}</strong> already exists in this segment. If this is a revision, select "Revision / Update" below.</span>`;
+    statusEl.innerHTML = `<span class="id-err">✕ <strong>${esc(refId)}</strong> already exists in this segment. If this is a revision, select "Revision / Update" below.</span>`;
   } else if (similar.length) {
     statusEl.innerHTML = `<span class="id-warn">~ Related IDs found: ${similar.slice(0,3).join(', ')}</span>`;
   } else {
@@ -979,7 +986,7 @@ function runDupChecks() {
     warnList.innerHTML = matches.map(m => `
       <div class="dup-warn-item">
         <div class="dup-warn-bar-wrap"><div class="dup-warn-bar" style="width:${Math.round(m.score*100)}%"></div></div>
-        <div class="dup-warn-title" title="${m.title}">${m.title}</div>
+        <div class="dup-warn-title" title="${esc(m.title)}">${esc(m.title)}</div>
         <span class="dup-warn-pct">${Math.round(m.score*100)}%</span>
       </div>`).join('');
     warnPanel.style.display = '';
@@ -1004,7 +1011,7 @@ async function computeAndCheckHash(file) {
     const stored = JSON.parse(localStorage.getItem('taqa-doc-hashes')||'[]');
     const match = stored.find(h => h.hash === hex);
     if (match) {
-      hashStatus.innerHTML = `<span class="hash-status-dup">✕ Duplicate — matches "${match.title}"</span>`;
+      hashStatus.innerHTML = `<span class="hash-status-dup">✕ Duplicate — matches "${esc(match.title)}"</span>`;
       document.getElementById('dup-error-panel').style.display = '';
       document.getElementById('dup-error-msg').textContent = `File fingerprint matches a document already in the library: "${match.title}"`;
     } else {
