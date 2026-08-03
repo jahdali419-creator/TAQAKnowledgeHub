@@ -114,7 +114,8 @@ dependency elimination, and Content-Security-Policy enforcement.
 | Finding | Severity | Status |
 |---|---|---|
 | **Cross-site scripting via filename (upload page).** The selected filename was inserted into page HTML without escaping. A file named `<img src=x onerror=alert("XSS")>.pdf` executed script — **confirmed by test, not theoretical.** Impact today is limited to the user's own browser session since nothing is stored; **after Phase 3 it would become stored XSS affecting every viewer of the document library.** | Low now, **High after integration** | **Fixed 3 Aug 2026.** All user-controlled values escaped. Re-tested with the same payload: renders as inert text, no execution. Existing behaviour verified unaffected. |
-| **Upload accepts executable file types** (`.exe`, `.msi`, `.zip`). | Low now, **High after integration** | **Open — decision required.** No risk today as nothing is stored. If software distribution is intended it requires approval plus server-side antivirus. If not, these types should be removed. |
+| **Upload accepted executable file types** (`.exe`, `.msi`). Once uploads reach SharePoint in Phase 3, this would have been a malware distribution path into a platform used by 5,000 staff. | Low now, **High after integration** | **Fixed 3 Aug 2026.** Executables removed. Enforcement is a **code-level allow-list**, not just the input's `accept` attribute — that attribute is only a UI hint and is bypassed by drag-and-drop and the picker's "All files" option. Verified via the bypass path: `.exe` and `.msi` are refused, including double extensions such as `trick.pdf.exe`, and the user is told why. |
+| **`.zip` archives remain permitted** for legitimate multi-file documents. Archive *contents* cannot be inspected in the browser. | Low now, **Medium after integration** | **Open — accepted, mitigated at Phase 3.** Requires server-side antivirus scanning (Defender for Storage / SharePoint) once files are actually stored. Recorded here for the exception register. |
 | **`script-src` permits `'unsafe-inline'`** — the reason the XSS above was able to execute. | Medium | **Open — deferred.** Removing it means relocating all inline scripts across ~13,000 lines. Recommend doing this during the Azure migration rather than as an isolated change. |
 | **Repository is public.** All code and document titles are publicly readable. No credentials or real documents are exposed. | Low | **Open — deliberate and time-boxed.** GitHub requires a public repository for the free preview link. To be made private once TAQA hosting is live. |
 
@@ -132,11 +133,13 @@ dependency elimination, and Content-Security-Policy enforcement.
 
 ## 9. Summary
 
-**Done — 6 of 13 controls, plus this assessment's fixes**
+**Done — 6 of 13 controls, plus three defects found and fixed during this assessment**
 All four Secure Build controls are met, and the build posture is genuinely strong:
 no dependency tree, no secrets in history, no third-party calls, full provenance
 and version control. Change Records and Secrets Management are met for the
-current scope. One confirmed XSS vulnerability was found and fixed the same day.
+current scope. Three defects were found and fixed the same day: a confirmed cross-site scripting
+vulnerability, executable file types accepted by the upload page, and a function-name
+collision that was silently suppressing upload warnings.
 
 **Pending because no IT owner is assigned — 3 controls**
 Code Review, Deployment Approvals and Service Ownership all wait on D&T naming

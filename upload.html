@@ -393,9 +393,9 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
       <div class="drop-title">Drag & drop your file here</div>
       <div class="drop-sub">Supports documents, presentations, and software packages.<br>Max file size: 500 MB per file.</div>
       <button class="drop-btn" type="button">Browse Files</button>
-      <div class="drop-types">Documents: .pdf · .docx · .xlsx · .pptx &nbsp;|&nbsp; Software: .zip · .exe · .msi</div>
+      <div class="drop-types">Documents: .pdf · .docx · .xlsx · .pptx &nbsp;|&nbsp; Archives: .zip</div>
     </div>
-    <input type="file" id="file-input" class="drop-input" accept=".pdf,.docx,.doc,.xlsx,.xls,.pptx,.ppt,.zip,.exe,.msi" multiple>
+    <input type="file" id="file-input" class="drop-input" accept=".pdf,.docx,.doc,.xlsx,.xls,.pptx,.ppt,.zip" multiple>
 
     <!-- ── File Queue ── -->
     <div class="file-queue" id="file-queue" style="display:none;">
@@ -734,7 +734,10 @@ let toastTimer = null;
 const ICON_OK = `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="rgba(0,191,178,0.15)" stroke="#00BFB2" stroke-width="1.5"/><path d="M7 11l3 3 5-5" stroke="#00BFB2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const ICON_ADD = `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="rgba(0,191,178,0.12)" stroke="#00BFB2" stroke-width="1.5"/><path d="M11 7v8M7 11h8" stroke="#00BFB2" stroke-width="1.8" stroke-linecap="round"/></svg>`;
 const ICON_REMOVE = `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="rgba(255,103,32,0.1)" stroke="#FF6720" stroke-width="1.5"/><path d="M8 11h6" stroke="#FF6720" stroke-width="1.8" stroke-linecap="round"/></svg>`;
-function showToast(title, sub, iconHTML) {
+const ICON_WARN = `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="rgba(255,103,32,0.12)" stroke="#FF6720" stroke-width="1.5"/><path d="M11 6.5v5.5" stroke="#FF6720" stroke-width="1.8" stroke-linecap="round"/><circle cx="11" cy="15.2" r="1" fill="#FF6720"/></svg>`;
+// Named distinctly: shared.js defines its own window.showToast(msg, type),
+// which would otherwise overwrite this richer title/sub/icon version.
+function showUploadToast(title, sub, iconHTML) {
   const toast = document.getElementById('toast');
   document.getElementById('toast-title').textContent = title;
   document.getElementById('toast-sub').textContent = sub;
@@ -744,9 +747,22 @@ function showToast(title, sub, iconHTML) {
   toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
 }
 
+// Permitted upload types. Executables (.exe, .msi) are deliberately excluded:
+// the platform distributes documents, not software. This list is enforced here
+// rather than relying on the input's accept attribute, which drag-and-drop and
+// the file picker's "All files" option both bypass.
+const ALLOWED_EXT = ['pdf','doc','docx','xls','xlsx','ppt','pptx','zip'];
+
+function extOf(name) {
+  const i = String(name).lastIndexOf('.');
+  return i === -1 ? '' : String(name).slice(i + 1).toLowerCase();
+}
+
 function addFiles(files) {
   let added = 0;
+  const rejected = [];
   files.forEach(f => {
+    if (!ALLOWED_EXT.includes(extOf(f.name))) { rejected.push(f.name); return; }
     if (selectedFiles.find(x => x.name === f.name)) return;
     selectedFiles.push(f);
     added++;
@@ -768,11 +784,18 @@ function addFiles(files) {
       if (pb) { let w=0; const t=setInterval(()=>{ w+=Math.random()*15; if(w>=100){w=100;clearInterval(t);} pb.style.width=w+'%'; },80); }
     }, 200);
   });
+
   fileQueue.style.display = selectedFiles.length ? 'block' : 'none';
   if (added > 0) {
-    showToast('File Added', files[0].name.length > 32 ? files[0].name.substring(0,32)+'…' : files[0].name, ICON_ADD);
+    showUploadToast('File Added', files[0].name.length > 32 ? files[0].name.substring(0,32)+'…' : files[0].name, ICON_ADD);
     computeAndCheckHash(files[0]);
   }
+  if (rejected.length) {
+    showUploadToast('File type not permitted',
+      rejected.length + ' file' + (rejected.length > 1 ? 's were' : ' was') +
+      ' refused. Allowed: ' + ALLOWED_EXT.join(', ') + '.', ICON_WARN);
+  }
+
 }
 
 function removeFile(id, name) {
@@ -780,7 +803,7 @@ function removeFile(id, name) {
   const el = document.getElementById(id);
   if (el) el.remove();
   fileQueue.style.display = selectedFiles.length ? 'block' : 'none';
-  showToast('File Removed', name.length > 36 ? name.substring(0,36)+'…' : name, ICON_REMOVE);
+  showUploadToast('File Removed', name.length > 36 ? name.substring(0,36)+'…' : name, ICON_REMOVE);
 }
 
 // ── Summary Character Counter ──
@@ -810,7 +833,7 @@ function setUploadStep(n) {
 function submitUpload(e) {
   e.preventDefault();
   if (!selectedFiles.length) {
-    showToast('No file selected', 'Please attach a document before submitting.', ICON_REMOVE);
+    showUploadToast('No file selected', 'Please attach a document before submitting.', ICON_REMOVE);
     const dz = document.getElementById('drop-zone');
     if (dz) { dz.style.borderColor = '#ef4444'; setTimeout(() => dz.style.borderColor = '', 1800); }
     return;
