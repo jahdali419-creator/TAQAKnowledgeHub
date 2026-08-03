@@ -109,7 +109,16 @@ dependency elimination, and Content-Security-Policy enforcement.
 
 ---
 
-## 7. Findings raised and closed this assessment
+## 7. Application-security findings — beyond the Kosli scope
+
+**Note on scope.** The Kosli template defines a *process* framework — how software
+is built, reviewed, approved and deployed. It does not cover application-level
+security: it contains no controls for input validation, file handling, or output
+encoding. This was verified against the template document itself.
+
+An application-level review was therefore carried out **in addition** to the 13
+Kosli controls. The findings below come from that review, not from the framework.
+All were identified and resolved on 3 August 2026.
 
 | Finding | Severity | Status |
 |---|---|---|
@@ -150,6 +159,11 @@ Workload Monitoring, full Quality Assurance, complete Vulnerability Scanning and
 full Deployment Controls require a running service with identity, storage and
 logs. **The Hub has no backend yet**, so these cannot be implemented or
 meaningfully tested.
+
+**Scope note:** the Kosli template covers the build and delivery *process*. It
+contains no application-security controls, so an application-level review was run
+alongside it (Section 7). The three defects fixed during this assessment came from
+that additional review, not from the framework.
 
 **The honest position:** for a front-end application at this stage, the
 code-level security work is complete and evidenced. What remains is not
