@@ -1,4 +1,4 @@
-const CACHE = 'taqa-hub-v49';
+const CACHE = 'taqa-hub-v50';
 
 // Detect base path automatically — works on GitHub Pages and Azure
 const BASE = self.location.pathname.replace('service-worker.js', '');
@@ -18,17 +18,27 @@ const CORE = [
   BASE + 'upload.html',
   BASE + 'support-ticket.html',
   BASE + 'analytics.html',
+  BASE + 'qrcode.js',
+  BASE + 'qr.js',
+  BASE + 'fonts/fonts.css',
   BASE + 'icons/icon.svg',
   BASE + 'offline.html'
 ];
 
-const OPTIONAL = [
+// Self-hosted webfonts — cached so typography survives offline.
+const FONTS = [
+  'Inter-300', 'Inter-400', 'Inter-500', 'Inter-600', 'Inter-700',
+  'Urbanist-300', 'Urbanist-400', 'Urbanist-500', 'Urbanist-600',
+  'Urbanist-700', 'Urbanist-800'
+].map(f => BASE + 'fonts/web/' + f + '.woff2');
+
+const OPTIONAL = FONTS.concat([
   BASE + 'taqa-hero.webp',
   BASE + 'taqa-hero-2.jpg',
   BASE + 'taqa-hero-3.jpeg',
   BASE + 'taqa-hero-4.jpg',
   BASE + 'taqa-hero-5.jpeg'
-];
+]);
 
 self.addEventListener('message', e => {
   if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
