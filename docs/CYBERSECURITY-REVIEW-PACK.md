@@ -18,7 +18,7 @@ A search across all 42 site files for `fetch()`, `XMLHttpRequest`, `WebSocket`, 
 
 The only network activity is the service worker retrieving the site's own files from its own origin so that pages work offline.
 
-This was confirmed a second way. All ten pages were loaded in an instrumented browser with every network request recorded, and no request reached any host other than the site's own origin.
+This was confirmed a second way. All eleven pages were loaded in an instrumented browser with every network request recorded, and no request reached any host other than the site's own origin.
 
 Everything in section 6 follows from this. No button in this application sends data anywhere, because there is nowhere for it to send data to.
 
@@ -101,16 +101,32 @@ Nothing on any server, because there is no server. Everything below lives in the
 | Storage key | Contents | Sensitivity |
 |---|---|---|
 | `taqa-theme` | Light or dark preference | None |
-| `taqa-bookmarks` | Titles of bookmarked documents | Low |
-| `taqa-recent` | Recently viewed document titles | Low |
-| `taqa-read-docs` | Which documents have been opened | Low |
-| `taqa-analytics` | A local counter of page views | Low |
-| `taqa-doc-hashes` | File fingerprints used for duplicate detection on the upload page | Low |
 | `taqa-tour-done` | Whether the introductory tour has been dismissed | None |
+| `taqa-install-dismissed` | Whether the install prompt has been dismissed | None |
 | `taqa-bell-count` | A notification badge number | None |
 | `taqa-last-sync` | A timestamp | None |
+| `taqa-bookmarks` | Titles of bookmarked documents | Low |
+| `taqa-pins` | Pinned documents: title, type, segment and link | Low |
+| `taqa-recent` | Recently viewed document and segment titles | Low |
+| `taqa-read-docs` | Which documents have been opened | Low |
+| `taqa-doc-hashes` | File fingerprints used for duplicate detection on the upload page | Low |
+| `taqa-analytics` | Up to 300 usage events: event type, page or document key, timestamp | Low |
+| `taqa-errors` | Up to 50 script errors: message, source file, line, column, page path, timestamp | Low |
+| `taqa_glossary_custom` | Glossary terms the visitor has added themselves | Low |
+| `taqa_delegation` | The name of the person work is being delegated to | **Personal data** |
+| `taqa-draft-upload` | Every field typed on the upload form, saved as the visitor types | **See below** |
+| `taqa-draft-ticket` | Every field typed on the support ticket form, saved as the visitor types | **See below** |
+| `sessionStorage: taqa_user` | Read only. A placeholder for the future Entra ID integration. Nothing currently writes to it | None |
 
-No credentials, no personal data, no document content and no session tokens are stored. Clearing the browser cache removes all of it, and nothing is shared between users or devices.
+### The two draft keys need stating plainly
+
+The upload and support ticket pages save every text field, dropdown and text area to the browser as the visitor types, so that a half-completed form survives a refresh. The draft is deleted when the form is submitted, but persists until then.
+
+On the support ticket page those fields include the reporter's work email, their employee identifier, the equipment involved, and **the well, rig or location** the issue relates to. On the upload page they include the document title, reference identifier, owner and summary.
+
+So the platform does hold personal data and operational detail, on the visitor's own device, in the ordinary course of use. It is never transmitted, but it is retained locally and survives closing the browser. This should be considered when the offline caching decision in R-03 is made, and it is a reason to prefer managed devices for the support ticket workflow.
+
+No credentials, no session tokens and no document files are stored. Personal data and operational detail can be present in the two draft keys described above. Clearing the browser cache removes all of it, and nothing is shared between users or devices.
 
 ### What data the application does not have
 
@@ -240,6 +256,8 @@ Rated for the platform as it exists today, and again for after the SharePoint in
 |---|---|---|---|---|
 | R-01 | No authentication. The site is open to anyone with the URL | Medium | Critical | Open. Closed by Entra ID sign-in. Until then the platform must not hold real operational documents. This is the reason none have been loaded |
 | R-02 | The repository is public. All code and document titles are readable on the internet | Low | Medium | Open, deliberate and time-boxed. GitHub requires a public repository for the free preview link. To be made private once TAQA hosting is live. No credentials or real documents are exposed |
+| R-12 | Form drafts on the upload and support ticket pages save every typed field to the device as the visitor types, including work email, employee identifier and the well, rig or location an issue relates to. The draft is cleared on submission but persists until then, and survives closing the browser | Low | Medium | Open. Identified 4 August 2026. Options are to exclude identifying fields from the draft, shorten its lifetime, or accept it and cover it under the device policy decided for R-03 |
+| R-13 | The home page displays fixed headline figures that do not match the data, including a "Registered Users: 1,200" figure on a platform with no user accounts. The other four figures understate documents, segments, alerts and glossary terms | Low | Low | Open. No security impact, but it misrepresents the platform to anyone reviewing it and should be corrected before wider demonstration |
 | R-11 | Three deployment targets exist and two are publicly live: GitHub Pages and an Azure Static Web App (`agreeable-river-0ab0a3310`). A third (`gray-mud-003cdea10`) is dormant. Each live copy is a separate public URL serving the same content, and each has its own deployment token held in GitHub secrets | Medium | High | Open. Consolidate to one TAQA-owned deployment at handover and retire the others, including revoking their deployment tokens. Identified 4 August 2026 while verifying the file inventory |
 | R-03 | Progressive Web App offline caching. The application installs on phones and caches pages for offline reading. Once real documents are added, TAQA content will be cached on whatever device installed it, including personal devices outside MDM control | Low | High | Open, needs a decision. No policy exists yet on whether offline caching of operational documents on personal devices is acceptable. Recommend deciding this before Phase 2 |
 | R-04 | `.zip` archives are accepted for upload and their contents cannot be inspected in the browser. An executable can be placed inside an archive | Low | Medium | Open and accepted. To be mitigated by server-side antivirus through Defender for Storage or SharePoint at Phase 3. Recorded for the exception register |
@@ -277,7 +295,7 @@ The application is a front end with no server, no backend, no database and no ne
 
 There are no third-party services. All four that previously existed were removed and the removal was verified. One MIT-licensed library is vendored into the repository, and there is no package manager and no dependency tree.
 
-Four findings were identified and closed during this review, including a confirmed cross-site scripting vulnerability. Eleven risks remain open. Six close through the Azure and Entra ID integration, three need a decision from Cybersecurity or D&T, one is a repository setting that can be changed today, and one is the consolidation of three deployment targets down to a single TAQA-owned one.
+Four findings were identified and closed during this review, including a confirmed cross-site scripting vulnerability. Thirteen risks remain open. Six close through the Azure and Entra ID integration, four need a decision from Cybersecurity or D&T, one is a repository setting that can be changed today, one is the consolidation of three deployment targets down to a single TAQA-owned one, and one is a display error on the home page with no security impact.
 
 The controls that are missing are missing because the platform has no identity provider, no server and no stored data. They become implementable at integration, not before, and this assessment should be repeated once that work is complete.
 

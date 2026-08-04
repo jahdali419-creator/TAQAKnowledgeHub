@@ -18,10 +18,12 @@ This is the most important fact for planning, because it means there is nothing 
 | Type | Files | What they are |
 |---|---|---|
 | Pages | 11 `.html` | Home, segment view, document viewer, library, search, glossary, upload, support, control panel, analytics, offline page |
-| Scripts | 5 `.js` | Shared UI, two data files, the QR library and the service worker |
-| Fonts | 13 files | TAQA corporate typeface plus self-hosted web fonts |
-| Images | 5 plus icons | Hero images and app icons |
+| Scripts | 7 `.js` | Shared UI, page fixes, two data files, the QR library and its helper, and the service worker |
+| Fonts | 13 font files plus `fonts.css` | TAQA corporate typeface plus self-hosted web fonts |
+| Images | 5 hero images plus 3 icons | |
 | Config | `manifest.json`, `staticwebapp.config.json` | App install settings and Azure routing rules |
+
+That totals 42 files.
 
 The current state of the application, and what it does and does not do, is covered in the companion document "What the platform does".
 
@@ -47,6 +49,7 @@ Every service below is already owned by TAQA. **The migration requires no new li
 | SharePoint Online | Holds the actual document files. Becomes the source of truth, replacing the placeholder in the viewer | Included in existing TAQA M365 |
 | Microsoft Graph API | The interface the platform uses to read document metadata and files from SharePoint | No cost |
 | SharePoint metadata columns | Segment, document type, revision, owner and review date, so the platform's filters read live data rather than a static file | Included |
+| Microsoft Search or Graph search | Replaces the current static index. Worth noting that the existing index covers 503 of the 546 documents, with all 43 Cybersecurity documents missing from it. Moving to live data closes that gap rather than carrying it forward | Included |
 | Microsoft Search | Optional. Can back the cross-segment search with a real index instead of the current fixed list | Included |
 
 ### Phase 3: workflow

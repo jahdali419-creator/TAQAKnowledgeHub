@@ -43,7 +43,7 @@ Every pending item comes down to one of two causes. Either no IT owner has been 
 | Defined Toolchain | Done | Deliberately minimal: Git, then GitHub Actions, then Azure Static Web Apps. No compilers or bundlers to compromise. |
 | Dependency Management | Done | There is no package manager and no dependency tree, so the largest software supply chain risk does not exist here. One vendored library, `qrcode.js` (MIT), was added to remove reliance on an external service. |
 
-Also completed under Build on 3 August 2026: all four third-party services were removed. Those were Google Analytics, Google Fonts, a Google Apps Script endpoint and an external QR service. Every page was then loaded in an instrumented browser with all traffic recorded, and no requests reached any host other than our own.
+Also completed under Build on 3 August 2026: all four third-party services were removed. Those were Google Analytics, Google Fonts, a Google Apps Script endpoint and an external QR service. All eleven pages were then loaded in an instrumented browser with all traffic recorded, and no requests reached any host other than our own.
 
 ---
 
@@ -73,7 +73,7 @@ Penetration testing, DAST and malware scanning cannot produce useful results aga
 
 The recommendation is to schedule the full security test cycle after Phase 1 (Entra ID sign-in) and Phase 2 (SharePoint document storage) are complete, so that it tests the real system. Running it now would spend budget on findings that do not map to the final architecture, and a full re-test would still be needed afterwards.
 
-What was done instead suits a front-end at this stage: manual code review, a full-history secret scan, browser testing of every page, removal of external dependencies, and Content-Security-Policy enforcement.
+What was done instead suits a front-end at this stage: manual code review, a full-history secret scan, browser testing of all eleven pages, removal of external dependencies, and Content-Security-Policy enforcement.
 
 ---
 

@@ -128,7 +128,7 @@ These do not depend on D&T and are proceeding in parallel.
 | LC-01 | Collect and organise the real source documents for all 12 segments | Learning Center and segment owners | Documents gathered with owner and revision confirmed |
 | LC-02 | Confirm each segment's content owner and approver | Learning Center | A named owner per segment |
 | LC-03 | Wire the frontend to Graph and SharePoint once DT-05, DT-06 and DT-10 are complete | Learning Center, with the DT-02 reviewer | Library, viewer and search read live data |
-| LC-04 | Close the Cybersecurity gap in the search index. The segment exists in the data model but has no searchable entries | Learning Center | Cybersecurity documents indexed like the other 11 segments |
+| LC-04 | Close the Cybersecurity gap in the search index. Its 43 documents appear on the segment page but are absent from the index, so search returns nothing for them. The other 11 segments are fully indexed | Learning Center | Cybersecurity documents indexed like the other 11 segments |
 | LC-05 | Decide whether an Arabic version is required, and scope it if so. The platform is English only today | Learning Center and segment owners | A written decision. If Arabic is required, the translation and right-to-left work is scoped as its own phase |
 | LC-06 | Codebase walkthrough session for the D&T coordinator and reviewer | Learning Center | Session delivered and questions closed |
 | LC-07 | User acceptance testing with a pilot segment before full rollout | Learning Center and pilot segment | UAT signed off |
@@ -148,7 +148,7 @@ Raised here rather than left for D&T review to surface. The four code-level item
 | CMP-04 | The site is publicly reachable with no sign-in | Anyone with the URL can browse it | Open, with D&T. Closed by DT-07. Until then the Hub must not hold real operational documents |
 | CMP-05 | GitHub Pages deployment runs alongside Azure | A second public copy outside TAQA hosting | Open, pending a decision. Retire the workflow at repository transfer (DT-03). Left running for now, as it may be the URL in current use |
 
-All ten pages were loaded in a browser with network traffic recorded. The site now makes no requests to any third-party host. The Content-Security-Policy on every page was tightened to `'self'` only, so any future third-party call is blocked by the browser rather than merely absent from the code.
+All eleven pages were loaded in a browser with network traffic recorded. The site now makes no requests to any third-party host. The Content-Security-Policy on every page was tightened to `'self'` only, so any future third-party call is blocked by the browser rather than merely absent from the code.
 
 CMP-04 is the reason no real operational content has been loaded into the platform yet.
 

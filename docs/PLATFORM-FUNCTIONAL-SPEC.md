@@ -64,21 +64,31 @@ These are document records, meaning title, type, segment and reference identifie
 
 ### Home
 
-The landing page. It carries a hero panel with a platform-wide search box, a live count of documents, segments and active technical alerts, and a grid of the 12 segment cards. Each card shows the segment name, its discipline label, how many documents it holds and how many technical alerts are open.
+The landing page. It carries a hero panel with a platform-wide search box, a summary panel of headline figures, and a grid of the 12 segment cards. Each card shows the segment name, its discipline label, how many documents it holds and how many technical alerts are open. The card figures are read from the data and are correct.
+
+The headline figures in the summary panel are not. They are fixed numbers written into the page rather than counted from the data, and none of them currently matches:
+
+| Figure shown | Displayed | Actual |
+|---|---|---|
+| Total Documents | 523 | 546 |
+| Business Segments | 11 | 12 |
+| Active Technical Alerts | 25 | 37 |
+| Glossary Terms | 160 | 197 |
+| Registered Users | 1,200 | No registration system exists |
+
+The last line is the one to note. The platform has no user accounts, so there is no source for a registered user count. That figure should be corrected or removed before the platform is shown more widely.
 
 Below the grid are shortcuts to the glossary, the document library, the upload page and the expert request page. A five-step guided tour runs on a visitor's first arrival and can be dismissed. Once dismissed it does not return.
 
-A "continue reading" panel appears if the visitor has opened a document before, taking them back to it.
+A "continue reading" panel appears if the visitor has opened a document before, and a row of recently visited segments appears once they have browsed a few.
 
 ### Segment page
 
 Opened by selecting a segment card. Everything for one segment in one place.
 
-Documents are presented in six tabs matching the categories above. Within each tab the visitor can sort alphabetically or leave the default order, and page through longer lists. Selecting a document opens a preview panel with its title, type and reference identifier.
+Documents are presented in seven tabs: All, plus one for each of the six categories. Within each tab the visitor can sort alphabetically or leave the default order, and page through longer lists. Selecting a document opens a preview panel with its title, type and reference identifier.
 
 Each document can be bookmarked, and each has a QR code button that generates a scannable code for the page address. The QR code is produced inside the browser. A copy-link button puts the page address on the clipboard, which is how a supervisor would share a specific segment with a crew.
-
-The page also shows recently visited segments, so returning to a frequently used area takes one click.
 
 ### Document viewer
 
@@ -94,13 +104,17 @@ A single table of all published documents across every segment. It can be filter
 
 ### Search
 
-A cross-segment search over all 502 indexed records. Results show the document title, its segment and its type, and lead through to the viewer.
+A cross-segment search. Results show the document title, its segment and its type, and lead through to the viewer.
+
+The index holds 503 of the 546 documents. The 43 Cybersecurity documents are absent from it entirely, so searching for them returns nothing even though they appear on the Cybersecurity segment page. Every other segment is fully indexed. This needs closing before launch.
 
 The page is labelled "AI Document Search" and offers example prompts, but it performs keyword matching against a fixed list held in the browser. There is no artificial intelligence behind it and no connection to any language model. Nothing typed into it is transmitted anywhere.
 
 ### Field glossary
 
-197 oilfield abbreviations and terms, from BOP and CT through to WOB. Terms can be searched, filtered by category, or browsed alphabetically. Selecting a term expands its definition.
+197 oilfield abbreviations and terms. They are grouped into eight categories: drilling, production, engineering, logging, maintenance, cybersecurity, HR and commercial. Terms can be searched, filtered by category, or browsed alphabetically, and selecting one expands its definition.
+
+Terms a visitor adds are kept in their own browser and are not shared with anyone else.
 
 A form lets staff propose a new term. It currently shows a confirmation without saving or sending anything.
 
@@ -132,9 +146,9 @@ Approving or rejecting changes only what is displayed on screen. Nothing is reco
 
 ### Analytics
 
-Usage figures collected in the visitor's own browser: pages viewed, documents opened, searches run. The figures can be exported to a CSV file saved to the visitor's own device, or cleared.
+Three figures collected in the visitor's own browser: total page views, documents opened, and searches made. Events are recorded as they happen, with the most recent 300 retained. The figures can be exported to a CSV file saved to the visitor's own device, or cleared.
 
-Because the counters are per-browser, these are not organisation-wide figures. Real usage analytics arrive with the integration.
+Because the counters are per browser, these are not organisation-wide figures. Real usage analytics arrive with the integration.
 
 ### Offline page
 
@@ -156,6 +170,8 @@ Shown when the visitor navigates to a page that has not been cached and there is
 | Mobile layout | Every page reflows for phone screens, with touch targets sized for gloved hands |
 | Sunlight mode | Raises contrast in the document viewer for outdoor reading |
 | Print | The document viewer and segment page produce a clean printed layout with the navigation removed. Other pages print as they appear |
+| Draft saving | On the upload and support ticket pages, whatever has been typed is saved to the visitor's own browser as they type and restored if they return. The draft is cleared when the form is submitted |
+| Error logging | Script errors are recorded in the visitor's own browser, keeping the most recent 50, to help diagnose problems |
 
 ---
 
