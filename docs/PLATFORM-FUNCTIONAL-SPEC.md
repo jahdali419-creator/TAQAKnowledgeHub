@@ -147,7 +147,7 @@ Shown when the visitor navigates to a page that has not been cached and there is
 | Function | What it does |
 |---|---|
 | Offline reading | Pages the visitor has opened stay available without a network connection. The platform installs to a phone home screen like an app |
-| Bilingual display | The interface switches between English and Arabic, including full right-to-left layout |
+| Language | English only. There is no Arabic version and no right-to-left layout. Every page is marked `lang="en"` |
 | Dark mode | Switches the colour theme. The choice is remembered on that device |
 | Bookmarks | A personal list of saved documents, held on that device |
 | Reading history | Recently viewed documents and read progress, held on that device |
@@ -155,7 +155,7 @@ Shown when the visitor navigates to a page that has not been cached and there is
 | QR codes | Generated in the browser for any segment or document, so a printed procedure can carry a link back to the current version |
 | Mobile layout | Every page reflows for phone screens, with touch targets sized for gloved hands |
 | Sunlight mode | Raises contrast in the document viewer for outdoor reading |
-| Print | Produces a clean printed layout with navigation removed |
+| Print | The document viewer and segment page produce a clean printed layout with the navigation removed. Other pages print as they appear |
 
 ---
 
@@ -181,9 +181,9 @@ Stated plainly, because the gaps matter as much as the features.
 
 A static web application: HTML, CSS and JavaScript only. There is no server, no database and no backend. Every function described above runs inside the visitor's own browser.
 
-The platform makes no network calls. There is no code in it capable of transmitting data. This was verified by searching all 33 files for network functions and by loading every page with all traffic recorded.
+The platform makes no network calls. There is no code in it capable of transmitting data. This was verified by searching all 42 site files for network functions and by loading every page with all traffic recorded.
 
-It is 33 files and roughly 2.3 MB in total, with no build step and no package manager.
+It is 42 files and about 2.2 MB in total, with no build step and no package manager.
 
 ---
 

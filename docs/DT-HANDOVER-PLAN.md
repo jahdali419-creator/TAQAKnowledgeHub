@@ -27,7 +27,7 @@ The frontend is complete and running. It is a static web application with no bac
 | Pages | Home, dashboard, segment view, document library, document viewer, AI search, analytics, glossary, upload, support ticket, offline fallback |
 | Segments modelled | 12: Cementing, Coiled Tubing, Cybersecurity, Drilling, Fracturing, HR, Inspection, QHSE, TWS Maintenance, Well Safety, Well Testing, Wireline |
 | Offline capability | Progressive Web App with a service worker, installable, with an offline fallback page |
-| Bilingual | English and Arabic with full RTL support |
+| Language | English only. No Arabic version exists today |
 | Branding | TAQA corporate colour and typography system throughout |
 | Hosting today | Azure Static Web Apps and GitHub Pages, both from the same repository |
 | CI/CD | GitHub Actions, automatic deploy on merge to `main` |
@@ -129,7 +129,7 @@ These do not depend on D&T and are proceeding in parallel.
 | LC-02 | Confirm each segment's content owner and approver | Learning Center | A named owner per segment |
 | LC-03 | Wire the frontend to Graph and SharePoint once DT-05, DT-06 and DT-10 are complete | Learning Center, with the DT-02 reviewer | Library, viewer and search read live data |
 | LC-04 | Close the Cybersecurity gap in the search index. The segment exists in the data model but has no searchable entries | Learning Center | Cybersecurity documents indexed like the other 11 segments |
-| LC-05 | Arabic content review across all pages | Learning Center | Translations verified by a native reviewer |
+| LC-05 | Decide whether an Arabic version is required, and scope it if so. The platform is English only today | Learning Center and segment owners | A written decision. If Arabic is required, the translation and right-to-left work is scoped as its own phase |
 | LC-06 | Codebase walkthrough session for the D&T coordinator and reviewer | Learning Center | Session delivered and questions closed |
 | LC-07 | User acceptance testing with a pilot segment before full rollout | Learning Center and pilot segment | UAT signed off |
 

@@ -11,7 +11,7 @@ From Mohammed Al-Jahdali, TAQA Learning Center
 
 The Knowledge Hub is a folder of files. That is the whole thing.
 
-33 files, about 2.3 MB. No database, no server, no backend. No build step, no compiling, no package manager. The files sitting in the repository are exactly the files served to the browser.
+42 files, about 2.2 MB. No database, no server, no backend. No build step, no compiling, no package manager. The files sitting in the repository are exactly the files served to the browser.
 
 This is the most important fact for planning, because it means there is nothing to migrate except static files. No data to export, no server to rebuild, no dependencies to resolve, no downtime to schedule.
 
@@ -161,14 +161,13 @@ If `output_location` is set to `dist` or `build`, the deployment fails looking f
 
 Push to `main` and the site deploys in about two minutes.
 
-Check six things:
+Check five things:
 
 1. The home page loads with the TAQA typeface, not a fallback
 2. Navigation between pages works
 3. Search returns results
-4. The Arabic toggle switches the layout right to left
-5. With the network switched off, the site still loads
-6. The browser console shows no errors and no requests to any outside host
+4. With the network switched off, the site still loads
+5. The browser console shows no errors and no requests to any outside host
 
 `staticwebapp.config.json` is already in the repository and handles routing, font MIME types, caching and the security headers. No configuration is needed.
 
@@ -247,13 +246,23 @@ Effort figures are our estimate to anchor discussion. D&T's own sizing governs.
 
 ---
 
-## 8. Current status: the platform is offline
+## 8. Current status: three deployment targets, two of them live
 
-The Hub previously ran on a free-trial Azure subscription inside the TAQA directory (`taqa.com.sa`). That trial credit has expired, the subscription now shows as Disabled, and the Azure URL returns 404.
+The repository currently deploys to three targets. Two are live and serving the current build.
 
-A GitHub Pages preview remains available in the meantime.
+| Target | State | Notes |
+|---|---|---|
+| Azure Static Web Apps `agreeable-river-0ab0a3310` | Live | Serving the current build |
+| GitHub Pages | Live | Public, free tier, serving the current build |
+| Azure Static Web Apps `gray-mud-003cdea10` | Dormant, returns 404 | The free-trial subscription behind it expired and now shows as Disabled |
 
-This is the practical reason the migration matters now rather than later. The resource itself runs on the Static Web Apps Free tier and carries no licence or hosting cost. What is needed is a TAQA-owned subscription to host it under.
+Two points follow from this.
+
+First, one Azure deployment is working, so the platform is not offline. That is the URL to use for any demonstration.
+
+Second, three deployment targets is two too many. Each live copy is a separate public address serving the same content, and each carries its own deployment token in the repository's secrets. Part of the handover should be consolidating to a single TAQA-owned deployment and retiring the others, including revoking the tokens that publish to them.
+
+The `gray-mud` subscription is a free trial inside the TAQA directory (`taqa.com.sa`) whose credit has expired. Whether it is revived or abandoned is a decision for D&T. The Static Web Apps Free tier carries no licence or hosting cost either way. What the platform needs is a TAQA-owned subscription to sit under, with one deployment target rather than three.
 
 ---
 

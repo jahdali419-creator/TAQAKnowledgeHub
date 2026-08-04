@@ -14,7 +14,7 @@ Everything here was verified against the running code rather than from documenta
 
 The application makes no network calls of any kind.
 
-A search across all 33 files for `fetch()`, `XMLHttpRequest`, `WebSocket`, `navigator.sendBeacon` and HTML form `action` attributes returns nothing. There is no code path that transmits data anywhere.
+A search across all 42 site files for `fetch()`, `XMLHttpRequest`, `WebSocket`, `navigator.sendBeacon` and HTML form `action` attributes returns nothing. There is no code path that transmits data anywhere.
 
 The only network activity is the service worker retrieving the site's own files from its own origin so that pages work offline.
 
@@ -44,8 +44,9 @@ There is no `package.json`, no `node_modules` and no package manager. The applic
 |---|---|---|
 | Source control | GitHub | Currently a personal repository, to be transferred to TAQA |
 | CI/CD | GitHub Actions | Automatic deploy on merge to `main` |
-| Hosting today | GitHub Pages | Free tier, public |
-| Hosting intended | Azure Static Web Apps | Currently offline, see section 5 |
+| Hosting, live copy 1 | GitHub Pages | Public, free tier, serving the current build |
+| Hosting, live copy 2 | Azure Static Web Apps `agreeable-river-0ab0a3310` | Public, serving the current build |
+| Hosting, dormant | Azure Static Web Apps `gray-mud-003cdea10` | Returns 404. The free-trial subscription behind it has expired |
 | Runtime | The visitor's browser | No server-side execution of any kind |
 
 ### Browser APIs used
@@ -239,6 +240,7 @@ Rated for the platform as it exists today, and again for after the SharePoint in
 |---|---|---|---|---|
 | R-01 | No authentication. The site is open to anyone with the URL | Medium | Critical | Open. Closed by Entra ID sign-in. Until then the platform must not hold real operational documents. This is the reason none have been loaded |
 | R-02 | The repository is public. All code and document titles are readable on the internet | Low | Medium | Open, deliberate and time-boxed. GitHub requires a public repository for the free preview link. To be made private once TAQA hosting is live. No credentials or real documents are exposed |
+| R-11 | Three deployment targets exist and two are publicly live: GitHub Pages and an Azure Static Web App (`agreeable-river-0ab0a3310`). A third (`gray-mud-003cdea10`) is dormant. Each live copy is a separate public URL serving the same content, and each has its own deployment token held in GitHub secrets | Medium | High | Open. Consolidate to one TAQA-owned deployment at handover and retire the others, including revoking their deployment tokens. Identified 4 August 2026 while verifying the file inventory |
 | R-03 | Progressive Web App offline caching. The application installs on phones and caches pages for offline reading. Once real documents are added, TAQA content will be cached on whatever device installed it, including personal devices outside MDM control | Low | High | Open, needs a decision. No policy exists yet on whether offline caching of operational documents on personal devices is acceptable. Recommend deciding this before Phase 2 |
 | R-04 | `.zip` archives are accepted for upload and their contents cannot be inspected in the browser. An executable can be placed inside an archive | Low | Medium | Open and accepted. To be mitigated by server-side antivirus through Defender for Storage or SharePoint at Phase 3. Recorded for the exception register |
 | R-05 | `script-src` permits `'unsafe-inline'`, which weakens the Content-Security-Policy's ability to contain script injection | Medium | Medium | Open and deferred. Removing it requires relocating every inline script across roughly 13,000 lines. Recommend doing this during the Azure migration rather than as an isolated change |
@@ -275,7 +277,7 @@ The application is a front end with no server, no backend, no database and no ne
 
 There are no third-party services. All four that previously existed were removed and the removal was verified. One MIT-licensed library is vendored into the repository, and there is no package manager and no dependency tree.
 
-Four findings were identified and closed during this review, including a confirmed cross-site scripting vulnerability. Ten risks remain open. Six of those close through the Azure and Entra ID integration, three need a decision from Cybersecurity or D&T, and one is a repository setting that can be changed today.
+Four findings were identified and closed during this review, including a confirmed cross-site scripting vulnerability. Eleven risks remain open. Six close through the Azure and Entra ID integration, three need a decision from Cybersecurity or D&T, one is a repository setting that can be changed today, and one is the consolidation of three deployment targets down to a single TAQA-owned one.
 
 The controls that are missing are missing because the platform has no identity provider, no server and no stored data. They become implementable at integration, not before, and this assessment should be repeated once that work is complete.
 

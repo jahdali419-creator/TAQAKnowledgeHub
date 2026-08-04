@@ -11,7 +11,7 @@ Prepared by Mohammed Al-Jahdali, TAQA Learning Center, for TAQA Cybersecurity
 
 The Knowledge Hub is a front-end application only.
 
-- 33 files, about 2.3 MB of HTML, CSS and JavaScript
+- 42 files, about 2.2 MB of HTML, CSS and JavaScript
 - No server, no backend, no database, no API, no user accounts
 - No build step and no package manager. There is no `package.json` and no `node_modules`
 - No real documents are stored. Document titles are reference metadata held in JavaScript, and the viewer shows a placeholder
