@@ -207,7 +207,7 @@ window.showToast=function(msg,type){
     '<tr><td><span class="sc-key">Esc</span></td><td>Close modals · dismiss overlay</td></tr>'+
     '<tr><td><span class="sc-key">Tab</span></td><td>Navigate interactive elements</td></tr>'+
     '</table>'+
-    '<p class="sc-hint">Part of <em style="color:#00BBB6;font-style:italic;">The One</em> Platform</p>'+
+    '<p class="sc-hint">Part of <em style="color:#00BBB6;font-style:italic;">Tech Hub</em> Platform</p>'+
     '</div>';
   document.body.appendChild(ov);
   document.getElementById('sc-close').onclick=function(){ov.classList.remove('open');};
@@ -429,7 +429,7 @@ window.showToast=function(msg,type){
     '<div class="pwa-handle"></div>'+
     '<div class="pwa-row">'+APP_ICON+
       '<div class="pwa-text-block">'+
-        '<div class="pwa-title">Install The One</div>'+
+        '<div class="pwa-title">Install Tech Hub</div>'+
         '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
       '</div>'+
     '</div>'+
@@ -445,7 +445,7 @@ window.showToast=function(msg,type){
     '<div class="pwa-handle"></div>'+
     '<div class="pwa-row">'+APP_ICON+
       '<div class="pwa-text-block">'+
-        '<div class="pwa-title">Install The One</div>'+
+        '<div class="pwa-title">Install Tech Hub</div>'+
         '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
       '</div>'+
     '</div>'+
@@ -462,7 +462,7 @@ window.showToast=function(msg,type){
     '<div class="pwa-handle"></div>'+
     '<div class="pwa-row">'+APP_ICON+
       '<div class="pwa-text-block">'+
-        '<div class="pwa-title">Install The One</div>'+
+        '<div class="pwa-title">Install Tech Hub</div>'+
         '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
       '</div>'+
     '</div>'+
