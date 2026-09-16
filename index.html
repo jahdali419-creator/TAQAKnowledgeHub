@@ -217,6 +217,13 @@ html[data-theme="dark"] .mob-seg-link { border-color:#243044; }
   display:inline-block; font-size:11.5px; font-weight:600; letter-spacing:1.2px;
   text-transform:uppercase; color:#4DD9D3; margin-bottom:16px;
 }
+a.hero-label {
+  text-decoration:none; border-bottom:1px solid rgba(77,217,211,0.35);
+  padding-bottom:2px; transition:color 150ms cubic-bezier(0.23,1,0.32,1),
+  border-color 150ms cubic-bezier(0.23,1,0.32,1);
+}
+a.hero-label:hover { color:#7FE8E3; border-bottom-color:#7FE8E3; }
+a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; border-radius:2px; }
 .hero h1 {
   font-family:'Urbanist',sans-serif; font-size:clamp(28px,3.5vw,44px);
   font-weight:700; line-height:1.18; color:#ffffff;
@@ -782,6 +789,14 @@ body.page-exit { animation:pageFadeOut 0.28s ease forwards; pointer-events:none;
 html[data-theme="dark"] .scroll-top-btn { background:rgba(14,24,36,0.92); border-color:#243044; }
 
 /* ── Hero Word Animations ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:0.01ms !important; animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important; scroll-behavior:auto !important;
+  }
+  .hw { opacity:1 !important; }
+}
+
 @keyframes heroWordIn {
   from { opacity:0; transform:translateY(28px); }
   to   { opacity:1; transform:translateY(0); }
@@ -1054,13 +1069,13 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
 
 <div class="hero">
   <div class="hero-left">
-<h1><span class="hw hw-1 hw-i">We Were&nbsp;</span><span class="hw hw-2 hw-i"><span class="hero-muted">Scattered.</span></span><br><span class="hw hw-3 hw-i" style="color:rgba(255,255,255,0.45)">Now We Have </span><span class="hw hw-4 hw-i" style="font-style:italic;">The One.</span></h1>
-    <p class="hero-desc hw hw-5">Every answer, within reach.</p>
-    <div class="hero-search-bar hw hw-6">
+<a class="hero-label hw hw-1" href="https://engage.cloud.microsoft/main/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyMTA0NzY4NjgyOTQyNDY0In0/all" target="_blank" rel="noopener noreferrer" aria-label="#BetterTogether@TAQA — opens the initiative community in Viva Engage">#BetterTogether@TAQA</a>
+<h1><span class="hw hw-2 hw-i" style="color:#ffffff;">Knowledge Is&nbsp;</span><span class="hw hw-3 hw-i">Better Together.</span><br><span class="hw hw-4 hw-i" style="font-style:italic;color:rgba(255,255,255,0.82);">Every Answer, Within Reach.</span></h1>
+    <div class="hero-search-bar hw hw-5">
       <input type="text" id="hero-search-input" placeholder="Search documents, procedures, manuals..." autocomplete="off">
       <a href="ai-search.html" class="btn btn-primary" id="hero-search-btn">Search</a>
     </div>
-    <div class="hero-links hw hw-7">
+    <div class="hero-links hw hw-6">
       <a href="#segments">Browse Segments</a>
       <a href="ai-search.html">AI Document Search</a>
     </div>
