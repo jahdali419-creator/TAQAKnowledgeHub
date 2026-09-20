@@ -178,6 +178,69 @@ tbody tr[aria-selected="true"]{background:var(--brand-soft);}
 .note{padding:11px 14px;border-top:1px solid var(--rule);background:var(--inset);
   border-radius:0 0 var(--r3) var(--r3);font-size:11.5px;color:var(--ink-3);}
 
+/* ── Tabs ── */
+.tabs{display:inline-flex;gap:2px;padding:3px;background:var(--inset);border:1px solid var(--rule);
+  border-radius:var(--r2);margin-bottom:14px;}
+.tab{appearance:none;border:none;background:transparent;font:600 12.5px/1 'Inter',sans-serif;
+  color:var(--ink-3);padding:7px 14px;border-radius:5px;cursor:pointer;
+  transition:background 140ms var(--out-ease),color 140ms var(--out-ease);}
+.tab[aria-selected="true"]{background:var(--paper);color:var(--ink);box-shadow:0 1px 2px rgba(19,27,38,.07);}
+@media (hover:hover) and (pointer:fine){.tab:not([aria-selected="true"]):hover{color:var(--ink);}}
+
+/* ── Charts ───────────────────────────────────────────────────────────────
+   Palette validated with the dataviz validator against both surfaces.
+   Ordinal blue ramp for the ageing buckets, three-slot set for the status
+   mix, emphasis (one accent against neutral) for numbering by segment.   */
+.viz{--c-blue:#2a78d6; --c-warn:#c98500; --c-crit:#d03b3b;
+  --o1:#86b6ef; --o2:#5598e7; --o3:#2a78d6; --o4:#1c5cab;
+  --neutral:#c8cdd6; --grid:#e6e8ec; --axis:#b9bfc9;}
+html[data-theme="dark"] .viz{--c-blue:#3987e5; --c-crit:#e66767;
+  --o1:#184f95; --o2:#256abf; --o3:#3987e5; --o4:#6da7ec;
+  --neutral:#38414f; --grid:#232c39; --axis:#333d4c;}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:14px;margin-bottom:14px;}
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:var(--r3);padding:17px 19px 15px;}
+.card.wide{grid-column:1/-1;}
+.card h3{font:700 12.5px/1.3 'Inter',sans-serif;color:var(--ink);}
+.card .sub{font-size:11.5px;color:var(--ink-3);margin-top:3px;margin-bottom:15px;}
+.card svg{display:block;width:100%;overflow:visible;}
+.card svg text{font-family:'Inter',sans-serif;font-variant-numeric:tabular-nums;}
+.lg{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:13px;}
+.lg span{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2);}
+.lg i{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+.lg b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;}
+.hero{display:flex;align-items:baseline;gap:9px;margin-bottom:2px;}
+.hero-n{font:700 34px/1 'Inter',sans-serif;color:var(--ink);letter-spacing:-.03em;}
+.hero-u{font-size:12px;color:var(--ink-3);}
+#tip{position:fixed;z-index:80;background:var(--ink);color:var(--paper);font-size:11.5px;font-weight:500;
+  padding:6px 9px;border-radius:5px;pointer-events:none;opacity:0;transition:opacity 120ms var(--out-ease);
+  white-space:nowrap;}
+#tip.on{opacity:1;}
+.bar-hit{cursor:default;}
+
+/* ── Conformance scorecard ── */
+.score{background:var(--paper);border:1px solid var(--rule);border-radius:var(--r3);overflow:hidden;}
+.score-h{padding:16px 19px 14px;border-bottom:1px solid var(--rule);}
+.score-h h3{font:700 12.5px/1.3 'Inter',sans-serif;color:var(--ink);}
+.score-h p{font-size:11.5px;color:var(--ink-3);margin-top:3px;}
+.score table{width:100%;}
+.score th{position:static;}
+.score td{padding:11px 19px;border-bottom:1px solid var(--rule-soft);vertical-align:top;}
+.score tr:last-child td{border-bottom:none;}
+.score .cl{font:600 11px/1.5 var(--mono);color:var(--ink-3);white-space:nowrap;}
+.score .what{font-weight:600;color:var(--ink);}
+.score .how{font-size:11.5px;color:var(--ink-2);margin-top:3px;max-width:62ch;}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:var(--r1);
+  border:1px solid currentColor;font:700 9.5px/1.2 'Inter',sans-serif;letter-spacing:.06em;
+  text-transform:uppercase;white-space:nowrap;}
+.chip svg{width:10px;height:10px;}
+.k-met{color:#0a7a2f;} html[data-theme="dark"] .k-met{color:#4ec07a;}
+.k-part{color:var(--c-warn,#8a5a08);} html[data-theme="dark"] .k-part{color:#d9a441;}
+.k-back{color:var(--ink-3);}
+.k-qhse{color:var(--out);}
+.sum-row{display:flex;gap:22px;flex-wrap:wrap;padding:14px 19px;background:var(--inset);
+  border-top:1px solid var(--rule);font-size:11.5px;color:var(--ink-2);}
+.sum-row b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums;}
+
 /* ── Drawer ── */
 .scrim{position:fixed;inset:0;background:rgba(10,15,22,.36);opacity:0;pointer-events:none;
   transition:opacity 190ms var(--out-ease);z-index:60;}
@@ -271,6 +334,44 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
     </div>
   </header>
 
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tab-reg" role="tab" aria-selected="true" onclick="showView('reg')">Register</button>
+    <button class="tab" id="tab-con" role="tab" aria-selected="false" onclick="showView('con')">Conformance</button>
+  </div>
+
+  <div id="view-con" class="viz" hidden>
+    <div class="cards">
+      <div class="card">
+        <h3>Where the register stands</h3>
+        <div class="sub">Every controlled document by its current state.</div>
+        <svg id="ch-mix" viewBox="0 0 400 42" preserveAspectRatio="none" height="42" role="img" aria-label="Documents by status"></svg>
+        <div class="lg" id="lg-mix"></div>
+      </div>
+      <div class="card">
+        <h3>How late the overdue reviews are</h3>
+        <div class="sub">Periodic review under API Q2 4.4.3 c.</div>
+        <div class="hero"><span class="hero-n" id="ov-n">0</span><span class="hero-u" id="ov-u"></span></div>
+        <svg id="ch-age" viewBox="0 0 400 128" role="img" aria-label="Overdue reviews by age"></svg>
+      </div>
+      <div class="card wide">
+        <h3>Numbering against TQ-QHSE-S001 5.3</h3>
+        <div class="sub">Documents that cannot take a conformant number because the standard assigns no short form.</div>
+        <svg id="ch-seg" role="img" aria-label="Numbering conformance by segment"></svg>
+        <div class="lg" id="lg-seg"></div>
+      </div>
+    </div>
+
+    <div class="score">
+      <div class="score-h">
+        <h3>Clause by clause</h3>
+        <p>What this register satisfies today, what needs the back end, and what is waiting on QHSE.</p>
+      </div>
+      <table><tbody id="score-rows"></tbody></table>
+      <div class="sum-row" id="score-sum"></div>
+    </div>
+  </div>
+
+  <div id="view-reg">
   <div class="counts" id="counts" role="group" aria-label="Filter by status"></div>
 
   <div class="bar">
@@ -310,7 +411,9 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
     <button class="more" id="more" hidden onclick="limit=1e6;render()"></button>
     <div class="note" id="note"></div>
   </section>
+  </div>
 </div>
+<div id="tip" role="status"></div>
 
 <div class="scrim" id="scrim" onclick="closeDetail()"></div>
 <aside class="dw" id="dw" role="dialog" aria-modal="true" aria-labelledby="dw-title" aria-hidden="true">
@@ -415,6 +518,7 @@ function setRole(r){
   TAQA_ROLE.set(r);
   if(quick){const c=CT.find(x=>x.k===quick); if(c&&c.control&&!TAQA_ROLES[r].controlPanel)quick=null;}
   limit=250;closeDetail();renderRole();renderCounts();render();
+  if(view==='con')drawCharts();
 }
 
 function current(){
@@ -541,6 +645,180 @@ function exportCsv(){
   a.download='TQ-QHSE-F086_Master_Document_List_'+new Date().toISOString().slice(0,10)+'.csv';
   a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
 }
+
+// ── Charts ────────────────────────────────────────────────────────────────
+// Everything is computed from the register, so the picture and the table can
+// never disagree. Palette validated against both surfaces before use.
+const tip=document.getElementById('tip');
+function bindTip(el,text){
+  el.addEventListener('mouseenter',()=>{tip.textContent=text;tip.classList.add('on');});
+  el.addEventListener('mousemove',e=>{
+    const w=tip.offsetWidth, x=Math.min(Math.max(e.clientX-w/2,8),innerWidth-w-8);
+    tip.style.left=x+'px'; tip.style.top=(e.clientY-34)+'px';});
+  el.addEventListener('mouseleave',()=>tip.classList.remove('on'));
+}
+const svgEl=(n,a)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',n);
+  for(const k in a)e.setAttribute(k,a[k]);return e;};
+
+function chartMix(){
+  const rows=visible().filter(d=>A.controlled(d));
+  const groups=[
+    {k:'Current',    n:rows.filter(d=>d.status==='current').length,       c:'var(--neutral)'},
+    {k:'Review due', n:rows.filter(d=>d.status==='under-review').length,  c:'var(--c-warn)'},
+    {k:'Draft',      n:rows.filter(d=>d.status==='draft').length,         c:'var(--c-blue)'},
+    {k:'Withdrawn',  n:rows.filter(d=>d.status==='obsolete'||d.status==='superseded').length, c:'var(--c-crit)'}
+  ].filter(g=>g.n>0);
+  const total=groups.reduce((a,g)=>a+g.n,0)||1, W=400, GAP=2;
+  const svg=document.getElementById('ch-mix'); svg.innerHTML='';
+  let x=0;
+  groups.forEach((g,i)=>{
+    const w=Math.max((g.n/total)*(W-GAP*(groups.length-1)),3);
+    const r=svgEl('rect',{x:x,y:0,width:w,height:26,fill:g.c,rx:3});
+    svg.appendChild(r);
+    bindTip(r,g.k+': '+g.n+' of '+total+' ('+Math.round(g.n/total*100)+'%)');
+    x+=w+GAP;
+  });
+  document.getElementById('lg-mix').innerHTML=groups.map(g=>
+    `<span><i style="background:${g.c}"></i>${g.k} <b>${g.n}</b></span>`).join('');
+}
+
+function chartAge(){
+  const k=role();
+  const late=visible().filter(d=>A.overdue(d)&&TAQA_ROLE.inControlScope(d,k))
+    .map(d=>-A.reviewDays(d));
+  document.getElementById('ov-n').textContent=late.length;
+  document.getElementById('ov-u').textContent=late.length===1?'review overdue':'reviews overdue';
+  const buckets=[
+    {l:'1 to 30 days',   f:n=>n<=30,            c:'var(--o1)'},
+    {l:'31 to 90 days',  f:n=>n>30&&n<=90,      c:'var(--o2)'},
+    {l:'91 to 180 days', f:n=>n>90&&n<=180,     c:'var(--o3)'},
+    {l:'Over 180 days',  f:n=>n>180,            c:'var(--o4)'}
+  ].map(b=>({...b,n:late.filter(b.f).length}));
+  const max=Math.max(...buckets.map(b=>b.n),1);
+  const svg=document.getElementById('ch-age'); svg.innerHTML='';
+  const LBL=104, W=400, BW=W-LBL-34, H=26, GAP=8;
+  buckets.forEach((b,i)=>{
+    const y=i*(H+GAP);
+    const t=svgEl('text',{x:0,y:y+H/2+4,'font-size':11.5,fill:'var(--ink-3)'});
+    t.textContent=b.l; svg.appendChild(t);
+    svg.appendChild(svgEl('rect',{x:LBL,y:y,width:BW,height:H,fill:'var(--grid)',rx:3}));
+    const w=Math.max((b.n/max)*BW, b.n?3:0);
+    if(w){
+      const r=svgEl('rect',{x:LBL,y:y,width:w,height:H,fill:b.c,rx:3});
+      svg.appendChild(r);
+      bindTip(r,b.n+(b.n===1?' document ':' documents ')+b.l.toLowerCase()+' overdue');
+    }
+    const v=svgEl('text',{x:LBL+BW+9,y:y+H/2+4,'font-size':12,'font-weight':700,fill:'var(--ink)'});
+    v.textContent=b.n; svg.appendChild(v);
+  });
+  svg.setAttribute('viewBox','0 0 400 '+(buckets.length*(H+GAP)-GAP+4));
+}
+
+function chartSeg(){
+  const rows=visible().filter(d=>A.controlled(d));
+  const segs=Object.keys(L.segments).map(id=>{
+    const inSeg=rows.filter(d=>d.segment===id);
+    const prov=inSeg.filter(d=>d.numberStatus==='provisional').length;
+    return {id,name:L.segments[id].name,total:inSeg.length,prov,ok:inSeg.length-prov};
+  }).filter(x=>x.total>0).sort((a,b)=>b.prov-a.prov||b.total-a.total);
+  const max=Math.max(...segs.map(x=>x.total),1);
+  const LBL=132, W=760, BW=W-LBL-46, H=19, GAP=7;
+  const svg=document.getElementById('ch-seg'); svg.innerHTML='';
+  svg.setAttribute('viewBox','0 0 '+W+' '+(segs.length*(H+GAP)-GAP+4));
+  svg.setAttribute('height',segs.length*(H+GAP)-GAP+4);
+  segs.forEach((x,i)=>{
+    const y=i*(H+GAP);
+    const t=svgEl('text',{x:0,y:y+H/2+4,'font-size':11.5,fill:'var(--ink-3)'});
+    t.textContent=x.name; svg.appendChild(t);
+    const okW=(x.ok/max)*BW, pvW=(x.prov/max)*BW;
+    if(okW>0){const r=svgEl('rect',{x:LBL,y:y,width:Math.max(okW,2),height:H,fill:'var(--neutral)',rx:2.5});
+      svg.appendChild(r); bindTip(r,x.name+': '+x.ok+' numbered under 5.3');}
+    if(pvW>0){const r=svgEl('rect',{x:LBL+okW+(okW>0?2:0),y:y,width:Math.max(pvW,2),height:H,fill:'var(--c-warn)',rx:2.5});
+      svg.appendChild(r); bindTip(r,x.name+': '+x.prov+' waiting on a short form');}
+    const v=svgEl('text',{x:LBL+BW+10,y:y+H/2+4,'font-size':11,fill:x.prov?'var(--c-warn)':'var(--ink-4)',
+      'font-weight':x.prov?700:500});
+    v.textContent=x.prov?x.prov+' held':'clear'; svg.appendChild(v);
+  });
+  const okT=segs.reduce((a,x)=>a+x.ok,0), pvT=segs.reduce((a,x)=>a+x.prov,0);
+  document.getElementById('lg-seg').innerHTML=
+    `<span><i style="background:var(--neutral)"></i>Numbered under 5.3 <b>${okT}</b></span>`+
+    `<span><i style="background:var(--c-warn)"></i>Waiting on a short form <b>${pvT}</b></span>`;
+}
+
+// ── Conformance scorecard ─────────────────────────────────────────────────
+const TICK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg>';
+const HALF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M4 12h16"/></svg>';
+const GEAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="3.4"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg>';
+const STOP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 7v7M12 17.5v.2"/></svg>';
+const KIND={met:['k-met',TICK,'Met'],part:['k-part',HALF,'Partial'],back:['k-back',GEAR,'Back end'],qhse:['k-qhse',STOP,'QHSE']};
+
+function scorecard(){
+  const all=D.filter(d=>A.controlled(d));
+  const n=all.length, prov=all.filter(d=>d.numberStatus==='provisional').length;
+  const over=all.filter(d=>A.overdue(d)).length;
+  const ar=all.filter(d=>d.translationOf).length;
+  const gone=all.filter(d=>d.status==='obsolete'||d.status==='superseded').length;
+  const rows=[
+    ['TQ-QHSE-S001 5.1','Master document list','met',
+      n+' controlled documents in one register, exportable as TQ-QHSE-F086.'],
+    ['TQ-QHSE-S001 5.3','Identification and numbering','part',
+      (n-prov)+' of '+n+' carry a conformant number. '+prov+' cannot, because no short form exists yet.'],
+    ['TQ-QHSE-S001 5.6','Obsolete documents','met',
+      gone+' withdrawn documents stay visible and marked. Download, print, offline pin and the reference card are blocked on them.'],
+    ['ISO 9001 7.5.2 a','Identification and description','met',
+      'Number, title, date, owner and reference are fields on every record rather than text inside a title.'],
+    ['ISO 9001 7.5.3.1 b','Protection from improper use','part',
+      'Every record carries a classification. Enforcing it needs server-side authorisation.'],
+    ['ISO 9001 7.5.3.2 c','Control of changes','met',
+      'Revision, issue date, approval date and what each document supersedes are all held.'],
+    ['API Q2 4.4.3 a, b','Approval and re-approval','part',
+      'Approval authority is recorded as a role from the section 4 table. The workflow itself needs a back end.'],
+    ['API Q2 4.4.3 c','Review for continued suitability','met',
+      'A cycle per document type, a stored due date, and '+over+' overdue surfaced for the controller.'],
+    ['API Q2 4.4.3 d','Changes and current revision status','met',
+      'Revision and supersedes are fields, so status is never inferred from a filename.'],
+    ['API Q2 4.4.3 e, f','Legibility and availability at point of use','met',
+      'Reachable offline, with the uncontrolled-when-printed caveat on the printable card.'],
+    ['API Q2 4.4.3','Translations','part',
+      ar+' Arabic versions linked to their English source. TQ-QHSE-S001 has no translation clause at all.'],
+    ['API Q2 4.4.4','External and customer documents','back',
+      'Not in the register yet. Needs its own store for standards, client specifications and their change impact.'],
+    ['API Q2 4.5 a to c','Record identification and legibility','met',
+      'Identification, collection point and legibility are covered by the record fields.'],
+    ['API Q2 4.5 d','Correction of records','back',
+      'No rule yet for correcting an entry. Needs an audit trail the front end cannot provide.'],
+    ['API Q2 4.5 e to g','Storage, protection, retrieval','back',
+      'SCORE is the master. Backup, restore and access control sit with IT.'],
+    ['API Q2 4.5 h, i','Retention and disposition','met',
+      'Ten years on every controlled record, per the 3rd Edition. TQ-QHSE-S001 7.5 still says five.'],
+    ['TQ-QHSE-S001 4','Document types','qhse',
+      'Technical Alert and Lesson Learned are not defined types, so they cannot be numbered conformantly.'],
+    ['TQ-QHSE-S001 5.3','Short forms','qhse',
+      'Cybersecurity and the Learning Center have no short form assigned. The Learning Center owns this platform.']
+  ];
+  document.getElementById('score-rows').innerHTML=rows.map(r=>{
+    const [cls,ico,lbl]=KIND[r[2]];
+    return `<tr><td style="width:150px;"><span class="cl">${esc(r[0])}</span></td>
+      <td><div class="what">${esc(r[1])}</div><div class="how">${esc(r[3])}</div></td>
+      <td style="width:108px;text-align:end;"><span class="chip ${cls}">${ico}${lbl}</span></td></tr>`;}).join('');
+  const c=k=>rows.filter(r=>r[2]===k).length;
+  document.getElementById('score-sum').innerHTML=
+    `<span><b>${c('met')}</b> met in the front end</span>`+
+    `<span><b>${c('part')}</b> partly met, the rest needs a back end</span>`+
+    `<span><b>${c('back')}</b> waiting on the back end</span>`+
+    `<span><b>${c('qhse')}</b> blocked until QHSE decides</span>`;
+}
+
+let view='reg';
+function showView(v){
+  view=v;
+  document.getElementById('view-reg').hidden=v!=='reg';
+  document.getElementById('view-con').hidden=v!=='con';
+  document.getElementById('tab-reg').setAttribute('aria-selected',v==='reg');
+  document.getElementById('tab-con').setAttribute('aria-selected',v==='con');
+  if(v==='con')drawCharts();
+}
+function drawCharts(){chartMix();chartAge();chartSeg();scorecard();}
 
 renderRole(); readUrl();
 if(quick){const c=CT.find(x=>x.k===quick); if(c&&c.control&&!TAQA_ROLES[role()].controlPanel)quick=null;}
