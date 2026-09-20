@@ -1,14 +1,14 @@
-// TAQA Knowledge Hub — document control roles and permissions
+// TAQA Knowledge Hub: document control roles and permissions
 //
 // ⚠  THIS IS A SPECIFICATION, NOT A SECURITY CONTROL.
 //
 // Everything here runs in the browser, so it can be bypassed by opening a page
 // directly or reading documents-master.js. It exists to define, unambiguously,
-// which role may do what — so the back end can enforce the same matrix
+// which role may do what, so the back end can enforce the same matrix
 // server-side. The API must filter what it returns; the client must never be
 // the thing deciding what a user is allowed to see.
 //
-// Target implementation: Entra ID group membership -> SSO claim -> server-side
+// Target implementation: Entra ID group membership, then SSO claim, then server-side
 // authorization on every document and every control action.
 //
 // Clause basis:
@@ -23,7 +23,7 @@
 //   1. ROLE decides which FUNCTIONS you get (control panel, export, approve).
 //   2. CLASSIFICATION decides which DOCUMENTS you get (internal/confidential/
 //      restricted). See classificationsFor() below.
-// Restricting the register itself to QMS would breach §5.5 — a supervisor needs
+// Restricting the register itself to QMS would breach §5.5, because a supervisor needs
 // to know which revision is current before starting a job.
 
 const TAQA_ROLES = {
@@ -33,7 +33,7 @@ const TAQA_ROLES = {
     blurb: 'Every TAQA employee. Read-only access to the register so the current revision of any document can be confirmed before use.',
     // Withdrawn documents stay VISIBLE and clearly marked rather than hidden:
     // an old printed QR code must land on the "do not use" banner, not a dead
-    // link. API Q2 §4.4.3 — prevent unintended USE, which the viewer enforces
+    // link. API Q2 §4.4.3 prevents unintended USE, which the viewer enforces
     // by disabling download, print, offline pin and the quick reference card.
     statuses:        ['current', 'under-review', 'superseded', 'obsolete'],
     classifications: ['internal'],
@@ -46,7 +46,7 @@ const TAQA_ROLES = {
 
   owner: {
     label: 'Document Owner',
-    blurb: 'Owns documents for one segment. Sees their own drafts and their own overdue reviews, but approves nothing — approval authority sits with the roles named in TQ-QHSE-S001 §4.',
+    blurb: 'Owns documents for one segment. Sees their own drafts and their own overdue reviews, but approves nothing, because approval authority sits with the roles named in TQ-QHSE-S001 §4.',
     statuses:        ['current', 'under-review', 'superseded', 'obsolete', 'draft'],
     classifications: ['internal', 'confidential'],
     controlPanel: true,
@@ -104,7 +104,7 @@ const TAQA_ROLE = {
     if (!R) return false;
     if (R.statuses.indexOf(doc.status) === -1 && doc.status !== 'asset') return false;
     if (doc.classification && R.classifications.indexOf(doc.classification) === -1) return false;
-    // A draft carries no authority (API Q2 §4.4.3 b) — an owner sees only their own.
+    // A draft carries no authority (API Q2 §4.4.3 b), so an owner sees only their own.
     if (doc.status === 'draft' && R.scope === 'own' && doc.segment !== R.ownSegment) return false;
     return true;
   },

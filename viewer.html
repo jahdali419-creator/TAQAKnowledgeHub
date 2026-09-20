@@ -81,7 +81,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .badge.software{background:rgba(56,189,248,0.12);color:#38bdf8;border:1px solid rgba(56,189,248,0.22);}
 .badge.seg{background:rgba(0,93,99,0.06);color:var(--primary);border:1px solid rgba(0,93,99,0.15);}
 
-/* Lifecycle banner — API Q2 §4.4.3 obsolete control */
+/* Lifecycle banner, API Q2 §4.4.3 obsolete control */
 .lcb{display:flex;gap:13px;align-items:flex-start;border-radius:13px;padding:15px 19px;margin-bottom:18px;border:1px solid;}
 .lcb svg{flex-shrink:0;margin-top:1px;}
 .lcb b{display:block;font-size:13px;margin-bottom:3px;}
@@ -280,7 +280,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 
 /* Sunlight mode overrides */
 #qref-overlay.sunlight #qref-card{background:#ffffff;border:3px solid #000;}
-/* Printed copies are uncontrolled — TQ-QHSE-S001 §5.2, API Q2 §4.4.3 */
+/* Printed copies are uncontrolled. TQ-QHSE-S001 §5.2, API Q2 §4.4.3 */
 .qref-ctrl-note{margin-top:16px;padding-top:13px;border-top:1px dashed #cbd5e1;font-size:10.5px;
   line-height:1.55;color:#64748b;}
 .qref-ctrl-note b{color:#b45309;}
@@ -579,10 +579,10 @@ document.getElementById('doc-badges').innerHTML =
   '<span class="badge seg">' + segInfo.tag + '</span>' +
   (docId ? '<span class="badge docid">Document ID: ' + docId + '</span>' : '');
 
-// ── Document control block ────────────────────────────────────────────────
+// Document control block.
 // Resolved from the Master Document List (documents-master.js). Nothing here is
-// invented: a field with no value in the register renders as "Not recorded" with
-// a link to SCORE, never a placeholder. ISO 9001 §7.5.2 a) · API Q2 §4.4.3.
+// invented. A field with no value renders as "Not recorded" with a link to
+// SCORE, never a placeholder. ISO 9001 §7.5.2 a), API Q2 §4.4.3.
 const MD = (typeof TAQA_MASTER_DOCS !== 'undefined') ? TAQA_MASTER_DOCS : [];
 const MA = (typeof TAQA_DOC !== 'undefined') ? TAQA_DOC : null;
 const _rec = MA ? (MA.byNumber(docId) || MA.byLegacy(docId) ||
@@ -597,7 +597,7 @@ function cell(label, value, clause, extraCls){
     (clause ? '<div class="meta-clause">' + clause + '</div>' : '') + '</div>';
 }
 
-// Role check. Demonstration only — the back end must refuse to RETURN a record
+// Role check. Demonstration only. The back end must refuse to RETURN a record
 // the caller may not see, rather than relying on the page to hide it. roles.js.
 const _roleKey = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE.current() : null;
 const _denied = _rec && _roleKey && !TAQA_ROLE.canSee(_rec, _roleKey);
@@ -624,10 +624,10 @@ if (_denied) {
 } else if (_rec) {
   const t = MA.type(_rec), days = MA.reviewDays(_rec);
   const withdrawn = _rec.status === 'obsolete' || _rec.status === 'superseded';
-  // A withdrawn document has no live review obligation — showing a future date
+  // A withdrawn document has no live review obligation. Showing a future date
   // in green would imply it is still in force.
   const due = withdrawn
-    ? '<span style="color:var(--text-dim);">Not applicable — withdrawn</span>'
+    ? '<span style="color:var(--text-dim);">Not applicable, withdrawn</span>'
     : (_rec.nextReviewDate
         ? (days < 0 ? '<span class="mv-over">' + _fmt(_rec.nextReviewDate) + ' · ' + Math.abs(days) + 'd overdue</span>'
                     : '<span class="mv-ok">' + _fmt(_rec.nextReviewDate) + '</span>')
@@ -647,20 +647,20 @@ if (_denied) {
     cell('Language',        _rec.language === 'ar' ? 'العربية' : 'English', 'API Q2 §4.4.3') +
     cell('Master copy',     score ? '<a href="' + score + '" rel="noopener">Open in SCORE</a>' : null, 'System of record');
 
-  // Lifecycle banner — obsolete documents must not be used at the point of use
+  // Lifecycle banner. Obsolete documents must not be used at the point of use.
   const B = [];
   if (_rec.status === 'obsolete')
-    B.push(['obsolete','Obsolete — do not use',
+    B.push(['obsolete','Obsolete. Do not use.',
       'This document has been withdrawn and must not be used for any activity. Destroy or mark any printed copy. Obtain the current document from SCORE.']);
   else if (_rec.status === 'superseded')
-    B.push(['superseded','Superseded — a newer revision exists',
+    B.push(['superseded','Superseded. A newer revision exists.',
       'This revision has been replaced by ' + (_rec.supersededBy || 'a later revision') + '. Use the current revision from SCORE.']);
   else if (_rec.status === 'draft')
-    B.push(['draft','Draft — not approved for use',
+    B.push(['draft','Draft. Not approved for use.',
       'This document has not completed approval and carries no authority. It is shown for review only.']);
   else if (MA.overdue(_rec))
     B.push(['review','Periodic review overdue',
-      'The review due on ' + _fmt(_rec.nextReviewDate) + ' has not been recorded. The content remains in force until withdrawn, but its continued suitability is unconfirmed. API Q2 §4.4.3 c).']);
+      'The review due on ' + _fmt(_rec.nextReviewDate) + ' has not been recorded. The content stays in force until it is withdrawn, but nobody has confirmed it is still suitable. API Q2 §4.4.3 c).']);
   if (_rec.numberStatus === 'provisional')
     B.push(['prov','Provisional document number',
       MA.numberNote(_rec) || 'This number is provisional pending assignment by QHSE.']);
@@ -668,13 +668,13 @@ if (_denied) {
   document.getElementById('lifecycle-banner').innerHTML = B.map(b =>
     '<div class="lcb lcb-' + b[0] + '">' + WARN + '<div><b>' + b[1] + '</b><span class="n">' + b[2] + '</span></div></div>').join('');
 
-  // API Q2 §4.4.3 — a withdrawn document must be prevented from unintended use.
+  // API Q2 §4.4.3: a withdrawn document must be prevented from unintended use.
   // Downloading, printing or pinning it offline all create an uncontrolled copy,
   // so those actions are disabled rather than merely warned about.
   if (withdrawn || _rec.status === 'draft') {
     var why = _rec.status === 'draft'
-      ? 'Not approved for use — download disabled'
-      : 'Withdrawn document — download disabled to prevent an uncontrolled copy';
+      ? 'Not approved for use, so download is disabled'
+      : 'Withdrawn document. Download is disabled to prevent an uncontrolled copy.';
     ['dl-btn','pin-btn','qref-open-btn','print-btn'].forEach(function(id){
       var el = document.getElementById(id);
       if (!el) return;
@@ -862,7 +862,7 @@ function showQuickRef() {
   // Title
   document.getElementById('qref-title').textContent = docTitle;
 
-  // Meta chips — from the Master Document List, never fabricated.
+  // Meta chips from the Master Document List, never fabricated.
   // This card is printable, so it carries the identification a controlled copy
   // needs plus the uncontrolled-when-printed caveat. API Q2 §4.4.3 e) f).
   var chip = function(l,v){ return '<div class="qref-meta-chip"><strong>' + l + '</strong>' + (v || 'Not recorded') + '</div>'; };
@@ -885,7 +885,7 @@ function showQuickRef() {
     return '<li><div class="qref-bullet-dot"></div><span>' + s.replace(/\.$/,'') + '</span></li>';
   }).join('');
 
-  // Control note — a printed card is an uncontrolled copy
+  // Control note. A printed card is an uncontrolled copy.
   document.getElementById('qref-ctrl-note').innerHTML =
     '<b>UNCONTROLLED WHEN PRINTED.</b> Valid at time of printing only. ' +
     (_rec && _rec.nextReviewDate
