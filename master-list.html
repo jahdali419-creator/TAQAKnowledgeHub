@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#005D63">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tech Hub">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<title>Master Document List — TAQA Knowledge Hub</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root{
+  --primary:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
+  --bg:#f4f5f7;--bg-white:#ffffff;
+  --glass:rgba(255,255,255,0.85);
+  --text:#1a2235;--text-muted:#64748b;--text-dim:#94a3b8;
+  --radius:14px;--gradient:#005D63;
+  --border:rgba(0,0,0,0.08);
+  --ok:#0f9d58;--warn:#f59e0b;--bad:#ef4444;--info:#3b82f6;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+@keyframes pageFadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;animation:pageFadeIn 0.4s ease;}
+.page-wrapper{min-height:100vh;display:flex;flex-direction:column;}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,0.93);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
+.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.nav-brand-icon{width:40px;height:40px;border-radius:11px;background:var(--gradient);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 18px rgba(0,93,99,0.38);}
+.nav-brand-icon svg{width:20px;height:20px;}
+.nav-brand-text{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;}
+.nav-brand-name{font-weight:800;color:var(--primary);}
+.nav-brand-hub{font-weight:500;color:#64748b;}
+.nav-links{display:flex;gap:2px;list-style:none;align-items:center;}
+.nav-links a{padding:7px 15px;border-radius:6px;text-decoration:none;font-size:13.5px;font-weight:500;color:var(--text-muted);transition:background .2s,color .2s;}
+.nav-links a:hover,.nav-links a.on{background:rgba(0,93,99,.07);color:var(--primary);}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.dark-toggle{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.btn{padding:8px 15px;border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text-muted);font-family:inherit;transition:all .2s;}
+.btn:hover{border-color:rgba(0,93,99,.35);color:var(--primary);}
+.btn-solid{background:var(--gradient);color:#fff;border:none;}
+.nav-role-badge{font-size:11px;font-weight:700;padding:5px 11px;border-radius:20px;background:rgba(0,187,182,.1);border:1px solid rgba(0,187,182,.25);color:var(--primary);}
+
+/* Layout */
+.outer{margin-top:68px;padding:26px 48px 70px;max-width:1680px;width:100%;margin-left:auto;margin-right:auto;}
+.hero{background:var(--gradient);border-radius:18px;padding:30px 34px;color:#fff;margin-bottom:22px;}
+.hero h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:25px;font-weight:800;margin-bottom:7px;}
+.hero p{font-size:13.5px;opacity:.9;line-height:1.65;max-width:900px;}
+.hero-ref{display:inline-flex;align-items:center;gap:7px;margin-top:14px;font-size:11.5px;font-weight:600;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:6px 12px;border-radius:20px;}
+
+/* Prototype banner */
+.proto{display:flex;gap:12px;align-items:flex-start;background:rgba(253,105,29,.07);border:1px solid rgba(253,105,29,.28);
+  border-left:3px solid var(--accent);border-radius:11px;padding:14px 18px;margin-bottom:22px;}
+.proto b{color:var(--accent);font-size:12.5px;display:block;margin-bottom:3px;}
+.proto span{font-size:12.5px;color:var(--text-muted);line-height:1.65;}
+
+/* Stat tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:12px;margin-bottom:22px;}
+.tile{background:var(--bg-white);border:1px solid var(--border);border-radius:13px;padding:16px 18px;position:relative;overflow:hidden;}
+.tile::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--c,var(--primary-light));}
+.tile-n{font-size:25px;font-weight:800;font-family:'BwGradual','Urbanist',sans-serif;color:var(--c,var(--primary));line-height:1.1;}
+.tile-l{font-size:11.5px;color:var(--text-muted);font-weight:600;margin-top:4px;}
+.tile-c{font-size:10px;color:var(--text-dim);margin-top:6px;letter-spacing:.3px;}
+.tile.clickable{cursor:pointer;transition:transform .18s,box-shadow .18s;}
+.tile.clickable:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.09);}
+.tile.on{outline:2px solid var(--c,var(--primary));outline-offset:-1px;}
+
+/* Controls */
+.card{background:var(--bg-white);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);}
+.search{flex:1;min-width:230px;display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:10px;padding:8px 12px;}
+.search input{border:none;outline:none;background:transparent;font-family:inherit;font-size:13.5px;color:var(--text);width:100%;}
+select.f{border:1px solid var(--border);border-radius:9px;padding:8px 11px;font-family:inherit;font-size:12.5px;color:var(--text-muted);background:transparent;cursor:pointer;outline:none;}
+.count{font-size:12.5px;color:var(--text-muted);font-weight:600;white-space:nowrap;}
+
+/* Table */
+.twrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th{text-align:left;padding:11px 13px;font-size:10px;text-transform:uppercase;letter-spacing:.7px;
+  color:var(--text-muted);font-weight:700;border-bottom:1px solid var(--border);white-space:nowrap;background:rgba(0,0,0,.015);position:sticky;top:0;z-index:2;}
+th .cl{display:block;font-size:8.5px;color:var(--text-dim);font-weight:600;letter-spacing:.2px;text-transform:none;margin-top:2px;}
+td{padding:11px 13px;border-bottom:1px solid rgba(0,0,0,.05);vertical-align:middle;}
+tbody tr{cursor:pointer;transition:background .15s;}
+tbody tr:hover td{background:rgba(0,93,99,.045);}
+.num{font-family:ui-monospace,'SFMono-Regular',Menlo,monospace;font-size:11.5px;font-weight:600;color:var(--primary);white-space:nowrap;}
+.num.prov{color:var(--warn);}
+.ttl{font-weight:600;color:var(--text);max-width:320px;}
+.sub{font-size:10.5px;color:var(--text-dim);margin-top:2px;}
+.role{font-size:11.5px;color:var(--text-muted);}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--text-muted);white-space:nowrap;}
+
+/* Badges */
+.b{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:700;letter-spacing:.2px;white-space:nowrap;}
+.b-current{background:rgba(15,157,88,.11);color:#0f9d58;}
+.b-review{background:rgba(245,158,11,.13);color:#b45309;}
+.b-draft{background:rgba(59,130,246,.12);color:#2563eb;}
+.b-superseded{background:rgba(100,116,139,.14);color:#475569;}
+.b-obsolete{background:rgba(239,68,68,.12);color:#dc2626;}
+.b-asset{background:rgba(148,163,184,.14);color:#64748b;}
+.cls{font-size:10px;font-weight:700;padding:3px 7px;border-radius:5px;letter-spacing:.3px;}
+.cls-internal{background:rgba(100,116,139,.12);color:#475569;}
+.cls-confidential{background:rgba(245,158,11,.14);color:#b45309;}
+.cls-restricted{background:rgba(239,68,68,.12);color:#dc2626;}
+.lang{font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:4px;background:rgba(0,187,182,.13);color:#00777a;}
+.due-ok{color:var(--text-muted);}
+.due-soon{color:#b45309;font-weight:600;}
+.due-over{color:#dc2626;font-weight:700;}
+.flag{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--warn);margin-right:5px;vertical-align:middle;}
+
+.foot{padding:13px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.foot small{font-size:11.5px;color:var(--text-dim);line-height:1.6;}
+.empty{padding:60px 20px;text-align:center;color:var(--text-dim);font-size:13.5px;}
+.showmore{width:100%;padding:13px;border:none;border-top:1px solid var(--border);background:transparent;
+  font-family:inherit;font-size:12.5px;font-weight:600;color:var(--primary);cursor:pointer;transition:background .18s;}
+.showmore:hover{background:rgba(0,93,99,.05);}
+html[data-theme="dark"] .showmore{color:var(--primary-light);border-color:#243044;}
+
+/* Clause legend */
+.legend{margin-top:22px;background:var(--bg-white);border:1px solid var(--border);border-radius:16px;padding:22px 26px;}
+.legend h2{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;font-weight:800;margin-bottom:5px;}
+.legend>p{font-size:12.5px;color:var(--text-muted);margin-bottom:16px;line-height:1.65;}
+.lg{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;}
+.lgi{border:1px solid var(--border);border-radius:11px;padding:13px 15px;border-left:3px solid var(--primary-light);}
+.lgi b{font-size:12px;display:block;margin-bottom:3px;}
+.lgi code{font-size:10.5px;color:var(--primary);font-family:ui-monospace,Menlo,monospace;background:rgba(0,93,99,.06);padding:1px 5px;border-radius:4px;}
+.lgi p{font-size:11.5px;color:var(--text-muted);line-height:1.6;margin-top:5px;}
+.lgi.gap{border-left-color:var(--accent);}
+.lgi.gap b{color:var(--accent);}
+
+/* Dark */
+html[data-theme="dark"]{--bg:#0e1824;--bg-white:#19263a;--border:#243044;--text:#dde4ef;--text-muted:#7e94ab;--text-dim:#4d6070;}
+html[data-theme="dark"] body{background:#0e1824;}
+html[data-theme="dark"] nav{background:rgba(14,24,36,.95)!important;border-color:#243044;}
+html[data-theme="dark"] .dark-toggle,html[data-theme="dark"] .btn{border-color:#243044;color:#7e94ab;}
+html[data-theme="dark"] .btn-solid{color:#fff;}
+html[data-theme="dark"] .nav-role-badge{background:rgba(0,187,182,.12);border-color:rgba(0,187,182,.2);}
+html[data-theme="dark"] .hero{background:linear-gradient(135deg,#04222a 0%,#0a3138 100%);}
+html[data-theme="dark"] th{background:rgba(255,255,255,.02);border-color:#243044;}
+html[data-theme="dark"] td{border-color:#1e2d3f;}
+html[data-theme="dark"] tbody tr:hover td{background:rgba(0,93,99,.13);}
+html[data-theme="dark"] .num{color:var(--primary-light);}
+html[data-theme="dark"] .b-review{color:#fbbf24;}
+html[data-theme="dark"] .b-obsolete,html[data-theme="dark"] .due-over{color:#f87171;}
+html[data-theme="dark"] .due-soon{color:#fbbf24;}
+html[data-theme="dark"] .cls-confidential{color:#fbbf24;}
+html[data-theme="dark"] .cls-restricted{color:#f87171;}
+html[data-theme="dark"] select.f,html[data-theme="dark"] .search{border-color:#243044;}
+html[data-theme="dark"] .search input{color:#dde4ef;}
+
+@media(max-width:1100px){nav{padding:0 20px;}.nav-links{display:none;}.outer{padding:20px 16px 60px;}}
+@media(max-width:640px){.hero{padding:22px 18px;}.hero h1{font-size:20px;}.bar{padding:12px;}}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<nav>
+  <a href="index.html" class="nav-brand">
+    <div class="nav-brand-icon">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M12 3L4 7v5c0 4.5 3.5 8.7 8 9.9 4.5-1.2 8-5.4 8-9.9V7l-8-4z" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
+        <path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="nav-brand-text"><span class="nav-brand-name">TAQA</span><span class="nav-brand-hub"> Knowledge Hub</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="ai-search.html">Document Search</a></li>
+    <li><a href="master-list.html" class="on">Master List</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="upload.html">Upload</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" aria-label="Toggle dark mode">
+      <svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>
+    </button>
+    <button class="btn" onclick="exportCsv()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export register
+    </button>
+    <a href="dashboard.html" class="btn">Dashboard</a>
+    <span class="nav-role-badge">Document Controller</span>
+  </div>
+</nav>
+
+<div class="outer">
+
+  <div class="hero">
+    <h1>Master Document List</h1>
+    <p>Every controlled document in the Hub, with its identification, current revision status, approval authority, periodic review date, lifecycle status, classification and retention period. SCORE remains the master repository — this register is the point-of-use distribution record.</p>
+    <div class="hero-ref">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      TQ-QHSE-S001 §5.1 · ISO 9001:2015 §7.5 · API Spec Q2 3rd Ed. §4.4–4.5
+    </div>
+  </div>
+
+  <div class="proto">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FD691D" stroke-width="2.2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12.01" y2="16.5"/></svg>
+    <div>
+      <b>Front-end prototype — control metadata is demonstration data</b>
+      <span>The document titles are real; the revision, approval, review and status values are generated to show the register working. <b style="display:inline;color:var(--text);">The schema is the deliverable.</b> Every column below maps to a named clause and defines a field the back end must supply. Owner and approver hold <b style="display:inline;color:var(--text);">roles, not personal names</b> — that is what API Q2 §4.4.3 a) requires, and it keeps personal data off the register.</span>
+    </div>
+  </div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <div class="card">
+    <div class="bar">
+      <div class="search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color:var(--text-dim);flex-shrink:0;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="q" type="search" placeholder="Search document number, title, SPL…" oninput="limit=250;render()" autocomplete="off">
+      </div>
+      <select class="f" id="f-seg" onchange="limit=250;render()"><option value="">All segments</option></select>
+      <select class="f" id="f-type" onchange="limit=250;render()"><option value="">All types</option></select>
+      <select class="f" id="f-status" onchange="limit=250;render()">
+        <option value="">All statuses</option>
+        <option value="current">Current</option>
+        <option value="under-review">Under review</option>
+        <option value="draft">Draft</option>
+        <option value="superseded">Superseded</option>
+        <option value="obsolete">Obsolete</option>
+      </select>
+      <select class="f" id="f-cls" onchange="limit=250;render()">
+        <option value="">All classifications</option>
+        <option value="internal">Internal</option>
+        <option value="confidential">Confidential</option>
+        <option value="restricted">Restricted</option>
+      </select>
+      <select class="f" id="f-lang" onchange="limit=250;render()">
+        <option value="">All languages</option><option value="en">English</option><option value="ar">العربية</option>
+      </select>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="twrap">
+      <table>
+        <thead><tr>
+          <th>Document number<span class="cl">TQ-QHSE-S001 §5.3</span></th>
+          <th>Title<span class="cl">ISO 9001 §7.5.2 a)</span></th>
+          <th>Type</th>
+          <th>Rev<span class="cl">API Q2 §4.4.3 d)</span></th>
+          <th>Issued</th>
+          <th>Owner<span class="cl">API Q2 §4.4.3 a)</span></th>
+          <th>Approver<span class="cl">API Q2 §4.4.3 a)</span></th>
+          <th>Next review<span class="cl">API Q2 §4.4.3 c)</span></th>
+          <th>Status<span class="cl">API Q2 §4.4.3</span></th>
+          <th>Class.<span class="cl">ISO 9001 §7.5.3.1 b)</span></th>
+          <th>Ret.<span class="cl">API Q2 §4.5</span></th>
+          <th>Master<span class="cl">SCORE</span></th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div class="empty" id="empty" style="display:none;">No documents match these filters.</div>
+      <button id="more" class="showmore" style="display:none;" onclick="limit=1e6;render()"></button>
+    </div>
+    <div class="foot">
+      <small id="footnote"></small>
+      <small>Retention shown as <b>10 years</b> per API Spec Q2 3rd Edition §4.5 — not the 5 years currently stated in TQ-QHSE-S001 §7.5.</small>
+    </div>
+  </div>
+
+  <div class="legend">
+    <h2>What this register demonstrates, clause by clause</h2>
+    <p>Each control below is implemented in the front end so the back-end scope is unambiguous. The four marked in orange are gaps the register surfaces rather than hides.</p>
+    <div class="lg" id="legend"></div>
+  </div>
+
+</div></div>
+
+<script src="documents-master.js"></script>
+<script>
+const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
+const MOON='M6.2 2.3a.55.55 0 0 1 .2.62 5.2 5.2 0 0 0 6.7 6.7.55.55 0 0 1 .68.75A6.3 6.3 0 1 1 5.6 2.1a.55.55 0 0 1 .6.2Z';
+(function(){const t=localStorage.getItem('taqa-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
+function toggleDark(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme',next);}
+
+const D=TAQA_MASTER_DOCS, L=TAQA_DOC_LOOKUPS, A=TAQA_DOC;
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—';
+
+// Populate filter options from the lookups, never hardcoded
+const fs=document.getElementById('f-seg'), ft=document.getElementById('f-type');
+Object.keys(L.segments).sort((a,b)=>L.segments[a].name.localeCompare(L.segments[b].name))
+  .forEach(k=>fs.insertAdjacentHTML('beforeend',`<option value="${k}">${esc(L.segments[k].name)} (${esc(L.segments[k].spl)})</option>`));
+Object.keys(L.types).forEach(k=>ft.insertAdjacentHTML('beforeend',`<option value="${k}">${esc(L.types[k].label)}</option>`));
+
+let quick=null;   // active stat-tile filter
+let limit=250;    // rows rendered; raised by the Show all control, never silently truncating
+const TILES=[
+  {k:'controlled',c:'#005D63',l:'Controlled documents',cl:'TQ-QHSE-S001 §5.1',f:d=>A.controlled(d)},
+  {k:'current',c:'#0f9d58',l:'Current revision',cl:'API Q2 §4.4.3 d)',f:d=>d.status==='current'},
+  {k:'overdue',c:'#f59e0b',l:'Review overdue',cl:'API Q2 §4.4.3 c)',f:d=>A.overdue(d)},
+  {k:'obsolete',c:'#ef4444',l:'Obsolete / superseded',cl:'API Q2 §4.4.3',f:d=>d.status==='obsolete'||d.status==='superseded'},
+  {k:'provisional',c:'#FD691D',l:'Non-conformant number',cl:'TQ-QHSE-S001 §5.3',f:d=>d.numberStatus==='provisional'},
+  {k:'ar',c:'#00BBB6',l:'Arabic translations',cl:'API Q2 §4.4.3',f:d=>!!d.translationOf}
+];
+document.getElementById('tiles').innerHTML=TILES.map(t=>
+  `<div class="tile clickable" style="--c:${t.c}" data-k="${t.k}" onclick="quickFilter('${t.k}')">
+     <div class="tile-n">${D.filter(t.f).length}</div>
+     <div class="tile-l">${t.l}</div><div class="tile-c">${t.cl}</div></div>`).join('');
+function quickFilter(k){
+  quick = quick===k ? null : k; limit=250;
+  document.querySelectorAll('.tile').forEach(e=>e.classList.toggle('on',e.dataset.k===quick));
+  render();
+}
+
+function statusBadge(d){
+  const map={current:'Current','under-review':'Review due',draft:'Draft',superseded:'Superseded',obsolete:'Obsolete',asset:'Asset'};
+  return `<span class="b b-${d.status.replace('-','')==='underreview'?'review':d.status}">${map[d.status]||d.status}</span>`;
+}
+function dueCell(d){
+  if(!d.nextReviewDate) return '<span class="due-ok">—</span>';
+  if(d.status==='obsolete'||d.status==='superseded') return '<span class="due-ok">n/a</span>';
+  const days=A.reviewDays(d);
+  const cls = days<0 ? 'due-over' : (days<90 ? 'due-soon' : 'due-ok');
+  const note= days<0 ? ` (${Math.abs(days)}d overdue)` : (days<90?` (${days}d)`:'');
+  return `<span class="${cls}">${fmt(d.nextReviewDate)}${note}</span>`;
+}
+
+function current(){
+  const q=document.getElementById('q').value.trim().toLowerCase();
+  const seg=document.getElementById('f-seg').value, typ=document.getElementById('f-type').value;
+  const st=document.getElementById('f-status').value, cl=document.getElementById('f-cls').value;
+  const lg=document.getElementById('f-lang').value;
+  const qt=quick?TILES.find(t=>t.k===quick):null;
+  return D.filter(d=>{
+    if(qt&&!qt.f(d))return false;
+    if(seg&&d.segment!==seg)return false;
+    if(typ&&d.docType!==typ)return false;
+    if(st&&d.status!==st)return false;
+    if(cl&&d.classification!==cl)return false;
+    if(lg&&d.language!==lg)return false;
+    if(q){const hay=[d.docNumber,d.legacyId,d.title,A.seg(d).spl,A.seg(d).name].join(' ').toLowerCase();
+      if(!hay.includes(q))return false;}
+    return true;
+  });
+}
+
+function render(){
+  const rows=current();
+  document.getElementById('count').textContent=rows.length+' of '+D.length+' documents';
+  document.getElementById('empty').style.display=rows.length?'none':'block';
+  const prov=rows.filter(d=>d.numberStatus==='provisional').length;
+  document.getElementById('footnote').innerHTML = prov
+    ? `<span class="flag"></span><b>${prov}</b> document${prov===1?'':'s'} in this view cannot be numbered conformantly — TQ-QHSE-S001 §5.3 assigns no short form. Hover the number for the reason.`
+    : 'All documents in this view carry a conformant TQ-QHSE-S001 §5.3 number.';
+  const shown=Math.min(limit,rows.length);
+  document.getElementById('more').style.display = rows.length>shown ? 'block' : 'none';
+  document.getElementById('more').textContent = 'Showing '+shown+' of '+rows.length+' — show all';
+  document.getElementById('rows').innerHTML=rows.slice(0,shown).map(d=>{
+    const t=A.type(d), s=A.seg(d), prov=d.numberStatus==='provisional', note=A.numberNote(d);
+    const href='viewer.html?doc='+encodeURIComponent(d.docNumber||'')+'&seg='+encodeURIComponent(d.segment)+'&type='+encodeURIComponent(d.docType)+'&title='+encodeURIComponent(d.title);
+    return `<tr onclick="location.href='${href}'">
+      <td><span class="num${prov?' prov':''}"${note?` title="${esc(note)}"`:''}>${prov?'<span class="flag"></span>':''}${esc(d.docNumber||'—')}</span>
+          ${d.legacyId?`<div class="sub">was ${esc(d.legacyId)}</div>`:''}</td>
+      <td class="ttl">${esc(d.title)} ${d.language==='ar'?'<span class="lang">AR</span>':''}
+          <div class="sub">${esc(s.name)} · ${esc(s.spl)}${d.translationOf?' · translation of '+esc(d.translationOf):''}</div></td>
+      <td class="role">${esc(t.label||d.docType)}</td>
+      <td class="mono">${esc(d.revision||'—')}</td>
+      <td class="mono">${fmt(d.issueDate)}</td>
+      <td class="role">${esc(A.owner(d))}</td>
+      <td class="role">${esc(A.approver(d))}</td>
+      <td class="mono">${dueCell(d)}</td>
+      <td>${statusBadge(d)}</td>
+      <td><span class="cls cls-${esc(d.classification)}">${esc(d.classification.toUpperCase())}</span></td>
+      <td class="mono">${A.retention(d)?A.retention(d)+' yr':'—'}</td>
+      <td>${A.scoreUrl(d)?`<a class="btn" style="padding:4px 9px;font-size:11px;" href="${esc(A.scoreUrl(d))}" onclick="event.stopPropagation()" rel="noopener">SCORE</a>`:'—'}</td>
+    </tr>`}).join('');
+}
+
+function exportCsv(){
+  const rows=current();
+  const head=['Document Number','Legacy ID','Title','Type','Segment','SPL','Revision','Issued','Approved','Owner Role','Approver Role','Review Cycle (months)','Next Review','Overdue','Status','Supersedes','Superseded By','Classification','Retention (years)','Language','Translation Of','Number Status','SCORE URL'];
+  const cell=v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`;
+  const body=rows.map(d=>[d.docNumber,d.legacyId,d.title,A.type(d).label,A.seg(d).name,A.seg(d).spl,d.revision,d.issueDate,d.approvedDate,A.owner(d),A.approver(d),A.cycle(d),d.nextReviewDate,A.overdue(d)?'YES':'NO',d.status,d.supersedes,d.supersededBy,d.classification,A.retention(d),d.language,d.translationOf,d.numberStatus,A.scoreUrl(d)].map(cell).join(','));
+  const blob=new Blob(['﻿'+[head.map(cell).join(','),...body].join('\r\n')],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='TQ-QHSE-F086_Master_Document_List_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+
+document.getElementById('legend').innerHTML=[
+ {t:'Identification',c:'TQ-QHSE-S001 §5.3',p:'Every document carries a structured number built from business unit, service line and document type — not a free-text label. The old Hub ID is retained so printed QR codes keep resolving.'},
+ {t:'Current revision status',c:'API Q2 §4.4.3 d)',p:'Revision, issue date and what the document supersedes are fields, not text baked into the title.'},
+ {t:'Approval authority',c:'API Q2 §4.4.3 a) b)',p:'Owner and approver are held as roles drawn from the TQ-QHSE-S001 §4 approver table, so they survive people changing jobs.'},
+ {t:'Periodic review',c:'API Q2 §4.4.3 c)',p:'A review cycle per document type, a stored next-review date, and an overdue flag the controller can filter on.'},
+ {t:'Obsolete control',c:'API Q2 §4.4.3',p:'Superseded and obsolete are lifecycle states. The viewer blocks them and the service worker must drop them from the offline cache.'},
+ {t:'Protection',c:'ISO 9001 §7.5.3.1 b)',p:'A classification on every record — internal, confidential or restricted — which the back end turns into real access control.'},
+ {t:'Retention',c:'API Q2 §4.5',p:'Ten years on every controlled record, per the 3rd Edition.',gap:true,g:'TQ-QHSE-S001 §7.5 still says five. The standard needs correcting; this register already shows the correct figure.'},
+ {t:'Translations',c:'API Q2 §4.4.3',p:'Arabic versions are linked to their English source and inherit its revision.',gap:true,g:'TQ-QHSE-S001 has no translation clause at all. Required by API Q2 and unwritten.'},
+ {t:'Segment short forms',c:'TQ-QHSE-S001 §5.3',p:'Numbers are generated from the standard’s own short-form tables.',gap:true,g:'Cybersecurity has no short form assigned. The Learning Center has none either. Both are flagged provisional until QHSE assigns them.'},
+ {t:'Document types',c:'TQ-QHSE-S001 §4',p:'Type drives the number, the approver and the review cycle.',gap:true,g:'Technical Alert and Lesson Learned are not defined document types in §4, so they cannot be numbered conformantly.'},
+ {t:'Master repository',c:'API Q2 §4.4.3 f)',p:'Every record links back to SCORE. The Hub is the point-of-use distribution channel; SCORE stays the system of record.'},
+ {t:'Register export',c:'TQ-QHSE-S001 §5.1',p:'The list exports as TQ-QHSE-F086 so the controller can hand an auditor the register without a screenshot.'}
+].map(i=>`<div class="lgi${i.gap?' gap':''}"><b>${esc(i.t)}</b><code>${esc(i.c)}</code><p>${esc(i.p)}${i.g?' <b style="color:var(--accent);display:inline;">Gap: </b>'+esc(i.g):''}</p></div>`).join('');
+
+render();
+</script>
+</body>
+</html>

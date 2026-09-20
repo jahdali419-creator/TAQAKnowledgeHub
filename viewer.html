@@ -81,8 +81,32 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .badge.software{background:rgba(56,189,248,0.12);color:#38bdf8;border:1px solid rgba(56,189,248,0.22);}
 .badge.seg{background:rgba(0,93,99,0.06);color:var(--primary);border:1px solid rgba(0,93,99,0.15);}
 
+/* Lifecycle banner — API Q2 §4.4.3 obsolete control */
+.lcb{display:flex;gap:13px;align-items:flex-start;border-radius:13px;padding:15px 19px;margin-bottom:18px;border:1px solid;}
+.lcb svg{flex-shrink:0;margin-top:1px;}
+.lcb b{display:block;font-size:13px;margin-bottom:3px;}
+.lcb span{font-size:12.5px;line-height:1.65;display:block;}
+.lcb a{color:inherit;font-weight:700;}
+.lcb-obsolete{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3);border-left:3px solid #ef4444;color:#dc2626;}
+.lcb-superseded{background:rgba(245,158,11,.09);border-color:rgba(245,158,11,.32);border-left:3px solid #f59e0b;color:#b45309;}
+.lcb-review{background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.26);border-left:3px solid #f59e0b;color:#b45309;}
+.lcb-draft{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.28);border-left:3px solid #3b82f6;color:#2563eb;}
+.lcb-prov{background:rgba(253,105,29,.07);border-color:rgba(253,105,29,.28);border-left:3px solid #FD691D;color:#c2410c;}
+.lcb span.n{color:var(--text-muted);}
+html[data-theme="dark"] .lcb-obsolete{color:#f87171;}
+html[data-theme="dark"] .lcb-superseded,html[data-theme="dark"] .lcb-review,html[data-theme="dark"] .lcb-prov{color:#fbbf24;}
+html[data-theme="dark"] .lcb-draft{color:#93c5fd;}
+
 /* Meta grid */
 .meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.meta-cell.wide{grid-column:span 2;}
+.meta-cell.none .meta-val{color:var(--text-dim);font-weight:500;font-style:italic;}
+.meta-clause{font-size:8.5px;color:var(--text-dim);letter-spacing:.2px;margin-top:3px;}
+.meta-val a{color:var(--primary-light);text-decoration:none;font-weight:700;}
+.meta-val a:hover{text-decoration:underline;}
+.mv-over{color:#dc2626;}
+.mv-ok{color:#0f9d58;}
+html[data-theme="dark"] .mv-over{color:#f87171;}
 .meta-cell{background:rgba(0,93,99,0.04);border:1px solid var(--glass-border);border-radius:10px;padding:12px 14px;}
 .meta-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;font-weight:600;}
 .meta-val{font-size:13px;font-weight:600;color:var(--text);}
@@ -256,6 +280,12 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 
 /* Sunlight mode overrides */
 #qref-overlay.sunlight #qref-card{background:#ffffff;border:3px solid #000;}
+/* Printed copies are uncontrolled — TQ-QHSE-S001 §5.2, API Q2 §4.4.3 */
+.qref-ctrl-note{margin-top:16px;padding-top:13px;border-top:1px dashed #cbd5e1;font-size:10.5px;
+  line-height:1.55;color:#64748b;}
+.qref-ctrl-note b{color:#b45309;}
+#qref-overlay.sunlight .qref-ctrl-note{color:#000;border-top-color:#000;}
+#qref-overlay.sunlight .qref-ctrl-note b{color:#000;}
 #qref-overlay.sunlight #qref-title{color:#000;font-size:30px;}
 #qref-overlay.sunlight #qref-body{background:#fff;}
 #qref-overlay.sunlight .qref-bullets li{color:#000;font-size:16px;font-weight:500;border-color:#ccc;}
@@ -335,6 +365,7 @@ html[data-theme="dark"] .rev-row.rev-current .rev-dot{background:#818cf8;}
 </div>
 
 <div class="doc-view">
+  <div id="lifecycle-banner"></div>
   <div class="doc-header">
     <div class="doc-header-top">
       <div class="doc-type-icon-lg" id="doc-icon"></div>
@@ -361,7 +392,7 @@ html[data-theme="dark"] .rev-row.rev-current .rev-dot{background:#818cf8;}
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       Quick Ref
     </button>
-    <button class="doc-act-btn doc-act-ghost" onclick="window.print()" title="Print this document" aria-label="Print">
+    <button class="doc-act-btn doc-act-ghost" id="print-btn" onclick="window.print()" title="Print this document" aria-label="Print">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
       Print
     </button>
@@ -451,6 +482,7 @@ html[data-theme="dark"] .rev-row.rev-current .rev-dot{background:#818cf8;}
       <ul class="qref-bullets" id="qref-bullets"></ul>
       <div class="qref-section-label">Applicability</div>
       <div class="qref-scope-box" id="qref-scope"></div>
+      <div class="qref-ctrl-note" id="qref-ctrl-note"></div>
     </div>
   </div>
 </div>
@@ -458,6 +490,7 @@ html[data-theme="dark"] .rev-row.rev-current .rev-dot{background:#818cf8;}
 <footer style="height:4px;position:relative;margin-top:auto;"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:#005D63;"></div></footer>
 </div>
 
+<script src="documents-master.js"></script>
 <script src="segments-data.js"></script>
 <script>
 const SEGS = {
@@ -487,9 +520,6 @@ const SCOPES={
   alert:'Requires immediate acknowledgment from all segment supervisors. Applicable to ongoing and planned operations until further notice.',
   software:'For authorised users with a valid TAQA software licence. Contact IT for installation support and licence queries.'
 };
-const AUTHORS=['Mohammed Al-Ghamdi','Ahmed Al-Zahrani','Saud Al-Harbi','Faisal Al-Otaibi','Khalid Al-Shehri','Omar Al-Dosari'];
-const VERSIONS=['Rev 1.0','Rev 2.1','v3.0','v4.2','Rev 5.0','v2.3'];
-const DATES=['Jan 2026','Feb 2026','Mar 2026','Apr 2026','May 2026'];
 const SIZES=['1.2 MB','845 KB','2.1 MB','3.4 MB','560 KB','1.8 MB','920 KB'];
 function rnd(a){return a[Math.abs(hashStr(docTitle||'x'))%a.length];}
 function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=((h<<5)-h)+s.charCodeAt(i);return h;}
@@ -548,19 +578,103 @@ document.getElementById('doc-badges').innerHTML =
   '<span class="badge seg">' + segInfo.tag + '</span>' +
   (docId ? '<span class="badge docid">Document ID: ' + docId + '</span>' : '');
 
-// Meta grid — use real revision data when available
-const vi = Math.abs(hashStr(docTitle)) % VERSIONS.length;
-const di = Math.abs(hashStr(docTitle + '1')) % DATES.length;
-const ai = Math.abs(hashStr(docTitle + '2')) % AUTHORS.length;
-const si = Math.abs(hashStr(docTitle + '3')) % SIZES.length;
-const _segRevMap = (typeof TAQA_SEGMENTS !== 'undefined' && TAQA_SEGMENTS[segId]) ? (TAQA_SEGMENTS[segId].docRevisions || {}) : {};
-const _revData = _segRevMap[docTitle] || null;
-const _curRev = _revData ? _revData.history.find(r => r.rev === _revData.current) : null;
-document.getElementById('meta-grid').innerHTML =
-  '<div class="meta-cell"><div class="meta-label">Revision</div><div class="meta-val">' + (_curRev ? 'Rev ' + _curRev.rev : VERSIONS[vi]) + '</div></div>' +
-  '<div class="meta-cell"><div class="meta-label">Issued</div><div class="meta-val">' + (_curRev ? _curRev.date : DATES[di]) + '</div></div>' +
-  '<div class="meta-cell"><div class="meta-label">Author</div><div class="meta-val">' + (_curRev ? _curRev.author : AUTHORS[ai]) + '</div></div>' +
-  (docId ? '<div class="meta-cell"><div class="meta-label">Document ID</div><div class="meta-val">' + docId + '</div></div>' : '');
+// ── Document control block ────────────────────────────────────────────────
+// Resolved from the Master Document List (documents-master.js). Nothing here is
+// invented: a field with no value in the register renders as "Not recorded" with
+// a link to SCORE, never a placeholder. ISO 9001 §7.5.2 a) · API Q2 §4.4.3.
+const MD = (typeof TAQA_MASTER_DOCS !== 'undefined') ? TAQA_MASTER_DOCS : [];
+const MA = (typeof TAQA_DOC !== 'undefined') ? TAQA_DOC : null;
+const _rec = MA ? (MA.byNumber(docId) || MA.byLegacy(docId) ||
+              MD.find(d => d.title === docTitle && d.segment === segId) || null) : null;
+
+const _fmt = v => v ? new Date(v).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : null;
+function cell(label, value, clause, extraCls){
+  const has = value !== null && value !== undefined && value !== '';
+  return '<div class="meta-cell' + (has ? '' : ' none') + (extraCls ? ' ' + extraCls : '') + '">' +
+    '<div class="meta-label">' + label + '</div>' +
+    '<div class="meta-val">' + (has ? value : 'Not recorded') + '</div>' +
+    (clause ? '<div class="meta-clause">' + clause + '</div>' : '') + '</div>';
+}
+
+if (_rec) {
+  const t = MA.type(_rec), days = MA.reviewDays(_rec);
+  const withdrawn = _rec.status === 'obsolete' || _rec.status === 'superseded';
+  // A withdrawn document has no live review obligation — showing a future date
+  // in green would imply it is still in force.
+  const due = withdrawn
+    ? '<span style="color:var(--text-dim);">Not applicable — withdrawn</span>'
+    : (_rec.nextReviewDate
+        ? (days < 0 ? '<span class="mv-over">' + _fmt(_rec.nextReviewDate) + ' · ' + Math.abs(days) + 'd overdue</span>'
+                    : '<span class="mv-ok">' + _fmt(_rec.nextReviewDate) + '</span>')
+        : null);
+  const score = MA.scoreUrl(_rec);
+  document.getElementById('meta-grid').innerHTML =
+    cell('Document number', _rec.docNumber, 'TQ-QHSE-S001 §5.3') +
+    cell('Revision',        _rec.revision ? 'Rev ' + _rec.revision : null, 'API Q2 §4.4.3 d)') +
+    cell('Issued',          _fmt(_rec.issueDate), 'API Q2 §4.4.3 d)') +
+    cell('Approved',        _fmt(_rec.approvedDate), 'API Q2 §4.4.3 b)') +
+    cell('Document owner',  t.owner, 'API Q2 §4.4.3 a) · role') +
+    cell('Approval authority', MA.approver(_rec), 'API Q2 §4.4.3 a) · role') +
+    cell('Next review',     due, 'API Q2 §4.4.3 c)') +
+    cell('Review cycle',    MA.cycle(_rec) ? MA.cycle(_rec) + ' months' : null, 'API Q2 §4.4.3 c)') +
+    cell('Classification',  _rec.classification ? _rec.classification.toUpperCase() : null, 'ISO 9001 §7.5.3.1 b)') +
+    cell('Retention',       MA.retention(_rec) ? MA.retention(_rec) + ' years' : null, 'API Q2 §4.5') +
+    cell('Language',        _rec.language === 'ar' ? 'العربية' : 'English', 'API Q2 §4.4.3') +
+    cell('Master copy',     score ? '<a href="' + score + '" rel="noopener">Open in SCORE</a>' : null, 'System of record');
+
+  // Lifecycle banner — obsolete documents must not be used at the point of use
+  const B = [];
+  if (_rec.status === 'obsolete')
+    B.push(['obsolete','Obsolete — do not use',
+      'This document has been withdrawn and must not be used for any activity. Destroy or mark any printed copy. Obtain the current document from SCORE.']);
+  else if (_rec.status === 'superseded')
+    B.push(['superseded','Superseded — a newer revision exists',
+      'This revision has been replaced by ' + (_rec.supersededBy || 'a later revision') + '. Use the current revision from SCORE.']);
+  else if (_rec.status === 'draft')
+    B.push(['draft','Draft — not approved for use',
+      'This document has not completed approval and carries no authority. It is shown for review only.']);
+  else if (MA.overdue(_rec))
+    B.push(['review','Periodic review overdue',
+      'The review due on ' + _fmt(_rec.nextReviewDate) + ' has not been recorded. The content remains in force until withdrawn, but its continued suitability is unconfirmed. API Q2 §4.4.3 c).']);
+  if (_rec.numberStatus === 'provisional')
+    B.push(['prov','Provisional document number',
+      MA.numberNote(_rec) || 'This number is provisional pending assignment by QHSE.']);
+  const WARN = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+  document.getElementById('lifecycle-banner').innerHTML = B.map(b =>
+    '<div class="lcb lcb-' + b[0] + '">' + WARN + '<div><b>' + b[1] + '</b><span class="n">' + b[2] + '</span></div></div>').join('');
+
+  // API Q2 §4.4.3 — a withdrawn document must be prevented from unintended use.
+  // Downloading, printing or pinning it offline all create an uncontrolled copy,
+  // so those actions are disabled rather than merely warned about.
+  if (withdrawn || _rec.status === 'draft') {
+    var why = _rec.status === 'draft'
+      ? 'Not approved for use — download disabled'
+      : 'Withdrawn document — download disabled to prevent an uncontrolled copy';
+    ['dl-btn','pin-btn','qref-open-btn','print-btn'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.setAttribute('aria-disabled','true');
+      el.title = why;
+      el.style.opacity = '0.45';
+      el.style.pointerEvents = 'none';
+      el.style.cursor = 'not-allowed';
+    });
+    var row = document.getElementById('doc-actions-row');
+    if (row) row.insertAdjacentHTML('beforeend',
+      '<span style="font-size:11.5px;color:var(--text-dim);align-self:center;padding-left:4px;">' + why + '</span>');
+  }
+} else {
+  // Not in the register. Say so plainly rather than inventing control metadata.
+  document.getElementById('meta-grid').innerHTML =
+    cell('Document number', docId || null, 'TQ-QHSE-S001 §5.3') +
+    cell('Revision', null, 'API Q2 §4.4.3 d)') +
+    cell('Issued', null, 'API Q2 §4.4.3 d)') +
+    cell('Document owner', null, 'API Q2 §4.4.3 a)');
+  document.getElementById('lifecycle-banner').innerHTML =
+    '<div class="lcb lcb-prov"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12.5"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+    '<div><b>Not in the Master Document List</b><span class="n">This document has no entry in the register, so its revision, approval and review status cannot be confirmed here. ' +
+    'Check <a href="master-list.html">the register</a> or SCORE before using it.</span></div></div>';
+}
 
 // Summary & Scope
 document.getElementById('doc-summary').textContent = getDocSummary(docTitle, docType);
@@ -723,15 +837,20 @@ function showQuickRef() {
   // Title
   document.getElementById('qref-title').textContent = docTitle;
 
-  // Meta chips
-  var vi2 = Math.abs(hashStr(docTitle)) % VERSIONS.length;
-  var di2 = Math.abs(hashStr(docTitle + '1')) % DATES.length;
-  var ai2 = Math.abs(hashStr(docTitle + '2')) % AUTHORS.length;
-  document.getElementById('qref-meta-row').innerHTML =
-    '<div class="qref-meta-chip"><strong>Revision</strong>' + VERSIONS[vi2] + '</div>' +
-    '<div class="qref-meta-chip"><strong>Issued</strong>' + DATES[di2] + '</div>' +
-    '<div class="qref-meta-chip"><strong>Author</strong>' + AUTHORS[ai2] + '</div>' +
-    '<div class="qref-meta-chip"><strong>Segment</strong>' + segInfo.tag + '</div>';
+  // Meta chips — from the Master Document List, never fabricated.
+  // This card is printable, so it carries the identification a controlled copy
+  // needs plus the uncontrolled-when-printed caveat. API Q2 §4.4.3 e) f).
+  var chip = function(l,v){ return '<div class="qref-meta-chip"><strong>' + l + '</strong>' + (v || 'Not recorded') + '</div>'; };
+  document.getElementById('qref-meta-row').innerHTML = _rec
+    ? chip('Document no.', _rec.docNumber) +
+      chip('Revision', _rec.revision ? 'Rev ' + _rec.revision : null) +
+      chip('Issued', _fmt(_rec.issueDate)) +
+      chip('Status', _rec.status === 'current' ? 'Current'
+                   : _rec.status.charAt(0).toUpperCase() + _rec.status.slice(1).replace('-',' ')) +
+      chip('Classification', _rec.classification ? _rec.classification.toUpperCase() : null) +
+      chip('Segment', segInfo.tag)
+    : chip('Document no.', docId || null) + chip('Revision', null) +
+      chip('Issued', null) + chip('Segment', segInfo.tag);
 
   // Summary as bullet points
   var summary = getDocSummary(docTitle, docType);
@@ -740,6 +859,15 @@ function showQuickRef() {
   bul.innerHTML = sentences.slice(0, 4).map(function(s){
     return '<li><div class="qref-bullet-dot"></div><span>' + s.replace(/\.$/,'') + '</span></li>';
   }).join('');
+
+  // Control note — a printed card is an uncontrolled copy
+  document.getElementById('qref-ctrl-note').innerHTML =
+    '<b>UNCONTROLLED WHEN PRINTED.</b> Valid at time of printing only. ' +
+    (_rec && _rec.nextReviewDate
+      ? 'This revision is due for review on ' + _fmt(_rec.nextReviewDate) + '. '
+      : '') +
+    'Verify the current revision in SCORE before use.' +
+    (_rec && MA.scoreUrl(_rec) ? ' \u00b7 ' + _rec.docNumber : '');
 
   // Scope
   document.getElementById('qref-scope').textContent = SCOPES[docType] || SCOPES.sop;
