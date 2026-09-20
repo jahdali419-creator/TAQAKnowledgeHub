@@ -229,7 +229,7 @@ window.showToast=function(msg,type){
   document.head.appendChild(s);
   var banner=document.createElement('div');
   banner.id='offline-banner';
-  banner.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>You\'re offline — viewing cached content. <a href="#" onclick="location.reload();return false;">Retry</a>';
+  banner.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>You\'re offline, viewing cached content. <a href="#" onclick="location.reload();return false;">Retry</a>';
   document.body.appendChild(banner);
   window.addEventListener('offline',function(){banner.style.display='flex';});
   window.addEventListener('online',function(){banner.style.display='none';if(window.showToast)window.showToast('Back online!');});
@@ -247,7 +247,7 @@ window.showToast=function(msg,type){
   document.head.appendChild(s);
   var bar=document.createElement('div');
   bar.id='sw-update-bar';
-  bar.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.68-7.58"/></svg> New version available — <button id="sw-reload-btn">Update now</button>';
+  bar.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.68-7.58"/></svg> New version available, <button id="sw-reload-btn">Update now</button>';
   document.body.appendChild(bar);
   navigator.serviceWorker.addEventListener('controllerchange', function(){
     window.location.reload();
@@ -293,7 +293,7 @@ window.showToast=function(msg,type){
     '}';
   document.head.appendChild(s);
 
-  // Inject hamburger into .nav-right (index.html already has one — skip)
+  // Inject hamburger into .nav-right (index.html already has one, skip)
   if(!document.getElementById('nav-hamburger')){
     var nr=document.querySelector('.nav-right');
     if(nr){
@@ -304,7 +304,7 @@ window.showToast=function(msg,type){
     }
   }
 
-  // Inject mobile dropdown menu (index.html already has one — skip)
+  // Inject mobile dropdown menu (index.html already has one, skip)
   if(!document.getElementById('nav-mobile-menu')){
     var nav=document.querySelector('nav');
     if(nav){
@@ -437,7 +437,7 @@ window.showToast=function(msg,type){
     '<div class="pwa-steps">'+
       '<div class="pwa-step"><div class="pwa-step-n">1</div><div class="pwa-step-t">Tap the <strong>Share</strong> button at the bottom <strong>(↑)</strong></div></div>'+
       '<div class="pwa-step"><div class="pwa-step-n">2</div><div class="pwa-step-t">Scroll down and tap <strong>"Add to Home Screen"</strong></div></div>'+
-      '<div class="pwa-step"><div class="pwa-step-n">3</div><div class="pwa-step-t">Tap <strong>"Add"</strong> — the app will appear on your home screen</div></div>'+
+      '<div class="pwa-step"><div class="pwa-step-n">3</div><div class="pwa-step-t">Tap <strong>"Add"</strong>, the app will appear on your home screen</div></div>'+
     '</div>'+
     '<button class="pwa-later" id="pwa-later">Maybe later</button>';
 
@@ -453,7 +453,7 @@ window.showToast=function(msg,type){
     '<div class="pwa-steps">'+
       '<div class="pwa-step"><div class="pwa-step-n" style="font-size:14px;">!</div>'+
         '<div class="pwa-step-t"><strong>Open this page in Safari</strong> to install the app.<br>'+
-        '<span style="font-size:11.5px;margin-top:3px;display:block;color:#94a3b8;">Apple only allows app installation through Safari — this is an Apple restriction, not ours.</span></div>'+
+        '<span style="font-size:11.5px;margin-top:3px;display:block;color:#94a3b8;">Apple only allows app installation through Safari, this is an Apple restriction, not ours.</span></div>'+
       '</div>'+
     '</div>'+
     '<button class="pwa-later" id="pwa-later">Got it</button>';
@@ -490,7 +490,7 @@ window.showToast=function(msg,type){
   });
 
   if(isIPhone){
-    // Show to all iPhone users — Safari gets install steps, others get "open in Safari" guidance
+    // Show to all iPhone users, Safari gets install steps, others get "open in Safari" guidance
     setTimeout(showSheet,2500);
   } else {
     window.addEventListener('beforeinstallprompt',function(e){
@@ -647,7 +647,7 @@ window.showToast=function(msg,type){
       }
       if(e.target.id==='bm-exp'){
         var its=window.TAQA_Bookmarks.getAll();
-        var lines=['TAQA Knowledge Hub — Bookmarks','Exported: '+new Date().toLocaleDateString(),''];
+        var lines=['TAQA Knowledge Hub, Bookmarks','Exported: '+new Date().toLocaleDateString(),''];
         its.forEach(function(it,i){lines.push((i+1)+'. '+it.title+' | '+(it.segName||'')+' | '+(it.type||'').toUpperCase());});
         try{
           var blob=new Blob([lines.join('\n')],{type:'text/plain'});

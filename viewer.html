@@ -5,7 +5,7 @@
 <script>try{var _t=localStorage.getItem('taqa-theme');if(_t)document.documentElement.setAttribute('data-theme',_t);}catch(e){}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Document Viewer — TAQA Knowledge Hub</title>
+<title>Document Viewer, TAQA Knowledge Hub</title>
 <script src="qrcode.js"></script>
 <script src="qr.js"></script>
 <link rel="manifest" href="manifest.json">
@@ -81,7 +81,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .badge.software{background:rgba(56,189,248,0.12);color:#38bdf8;border:1px solid rgba(56,189,248,0.22);}
 .badge.seg{background:rgba(0,93,99,0.06);color:var(--primary);border:1px solid rgba(0,93,99,0.15);}
 
-/* Lifecycle banner, API Q2 §4.4.3 obsolete control */
+/* Lifecycle banner, API Q2 4.4.3 obsolete control */
 .lcb{display:flex;gap:13px;align-items:flex-start;border-radius:13px;padding:15px 19px;margin-bottom:18px;border:1px solid;}
 .lcb svg{flex-shrink:0;margin-top:1px;}
 .lcb b{display:block;font-size:13px;margin-bottom:3px;}
@@ -280,7 +280,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 
 /* Sunlight mode overrides */
 #qref-overlay.sunlight #qref-card{background:#ffffff;border:3px solid #000;}
-/* Printed copies are uncontrolled. TQ-QHSE-S001 §5.2, API Q2 §4.4.3 */
+/* Printed copies are uncontrolled. TQ-QHSE-S001 5.2, API Q2 4.4.3 */
 .qref-ctrl-note{margin-top:16px;padding-top:13px;border-top:1px dashed #cbd5e1;font-size:10.5px;
   line-height:1.55;color:#64748b;}
 .qref-ctrl-note b{color:#b45309;}
@@ -553,7 +553,7 @@ const typeText = TYPE_TC[docType] || TYPE_TC.sop;
 const typeLabel = TYPE_LABELS[docType] || docType;
 const typeShort = TYPE_SHORT[docType] || 'DOC';
 
-document.title = docTitle + ' — TAQA Knowledge Hub';
+document.title = docTitle + ', TAQA Knowledge Hub';
 
 // Breadcrumb
 document.getElementById('bc-seg').textContent = segInfo.name;
@@ -582,7 +582,7 @@ document.getElementById('doc-badges').innerHTML =
 // Document control block.
 // Resolved from the Master Document List (documents-master.js). Nothing here is
 // invented. A field with no value renders as "Not recorded" with a link to
-// SCORE, never a placeholder. ISO 9001 §7.5.2 a), API Q2 §4.4.3.
+// SCORE, never a placeholder. ISO 9001 7.5.2 a), API Q2 4.4.3.
 const MD = (typeof TAQA_MASTER_DOCS !== 'undefined') ? TAQA_MASTER_DOCS : [];
 const MA = (typeof TAQA_DOC !== 'undefined') ? TAQA_DOC : null;
 const _rec = MA ? (MA.byNumber(docId) || MA.byLegacy(docId) ||
@@ -605,11 +605,11 @@ const _denied = _rec && _roleKey && !TAQA_ROLE.canSee(_rec, _roleKey);
 if (_denied) {
   const R = TAQA_ROLES[_roleKey];
   const reason = _rec.status === 'draft'
-    ? 'This document is a draft. It has not completed approval, carries no authority, and is visible only to its owner and the QMS function. API Q2 §4.4.3 b).'
+    ? 'This document is a draft. It has not completed approval, carries no authority, and is visible only to its owner and the QMS function. API Q2 4.4.3 b).'
     : 'This document is classified ' + String(_rec.classification).toUpperCase() +
-      '. Your role (' + R.label + ') has access to ' + R.classifications.join(', ') + ' documents. ISO 9001 §7.5.3.1 b).';
+      '. Your role (' + R.label + ') has access to ' + R.classifications.join(', ') + ' documents. ISO 9001 7.5.3.1 b).';
   document.getElementById('meta-grid').innerHTML =
-    cell('Document number', _rec.docNumber, 'TQ-QHSE-S001 §5.3') +
+    cell('Document number', _rec.docNumber, 'TQ-QHSE-S001 5.3') +
     cell('Status', 'Not available to your role', null, 'wide');
   document.getElementById('lifecycle-banner').innerHTML =
     '<div class="lcb lcb-obsolete"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
@@ -634,17 +634,17 @@ if (_denied) {
         : null);
   const score = MA.scoreUrl(_rec);
   document.getElementById('meta-grid').innerHTML =
-    cell('Document number', _rec.docNumber, 'TQ-QHSE-S001 §5.3') +
-    cell('Revision',        _rec.revision ? 'Rev ' + _rec.revision : null, 'API Q2 §4.4.3 d)') +
-    cell('Issued',          _fmt(_rec.issueDate), 'API Q2 §4.4.3 d)') +
-    cell('Approved',        _fmt(_rec.approvedDate), 'API Q2 §4.4.3 b)') +
-    cell('Document owner',  t.owner, 'API Q2 §4.4.3 a) · role') +
-    cell('Approval authority', MA.approver(_rec), 'API Q2 §4.4.3 a) · role') +
-    cell('Next review',     due, 'API Q2 §4.4.3 c)') +
-    cell('Review cycle',    MA.cycle(_rec) ? MA.cycle(_rec) + ' months' : null, 'API Q2 §4.4.3 c)') +
-    cell('Classification',  _rec.classification ? _rec.classification.toUpperCase() : null, 'ISO 9001 §7.5.3.1 b)') +
-    cell('Retention',       MA.retention(_rec) ? MA.retention(_rec) + ' years' : null, 'API Q2 §4.5') +
-    cell('Language',        _rec.language === 'ar' ? 'العربية' : 'English', 'API Q2 §4.4.3') +
+    cell('Document number', _rec.docNumber, 'TQ-QHSE-S001 5.3') +
+    cell('Revision',        _rec.revision ? 'Rev ' + _rec.revision : null, 'API Q2 4.4.3 d)') +
+    cell('Issued',          _fmt(_rec.issueDate), 'API Q2 4.4.3 d)') +
+    cell('Approved',        _fmt(_rec.approvedDate), 'API Q2 4.4.3 b)') +
+    cell('Document owner',  t.owner, 'API Q2 4.4.3 a) · role') +
+    cell('Approval authority', MA.approver(_rec), 'API Q2 4.4.3 a) · role') +
+    cell('Next review',     due, 'API Q2 4.4.3 c)') +
+    cell('Review cycle',    MA.cycle(_rec) ? MA.cycle(_rec) + ' months' : null, 'API Q2 4.4.3 c)') +
+    cell('Classification',  _rec.classification ? _rec.classification.toUpperCase() : null, 'ISO 9001 7.5.3.1 b)') +
+    cell('Retention',       MA.retention(_rec) ? MA.retention(_rec) + ' years' : null, 'API Q2 4.5') +
+    cell('Language',        _rec.language === 'ar' ? 'العربية' : 'English', 'API Q2 4.4.3') +
     cell('Master copy',     score ? '<a href="' + score + '" rel="noopener">Open in SCORE</a>' : null, 'System of record');
 
   // Lifecycle banner. Obsolete documents must not be used at the point of use.
@@ -660,7 +660,7 @@ if (_denied) {
       'This document has not completed approval and carries no authority. It is shown for review only.']);
   else if (MA.overdue(_rec))
     B.push(['review','Periodic review overdue',
-      'The review due on ' + _fmt(_rec.nextReviewDate) + ' has not been recorded. The content stays in force until it is withdrawn, but nobody has confirmed it is still suitable. API Q2 §4.4.3 c).']);
+      'The review due on ' + _fmt(_rec.nextReviewDate) + ' has not been recorded. The content stays in force until it is withdrawn, but nobody has confirmed it is still suitable. API Q2 4.4.3 c).']);
   if (_rec.numberStatus === 'provisional')
     B.push(['prov','Provisional document number',
       MA.numberNote(_rec) || 'This number is provisional pending assignment by QHSE.']);
@@ -668,7 +668,7 @@ if (_denied) {
   document.getElementById('lifecycle-banner').innerHTML = B.map(b =>
     '<div class="lcb lcb-' + b[0] + '">' + WARN + '<div><b>' + b[1] + '</b><span class="n">' + b[2] + '</span></div></div>').join('');
 
-  // API Q2 §4.4.3: a withdrawn document must be prevented from unintended use.
+  // API Q2 4.4.3: a withdrawn document must be prevented from unintended use.
   // Downloading, printing or pinning it offline all create an uncontrolled copy,
   // so those actions are disabled rather than merely warned about.
   if (withdrawn || _rec.status === 'draft') {
@@ -691,10 +691,10 @@ if (_denied) {
 } else {
   // Not in the register. Say so plainly rather than inventing control metadata.
   document.getElementById('meta-grid').innerHTML =
-    cell('Document number', docId || null, 'TQ-QHSE-S001 §5.3') +
-    cell('Revision', null, 'API Q2 §4.4.3 d)') +
-    cell('Issued', null, 'API Q2 §4.4.3 d)') +
-    cell('Document owner', null, 'API Q2 §4.4.3 a)');
+    cell('Document number', docId || null, 'TQ-QHSE-S001 5.3') +
+    cell('Revision', null, 'API Q2 4.4.3 d)') +
+    cell('Issued', null, 'API Q2 4.4.3 d)') +
+    cell('Document owner', null, 'API Q2 4.4.3 a)');
   document.getElementById('lifecycle-banner').innerHTML =
     '<div class="lcb lcb-prov"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12.5"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
     '<div><b>Not in the Master Document List</b><span class="n">This document has no entry in the register, so its revision, approval and review status cannot be confirmed here. ' +
@@ -864,7 +864,7 @@ function showQuickRef() {
 
   // Meta chips from the Master Document List, never fabricated.
   // This card is printable, so it carries the identification a controlled copy
-  // needs plus the uncontrolled-when-printed caveat. API Q2 §4.4.3 e) f).
+  // needs plus the uncontrolled-when-printed caveat. API Q2 4.4.3 e) f).
   var chip = function(l,v){ return '<div class="qref-meta-chip"><strong>' + l + '</strong>' + (v || 'Not recorded') + '</div>'; };
   document.getElementById('qref-meta-row').innerHTML = _rec
     ? chip('Document no.', _rec.docNumber) +

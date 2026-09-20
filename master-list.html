@@ -9,242 +9,233 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Tech Hub">
 <link rel="apple-touch-icon" href="icons/icon.svg">
-<title>Master Document List — TAQA Knowledge Hub</title>
+<title>Master Document List, TAQA Knowledge Hub</title>
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
-/* ── Register tokens ───────────────────────────────────────────────────────
-   A controlled register, not a dashboard. Ink on paper, ruled rows, colour
-   only where it changes what someone does. Borders carry the structure;
-   there are no shadows and nothing lifts on hover.                        */
 :root{
-  --ink:#16202e;          /* headings, document numbers          */
-  --ink-2:#44536b;        /* body text                           */
-  --ink-3:#6f8098;        /* labels, meta                        */
-  --ink-4:#9aa8ba;        /* placeholder, disabled               */
-  --paper:#ffffff;        /* register surface                    */
-  --canvas:#eef0f3;       /* page behind the register            */
-  --inset:#f6f7f9;        /* toolbar, table head, inputs         */
-  --rule:rgba(22,32,46,.10);      /* standard rule                */
-  --rule-soft:rgba(22,32,46,.055);/* row rules                    */
-  --rule-firm:rgba(22,32,46,.20); /* section separation           */
-  --brand:#005D63;        /* links, focus, the one accent        */
-  --brand-tint:rgba(0,93,99,.07);
-  --flag-due:#8a5a08;     /* review overdue                      */
-  --flag-out:#9b2220;     /* withdrawn                           */
-  --flag-prov:#8a4b12;    /* provisional numbering               */
-  --r-sm:3px; --r-md:6px;
+  --ink:#131b26; --ink-2:#465469; --ink-3:#74829a; --ink-4:#a2adbf;
+  --paper:#fff; --canvas:#eceef1; --inset:#f7f8fa;
+  --rule:rgba(19,27,38,.10); --rule-soft:rgba(19,27,38,.055); --rule-firm:rgba(19,27,38,.17);
+  --brand:#005D63; --brand-soft:rgba(0,93,99,.08);
+  --due:#8a5a08; --out:#9b2220; --prov:#8a4b12;
+  --r1:4px; --r2:7px; --r3:10px;
   --mono:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+  --out-ease:cubic-bezier(.23,1,.32,1);
 }
 html[data-theme="dark"]{
-  --ink:#e4e9f0; --ink-2:#a9b6c7; --ink-3:#7d8da2; --ink-4:#5a6a7e;
-  --paper:#161e29; --canvas:#0d131b; --inset:#1b2430;
-  --rule:rgba(255,255,255,.11); --rule-soft:rgba(255,255,255,.06); --rule-firm:rgba(255,255,255,.2);
-  --brand:#3fb9b4; --brand-tint:rgba(63,185,180,.1);
-  --flag-due:#d9a441; --flag-out:#e0736f; --flag-prov:#d89257;
+  --ink:#e7ebf1; --ink-2:#aab6c7; --ink-3:#7e8ca1; --ink-4:#5b697c;
+  --paper:#151c26; --canvas:#0c1118; --inset:#1a2230;
+  --rule:rgba(255,255,255,.10); --rule-soft:rgba(255,255,255,.055); --rule-firm:rgba(255,255,255,.18);
+  --brand:#45bdb7; --brand-soft:rgba(69,189,183,.12);
+  --due:#d9a441; --out:#e0736f; --prov:#d89257;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
+/* The closed drawer parks at translateX(102%), which widened the document.
+   clip trims it without creating a scroll container, so sticky still works. */
+html{overflow-x:clip;}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--canvas);color:var(--ink-2);
-  font-size:13px;line-height:1.55;-webkit-font-smoothing:antialiased;}
-a{color:var(--brand);}
-:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:var(--r-sm);}
+  font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;}
+a{color:var(--brand);text-decoration:none;}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:var(--r1);}
 .skip{position:absolute;inset-inline-start:-9999px;}
-.skip:focus{inset-inline-start:8px;top:8px;z-index:99;background:var(--paper);padding:8px 14px;border:1px solid var(--rule-firm);border-radius:var(--r-md);}
+.skip:focus{inset-inline-start:10px;top:10px;z-index:99;background:var(--paper);padding:8px 14px;border:1px solid var(--rule-firm);border-radius:var(--r2);}
 
-/* ── Site nav ── */
-nav{height:56px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;
+/* ── Buttons ───────────────────────────────────────────────────────────────
+   One button, three weights. Press feedback at 140ms so the interface answers
+   the finger before anything else happens.                                  */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 12px;
+  border-radius:var(--r2);border:1px solid var(--rule-firm);background:var(--paper);color:var(--ink-2);
+  font:600 12.5px/1 'Inter',sans-serif;cursor:pointer;white-space:nowrap;
+  transition:background 140ms var(--out-ease),border-color 140ms var(--out-ease),
+             color 140ms var(--out-ease),transform 140ms var(--out-ease);}
+.btn svg{width:14px;height:14px;flex-shrink:0;}
+.btn:active{transform:scale(.97);}
+.btn-quiet{border-color:transparent;background:transparent;color:var(--ink-3);}
+.btn-icon{width:32px;padding:0;}
+@media (hover:hover) and (pointer:fine){
+  .btn:hover{background:var(--inset);border-color:var(--rule-firm);color:var(--ink);}
+  .btn-quiet:hover{background:var(--inset);border-color:transparent;}
+}
+select,input[type=search]{font:500 12.5px/1 'Inter',sans-serif;color:var(--ink-2);background:var(--paper);
+  border:1px solid var(--rule-firm);border-radius:var(--r2);height:32px;padding:0 10px;outline:none;
+  transition:border-color 140ms var(--out-ease),background 140ms var(--out-ease);cursor:pointer;}
+select:hover,input[type=search]:hover{border-color:var(--ink-4);}
+input[type=search]{cursor:text;}
+input[type=search]::placeholder{color:var(--ink-4);}
+input[type=search]::-webkit-search-cancel-button{cursor:pointer;}
+
+/* ── Nav ── */
+nav{height:54px;padding:0 22px;display:flex;align-items:center;gap:6px;
   background:var(--paper);border-bottom:1px solid var(--rule);}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
-.brand-mark{width:28px;height:28px;border-radius:var(--r-md);background:var(--brand);
+.brand{display:flex;align-items:center;gap:9px;}
+.brand-mark{width:26px;height:26px;border-radius:var(--r2);background:var(--brand);
   display:flex;align-items:center;justify-content:center;}
-.brand-mark svg{width:15px;height:15px;}
-.brand-txt{font-family:'BwGradual','Urbanist',sans-serif;font-size:13.5px;color:var(--ink);}
-.brand-txt b{font-weight:800;}.brand-txt span{font-weight:500;color:var(--ink-3);}
-.nav-links{display:flex;gap:1px;list-style:none;margin-inline-start:20px;}
-.nav-links a{padding:6px 12px;border-radius:var(--r-md);text-decoration:none;font-size:12.5px;
-  font-weight:500;color:var(--ink-3);}
+.brand-mark svg{width:14px;height:14px;}
+.brand-txt{font-family:'BwGradual','Urbanist',sans-serif;font-size:13px;color:var(--ink);}
+.brand-txt b{font-weight:800;}.brand-txt i{font-style:normal;font-weight:500;color:var(--ink-3);}
+.nav-links{display:flex;gap:1px;list-style:none;margin-inline-start:18px;}
+.nav-links a{display:block;padding:6px 11px;border-radius:var(--r2);font-size:12.5px;font-weight:500;
+  color:var(--ink-3);transition:background 140ms var(--out-ease),color 140ms var(--out-ease);}
 .nav-links a:hover{background:var(--inset);color:var(--ink);}
 .nav-links a[aria-current]{color:var(--ink);font-weight:600;background:var(--inset);}
-.nav-end{display:flex;align-items:center;gap:8px;margin-inline-start:auto;}
+.nav-end{display:flex;align-items:center;gap:6px;margin-inline-start:auto;}
 
-/* ── Controls ── */
-.btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:var(--r-md);
-  border:1px solid var(--rule-firm);background:var(--paper);color:var(--ink-2);font:600 12px/1 'Inter',sans-serif;
-  cursor:pointer;text-decoration:none;transition:background 120ms;}
-.btn:hover{background:var(--inset);color:var(--ink);}
-.btn svg{width:13px;height:13px;}
-.icon-btn{width:30px;height:30px;padding:0;justify-content:center;}
-select,input[type=search]{font-family:inherit;font-size:12.5px;color:var(--ink-2);background:var(--inset);
-  border:1px solid var(--rule);border-radius:var(--r-md);height:30px;padding:0 9px;outline:none;}
-select{cursor:pointer;}
-input[type=search]{background:var(--inset);}
-input[type=search]::placeholder{color:var(--ink-4);}
-
-/* ── Page frame ── */
-.frame{max-width:1560px;margin:0 auto;padding:20px 24px 64px;}
-.head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;
-  padding-bottom:14px;border-bottom:1px solid var(--rule-firm);margin-bottom:0;}
-.eyebrow{font:700 10px/1 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
-  margin-bottom:7px;}
-h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:21px;font-weight:800;color:var(--ink);
-  letter-spacing:-.01em;line-height:1.2;}
-.head-sub{font-size:12.5px;color:var(--ink-3);margin-top:5px;max-width:74ch;}
-.clauses{font:600 11px/1 var(--mono);color:var(--ink-3);margin-top:9px;}
+/* ── Frame ── */
+.frame{max-width:1560px;margin:0 auto;padding:22px 22px 60px;}
+.head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px;}
+.title-wrap{display:flex;align-items:center;gap:9px;}
+h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:20px;font-weight:800;color:var(--ink);
+  letter-spacing:-.015em;line-height:1.2;}
+.kicker{font:700 9.5px/1 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-4);margin-bottom:6px;}
 .head-end{display:flex;align-items:center;gap:8px;}
-.role-field{display:flex;align-items:center;gap:7px;border:1px solid var(--rule-firm);border-radius:var(--r-md);
-  height:30px;padding-inline-start:10px;background:var(--paper);}
-.role-field label{font:700 9.5px/1 'Inter',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);}
-.role-field select{border:none;background:transparent;height:28px;font-weight:600;color:var(--ink);padding-inline-end:6px;}
+.role-field{display:flex;align-items:center;gap:6px;height:32px;padding-inline-start:11px;
+  border:1px solid var(--rule-firm);border-radius:var(--r2);background:var(--paper);}
+.role-field span{font:700 9px/1 'Inter',sans-serif;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-4);}
+.role-field select{border:none;background:transparent;height:30px;font-weight:600;color:var(--ink);padding-inline-start:0;}
 
-/* ── Notices: one strip, open only if the caveats are wanted ── */
-.notes{margin-top:12px;border:1px solid var(--rule);border-radius:var(--r-md);background:var(--paper);}
-.notes summary{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 14px;cursor:pointer;
-  list-style:none;font-size:12px;color:var(--ink-2);}
-.notes summary::-webkit-details-marker{display:none;}
-.notes summary:hover{background:var(--inset);border-radius:var(--r-md);}
-.n-line{display:flex;gap:7px;align-items:baseline;}
-.n-line b{color:var(--ink);font-weight:600;}
-#n-hidden{color:var(--ink-3);}
-.n-tag{font:700 9px/1 'Inter',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--flag-prov);
-  border:1px solid currentColor;border-radius:var(--r-sm);padding:3px 6px;}
-.n-more{margin-inline-start:auto;font-weight:600;color:var(--brand);font-size:11.5px;}
-.notes[open] .n-more::after{content:' (hide)';}
-.n-body{padding:2px 14px 14px;border-top:1px solid var(--rule-soft);margin:0 0 0;}
-.n-body p{font-size:12px;line-height:1.65;color:var(--ink-2);margin-top:10px;max-width:96ch;}
-.n-body b{color:var(--ink);font-weight:600;}
+/* ── About popover ── */
+.pop-wrap{position:relative;}
+.pop{position:absolute;top:calc(100% + 8px);inset-inline-start:0;width:min(420px,88vw);z-index:50;
+  background:var(--paper);border:1px solid var(--rule-firm);border-radius:var(--r3);padding:15px 17px;
+  box-shadow:0 12px 28px rgba(19,27,38,.13),0 2px 6px rgba(19,27,38,.06);
+  transform-origin:top left;opacity:0;transform:scale(.96);pointer-events:none;
+  transition:opacity 170ms var(--out-ease),transform 170ms var(--out-ease);}
+html[dir="rtl"] .pop{transform-origin:top right;}
+.pop.open{opacity:1;transform:scale(1);pointer-events:auto;}
+.pop h2{font:700 12px/1.3 'Inter',sans-serif;color:var(--ink);margin-bottom:7px;}
+.pop p{font-size:12px;line-height:1.6;color:var(--ink-2);}
+.pop p + p{margin-top:9px;}
+.pop b{color:var(--ink);font-weight:600;}
 
-/* ── Notices ── */
-.notice{display:flex;gap:10px;padding:11px 14px;border:1px solid var(--rule);border-radius:var(--r-md);
-  background:var(--paper);margin-top:14px;font-size:12.5px;color:var(--ink-2);line-height:1.6;}
-.notice b{color:var(--ink);font-weight:600;}
-.notice .bar{width:2px;border-radius:2px;background:var(--ink-4);flex-shrink:0;}
-.notice.prov .bar{background:var(--flag-prov);}
-.notice.role .bar{background:var(--brand);}
-
-/* ── Summary line: counts as a quiet ledger strip, not coloured cards ── */
-.summary{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--rule);border-bottom:none;
-  border-radius:var(--r-md) var(--r-md) 0 0;background:var(--paper);margin-top:18px;overflow:hidden;}
-.sum{flex:1 1 0;min-width:140px;padding:12px 16px;border-inline-end:1px solid var(--rule-soft);
-  background:transparent;text-align:start;font-family:inherit;cursor:pointer;border-top:none;border-bottom:none;
-  border-inline-start:none;transition:background 120ms;}
-.sum:last-child{border-inline-end:none;}
-.sum:hover{background:var(--inset);}
-.sum[aria-pressed="true"]{background:var(--brand-tint);box-shadow:inset 0 2px 0 var(--brand);}
-.sum-n{font:700 19px/1 var(--mono);color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.02em;}
-.sum[data-flag="due"] .sum-n{color:var(--flag-due);}
-.sum[data-flag="out"] .sum-n{color:var(--flag-out);}
-.sum[data-flag="prov"] .sum-n{color:var(--flag-prov);}
-.sum-l{font:600 11px/1.3 'Inter',sans-serif;color:var(--ink-2);margin-top:6px;}
-.sum-c{font:500 9.5px/1.3 var(--mono);color:var(--ink-4);margin-top:3px;}
+/* ── Counts: a segmented strip, numbers first ── */
+.counts{display:flex;border:1px solid var(--rule);border-radius:var(--r3) var(--r3) 0 0;
+  background:var(--paper);overflow:hidden;}
+.ct{flex:1 1 0;min-width:0;padding:13px 16px 14px;background:transparent;border:none;
+  border-inline-end:1px solid var(--rule-soft);text-align:start;cursor:pointer;font-family:inherit;
+  position:relative;transition:background 140ms var(--out-ease);}
+.ct:last-child{border-inline-end:none;}
+.ct::after{content:'';position:absolute;inset-inline:0;top:0;height:2px;background:var(--brand);
+  transform:scaleX(0);transform-origin:center;transition:transform 180ms var(--out-ease);}
+.ct[aria-pressed="true"]::after{transform:scaleX(1);}
+.ct[aria-pressed="true"]{background:var(--brand-soft);}
+@media (hover:hover) and (pointer:fine){.ct:hover{background:var(--inset);}}
+.ct-n{font:700 20px/1 var(--mono);color:var(--ink);letter-spacing:-.03em;}
+.ct[data-f="due"] .ct-n{color:var(--due);}
+.ct[data-f="out"] .ct-n{color:var(--out);}
+.ct[data-f="prov"] .ct-n{color:var(--prov);}
+.ct-l{font:500 11.5px/1.3 'Inter',sans-serif;color:var(--ink-3);margin-top:6px;}
 
 /* ── Toolbar ── */
-.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 14px;background:var(--inset);
+.bar{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding:10px 13px;background:var(--inset);
   border:1px solid var(--rule);border-bottom:none;}
-.search{display:flex;align-items:center;gap:7px;flex:1 1 260px;min-width:200px;background:var(--paper);
-  border:1px solid var(--rule);border-radius:var(--r-md);height:30px;padding:0 10px;}
-.search svg{width:13px;height:13px;color:var(--ink-4);flex-shrink:0;}
-.search input{border:none;background:transparent;height:28px;padding:0;flex:1;min-width:0;}
-.tally{margin-inline-start:auto;font:600 11.5px/1 var(--mono);color:var(--ink-3);white-space:nowrap;
-  font-variant-numeric:tabular-nums;}
+.find{display:flex;align-items:center;gap:7px;flex:1 1 240px;min-width:190px;background:var(--paper);
+  border:1px solid var(--rule-firm);border-radius:var(--r2);height:32px;padding:0 10px;
+  transition:border-color 140ms var(--out-ease);}
+.find:focus-within{border-color:var(--brand);}
+.find svg{width:13px;height:13px;color:var(--ink-4);flex-shrink:0;}
+.find input{border:none;background:transparent;height:30px;padding:0;flex:1;min-width:0;}
+.find input:hover{border:none;}
+.count{margin-inline-start:auto;font:600 11.5px/1 var(--mono);color:var(--ink-3);white-space:nowrap;}
 
 /* ── Register ── */
-.register{background:var(--paper);border:1px solid var(--rule);border-radius:0 0 var(--r-md) var(--r-md);}
+.reg{background:var(--paper);border:1px solid var(--rule);border-radius:0 0 var(--r3) var(--r3);}
 .scroll{overflow-x:visible;}
 table{width:100%;border-collapse:collapse;}
-thead th{position:sticky;top:0;z-index:10;background:var(--inset);text-align:start;
-  padding:9px 14px;border-bottom:1px solid var(--rule-firm);white-space:nowrap;
-  font:700 9.5px/1.3 'Inter',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);}
-thead th .cl{display:block;font:500 9px/1.3 var(--mono);letter-spacing:0;text-transform:none;color:var(--ink-4);margin-top:3px;}
-tbody td{padding:10px 14px;border-bottom:1px solid var(--rule-soft);vertical-align:top;}
-tbody tr{cursor:pointer;}
-tbody tr:hover td{background:var(--inset);}
-tbody tr[aria-selected="true"] td{background:var(--brand-tint);}
+thead th{position:sticky;top:0;z-index:10;background:var(--inset);text-align:start;padding:9px 14px;
+  border-bottom:1px solid var(--rule-firm);white-space:nowrap;
+  font:700 9.5px/1 'Inter',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-4);}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--rule-soft);vertical-align:top;}
+tbody tr{cursor:pointer;transition:background 120ms var(--out-ease);}
 tbody tr:last-child td{border-bottom:none;}
-.c-num{font:600 11.5px/1.5 var(--mono);color:var(--ink);white-space:nowrap;}
-.c-num.prov{color:var(--flag-prov);}
-.c-legacy{font:500 10px/1.4 var(--mono);color:var(--ink-4);margin-top:2px;}
-.c-title{font-weight:600;color:var(--ink);max-width:40ch;}
-.c-org{font-size:11px;color:var(--ink-3);margin-top:2px;}
-.c-data{font:500 11.5px/1.5 var(--mono);color:var(--ink-2);white-space:nowrap;font-variant-numeric:tabular-nums;}
-.c-data.due{color:var(--flag-due);font-weight:600;}
-.c-data.void{color:var(--ink-4);}
-
-/* The stamp: squared, ruled, like an ink mark on a controlled copy. */
-.stamp{display:inline-block;padding:2.5px 7px;border:1px solid currentColor;border-radius:var(--r-sm);
-  font:700 9.5px/1.25 'Inter',sans-serif;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;}
-.s-current{color:var(--ink-3);}
-.s-review{color:var(--flag-due);}
-.s-draft{color:var(--ink-4);border-style:dashed;}
-.s-superseded,.s-obsolete{color:var(--flag-out);}
-.s-asset{color:var(--ink-4);}
-.cls{font:600 10px/1.3 'Inter',sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);}
-.cls.r{color:var(--flag-out);}
-.lang{font:700 9px/1 var(--mono);border:1px solid var(--rule-firm);border-radius:var(--r-sm);
+@media (hover:hover) and (pointer:fine){tbody tr:hover{background:var(--inset);}}
+tbody tr[aria-selected="true"]{background:var(--brand-soft);}
+.num{font:600 11.5px/1.5 var(--mono);color:var(--ink);white-space:nowrap;}
+.num.prov{color:var(--prov);}
+.was{font:500 10px/1.4 var(--mono);color:var(--ink-4);margin-top:2px;}
+.ttl{font-weight:600;color:var(--ink);max-width:42ch;}
+.org{font-size:11px;color:var(--ink-3);margin-top:2px;}
+.dat{font:500 11.5px/1.5 var(--mono);color:var(--ink-2);white-space:nowrap;}
+.dat.late{color:var(--due);font-weight:600;}
+.dat.nil{color:var(--ink-4);}
+.mark{display:inline-block;padding:2.5px 7px;border:1px solid currentColor;border-radius:var(--r1);
+  font:700 9.5px/1.2 'Inter',sans-serif;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;}
+.m-current{color:var(--ink-3);}
+.m-review{color:var(--due);}
+.m-draft{color:var(--ink-4);border-style:dashed;}
+.m-superseded,.m-obsolete{color:var(--out);}
+.m-asset{color:var(--ink-4);}
+.cls{font:600 10px/1.3 'Inter',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);}
+.cls.hi{color:var(--out);}
+.ar{font:700 9px/1 var(--mono);border:1px solid var(--rule-firm);border-radius:var(--r1);
   padding:2px 4px;color:var(--ink-3);margin-inline-start:5px;}
+.more{width:100%;padding:12px;border:none;border-top:1px solid var(--rule);background:var(--inset);
+  font:600 12px 'Inter',sans-serif;color:var(--brand);cursor:pointer;
+  transition:background 140ms var(--out-ease);}
+.more:hover{background:var(--brand-soft);}
+.none{padding:56px 20px;text-align:center;color:var(--ink-4);}
+.note{padding:11px 14px;border-top:1px solid var(--rule);background:var(--inset);
+  border-radius:0 0 var(--r3) var(--r3);font-size:11.5px;color:var(--ink-3);}
 
-.more{width:100%;padding:11px;border:none;border-top:1px solid var(--rule);background:var(--inset);
-  font:600 12px 'Inter',sans-serif;color:var(--brand);cursor:pointer;}
-.more:hover{background:var(--brand-tint);}
-.empty{padding:54px 20px;text-align:center;color:var(--ink-4);font-size:13px;}
-.foot{padding:11px 14px;border-top:1px solid var(--rule);background:var(--inset);border-radius:0 0 var(--r-md) var(--r-md);
-  font-size:11.5px;color:var(--ink-3);display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;}
-
-/* ── Detail drawer: the rest of the control record ── */
-.scrim{position:fixed;inset:0;background:rgba(10,16,24,.34);opacity:0;pointer-events:none;
-  transition:opacity 180ms;z-index:60;}
+/* ── Drawer ── */
+.scrim{position:fixed;inset:0;background:rgba(10,15,22,.36);opacity:0;pointer-events:none;
+  transition:opacity 190ms var(--out-ease);z-index:60;}
 .scrim.open{opacity:1;pointer-events:auto;}
-.drawer{position:fixed;top:0;inset-inline-end:0;height:100dvh;width:min(432px,100%);background:var(--paper);
+.dw{position:fixed;top:0;inset-inline-end:0;height:100dvh;width:min(428px,100%);background:var(--paper);
   border-inline-start:1px solid var(--rule-firm);z-index:61;display:flex;flex-direction:column;
-  transform:translateX(102%);transition:transform 200ms cubic-bezier(.23,1,.32,1);}
-html[dir="rtl"] .drawer{transform:translateX(-102%);}
-.drawer.open{transform:translateX(0);}
-.d-head{padding:16px 20px;border-bottom:1px solid var(--rule-firm);display:flex;gap:12px;align-items:flex-start;}
-.d-head h2{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;font-weight:800;color:var(--ink);line-height:1.3;}
-.d-num{font:600 11.5px/1.5 var(--mono);color:var(--ink-3);margin-top:4px;}
-.d-body{flex:1;overflow-y:auto;padding:4px 0 24px;}
-.d-sect{padding:14px 20px 4px;font:700 9.5px/1 'Inter',sans-serif;letter-spacing:.11em;
+  transform:translateX(102%);transition:transform 260ms cubic-bezier(.32,.72,0,1);}
+html[dir="rtl"] .dw{transform:translateX(-102%);}
+.dw.open{transform:translateX(0);}
+.dw-h{padding:16px 18px;border-bottom:1px solid var(--rule-firm);display:flex;gap:10px;align-items:flex-start;}
+.dw-h h2{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;font-weight:800;color:var(--ink);line-height:1.3;}
+.dw-n{font:600 11.5px/1.5 var(--mono);color:var(--ink-3);margin-top:4px;}
+.dw-b{flex:1;overflow-y:auto;padding-bottom:20px;}
+.dw-s{padding:15px 18px 5px;font:700 9.5px/1 'Inter',sans-serif;letter-spacing:.11em;
   text-transform:uppercase;color:var(--ink-4);}
-.d-row{display:flex;justify-content:space-between;gap:16px;padding:8px 20px;border-bottom:1px solid var(--rule-soft);}
-.d-k{font-size:12px;color:var(--ink-3);flex-shrink:0;}
-.d-k small{display:block;font:500 9px/1.3 var(--mono);color:var(--ink-4);margin-top:1px;}
-.d-v{font-size:12.5px;color:var(--ink);text-align:end;font-weight:500;}
-.d-v.mono{font-family:var(--mono);font-size:11.5px;}
-.d-v.none{color:var(--ink-4);font-weight:400;font-style:italic;}
-.d-note{margin:12px 20px;padding:11px 13px;border:1px solid var(--rule);border-inline-start:2px solid var(--flag-prov);
-  border-radius:var(--r-md);font-size:11.5px;line-height:1.6;color:var(--ink-2);}
-.d-note.out{border-inline-start-color:var(--flag-out);}
-.d-note b{color:var(--ink);}
-.d-foot{padding:14px 20px;border-top:1px solid var(--rule-firm);display:flex;gap:8px;}
+.dw-r{display:flex;justify-content:space-between;gap:14px;padding:8px 18px;border-bottom:1px solid var(--rule-soft);}
+.dw-k{font-size:12px;color:var(--ink-3);}
+.dw-k small{display:block;font:500 9px/1.3 var(--mono);color:var(--ink-4);margin-top:1px;}
+.dw-v{font-size:12.5px;color:var(--ink);text-align:end;font-weight:500;}
+.dw-v.mono{font-family:var(--mono);font-size:11.5px;}
+.dw-v.nil{color:var(--ink-4);font-weight:400;font-style:italic;}
+.dw-note{margin:13px 18px 0;padding:11px 13px;border:1px solid var(--rule);
+  border-inline-start:2px solid var(--prov);border-radius:var(--r2);font-size:11.5px;line-height:1.6;}
+.dw-note.out{border-inline-start-color:var(--out);}
+.dw-note b{color:var(--ink);font-weight:600;}
+.dw-f{padding:13px 18px;border-top:1px solid var(--rule-firm);display:flex;gap:7px;}
+.dw-f .btn{flex:1;}
 
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
-@media(max-width:1180px){.nav-links{display:none;}.frame{padding:16px 14px 56px;}}
+@media(max-width:1180px){.nav-links{display:none;}.frame{padding:16px 13px 54px;}}
 @media(max-width:1100px){.scroll{overflow-x:auto;}}
-@media(max-width:720px){
-  .head{align-items:flex-start;}.head-end{width:100%;}
-  .sum{min-width:50%;flex:1 1 50%;border-bottom:1px solid var(--rule-soft);}
-  thead th{top:0;}
+@media(max-width:760px){
+  .counts{flex-wrap:wrap;}
+  .ct{flex:1 1 50%;min-width:50%;border-bottom:1px solid var(--rule-soft);}
+  .head{align-items:flex-start;}
 }
 </style>
 </head>
 <body>
-<a class="skip" href="#register">Skip to the register</a>
+<a class="skip" href="#reg">Skip to the register</a>
 
 <nav>
-  <a href="index.html" class="brand">
+  <a href="index.html" class="brand" aria-label="TAQA Knowledge Hub home">
     <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3L4 7v5c0 4.5 3.5 8.7 8 9.9 4.5-1.2 8-5.4 8-9.9V7l-8-4z" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.65)" stroke-width="1.6"/><path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-    <span class="brand-txt"><b>TAQA</b> <span>Knowledge Hub</span></span>
+    <span class="brand-txt"><b>TAQA</b> <i>Knowledge Hub</i></span>
   </a>
   <ul class="nav-links">
     <li><a href="index.html">Home</a></li>
-    <li><a href="ai-search.html">Document Search</a></li>
+    <li><a href="ai-search.html">Search</a></li>
     <li><a href="master-list.html" aria-current="page">Master List</a></li>
-    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="glossary.html">Glossary</a></li>
     <li><a href="upload.html">Upload</a></li>
   </ul>
   <div class="nav-end">
-    <button class="btn icon-btn" id="theme-btn" onclick="toggleDark()" aria-label="Switch between light and dark">
+    <button class="btn btn-quiet btn-icon" onclick="toggleDark()" aria-label="Switch light or dark">
       <svg id="theme-icon" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>
     </button>
-    <a href="dashboard.html" class="btn">Dashboard</a>
+    <a href="dashboard.html" class="btn btn-quiet">Dashboard</a>
   </div>
 </nav>
 
@@ -252,15 +243,26 @@ html[dir="rtl"] .drawer{transform:translateX(-102%);}
 
   <header class="head">
     <div>
-      <div class="eyebrow">Document control</div>
-      <h1>Master Document List</h1>
-      <p class="head-sub">Every controlled document held in the Hub, with its number, current revision, approval authority, review date, status and retention. SCORE remains the master repository. This register records what is distributed at the point of use.</p>
-      <div class="clauses">TQ-QHSE-S001 §5.1 · ISO 9001:2015 §7.5 · API Spec Q2 3rd Ed. §4.4, §4.5</div>
+      <div class="kicker">Document control</div>
+      <div class="title-wrap">
+        <h1>Master Document List</h1>
+        <div class="pop-wrap">
+          <button class="btn btn-quiet btn-icon" id="about-btn" onclick="togglePop()" aria-expanded="false" aria-label="About this register">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v5.5"/><path d="M12 7.6v.2"/></svg>
+          </button>
+          <div class="pop" id="about-pop" role="dialog" aria-label="About this register">
+            <h2>Prototype data</h2>
+            <p>Document titles are real. Revision, approval, review and status values are generated so the controls can be seen working. The schema is what matters: it sets the fields the back end supplies.</p>
+            <p>Owner and approver hold <b>roles, not names</b>. Role switching runs in the browser and proves nothing about access. The server has to apply the same rules.</p>
+            <p id="pop-role"></p>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="head-end">
       <div class="role-field">
-        <label for="role-select">Viewing as</label>
-        <select id="role-select" onchange="setRole(this.value)"></select>
+        <span>As</span>
+        <select id="role-select" onchange="setRole(this.value)" aria-label="Viewing role"></select>
       </div>
       <button class="btn" id="export-btn" onclick="exportCsv()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -269,85 +271,60 @@ html[dir="rtl"] .drawer{transform:translateX(-102%);}
     </div>
   </header>
 
-  <details class="notes" id="notes">
-    <summary>
-      <span class="n-line"><b id="n-role">Viewing as</b><span id="n-hidden"></span></span>
-      <span class="n-tag">Prototype data</span>
-      <span class="n-more">Read the caveats</span>
-    </summary>
-    <div class="n-body">
-      <p><b>Prototype.</b> The document titles are real. Revision, approval, review and status values are generated so the controls can be seen working. The schema is what matters: it sets out the fields the back end has to supply. Owner and approver hold roles rather than personal names, which is what API Q2 §4.4.3 a) asks for and keeps personal data out of the register.</p>
-      <p id="n-blurb"></p>
-      <p>Switching role here runs in the browser and proves nothing about access. The back end has to apply the same matrix on the server, from an Entra ID group through the SSO claim to a check on every record.</p>
-    </div>
-  </details>
+  <div class="counts" id="counts" role="group" aria-label="Filter by status"></div>
 
-  <div class="summary" id="summary" role="group" aria-label="Filter the register by status"></div>
-
-  <div class="toolbar">
-    <div class="search">
+  <div class="bar">
+    <div class="find">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-      <input id="q" type="search" placeholder="Search by number, title or service line" oninput="limit=250;render()" autocomplete="off" aria-label="Search the register">
+      <input id="q" type="search" placeholder="Search" oninput="limit=250;render()" autocomplete="off" aria-label="Search the register">
     </div>
     <select id="f-seg" onchange="limit=250;render()" aria-label="Segment"><option value="">All segments</option></select>
-    <select id="f-type" onchange="limit=250;render()" aria-label="Document type"><option value="">All types</option></select>
+    <select id="f-type" onchange="limit=250;render()" aria-label="Type"><option value="">All types</option></select>
     <select id="f-status" onchange="limit=250;render()" aria-label="Status">
-      <option value="">Any status</option>
-      <option value="current">Current</option>
-      <option value="under-review">Review due</option>
-      <option value="draft">Draft</option>
-      <option value="superseded">Superseded</option>
-      <option value="obsolete">Obsolete</option>
+      <option value="">Any status</option><option value="current">Current</option>
+      <option value="under-review">Review due</option><option value="draft">Draft</option>
+      <option value="superseded">Superseded</option><option value="obsolete">Obsolete</option>
     </select>
     <select id="f-cls" onchange="limit=250;render()" aria-label="Classification">
-      <option value="">Any classification</option>
-      <option value="internal">Internal</option>
-      <option value="confidential">Confidential</option>
-      <option value="restricted">Restricted</option>
+      <option value="">Any class</option><option value="internal">Internal</option>
+      <option value="confidential">Confidential</option><option value="restricted">Restricted</option>
     </select>
     <select id="f-lang" onchange="limit=250;render()" aria-label="Language">
       <option value="">Both languages</option><option value="en">English</option><option value="ar">العربية</option>
     </select>
-    <span class="tally" id="tally"></span>
+    <span class="count" id="count"></span>
   </div>
 
-  <section class="register" id="register">
+  <section class="reg" id="reg">
     <div class="scroll">
       <table>
         <thead><tr>
-          <th scope="col">Document number<span class="cl">TQ-QHSE-S001 §5.3</span></th>
-          <th scope="col">Title<span class="cl">ISO 9001 §7.5.2 a)</span></th>
-          <th scope="col">Rev<span class="cl">API Q2 §4.4.3 d)</span></th>
-          <th scope="col">Issued</th>
-          <th scope="col">Review due<span class="cl">API Q2 §4.4.3 c)</span></th>
-          <th scope="col">Status<span class="cl">API Q2 §4.4.3</span></th>
-          <th scope="col">Class<span class="cl">ISO 9001 §7.5.3.1 b)</span></th>
+          <th scope="col">Number</th><th scope="col">Title</th><th scope="col">Rev</th>
+          <th scope="col">Issued</th><th scope="col">Review due</th>
+          <th scope="col">Status</th><th scope="col">Class</th>
         </tr></thead>
         <tbody id="rows"></tbody>
       </table>
-      <p class="empty" id="empty" hidden>Nothing in the register matches these filters.</p>
+      <p class="none" id="empty" hidden>Nothing matches these filters.</p>
     </div>
     <button class="more" id="more" hidden onclick="limit=1e6;render()"></button>
-    <div class="foot">
-      <span id="foot-prov"></span>
-      <span>Retention runs to 10 years under API Spec Q2 3rd Edition §4.5. TQ-QHSE-S001 §7.5 still says five.</span>
-    </div>
+    <div class="note" id="note"></div>
   </section>
 </div>
 
 <div class="scrim" id="scrim" onclick="closeDetail()"></div>
-<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="d-title" aria-hidden="true">
-  <div class="d-head">
+<aside class="dw" id="dw" role="dialog" aria-modal="true" aria-labelledby="dw-title" aria-hidden="true">
+  <div class="dw-h">
     <div style="flex:1;min-width:0;">
-      <h2 id="d-title"></h2>
-      <div class="d-num" id="d-num"></div>
+      <h2 id="dw-title"></h2>
+      <div class="dw-n" id="dw-num"></div>
     </div>
-    <button class="btn icon-btn" onclick="closeDetail()" aria-label="Close">
+    <button class="btn btn-quiet btn-icon" onclick="closeDetail()" aria-label="Close">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
     </button>
   </div>
-  <div class="d-body" id="d-body"></div>
-  <div class="d-foot" id="d-foot"></div>
+  <div class="dw-b" id="dw-body"></div>
+  <div class="dw-f" id="dw-foot"></div>
 </aside>
 
 <script src="roles.js"></script>
@@ -357,7 +334,7 @@ const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5
 const MOON='M6.2 2.3a.55.55 0 0 1 .2.62 5.2 5.2 0 0 0 6.7 6.7.55.55 0 0 1 .68.75A6.3 6.3 0 1 1 5.6 2.1a.55.55 0 0 1 .6.2Z';
 (function(){var t;try{t=localStorage.getItem('taqa-theme');}catch(e){}
   if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');
-  var p=document.querySelector('#theme-icon path');if(p)p.setAttribute('d',MOON);}})();
+    var p=document.querySelector('#theme-icon path');if(p)p.setAttribute('d',MOON);}})();
 function toggleDark(){var d=document.documentElement.getAttribute('data-theme')==='dark',n=d?'light':'dark';
   document.documentElement.setAttribute('data-theme',n);
   var p=document.querySelector('#theme-icon path');if(p)p.setAttribute('d',n==='dark'?MOON:SUN);
@@ -366,41 +343,37 @@ function toggleDark(){var d=document.documentElement.getAttribute('data-theme')=
 const D=TAQA_MASTER_DOCS, L=TAQA_DOC_LOOKUPS, A=TAQA_DOC;
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):null;
-const STATUS={current:'Current','under-review':'Review due',draft:'Draft',superseded:'Superseded',obsolete:'Obsolete',asset:'Asset'};
+const LABEL={current:'Current','under-review':'Review due',draft:'Draft',superseded:'Superseded',obsolete:'Obsolete',asset:'Asset'};
 
 const fs=document.getElementById('f-seg'), ft=document.getElementById('f-type');
 Object.keys(L.segments).sort((a,b)=>L.segments[a].name.localeCompare(L.segments[b].name))
-  .forEach(k=>fs.insertAdjacentHTML('beforeend',`<option value="${k}">${esc(L.segments[k].name)} (${esc(L.segments[k].spl)})</option>`));
+  .forEach(k=>fs.insertAdjacentHTML('beforeend',`<option value="${k}">${esc(L.segments[k].name)}</option>`));
 Object.keys(L.types).forEach(k=>ft.insertAdjacentHTML('beforeend',`<option value="${k}">${esc(L.types[k].label)}</option>`));
 
 let quick=null, limit=250, selected=null;
-
-// Counts shown as a ledger strip. Only the ones that change what a controller
-// does get a colour: review overdue, withdrawn, and numbering that cannot
-// follow §5.3 yet.
-const SUMS=[
-  {k:'controlled',l:'Controlled documents',cl:'§5.1',        f:d=>A.controlled(d)},
-  {k:'current',   l:'Current revision',    cl:'§4.4.3 d)',   f:d=>d.status==='current'},
-  {k:'overdue',   l:'Review overdue',      cl:'§4.4.3 c)',   f:d=>A.overdue(d), flag:'due',  control:true},
-  {k:'obsolete',  l:'Withdrawn',           cl:'§4.4.3',      f:d=>d.status==='obsolete'||d.status==='superseded', flag:'out'},
-  {k:'provisional',l:'Provisional number', cl:'§5.3',        f:d=>d.numberStatus==='provisional', flag:'prov', control:true},
-  {k:'ar',        l:'Arabic versions',     cl:'§4.4.3',      f:d=>!!d.translationOf}
+const CT=[
+  {k:'controlled', l:'Controlled',   f:d=>A.controlled(d)},
+  {k:'current',    l:'Current',      f:d=>d.status==='current'},
+  {k:'overdue',    l:'Review overdue',f:d=>A.overdue(d), flag:'due', control:true},
+  {k:'obsolete',   l:'Withdrawn',    f:d=>d.status==='obsolete'||d.status==='superseded', flag:'out'},
+  {k:'provisional',l:'Provisional',  f:d=>d.numberStatus==='provisional', flag:'prov', control:true},
+  {k:'ar',         l:'Arabic',       f:d=>!!d.translationOf}
 ];
 
-const FIELDS={q:'q',seg:'f-seg',type:'f-type',status:'f-status',cls:'f-cls',lang:'f-lang'};
+const F={q:'q',seg:'f-seg',type:'f-type',status:'f-status',cls:'f-cls',lang:'f-lang'};
 function readUrl(){
   const u=new URLSearchParams(location.search);
-  for(const [key,id] of Object.entries(FIELDS)){
-    const v=u.get(key); if(v==null) continue;
-    const el=document.getElementById(id); if(!el) continue;
-    if(el.tagName==='SELECT'&&!Array.from(el.options).some(o=>o.value===v)) continue;
+  for(const [key,id] of Object.entries(F)){
+    const v=u.get(key); if(v==null)continue;
+    const el=document.getElementById(id); if(!el)continue;
+    if(el.tagName==='SELECT'&&!Array.from(el.options).some(o=>o.value===v))continue;
     el.value=v;
   }
-  const qk=u.get('view'); if(qk&&SUMS.some(s=>s.k===qk)) quick=qk;
+  const k=u.get('view'); if(k&&CT.some(c=>c.k===k))quick=k;
 }
 function writeUrl(){
   const u=new URLSearchParams();
-  for(const [key,id] of Object.entries(FIELDS)){const el=document.getElementById(id); if(el&&el.value)u.set(key,el.value);}
+  for(const [key,id] of Object.entries(F)){const el=document.getElementById(id); if(el&&el.value)u.set(key,el.value);}
   if(quick)u.set('view',quick);
   const qs=u.toString();
   history.replaceState(null,'',qs?location.pathname+'?'+qs:location.pathname);
@@ -409,33 +382,39 @@ function writeUrl(){
 function role(){return TAQA_ROLE.current();}
 function visible(){return D.filter(d=>TAQA_ROLE.canSee(d,role()));}
 
+let popOpen=false;
+function togglePop(){
+  popOpen=!popOpen;
+  document.getElementById('about-pop').classList.toggle('open',popOpen);
+  document.getElementById('about-btn').setAttribute('aria-expanded',popOpen);
+}
+document.addEventListener('click',e=>{
+  if(popOpen&&!e.target.closest('.pop-wrap'))togglePop();
+});
+
 function renderRole(){
   const k=role(), R=TAQA_ROLES[k], sel=document.getElementById('role-select');
-  if(!sel.options.length) TAQA_ROLE_ORDER.forEach(r=>sel.insertAdjacentHTML('beforeend',`<option value="${r}">${esc(TAQA_ROLES[r].label)}</option>`));
+  if(!sel.options.length)TAQA_ROLE_ORDER.forEach(r=>sel.insertAdjacentHTML('beforeend',`<option value="${r}">${esc(TAQA_ROLES[r].label)}</option>`));
   sel.value=k;
   const hidden=D.length-visible().length;
-  document.getElementById('n-role').textContent='Viewing as '+R.label;
-  document.getElementById('n-hidden').textContent = hidden>0
-    ? '· ' + hidden + (hidden===1?' document is':' documents are') + ' outside this role'
-    : '· the whole register is in view';
-  document.getElementById('n-blurb').textContent=R.blurb;
-  document.getElementById('export-btn').hidden = !TAQA_ROLE.can('export',k);
+  document.getElementById('pop-role').innerHTML='<b>'+esc(R.label)+'.</b> '+esc(R.blurb)+
+    (hidden>0?' '+hidden+(hidden===1?' document is':' documents are')+' outside this role.':'');
+  document.getElementById('export-btn').hidden=!TAQA_ROLE.can('export',k);
   const dr=document.querySelector('#f-status option[value="draft"]');
-  if(dr) dr.hidden = !R.statuses.includes('draft');
+  if(dr)dr.hidden=!R.statuses.includes('draft');
 }
-
-function renderSummary(){
+function renderCounts(){
   const k=role(), ctrl=TAQA_ROLES[k].controlPanel, rows=visible();
-  document.getElementById('summary').innerHTML=SUMS.filter(s=>ctrl||!s.control).map(s=>{
-    const n=(s.control? rows.filter(d=>s.f(d)&&TAQA_ROLE.inControlScope(d,k)) : rows.filter(s.f)).length;
-    return `<button class="sum" data-k="${s.k}"${s.flag?` data-flag="${s.flag}"`:''} aria-pressed="${quick===s.k}" onclick="quickFilter('${s.k}')">
-      <div class="sum-n">${n}</div><div class="sum-l">${s.l}</div><div class="sum-c">${s.cl}</div></button>`;}).join('');
+  document.getElementById('counts').innerHTML=CT.filter(c=>ctrl||!c.control).map(c=>{
+    const n=(c.control?rows.filter(d=>c.f(d)&&TAQA_ROLE.inControlScope(d,k)):rows.filter(c.f)).length;
+    return `<button class="ct" data-k="${c.k}"${c.flag?` data-f="${c.flag}"`:''} aria-pressed="${quick===c.k}" onclick="quickFilter('${c.k}')">
+      <div class="ct-n">${n}</div><div class="ct-l">${c.l}</div></button>`;}).join('');
 }
-function quickFilter(k){quick=quick===k?null:k;limit=250;renderSummary();render();}
+function quickFilter(k){quick=quick===k?null:k;limit=250;renderCounts();render();}
 function setRole(r){
   TAQA_ROLE.set(r);
-  if(quick){const s=SUMS.find(x=>x.k===quick); if(s&&s.control&&!TAQA_ROLES[r].controlPanel)quick=null;}
-  limit=250;closeDetail();renderRole();renderSummary();render();
+  if(quick){const c=CT.find(x=>x.k===quick); if(c&&c.control&&!TAQA_ROLES[r].controlPanel)quick=null;}
+  limit=250;closeDetail();renderRole();renderCounts();render();
 }
 
 function current(){
@@ -443,10 +422,10 @@ function current(){
   const seg=document.getElementById('f-seg').value, typ=document.getElementById('f-type').value;
   const st=document.getElementById('f-status').value, cl=document.getElementById('f-cls').value;
   const lg=document.getElementById('f-lang').value;
-  const s=quick?SUMS.find(x=>x.k===quick):null, k=role();
+  const c=quick?CT.find(x=>x.k===quick):null, k=role();
   return visible().filter(d=>{
-    if(s&&!s.f(d))return false;
-    if(s&&s.control&&!TAQA_ROLE.inControlScope(d,k))return false;
+    if(c&&!c.f(d))return false;
+    if(c&&c.control&&!TAQA_ROLE.inControlScope(d,k))return false;
     if(seg&&d.segment!==seg)return false;
     if(typ&&d.docType!==typ)return false;
     if(st&&d.status!==st)return false;
@@ -456,102 +435,99 @@ function current(){
     return true;
   });
 }
-
-function dueCell(d){
-  if(d.status==='obsolete'||d.status==='superseded') return '<span class="c-data void">Withdrawn</span>';
-  if(!d.nextReviewDate) return '<span class="c-data void">Not set</span>';
-  const days=A.reviewDays(d);
-  return days<0
-    ? `<span class="c-data due">${fmt(d.nextReviewDate)}<br>${Math.abs(days)} days late</span>`
-    : `<span class="c-data">${fmt(d.nextReviewDate)}</span>`;
+function due(d){
+  if(d.status==='obsolete'||d.status==='superseded')return '<span class="dat nil">Withdrawn</span>';
+  if(!d.nextReviewDate)return '<span class="dat nil">Not set</span>';
+  const n=A.reviewDays(d);
+  return n<0?`<span class="dat late">${fmt(d.nextReviewDate)}<br>${Math.abs(n)} days late</span>`
+            :`<span class="dat">${fmt(d.nextReviewDate)}</span>`;
 }
-
 function render(){
   writeUrl();
   const rows=current(), shown=Math.min(limit,rows.length);
-  document.getElementById('tally').textContent=rows.length+' of '+visible().length;
+  document.getElementById('count').textContent=rows.length+' of '+visible().length;
   document.getElementById('empty').hidden=rows.length>0;
-  const more=document.getElementById('more');
-  more.hidden=rows.length<=shown;
-  more.textContent='Showing '+shown+' of '+rows.length+'. Show the rest.';
-  const prov=rows.filter(d=>d.numberStatus==='provisional').length;
-  document.getElementById('foot-prov').textContent = prov
-    ? prov+' '+(prov===1?'document in this view carries':'documents in this view carry')+' a provisional number because TQ-QHSE-S001 §5.3 assigns no short form yet.'
-    : 'Every document in this view carries a conformant TQ-QHSE-S001 §5.3 number.';
+  const m=document.getElementById('more');
+  m.hidden=rows.length<=shown;
+  m.textContent='Show the remaining '+(rows.length-shown);
+  const p=rows.filter(d=>d.numberStatus==='provisional').length;
+  document.getElementById('note').textContent = (p
+    ? p+' of these cannot be numbered yet because TQ-QHSE-S001 5.3 assigns no short form. '
+    : 'Every number here follows TQ-QHSE-S001 5.3. ')
+    + 'Retention runs to 10 years under API Q2 3rd Edition 4.5.';
   document.getElementById('rows').innerHTML=rows.slice(0,shown).map((d,i)=>{
-    const s=A.seg(d), prov=d.numberStatus==='provisional';
-    return `<tr tabindex="0" aria-selected="${!!selected&&selected===d.docNumber}" data-i="${i}"
+    const s=A.seg(d), pv=d.numberStatus==='provisional';
+    return `<tr tabindex="0" aria-selected="${!!selected&&selected===d.docNumber}"
         onclick="openDetail(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetail(${i});}">
-      <td><div class="c-num${prov?' prov':''}">${esc(d.docNumber||'Not numbered')}</div>
-          ${d.legacyId?`<div class="c-legacy">was ${esc(d.legacyId)}</div>`:''}</td>
-      <td><div class="c-title">${esc(d.title)}${d.language==='ar'?'<span class="lang">AR</span>':''}</div>
-          <div class="c-org">${esc(s.name)} · ${esc(s.spl)}</div></td>
-      <td><span class="c-data">${esc(d.revision||'n/a')}</span></td>
-      <td><span class="c-data">${fmt(d.issueDate)||'<span class="void">Not recorded</span>'}</span></td>
-      <td>${dueCell(d)}</td>
-      <td><span class="stamp s-${d.status.replace('under-review','review')}">${STATUS[d.status]||d.status}</span></td>
-      <td><span class="cls${d.classification==='restricted'?' r':''}">${esc(d.classification||'')}</span></td>
+      <td><div class="num${pv?' prov':''}">${esc(d.docNumber||'Not numbered')}</div>${d.legacyId?`<div class="was">was ${esc(d.legacyId)}</div>`:''}</td>
+      <td><div class="ttl">${esc(d.title)}${d.language==='ar'?'<span class="ar">AR</span>':''}</div><div class="org">${esc(s.name)}</div></td>
+      <td><span class="dat">${esc(d.revision||'n/a')}</span></td>
+      <td><span class="dat${d.issueDate?'':' nil'}">${fmt(d.issueDate)||'Not recorded'}</span></td>
+      <td>${due(d)}</td>
+      <td><span class="mark m-${d.status.replace('under-review','review')}">${LABEL[d.status]||d.status}</span></td>
+      <td><span class="cls${d.classification==='restricted'?' hi':''}">${esc(d.classification||'')}</span></td>
     </tr>`}).join('');
 }
 
-// ── Detail drawer ──────────────────────────────────────────────────────────
 let lastFocus=null;
-function row(k,v,clause,mono){
+function dwRow(k,v,clause,mono){
   const has=v!==null&&v!==undefined&&v!=='';
-  return `<div class="d-row"><div class="d-k">${k}${clause?`<small>${clause}</small>`:''}</div>
-    <div class="d-v${mono?' mono':''}${has?'':' none'}">${has?v:'Not recorded'}</div></div>`;
+  return `<div class="dw-r"><div class="dw-k">${k}${clause?`<small>${clause}</small>`:''}</div>
+    <div class="dw-v${mono?' mono':''}${has?'':' nil'}">${has?v:'Not recorded'}</div></div>`;
 }
 function openDetail(i){
-  const d=current()[i]; if(!d) return;
+  const d=current()[i]; if(!d)return;
   lastFocus=document.activeElement; selected=d.docNumber;
-  const t=A.type(d), s=A.seg(d), days=A.reviewDays(d), withdrawn=d.status==='obsolete'||d.status==='superseded';
-  document.getElementById('d-title').textContent=d.title;
-  document.getElementById('d-num').textContent=(d.docNumber||'Not numbered')+(d.legacyId?'  (was '+d.legacyId+')':'');
+  const t=A.type(d), s=A.seg(d), n=A.reviewDays(d), gone=d.status==='obsolete'||d.status==='superseded';
+  document.getElementById('dw-title').textContent=d.title;
+  document.getElementById('dw-num').textContent=(d.docNumber||'Not numbered')+(d.legacyId?'   was '+d.legacyId:'');
   let notes='';
-  if(d.status==='obsolete') notes+=`<div class="d-note out"><b>Withdrawn. Do not use.</b> Destroy or mark any printed copy. Take the current document from SCORE.</div>`;
-  else if(d.status==='superseded') notes+=`<div class="d-note out"><b>Superseded by ${esc(d.supersededBy||'a later revision')}.</b> Use the current revision from SCORE.</div>`;
-  else if(d.status==='draft') notes+=`<div class="d-note"><b>Draft.</b> Approval is not complete, so this carries no authority.</div>`;
-  else if(A.overdue(d)) notes+=`<div class="d-note"><b>Review overdue by ${Math.abs(days)} days.</b> The content stays in force until it is withdrawn, but nobody has confirmed it is still suitable. API Q2 §4.4.3 c).</div>`;
-  if(d.numberStatus==='provisional') notes+=`<div class="d-note"><b>Provisional number.</b> ${esc(A.numberNote(d)||'')}</div>`;
-  document.getElementById('d-body').innerHTML = notes +
-    '<div class="d-sect">Identification</div>'+
-    row('Type',esc(t.label))+
-    row('Segment',esc(s.name)+' · '+esc(s.spl))+
-    row('Language', d.language==='ar'?'العربية':'English')+
-    (d.translationOf?row('Translation of',esc(d.translationOf),'API Q2 §4.4.3',true):'')+
-    '<div class="d-sect">Revision and approval</div>'+
-    row('Revision',esc(d.revision),'API Q2 §4.4.3 d)',true)+
-    row('Issued',fmt(d.issueDate),null,true)+
-    row('Approved',fmt(d.approvedDate),'API Q2 §4.4.3 b)',true)+
-    row('Supersedes',esc(d.supersedes),null,true)+
-    '<div class="d-sect">Authority</div>'+
-    row('Document owner',esc(A.owner(d)),'API Q2 §4.4.3 a), role')+
-    row('Approval authority',esc(A.approver(d)),'API Q2 §4.4.3 a), role')+
-    '<div class="d-sect">Review, protection and retention</div>'+
-    row('Review cycle',A.cycle(d)?A.cycle(d)+' months':null,'API Q2 §4.4.3 c)')+
-    row('Review due', withdrawn?'Not applicable':fmt(d.nextReviewDate),null,true)+
-    row('Classification',esc((d.classification||'').toUpperCase()),'ISO 9001 §7.5.3.1 b)')+
-    row('Retention',A.retention(d)?A.retention(d)+' years':null,'API Q2 §4.5')+
-    row('Status',STATUS[d.status]||d.status,'API Q2 §4.4.3');
+  if(d.status==='obsolete')notes+='<div class="dw-note out"><b>Withdrawn. Do not use.</b> Destroy or mark any printed copy. Take the current document from SCORE.</div>';
+  else if(d.status==='superseded')notes+=`<div class="dw-note out"><b>Superseded by ${esc(d.supersededBy||'a later revision')}.</b> Use the current revision from SCORE.</div>`;
+  else if(d.status==='draft')notes+='<div class="dw-note"><b>Draft.</b> Approval is not complete, so this carries no authority.</div>';
+  else if(A.overdue(d))notes+=`<div class="dw-note"><b>Review overdue by ${Math.abs(n)} days.</b> It stays in force until withdrawn, but nobody has confirmed it is still suitable.</div>`;
+  if(d.numberStatus==='provisional')notes+=`<div class="dw-note"><b>Provisional number.</b> ${esc(A.numberNote(d)||'')}</div>`;
+  document.getElementById('dw-body').innerHTML = notes +
+    '<div class="dw-s">Identification</div>'+
+    dwRow('Type',esc(t.label))+dwRow('Segment',esc(s.name)+', '+esc(s.spl))+
+    dwRow('Language',d.language==='ar'?'العربية':'English')+
+    (d.translationOf?dwRow('Translation of',esc(d.translationOf),'API Q2 4.4.3',true):'')+
+    '<div class="dw-s">Revision and approval</div>'+
+    dwRow('Revision',esc(d.revision),'API Q2 4.4.3 d',true)+
+    dwRow('Issued',fmt(d.issueDate),null,true)+
+    dwRow('Approved',fmt(d.approvedDate),'API Q2 4.4.3 b',true)+
+    dwRow('Supersedes',esc(d.supersedes),null,true)+
+    '<div class="dw-s">Authority</div>'+
+    dwRow('Owner',esc(A.owner(d)),'API Q2 4.4.3 a, role')+
+    dwRow('Approval authority',esc(A.approver(d)),'API Q2 4.4.3 a, role')+
+    '<div class="dw-s">Review, protection, retention</div>'+
+    dwRow('Review cycle',A.cycle(d)?A.cycle(d)+' months':null,'API Q2 4.4.3 c')+
+    dwRow('Review due',gone?'Not applicable':fmt(d.nextReviewDate),null,true)+
+    dwRow('Classification',esc((d.classification||'').toUpperCase()),'ISO 9001 7.5.3.1 b')+
+    dwRow('Retention',A.retention(d)?A.retention(d)+' years':null,'API Q2 4.5')+
+    dwRow('Status',LABEL[d.status]||d.status,'API Q2 4.4.3');
   const url=A.scoreUrl(d), open='viewer.html?doc='+encodeURIComponent(d.docNumber||'')+'&seg='+encodeURIComponent(d.segment)+'&type='+encodeURIComponent(d.docType)+'&title='+encodeURIComponent(d.title);
-  document.getElementById('d-foot').innerHTML =
-    `<a class="btn" href="${esc(open)}" style="flex:1;justify-content:center;">Open the document</a>`+
-    (url?`<a class="btn" href="${esc(url)}" rel="noopener" style="flex:1;justify-content:center;">View master in SCORE</a>`:'');
+  document.getElementById('dw-foot').innerHTML=
+    `<a class="btn" href="${esc(open)}">Open document</a>`+(url?`<a class="btn" href="${esc(url)}" rel="noopener">Master in SCORE</a>`:'');
   document.getElementById('scrim').classList.add('open');
-  const dw=document.getElementById('drawer');
-  dw.classList.add('open'); dw.setAttribute('aria-hidden','false');
-  dw.querySelector('.btn').focus();
+  const w=document.getElementById('dw');
+  w.classList.add('open'); w.setAttribute('aria-hidden','false');
+  w.querySelector('.btn').focus();
   render();
 }
 function closeDetail(){
   selected=null;
   document.getElementById('scrim').classList.remove('open');
-  const dw=document.getElementById('drawer');
-  dw.classList.remove('open'); dw.setAttribute('aria-hidden','true');
+  const w=document.getElementById('dw');
+  w.classList.remove('open'); w.setAttribute('aria-hidden','true');
   if(lastFocus&&lastFocus.focus)lastFocus.focus();
   render();
 }
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('drawer').classList.contains('open'))closeDetail();});
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  if(document.getElementById('dw').classList.contains('open'))closeDetail();
+  else if(popOpen)togglePop();
+});
 
 function exportCsv(){
   if(!TAQA_ROLE.can('export',role()))return;
@@ -566,11 +542,9 @@ function exportCsv(){
   a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
 }
 
-renderRole();
-readUrl();
-if(quick){const s=SUMS.find(x=>x.k===quick); if(s&&s.control&&!TAQA_ROLES[role()].controlPanel)quick=null;}
-renderSummary();
-render();
+renderRole(); readUrl();
+if(quick){const c=CT.find(x=>x.k===quick); if(c&&c.control&&!TAQA_ROLES[role()].controlPanel)quick=null;}
+renderCounts(); render();
 </script>
 </body>
 </html>

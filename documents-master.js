@@ -1,18 +1,18 @@
-// TAQA Knowledge Hub: Master Document List (TQ-QHSE-S001 §5.1)
+// TAQA Knowledge Hub: Master Document List (TQ-QHSE-S001 5.1)
 // Single source of truth for every controlled document in the Hub.
 //
 // PROTOTYPE DATA. The control metadata is generated deterministically to
 // demonstrate the record structure. THE SCHEMA IS THE DELIVERABLE. It is the
 // contract the backend must satisfy. Every field maps to a clause:
 //
-//   docNumber / legacyId / title / segment   TQ-QHSE-S001 §5.3 · ISO 9001 §7.5.2 a)
-//   revision / issueDate                     API Q2 §4.4.3 d)
-//   approvedDate + type.owner/approver       API Q2 §4.4.3 a) b), roles not names
-//   nextReviewDate + type.reviewCycleMonths  API Q2 §4.4.3 c)
-//   status / supersedes / supersededBy       API Q2 §4.4.3 obsolete control
-//   classification                           ISO 9001 §7.5.3.1 b)
-//   type.retentionYears = 10                 API Q2 §4.5 (3rd Edition, not 5)
-//   language / translationOf                 API Q2 §4.4.3 translations
+//   docNumber / legacyId / title / segment   TQ-QHSE-S001 5.3 · ISO 9001 7.5.2 a)
+//   revision / issueDate                     API Q2 4.4.3 d)
+//   approvedDate + type.owner/approver       API Q2 4.4.3 a) b), roles not names
+//   nextReviewDate + type.reviewCycleMonths  API Q2 4.4.3 c)
+//   status / supersedes / supersededBy       API Q2 4.4.3 obsolete control
+//   classification                           ISO 9001 7.5.3.1 b)
+//   type.retentionYears = 10                 API Q2 4.5 (3rd Edition, not 5)
+//   language / translationOf                 API Q2 4.4.3 translations
 //   scoreUrl (derived)                       SCORE is master; the Hub distributes
 //
 // numberStatus 'provisional' marks a document that CANNOT be numbered
@@ -115,7 +115,7 @@ const TAQA_DOC_LOOKUPS = {
       "splName": "Cybersecurity",
       "bu": null,
       "provisional": true,
-      "note": "No short form assigned in TQ-QHSE-S001 §5.3. \"CYB\" is provisional pending QHSE assignment. Note \"CS\" is already assigned to Customer Service."
+      "note": "No short form assigned in TQ-QHSE-S001 5.3. \"CYB\" is provisional pending QHSE assignment. Note \"CS\" is already assigned to Customer Service."
     }
   },
   "types": {
@@ -161,7 +161,7 @@ const TAQA_DOC_LOOKUPS = {
       "controlled": true,
       "retentionYears": 10,
       "provisional": true,
-      "note": "Document type not defined in TQ-QHSE-S001 §4. \"ALT\" is provisional pending QHSE assignment."
+      "note": "Document type not defined in TQ-QHSE-S001 4. \"ALT\" is provisional pending QHSE assignment."
     },
     "lesson": {
       "label": "Lesson Learned",
@@ -172,7 +172,7 @@ const TAQA_DOC_LOOKUPS = {
       "controlled": true,
       "retentionYears": 10,
       "provisional": true,
-      "note": "Document type not defined in TQ-QHSE-S001 §4. \"LL\" is provisional pending QHSE assignment."
+      "note": "Document type not defined in TQ-QHSE-S001 4. \"LL\" is provisional pending QHSE assignment."
     },
     "software": {
       "label": "Software / Tool",
@@ -766,17 +766,17 @@ const TAQA_DOC = {
   seg:        d => TAQA_DOC_LOOKUPS.segments[d.segment] || {},
   type:       d => TAQA_DOC_LOOKUPS.types[d.docType] || {},
   controlled: d => TAQA_DOC.type(d).controlled !== false,
-  owner:      d => TAQA_DOC.type(d).owner || '—',
-  approver:   d => d.translationOf ? 'Translation verified by: ' + (TAQA_DOC.type(d).approver||'—')
-                                   : (TAQA_DOC.type(d).approver || '—'),
+  owner:      d => TAQA_DOC.type(d).owner || ',',
+  approver:   d => d.translationOf ? 'Translation verified by: ' + (TAQA_DOC.type(d).approver||',')
+                                   : (TAQA_DOC.type(d).approver || ','),
   retention:  d => TAQA_DOC.type(d).retentionYears,
   cycle:      d => TAQA_DOC.type(d).reviewCycleMonths,
   scoreUrl:   d => d.docNumber ? 'https://score.taqa.com.sa/library/' + d.docNumber : null,
-  // API Q2 §4.4.3 c): days until the periodic review falls due (negative means overdue)
+  // API Q2 4.4.3 c): days until the periodic review falls due (negative means overdue)
   reviewDays: d => d.nextReviewDate
                    ? Math.round((new Date(d.nextReviewDate) - new Date()) / 86400000) : null,
   overdue:    d => d.status !== 'obsolete' && d.status !== 'superseded' && !!d.reviewOverdue,
-  // API Q2 §4.4.3: obsolete documents must not be used at point of use
+  // API Q2 4.4.3: obsolete documents must not be used at point of use
   usable:     d => d.status === 'current' || d.status === 'under-review',
   numberNote: d => {
     const n = []; const s = TAQA_DOC.seg(d), t = TAQA_DOC.type(d);

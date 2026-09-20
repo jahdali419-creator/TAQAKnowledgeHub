@@ -1,18 +1,18 @@
 /**
- * TAQA KnowledgeHub — Frontend Fixes v1.0
+ * TAQA KnowledgeHub, Frontend Fixes v1.0
  * Covers all 10 frontend improvements agreed with Claude.
  * One file. Drop into repo. Add script tag to 4 pages.
  *
- * FIX 1  — Upload: file size contradiction (50MB vs 500MB)
- * FIX 2  — Upload: auto-fill Submitted By from login (M365-ready stub)
- * FIX 3  — Upload: approval workflow text matches 11-director reality
- * FIX 4  — AI Search: permanent safety disclaimer
- * FIX 5  — AI Search: segment filter chips actually filter instant results
- * FIX 6  — Dashboard: Reject requires a reason (modal + reason stored)
- * FIX 7  — Dashboard: Remove button requires confirmation (two-click)
- * FIX 8  — Dashboard: Delegate Approvals full UI
- * FIX 9  — Glossary: submitted terms flagged Pending Review
- * FIX 10 — Support ticket: proper reference number generation
+ * FIX 1, Upload: file size contradiction (50MB vs 500MB)
+ * FIX 2, Upload: auto-fill Submitted By from login (M365-ready stub)
+ * FIX 3, Upload: approval workflow text matches 11-director reality
+ * FIX 4, AI Search: permanent safety disclaimer
+ * FIX 5, AI Search: segment filter chips actually filter instant results
+ * FIX 6, Dashboard: Reject requires a reason (modal + reason stored)
+ * FIX 7, Dashboard: Remove button requires confirmation (two-click)
+ * FIX 8, Dashboard: Delegate Approvals full UI
+ * FIX 9, Glossary: submitted terms flagged Pending Review
+ * FIX 10, Support ticket: proper reference number generation
  */
 
 (function () {
@@ -37,7 +37,7 @@
   }
 
   // ─────────────────────────────────────────────────────────
-  // FIX 1 + 3 — UPLOAD PAGE
+  // FIX 1 + 3, UPLOAD PAGE
   // ─────────────────────────────────────────────────────────
 
   if (page === 'upload.html') {
@@ -69,10 +69,10 @@
       }
       fixTextNodes(document.body);
 
-      // FIX 2: Auto-fill Submitted By — stub ready for M365 MSAL
+      // FIX 2: Auto-fill Submitted By, stub ready for M365 MSAL
       // When Microsoft login is connected, replace getLoggedInUser() with real MSAL call
       function getLoggedInUser() {
-        // STUB — replace with: msalInstance.getAllAccounts()[0]
+        // STUB, replace with: msalInstance.getAllAccounts()[0]
         // Returns null if not logged in (no change to form)
         try {
           const stored = sessionStorage.getItem('taqa_user');
@@ -96,7 +96,7 @@
         }
       }
 
-      // FIX 3: Fix approval workflow text — replace "Knowledge Team Lead" with reality
+      // FIX 3: Fix approval workflow text, replace "Knowledge Team Lead" with reality
       document.querySelectorAll('p, span, div, li').forEach(el => {
         if (el.children.length === 0 && el.textContent.includes('Knowledge Team Lead')) {
           el.textContent = el.textContent
@@ -115,7 +115,7 @@
   }
 
   // ─────────────────────────────────────────────────────────
-  // FIX 4 + 5 — AI SEARCH PAGE
+  // FIX 4 + 5, AI SEARCH PAGE
   // ─────────────────────────────────────────────────────────
 
   if (page === 'ai-search.html') {
@@ -154,7 +154,7 @@
 
     document.addEventListener('DOMContentLoaded', function () {
 
-      // FIX 4: Safety disclaimer — insert above search area
+      // FIX 4: Safety disclaimer, insert above search area
       const banner = document.createElement('div');
       banner.className = 'ai-safety-banner';
       banner.innerHTML = `
@@ -183,7 +183,7 @@
           const chipText = (this.textContent || '').trim().toLowerCase();
           activeSegment = chipText === 'all' ? 'all' : chipText;
 
-          // Visual update — add our active class
+          // Visual update, add our active class
           document.querySelectorAll('.seg-chip, [class*="seg-filter"], [class*="filter-chip"]')
             .forEach(c => c.classList.remove('seg-chip-active-real'));
           this.classList.add('seg-chip-active-real');
@@ -239,7 +239,7 @@
   }
 
   // ─────────────────────────────────────────────────────────
-  // FIX 6 + 7 + 8 — DASHBOARD PAGE
+  // FIX 6 + 7 + 8, DASHBOARD PAGE
   // ─────────────────────────────────────────────────────────
 
   if (page === 'dashboard.html') {
@@ -431,7 +431,7 @@
           <p id="reject-modal-doc-name" style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px;font-style:italic;"></p>
           <p>Provide a clear reason so the submitter knows exactly what to fix before resubmitting.</p>
           <textarea class="reject-reason-input" id="reject-reason-input"
-            placeholder="e.g. Section 4.2 is incomplete — scope of application missing. Please revise and resubmit."
+            placeholder="e.g. Section 4.2 is incomplete, scope of application missing. Please revise and resubmit."
             maxlength="500"></textarea>
           <div class="reject-char-hint"><span id="reject-char-count">0</span> / 500 characters (minimum 20 required)</div>
           <div class="reject-modal-actions">
@@ -474,7 +474,7 @@
         if (badge) { badge.textContent = 'Rejected'; badge.className = 'pending-status-badge badge-rejected'; }
         const actions = rejectTargetCard.querySelector('.pending-actions');
         if (actions) {
-          actions.innerHTML = `<span style="font-size:12px;color:#ef4444;font-weight:600;">✕ Rejected — reason sent to submitter</span>`;
+          actions.innerHTML = `<span style="font-size:12px;color:#ef4444;font-weight:600;">✕ Rejected, reason sent to submitter</span>`;
         }
 
         // Add reason to card
@@ -497,7 +497,7 @@
         rejectCount.textContent = '0';
         rejectConfirm.disabled = true;
 
-        showToast('✕ Document rejected — reason sent to submitter');
+        showToast('✕ Document rejected, reason sent to submitter');
 
         setTimeout(() => {
           if (rejectTargetCard) {
@@ -622,13 +622,13 @@
           </div>
 
           <div class="delegate-active-banner" id="delegate-active-banner">
-            Currently delegating to: <strong id="delegate-current-name">—</strong>
-            (<span id="delegate-current-email">—</span>)<br>
-            <span style="font-size:11.5px;opacity:0.7;">Set on <span id="delegate-set-date">—</span></span>
+            Currently delegating to: <strong id="delegate-current-name">,</strong>
+            (<span id="delegate-current-email">,</span>)<br>
+            <span style="font-size:11.5px;opacity:0.7;">Set on <span id="delegate-set-date">,</span></span>
           </div>
 
           <div class="delegate-scope-note">
-            ⚠️ The delegate will only be notified — they cannot permanently publish or remove documents.
+            ⚠️ The delegate will only be notified, they cannot permanently publish or remove documents.
             Final authority remains with you. You will receive a copy of all delegate actions.
           </div>
 
@@ -747,7 +747,7 @@
         clearDelegation();
         updateDelegateUI();
         delegateOverlay.classList.remove('open');
-        showToast('Delegation removed — you are the sole approver again');
+        showToast('Delegation removed, you are the sole approver again');
       });
 
       document.getElementById('delegate-modal-save').addEventListener('click', () => {
@@ -776,7 +776,7 @@
 
         updateDelegateUI();
         delegateOverlay.classList.remove('open');
-        showToast('✓ Delegation saved — ' + name + ' will receive approval requests');
+        showToast('✓ Delegation saved, ' + name + ' will receive approval requests');
       });
 
       delegateOverlay.addEventListener('click', e => {
@@ -790,7 +790,7 @@
   }
 
   // ─────────────────────────────────────────────────────────
-  // FIX 9 — GLOSSARY PAGE
+  // FIX 9, GLOSSARY PAGE
   // ─────────────────────────────────────────────────────────
 
   if (page === 'glossary.html') {
@@ -848,7 +848,7 @@
               newest.appendChild(notice);
             }
 
-            showToast('Term submitted — pending review before going live');
+            showToast('Term submitted, pending review before going live');
           }, 300);
         });
       }
@@ -859,7 +859,7 @@
   }
 
   // ─────────────────────────────────────────────────────────
-  // FIX 10 — SUPPORT TICKET REFERENCE NUMBER
+  // FIX 10, SUPPORT TICKET REFERENCE NUMBER
   // ─────────────────────────────────────────────────────────
 
   if (page === 'support-ticket.html') {
