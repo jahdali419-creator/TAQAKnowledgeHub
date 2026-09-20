@@ -295,6 +295,32 @@ Object.keys(L.types).forEach(k=>ft.insertAdjacentHTML('beforeend',`<option value
 
 let quick=null;   // active stat-tile filter
 let limit=250;    // rows rendered; raised by the Show all control, never silently truncating
+
+// ── Shareable views ───────────────────────────────────────────────────────
+// A filtered register is something a controller sends to an auditor or an owner,
+// so the filter state lives in the URL rather than only in the page.
+const FIELDS = {q:'q', seg:'f-seg', type:'f-type', status:'f-status', cls:'f-cls', lang:'f-lang'};
+function readUrl(){
+  const u = new URLSearchParams(location.search);
+  for (const [key,id] of Object.entries(FIELDS)) {
+    const v = u.get(key); if (v == null) continue;
+    const el = document.getElementById(id); if (!el) continue;
+    if (el.tagName === 'SELECT' && !Array.from(el.options).some(o => o.value === v)) continue;
+    el.value = v;
+  }
+  const qk = u.get('view');
+  if (qk && TILES.some(t => t.k === qk)) quick = qk;
+}
+function writeUrl(){
+  const u = new URLSearchParams();
+  for (const [key,id] of Object.entries(FIELDS)) {
+    const el = document.getElementById(id);
+    if (el && el.value) u.set(key, el.value);
+  }
+  if (quick) u.set('view', quick);
+  const qs = u.toString();
+  history.replaceState(null, '', qs ? location.pathname + '?' + qs : location.pathname);
+}
 const TILES=[
   {k:'controlled',c:'#005D63',l:'Controlled documents',cl:'TQ-QHSE-S001 §5.1',f:d=>A.controlled(d)},
   {k:'current',c:'#0f9d58',l:'Current revision',cl:'API Q2 §4.4.3 d)',f:d=>d.status==='current'},
@@ -346,6 +372,7 @@ function current(){
 }
 
 function render(){
+  writeUrl();
   const rows=current();
   document.getElementById('count').textContent=rows.length+' of '+D.length+' documents';
   document.getElementById('empty').style.display=rows.length?'none':'block';
@@ -404,6 +431,8 @@ document.getElementById('legend').innerHTML=[
  {t:'Register export',c:'TQ-QHSE-S001 §5.1',p:'The list exports as TQ-QHSE-F086 so the controller can hand an auditor the register without a screenshot.'}
 ].map(i=>`<div class="lgi${i.gap?' gap':''}"><b>${esc(i.t)}</b><code>${esc(i.c)}</code><p>${esc(i.p)}${i.g?' <b style="color:var(--accent);display:inline;">Gap: </b>'+esc(i.g):''}</p></div>`).join('');
 
+readUrl();
+document.querySelectorAll('.tile').forEach(e=>e.classList.toggle('on',e.dataset.k===quick));
 render();
 </script>
 </body>
