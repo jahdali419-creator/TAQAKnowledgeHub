@@ -1022,6 +1022,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
       </div>
     </li>
     <li><a href="ai-search.html">Document Search</a></li>
+    <li><a href="master-list.html">Master List</a></li>
     <li><a href="glossary.html">Field Glossary</a></li>
     <li><a href="upload.html">Upload</a></li>
     <li><a href="support-ticket.html">Ask Expert</a></li>
@@ -1649,8 +1650,12 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
 // ── Animated Counters ──
 function animateCounter(el, target, delay) {
-  const suffix = el.dataset.suffix || (target >= 1000 ? '+' : '');
   setTimeout(() => {
+    // Re-read the target here. The document counts are synced from
+    // segments-data.js at the end of the document; reading at observer-fire
+    // time raced that sync and could animate to the stale hardcoded value.
+    target = parseInt(el.dataset.target, 10) || 0;
+    const suffix = el.dataset.suffix || (target >= 1000 ? '+' : '');
     let start = 0;
     const step = ts => {
       if (!start) start = ts;
