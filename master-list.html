@@ -47,7 +47,21 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .btn{padding:8px 15px;border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text-muted);font-family:inherit;transition:all .2s;}
 .btn:hover{border-color:rgba(0,93,99,.35);color:var(--primary);}
 .btn-solid{background:var(--gradient);color:#fff;border:none;}
-.nav-role-badge{font-size:11px;font-weight:700;padding:5px 11px;border-radius:20px;background:rgba(0,187,182,.1);border:1px solid rgba(0,187,182,.25);color:var(--primary);}
+.role-pick{display:flex;align-items:center;gap:7px;border:1px solid rgba(0,187,182,.3);background:rgba(0,187,182,.08);
+  border-radius:20px;padding:3px 5px 3px 12px;}
+.role-pick-tag{font-size:9.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--primary);}
+#role-select{border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:700;
+  color:var(--primary);cursor:pointer;outline:none;padding:4px 2px;}
+html[data-theme="dark"] .role-pick{border-color:rgba(0,187,182,.28);background:rgba(0,187,182,.1);}
+html[data-theme="dark"] .role-pick-tag,html[data-theme="dark"] #role-select{color:var(--primary-light);}
+html[data-theme="dark"] #role-select option{background:#19263a;}
+
+/* Role explainer */
+.rolebar{display:flex;gap:12px;align-items:flex-start;background:rgba(0,93,99,.05);border:1px solid rgba(0,93,99,.16);
+  border-left:3px solid var(--primary);border-radius:11px;padding:13px 18px;margin-bottom:22px;}
+.rolebar b{font-size:12.5px;display:block;margin-bottom:2px;color:var(--primary);}
+.rolebar span{font-size:12.5px;color:var(--text-muted);line-height:1.6;}
+html[data-theme="dark"] .rolebar b{color:var(--primary-light);}
 
 /* Layout */
 .outer{margin-top:68px;padding:26px 48px 70px;max-width:1680px;width:100%;margin-left:auto;margin-right:auto;}
@@ -184,12 +198,15 @@ html[data-theme="dark"] .search input{color:#dde4ef;}
     <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" aria-label="Toggle dark mode">
       <svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>
     </button>
-    <button class="btn" onclick="exportCsv()">
+    <button class="btn" id="export-btn" onclick="exportCsv()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Export register
     </button>
     <a href="dashboard.html" class="btn">Dashboard</a>
-    <span class="nav-role-badge">Document Controller</span>
+    <label class="role-pick" title="Demonstration only — not a security control">
+      <span class="role-pick-tag">Viewing as</span>
+      <select id="role-select" onchange="setRole(this.value)"></select>
+    </label>
   </div>
 </nav>
 
@@ -212,6 +229,7 @@ html[data-theme="dark"] .search input{color:#dde4ef;}
     </div>
   </div>
 
+  <div class="rolebar" id="rolebar"></div>
   <div class="tiles" id="tiles"></div>
 
   <div class="card">
@@ -276,6 +294,7 @@ html[data-theme="dark"] .search input{color:#dde4ef;}
 
 </div></div>
 
+<script src="roles.js"></script>
 <script src="documents-master.js"></script>
 <script>
 const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
@@ -324,15 +343,52 @@ function writeUrl(){
 const TILES=[
   {k:'controlled',c:'#005D63',l:'Controlled documents',cl:'TQ-QHSE-S001 §5.1',f:d=>A.controlled(d)},
   {k:'current',c:'#0f9d58',l:'Current revision',cl:'API Q2 §4.4.3 d)',f:d=>d.status==='current'},
-  {k:'overdue',c:'#f59e0b',l:'Review overdue',cl:'API Q2 §4.4.3 c)',f:d=>A.overdue(d)},
+  {k:'overdue',c:'#f59e0b',l:'Review overdue',cl:'API Q2 §4.4.3 c)',f:d=>A.overdue(d),control:true},
   {k:'obsolete',c:'#ef4444',l:'Obsolete / superseded',cl:'API Q2 §4.4.3',f:d=>d.status==='obsolete'||d.status==='superseded'},
-  {k:'provisional',c:'#FD691D',l:'Non-conformant number',cl:'TQ-QHSE-S001 §5.3',f:d=>d.numberStatus==='provisional'},
+  {k:'provisional',c:'#FD691D',l:'Non-conformant number',cl:'TQ-QHSE-S001 §5.3',f:d=>d.numberStatus==='provisional',control:true},
   {k:'ar',c:'#00BBB6',l:'Arabic translations',cl:'API Q2 §4.4.3',f:d=>!!d.translationOf}
 ];
-document.getElementById('tiles').innerHTML=TILES.map(t=>
-  `<div class="tile clickable" style="--c:${t.c}" data-k="${t.k}" onclick="quickFilter('${t.k}')">
-     <div class="tile-n">${D.filter(t.f).length}</div>
-     <div class="tile-l">${t.l}</div><div class="tile-c">${t.cl}</div></div>`).join('');
+// ── Role gating ───────────────────────────────────────────────────────────
+// Demonstration only. The real control is server-side: see roles.js.
+function role(){ return TAQA_ROLE.current(); }
+function visible(){ return D.filter(d=>TAQA_ROLE.canSee(d, role())); }
+
+function renderRoleBar(){
+  const k=role(), R=TAQA_ROLES[k];
+  const sel=document.getElementById('role-select');
+  if(!sel.options.length){
+    TAQA_ROLE_ORDER.forEach(r=>sel.insertAdjacentHTML('beforeend',
+      `<option value="${r}">${esc(TAQA_ROLES[r].label)}</option>`));
+  }
+  sel.value=k;
+  const hidden=D.length-visible().length;
+  document.getElementById('rolebar').innerHTML =
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;color:var(--primary);"><path d="M12 2l8 4v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V6l8-4z"/></svg>' +
+    '<div><b>Viewing as ' + esc(R.label) + ' — demonstration, not a security control</b>' +
+    '<span>' + esc(R.blurb) + (hidden>0 ? ' <b style="display:inline;">' + hidden + ' document' + (hidden===1?'':'s') + ' hidden from this role.</b>' : '') +
+    ' Role switching here runs in the browser and proves nothing about access. ' +
+    'The back end must apply the same matrix server-side — Entra ID group → SSO claim → per-record authorization.</span></div>';
+  // Control functions
+  document.getElementById('export-btn').style.display = TAQA_ROLE.can('export',k) ? '' : 'none';
+  const draftOpt=document.querySelector('#f-status option[value="draft"]');
+  if(draftOpt) draftOpt.hidden = !TAQA_ROLES[k].statuses.includes('draft');
+}
+
+function renderTiles(){
+  const k=role(), ctrl=TAQA_ROLES[k].controlPanel, rows=visible();
+  document.getElementById('tiles').innerHTML=TILES.filter(t=>ctrl||!t.control).map(t=>{
+    const n=(t.control? rows.filter(d=>t.f(d)&&TAQA_ROLE.inControlScope(d,k)) : rows.filter(t.f)).length;
+    return `<div class="tile clickable" style="--c:${t.c}" data-k="${t.k}" onclick="quickFilter('${t.k}')">
+     <div class="tile-n">${n}</div>
+     <div class="tile-l">${t.l}</div><div class="tile-c">${t.cl}</div></div>`;}).join('');
+  document.querySelectorAll('.tile').forEach(e=>e.classList.toggle('on',e.dataset.k===quick));
+}
+
+function setRole(r){
+  TAQA_ROLE.set(r);
+  if(quick){ const t=TILES.find(x=>x.k===quick); if(t&&t.control&&!TAQA_ROLES[r].controlPanel) quick=null; }
+  limit=250; renderRoleBar(); renderTiles(); render();
+}
 function quickFilter(k){
   quick = quick===k ? null : k; limit=250;
   document.querySelectorAll('.tile').forEach(e=>e.classList.toggle('on',e.dataset.k===quick));
@@ -358,8 +414,10 @@ function current(){
   const st=document.getElementById('f-status').value, cl=document.getElementById('f-cls').value;
   const lg=document.getElementById('f-lang').value;
   const qt=quick?TILES.find(t=>t.k===quick):null;
-  return D.filter(d=>{
+  const k=role();
+  return visible().filter(d=>{
     if(qt&&!qt.f(d))return false;
+    if(qt&&qt.control&&!TAQA_ROLE.inControlScope(d,k))return false;
     if(seg&&d.segment!==seg)return false;
     if(typ&&d.docType!==typ)return false;
     if(st&&d.status!==st)return false;
@@ -374,7 +432,7 @@ function current(){
 function render(){
   writeUrl();
   const rows=current();
-  document.getElementById('count').textContent=rows.length+' of '+D.length+' documents';
+  document.getElementById('count').textContent=rows.length+' of '+visible().length+' documents';
   document.getElementById('empty').style.display=rows.length?'none':'block';
   const prov=rows.filter(d=>d.numberStatus==='provisional').length;
   document.getElementById('footnote').innerHTML = prov
@@ -405,6 +463,7 @@ function render(){
 }
 
 function exportCsv(){
+  if(!TAQA_ROLE.can('export',role())) return;   // server must enforce this too
   const rows=current();
   const head=['Document Number','Legacy ID','Title','Type','Segment','SPL','Revision','Issued','Approved','Owner Role','Approver Role','Review Cycle (months)','Next Review','Overdue','Status','Supersedes','Superseded By','Classification','Retention (years)','Language','Translation Of','Number Status','SCORE URL'];
   const cell=v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`;
@@ -431,8 +490,10 @@ document.getElementById('legend').innerHTML=[
  {t:'Register export',c:'TQ-QHSE-S001 §5.1',p:'The list exports as TQ-QHSE-F086 so the controller can hand an auditor the register without a screenshot.'}
 ].map(i=>`<div class="lgi${i.gap?' gap':''}"><b>${esc(i.t)}</b><code>${esc(i.c)}</code><p>${esc(i.p)}${i.g?' <b style="color:var(--accent);display:inline;">Gap: </b>'+esc(i.g):''}</p></div>`).join('');
 
+renderRoleBar();
 readUrl();
-document.querySelectorAll('.tile').forEach(e=>e.classList.toggle('on',e.dataset.k===quick));
+if(quick){ const t=TILES.find(x=>x.k===quick); if(t&&t.control&&!TAQA_ROLES[role()].controlPanel) quick=null; }
+renderTiles();
 render();
 </script>
 </body>

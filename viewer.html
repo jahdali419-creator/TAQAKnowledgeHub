@@ -490,6 +490,7 @@ html[data-theme="dark"] .rev-row.rev-current .rev-dot{background:#818cf8;}
 <footer style="height:4px;position:relative;margin-top:auto;"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:#005D63;"></div></footer>
 </div>
 
+<script src="roles.js"></script>
 <script src="documents-master.js"></script>
 <script src="segments-data.js"></script>
 <script>
@@ -596,7 +597,31 @@ function cell(label, value, clause, extraCls){
     (clause ? '<div class="meta-clause">' + clause + '</div>' : '') + '</div>';
 }
 
-if (_rec) {
+// Role check. Demonstration only — the back end must refuse to RETURN a record
+// the caller may not see, rather than relying on the page to hide it. roles.js.
+const _roleKey = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE.current() : null;
+const _denied = _rec && _roleKey && !TAQA_ROLE.canSee(_rec, _roleKey);
+
+if (_denied) {
+  const R = TAQA_ROLES[_roleKey];
+  const reason = _rec.status === 'draft'
+    ? 'This document is a draft. It has not completed approval, carries no authority, and is visible only to its owner and the QMS function. API Q2 §4.4.3 b).'
+    : 'This document is classified ' + String(_rec.classification).toUpperCase() +
+      '. Your role (' + R.label + ') has access to ' + R.classifications.join(', ') + ' documents. ISO 9001 §7.5.3.1 b).';
+  document.getElementById('meta-grid').innerHTML =
+    cell('Document number', _rec.docNumber, 'TQ-QHSE-S001 §5.3') +
+    cell('Status', 'Not available to your role', null, 'wide');
+  document.getElementById('lifecycle-banner').innerHTML =
+    '<div class="lcb lcb-obsolete"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
+    '<div><b>Access restricted</b><span class="n">' + reason +
+    ' If you need it, request access through the QMS function. <a href="master-list.html">Back to the register</a>.</span></div></div>';
+  ['dl-btn','pin-btn','qref-open-btn','print-btn','bm-doc-btn'].forEach(function(id){
+    var el=document.getElementById(id); if(!el) return;
+    el.style.opacity='0.45'; el.style.pointerEvents='none'; el.setAttribute('aria-disabled','true');
+  });
+  var _sm=document.getElementById('doc-summary'); if(_sm) _sm.textContent='Not available to your role.';
+  var _sc=document.getElementById('doc-scope');   if(_sc) _sc.textContent='Not available to your role.';
+} else if (_rec) {
   const t = MA.type(_rec), days = MA.reviewDays(_rec);
   const withdrawn = _rec.status === 'obsolete' || _rec.status === 'superseded';
   // A withdrawn document has no live review obligation — showing a future date
