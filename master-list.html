@@ -453,7 +453,7 @@ Object.keys(L.segments).sort((a,b)=>L.segments[a].name.localeCompare(L.segments[
   .forEach(k=>fs.insertAdjacentHTML('beforeend',`<option value="${k}">${esc(L.segments[k].name)}</option>`));
 Object.keys(L.types).forEach(k=>ft.insertAdjacentHTML('beforeend',`<option value="${k}">${esc(L.types[k].label)}</option>`));
 
-let quick=null, limit=250, selected=null;
+let quick=null, limit=250, selected=null, view='reg';
 const CT=[
   {k:'controlled', l:'Controlled',   f:d=>A.controlled(d)},
   {k:'current',    l:'Current',      f:d=>d.status==='current'},
@@ -473,11 +473,13 @@ function readUrl(){
     el.value=v;
   }
   const k=u.get('view'); if(k&&CT.some(c=>c.k===k))quick=k;
+  if(u.get('tab')==='con')view='con';
 }
 function writeUrl(){
   const u=new URLSearchParams();
   for(const [key,id] of Object.entries(F)){const el=document.getElementById(id); if(el&&el.value)u.set(key,el.value);}
   if(quick)u.set('view',quick);
+  if(view==='con')u.set('tab','con');
   const qs=u.toString();
   history.replaceState(null,'',qs?location.pathname+'?'+qs:location.pathname);
 }
@@ -809,7 +811,6 @@ function scorecard(){
     `<span><b>${c('qhse')}</b> blocked until QHSE decides</span>`;
 }
 
-let view='reg';
 function showView(v){
   view=v;
   document.getElementById('view-reg').hidden=v!=='reg';
@@ -823,6 +824,7 @@ function drawCharts(){chartMix();chartAge();chartSeg();scorecard();}
 renderRole(); readUrl();
 if(quick){const c=CT.find(x=>x.k===quick); if(c&&c.control&&!TAQA_ROLES[role()].controlPanel)quick=null;}
 renderCounts(); render();
+if(view==='con')showView('con');
 </script>
 </body>
 </html>

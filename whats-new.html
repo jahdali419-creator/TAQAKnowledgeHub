@@ -1,202 +1,260 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#005D63">
-<title>Document Control, What Changed</title>
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<title>Document Control Changes, TAQA Knowledge Hub</title>
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
-:root{--primary:#005D63;--primary-light:#00BBB6;--accent:#FD691D;--bg:#f4f5f7;--bg-white:#fff;
-  --text:#1a2235;--text-muted:#64748b;--text-dim:#94a3b8;--border:rgba(0,0,0,.08);}
+:root{
+  --ink:#131b26; --ink-2:#465469; --ink-3:#74829a; --ink-4:#a2adbf;
+  --paper:#fff; --canvas:#eceef1; --inset:#f7f8fa;
+  --rule:rgba(19,27,38,.10); --rule-soft:rgba(19,27,38,.055); --rule-firm:rgba(19,27,38,.17);
+  --brand:#005D63; --brand-soft:rgba(0,93,99,.08);
+  --due:#8a5a08; --out:#9b2220; --prov:#8a4b12;
+  --r1:4px; --r2:7px; --r3:10px;
+  --mono:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+  --out-ease:cubic-bezier(.23,1,.32,1);
+}
+html[data-theme="dark"]{
+  --ink:#e7ebf1; --ink-2:#aab6c7; --ink-3:#7e8ca1; --ink-4:#5b697c;
+  --paper:#151c26; --canvas:#0c1118; --inset:#1a2230;
+  --rule:rgba(255,255,255,.10); --rule-soft:rgba(255,255,255,.055); --rule-firm:rgba(255,255,255,.18);
+  --brand:#45bdb7; --brand-soft:rgba(69,189,183,.12);
+  --due:#d9a441; --out:#e0736f; --prov:#d89257;
+}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
-.wrap{max-width:1080px;margin:0 auto;padding:34px 24px 80px;}
-.top{background:var(--primary);border-radius:18px;padding:34px 36px;color:#fff;margin-bottom:12px;}
-.top h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:27px;font-weight:800;margin-bottom:9px;letter-spacing:-.3px;}
-.top p{font-size:14px;opacity:.92;max-width:760px;}
-.top .ref{display:inline-block;margin-top:15px;font-size:11.5px;font-weight:600;
-  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:6px 13px;border-radius:20px;}
-.note{background:rgba(253,105,29,.07);border:1px solid rgba(253,105,29,.28);border-left:3px solid var(--accent);
-  border-radius:11px;padding:14px 18px;margin-bottom:26px;font-size:12.5px;color:var(--text-muted);}
-.note b{color:var(--accent);}
-h2{font-family:'BwGradual','Urbanist',sans-serif;font-size:17px;font-weight:800;margin:32px 0 4px;}
-h2 .n{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;border-radius:7px;
-  background:var(--primary);color:#fff;font-size:12px;margin-right:9px;vertical-align:2px;}
-.lede{font-size:13.5px;color:var(--text-muted);margin-bottom:14px;max-width:820px;}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:13px;}
-.c{background:var(--bg-white);border:1px solid var(--border);border-radius:14px;padding:19px 21px;
-  text-decoration:none;color:inherit;display:block;transition:transform .18s,box-shadow .18s,border-color .18s;
-  border-left:3px solid var(--primary-light);}
-.c:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.09);border-left-color:var(--primary);}
-.c.warn{border-left-color:var(--accent);}
-.c .k{font-size:9.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--primary-light);margin-bottom:6px;}
-.c.warn .k{color:var(--accent);}
-.c h3{font-size:14.5px;font-weight:700;margin-bottom:6px;}
-.c p{font-size:12.5px;color:var(--text-muted);}
-.c .go{font-size:11.5px;font-weight:700;color:var(--primary);margin-top:11px;display:inline-block;}
-.c .num{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--text-dim);margin-top:8px;display:block;}
-.big{font-family:'BwGradual','Urbanist',sans-serif;font-size:30px;font-weight:800;line-height:1;margin-bottom:3px;}
-.before{background:var(--bg-white);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-top:6px;}
-.before table{width:100%;border-collapse:collapse;font-size:12.5px;}
-.before th{text-align:left;padding:11px 16px;background:rgba(0,0,0,.02);font-size:10px;text-transform:uppercase;
-  letter-spacing:.7px;color:var(--text-muted);border-bottom:1px solid var(--border);}
-.before td{padding:11px 16px;border-bottom:1px solid rgba(0,0,0,.05);vertical-align:top;}
-.before tr:last-child td{border-bottom:none;}
-.before td.was{color:#b91c1c;}
-.before td.now{color:#0f7c48;}
-code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;background:rgba(0,93,99,.07);
-  padding:1px 6px;border-radius:4px;color:var(--primary);}
-.foot{margin-top:40px;padding-top:20px;border-top:1px solid var(--border);font-size:12.5px;color:var(--text-dim);}
-.foot a{color:var(--primary);font-weight:600;}
-@media(max-width:640px){.wrap{padding:20px 16px 60px;}.top{padding:24px 20px;}.top h1{font-size:21px;}}
+html{overflow-x:clip;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--canvas);color:var(--ink-2);
+  font-size:13px;line-height:1.55;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;}
+a{color:var(--brand);text-decoration:none;}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:var(--r1);}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 12px;
+  border-radius:var(--r2);border:1px solid var(--rule-firm);background:var(--paper);color:var(--ink-2);
+  font:600 12.5px/1 'Inter',sans-serif;cursor:pointer;white-space:nowrap;
+  transition:background 140ms var(--out-ease),border-color 140ms var(--out-ease),
+             color 140ms var(--out-ease),transform 140ms var(--out-ease);}
+.btn svg{width:14px;height:14px;flex-shrink:0;}
+.btn:active{transform:scale(.97);}
+.btn-quiet{border-color:transparent;background:transparent;color:var(--ink-3);}
+.btn-icon{width:32px;padding:0;}
+@media (hover:hover) and (pointer:fine){
+  .btn:hover{background:var(--inset);border-color:var(--rule-firm);color:var(--ink);}
+  .btn-quiet:hover{background:var(--inset);border-color:transparent;}
+}
+
+nav{height:54px;padding:0 22px;display:flex;align-items:center;gap:6px;
+  background:var(--paper);border-bottom:1px solid var(--rule);}
+.brand{display:flex;align-items:center;gap:9px;}
+.brand-mark{width:26px;height:26px;border-radius:var(--r2);background:var(--brand);
+  display:flex;align-items:center;justify-content:center;}
+.brand-mark svg{width:14px;height:14px;}
+.brand-txt{font-family:'BwGradual','Urbanist',sans-serif;font-size:13px;color:var(--ink);}
+.brand-txt b{font-weight:800;}.brand-txt i{font-style:normal;font-weight:500;color:var(--ink-3);}
+.nav-links{display:flex;gap:1px;list-style:none;margin-inline-start:18px;}
+.nav-links a{display:block;padding:6px 11px;border-radius:var(--r2);font-size:12.5px;font-weight:500;
+  color:var(--ink-3);transition:background 140ms var(--out-ease),color 140ms var(--out-ease);}
+.nav-links a:hover{background:var(--inset);color:var(--ink);}
+.nav-end{display:flex;align-items:center;gap:6px;margin-inline-start:auto;}
+
+.frame{max-width:1080px;margin:0 auto;padding:26px 22px 70px;}
+.kicker{font:700 9.5px/1 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-4);margin-bottom:7px;}
+h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:23px;font-weight:800;color:var(--ink);
+  letter-spacing:-.015em;line-height:1.2;}
+.lede{font-size:13px;color:var(--ink-3);margin-top:7px;max-width:70ch;}
+.flag{display:flex;gap:9px;align-items:flex-start;margin-top:15px;padding:11px 14px;background:var(--paper);
+  border:1px solid var(--rule);border-inline-start:2px solid var(--prov);border-radius:var(--r2);
+  font-size:12px;line-height:1.6;max-width:86ch;}
+.flag b{color:var(--ink);font-weight:600;}
+
+h2{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;font-weight:800;color:var(--ink);
+  margin:34px 0 3px;display:flex;align-items:center;gap:9px;}
+h2 em{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;
+  border-radius:var(--r1);background:var(--inset);border:1px solid var(--rule);
+  font:700 10.5px/1 var(--mono);color:var(--ink-3);}
+.sub{font-size:12.5px;color:var(--ink-3);margin-bottom:13px;max-width:78ch;}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(252px,1fr));gap:11px;}
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:var(--r3);padding:16px 18px;
+  display:flex;flex-direction:column;gap:5px;color:inherit;
+  transition:border-color 150ms var(--out-ease),transform 150ms var(--out-ease);}
+a.card:active{transform:scale(.99);}
+@media (hover:hover) and (pointer:fine){a.card:hover{border-color:var(--rule-firm);}}
+.card .n{font:700 25px/1 'Inter',sans-serif;color:var(--ink);letter-spacing:-.03em;}
+.card .n.due{color:var(--due);} .card .n.prov{color:var(--prov);} .card .n.out{color:var(--out);}
+.card h3{font:700 12.5px/1.35 'Inter',sans-serif;color:var(--ink);}
+.card p{font-size:12px;color:var(--ink-3);line-height:1.6;}
+.card .go{font-size:11.5px;font-weight:600;color:var(--brand);margin-top:5px;}
+.card .ref{font:500 10.5px/1.4 var(--mono);color:var(--ink-4);margin-top:3px;}
+.card.flat{border-inline-start:2px solid var(--out);}
+
+.tscroll{overflow-x:auto;border-radius:var(--r3);}
+table{width:100%;min-width:520px;border-collapse:collapse;background:var(--paper);border:1px solid var(--rule);
+  border-radius:var(--r3);overflow:hidden;}
+th{text-align:start;padding:9px 16px;background:var(--inset);border-bottom:1px solid var(--rule-firm);
+  font:700 9.5px/1 'Inter',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-4);}
+td{padding:11px 16px;border-bottom:1px solid var(--rule-soft);vertical-align:top;font-size:12.5px;}
+tr:last-child td{border-bottom:none;}
+code{font-family:var(--mono);font-size:11.5px;background:var(--inset);border:1px solid var(--rule);
+  padding:1px 5px;border-radius:var(--r1);color:var(--ink);white-space:nowrap;}
+code.was{color:var(--ink-4);}
+td b{color:var(--ink);font-weight:600;}
+
+.foot{margin-top:38px;padding-top:18px;border-top:1px solid var(--rule);font-size:12px;color:var(--ink-4);
+  display:flex;gap:14px;flex-wrap:wrap;}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{transition-duration:.01ms!important;}}
+@media(max-width:900px){.nav-links{display:none;}.frame{padding:18px 14px 56px;}}
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <div class="top">
-    <h1>Document control, what changed</h1>
-    <p>The rest of the Hub is exactly as it was. Three things are new, and all three exist to show the back-end team what the document control layer has to do. Every link below opens the live prototype.</p>
-    <div class="ref">TQ-QHSE-S001 · ISO 9001:2015 7.5 · API Spec Q2 3rd Ed. 4.4, 4.5</div>
+<nav>
+  <a href="index.html" class="brand" aria-label="TAQA Knowledge Hub home">
+    <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3L4 7v5c0 4.5 3.5 8.7 8 9.9 4.5-1.2 8-5.4 8-9.9V7l-8-4z" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.65)" stroke-width="1.6"/><path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <span class="brand-txt"><b>TAQA</b> <i>Knowledge Hub</i></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="master-list.html">Master List</a></li>
+    <li><a href="ai-search.html">Search</a></li>
+  </ul>
+  <div class="nav-end">
+    <button class="btn btn-quiet btn-icon" onclick="toggleDark()" aria-label="Switch light or dark">
+      <svg id="theme-icon" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>
+    </button>
+    <a href="master-list.html" class="btn">Open the register</a>
+  </div>
+</nav>
+
+<div class="frame">
+
+  <div class="kicker">Document control</div>
+  <h1>What changed, and what is still open</h1>
+  <p class="lede">The rest of the Hub is untouched. Four things are new, and each exists to show the back end what the document control layer has to do. Every link opens the running prototype.</p>
+  <div class="flag">
+    <span><b>Prototype.</b> Document titles are real. Revision, approval, review and status values are generated so the controls can be seen working. The schema is the deliverable: it sets the fields the back end supplies.</span>
   </div>
 
-  <div class="note">
-    <b>Prototype.</b> Document titles are real. The revision, approval, review and status values are generated to make the controls work end to end. <b>The schema is the deliverable</b>, it is the contract the back end must satisfy.
-  </div>
-
-  <h2><span class="n">1</span>A Master Document List, which did not exist</h2>
-  <p class="lede">TQ-QHSE-S001 5.1 requires one. The Hub had the document set split across three unsynchronised copies instead. It is now one register, and every column header names the clause it satisfies.</p>
+  <h2><em>1</em>A register, where there was none</h2>
+  <p class="sub">TQ-QHSE-S001 5.1 requires a Master Document List. The Hub held its documents in three copies that nothing kept in step.</p>
   <div class="grid">
-    <a class="c" href="master-list.html">
-      <div class="k">Start here</div>
-      <div class="big">560</div>
-      <h3>The full register</h3>
-      <p>Filter by segment, type, status, classification or language. Every view is a shareable link.</p>
-      <span class="go">Open the Master List →</span>
+    <a class="card" href="master-list.html">
+      <span class="n">560</span>
+      <h3>The register</h3>
+      <p>Filter by segment, type, status, class or language. Every view is a link you can send.</p>
+      <span class="go">Open it</span>
     </a>
-    <a class="c warn" href="master-list.html?view=provisional">
-      <div class="k">Gap the register surfaces</div>
-      <div class="big" style="color:var(--accent);">140</div>
-      <h3>Cannot be numbered conformantly</h3>
-      <p>Rather than invent a number that looks valid, these are flagged with the reason. Hover any number to read it.</p>
-      <span class="go">See the 140 →</span>
+    <a class="card" href="master-list.html?tab=con">
+      <span class="n">18</span>
+      <h3>Clause by clause</h3>
+      <p>Charts and a scorecard showing what is met, what needs the back end, and what is waiting on QHSE.</p>
+      <span class="go">Open conformance</span>
     </a>
-    <a class="c" href="master-list.html?view=overdue">
-      <div class="k">API Q2 4.4.3 c)</div>
-      <div class="big" style="color:#b45309;">64</div>
-      <h3>Periodic review overdue</h3>
-      <p>Each row shows how many days it is overdue. This is the evidence an auditor asks for first.</p>
-      <span class="go">See overdue reviews →</span>
+    <a class="card" href="master-list.html?view=overdue">
+      <span class="n due">40</span>
+      <h3>More than six months overdue</h3>
+      <p>Of 64 overdue reviews, 40 are past 180 days. The old count strip only ever said 64.</p>
+      <span class="go">See them</span>
     </a>
   </div>
 
-  <h2><span class="n">2</span>Documents now carry real control metadata</h2>
-  <p class="lede">The viewer used to derive Revision, Issued and Author by hashing the document title from a list of six names. It now reads the register, and where a value is genuinely absent it says <em>Not recorded</em> rather than inventing one.</p>
+  <h2><em>2</em>Documents carry real control metadata</h2>
+  <p class="sub">The viewer used to derive revision, issue date and author by hashing the title against a list of six names. It now reads the register, and says so plainly when a value is missing.</p>
   <div class="grid">
-    <a class="c" href="viewer.html?doc=TQ-TWS-CTSS-SOP-001&seg=coiled-tubing&type=sop&title=Pre-Job%20Safety%20Checklist">
-      <div class="k">Current document</div>
-      <h3>The control block</h3>
-      <p>Twelve fields, number, revision, approval authority, review date, classification, retention, SCORE link, each labelled with its clause.</p>
-      <span class="go">Open a current SOP →</span>
-      <span class="num">TQ-TWS-CTSS-SOP-001</span>
-    </a>
-    <a class="c warn" href="viewer.html?doc=TQ-TWS-CTSS-SOP-012&seg=coiled-tubing&type=sop&title=Post-Job%20Reporting%20SOP">
-      <div class="k">The one to try</div>
+    <a class="card" href="viewer.html?doc=TQ-TWS-CTSS-SOP-012&amp;seg=coiled-tubing&amp;type=sop&amp;title=Post-Job%20Reporting%20SOP">
       <h3>An obsolete document</h3>
-      <p>Red banner, and <strong>Download, Print, Pin Offline and Quick Ref are all disabled</strong>, each would create an uncontrolled copy. API Q2 4.4.3.</p>
-      <span class="go">Open an obsolete SOP →</span>
-      <span class="num">TQ-TWS-CTSS-SOP-012</span>
+      <p>Download, print, offline pin and the reference card are all disabled. Each would create an uncontrolled copy.</p>
+      <span class="go">Try this one first</span>
+      <span class="ref">TQ-TWS-CTSS-SOP-012</span>
     </a>
-    <a class="c" href="viewer.html?doc=TQ-TWS-CTSS-SOP-004&seg=coiled-tubing&type=sop&title=Emergency%20Disconnect%20Procedure">
-      <div class="k">API Q2 4.4.3 c)</div>
+    <a class="card" href="viewer.html?doc=TQ-TWS-CTSS-SOP-004&amp;seg=coiled-tubing&amp;type=sop&amp;title=Emergency%20Disconnect%20Procedure">
       <h3>Review overdue</h3>
-      <p>Still in force, but its continued suitability is unconfirmed, and the banner says exactly that.</p>
-      <span class="go">Open an overdue SOP →</span>
-      <span class="num">TQ-TWS-CTSS-SOP-004</span>
+      <p>Still in force, but nobody has confirmed it is still suitable, and the banner says exactly that.</p>
+      <span class="go">Open it</span>
+      <span class="ref">TQ-TWS-CTSS-SOP-004</span>
     </a>
-    <a class="c" href="viewer.html?doc=TQ-CYB-P001&seg=cybersecurity&type=policy&title=Information%20Security%20Policy">
-      <div class="k">Provisional number</div>
-      <h3>Cybersecurity has no short form</h3>
-      <p>5.3 assigns none, and <code>CS</code> is already Customer Service. The document says so on its face.</p>
-      <span class="go">Open it →</span>
-      <span class="num">TQ-CYB-P001</span>
-    </a>
-    <a class="c" href="viewer.html?doc=TQ-TWS-CTSS-SOP-001-AR&seg=coiled-tubing&type=sop&title=Pre-Job%20Safety%20Checklist">
-      <div class="k">API Q2 4.4.3 translations</div>
+    <a class="card" href="viewer.html?doc=TQ-TWS-CTSS-SOP-001-AR&amp;seg=coiled-tubing&amp;type=sop&amp;title=Pre-Job%20Safety%20Checklist">
       <h3>An Arabic version</h3>
       <p>Linked to its English source and inheriting its revision. TQ-QHSE-S001 has no translation clause at all.</p>
-      <span class="go">Open the Arabic SOP →</span>
-      <span class="num">TQ-TWS-CTSS-SOP-001-AR</span>
-    </a>
-    <a class="c" href="master-list.html?lang=ar">
-      <div class="k">All translations</div>
-      <h3>Arabic in the register</h3>
-      <p>Translations are records in their own right, not attachments.</p>
-      <span class="go">Filter to Arabic →</span>
+      <span class="go">Open it</span>
+      <span class="ref">TQ-TWS-CTSS-SOP-001-AR</span>
     </a>
   </div>
 
-  <h2><span class="n">3</span>Numbering now follows TQ-QHSE-S001 5.3</h2>
-  <p class="lede">The Hub was inventing its own scheme, and two prefixes collided with short forms the standard had already assigned.</p>
-  <div class="before">
-    <table>
-      <thead><tr><th style="width:26%;">Was</th><th style="width:34%;">Now</th><th>Why it mattered</th></tr></thead>
-      <tbody>
-        <tr><td class="was"><code>CT-001</code></td><td class="now"><code>TQ-TWS-CTSS-SOP-001</code></td><td>Business unit, service line and document type are all encoded, per 5.3.</td></tr>
-        <tr><td class="was"><code>WS-001</code></td><td class="now"><code>TQ-TWS-WSS-SOP-001</code></td><td><strong>Collision.</strong> The Hub used <code>WS</code> for Well Safety; 5.3 assigns <code>WS</code> to Wireline Services.</td></tr>
-        <tr><td class="was"><code>CS-PROC-001</code></td><td class="now"><code>TQ-CYB-SOP-001</code> <em>(provisional)</em></td><td><strong>Collision.</strong> The Hub used <code>CS</code> for Cybersecurity; 5.3 assigns <code>CS</code> to Customer Service.</td></tr>
-        <tr><td class="was"><code>ALERT-CT-001</code></td><td class="now"><code>TQ-TWS-CTSS-ALT-001</code> <em>(provisional)</em></td><td>Technical Alert is not a document type defined in 4, so no conformant code exists.</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <h2><em>3</em>Numbering follows TQ-QHSE-S001 5.3</h2>
+  <p class="sub">The Hub was inventing its own scheme, and two of its prefixes collided with short forms the standard had already assigned elsewhere.</p>
+  <div class="tscroll"><table>
+    <thead><tr><th style="width:23%">Was</th><th style="width:32%">Now</th><th>Why it mattered</th></tr></thead>
+    <tbody>
+      <tr><td><code class="was">CT-001</code></td><td><code>TQ-TWS-CTSS-SOP-001</code></td><td>Business unit, service line and type are all carried in the number.</td></tr>
+      <tr><td><code class="was">WS-001</code></td><td><code>TQ-TWS-WSS-SOP-001</code></td><td><b>Collision.</b> The Hub used WS for Well Safety. The standard assigns WS to Wireline Services.</td></tr>
+      <tr><td><code class="was">CS-PROC-001</code></td><td><code>TQ-CYB-SOP-001</code></td><td><b>Collision.</b> The Hub used CS for Cybersecurity. The standard assigns CS to Customer Service.</td></tr>
+      <tr><td><code class="was">ALERT-CT-001</code></td><td><code>TQ-TWS-CTSS-ALT-001</code></td><td>Technical Alert is not a type defined in section 4, so no conformant code exists.</td></tr>
+    </tbody>
+  </table></div>
 
-  <h2><span class="n">4</span>Who can see and control the register</h2>
-  <p class="lede">Four roles, switchable in the Master List nav. The split is deliberate: <strong>role</strong> decides which <em>functions</em> you get, <strong>classification</strong> decides which <em>documents</em>. The register itself stays readable by every employee, restricting it to QMS would breach 5.5, which requires Policies and Guidelines to be accessible to all, and a supervisor needs to confirm the current revision before starting a job.</p>
-  <div class="before" style="margin-bottom:13px;">
-    <table>
-      <thead><tr><th style="width:40%;">Role</th><th style="width:16%;">Sees</th><th>Control functions</th></tr></thead>
-      <tbody>
-        <tr><td><strong>Employee</strong><br><span style="color:var(--text-muted);font-size:11.5px;">Internal documents, no drafts</span></td><td class="now">360</td><td>None. Read-only register.</td></tr>
-        <tr><td><strong>Document Owner</strong><br><span style="color:var(--text-muted);font-size:11.5px;">+ confidential, + own drafts</span></td><td class="now">442</td><td>Overdue queue and numbering report, scoped to their own segment. No approval, no export.</td></tr>
-        <tr><td><strong>QMS / Document Controller</strong><br><span style="color:var(--text-muted);font-size:11.5px;">Everything</span></td><td class="now">560</td><td>Full control: approve, withdraw, edit metadata, TQ-QHSE-F086 export.</td></tr>
-        <tr><td><strong>External Auditor</strong><br><span style="color:var(--text-muted);font-size:11.5px;">Everything, time-boxed</span></td><td class="now">560</td><td>Read-only, plus the export. Changes nothing.</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="grid">
-    <a class="c" href="master-list.html">
-      <div class="k">Try it</div>
-      <h3>Switch role in the nav</h3>
-      <p>Set it to <strong>Employee</strong>, the overdue queue, the numbering report and the export button all disappear, and 200 documents drop out of the register.</p>
-      <span class="go">Open the Master List →</span>
+  <h2><em>4</em>Who can see and control the register</h2>
+  <p class="sub">Role decides which functions you get. Classification decides which documents. The register itself stays readable by everyone, because restricting it would breach 5.5, and a supervisor needs to confirm the current revision before starting a job.</p>
+  <div class="tscroll"><table>
+    <thead><tr><th style="width:30%">Role</th><th style="width:12%">Sees</th><th>Control</th></tr></thead>
+    <tbody>
+      <tr><td><b>Employee</b><br><span style="color:var(--ink-3);font-size:11.5px;">Internal only, no drafts</span></td><td><b>360</b></td><td>None. Read only.</td></tr>
+      <tr><td><b>Document owner</b><br><span style="color:var(--ink-3);font-size:11.5px;">Plus confidential and own drafts</span></td><td><b>442</b></td><td>Overdue queue and numbering report, limited to their own segment. No approval, no export.</td></tr>
+      <tr><td><b>QMS or controller</b><br><span style="color:var(--ink-3);font-size:11.5px;">Everything</span></td><td><b>560</b></td><td>Approve, withdraw, edit metadata, export TQ-QHSE-F086.</td></tr>
+      <tr><td><b>External auditor</b><br><span style="color:var(--ink-3);font-size:11.5px;">Everything, time boxed</span></td><td><b>560</b></td><td>Read only, plus the export. Changes nothing.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="grid" style="margin-top:11px;">
+    <a class="card" href="master-list.html">
+      <h3>Switch role in the register</h3>
+      <p>Set it to Employee. The overdue queue, the numbering report and the export all disappear, and 200 documents leave the register.</p>
+      <span class="go">Try it</span>
     </a>
-    <div class="c warn" style="cursor:default;">
-      <div class="k">Important</div>
+    <div class="card flat">
       <h3>This is not security</h3>
-      <p>Role switching runs in the browser and proves nothing, anyone can open a page directly or read the data file. It is a <strong>specification</strong>, so IT can implement the same matrix server-side: Entra ID group → SSO claim → per-record authorization, with the API returning only what the caller may see.</p>
+      <p>Role switching runs in the browser and proves nothing. It is a specification. The back end applies the same rules on the server, from an Entra ID group through the SSO claim to a check on every record.</p>
     </div>
   </div>
 
-  <h2><span class="n">5</span>What QHSE has to decide</h2>
-  <p class="lede">Applying the standard in code is what exposed these. None of them can be fixed in the Hub.</p>
+  <h2><em>5</em>Waiting on QHSE</h2>
+  <p class="sub">Applying the standard in code is what exposed these. None can be fixed in the Hub.</p>
   <div class="grid">
-    <div class="c warn" style="cursor:default;">
-      <div class="k">Blocked</div>
-      <h3>Four short forms are missing</h3>
-      <p><strong>Cybersecurity</strong> and <strong>the Learning Center</strong> have no short form in 5.3, the Learning Center owns this platform and cannot legally number its own documents. <strong>Technical Alert</strong> and <strong>Lesson Learned</strong> are not document types in 4.</p>
-    </div>
-    <div class="c warn" style="cursor:default;">
-      <div class="k">Non-compliance</div>
+    <a class="card flat" href="master-list.html?view=provisional">
+      <span class="n prov">140</span>
+      <h3>Cannot be numbered</h3>
+      <p><b>Cybersecurity</b> holds 41 and <b>the Learning Center</b> has no short form either, though it owns this platform. <b>Technical Alert</b> and <b>Lesson Learned</b> are not types defined in section 4.</p>
+      <span class="go">See which ones</span>
+    </a>
+    <div class="card flat">
       <h3>Retention says five years</h3>
-      <p>TQ-QHSE-S001 7.5 sets five years, with ten as an API Q1 and medical exception. API Q2 3rd Edition 4.5 requires <strong>ten years for all records</strong>. The register already shows ten.</p>
+      <p>TQ-QHSE-S001 7.5 sets five, with ten as an API Q1 and medical exception. API Q2 3rd Edition 4.5 requires ten for all records. The register already shows ten.</p>
     </div>
   </div>
 
   <div class="foot">
-    The rest of the Hub is unchanged, <a href="index.html">Home</a> · <a href="segment.html?id=drilling">Segments</a> · <a href="ai-search.html">Search</a> · <a href="dashboard.html">Dashboard</a> · <a href="upload.html">Upload</a> · <a href="glossary.html">Glossary</a>
+    <span>The rest of the Hub is unchanged.</span>
+    <a href="index.html">Home</a><a href="segment.html?id=drilling">Segments</a>
+    <a href="ai-search.html">Search</a><a href="dashboard.html">Dashboard</a>
+    <a href="upload.html">Upload</a><a href="glossary.html">Glossary</a>
   </div>
-
 </div>
+
+<script>
+const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
+const MOON='M6.2 2.3a.55.55 0 0 1 .2.62 5.2 5.2 0 0 0 6.7 6.7.55.55 0 0 1 .68.75A6.3 6.3 0 1 1 5.6 2.1a.55.55 0 0 1 .6.2Z';
+(function(){var t;try{t=localStorage.getItem('taqa-theme');}catch(e){}
+  if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');
+    var p=document.querySelector('#theme-icon path');if(p)p.setAttribute('d',MOON);}})();
+function toggleDark(){var d=document.documentElement.getAttribute('data-theme')==='dark',n=d?'light':'dark';
+  document.documentElement.setAttribute('data-theme',n);
+  var p=document.querySelector('#theme-icon path');if(p)p.setAttribute('d',n==='dark'?MOON:SUN);
+  try{localStorage.setItem('taqa-theme',n);}catch(e){}}
+</script>
 </body>
 </html>
