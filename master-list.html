@@ -188,18 +188,82 @@ tbody tr[aria-selected="true"]{background:var(--brand-soft);}
 @media (hover:hover) and (pointer:fine){.tab:not([aria-selected="true"]):hover{color:var(--ink);}}
 
 /* ── Charts ───────────────────────────────────────────────────────────────
-   Palette validated with the dataviz validator against both surfaces.
-   Ordinal blue ramp for the ageing buckets, three-slot set for the status
-   mix, emphasis (one accent against neutral) for numbering by segment.   */
-.viz{--c-blue:#2a78d6; --c-warn:#c98500; --c-crit:#d03b3b;
+   Every colour ran through the dataviz validator against both surfaces.
+   The four conformance states needed four hues: the default status green sat
+   at CVD delta E 3.0 against the amber, so it was re-stepped, and blue was put
+   between amber and red to keep that pair apart.                          */
+.viz{--c-met:#0a7a2f; --c-part:#c98500; --c-back:#2a78d6; --c-qhse:#d03b3b;
+  --c-blue:#2a78d6; --c-warn:#c98500; --c-crit:#d03b3b;
   --o1:#86b6ef; --o2:#5598e7; --o3:#2a78d6; --o4:#1c5cab;
-  --neutral:#c8cdd6; --grid:#e6e8ec; --axis:#b9bfc9;}
-html[data-theme="dark"] .viz{--c-blue:#3987e5; --c-crit:#e66767;
+  --neutral:#c8cdd6; --grid:#e6e8ec;
+  --glass:rgba(255,255,255,.66); --glass-line:rgba(255,255,255,.82);
+  --glass-shade:0 1px 2px rgba(19,27,38,.05),0 8px 26px rgba(19,27,38,.07);
+  position:relative;}
+html[data-theme="dark"] .viz{--c-met:#14957f; --c-back:#3987e5; --c-qhse:#e66767;
+  --c-blue:#3987e5; --c-crit:#e66767;
   --o1:#184f95; --o2:#256abf; --o3:#3987e5; --o4:#6da7ec;
-  --neutral:#38414f; --grid:#232c39; --axis:#333d4c;}
+  --neutral:#38414f; --grid:#232c39;
+  --glass:rgba(24,32,44,.62); --glass-line:rgba(255,255,255,.09);
+  --glass-shade:0 1px 2px rgba(0,0,0,.3),0 8px 26px rgba(0,0,0,.28);}
+
+/* Something for the glass to refract. Brand teal, very low alpha. */
+.viz::before{content:'';position:absolute;inset:-56px 0 auto;height:440px;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(48% 62% at 16% 8%, rgba(0,93,99,.16), transparent 68%),
+    radial-gradient(42% 58% at 82% 4%, rgba(201,133,0,.11), transparent 66%),
+    radial-gradient(40% 50% at 52% 40%, rgba(42,120,214,.09), transparent 70%);
+  filter:blur(6px);}
+html[data-theme="dark"] .viz::before{
+  background:
+    radial-gradient(48% 62% at 16% 8%, rgba(69,189,183,.16), transparent 68%),
+    radial-gradient(42% 58% at 82% 4%, rgba(201,133,0,.10), transparent 66%),
+    radial-gradient(40% 50% at 52% 40%, rgba(57,135,229,.11), transparent 70%);}
+.viz > *{position:relative;z-index:1;}
+
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:14px;margin-bottom:14px;}
-.card{background:var(--paper);border:1px solid var(--rule);border-radius:var(--r3);padding:17px 19px 15px;}
+.card{background:var(--glass);border:1px solid var(--glass-line);border-radius:var(--r3);
+  padding:17px 19px 15px;backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);
+  box-shadow:var(--glass-shade);}
 .card.wide{grid-column:1/-1;}
+@supports not (backdrop-filter:blur(1px)){.card,.score{background:var(--paper);}}
+
+/* Entrance. Rise and fade, staggered just enough to read as a sequence. */
+.viz .rise{opacity:0;transform:translateY(10px);}
+.viz.go .rise{opacity:1;transform:none;
+  transition:opacity 340ms var(--out-ease),transform 340ms var(--out-ease);}
+.viz.go .rise:nth-child(1){transition-delay:0ms;}
+.viz.go .rise:nth-child(2){transition-delay:60ms;}
+.viz.go .rise:nth-child(3){transition-delay:120ms;}
+.viz.go .score{transition-delay:180ms;}
+
+/* Donut */
+.donut-wrap{display:flex;align-items:center;gap:20px;margin-top:6px;}
+.donut{position:relative;flex-shrink:0;width:150px;height:150px;}
+.donut svg{width:150px;height:150px;transform:rotate(-90deg);}
+.donut circle{fill:none;stroke-linecap:butt;
+  transition:stroke-dasharray 760ms var(--out-ease),stroke-width 160ms var(--out-ease),opacity 160ms var(--out-ease);}
+.donut circle.seg{cursor:default;}
+.donut:hover circle.seg{opacity:.45;}
+.donut:hover circle.seg:hover{opacity:1;stroke-width:24;}
+.donut-mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  pointer-events:none;text-align:center;}
+.donut-n{font:700 30px/1 'Inter',sans-serif;color:var(--ink);letter-spacing:-.03em;}
+.donut-l{font:500 10.5px/1.3 'Inter',sans-serif;color:var(--ink-3);margin-top:4px;max-width:96px;}
+.keys{display:flex;flex-direction:column;gap:7px;min-width:0;flex:1;}
+.key{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);}
+.key i{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+.key b{color:var(--ink);font-weight:700;margin-inline-start:auto;font-variant-numeric:tabular-nums;}
+
+/* Bars grow from their own baseline rather than fading in */
+.viz .grow{transform:scaleX(0);transform-origin:left center;}
+html[dir="rtl"] .viz .grow{transform-origin:right center;}
+.viz.go .grow{transform:scaleX(1);transition:transform 620ms var(--out-ease);}
+
+@media (prefers-reduced-motion: reduce){
+  .viz .rise,.viz.go .rise{opacity:1;transform:none;transition:none;}
+  .viz .grow,.viz.go .grow{transform:none;transition:none;}
+  .donut circle{transition:none;}
+}
 .card h3{font:700 12.5px/1.3 'Inter',sans-serif;color:var(--ink);}
 .card .sub{font-size:11.5px;color:var(--ink-3);margin-top:3px;margin-bottom:15px;}
 .card svg{display:block;width:100%;overflow:visible;}
@@ -218,7 +282,10 @@ html[data-theme="dark"] .viz{--c-blue:#3987e5; --c-crit:#e66767;
 .bar-hit{cursor:default;}
 
 /* ── Conformance scorecard ── */
-.score{background:var(--paper);border:1px solid var(--rule);border-radius:var(--r3);overflow:hidden;}
+.score{background:var(--glass);border:1px solid var(--glass-line);border-radius:var(--r3);overflow:hidden;
+  backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);
+  box-shadow:var(--glass-shade);opacity:0;transform:translateY(10px);}
+.viz.go .score{opacity:1;transform:none;transition:opacity 340ms var(--out-ease),transform 340ms var(--out-ease);}
 .score-h{padding:16px 19px 14px;border-bottom:1px solid var(--rule);}
 .score-h h3{font:700 12.5px/1.3 'Inter',sans-serif;color:var(--ink);}
 .score-h p{font-size:11.5px;color:var(--ink-3);margin-top:3px;}
@@ -233,10 +300,8 @@ html[data-theme="dark"] .viz{--c-blue:#3987e5; --c-crit:#e66767;
   border:1px solid currentColor;font:700 9.5px/1.2 'Inter',sans-serif;letter-spacing:.06em;
   text-transform:uppercase;white-space:nowrap;}
 .chip svg{width:10px;height:10px;}
-.k-met{color:#0a7a2f;} html[data-theme="dark"] .k-met{color:#4ec07a;}
-.k-part{color:var(--c-warn,#8a5a08);} html[data-theme="dark"] .k-part{color:#d9a441;}
-.k-back{color:var(--ink-3);}
-.k-qhse{color:var(--out);}
+.k-met{color:var(--c-met);} .k-part{color:var(--c-part);}
+.k-back{color:var(--c-back);} .k-qhse{color:var(--c-qhse);}
 .sum-row{display:flex;gap:22px;flex-wrap:wrap;padding:14px 19px;background:var(--inset);
   border-top:1px solid var(--rule);font-size:11.5px;color:var(--ink-2);}
 .sum-row b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums;}
@@ -341,13 +406,29 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
 
   <div id="view-con" class="viz" hidden>
     <div class="cards">
-      <div class="card">
+      <div class="card rise">
+        <h3>Against the standards</h3>
+        <div class="sub">Eighteen clauses across TQ-QHSE-S001, ISO 9001 and API Q2.</div>
+        <div class="donut-wrap">
+          <div class="donut">
+            <svg viewBox="0 0 150 150" id="dn-con" role="img" aria-label="Clause conformance"></svg>
+            <div class="donut-mid"><span class="donut-n" id="dn-con-n">0</span><span class="donut-l">of 18 clauses met in the front end</span></div>
+          </div>
+          <div class="keys" id="k-con"></div>
+        </div>
+      </div>
+      <div class="card rise">
         <h3>Where the register stands</h3>
         <div class="sub">Every controlled document by its current state.</div>
-        <svg id="ch-mix" viewBox="0 0 400 42" preserveAspectRatio="none" height="42" role="img" aria-label="Documents by status"></svg>
-        <div class="lg" id="lg-mix"></div>
+        <div class="donut-wrap">
+          <div class="donut">
+            <svg viewBox="0 0 150 150" id="dn-mix" role="img" aria-label="Documents by status"></svg>
+            <div class="donut-mid"><span class="donut-n" id="dn-mix-n">0</span><span class="donut-l">on their current revision</span></div>
+          </div>
+          <div class="keys" id="k-mix"></div>
+        </div>
       </div>
-      <div class="card">
+      <div class="card rise">
         <h3>How late the overdue reviews are</h3>
         <div class="sub">Periodic review under API Q2 4.4.3 c.</div>
         <div class="hero"><span class="hero-n" id="ov-n">0</span><span class="hero-u" id="ov-u"></span></div>
@@ -662,26 +743,53 @@ function bindTip(el,text){
 const svgEl=(n,a)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',n);
   for(const k in a)e.setAttribute(k,a[k]);return e;};
 
+// A donut is fair for part-to-whole at a glance with six or fewer segments.
+// Segments are separated by a real 2px gap, carry a legend with counts, and
+// hold the headline in the middle rather than leaving it to be inferred.
+const R=57, CIRC=2*Math.PI*R, GAP_DEG=2;
+function donut(svgId, keyId, midId, parts, mid){
+  const svg=document.getElementById(svgId); svg.innerHTML='';
+  const total=parts.reduce((a,p)=>a+p.n,0)||1;
+  svg.appendChild(svgEl('circle',{cx:75,cy:75,r:R,stroke:'var(--grid)','stroke-width':18}));
+  let acc=0; const drawn=[];
+  parts.forEach((p,i)=>{
+    if(!p.n)return;
+    const frac=p.n/total;
+    const gap=parts.filter(x=>x.n).length>1 ? (GAP_DEG/360)*CIRC : 0;
+    const len=Math.max(frac*CIRC-gap,1.5);
+    const c=svgEl('circle',{cx:75,cy:75,r:R,stroke:p.c,'stroke-width':18,
+      'stroke-dasharray':'0 '+CIRC,'stroke-dashoffset':-(acc*CIRC)});
+    c.classList.add('seg');
+    c.style.transitionDelay=(i*90)+'ms';
+    svg.appendChild(c);
+    bindTip(c,p.k+': '+p.n+' of '+total+', '+Math.round(frac*100)+' per cent');
+    drawn.push([c,len]);
+    acc+=frac;
+  });
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    drawn.forEach(([c,len])=>c.setAttribute('stroke-dasharray',len+' '+(CIRC-len)));
+  }));
+  document.getElementById(keyId).innerHTML=parts.filter(p=>p.n).map(p=>
+    `<span class="key"><i style="background:${p.c}"></i>${p.k}<b>${p.n}</b></span>`).join('');
+  countTo(document.getElementById(midId), mid);
+}
+function countTo(el,to){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){el.textContent=to;return;}
+  const t0=performance.now(), dur=780;
+  const step=t=>{const p=Math.min((t-t0)/dur,1); el.textContent=Math.round((1-Math.pow(1-p,3))*to);
+    if(p<1)requestAnimationFrame(step);};
+  requestAnimationFrame(step);
+}
+
 function chartMix(){
   const rows=visible().filter(d=>A.controlled(d));
-  const groups=[
-    {k:'Current',    n:rows.filter(d=>d.status==='current').length,       c:'var(--neutral)'},
-    {k:'Review due', n:rows.filter(d=>d.status==='under-review').length,  c:'var(--c-warn)'},
-    {k:'Draft',      n:rows.filter(d=>d.status==='draft').length,         c:'var(--c-blue)'},
-    {k:'Withdrawn',  n:rows.filter(d=>d.status==='obsolete'||d.status==='superseded').length, c:'var(--c-crit)'}
-  ].filter(g=>g.n>0);
-  const total=groups.reduce((a,g)=>a+g.n,0)||1, W=400, GAP=2;
-  const svg=document.getElementById('ch-mix'); svg.innerHTML='';
-  let x=0;
-  groups.forEach((g,i)=>{
-    const w=Math.max((g.n/total)*(W-GAP*(groups.length-1)),3);
-    const r=svgEl('rect',{x:x,y:0,width:w,height:26,fill:g.c,rx:3});
-    svg.appendChild(r);
-    bindTip(r,g.k+': '+g.n+' of '+total+' ('+Math.round(g.n/total*100)+'%)');
-    x+=w+GAP;
-  });
-  document.getElementById('lg-mix').innerHTML=groups.map(g=>
-    `<span><i style="background:${g.c}"></i>${g.k} <b>${g.n}</b></span>`).join('');
+  const cur=rows.filter(d=>d.status==='current').length;
+  donut('dn-mix','k-mix','dn-mix-n',[
+    {k:'Current',    n:cur,                                                   c:'var(--c-met)'},
+    {k:'Review due', n:rows.filter(d=>d.status==='under-review').length,      c:'var(--c-part)'},
+    {k:'Draft',      n:rows.filter(d=>d.status==='draft').length,             c:'var(--c-back)'},
+    {k:'Withdrawn',  n:rows.filter(d=>d.status==='obsolete'||d.status==='superseded').length, c:'var(--c-qhse)'}
+  ], cur);
 }
 
 function chartAge(){
@@ -707,6 +815,8 @@ function chartAge(){
     const w=Math.max((b.n/max)*BW, b.n?3:0);
     if(w){
       const r=svgEl('rect',{x:LBL,y:y,width:w,height:H,fill:b.c,rx:3});
+      r.classList.add('grow'); r.style.transformOrigin=LBL+'px '+(y+H/2)+'px';
+      r.style.transitionDelay=(i*70)+'ms';
       svg.appendChild(r);
       bindTip(r,b.n+(b.n===1?' document ':' documents ')+b.l.toLowerCase()+' overdue');
     }
@@ -733,18 +843,20 @@ function chartSeg(){
     const t=svgEl('text',{x:0,y:y+H/2+4,'font-size':11.5,fill:'var(--ink-3)'});
     t.textContent=x.name; svg.appendChild(t);
     const okW=(x.ok/max)*BW, pvW=(x.prov/max)*BW;
+    const grow=(r,i2)=>{r.classList.add('grow');r.style.transformOrigin=LBL+'px '+(y+H/2)+'px';
+      r.style.transitionDelay=(i*45+i2*40)+'ms';};
     if(okW>0){const r=svgEl('rect',{x:LBL,y:y,width:Math.max(okW,2),height:H,fill:'var(--neutral)',rx:2.5});
-      svg.appendChild(r); bindTip(r,x.name+': '+x.ok+' numbered under 5.3');}
-    if(pvW>0){const r=svgEl('rect',{x:LBL+okW+(okW>0?2:0),y:y,width:Math.max(pvW,2),height:H,fill:'var(--c-warn)',rx:2.5});
-      svg.appendChild(r); bindTip(r,x.name+': '+x.prov+' waiting on a short form');}
-    const v=svgEl('text',{x:LBL+BW+10,y:y+H/2+4,'font-size':11,fill:x.prov?'var(--c-warn)':'var(--ink-4)',
+      grow(r,0); svg.appendChild(r); bindTip(r,x.name+': '+x.ok+' numbered under 5.3');}
+    if(pvW>0){const r=svgEl('rect',{x:LBL+okW+(okW>0?2:0),y:y,width:Math.max(pvW,2),height:H,fill:'var(--c-part)',rx:2.5});
+      grow(r,1); svg.appendChild(r); bindTip(r,x.name+': '+x.prov+' waiting on a short form');}
+    const v=svgEl('text',{x:LBL+BW+10,y:y+H/2+4,'font-size':11,fill:x.prov?'var(--c-part)':'var(--ink-4)',
       'font-weight':x.prov?700:500});
     v.textContent=x.prov?x.prov+' held':'clear'; svg.appendChild(v);
   });
   const okT=segs.reduce((a,x)=>a+x.ok,0), pvT=segs.reduce((a,x)=>a+x.prov,0);
   document.getElementById('lg-seg').innerHTML=
     `<span><i style="background:var(--neutral)"></i>Numbered under 5.3 <b>${okT}</b></span>`+
-    `<span><i style="background:var(--c-warn)"></i>Waiting on a short form <b>${pvT}</b></span>`;
+    `<span><i style="background:var(--c-part)"></i>Waiting on a short form <b>${pvT}</b></span>`;
 }
 
 // ── Conformance scorecard ─────────────────────────────────────────────────
@@ -804,6 +916,12 @@ function scorecard(){
       <td><div class="what">${esc(r[1])}</div><div class="how">${esc(r[3])}</div></td>
       <td style="width:108px;text-align:end;"><span class="chip ${cls}">${ico}${lbl}</span></td></tr>`;}).join('');
   const c=k=>rows.filter(r=>r[2]===k).length;
+  donut('dn-con','k-con','dn-con-n',[
+    {k:'Met in the front end', n:c('met'),  c:'var(--c-met)'},
+    {k:'Partly met',           n:c('part'), c:'var(--c-part)'},
+    {k:'Waiting on the back end', n:c('back'), c:'var(--c-back)'},
+    {k:'Blocked until QHSE decides', n:c('qhse'), c:'var(--c-qhse)'}
+  ], c('met'));
   document.getElementById('score-sum').innerHTML=
     `<span><b>${c('met')}</b> met in the front end</span>`+
     `<span><b>${c('part')}</b> partly met, the rest needs a back end</span>`+
@@ -819,7 +937,12 @@ function showView(v){
   document.getElementById('tab-con').setAttribute('aria-selected',v==='con');
   if(v==='con')drawCharts();
 }
-function drawCharts(){chartMix();chartAge();chartSeg();scorecard();}
+function drawCharts(){
+  const v=document.getElementById('view-con');
+  v.classList.remove('go');
+  chartMix();chartAge();chartSeg();scorecard();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>v.classList.add('go')));
+}
 
 renderRole(); readUrl();
 if(quick){const c=CT.find(x=>x.k===quick); if(c&&c.control&&!TAQA_ROLES[role()].controlPanel)quick=null;}
