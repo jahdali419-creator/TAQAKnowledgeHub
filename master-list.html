@@ -262,358 +262,124 @@ html[data-theme="dark"] .pg[aria-current="page"]{color:#00272A;}
 .tab[aria-selected="true"]{background:var(--paper);color:var(--brand);}
 @media (hover:hover) and (pointer:fine){.tab:not([aria-selected="true"]):hover{color:var(--ink);}}
 
-/* ── Conformance: a drawing sheet ──────────────────────────────────────────
-   White paper on a Monument Gray desk, a teal drawing frame, a form-ruled
-   masthead and dimension lines instead of tooltips. Every number the page
-   needs is typeset, so nothing here depends on a hover or an animation.
-   All tokens are scoped to #view-con; the register view is untouched.     */
-#view-con{
-  /* brand and its permitted tints */
-  --teal:#005D63; --teal-80:#337D82; --teal-60:#669EA1; --teal-40:#99BEC1; --teal-20:#CCDFE0;
-  /* surfaces */
-  --desk:#EAE8E6; --sheet:#FFFFFF; --edge:#D5D1CD; --frame:#005D63;
-  --ink:#005D63; --ink-2:#337D82; --hair:#EAE8E6; --reg-mark:#669EA1;
-  --hover:#EAE8E6; --band:#CCDFE0; --band-ink:#005D63;
-  --gap:#FFFFFF; --bar-edge:#005D63;
-  --track:#CCDFE0; --track-ink:#005D63;
-  --inv-bg:#005D63; --inv-ink:#FFFFFF;
-  --focus:#005D63;
-  /* conformance states */
-  --st-met:#008675; --st-part:#FD691D; --st-back:#0076A8; --st-qhse:#C8102E;
-  --chip-met:#CCE7E3; --chip-part:#FFE1D2; --chip-back:#CCE4EE; --chip-qhse:#F4CFD5;
-  --chip-ink:#005D63;
-  /* register states, a disjoint set so no hue means two things on one sheet */
-  --rg-current:#008675; --rg-review:#FFB81C; --rg-draft:#0076A8; --rg-withdrawn:#968C83;
-  /* ageing ramp: severity reads as distance from the paper */
-  --age-1:#99BEC1; --age-2:#669EA1; --age-3:#337D82; --age-4:#005D63;
-  --press:cubic-bezier(.2,.8,.2,1);
-  background:var(--desk);margin:0 -22px;padding:26px 22px 64px;position:static;}
-@media(max-width:1180px){#view-con{margin:0 -13px;padding:20px 13px 54px;}}
-/* .frame keeps a 13px gutter below 1180px, so the desk bleeds to -13px,
-   not -16px, or the sheet pushes the document 3px sideways. */
-@media(max-width:430px){#view-con{padding:16px 13px 44px;}}
+/* ── Charts ───────────────────────────────────────────────────────────────
+   Every colour ran through the dataviz validator against both surfaces.
+   The four conformance states needed four hues: the default status green sat
+   at CVD delta E 3.0 against the amber, so it was re-stepped, and blue was put
+   between amber and red to keep that pair apart.                          */
+.viz{--c-met:#008675; --c-part:#FD691D; --c-back:#0076A8; --c-qhse:#C8102E;
+  --c-blue:#0076A8; --c-warn:#FD691D; --c-crit:#C8102E;
+  --o1:#99BEC1; --o2:#669EA1; --o3:#337D82; --o4:#005D63;
+  --neutral:#C0BAB5; --grid:#EAE8E6;
+  --glass:rgba(255,255,255,.68); --glass-line:rgba(255,255,255,.86);
+  --glass-shade:0 1px 2px rgba(0,93,99,.06),0 8px 26px rgba(0,93,99,.09);
+  position:relative;}
+html[data-theme="dark"] .viz{--c-met:#008675; --c-back:#0076A8; --c-qhse:#D34058;
+  --c-blue:#0076A8; --c-crit:#D34058;
+  --o1:#005D63; --o2:#337D82; --o3:#669EA1; --o4:#99BEC1;
+  --neutral:#4C8E92; --grid:#247479;
+  --glass:rgba(0,45,48,.60); --glass-line:rgba(0,187,182,.16);
+  --glass-shade:0 1px 2px rgba(0,10,11,.38),0 8px 26px rgba(0,10,11,.34);}
 
-/* Dark mode inverts the paper and re-tints the ink. It never reverses the
-   encoding: the ageing ramp flips its assignment so the worst bucket stays
-   the highest contrast mark against its own ground in either theme.       */
-html[data-theme="dark"] #view-con{
-  --desk:#002326; --sheet:#005D63; --edge:#33C9C5; --frame:#33C9C5;
-  --ink:#FFFFFF; --ink-2:#CCDFE0; --hair:rgba(255,255,255,.18); --reg-mark:#669EA1;
-  --hover:#337D82; --band:#337D82; --band-ink:#FFFFFF;
-  --gap:#005D63; --bar-edge:#CCDFE0;
-  --track:#337D82; --track-ink:#FFFFFF;
-  --inv-bg:#FFFFFF; --inv-ink:#005D63;
-  --focus:#33C9C5;
-  /* Tinted to clear 3:1 on the teal sheet. The first pass used 40% tints
-     throughout and met sat at delta E 4.0 from back end, which is no
-     separation at all; 80% orange and 60% azure take that to 11.1. */
-  --st-met:#99CFC8; --st-part:#FD874A; --st-back:#66ADCB; --st-qhse:#E99FAB;
-  --chip-met:transparent; --chip-part:transparent;
-  --chip-back:transparent; --chip-qhse:transparent;
-  --chip-ink:#FFFFFF;
-  --rg-current:#99CFC8; --rg-review:#FFC649; --rg-draft:#66ADCB; --rg-withdrawn:#ABA39C;
-  --age-1:#669EA1; --age-2:#99BEC1; --age-3:#CCDFE0; --age-4:#FFFFFF;}
+/* Something for the glass to refract. Brand teal, very low alpha. */
+.viz::before{content:'';position:absolute;inset:-56px 0 auto;height:440px;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(48% 62% at 16% 8%, rgba(0,93,99,.17), transparent 68%),
+    radial-gradient(42% 58% at 82% 4%, rgba(0,187,182,.13), transparent 66%),
+    radial-gradient(40% 50% at 52% 40%, rgba(253,105,29,.05), transparent 70%);
+  filter:blur(6px);}
+html[data-theme="dark"] .viz::before{
+  background:
+    radial-gradient(48% 62% at 16% 8%, rgba(0,187,182,.18), transparent 68%),
+    radial-gradient(42% 58% at 82% 4%, rgba(0,134,117,.14), transparent 66%),
+    radial-gradient(40% 50% at 52% 40%, rgba(253,105,29,.06), transparent 70%);}
+.viz > *{position:relative;z-index:1;}
 
-#view-con :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:0;}
-.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:14px;margin-bottom:14px;}
+.card{background:var(--glass);border:1px solid var(--glass-line);border-radius:var(--r3);
+  padding:17px 19px 15px;backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);
+  box-shadow:var(--glass-shade);}
+.card.wide{grid-column:1/-1;}
+@supports not (backdrop-filter:blur(1px)){.card,.score{background:var(--paper);}}
 
-/* ── The sheet ── */
-.sheet{max-width:1180px;margin:0 auto;background:var(--sheet);border:1px solid var(--edge);
-  position:relative;padding:14px;color:var(--ink);}
-.sheet::after{content:'';position:absolute;inset:14px;border:1px solid var(--frame);
-  pointer-events:none;z-index:2;}
-.xh{position:absolute;width:8px;height:8px;color:var(--reg-mark);z-index:3;pointer-events:none;}
-.xh-tl{top:10px;inset-inline-start:10px;} .xh-tr{top:10px;inset-inline-end:10px;}
-.xh-bl{bottom:10px;inset-inline-start:10px;} .xh-br{bottom:10px;inset-inline-end:10px;}
-/* A security band as pure texture. No lettering, because a screen cannot
-   carry authenticated issue and is not allowed to imply that it does.    */
-.band{height:5px;margin:-14px -14px 14px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5'%3E%3Cpath d='M0 5L4 0' stroke='%23CCDFE0' stroke-width='1'/%3E%3C/svg%3E");}
-html[data-theme="dark"] .band{
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5'%3E%3Cpath d='M0 5L4 0' stroke='%23337D82' stroke-width='1'/%3E%3C/svg%3E");}
+/* Entrance. Rise and fade, staggered just enough to read as a sequence. */
+.viz .rise{opacity:0;transform:translateY(10px);}
+.viz.go .rise{opacity:1;transform:none;
+  transition:opacity 340ms var(--out-ease),transform 340ms var(--out-ease);}
+.viz.go .rise:nth-child(1){transition-delay:0ms;}
+.viz.go .rise:nth-child(2){transition-delay:60ms;}
+.viz.go .rise:nth-child(3){transition-delay:120ms;}
+.viz.go .score{transition-delay:180ms;}
 
-/* ── Masthead ── */
-.over{font:700 10px/1.4 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--ink-2);text-align:end;margin-bottom:9px;padding-inline:4px;}
-.mrule{height:3px;background:var(--frame);}
-.mast{display:flex;}
-.mast > div{padding:12px 16px 14px;border-inline-end:1px solid var(--frame);min-width:0;}
-.mast > div:last-child{border-inline-end:0;}
-.mc-1{flex:1;} .mc-2{width:150px;flex:none;} .mc-3{width:120px;flex:none;} .mc-4{width:196px;flex:none;}
-.mast em{display:block;font:700 10px/1 'Inter',sans-serif;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--ink-2);font-style:normal;}
-.mast b{display:block;font:800 15px/1.1 'BwGradual',sans-serif;color:var(--ink);margin-top:28px;
-  font-variant-numeric:tabular-nums;}
-.mc-1 b{font-size:21px;letter-spacing:-.01em;font-variant-numeric:normal;}
-.mast span{display:block;font:500 11px/1.4 'Inter',sans-serif;color:var(--ink-2);margin-top:5px;}
-/* The one inverted cell, always the inverse of the paper, so in dark mode it
-   flips to teal on white rather than sitting there as a dark block.       */
-.mc-4{background:var(--inv-bg);}
-.mc-4 em,.mc-4 b,.mc-4 span{color:var(--inv-ink);}
+/* Donut */
+.donut-wrap{display:flex;align-items:center;gap:20px;margin-top:6px;}
+.donut{position:relative;flex-shrink:0;width:150px;height:150px;}
+.donut svg{width:150px;height:150px;transform:rotate(-90deg);}
+.donut circle{fill:none;stroke-linecap:butt;
+  transition:stroke-dasharray 760ms var(--out-ease),stroke-width 160ms var(--out-ease),opacity 160ms var(--out-ease);}
+.donut circle.seg{cursor:default;}
+.donut:hover circle.seg{opacity:.45;}
+.donut:hover circle.seg:hover{opacity:1;stroke-width:24;}
+.donut-mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  pointer-events:none;text-align:center;}
+.donut-n{font:800 31px/1 'BwGradual',sans-serif;color:var(--ink);letter-spacing:-.03em;}
+.donut-l{font:500 10.5px/1.3 'BwGradual',sans-serif;color:var(--ink-3);margin-top:4px;max-width:96px;}
+.keys{display:flex;flex-direction:column;gap:7px;min-width:0;flex:1;}
+.key{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);}
+.key i{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+.key b{color:var(--ink);font-weight:700;margin-inline-start:auto;font-variant-numeric:tabular-nums;}
 
-/* ── Row A, the clause rule ── */
-.crule{margin-top:22px;}
-.crule-k{font:700 10px/1.4 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--ink-2);margin-bottom:12px;}
-.crule-h{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
-  flex-wrap:wrap;margin-bottom:16px;}
-.big{display:flex;align-items:baseline;gap:12px;}
-.big-n{font:800 76px/.85 'BwGradual',sans-serif;letter-spacing:-.03em;color:var(--ink);}
-.big-t{font:400 13px/1.35 'BwGradual',sans-serif;letter-spacing:.02em;color:var(--ink);max-width:22ch;}
-.big-s{font:500 11px/1.5 'Inter',sans-serif;color:var(--ink-2);margin-top:8px;max-width:56ch;}
-.lgd{display:grid;grid-template-columns:auto auto;gap:11px 28px;
-  justify-content:end;align-content:end;}
-.lgd span{display:inline-flex;align-items:center;gap:7px;min-width:0;}
-.lgd em{min-width:0;}
-.lgd i{width:14px;height:14px;flex-shrink:0;border:1px solid var(--bar-edge);border-radius:2px;}
-.lgd svg{width:13px;height:13px;color:var(--ink);flex-shrink:0;}
-.lgd em{font:600 12.5px/1 'BwGradual',sans-serif;color:var(--ink);font-style:normal;}
-.lgd b{font:700 13px/1 'BwGradual',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums;}
+/* Bars grow from their own baseline rather than fading in */
+.viz .grow{transform:scaleX(0);transform-origin:left center;}
+html[dir="rtl"] .viz .grow{transform-origin:right center;}
+.viz.go .grow{transform:scaleX(1);transition:transform 620ms var(--out-ease);}
 
-/* Three standards drawn as dimension brackets over eighteen blades */
-.grid18{display:grid;grid-template-columns:repeat(18,1fr);gap:0;}
-.brackets{margin-bottom:8px;}
-.grp{position:relative;height:30px;}
-.grp b{position:absolute;inset-inline:3px;bottom:0;border-top:1px solid var(--reg-mark);}
-.grp b::before,.grp b::after{content:'';position:absolute;top:0;width:1px;height:6px;background:var(--reg-mark);}
-.grp b::before{inset-inline-start:0;} .grp b::after{inset-inline-end:0;}
-.grp span{position:absolute;inset-inline:0;bottom:9px;text-align:center;
-  font:700 11px/1 'Inter',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);}
-.blade{display:block;padding:0;border-inline-start:1px solid var(--hair);
-  text-decoration:none;color:inherit;}
-.blade:first-of-type{border-inline-start:0;}
-.blade i{display:block;height:64px;background:var(--st);
-  outline:1px solid var(--bar-edge);outline-offset:-1px;transform-origin:bottom center;}
-.blade .cap{display:block;min-height:46px;padding:8px 4px 0;text-align:center;}
-.blade .cap svg{width:13px;height:13px;color:var(--ink);display:block;margin:0 auto 4px;}
-.blade .cap em{display:block;font:700 10px/1.2 'Inter',sans-serif;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--ink-2);font-style:normal;}
-.blade .cap b{display:block;font:600 11.5px/1.25 var(--mono);color:var(--ink);margin-top:2px;}
-.gband{display:none;}
-
-/* ── Data plates: one ruled form, not three floating cards ── */
-.plates{display:grid;grid-template-columns:repeat(12,1fr);margin-top:24px;
-  border-top:1px solid var(--frame);}
-.plate{border-bottom:1px solid var(--frame);padding:18px 20px 20px;background:var(--sheet);min-width:0;}
-.plate-a{grid-column:1/7;} .plate-b{grid-column:7/13;border-inline-start:1px solid var(--frame);}
-.plate-c{grid-column:1/-1;}
-.plate h3{font:700 12.5px/1.3 'Inter',sans-serif;color:var(--ink);letter-spacing:.01em;}
-.plate .sub{font:500 11px/1.45 'Inter',sans-serif;color:var(--ink-2);margin-top:4px;margin-bottom:18px;}
-.plate .foot{font:400 11px/1.5 'Inter',sans-serif;color:var(--ink-2);margin-top:14px;}
-
-/* The measured bar. flex is the raw count, so the proportions are the data
-   and no frame of the entrance can show a false one.                     */
-.mbar{display:flex;height:34px;gap:2px;background:var(--gap);}
-.mbar span{outline:1px solid var(--bar-edge);outline-offset:-1px;min-width:3px;}
-.dim{height:30px;position:relative;margin-top:7px;}
-.dim::before{content:'';position:absolute;inset-inline:0;top:11px;height:1px;background:var(--teal-40);}
-html[data-theme="dark"] .dim::before{background:var(--teal-60);}
-.dim i{position:absolute;top:6px;width:1px;height:11px;background:var(--frame);}
-.dim span{position:absolute;top:15px;inset-inline-start:0;font:600 12px/1 'BwGradual',sans-serif;
-  color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;}
-.sched{margin-top:10px;}
-.sched > div{display:grid;grid-template-columns:18px 1fr 56px 56px;align-items:center;height:28px;
-  border-top:1px solid var(--hair);}
-.sched > div:last-child{border-bottom:1px solid var(--hair);}
-.sched i{width:12px;height:12px;border-radius:2px;outline:1px solid var(--bar-edge);}
-.sched em{font:600 11.5px/1 'Inter',sans-serif;letter-spacing:.06em;text-transform:uppercase;
-  color:var(--ink);font-style:normal;}
-.sched b{font:700 13px/1 'BwGradual',sans-serif;color:var(--ink);text-align:end;
-  font-variant-numeric:tabular-nums;border-inline-start:1px solid var(--hair);padding-inline-end:8px;}
-.sched u{font:400 11.5px/1 'Inter',sans-serif;color:var(--ink-2);text-align:end;
-  text-decoration:none;font-variant-numeric:tabular-nums;}
-
-/* Ageing. DOM flex tracks, so labels are real text and RTL comes for free. */
-.ages > div{display:grid;grid-template-columns:112px 1fr 48px;align-items:center;
-  min-height:34px;border-top:1px solid var(--hair);}
-.ages > div:last-child{border-bottom:1px solid var(--hair);}
-.ages em{font:600 11.5px/1 'Inter',sans-serif;letter-spacing:.05em;text-transform:uppercase;
-  color:var(--ink);font-style:normal;font-variant-numeric:tabular-nums;}
-.track{display:flex;height:18px;}
-.track b{outline:1px solid var(--bar-edge);outline-offset:-1px;}
-.track u{background:transparent;}
-.ages span{font:700 15px/1 'BwGradual',sans-serif;color:var(--ink);text-align:end;
-  font-variant-numeric:tabular-nums;border-inline-start:1px solid var(--hair);padding-inline-end:6px;}
-/* A change bar marks a location, never a condition, so it is always teal. */
-.ages .flag,.nrow.flag{position:relative;}
-.ages .flag::before,.nrow.flag::before{content:'';position:absolute;inset-block:0;
-  inset-inline-start:-20px;width:3px;background:var(--frame);}
-
-/* Numbering. The held run is what carries ink, because it is the problem. */
-.nhd,.nrow{display:grid;grid-template-columns:1fr 76px 64px 2.2fr 56px;align-items:center;}
-.nhd{height:26px;background:var(--band);}
-.nhd em{font:700 10px/1 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--band-ink);font-style:normal;padding-inline-end:8px;}
-.nhd em.end{text-align:end;padding-inline-end:2px;}
-.nrow{height:30px;border-top:1px solid var(--hair);}
-.nsch > .nrow:last-child{border-bottom:1px solid var(--hair);}
-.nrow em{font:600 12px/1.2 'Inter',sans-serif;color:var(--ink);font-style:normal;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-inline-end:10px;}
-.nrow.flag em{font:800 12.5px/1.2 'BwGradual',sans-serif;}
-.nrow s{font:600 12px/1 'BwGradual',sans-serif;color:var(--ink);text-decoration:none;
-  font-variant-numeric:tabular-nums;}
-.nrow b{font:700 13px/1 'BwGradual',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums;}
-.nrow u{font:400 11.5px/1 'Inter',sans-serif;color:var(--ink-2);text-align:end;
-  text-decoration:none;font-variant-numeric:tabular-nums;padding-inline-end:2px;}
-.ncell{padding-inline-end:14px;min-width:0;}
-.ntr{height:14px;background:var(--track);}
-.ntr b{display:block;height:100%;background:var(--track-ink);
-  outline:1px solid var(--bar-edge);outline-offset:-1px;}
-
-/* ── The ledger ── */
-.ledger{margin-top:24px;border:1px solid var(--frame);border-collapse:collapse;width:100%;}
-/* The register's glass thead rule is a bare element selector, so it reaches
-   the ledger too. Nothing inside the sheet blurs. */
-#view-con thead th{position:static;background:var(--frame);color:#FFFFFF;
-  backdrop-filter:none;-webkit-backdrop-filter:none;
-  font:700 10px/1 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;
-  padding:9px 16px;text-align:start;border-bottom:0;white-space:nowrap;}
-html[data-theme="dark"] #view-con thead th{background:transparent;border-bottom:2px solid var(--frame);}
-#view-con tbody tr{cursor:default;opacity:1;transform:none;animation:none;
-  transition:background 120ms var(--press);}
-.ledger td{padding:13px 16px;border-bottom:1px solid var(--hair);vertical-align:top;
-  background:transparent;}
-.ledger tr:last-child td{border-bottom:none;}
-/* The ledger's left edge is an eighteen segment ribbon that rhymes with the
-   clause rule above it: a printed margin rule, not a badge column.       */
-.mk{width:26px;padding:0;box-shadow:inset 4px 0 0 var(--st);}
-.ref{width:168px;}
-/* Ledger rows are hoverable, and --ink-2 falls to 3.91:1 on the hover
-   ground. Every word in a row is --ink; hierarchy comes from weight,
-   size and letter-spacing instead. */
-.ref em{display:block;font:700 10px/1.3 'Inter',sans-serif;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--ink);font-style:normal;}
-.ref b{display:block;font:600 11.5px/1.4 var(--mono);color:var(--ink);white-space:nowrap;margin-top:2px;}
-.req{font:600 12.5px/1.4 'BwGradual',sans-serif;color:var(--ink);}
-.evd{font:400 12.5px/1.6 'Inter',sans-serif;color:var(--ink);max-width:62ch;margin-top:4px;}
-.cell-chip{width:132px;text-align:end;}
-.bandrow td{background:var(--band);color:var(--band-ink);padding:7px 16px;
-  font:700 10.5px/1.2 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;
-  border-bottom:0;}
-.bandrow div{display:flex;align-items:center;justify-content:space-between;gap:14px;}
-.up{font:600 11px/1 'Inter',sans-serif;color:var(--band-ink);letter-spacing:.04em;
-  text-transform:none;white-space:nowrap;}
-/* Jumping from a blade to its row. :target alone would do it, but the
-   ledger is rebuilt on every tab switch and role change, and a recreated
-   row is no longer the document's target, so the mark is mirrored. */
-.ledger tr:target,.ledger tr.hit{background:var(--band);}
-.ledger tr:target td,.ledger tr.hit td{animation:flash 1200ms var(--press) 1 both;}
-@keyframes flash{0%{background:var(--band);}100%{background:transparent;}}
-
-#view-con .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:2px;
-  background:var(--chip-bg);border:1.5px solid var(--st);color:var(--chip-ink);
-  font:700 11px/1.2 'Inter',sans-serif;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;}
-#view-con .chip svg{width:12px;height:12px;color:var(--st);flex-shrink:0;}
-
-/* ── Row D, title block ── */
-.tblock{margin-top:24px;display:flex;align-items:flex-end;justify-content:space-between;
-  gap:24px;flex-wrap:wrap;}
-.note-l{font:400 11.5px/1.65 'Inter',sans-serif;color:var(--ink-2);max-width:62ch;
-  flex:1 1 320px;padding-inline-start:4px;}
-.tb{width:396px;flex:none;border:1px solid var(--frame);}
-.tb > div{display:grid;grid-template-columns:106px 1fr 104px;border-bottom:1px solid var(--frame);}
-.tb > div:last-child{border-bottom:0;}
-.tb span{padding:8px 10px;border-inline-end:1px solid var(--frame);min-width:0;display:flex;align-items:center;}
-.tb span:last-child{border-inline-end:0;}
-.tb em{font:700 10px/1.2 'Inter',sans-serif;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--ink-2);font-style:normal;}
-.tb b{font:600 11.5px/1.3 'Inter',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums;}
-.strip{margin-top:14px;border-top:1px solid var(--frame);padding:10px 4px 0;
-  font:700 11px/1.7 'Inter',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);}
-
-/* ── Motion: one entrance of 1.26s, then the page is still until touched ── */
-.grow{transform:scaleX(0);transform-origin:left center;}
-html[dir="rtl"] .grow{transform-origin:right center;}
-.go .grow{transform:scaleX(1);transition:transform var(--dur,520ms) var(--press) var(--d,0ms);}
-.sheet,.fade{opacity:0;}
-.go .sheet{opacity:1;transition:opacity 90ms var(--press);}
-.go .fade{opacity:1;transition:opacity var(--fdur,200ms) var(--press) var(--d,0ms);}
-.mrule{transform:scaleX(0);transform-origin:left center;}
-html[dir="rtl"] .mrule{transform-origin:right center;}
-.go .mrule{transform:scaleX(1);transition:transform 260ms var(--press) 60ms;}
-.blade i{opacity:0;transform:scaleY(.35);}
-.go .blade i{opacity:1;transform:scaleY(1);
-  transition:opacity 200ms var(--press) var(--d),transform 200ms var(--press) var(--d);}
-
-@media (hover:hover) and (pointer:fine){
-  .ledger tbody tr:hover{background:var(--hover);}
-  .ledger tbody tr:hover td.mk{box-shadow:inset 7px 0 0 var(--st);}
-  .ledger tbody tr.bandrow:hover{background:var(--band);}
-  .blade:hover i{outline-width:2px;}
-  .blade:hover .cap b{font-weight:700;}
-  .mbar span:hover,.track b:hover{outline-width:2px;}
+@media (prefers-reduced-motion: reduce){
+  .viz .rise,.viz.go .rise{opacity:1;transform:none;transition:none;}
+  .viz .grow,.viz.go .grow{transform:none;transition:none;}
+  .donut circle{transition:none;}
 }
-@media (prefers-reduced-motion:reduce){
-  #view-con *,#view-con *::before,#view-con *::after{
-    animation:none!important;transition:none!important;transform:none!important;opacity:1!important;}
-  .ledger tr:target td,.ledger tr.hit td{background:var(--band)!important;}
-}
-@media print{
-  #view-con{background:#fff;margin:0;padding:0;}
-  .sheet{max-width:none;border:0;}
-  .blade i{print-color-adjust:exact;-webkit-print-color-adjust:exact;}
-}
+.card h3{font:700 12.5px/1.3 'BwGradual',sans-serif;color:var(--ink);}
+.card .sub{font-family:var(--read);font-size:11.5px;color:var(--ink-3);margin-top:3px;margin-bottom:15px;}
+.card svg{display:block;width:100%;overflow:visible;}
+.card svg text{font-family:'BwGradual',sans-serif;font-variant-numeric:tabular-nums;}
+.lg{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:13px;}
+.lg span{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2);}
+.lg i{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+.lg b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;}
+.hero{display:flex;align-items:baseline;gap:9px;margin-bottom:2px;}
+.hero-n{font:800 35px/1 'BwGradual',sans-serif;color:var(--ink);letter-spacing:-.03em;}
+.hero-u{font-size:12px;color:var(--ink-3);}
+#tip{position:fixed;z-index:80;background:#005D63;color:#FFFFFF;font-size:11.5px;font-weight:500;
+  padding:6px 9px;border-radius:5px;pointer-events:none;opacity:0;transition:opacity 120ms var(--out-ease);
+  white-space:nowrap;}
+#tip.on{opacity:1;}
+.bar-hit{cursor:default;}
 
-/* ── 390px. The clause rule loses nothing here: all eighteen blades, all
-   eighteen captions, all eighteen links, all three groups.              ── */
-@media(max-width:620px){
-  .sheet{padding:8px;} .sheet::after{inset:8px;}
-  .xh-tl,.xh-tr{top:4px;} .xh-bl,.xh-br{bottom:4px;}
-  .xh-tl,.xh-bl{inset-inline-start:4px;} .xh-tr,.xh-br{inset-inline-end:4px;}
-  .band{height:4px;margin:-8px -8px 10px;}
-  .over{font-size:9.5px;letter-spacing:.08em;}
-  .mast{display:grid;grid-template-columns:1fr 1fr;}
-  .mast > div{border-inline-end:1px solid var(--frame);border-bottom:1px solid var(--frame);
-    width:auto;flex:none;padding:10px 12px 12px;}
-  .mast > div:nth-child(2n){border-inline-end:0;}
-  .mast > div:nth-child(n+3){border-bottom:0;}
-  .mc-1 b{font-size:17px;}
-  .big-n{font-size:56px;}
-  .lgd{grid-template-columns:1fr 1fr;gap:10px 12px;justify-content:stretch;}
-  .lgd b{margin-inline-start:auto;}
-  .brackets{display:none;}
-  .grid18{grid-template-columns:repeat(3,1fr);}
-  .gband{display:flex;grid-column:1/-1;height:24px;background:var(--band);color:var(--band-ink);
-    align-items:center;padding-inline:8px;margin-top:6px;
-    font:700 10.5px/1 'Inter',sans-serif;letter-spacing:.12em;text-transform:uppercase;}
-  .gband:first-child{margin-top:0;}
-  .blade{border-inline-start:0;}
-  .blade i{height:48px;}
-  .plates{grid-template-columns:1fr;}
-  .plate,.plate-a,.plate-b,.plate-c{grid-column:1/-1;padding:14px 12px 16px;}
-  .plate-b{border-inline-start:0;}
-  .mbar{height:30px;}
-  .ages > div{grid-template-columns:104px 1fr 40px;}
-  .ages em{letter-spacing:.02em;}
-  .ages .flag::before,.nrow.flag::before{inset-inline-start:-12px;}
-  .nhd,.nrow{grid-template-columns:1.35fr 40px 1fr 42px;}
-  .nrow em{font-size:11.5px;} .nrow.flag em{font-size:12px;}
-  .nhd em{padding-inline-end:4px;} .nhd em.end{font-size:9px;letter-spacing:.04em;}
-  .nhd .col-num,.nrow .col-num{display:none;}
-  .ncell{padding-inline-end:8px;}
-  /* The ledger becomes three lines: reference and state, then requirement,
-     then evidence. The 4px state spine moves to the whole row.           */
-  #view-con .ledger thead th{display:none;}
-  #view-con .ledger thead th.ref-h{display:block;font-size:0;padding:9px 12px;}
-  #view-con .ledger thead th.ref-h::before{content:'Clause by clause';font-size:10px;
-    letter-spacing:.14em;}
-  .bandrow td{font-size:10px;letter-spacing:.06em;}
-  .bandrow div{gap:8px;}
-  .ledger tbody tr{display:flex;flex-wrap:wrap;align-items:flex-start;
-    border-bottom:1px solid var(--hair);box-shadow:inset 4px 0 0 var(--st);padding:12px 0;}
-  .ledger tbody tr.bandrow{display:block;padding:0;box-shadow:none;}
-  .ledger tbody tr.bandrow td{display:block;padding:7px 12px;}
-  .ledger td{border-bottom:0;padding:0 12px;}
-  .ledger td.mk{display:none;}
-  .ledger td.ref{width:auto;flex:1 1 auto;order:1;}
-  .ledger td.ref em,.ledger td.ref b{display:inline;margin:0;}
-  .ledger td.ref b{margin-inline-start:6px;}
-  .ledger td.cell-chip{width:auto;flex:0 0 auto;order:2;}
-  .ledger td.body{flex:1 1 100%;order:3;margin-top:7px;}
-  .evd{max-width:none;}
-  .tb{width:100%;}
-  .strip{letter-spacing:.05em;font-size:10.5px;}
-}
+/* ── Conformance scorecard ── */
+.score{background:var(--glass);border:1px solid var(--glass-line);border-radius:var(--r3);overflow:hidden;
+  backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);
+  box-shadow:var(--glass-shade);opacity:0;transform:translateY(10px);}
+.viz.go .score{opacity:1;transform:none;transition:opacity 340ms var(--out-ease),transform 340ms var(--out-ease);}
+.score-h{padding:16px 19px 14px;border-bottom:1px solid var(--rule);}
+.score-h h3{font:700 12.5px/1.3 'BwGradual',sans-serif;color:var(--ink);}
+.score-h p{font-size:11.5px;color:var(--ink-3);margin-top:3px;}
+.score table{width:100%;}
+.score th{position:static;}
+.score td{padding:11px 19px;border-bottom:1px solid var(--rule-soft);vertical-align:top;}
+.score tr:last-child td{border-bottom:none;}
+.score .cl{font:600 11px/1.5 var(--mono);color:var(--ink-3);white-space:nowrap;}
+.score .what{font-weight:600;color:var(--ink);}
+.score .how{font-family:var(--read);font-size:11.5px;color:var(--ink-2);margin-top:3px;max-width:62ch;}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:var(--r1);
+  border:1px solid currentColor;font:700 9.5px/1.2 'BwGradual',sans-serif;letter-spacing:.06em;
+  text-transform:uppercase;white-space:nowrap;}
+.chip svg{width:10px;height:10px;}
+.k-met{color:var(--c-met);} .k-part{color:var(--c-part);}
+.k-back{color:var(--c-back);} .k-qhse{color:var(--c-qhse);}
+.sum-row{display:flex;gap:22px;flex-wrap:wrap;padding:14px 19px;background:var(--inset);
+  border-top:1px solid var(--rule);font-size:11.5px;color:var(--ink-2);}
+.sum-row b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums;}
 
 /* ── Drawer ── */
 .scrim{position:fixed;inset:0;background:rgba(0,19,20,.44);opacity:0;pointer-events:none;
@@ -718,84 +484,51 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
     <button class="tab" id="tab-reg" role="tab" aria-selected="false" onclick="showView('reg')">Register</button>
   </div>
 
-  <div id="view-con">
-    <div class="sheet">
-      <div class="band" aria-hidden="true"></div>
-      <svg class="xh xh-tl" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width=".75" aria-hidden="true"><path d="M4 0V8"/><path d="M0 4H8"/></svg>
-      <svg class="xh xh-tr" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width=".75" aria-hidden="true"><path d="M4 0V8"/><path d="M0 4H8"/></svg>
-      <svg class="xh xh-bl" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width=".75" aria-hidden="true"><path d="M4 0V8"/><path d="M0 4H8"/></svg>
-      <svg class="xh xh-br" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width=".75" aria-hidden="true"><path d="M4 0V8"/><path d="M0 4H8"/></svg>
-
-      <div class="over">Sheet 1 of 1 · Generated from the live register · Not a controlled copy</div>
-      <div class="mrule"></div>
-      <div class="mast">
-        <div class="mc-1">
-          <em>Document</em><b>MASTER DOCUMENT LIST</b>
-          <span>Conformance reading, TQ-QHSE-S001 · ISO 9001 · API Spec Q2</span>
-        </div>
-        <div class="mc-2"><em>As at</em><b id="mh-date">&nbsp;</b></div>
-        <div class="mc-3"><em>Records</em><b id="mh-n">&nbsp;</b><span>Visible to this role</span></div>
-        <div class="mc-4"><em>Status</em><b>UNCONTROLLED</b><span>Screen view</span></div>
-      </div>
-
-      <section class="crule" id="clause-rule">
-        <div class="crule-k fade" style="--d:180ms" id="crule-k">&nbsp;</div>
-        <div class="crule-h">
-          <div class="fade" style="--d:180ms">
-            <div class="big"><span class="big-n" id="met-n">&nbsp;</span><span class="big-t" id="big-t"></span></div>
-            <p class="big-s">Front end means satisfied by this register and this interface. Nine clauses need a back end or a QHSE decision.</p>
+  <div id="view-con" class="viz">
+    <div class="cards">
+      <div class="card rise">
+        <h3>Against the standards</h3>
+        <div class="sub">Eighteen clauses across TQ-QHSE-S001, ISO 9001 and API Q2.</div>
+        <div class="donut-wrap">
+          <div class="donut">
+            <svg viewBox="0 0 150 150" id="dn-con" role="img" aria-label="Clause conformance"></svg>
+            <div class="donut-mid"><span class="donut-n" id="dn-con-n">0</span><span class="donut-l">of 18 clauses met in the front end</span></div>
           </div>
-          <div class="lgd fade" style="--d:300ms" id="lgd"></div>
-        </div>
-        <div class="grid18 brackets fade" style="--d:300ms" aria-hidden="true">
-          <div class="grp" style="grid-column:span 5"><span>TQ-QHSE-S001 · 5</span><b></b></div>
-          <div class="grp" style="grid-column:span 3"><span>ISO 9001 · 3</span><b></b></div>
-          <div class="grp" style="grid-column:span 10"><span>API Spec Q2 · 10</span><b></b></div>
-        </div>
-        <div class="grid18" id="blades" role="navigation" aria-label="Clauses"></div>
-      </section>
-
-      <div class="plates">
-        <div class="plate plate-a">
-          <h3>Register state</h3>
-          <p class="sub" id="reg-sub"></p>
-          <div class="mbar grow" id="mbar" style="--d:380ms;--dur:520ms"></div>
-          <div class="dim" id="dim"></div>
-          <div class="sched" id="sched"></div>
-        </div>
-        <div class="plate plate-b">
-          <h3>Overdue review ageing</h3>
-          <p class="sub" id="age-sub"></p>
-          <div class="ages" id="ages"></div>
-          <p class="foot" id="age-foot"></p>
-        </div>
-        <div class="plate plate-c">
-          <h3>Numbering under TQ-QHSE-S001 5.3</h3>
-          <p class="sub" id="num-sub"></p>
-          <div class="nsch" id="nsch"></div>
-          <p class="foot" id="num-foot"></p>
+          <div class="keys" id="k-con"></div>
         </div>
       </div>
-
-      <table class="ledger">
-        <thead><tr>
-          <th scope="col"><span class="vh">Marker</span></th>
-          <th scope="col" class="ref-h">Clause</th>
-          <th scope="col">Requirement and evidence</th>
-          <th scope="col">State</th>
-        </tr></thead>
-        <tbody id="ledger"></tbody>
-      </table>
-
-      <div class="tblock">
-        <p class="note-l">Figures are computed from the Knowledge Hub register at the time this page was opened and reflect the documents visible to the current role. The clause reading is a self-assessment by Document Control; no external body has assessed it.</p>
-        <div class="tb">
-          <div><span><em>Generated</em></span><span><b id="tb-when">&nbsp;</b></span><span><b id="tb-tz">&nbsp;</b></span></div>
-          <div><span><em>Source</em></span><span><b>Knowledge Hub register</b></span><span><b id="tb-n">&nbsp;</b></span></div>
-          <div><span><em>Basis</em></span><span><b>Self-assessment</b></span><span><b>Not verified</b></span></div>
+      <div class="card rise">
+        <h3>Where the register stands</h3>
+        <div class="sub">Every controlled document by its current state.</div>
+        <div class="donut-wrap">
+          <div class="donut">
+            <svg viewBox="0 0 150 150" id="dn-mix" role="img" aria-label="Documents by status"></svg>
+            <div class="donut-mid"><span class="donut-n" id="dn-mix-n">0</span><span class="donut-l">on their current revision</span></div>
+          </div>
+          <div class="keys" id="k-mix"></div>
         </div>
       </div>
-      <p class="strip">Uncontrolled, screen view. This is a self-assessment reading generated from the register. It is not a statement of conformity, not an approval, and not a controlled copy. The controlled export is TQ-QHSE-F086; SCORE remains the master.</p>
+      <div class="card rise">
+        <h3>How late the overdue reviews are</h3>
+        <div class="sub">Periodic review under API Q2 4.4.3 c.</div>
+        <div class="hero"><span class="hero-n" id="ov-n">0</span><span class="hero-u" id="ov-u"></span></div>
+        <svg id="ch-age" viewBox="0 0 400 128" role="img" aria-label="Overdue reviews by age"></svg>
+      </div>
+      <div class="card wide">
+        <h3>Numbering against TQ-QHSE-S001 5.3</h3>
+        <div class="sub">Documents that cannot take a conformant number because the standard assigns no short form.</div>
+        <svg id="ch-seg" role="img" aria-label="Numbering conformance by segment"></svg>
+        <div class="lg" id="lg-seg"></div>
+      </div>
+    </div>
+
+    <div class="score">
+      <div class="score-h">
+        <h3>Clause by clause</h3>
+        <p>What this register satisfies today, what needs the back end, and what is waiting on QHSE.</p>
+      </div>
+      <table><tbody id="score-rows"></tbody></table>
+      <div class="sum-row" id="score-sum"></div>
     </div>
   </div>
 
@@ -844,6 +577,7 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
   </section>
   </div>
 </div>
+<div id="tip" role="status"></div>
 <div id="toast" role="status" aria-live="polite"></div>
 
 <div class="scrim" id="scrim" onclick="closeDetail()"></div>
@@ -915,7 +649,7 @@ function writeUrl(){
   if(quick)u.set('view',quick);
   if(view==='reg')u.set('tab','reg');
   const qs=u.toString();
-  history.replaceState(null,'',(qs?location.pathname+'?'+qs:location.pathname)+location.hash);
+  history.replaceState(null,'',qs?location.pathname+'?'+qs:location.pathname);
 }
 
 function role(){return TAQA_ROLE.current();}
@@ -1151,225 +885,205 @@ function legacyCopy(text,done){
   else toast('This preview blocks downloads and clipboard access. Open the register in its own tab to export.',6500);
 }
 
-// ── The sheet ─────────────────────────────────────────────────────────────
-// Every figure is computed from the register, so the drawing and the ledger
-// can never disagree. There are no tooltips: a controlled document prints
-// what it means, and everything this page needs to say is typeset.
-const TICK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg>';
-const HALF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M4 12h16"/></svg>';
-const GEAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="3.4"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg>';
-const STOP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 7v7M12 17.5v.2"/></svg>';
-const KIND={
-  met: {ico:TICK, word:'Met',      say:'met',                        long:'Met'},
-  part:{ico:HALF, word:'Partial',  say:'partly met',                 long:'Partly met'},
-  back:{ico:GEAR, word:'Back end', say:'waiting on the back end',    long:'Waiting on the back end'},
-  qhse:{ico:STOP, word:'QHSE',     say:'blocked until QHSE decides', long:'Blocked until QHSE decides'}
-};
-const SHORT={'TQ-QHSE-S001':'S001','ISO 9001':'ISO 9001','API Spec Q2':'API Q2'};
+// ── Charts ────────────────────────────────────────────────────────────────
+// Everything is computed from the register, so the picture and the table can
+// never disagree. Palette validated against both surfaces before use.
+const tip=document.getElementById('tip');
+function bindTip(el,text){
+  el.addEventListener('mouseenter',()=>{tip.textContent=text;tip.classList.add('on');});
+  el.addEventListener('mousemove',e=>{
+    const w=tip.offsetWidth, x=Math.min(Math.max(e.clientX-w/2,8),innerWidth-w-8);
+    tip.style.left=x+'px'; tip.style.top=(e.clientY-34)+'px';});
+  el.addEventListener('mouseleave',()=>tip.classList.remove('on'));
+}
+const svgEl=(n,a)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',n);
+  for(const k in a)e.setAttribute(k,a[k]);return e;};
 
-const pad2=v=>String(v).padStart(2,'0');
-function stamp(){
-  const d=new Date(), off=-d.getTimezoneOffset(), m=Math.abs(off)%60;
-  return {date:d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()),
-    time:pad2(d.getHours())+':'+pad2(d.getMinutes()),
-    tz:(off<0?'-':'+')+pad2(Math.floor(Math.abs(off)/60))+(m?':'+pad2(m):'')};
+// A donut is fair for part-to-whole at a glance with six or fewer segments.
+// Segments are separated by a real 2px gap, carry a legend with counts, and
+// hold the headline in the middle rather than leaving it to be inferred.
+const R=57, CIRC=2*Math.PI*R, GAP_DEG=2;
+function donut(svgId, keyId, midId, parts, mid){
+  const svg=document.getElementById(svgId); svg.innerHTML='';
+  const total=parts.reduce((a,p)=>a+p.n,0)||1;
+  svg.appendChild(svgEl('circle',{cx:75,cy:75,r:R,stroke:'var(--grid)','stroke-width':18}));
+  let acc=0; const drawn=[];
+  parts.forEach((p,i)=>{
+    if(!p.n)return;
+    const frac=p.n/total;
+    const gap=parts.filter(x=>x.n).length>1 ? (GAP_DEG/360)*CIRC : 0;
+    const len=Math.max(frac*CIRC-gap,1.5);
+    const c=svgEl('circle',{cx:75,cy:75,r:R,stroke:p.c,'stroke-width':18,
+      'stroke-dasharray':'0 '+CIRC,'stroke-dashoffset':-(acc*CIRC)});
+    c.classList.add('seg');
+    c.style.transitionDelay=(i*90)+'ms';
+    svg.appendChild(c);
+    bindTip(c,p.k+': '+p.n+' of '+total+', '+Math.round(frac*100)+' per cent');
+    drawn.push([c,len]);
+    acc+=frac;
+  });
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    drawn.forEach(([c,len])=>c.setAttribute('stroke-dasharray',len+' '+(CIRC-len)));
+  }));
+  document.getElementById(keyId).innerHTML=parts.filter(p=>p.n).map(p=>
+    `<span class="key"><i style="background:${p.c}"></i>${p.k}<b>${p.n}</b></span>`).join('');
+  countTo(document.getElementById(midId), mid);
+}
+function countTo(el,to){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){el.textContent=to;return;}
+  const t0=performance.now(), dur=780;
+  const step=t=>{const p=Math.min((t-t0)/dur,1); el.textContent=Math.round((1-Math.pow(1-p,3))*to);
+    if(p<1)requestAnimationFrame(step);};
+  requestAnimationFrame(step);
 }
 
-// ── Row B1, register state ────────────────────────────────────────────────
-function plateRegister(){
+function chartMix(){
   const rows=visible().filter(d=>A.controlled(d));
-  const total=rows.length||1;
-  const parts=[
-    {k:'Current',    n:rows.filter(d=>d.status==='current').length,      c:'var(--rg-current)'},
-    {k:'Review due', n:rows.filter(d=>d.status==='under-review').length, c:'var(--rg-review)'},
-    {k:'Draft',      n:rows.filter(d=>d.status==='draft').length,        c:'var(--rg-draft)'},
-    {k:'Withdrawn',  n:rows.filter(d=>d.status==='obsolete'||d.status==='superseded').length,
-      c:'var(--rg-withdrawn)'}
-  ];
-  document.getElementById('reg-sub').textContent=
-    rows.length+' controlled documents by current state.';
-  // flex carries the raw count, so the proportions are the data itself and
-  // the entrance scales the whole bar rather than each segment separately.
-  document.getElementById('mbar').innerHTML=parts.filter(p=>p.n).map(p=>
-    `<span style="flex:${p.n};background:${p.c}"></span>`).join('');
-
-  let acc=0; const cuts=parts.filter(p=>p.n).map(p=>{acc+=p.n;return acc/total*100;});
-  const lead=parts[0];
-  document.getElementById('dim').innerHTML=
-    cuts.map((t,i)=>`<i class="fade" style="${i===cuts.length-1?'inset-inline-end:0':'inset-inline-start:'+t.toFixed(4)+'%'};--d:${1080+i*8}ms;--fdur:180ms"></i>`).join('')+
-    `<span class="fade" style="--d:1080ms;--fdur:180ms">${lead.n} ${lead.k.toUpperCase()} · ${(lead.n/total*100).toFixed(1)}%</span>`;
-
-  document.getElementById('sched').innerHTML=parts.map(p=>
-    `<div><i style="background:${p.c}"></i><em>${p.k}</em><b>${p.n}</b>`+
-    `<u>${(p.n/total*100).toFixed(1)}%</u></div>`).join('');
+  const cur=rows.filter(d=>d.status==='current').length;
+  donut('dn-mix','k-mix','dn-mix-n',[
+    {k:'Current',    n:cur,                                                   c:'var(--c-met)'},
+    {k:'Review due', n:rows.filter(d=>d.status==='under-review').length,      c:'var(--c-part)'},
+    {k:'Draft',      n:rows.filter(d=>d.status==='draft').length,             c:'var(--c-back)'},
+    {k:'Withdrawn',  n:rows.filter(d=>d.status==='obsolete'||d.status==='superseded').length, c:'var(--c-qhse)'}
+  ], cur);
 }
 
-// ── Row B2, overdue review ageing ─────────────────────────────────────────
-function plateAgeing(){
+function chartAge(){
   const k=role();
-  const late=visible().filter(d=>A.overdue(d)&&TAQA_ROLE.inControlScope(d,k)).map(d=>-A.reviewDays(d));
+  const late=visible().filter(d=>A.overdue(d)&&TAQA_ROLE.inControlScope(d,k))
+    .map(d=>-A.reviewDays(d));
+  document.getElementById('ov-n').textContent=late.length;
+  document.getElementById('ov-u').textContent=late.length===1?'review overdue':'reviews overdue';
   const buckets=[
-    {l:'1 to 30 days',   f:n=>n<=30},
-    {l:'31 to 90 days',  f:n=>n>30&&n<=90},
-    {l:'91 to 180 days', f:n=>n>90&&n<=180},
-    {l:'Over 180 days',  f:n=>n>180}
-  ].map((b,i)=>({...b, n:late.filter(b.f).length, c:'var(--age-'+(i+1)+')'}));
+    {l:'1 to 30 days',   f:n=>n<=30,            c:'var(--o1)'},
+    {l:'31 to 90 days',  f:n=>n>30&&n<=90,      c:'var(--o2)'},
+    {l:'91 to 180 days', f:n=>n>90&&n<=180,     c:'var(--o3)'},
+    {l:'Over 180 days',  f:n=>n>180,            c:'var(--o4)'}
+  ].map(b=>({...b,n:late.filter(b.f).length}));
   const max=Math.max(...buckets.map(b=>b.n),1);
-  document.getElementById('age-sub').textContent=
-    'Periodic review under API Spec Q2 4.4.3 c.';
-  if(!TAQA_ROLES[k].controlPanel){
-    document.getElementById('ages').innerHTML='';
-    document.getElementById('age-foot').textContent=
-      'The overdue review queue is a Document Control function, so this role does not carry it. '+
-      'Switch to QMS or External Auditor to read it.';
-    return;
-  }
-  document.getElementById('ages').innerHTML=buckets.map((b,i)=>
-    `<div${i===3?' class="flag"':''}><em>${b.l}</em>`+
-    `<div class="track grow" style="--d:${480+i*60}ms;--dur:520ms">`+
-      (b.n?`<b style="flex:${b.n};background:${b.c}"></b>`:'')+
-      `<u style="flex:${max-b.n}"></u></div>`+
-    `<span>${b.n}</span></div>`).join('');
-  document.getElementById('age-foot').textContent=
-    late.length+' reviews overdue, bucketed by days past the stored review date. '+
-    buckets[3].n+' of '+late.length+' are more than six months late.';
+  const svg=document.getElementById('ch-age'); svg.innerHTML='';
+  const LBL=104, W=400, BW=W-LBL-34, H=26, GAP=8;
+  buckets.forEach((b,i)=>{
+    const y=i*(H+GAP);
+    const t=svgEl('text',{x:0,y:y+H/2+4,'font-size':11.5,fill:'var(--ink-3)'});
+    t.textContent=b.l; svg.appendChild(t);
+    svg.appendChild(svgEl('rect',{x:LBL,y:y,width:BW,height:H,fill:'var(--grid)',rx:3}));
+    const w=Math.max((b.n/max)*BW, b.n?3:0);
+    if(w){
+      const r=svgEl('rect',{x:LBL,y:y,width:w,height:H,fill:b.c,rx:3});
+      r.classList.add('grow'); r.style.transformOrigin=LBL+'px '+(y+H/2)+'px';
+      r.style.transitionDelay=(i*70)+'ms';
+      svg.appendChild(r);
+      bindTip(r,b.n+(b.n===1?' document ':' documents ')+b.l.toLowerCase()+' overdue');
+    }
+    const v=svgEl('text',{x:LBL+BW+9,y:y+H/2+4,'font-size':12,'font-weight':700,fill:'var(--ink)'});
+    v.textContent=b.n; svg.appendChild(v);
+  });
+  svg.setAttribute('viewBox','0 0 400 '+(buckets.length*(H+GAP)-GAP+4));
 }
 
-// ── Row C, numbering ──────────────────────────────────────────────────────
-function plateNumbering(){
+function chartSeg(){
   const rows=visible().filter(d=>A.controlled(d));
   const segs=Object.keys(L.segments).map(id=>{
     const inSeg=rows.filter(d=>d.segment===id);
     const prov=inSeg.filter(d=>d.numberStatus==='provisional').length;
-    return {id, name:L.segments[id].name, total:inSeg.length, prov, ok:inSeg.length-prov};
+    return {id,name:L.segments[id].name,total:inSeg.length,prov,ok:inSeg.length-prov};
   }).filter(x=>x.total>0).sort((a,b)=>b.prov-a.prov||b.total-a.total);
   const max=Math.max(...segs.map(x=>x.total),1);
-  const pvT=segs.reduce((a,x)=>a+x.prov,0), okT=segs.reduce((a,x)=>a+x.ok,0);
-  document.getElementById('num-sub').textContent=
-    pvT+' of '+rows.length+' controlled documents cannot take a conformant number, '+
-    'because the standard assigns no short form.';
-  // The held run is what carries ink. The problem is the thing drawn dark.
-  document.getElementById('nsch').innerHTML=
-    '<div class="nhd"><em>Segment</em><em class="col-num">Numbered</em><em>Held</em>'+
-    '<em></em><em class="end">Held %</em></div>'+
-    segs.map((x,i)=>
-      `<div class="nrow${i===0&&x.prov?' flag':''}">`+
-        `<em title="${esc(x.name)}">${esc(x.name)}</em>`+
-        `<s class="col-num">${x.ok}</s><b>${x.prov}</b>`+
-        `<div class="ncell"><div class="ntr grow" style="width:${(x.total/max*100).toFixed(3)}%;`+
-          `--d:${520+i*22}ms;--dur:440ms">`+
-          (x.prov?`<b style="width:${(x.prov/x.total*100).toFixed(3)}%"></b>`:'')+
-        `</div></div>`+
-        `<u>${Math.round(x.prov/x.total*100)}%</u>`+
-      `</div>`).join('');
-  document.getElementById('num-foot').textContent=
-    segs.length+' segments · '+okT+' numbered · '+pvT+' held pending a short form.';
+  const LBL=132, W=760, BW=W-LBL-46, H=19, GAP=7;
+  const svg=document.getElementById('ch-seg'); svg.innerHTML='';
+  svg.setAttribute('viewBox','0 0 '+W+' '+(segs.length*(H+GAP)-GAP+4));
+  svg.setAttribute('height',segs.length*(H+GAP)-GAP+4);
+  segs.forEach((x,i)=>{
+    const y=i*(H+GAP);
+    const t=svgEl('text',{x:0,y:y+H/2+4,'font-size':11.5,fill:'var(--ink-3)'});
+    t.textContent=x.name; svg.appendChild(t);
+    const okW=(x.ok/max)*BW, pvW=(x.prov/max)*BW;
+    const grow=(r,i2)=>{r.classList.add('grow');r.style.transformOrigin=LBL+'px '+(y+H/2)+'px';
+      r.style.transitionDelay=(i*45+i2*40)+'ms';};
+    if(okW>0){const r=svgEl('rect',{x:LBL,y:y,width:Math.max(okW,2),height:H,fill:'var(--neutral)',rx:2.5});
+      grow(r,0); svg.appendChild(r); bindTip(r,x.name+': '+x.ok+' numbered under 5.3');}
+    if(pvW>0){const r=svgEl('rect',{x:LBL+okW+(okW>0?2:0),y:y,width:Math.max(pvW,2),height:H,fill:'var(--c-qhse)',rx:2.5});
+      grow(r,1); svg.appendChild(r); bindTip(r,x.name+': '+x.prov+' waiting on a short form');}
+    const v=svgEl('text',{x:LBL+BW+10,y:y+H/2+4,'font-size':11,fill:x.prov?'var(--c-qhse)':'var(--ink-4)',
+      'font-weight':x.prov?700:500});
+    v.textContent=x.prov?x.prov+' held':'clear'; svg.appendChild(v);
+  });
+  const okT=segs.reduce((a,x)=>a+x.ok,0), pvT=segs.reduce((a,x)=>a+x.prov,0);
+  document.getElementById('lg-seg').innerHTML=
+    `<span><i style="background:var(--neutral)"></i>Numbered under 5.3 <b>${okT}</b></span>`+
+    `<span><i style="background:var(--c-qhse)"></i>Waiting on a short form <b>${pvT}</b></span>`;
 }
 
-// ── Row A and the ledger ──────────────────────────────────────────────────
-// The same eighteen clauses in the same order, drawn twice: once large,
-// labelled and navigable, once as a 4px margin spine beside the evidence.
-function ledger(){
-  const all=visible().filter(d=>A.controlled(d));
+// ── Conformance scorecard ─────────────────────────────────────────────────
+const TICK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg>';
+const HALF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M4 12h16"/></svg>';
+const GEAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="3.4"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg>';
+const STOP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 7v7M12 17.5v.2"/></svg>';
+const KIND={met:['k-met',TICK,'Met'],part:['k-part',HALF,'Partial'],back:['k-back',GEAR,'Back end'],qhse:['k-qhse',STOP,'QHSE']};
+
+function scorecard(){
+  const all=D.filter(d=>A.controlled(d));
   const n=all.length, prov=all.filter(d=>d.numberStatus==='provisional').length;
+  const over=all.filter(d=>A.overdue(d)).length;
   const ar=all.filter(d=>d.translationOf).length;
   const gone=all.filter(d=>d.status==='obsolete'||d.status==='superseded').length;
-
-  const S1='TQ-QHSE-S001', ISO='ISO 9001', Q2='API Spec Q2';
   const rows=[
-    ['c-01',S1,'4','Document types','qhse',
-      'Technical Alert and Lesson Learned are not defined types, so they cannot be numbered conformantly.'],
-    ['c-02',S1,'5.1','Master document list','met',
+    ['TQ-QHSE-S001 5.1','Master document list','met',
       n+' controlled documents in one register, exportable as TQ-QHSE-F086.'],
-    ['c-03',S1,'5.3','Identification and numbering','part',
+    ['TQ-QHSE-S001 5.3','Identification and numbering','part',
       (n-prov)+' of '+n+' carry a conformant number. '+prov+' cannot, because no short form exists yet.'],
-    ['c-04',S1,'5.3','Short forms','qhse',
-      'Cybersecurity and the Learning Center have no short form assigned. The Learning Center owns this platform.'],
-    ['c-05',S1,'5.6','Obsolete documents','met',
+    ['TQ-QHSE-S001 5.6','Obsolete documents','met',
       gone+' withdrawn documents stay visible and marked. Download, print, offline pin and the reference card are blocked on them.'],
-    ['c-06',ISO,'7.5.2 a','Identification and description','met',
+    ['ISO 9001 7.5.2 a','Identification and description','met',
       'Number, title, date, owner and reference are fields on every record rather than text inside a title.'],
-    ['c-07',ISO,'7.5.3.1 b','Protection from improper use','part',
+    ['ISO 9001 7.5.3.1 b','Protection from improper use','part',
       'Every record carries a classification. Enforcing it needs server-side authorisation.'],
-    ['c-08',ISO,'7.5.3.2 c','Control of changes','met',
+    ['ISO 9001 7.5.3.2 c','Control of changes','met',
       'Revision, issue date, approval date and what each document supersedes are all held.'],
-    ['c-09',Q2,'4.4.3 a, b','Approval and re-approval','part',
+    ['API Q2 4.4.3 a, b','Approval and re-approval','part',
       'Approval authority is recorded as a role from the section 4 table. The workflow itself needs a back end.'],
-    ['c-10',Q2,'4.4.3 c','Review for continued suitability','met',
-      'A cycle per document type, a stored due date, and an overdue queue surfaced to Document Control.'],
-    ['c-11',Q2,'4.4.3 d','Changes and current revision status','met',
+    ['API Q2 4.4.3 c','Review for continued suitability','met',
+      'A cycle per document type, a stored due date, and '+over+' overdue surfaced for the controller.'],
+    ['API Q2 4.4.3 d','Changes and current revision status','met',
       'Revision and supersedes are fields, so status is never inferred from a filename.'],
-    ['c-12',Q2,'4.4.3 e, f','Legibility and availability at point of use','met',
+    ['API Q2 4.4.3 e, f','Legibility and availability at point of use','met',
       'Reachable offline, with the uncontrolled-when-printed caveat on the printable card.'],
-    ['c-13',Q2,'4.4.3','Translations','part',
+    ['API Q2 4.4.3','Translations','part',
       ar+' Arabic versions linked to their English source. TQ-QHSE-S001 has no translation clause at all.'],
-    ['c-14',Q2,'4.4.4','External and customer documents','back',
+    ['API Q2 4.4.4','External and customer documents','back',
       'Not in the register yet. Needs its own store for standards, client specifications and their change impact.'],
-    ['c-15',Q2,'4.5 a to c','Record identification and legibility','met',
+    ['API Q2 4.5 a to c','Record identification and legibility','met',
       'Identification, collection point and legibility are covered by the record fields.'],
-    ['c-16',Q2,'4.5 d','Correction of records','back',
+    ['API Q2 4.5 d','Correction of records','back',
       'No rule yet for correcting an entry. Needs an audit trail the front end cannot provide.'],
-    ['c-17',Q2,'4.5 e to g','Storage, protection, retrieval','back',
+    ['API Q2 4.5 e to g','Storage, protection, retrieval','back',
       'SCORE is the master. Backup, restore and access control sit with IT.'],
-    ['c-18',Q2,'4.5 h, i','Retention and disposition','met',
-      'Ten years on every controlled record, per the 3rd Edition. TQ-QHSE-S001 7.5 still says five.']
+    ['API Q2 4.5 h, i','Retention and disposition','met',
+      'Ten years on every controlled record, per the 3rd Edition. TQ-QHSE-S001 7.5 still says five.'],
+    ['TQ-QHSE-S001 4','Document types','qhse',
+      'Technical Alert and Lesson Learned are not defined types, so they cannot be numbered conformantly.'],
+    ['TQ-QHSE-S001 5.3','Short forms','qhse',
+      'Cybersecurity and the Learning Center have no short form assigned. The Learning Center owns this platform.']
   ];
-  const c=k=>rows.filter(r=>r[4]===k).length;
-  const groups=[S1,ISO,Q2].map(std=>{
-    const inStd=rows.filter(r=>r[1]===std);
-    return {std, total:inStd.length, met:inStd.filter(r=>r[4]==='met').length, first:inStd[0][0]};
-  });
-
-  // The eighteen blades. The glyph sits in the caption, never inside the
-  // fill: no glyph colour clears 3:1 on Brave Orange, and in the caption it
-  // is 7.65:1 in both themes. Shape carries the state, hue confirms it.
-  document.getElementById('blades').innerHTML=rows.map((r,i)=>{
-    const g=groups.find(x=>x.std===r[1]);
-    const band=r[0]===g.first
-      ? `<div class="gband">${esc(r[1])} · ${g.total}</div>` : '';
-    return band+`<a class="blade" href="#${r[0]}" style="--st:var(--st-${r[4]});--d:${300+i*26}ms" `+
-      `aria-label="Clause ${esc(r[2])}, ${esc(r[1])}, ${KIND[r[4]].say}"><i></i>`+
-      `<span class="cap">${KIND[r[4]].ico}<em>${esc(SHORT[r[1]])}</em><b>${esc(r[2])}</b></span></a>`;
-  }).join('');
-
-  document.getElementById('crule-k').textContent='Conformance reading, '+rows.length+' clauses';
-  document.getElementById('met-n').textContent=c('met');
-  document.getElementById('big-t').textContent='of '+rows.length+' clauses met in the front end';
-  document.getElementById('lgd').innerHTML=['met','part','back','qhse'].map(k=>
-    `<span><i style="background:var(--st-${k})"></i>${KIND[k].ico}`+
-    `<em>${KIND[k].long}</em><b>${c(k)}</b></span>`).join('');
-
-  document.getElementById('ledger').innerHTML=rows.map(r=>{
-    const g=groups.find(x=>x.std===r[1]);
-    const band=r[0]===g.first
-      ? `<tr class="bandrow"><td colspan="4"><div><span>${esc(r[1])} · ${g.total} clauses · ${g.met} met</span>`+
-        `<a class="up" href="#clause-rule">&#8593; Clause rule</a></div></td></tr>` : '';
-    return band+`<tr id="${r[0]}" style="--st:var(--st-${r[4]})">`+
-      `<td class="mk"></td>`+
-      `<td class="ref"><em>${esc(r[1])}</em><b>${esc(r[2])}</b></td>`+
-      `<td class="body"><div class="req">${esc(r[3])}</div><div class="evd">${esc(r[5])}</div></td>`+
-      `<td class="cell-chip"><span class="chip" style="--chip-bg:var(--chip-${r[4]})">`+
-        `${KIND[r[4]].ico}${KIND[r[4]].word}</span></td></tr>`;
-  }).join('');
-
-  markTarget();
-  const t=stamp();
-  document.getElementById('mh-date').textContent=t.date;
-  document.getElementById('mh-n').textContent=n;
-  document.getElementById('tb-when').textContent=t.date+' '+t.time;
-  document.getElementById('tb-tz').textContent=t.tz;
-  document.getElementById('tb-n').textContent=n+' records';
+  document.getElementById('score-rows').innerHTML=rows.map(r=>{
+    const [cls,ico,lbl]=KIND[r[2]];
+    return `<tr><td style="width:150px;"><span class="cl">${esc(r[0])}</span></td>
+      <td><div class="what">${esc(r[1])}</div><div class="how">${esc(r[3])}</div></td>
+      <td style="width:108px;text-align:end;"><span class="chip ${cls}">${ico}${lbl}</span></td></tr>`;}).join('');
+  const c=k=>rows.filter(r=>r[2]===k).length;
+  donut('dn-con','k-con','dn-con-n',[
+    {k:'Met in the front end', n:c('met'),  c:'var(--c-met)'},
+    {k:'Partly met',           n:c('part'), c:'var(--c-part)'},
+    {k:'Waiting on the back end', n:c('back'), c:'var(--c-back)'},
+    {k:'Blocked until QHSE decides', n:c('qhse'), c:'var(--c-qhse)'}
+  ], c('met'));
+  document.getElementById('score-sum').innerHTML=
+    `<span><b>${c('met')}</b> met in the front end</span>`+
+    `<span><b>${c('part')}</b> partly met, the rest needs a back end</span>`+
+    `<span><b>${c('back')}</b> waiting on the back end</span>`+
+    `<span><b>${c('qhse')}</b> blocked until QHSE decides</span>`;
 }
-
-let targetSeen=false;
-function markTarget(){
-  document.querySelectorAll('.ledger tr.hit').forEach(t=>t.classList.remove('hit'));
-  const id=location.hash.slice(1); if(!id)return;
-  const t=document.getElementById(id); if(!t||!t.closest('.ledger'))return;
-  t.classList.add('hit');
-  if(!targetSeen){targetSeen=true;t.scrollIntoView({block:'center'});}
-}
-addEventListener('hashchange',markTarget);
 
 function showView(v){
   view=v;
@@ -1383,7 +1097,7 @@ function showView(v){
 function drawCharts(){
   const v=document.getElementById('view-con');
   v.classList.remove('go');
-  plateRegister();plateAgeing();plateNumbering();ledger();
+  chartMix();chartAge();chartSeg();scorecard();
   requestAnimationFrame(()=>requestAnimationFrame(()=>v.classList.add('go')));
 }
 
