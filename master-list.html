@@ -178,6 +178,64 @@ tbody tr[aria-selected="true"]{background:var(--brand-soft);}
 .note{padding:11px 14px;border-top:1px solid var(--rule);background:var(--inset);
   border-radius:0 0 var(--r3) var(--r3);font-size:11.5px;color:var(--ink-3);}
 
+/* ── Register surface: same glass as conformance, same ambient wash ── */
+#view-reg{position:relative;}
+#view-reg::before{content:'';position:absolute;inset:-56px 0 auto;height:380px;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(46% 60% at 14% 6%, rgba(0,93,99,.13), transparent 68%),
+    radial-gradient(40% 54% at 84% 2%, rgba(42,120,214,.08), transparent 66%);
+  filter:blur(6px);}
+html[data-theme="dark"] #view-reg::before{
+  background:
+    radial-gradient(46% 60% at 14% 6%, rgba(69,189,183,.13), transparent 68%),
+    radial-gradient(40% 54% at 84% 2%, rgba(57,135,229,.10), transparent 66%);}
+#view-reg > *{position:relative;z-index:1;}
+.counts,.reg{backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);}
+.counts{background:rgba(255,255,255,.7);border-color:rgba(255,255,255,.84);}
+.reg{background:rgba(255,255,255,.72);border-color:rgba(255,255,255,.84);
+  box-shadow:0 1px 2px rgba(19,27,38,.05),0 8px 26px rgba(19,27,38,.07);}
+.bar{background:rgba(247,248,250,.72);border-color:rgba(255,255,255,.84);}
+html[data-theme="dark"] .counts{background:rgba(24,32,44,.66);border-color:rgba(255,255,255,.09);}
+html[data-theme="dark"] .reg{background:rgba(24,32,44,.62);border-color:rgba(255,255,255,.09);
+  box-shadow:0 1px 2px rgba(0,0,0,.3),0 8px 26px rgba(0,0,0,.28);}
+html[data-theme="dark"] .bar{background:rgba(20,27,38,.66);border-color:rgba(255,255,255,.09);}
+@supports not (backdrop-filter:blur(1px)){
+  .counts,.reg{background:var(--paper);} .bar{background:var(--inset);}
+}
+thead th{background:rgba(247,248,250,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+html[data-theme="dark"] thead th{background:rgba(20,27,38,.94);}
+
+/* Rows arrive in sequence the first time a page is drawn */
+tbody tr{opacity:0;transform:translateY(4px);animation:rowIn 260ms var(--out-ease) forwards;}
+@keyframes rowIn{to{opacity:1;transform:none;}}
+
+/* ── Pager ── */
+.pager{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 14px;
+  border-top:1px solid var(--rule);}
+.pager-info{font:500 11.5px/1 var(--mono);color:var(--ink-3);}
+.pages{display:flex;gap:3px;margin-inline-start:auto;align-items:center;}
+.pg{min-width:29px;height:29px;padding:0 8px;border:1px solid transparent;background:transparent;
+  border-radius:var(--r2);font:600 12px/1 'Inter',sans-serif;color:var(--ink-3);cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background 140ms var(--out-ease),color 140ms var(--out-ease),
+             border-color 140ms var(--out-ease),transform 140ms var(--out-ease);}
+.pg:active{transform:scale(.94);}
+.pg[aria-current="page"]{background:var(--brand);border-color:var(--brand);color:#fff;}
+html[data-theme="dark"] .pg[aria-current="page"]{color:#0c1118;}
+.pg:disabled{opacity:.35;cursor:default;}
+.pg.dots{cursor:default;color:var(--ink-4);min-width:18px;padding:0;}
+@media (hover:hover) and (pointer:fine){
+  .pg:not(:disabled):not(.dots):not([aria-current]):hover{background:var(--inset);color:var(--ink);}
+}
+
+/* ── Toast ── */
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);z-index:90;
+  background:var(--ink);color:var(--paper);font-size:12.5px;font-weight:500;padding:11px 16px;
+  border-radius:var(--r2);box-shadow:0 10px 30px rgba(0,0,0,.24);opacity:0;pointer-events:none;
+  max-width:min(460px,90vw);line-height:1.5;
+  transition:opacity 200ms var(--out-ease),transform 200ms var(--out-ease);}
+#toast.on{opacity:1;transform:translate(-50%,0);}
+
 /* ── Tabs ── */
 .tabs{display:inline-flex;gap:2px;padding:3px;background:var(--inset);border:1px solid var(--rule);
   border-radius:var(--r2);margin-bottom:14px;}
@@ -458,20 +516,20 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
   <div class="bar">
     <div class="find">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-      <input id="q" type="search" placeholder="Search" oninput="limit=250;render()" autocomplete="off" aria-label="Search the register">
+      <input id="q" type="search" placeholder="Search" oninput="page=1;render()" autocomplete="off" aria-label="Search the register">
     </div>
-    <select id="f-seg" onchange="limit=250;render()" aria-label="Segment"><option value="">All segments</option></select>
-    <select id="f-type" onchange="limit=250;render()" aria-label="Type"><option value="">All types</option></select>
-    <select id="f-status" onchange="limit=250;render()" aria-label="Status">
+    <select id="f-seg" onchange="page=1;render()" aria-label="Segment"><option value="">All segments</option></select>
+    <select id="f-type" onchange="page=1;render()" aria-label="Type"><option value="">All types</option></select>
+    <select id="f-status" onchange="page=1;render()" aria-label="Status">
       <option value="">Any status</option><option value="current">Current</option>
       <option value="under-review">Review due</option><option value="draft">Draft</option>
       <option value="superseded">Superseded</option><option value="obsolete">Obsolete</option>
     </select>
-    <select id="f-cls" onchange="limit=250;render()" aria-label="Classification">
+    <select id="f-cls" onchange="page=1;render()" aria-label="Classification">
       <option value="">Any class</option><option value="internal">Internal</option>
       <option value="confidential">Confidential</option><option value="restricted">Restricted</option>
     </select>
-    <select id="f-lang" onchange="limit=250;render()" aria-label="Language">
+    <select id="f-lang" onchange="page=1;render()" aria-label="Language">
       <option value="">Both languages</option><option value="en">English</option><option value="ar">العربية</option>
     </select>
     <span class="count" id="count"></span>
@@ -489,12 +547,16 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
       </table>
       <p class="none" id="empty" hidden>Nothing matches these filters.</p>
     </div>
-    <button class="more" id="more" hidden onclick="limit=1e6;render()"></button>
+    <div class="pager" id="pager">
+      <span class="pager-info" id="pager-info"></span>
+      <div class="pages" id="pages"></div>
+    </div>
     <div class="note" id="note"></div>
   </section>
   </div>
 </div>
 <div id="tip" role="status"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <div class="scrim" id="scrim" onclick="closeDetail()"></div>
 <aside class="dw" id="dw" role="dialog" aria-modal="true" aria-labelledby="dw-title" aria-hidden="true">
@@ -534,7 +596,8 @@ Object.keys(L.segments).sort((a,b)=>L.segments[a].name.localeCompare(L.segments[
   .forEach(k=>fs.insertAdjacentHTML('beforeend',`<option value="${k}">${esc(L.segments[k].name)}</option>`));
 Object.keys(L.types).forEach(k=>ft.insertAdjacentHTML('beforeend',`<option value="${k}">${esc(L.types[k].label)}</option>`));
 
-let quick=null, limit=250, selected=null, view='reg';
+let quick=null, page=1, selected=null, view='reg';
+const PER_PAGE=20;
 const CT=[
   {k:'controlled', l:'Controlled',   f:d=>A.controlled(d)},
   {k:'current',    l:'Current',      f:d=>d.status==='current'},
@@ -596,11 +659,11 @@ function renderCounts(){
     return `<button class="ct" data-k="${c.k}"${c.flag?` data-f="${c.flag}"`:''} aria-pressed="${quick===c.k}" onclick="quickFilter('${c.k}')">
       <div class="ct-n">${n}</div><div class="ct-l">${c.l}</div></button>`;}).join('');
 }
-function quickFilter(k){quick=quick===k?null:k;limit=250;renderCounts();render();}
+function quickFilter(k){quick=quick===k?null:k;page=1;renderCounts();render();}
 function setRole(r){
   TAQA_ROLE.set(r);
   if(quick){const c=CT.find(x=>x.k===quick); if(c&&c.control&&!TAQA_ROLES[r].controlPanel)quick=null;}
-  limit=250;closeDetail();renderRole();renderCounts();render();
+  page=1;closeDetail();renderRole();renderCounts();render();
   if(view==='con')drawCharts();
 }
 
@@ -629,20 +692,48 @@ function due(d){
   return n<0?`<span class="dat late">${fmt(d.nextReviewDate)}<br>${Math.abs(n)} days late</span>`
             :`<span class="dat">${fmt(d.nextReviewDate)}</span>`;
 }
+// Twenty rows a page. A register is read a screen at a time, and an endless
+// list makes "where was that one" impossible to answer.
+function pageButtons(total){
+  const el=document.getElementById('pages');
+  if(total<=1){el.innerHTML='';return;}
+  const win=[], push=n=>{if(!win.includes(n))win.push(n);};
+  push(1); for(let i=page-1;i<=page+1;i++)if(i>1&&i<total)push(i); push(total);
+  win.sort((a,b)=>a-b);
+  let html='<button class="pg" onclick="goPage('+(page-1)+')"'+(page===1?' disabled':'')+' aria-label="Previous page">&#8249;</button>';
+  let last=0;
+  win.forEach(n=>{
+    if(last&&n-last>1)html+='<span class="pg dots" aria-hidden="true">&#8230;</span>';
+    html+='<button class="pg" onclick="goPage('+n+')"'+(n===page?' aria-current="page"':'')+'>'+n+'</button>';
+    last=n;
+  });
+  html+='<button class="pg" onclick="goPage('+(page+1)+')"'+(page===total?' disabled':'')+' aria-label="Next page">&#8250;</button>';
+  el.innerHTML=html;
+}
+function goPage(n){
+  page=n; render();
+  document.getElementById('reg').scrollIntoView({block:'start',
+    behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+}
+
 function render(){
   writeUrl();
-  const rows=current(), shown=Math.min(limit,rows.length);
+  const rows=current();
+  const totalPages=Math.max(Math.ceil(rows.length/PER_PAGE),1);
+  if(page>totalPages)page=totalPages;
+  const from=(page-1)*PER_PAGE, slice=rows.slice(from,from+PER_PAGE);
   document.getElementById('count').textContent=rows.length+' of '+visible().length;
   document.getElementById('empty').hidden=rows.length>0;
-  const m=document.getElementById('more');
-  m.hidden=rows.length<=shown;
-  m.textContent='Show the remaining '+(rows.length-shown);
+  document.getElementById('pager').hidden=rows.length===0;
+  document.getElementById('pager-info').textContent=rows.length
+    ? (from+1)+' to '+(from+slice.length)+' of '+rows.length : '';
+  pageButtons(totalPages);
   const p=rows.filter(d=>d.numberStatus==='provisional').length;
   document.getElementById('note').textContent = (p
     ? p+' of these cannot be numbered yet because TQ-QHSE-S001 5.3 assigns no short form. '
     : 'Every number here follows TQ-QHSE-S001 5.3. ')
     + 'Retention runs to 10 years under API Q2 3rd Edition 4.5.';
-  document.getElementById('rows').innerHTML=rows.slice(0,shown).map((d,i)=>{
+  document.getElementById('rows').innerHTML=slice.map((d,i)=>{
     const s=A.seg(d), pv=d.numberStatus==='provisional';
     return `<tr tabindex="0" aria-selected="${!!selected&&selected===d.docNumber}"
         onclick="openDetail(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetail(${i});}">
@@ -663,7 +754,7 @@ function dwRow(k,v,clause,mono){
     <div class="dw-v${mono?' mono':''}${has?'':' nil'}">${has?v:'Not recorded'}</div></div>`;
 }
 function openDetail(i){
-  const d=current()[i]; if(!d)return;
+  const rows=current(), d=rows[(page-1)*PER_PAGE+i]; if(!d)return;
   lastFocus=document.activeElement; selected=d.docNumber;
   const t=A.type(d), s=A.seg(d), n=A.reviewDays(d), gone=d.status==='obsolete'||d.status==='superseded';
   document.getElementById('dw-title').textContent=d.title;
@@ -716,17 +807,58 @@ document.addEventListener('keydown',e=>{
   else if(popOpen)togglePop();
 });
 
-function exportCsv(){
-  if(!TAQA_ROLE.can('export',role()))return;
-  const rows=current();
+let toastTimer=null;
+function toast(msg,ms){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('on');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('on'),ms||4400);
+}
+
+function csvText(rows){
   const head=['Document Number','Legacy ID','Title','Type','Segment','SPL','Revision','Issued','Approved','Owner Role','Approver Role','Review Cycle (months)','Review Due','Overdue','Status','Supersedes','Superseded By','Classification','Retention (years)','Language','Translation Of','Number Status','SCORE URL'];
   const cell=v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`;
   const body=rows.map(d=>[d.docNumber,d.legacyId,d.title,A.type(d).label,A.seg(d).name,A.seg(d).spl,d.revision,d.issueDate,d.approvedDate,A.owner(d),A.approver(d),A.cycle(d),d.nextReviewDate,A.overdue(d)?'YES':'NO',d.status,d.supersedes,d.supersededBy,d.classification,A.retention(d),d.language,d.translationOf,d.numberStatus,A.scoreUrl(d)].map(cell).join(','));
-  const blob=new Blob(['﻿'+[head.map(cell).join(','),...body].join('\r\n')],{type:'text/csv;charset=utf-8;'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='TQ-QHSE-F086_Master_Document_List_'+new Date().toISOString().slice(0,10)+'.csv';
-  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  return '﻿'+[head.map(cell).join(','),...body].join('\r\n');
+}
+
+// The register is often read inside an embed, and a sandboxed frame refuses
+// downloads outright. Rather than a button that silently does nothing, fall
+// back to the clipboard and say plainly what happened.
+function exportCsv(){
+  if(!TAQA_ROLE.can('export',role()))return;
+  const rows=current();
+  if(!rows.length){toast('Nothing to export in this view.');return;}
+  const text=csvText(rows);
+  const name='TQ-QHSE-F086_Master_Document_List_'+new Date().toISOString().slice(0,10)+'.csv';
+  let framed=true; try{framed=window.self!==window.top;}catch(e){framed=true;}
+
+  if(!framed){
+    const url=URL.createObjectURL(new Blob([text],{type:'text/csv;charset=utf-8;'}));
+    const a=document.createElement('a');
+    a.href=url; a.download=name; a.style.display='none';
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},2000);
+    toast('Exported '+rows.length+' rows as '+name);
+    return;
+  }
+  copyOut(text,rows.length,name);
+}
+
+function copyOut(text,n,name){
+  const done=()=>toast('Downloads are blocked inside this preview, so '+n+' rows went to the clipboard instead. Paste into a file and save it as '+name,6500);
+  if(navigator.clipboard&&navigator.clipboard.writeText)
+    navigator.clipboard.writeText(text).then(done).catch(()=>legacyCopy(text,done));
+  else legacyCopy(text,done);
+}
+function legacyCopy(text,done){
+  const ta=document.createElement('textarea');
+  ta.value=text; ta.setAttribute('readonly','');
+  ta.style.cssText='position:fixed;top:0;left:-9999px;';
+  document.body.appendChild(ta); ta.select();
+  let ok=false; try{ok=document.execCommand('copy');}catch(e){}
+  ta.remove();
+  if(ok)done();
+  else toast('This preview blocks downloads and clipboard access. Open the register in its own tab to export.',6500);
 }
 
 // ── Charts ────────────────────────────────────────────────────────────────

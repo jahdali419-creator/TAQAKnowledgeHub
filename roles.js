@@ -85,14 +85,21 @@ const TAQA_ROLES = {
 const TAQA_ROLE_ORDER = ['employee', 'owner', 'qms', 'auditor'];
 const TAQA_DEFAULT_ROLE = 'employee';
 
+// Storage is not always there. A sandboxed frame throws on localStorage, and
+// so does a browser with site data blocked. Keep the choice in memory as well,
+// otherwise the role silently refuses to change and the switcher looks broken.
+let _role = null;
+
 const TAQA_ROLE = {
   current(){
+    if (_role && TAQA_ROLES[_role]) return _role;
     let r = null;
     try { r = localStorage.getItem('taqa-demo-role'); } catch(e){}
     return TAQA_ROLES[r] ? r : TAQA_DEFAULT_ROLE;
   },
   set(r){
     if (!TAQA_ROLES[r]) return;
+    _role = r;
     try { localStorage.setItem('taqa-demo-role', r); } catch(e){}
   },
   def(r){ return TAQA_ROLES[r || TAQA_ROLE.current()]; },
