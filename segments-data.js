@@ -59,7 +59,7 @@ const TAQA_SEGMENTS = {
     }
   },
   'wireline': {
-    name:'Wireline', icon:'📡', tag:'Logging',
+    name:'Wireline Services', icon:'📡', tag:'Logging',
     desc:'Wireline logging, perforating, and well intervention operations, memory, pump-down, and slickline procedures.',
     sops:10, manuals:8, policies:5, alerts:0, lessons:4, software:2,
     docs:{
@@ -80,7 +80,7 @@ const TAQA_SEGMENTS = {
     }
   },
   'drilling': {
-    name:'Drilling', icon:'⛏️', tag:'Drilling Ops',
+    name:'Drilling Services', icon:'⛏️', tag:'Drilling Ops',
     desc:'Drilling engineering, well planning, rig operations, mud systems, BHA design, and formation evaluation procedures.',
     sops:22, manuals:15, policies:12, alerts:7, lessons:9, software:3,
     docs:{
@@ -144,7 +144,7 @@ const TAQA_SEGMENTS = {
     }
   },
   'inspection': {
-    name:'Inspection Services', icon:'🔍', tag:'Compliance',
+    name:'Inspection', icon:'🔍', tag:'Compliance',
     desc:'Equipment inspection standards, NDT methods, compliance requirements, certification workflows, and audit documentation.',
     sops:15, manuals:10, policies:9, alerts:3, lessons:6, software:2,
     docs:{
@@ -172,7 +172,7 @@ const TAQA_SEGMENTS = {
     }
   },
   'well-safety': {
-    name:'Well Safety', icon:'🛡️', tag:'Safety Critical',
+    name:'Safety Services', icon:'🛡️', tag:'Safety Critical',
     desc:'Well control procedures, blowout prevention, emergency response plans, pressure management, and safety management systems.',
     sops:20, manuals:12, policies:15, alerts:8, lessons:9, software:2,
     docs:{
@@ -246,7 +246,7 @@ const TAQA_SEGMENTS = {
     }
   },
   'hr': {
-    name:'Human Resources', icon:'👥', tag:'HR & People',
+    name:'Group Human Resources', icon:'👥', tag:'HR & People',
     desc:'TAQA HR policies, employee standards, code of conduct, organizational guidelines, and personnel procedures for all employees.',
     sops:10, manuals:8, policies:15, alerts:0, lessons:5, software:1,
     docs:{
@@ -325,7 +325,7 @@ const TAQA_SEGMENTS = {
     }
   },
   'cybersecurity': {
-    name:'Cybersecurity', icon:'🔐', tag:'IT & Security',
+    name:'GRC', icon:'🔐', tag:'Governance, Risk & Compliance',
     desc:'Cybersecurity governance, policies, standards, operational procedures, security awareness programs, and compliance documentation for TAQA\'s IT and OT environments.',
     sops:10, manuals:8, policies:12, alerts:5, lessons:6, software:2,
     tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Compliance', lessons:'Awareness'},

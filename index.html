@@ -484,6 +484,8 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 @keyframes tileIn { to { opacity:1; transform:none; } }
 .tile.w6 { grid-column:span 6; min-height:156px; }
 .tile.w4 { grid-column:span 4; }
+.tile.w3 { grid-column:span 3; }
+.tile.w12 { grid-column:span 12; min-height:156px; }
 
 /* The cursor lights the tile from where it actually is. Two custom properties
    set on pointermove; nothing re-renders and nothing but opacity animates. */
@@ -552,6 +554,27 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 html[dir="rtl"] .tile-bar i { transform-origin:right center; }
 
 /* The functions band inverts: rules sit over the work, so they sit on teal. */
+/* Approved entities with nothing filed yet. A chip, not a tile: an empty card
+   claims a place in the picture that the data has not earned. */
+.waiting { display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin-top:12px; }
+.wait-label {
+  font-size:10px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase;
+  color:var(--text-light); margin-inline-end:4px;
+}
+.wait-chip {
+  font-size:11.5px; font-weight:500; color:var(--text-muted);
+  padding:5px 11px; border-radius:999px;
+  border:1px dashed var(--border); background:transparent;
+}
+.band-move {
+  margin-top:12px; font-size:11.5px; line-height:1.6; color:var(--text-muted);
+  padding-inline-start:11px; border-inline-start:2px solid var(--border);
+}
+.band-move b { color:var(--text); font-weight:700; font-variant-numeric:tabular-nums; }
+.band-fn .wait-label { color:rgba(255,255,255,0.42); }
+.band-fn .wait-chip { color:rgba(255,255,255,0.72); border-color:rgba(255,255,255,0.24); }
+html[data-theme="dark"] .wait-chip { border-color:#31405a; }
+
 .band-fn {
   background:#005D63; border-radius:22px; padding:20px 20px 22px;
   position:relative; overflow:hidden;
@@ -570,7 +593,7 @@ html[dir="rtl"] .tile-bar i { transform-origin:right center; }
   position:relative; z-index:1; font-size:12px; line-height:1.6;
   color:rgba(255,255,255,0.70); margin-bottom:16px; max-width:62ch;
 }
-.band-fn .bento { position:relative; z-index:1; }
+.band-fn .bento, .band-fn .waiting, .band-fn .band-move { position:relative; z-index:1; }
 .band-fn .tile {
   background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.16);
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.12);
@@ -1250,6 +1273,8 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
           <span class="band-note" id="band-seg-note"></span>
         </div>
         <div class="bento" id="band-seg"></div>
+        <div class="waiting" id="band-seg-wait"></div>
+        <p class="band-move" id="band-seg-move"></p>
       </div>
 
       <div class="band band-fn reveal">
@@ -1259,6 +1284,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
         </div>
         <p class="band-fn-line">These set rules that apply across every segment. A policy published here binds the wellsite as much as the office.</p>
         <div class="bento" id="band-fn"></div>
+        <div class="waiting" id="band-fn-wait"></div>
       </div>
 
       <div class="seg-accordion" id="seg-accordion" style="display:none">
@@ -2083,50 +2109,76 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
 (function(){
   if (typeof TAQA_MASTER_DOCS === 'undefined') return;
   var D = TAQA_MASTER_DOCS, L = TAQA_DOC_LOOKUPS, A = TAQA_DOC;
-  var FUNCTIONS = ['qhse','hr','cybersecurity'];
-  var TAG = {
-    'coiled-tubing':'Operations','fracturing':'Stimulation','wireline':'Logging',
-    'drilling':'Well Operations','cementing':'Well Integrity','inspection':'Compliance',
-    'well-safety':'HSE Critical','well-testing':'Testing Services',
-    'tws-maintenance':'Maintenance','qhse':'Quality & Safety','hr':'HR & People',
-    'cybersecurity':'IT & Data Security'
-  };
+
+  var SEGMENTS = [
+    { name:'Drilling Services',  from:'drilling',     tag:'Well Operations' },
+    { name:'Safety Services',    from:'well-safety',  tag:'HSE Critical' },
+    { name:'Fracturing',         from:'fracturing',   tag:'Stimulation' },
+    { name:'Inspection',         from:'inspection',   tag:'Compliance' },
+    { name:'Coiled Tubing',      from:'coiled-tubing',tag:'Operations' },
+    { name:'Cementing',          from:'cementing',    tag:'Well Integrity' },
+    { name:'Well Testing',       from:'well-testing', tag:'Testing Services' },
+    { name:'Wireline Services',  from:'wireline',     tag:'Logging' },
+    { name:'Slickline',                               tag:'Logging' },
+    { name:'Well Completions',                        tag:'Well Operations' },
+    { name:'Marine Services',                         tag:'Marine' }
+  ];
+  var FUNCTIONS = [
+    { name:'QHSE',                        from:'qhse',          tag:'Quality & Safety' },
+    { name:'GRC',                         from:'cybersecurity', tag:'Governance, Risk & Compliance' },
+    { name:'Group Human Resources',       from:'hr',            tag:'HR & People' },
+    { name:'Finance',                       tag:'Finance' },
+    { name:'Information Technology',        tag:'IT' },
+    { name:'Supply Chain',                  tag:'Procurement' },
+    { name:'Legal',                         tag:'Legal' },
+    { name:'Learning Center',               tag:'Training' },
+    { name:'Commercial & Sales',            tag:'Commercial' },
+    { name:'Facility Management',           tag:'Facilities' },
+    { name:'Administration',                tag:'Admin' },
+    { name:'Venture Management',            tag:'Corporate Development' },
+    { name:'New Business Development',      tag:'Corporate Development' },
+    { name:'Geothermal Centre of Excellence', tag:'Advisory' }
+  ];
+  // Not one of the eleven. Its documents reassign to the segment that owns
+  // the equipment, so they are counted here until that migration runs.
+  var PENDING_MOVE = 'tws-maintenance';
+
   var LATE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" ' +
              'stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 1.8"/></svg>';
-
   var controlled = D.filter(A.controlled);
-  var rows = Object.keys(L.segments).map(function(id){
+  function statsFor(id){
     var mine = controlled.filter(function(d){ return d.segment === id; });
-    return { id:id, name:L.segments[id].name, docs:mine.length,
-             overdue:mine.filter(A.overdue).length,
-             kind:FUNCTIONS.indexOf(id) > -1 ? 'fn' : 'seg' };
-  }).filter(function(x){ return x.docs; })
-    .sort(function(a,b){ return b.docs - a.docs; });
-
-  // Widths follow the data: the two biggest take half a row each, the next
-  // three a third, the rest a quarter.
-  function widths(n){
-    if (n >= 9) return ['w6','w6','w4','w4','w4'];
-    if (n >= 3) return ['w6'];
-    return [];
+    return { docs:mine.length, overdue:mine.filter(A.overdue).length };
   }
 
-  function draw(list, hostId, noteId, noun){
-    var host = document.getElementById(hostId), note = document.getElementById(noteId);
+  function draw(list, hostId, noteId, chipId, noun){
+    var host = document.getElementById(hostId);
     if (!host) return;
-    var total = list.reduce(function(a,x){ return a + x.docs; }, 0);
-    var max   = list.length ? list[0].docs : 1;
-    var w     = widths(list.length);
-    host.innerHTML = list.map(function(x, i){
-      var cls = w[i] || '';
+    var live = [], waiting = [];
+    list.forEach(function(x){
+      if (!x.from) { waiting.push(x); return; }
+      var st = statsFor(x.from);
+      live.push({ id:x.from, name:x.name, tag:x.tag, docs:st.docs, overdue:st.overdue });
+    });
+    live.sort(function(a,b){ return b.docs - a.docs; });
+
+    var total = live.reduce(function(a,x){ return a + x.docs; }, 0);
+    var max   = live.length ? live[0].docs : 1;
+    // Width follows document count, and each row still has to add to twelve.
+    var w = live.length === 3 ? ['w6','w3','w3']
+          : live.length === 2 ? ['w6','w6']
+          : live.length === 1 ? ['w12']
+          : ['w6','w6','w4','w4','w4'];
+
+    host.innerHTML = live.map(function(x, i){
       var late = x.overdue
         ? '<span class="tile-flag">' + LATE + x.overdue + '</span>'
         : '<span class="tile-clear">Up to date</span>';
-      return '<a class="tile ' + cls + '" style="--i:' + i + '" data-id="' + x.id + '" ' +
+      return '<a class="tile ' + (w[i] || 'w4') + '" style="--i:' + i + '" data-id="' + x.id + '" ' +
              'href="segment.html?id=' + x.id + '">' +
                '<span class="tile-rank">' + (i < 9 ? '0' : '') + (i + 1) + '</span>' +
                '<span class="tile-name">' + x.name + '</span>' +
-               '<span class="tile-tag">' + (TAG[x.id] || '') + '</span>' +
+               '<span class="tile-tag">' + (x.tag || '') + '</span>' +
                '<span class="tile-foot">' +
                  '<span class="tile-docs">' + x.docs + '<span>docs</span></span>' + late +
                '</span>' +
@@ -2134,17 +2186,34 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
                  Math.round(x.docs / max * 100) + '%;--i:' + i + '"></i></span>' +
              '</a>';
     }).join('');
+
+    var note = document.getElementById(noteId);
     if (note) {
-      note.innerHTML = '<b>' + list.length + '</b> ' + noun +
-                       ' · <b>' + total + '</b> controlled documents';
+      note.innerHTML = '<b>' + list.length + '</b> ' + noun + ' · <b>' + total +
+        '</b> controlled documents · <b>' + waiting.length + '</b> awaiting';
+    }
+    var chips = document.getElementById(chipId);
+    if (chips) {
+      chips.innerHTML = waiting.length
+        ? '<span class="wait-label">Approved, no documents filed yet</span>' +
+          waiting.map(function(x){
+            return '<span class="wait-chip">' + x.name + '</span>'; }).join('')
+        : '';
     }
   }
 
-  draw(rows.filter(function(x){ return x.kind === 'seg'; }), 'band-seg', 'band-seg-note', 'segments');
-  draw(rows.filter(function(x){ return x.kind === 'fn';  }), 'band-fn',  'band-fn-note',  'functions');
+  draw(SEGMENTS,  'band-seg', 'band-seg-note', 'band-seg-wait', 'segments');
+  draw(FUNCTIONS, 'band-fn',  'band-fn-note',  'band-fn-wait',  'functions');
 
-  // The cursor lights the tile from where it actually is. Pointer devices
-  // only, and it writes two custom properties rather than re-rendering.
+  // The 39 documents that have not been reassigned yet are named rather than
+  // dropped, so the bands and the register still add up to 534.
+  var mv = statsFor(PENDING_MOVE), foot = document.getElementById('band-seg-move');
+  if (foot && mv.docs) {
+    foot.innerHTML = '<b>' + mv.docs + '</b> documents still sit under TWS Maintenance. ' +
+      'Each one reassigns to the segment that owns the equipment, so they are not ' +
+      'counted above.';
+  }
+
   if (window.matchMedia && matchMedia('(hover:hover) and (pointer:fine)').matches) {
     document.querySelectorAll('.bento').forEach(function(grid){
       grid.addEventListener('pointermove', function(e){
