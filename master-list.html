@@ -194,18 +194,7 @@ tbody tr[aria-selected="true"]{background:var(--brand-soft);}
 .note{font-family:var(--read);padding:11px 14px;border-top:1px solid var(--rule);background:var(--inset);
   border-radius:0 0 var(--r3) var(--r3);font-size:11.5px;color:var(--ink-3);}
 
-/* ── Register surface: same glass as conformance, same ambient wash ── */
-#view-reg{position:relative;}
-#view-reg::before{content:'';position:absolute;inset:-56px 0 auto;height:380px;z-index:0;pointer-events:none;
-  background:
-    radial-gradient(46% 60% at 14% 6%, rgba(0,93,99,.14), transparent 68%),
-    radial-gradient(40% 54% at 84% 2%, rgba(0,187,182,.10), transparent 66%);
-  filter:blur(6px);}
-html[data-theme="dark"] #view-reg::before{
-  background:
-    radial-gradient(46% 60% at 14% 6%, rgba(0,187,182,.15), transparent 68%),
-    radial-gradient(40% 54% at 84% 2%, rgba(0,134,117,.11), transparent 66%);}
-#view-reg > *{position:relative;z-index:1;}
+/* ── Register surface: the same glass as the summary above it ── */
 .counts,.reg{backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);}
 .counts{background:rgba(255,255,255,.72);border-color:rgba(255,255,255,.86);}
 .reg{background:rgba(255,255,255,.74);border-color:rgba(255,255,255,.86);
@@ -252,15 +241,6 @@ html[data-theme="dark"] .pg[aria-current="page"]{color:#00272A;}
   transition:opacity 200ms var(--out-ease),transform 200ms var(--out-ease);}
 #toast.on{opacity:1;transform:translate(-50%,0);}
 
-/* ── Tabs ── */
-.tabs{display:inline-flex;gap:2px;padding:3px;background:var(--inset);border:1px solid var(--rule);
-  border-radius:var(--r2);margin-bottom:14px;}
-.tab[aria-selected="true"]{box-shadow:0 1px 2px rgba(0,93,99,.10);}
-.tab{appearance:none;border:none;background:transparent;font:600 12.5px/1 'BwGradual',sans-serif;
-  color:var(--ink-3);padding:7px 14px;border-radius:5px;cursor:pointer;
-  transition:background 140ms var(--out-ease),color 140ms var(--out-ease);}
-.tab[aria-selected="true"]{background:var(--paper);color:var(--brand);}
-@media (hover:hover) and (pointer:fine){.tab:not([aria-selected="true"]):hover{color:var(--ink);}}
 
 /* ── Charts ───────────────────────────────────────────────────────────────
    Every colour ran through the dataviz validator against both surfaces.
@@ -300,6 +280,8 @@ html[data-theme="dark"] .viz::before{
   padding:17px 19px 15px;backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);
   box-shadow:var(--glass-shade);}
 .card.wide{grid-column:1/-1;}
+.card{display:flex;flex-direction:column;}
+.donut-wrap{flex:1;justify-content:center;}
 @supports not (backdrop-filter:blur(1px)){.card,.score{background:var(--paper);}}
 
 /* Entrance. Rise and fade, staggered just enough to read as a sequence. */
@@ -326,6 +308,14 @@ html[data-theme="dark"] .viz::before{
 .donut-l{font:500 10.5px/1.3 'BwGradual',sans-serif;color:var(--ink-3);margin-top:4px;max-width:96px;}
 .keys{display:flex;flex-direction:column;gap:7px;min-width:0;flex:1;}
 .key{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);}
+button.key{width:100%;border:none;background:transparent;font-family:inherit;cursor:pointer;
+  padding:5px 7px;border-radius:var(--r1);text-align:start;
+  transition:background 140ms var(--out-ease),color 140ms var(--out-ease);}
+button.key[aria-pressed="true"]{background:var(--brand-soft);color:var(--ink);}
+button.key[aria-pressed="true"] b{color:var(--brand);}
+@media (hover:hover) and (pointer:fine){button.key:hover{background:var(--inset);color:var(--ink);}}
+.keys{gap:2px;margin-inline-start:-7px;}
+.hit{cursor:pointer;}
 .key i{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
 .key b{color:var(--ink);font-weight:700;margin-inline-start:auto;font-variant-numeric:tabular-nums;}
 
@@ -356,30 +346,6 @@ html[dir="rtl"] .viz .grow{transform-origin:right center;}
 #tip.on{opacity:1;}
 .bar-hit{cursor:default;}
 
-/* ── Conformance scorecard ── */
-.score{background:var(--glass);border:1px solid var(--glass-line);border-radius:var(--r3);overflow:hidden;
-  backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);
-  box-shadow:var(--glass-shade);opacity:0;transform:translateY(10px);}
-.viz.go .score{opacity:1;transform:none;transition:opacity 340ms var(--out-ease),transform 340ms var(--out-ease);}
-.score-h{padding:16px 19px 14px;border-bottom:1px solid var(--rule);}
-.score-h h3{font:700 12.5px/1.3 'BwGradual',sans-serif;color:var(--ink);}
-.score-h p{font-size:11.5px;color:var(--ink-3);margin-top:3px;}
-.score table{width:100%;}
-.score th{position:static;}
-.score td{padding:11px 19px;border-bottom:1px solid var(--rule-soft);vertical-align:top;}
-.score tr:last-child td{border-bottom:none;}
-.score .cl{font:600 11px/1.5 var(--mono);color:var(--ink-3);white-space:nowrap;}
-.score .what{font-weight:600;color:var(--ink);}
-.score .how{font-family:var(--read);font-size:11.5px;color:var(--ink-2);margin-top:3px;max-width:62ch;}
-.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:var(--r1);
-  border:1px solid currentColor;font:700 9.5px/1.2 'BwGradual',sans-serif;letter-spacing:.06em;
-  text-transform:uppercase;white-space:nowrap;}
-.chip svg{width:10px;height:10px;}
-.k-met{color:var(--c-met);} .k-part{color:var(--c-part);}
-.k-back{color:var(--c-back);} .k-qhse{color:var(--c-qhse);}
-.sum-row{display:flex;gap:22px;flex-wrap:wrap;padding:14px 19px;background:var(--inset);
-  border-top:1px solid var(--rule);font-size:11.5px;color:var(--ink-2);}
-.sum-row b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums;}
 
 /* ── Drawer ── */
 .scrim{position:fixed;inset:0;background:rgba(0,19,20,.44);opacity:0;pointer-events:none;
@@ -479,60 +445,33 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
     </div>
   </header>
 
-  <div class="tabs" role="tablist">
-    <button class="tab" id="tab-con" role="tab" aria-selected="true" onclick="showView('con')">Conformance</button>
-    <button class="tab" id="tab-reg" role="tab" aria-selected="false" onclick="showView('reg')">Register</button>
-  </div>
-
-  <div id="view-con" class="viz">
+  <div class="viz" id="summary">
     <div class="cards">
       <div class="card rise">
-        <h3>Against the standards</h3>
-        <div class="sub">Eighteen clauses across TQ-QHSE-S001, ISO 9001 and API Q2.</div>
-        <div class="donut-wrap">
-          <div class="donut">
-            <svg viewBox="0 0 150 150" id="dn-con" role="img" aria-label="Clause conformance"></svg>
-            <div class="donut-mid"><span class="donut-n" id="dn-con-n">0</span><span class="donut-l">of 18 clauses met in the front end</span></div>
-          </div>
-          <div class="keys" id="k-con"></div>
-        </div>
-      </div>
-      <div class="card rise">
         <h3>Where the register stands</h3>
-        <div class="sub">Every controlled document by its current state.</div>
+        <div class="sub">Every controlled document by its current state. Pick a slice to filter the table.</div>
         <div class="donut-wrap">
           <div class="donut">
             <svg viewBox="0 0 150 150" id="dn-mix" role="img" aria-label="Documents by status"></svg>
-            <div class="donut-mid"><span class="donut-n" id="dn-mix-n">0</span><span class="donut-l">on their current revision</span></div>
+            <div class="donut-mid"><span class="donut-n" id="dn-mix-n">0</span><span class="donut-l" id="dn-mix-l">controlled documents</span></div>
           </div>
-          <div class="keys" id="k-mix"></div>
+          <div class="keys" id="k-mix" role="group" aria-label="Filter by status"></div>
         </div>
       </div>
       <div class="card rise">
+        <h3>Where the documents sit</h3>
+        <div class="sub">Controlled documents by segment. Pick a bar to filter the table.</div>
+        <svg id="ch-seg" role="img" aria-label="Documents by segment"></svg>
+      </div>
+      <div class="card rise" id="card-age">
         <h3>How late the overdue reviews are</h3>
         <div class="sub">Periodic review under API Q2 4.4.3 c.</div>
         <div class="hero"><span class="hero-n" id="ov-n">0</span><span class="hero-u" id="ov-u"></span></div>
         <svg id="ch-age" viewBox="0 0 400 128" role="img" aria-label="Overdue reviews by age"></svg>
       </div>
-      <div class="card wide">
-        <h3>Numbering against TQ-QHSE-S001 5.3</h3>
-        <div class="sub">Documents that cannot take a conformant number because the standard assigns no short form.</div>
-        <svg id="ch-seg" role="img" aria-label="Numbering conformance by segment"></svg>
-        <div class="lg" id="lg-seg"></div>
-      </div>
-    </div>
-
-    <div class="score">
-      <div class="score-h">
-        <h3>Clause by clause</h3>
-        <p>What this register satisfies today, what needs the back end, and what is waiting on QHSE.</p>
-      </div>
-      <table><tbody id="score-rows"></tbody></table>
-      <div class="sum-row" id="score-sum"></div>
     </div>
   </div>
 
-  <div id="view-reg" hidden>
   <div class="counts" id="counts" role="group" aria-label="Filter by status"></div>
 
   <div class="bar">
@@ -540,7 +479,7 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
       <input id="q" type="search" placeholder="Search" oninput="page=1;render()" autocomplete="off" aria-label="Search the register">
     </div>
-    <select id="f-seg" onchange="page=1;render()" aria-label="Segment"><option value="">All segments</option></select>
+    <select id="f-seg" onchange="page=1;chartSeg(false);render()" aria-label="Segment"><option value="">All segments</option></select>
     <select id="f-type" onchange="page=1;render()" aria-label="Type"><option value="">All types</option></select>
     <select id="f-status" onchange="page=1;render()" aria-label="Status">
       <option value="">Any status</option><option value="current">Current</option>
@@ -575,7 +514,6 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
     </div>
     <div class="note" id="note"></div>
   </section>
-  </div>
 </div>
 <div id="tip" role="status"></div>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -618,15 +556,18 @@ Object.keys(L.segments).sort((a,b)=>L.segments[a].name.localeCompare(L.segments[
   .forEach(k=>fs.insertAdjacentHTML('beforeend',`<option value="${k}">${esc(L.segments[k].name)}</option>`));
 Object.keys(L.types).forEach(k=>ft.insertAdjacentHTML('beforeend',`<option value="${k}">${esc(L.types[k].label)}</option>`));
 
-let quick=null, page=1, selected=null, view='con';
+let quick='controlled', page=1, selected=null;
 const PER_PAGE=20;
 const CT=[
-  {k:'controlled', l:'Controlled',   f:d=>A.controlled(d)},
-  {k:'current',    l:'Current',      f:d=>d.status==='current'},
-  {k:'overdue',    l:'Review overdue',f:d=>A.overdue(d), flag:'due', control:true},
-  {k:'obsolete',   l:'Withdrawn',    f:d=>d.status==='obsolete'||d.status==='superseded'},
-  {k:'provisional',l:'Provisional',  f:d=>d.numberStatus==='provisional', flag:'out', control:true},
-  {k:'ar',         l:'Arabic',       f:d=>!!d.translationOf}
+  {k:'controlled', l:'All controlled',f:d=>A.controlled(d),               strip:true},
+  {k:'current',    l:'Current',       f:d=>d.status==='current'},
+  {k:'review',     l:'Review due',    f:d=>d.status==='under-review'},
+  {k:'draft',      l:'Draft',         f:d=>d.status==='draft'},
+  {k:'obsolete',   l:'Withdrawn',     f:d=>d.status==='obsolete'||d.status==='superseded'},
+  {k:'overdue',    l:'Review overdue',f:d=>A.overdue(d), flag:'due', control:true, strip:true},
+  {k:'provisional',l:'Provisional',   f:d=>d.numberStatus==='provisional', flag:'out', control:true, strip:true},
+  {k:'ar',         l:'Arabic',        f:d=>!!d.translationOf,              strip:true},
+  {k:'asset',      l:'Software assets',f:d=>!A.controlled(d),              strip:true}
 ];
 
 const F={q:'q',seg:'f-seg',type:'f-type',status:'f-status',cls:'f-cls',lang:'f-lang'};
@@ -639,15 +580,11 @@ function readUrl(){
     el.value=v;
   }
   const k=u.get('view'); if(k&&CT.some(c=>c.k===k))quick=k;
-  const tab=u.get('tab');
-  if(tab==='reg'||tab==='con')view=tab;
-  else if(['view','q','seg','type','status','cls','lang'].some(x=>u.get(x)))view='reg';
 }
 function writeUrl(){
   const u=new URLSearchParams();
   for(const [key,id] of Object.entries(F)){const el=document.getElementById(id); if(el&&el.value)u.set(key,el.value);}
-  if(quick)u.set('view',quick);
-  if(view==='reg')u.set('tab','reg');
+  if(quick&&quick!=='controlled')u.set('view',quick);
   const qs=u.toString();
   history.replaceState(null,'',qs?location.pathname+'?'+qs:location.pathname);
 }
@@ -678,17 +615,19 @@ function renderRole(){
 }
 function renderCounts(){
   const k=role(), ctrl=TAQA_ROLES[k].controlPanel, rows=visible();
-  document.getElementById('counts').innerHTML=CT.filter(c=>ctrl||!c.control).map(c=>{
+  document.getElementById('counts').innerHTML=CT.filter(c=>c.strip&&(ctrl||!c.control)).map(c=>{
     const n=(c.control?rows.filter(d=>c.f(d)&&TAQA_ROLE.inControlScope(d,k)):rows.filter(c.f)).length;
     return `<button class="ct" data-k="${c.k}"${c.flag?` data-f="${c.flag}"`:''} aria-pressed="${quick===c.k}" onclick="quickFilter('${c.k}')">
       <div class="ct-n">${n}</div><div class="ct-l">${c.l}</div></button>`;}).join('');
 }
-function quickFilter(k){quick=quick===k?null:k;page=1;renderCounts();render();}
+function quickFilter(k){quick=(quick===k&&k!=='controlled')?'controlled':k;
+  page=1;renderCounts();syncDonut();chartSeg(false);render();}
+function segFilter(id){const el=document.getElementById('f-seg');
+  el.value=el.value===id?'':id; page=1; chartSeg(false); render();}
 function setRole(r){
   TAQA_ROLE.set(r);
-  if(quick){const c=CT.find(x=>x.k===quick); if(c&&c.control&&!TAQA_ROLES[r].controlPanel)quick=null;}
-  page=1;closeDetail();renderRole();renderCounts();render();
-  if(view==='con')drawCharts();
+  if(quick){const c=CT.find(x=>x.k===quick); if(c&&c.control&&!TAQA_ROLES[r].controlPanel)quick='controlled';}
+  page=1;closeDetail();renderRole();renderCounts();render();drawSummary();
 }
 
 function current(){
@@ -906,6 +845,7 @@ const R=57, CIRC=2*Math.PI*R, GAP_DEG=2;
 function donut(svgId, keyId, midId, parts, mid){
   const svg=document.getElementById(svgId); svg.innerHTML='';
   const total=parts.reduce((a,p)=>a+p.n,0)||1;
+  const on=parts.some(p=>p.q&&p.q===quick);
   svg.appendChild(svgEl('circle',{cx:75,cy:75,r:R,stroke:'var(--grid)','stroke-width':18}));
   let acc=0; const drawn=[];
   parts.forEach((p,i)=>{
@@ -917,6 +857,11 @@ function donut(svgId, keyId, midId, parts, mid){
       'stroke-dasharray':'0 '+CIRC,'stroke-dashoffset':-(acc*CIRC)});
     c.classList.add('seg');
     c.style.transitionDelay=(i*90)+'ms';
+    // A filtered-out slice fades rather than vanishing, so the whole shape of
+    // the register stays readable while one cut is selected.
+    if(on)c.style.opacity = p.q===quick ? 1 : .28;
+    if(p.q){c.classList.add('hit'); c.dataset.q=p.q;
+      c.addEventListener('click',()=>quickFilter(p.q));}
     svg.appendChild(c);
     bindTip(c,p.k+': '+p.n+' of '+total+', '+Math.round(frac*100)+' per cent');
     drawn.push([c,len]);
@@ -925,27 +870,41 @@ function donut(svgId, keyId, midId, parts, mid){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     drawn.forEach(([c,len])=>c.setAttribute('stroke-dasharray',len+' '+(CIRC-len)));
   }));
-  document.getElementById(keyId).innerHTML=parts.filter(p=>p.n).map(p=>
-    `<span class="key"><i style="background:${p.c}"></i>${p.k}<b>${p.n}</b></span>`).join('');
+  document.getElementById(keyId).innerHTML=parts.filter(p=>p.n).map(p=> p.q
+    ? `<button type="button" class="key" data-q="${p.q}" aria-pressed="${quick===p.q}" onclick="quickFilter('${p.q}')">
+        <i style="background:${p.c}"></i>${p.k}<b>${p.n}</b></button>`
+    : `<span class="key"><i style="background:${p.c}"></i>${p.k}<b>${p.n}</b></span>`).join('');
   countTo(document.getElementById(midId), mid);
 }
 function countTo(el,to){
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches){el.textContent=to;return;}
+  if(el.dataset.seen||matchMedia('(prefers-reduced-motion: reduce)').matches){
+    el.textContent=to; el.dataset.seen='1'; return;}
+  el.dataset.seen='1';
   const t0=performance.now(), dur=780;
   const step=t=>{const p=Math.min((t-t0)/dur,1); el.textContent=Math.round((1-Math.pow(1-p,3))*to);
     if(p<1)requestAnimationFrame(step);};
   requestAnimationFrame(step);
 }
 
-function chartMix(){
+function syncDonut(){
+  const on=[...document.querySelectorAll('#dn-mix circle.seg')].some(c=>c.dataset.q===quick);
+  document.querySelectorAll('#dn-mix circle.seg').forEach(c=>{
+    c.style.opacity = on ? (c.dataset.q===quick?1:.28) : 1;});
+  document.querySelectorAll('#k-mix button.key').forEach(b=>
+    b.setAttribute('aria-pressed', b.dataset.q===quick));
+}
+
+function chartStatus(){
   const rows=visible().filter(d=>A.controlled(d));
-  const cur=rows.filter(d=>d.status==='current').length;
   donut('dn-mix','k-mix','dn-mix-n',[
-    {k:'Current',    n:cur,                                                   c:'var(--c-met)'},
-    {k:'Review due', n:rows.filter(d=>d.status==='under-review').length,      c:'var(--c-part)'},
-    {k:'Draft',      n:rows.filter(d=>d.status==='draft').length,             c:'var(--c-back)'},
-    {k:'Withdrawn',  n:rows.filter(d=>d.status==='obsolete'||d.status==='superseded').length, c:'var(--c-qhse)'}
-  ], cur);
+    {k:'Current',    q:'current',  n:rows.filter(d=>d.status==='current').length,      c:'var(--c-met)'},
+    {k:'Review due', q:'review',   n:rows.filter(d=>d.status==='under-review').length, c:'var(--c-part)'},
+    {k:'Draft',      q:'draft',    n:rows.filter(d=>d.status==='draft').length,        c:'var(--c-back)'},
+    {k:'Withdrawn',  q:'obsolete', n:rows.filter(d=>d.status==='obsolete'||d.status==='superseded').length,
+      c:'var(--c-qhse)'}
+  ], rows.length);
+  document.getElementById('dn-mix-l').textContent=
+    rows.length===1?'controlled document':'controlled documents';
 }
 
 function chartAge(){
@@ -982,129 +941,59 @@ function chartAge(){
   svg.setAttribute('viewBox','0 0 400 '+(buckets.length*(H+GAP)-GAP+4));
 }
 
-function chartSeg(){
+function chartSeg(anim){
   const rows=visible().filter(d=>A.controlled(d));
-  const segs=Object.keys(L.segments).map(id=>{
-    const inSeg=rows.filter(d=>d.segment===id);
-    const prov=inSeg.filter(d=>d.numberStatus==='provisional').length;
-    return {id,name:L.segments[id].name,total:inSeg.length,prov,ok:inSeg.length-prov};
-  }).filter(x=>x.total>0).sort((a,b)=>b.prov-a.prov||b.total-a.total);
-  const max=Math.max(...segs.map(x=>x.total),1);
-  const LBL=132, W=760, BW=W-LBL-46, H=19, GAP=7;
+  const segs=Object.keys(L.segments)
+    .map(id=>({id,name:L.segments[id].name,n:rows.filter(d=>d.segment===id).length}))
+    .filter(x=>x.n).sort((a,b)=>b.n-a.n);
+  const max=Math.max(...segs.map(x=>x.n),1);
+  const sel=document.getElementById('f-seg').value;
+  // Draw at the card's real width so the labels stay 11.5px instead of being
+  // scaled down with the viewBox on a narrow screen.
   const svg=document.getElementById('ch-seg'); svg.innerHTML='';
-  svg.setAttribute('viewBox','0 0 '+W+' '+(segs.length*(H+GAP)-GAP+4));
-  svg.setAttribute('height',segs.length*(H+GAP)-GAP+4);
+  const W=Math.max(Math.round(svg.clientWidth)||440,280);
+  const LBL=W<400?116:128, BW=W-LBL-34, H=14, GAP=6;
+  const h=segs.length*(H+GAP)-GAP+4;
+  svg.setAttribute('viewBox','0 0 '+W+' '+h); svg.setAttribute('height',h);
   segs.forEach((x,i)=>{
-    const y=i*(H+GAP);
-    const t=svgEl('text',{x:0,y:y+H/2+4,'font-size':11.5,fill:'var(--ink-3)'});
+    const y=i*(H+GAP), me=sel===x.id, dim=sel&&!me;
+    const t=svgEl('text',{x:0,y:y+H/2+4,'font-size':11.5,
+      fill:me?'var(--ink)':'var(--ink-3)','font-weight':me?600:400});
     t.textContent=x.name; svg.appendChild(t);
-    const okW=(x.ok/max)*BW, pvW=(x.prov/max)*BW;
-    const grow=(r,i2)=>{r.classList.add('grow');r.style.transformOrigin=LBL+'px '+(y+H/2)+'px';
-      r.style.transitionDelay=(i*45+i2*40)+'ms';};
-    if(okW>0){const r=svgEl('rect',{x:LBL,y:y,width:Math.max(okW,2),height:H,fill:'var(--neutral)',rx:2.5});
-      grow(r,0); svg.appendChild(r); bindTip(r,x.name+': '+x.ok+' numbered under 5.3');}
-    if(pvW>0){const r=svgEl('rect',{x:LBL+okW+(okW>0?2:0),y:y,width:Math.max(pvW,2),height:H,fill:'var(--c-qhse)',rx:2.5});
-      grow(r,1); svg.appendChild(r); bindTip(r,x.name+': '+x.prov+' waiting on a short form');}
-    const v=svgEl('text',{x:LBL+BW+10,y:y+H/2+4,'font-size':11,fill:x.prov?'var(--c-qhse)':'var(--ink-4)',
-      'font-weight':x.prov?700:500});
-    v.textContent=x.prov?x.prov+' held':'clear'; svg.appendChild(v);
+    // SVG has no ellipsis, so a long segment name is trimmed by measurement
+    // rather than by guessing how many characters fit.
+    let n=x.name;
+    while(n.length>4 && t.getComputedTextLength()>LBL-10){n=n.slice(0,-1); t.textContent=n+'\u2026';}
+    const ttl=svgEl('title',{}); ttl.textContent=x.name; t.appendChild(ttl);
+    svg.appendChild(svgEl('rect',{x:LBL,y:y,width:BW,height:H,fill:'var(--grid)',rx:2.5}));
+    const r=svgEl('rect',{x:LBL,y:y,width:Math.max((x.n/max)*BW,3),height:H,
+      fill:me?'var(--brand)':'var(--o3)',rx:2.5,opacity:dim?.4:1});
+    r.classList.add('hit'); if(anim)r.classList.add('grow');
+    r.style.transformOrigin=LBL+'px '+(y+H/2)+'px';
+    r.style.transitionDelay=(i*40)+'ms';
+    r.addEventListener('click',()=>segFilter(x.id));
+    svg.appendChild(r);
+    bindTip(r,x.name+': '+x.n+(x.n===1?' document':' documents'));
+    const v=svgEl('text',{x:LBL+BW+9,y:y+H/2+4,'font-size':11.5,
+      fill:me?'var(--ink)':'var(--ink-3)','font-weight':me?700:500});
+    v.textContent=x.n; svg.appendChild(v);
   });
-  const okT=segs.reduce((a,x)=>a+x.ok,0), pvT=segs.reduce((a,x)=>a+x.prov,0);
-  document.getElementById('lg-seg').innerHTML=
-    `<span><i style="background:var(--neutral)"></i>Numbered under 5.3 <b>${okT}</b></span>`+
-    `<span><i style="background:var(--c-qhse)"></i>Waiting on a short form <b>${pvT}</b></span>`;
 }
 
-// ── Conformance scorecard ─────────────────────────────────────────────────
-const TICK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg>';
-const HALF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M4 12h16"/></svg>';
-const GEAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="3.4"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg>';
-const STOP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 7v7M12 17.5v.2"/></svg>';
-const KIND={met:['k-met',TICK,'Met'],part:['k-part',HALF,'Partial'],back:['k-back',GEAR,'Back end'],qhse:['k-qhse',STOP,'QHSE']};
-
-function scorecard(){
-  const all=D.filter(d=>A.controlled(d));
-  const n=all.length, prov=all.filter(d=>d.numberStatus==='provisional').length;
-  const over=all.filter(d=>A.overdue(d)).length;
-  const ar=all.filter(d=>d.translationOf).length;
-  const gone=all.filter(d=>d.status==='obsolete'||d.status==='superseded').length;
-  const rows=[
-    ['TQ-QHSE-S001 5.1','Master document list','met',
-      n+' controlled documents in one register, exportable as TQ-QHSE-F086.'],
-    ['TQ-QHSE-S001 5.3','Identification and numbering','part',
-      (n-prov)+' of '+n+' carry a conformant number. '+prov+' cannot, because no short form exists yet.'],
-    ['TQ-QHSE-S001 5.6','Obsolete documents','met',
-      gone+' withdrawn documents stay visible and marked. Download, print, offline pin and the reference card are blocked on them.'],
-    ['ISO 9001 7.5.2 a','Identification and description','met',
-      'Number, title, date, owner and reference are fields on every record rather than text inside a title.'],
-    ['ISO 9001 7.5.3.1 b','Protection from improper use','part',
-      'Every record carries a classification. Enforcing it needs server-side authorisation.'],
-    ['ISO 9001 7.5.3.2 c','Control of changes','met',
-      'Revision, issue date, approval date and what each document supersedes are all held.'],
-    ['API Q2 4.4.3 a, b','Approval and re-approval','part',
-      'Approval authority is recorded as a role from the section 4 table. The workflow itself needs a back end.'],
-    ['API Q2 4.4.3 c','Review for continued suitability','met',
-      'A cycle per document type, a stored due date, and '+over+' overdue surfaced for the controller.'],
-    ['API Q2 4.4.3 d','Changes and current revision status','met',
-      'Revision and supersedes are fields, so status is never inferred from a filename.'],
-    ['API Q2 4.4.3 e, f','Legibility and availability at point of use','met',
-      'Reachable offline, with the uncontrolled-when-printed caveat on the printable card.'],
-    ['API Q2 4.4.3','Translations','part',
-      ar+' Arabic versions linked to their English source. TQ-QHSE-S001 has no translation clause at all.'],
-    ['API Q2 4.4.4','External and customer documents','back',
-      'Not in the register yet. Needs its own store for standards, client specifications and their change impact.'],
-    ['API Q2 4.5 a to c','Record identification and legibility','met',
-      'Identification, collection point and legibility are covered by the record fields.'],
-    ['API Q2 4.5 d','Correction of records','back',
-      'No rule yet for correcting an entry. Needs an audit trail the front end cannot provide.'],
-    ['API Q2 4.5 e to g','Storage, protection, retrieval','back',
-      'SCORE is the master. Backup, restore and access control sit with IT.'],
-    ['API Q2 4.5 h, i','Retention and disposition','met',
-      'Ten years on every controlled record, per the 3rd Edition. TQ-QHSE-S001 7.5 still says five.'],
-    ['TQ-QHSE-S001 4','Document types','qhse',
-      'Technical Alert and Lesson Learned are not defined types, so they cannot be numbered conformantly.'],
-    ['TQ-QHSE-S001 5.3','Short forms','qhse',
-      'Cybersecurity and the Learning Center have no short form assigned. The Learning Center owns this platform.']
-  ];
-  document.getElementById('score-rows').innerHTML=rows.map(r=>{
-    const [cls,ico,lbl]=KIND[r[2]];
-    return `<tr><td style="width:150px;"><span class="cl">${esc(r[0])}</span></td>
-      <td><div class="what">${esc(r[1])}</div><div class="how">${esc(r[3])}</div></td>
-      <td style="width:108px;text-align:end;"><span class="chip ${cls}">${ico}${lbl}</span></td></tr>`;}).join('');
-  const c=k=>rows.filter(r=>r[2]===k).length;
-  donut('dn-con','k-con','dn-con-n',[
-    {k:'Met in the front end', n:c('met'),  c:'var(--c-met)'},
-    {k:'Partly met',           n:c('part'), c:'var(--c-part)'},
-    {k:'Waiting on the back end', n:c('back'), c:'var(--c-back)'},
-    {k:'Blocked until QHSE decides', n:c('qhse'), c:'var(--c-qhse)'}
-  ], c('met'));
-  document.getElementById('score-sum').innerHTML=
-    `<span><b>${c('met')}</b> met in the front end</span>`+
-    `<span><b>${c('part')}</b> partly met, the rest needs a back end</span>`+
-    `<span><b>${c('back')}</b> waiting on the back end</span>`+
-    `<span><b>${c('qhse')}</b> blocked until QHSE decides</span>`;
-}
-
-function showView(v){
-  view=v;
-  document.getElementById('view-reg').hidden=v!=='reg';
-  document.getElementById('view-con').hidden=v!=='con';
-  document.getElementById('tab-reg').setAttribute('aria-selected',v==='reg');
-  document.getElementById('tab-con').setAttribute('aria-selected',v==='con');
-  if(v==='con')drawCharts();
-  writeUrl();
-}
-function drawCharts(){
-  const v=document.getElementById('view-con');
+// The charts read the whole register the role can see, never the filtered
+// slice, so picking a cut narrows the table without reshaping the picture.
+function drawSummary(){
+  const v=document.getElementById('summary');
   v.classList.remove('go');
-  chartMix();chartAge();chartSeg();scorecard();
+  document.getElementById('card-age').hidden=!TAQA_ROLES[role()].controlPanel;
+  chartStatus();chartSeg(true);
+  if(TAQA_ROLES[role()].controlPanel)chartAge();
   requestAnimationFrame(()=>requestAnimationFrame(()=>v.classList.add('go')));
 }
 
 renderRole(); readUrl();
-if(quick){const c=CT.find(x=>x.k===quick); if(c&&c.control&&!TAQA_ROLES[role()].controlPanel)quick=null;}
-renderCounts(); render();
-showView(view);
+if(quick){const c=CT.find(x=>x.k===quick); if(c&&c.control&&!TAQA_ROLES[role()].controlPanel)quick='controlled';}
+renderCounts(); render(); drawSummary();
 </script>
 </body>
 </html>
