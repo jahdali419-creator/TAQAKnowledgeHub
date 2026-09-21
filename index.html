@@ -571,55 +571,26 @@ html[dir="rtl"] .tile-bar i { transform-origin:right center; }
   padding-inline-start:11px; border-inline-start:2px solid var(--border);
 }
 .band-move b { color:var(--text); font-weight:700; font-variant-numeric:tabular-nums; }
-.band-fn .wait-label { color:rgba(255,255,255,0.42); }
-.band-fn .wait-chip { color:rgba(255,255,255,0.72); border-color:rgba(255,255,255,0.24); }
-html[data-theme="dark"] .wait-chip { border-color:#31405a; }
-
+/* Both bands sit on the same white. The functions band is set apart by a
+   rule and a line of type, not by a block of colour: a coloured panel makes
+   the difference look decorative when it is structural. */
 .band-fn {
-  background:#005D63; border-radius:22px; padding:20px 20px 22px;
-  position:relative; overflow:hidden;
+  margin-top:30px; padding-top:24px;
+  border-top:1px solid var(--border);
 }
-.band-fn::before {
-  content:''; position:absolute; top:-70px; inset-inline-end:-50px;
-  width:240px; height:240px; border-radius:50%; pointer-events:none;
-  background:radial-gradient(circle, rgba(0,187,178,0.20) 0%, transparent 68%);
+.band-fn .band-dot {
+  background:transparent; border:2px solid var(--primary);
+  box-shadow:none; width:8px; height:8px;
 }
-.band-fn .band-head { position:relative; z-index:1; margin-bottom:4px; }
-.band-fn .band-title h3 { color:#fff; }
-.band-fn .band-dot { background:#4DD9D3; box-shadow:0 0 0 3px rgba(77,217,211,0.20); }
-.band-fn .band-note { color:rgba(255,255,255,0.62); }
-.band-fn .band-note b { color:#fff; }
 .band-fn-line {
-  position:relative; z-index:1; font-size:12px; line-height:1.6;
-  color:rgba(255,255,255,0.70); margin-bottom:16px; max-width:62ch;
+  font-size:12.5px; line-height:1.65; color:var(--text-muted);
+  margin:2px 0 16px; max-width:64ch;
 }
-.band-fn .bento, .band-fn .waiting, .band-fn .band-move { position:relative; z-index:1; }
-.band-fn .tile {
-  background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.16);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.12);
-  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-}
-.band-fn .tile-rank { color:rgba(255,255,255,0.45); }
-.band-fn .tile-name { color:#fff; }
-.band-fn .tile-tag { color:rgba(255,255,255,0.55); }
-.band-fn .tile-docs { color:#fff; }
-.band-fn .tile-docs span { color:rgba(255,255,255,0.60); }
-.band-fn .tile-clear { color:#4DD9D3; }
-.band-fn .tile-flag { color:#FFB8A8; }
-.band-fn .tile-bar { background:rgba(255,255,255,0.14); }
-.band-fn .tile-bar i { background:#4DD9D3; opacity:.85; }
-.band-fn .tile::before { background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),
-  rgba(255,255,255,0.12), transparent 62%); }
-.band-fn .tile::after { background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%),
-  rgba(255,255,255,0.40), transparent 60%); }
-@media (hover:hover) and (pointer:fine) {
-  .band-fn .tile:hover { box-shadow:inset 0 1px 0 rgba(255,255,255,0.18),
-    0 14px 30px rgba(0,20,21,0.30); border-color:rgba(255,255,255,0.30); }
-}
+.band-fn-line b { color:var(--text); font-weight:600; }
+
 html[data-theme="dark"] .tile { background:#19263a; border-color:#243044; }
 html[data-theme="dark"] .tile-flag { color:#E99FAB; }
 html[data-theme="dark"] .tile-bar { background:rgba(255,255,255,0.10); }
-html[data-theme="dark"] .band-fn { background:#00383B; }
 
 @media(max-width:1100px){
   .tile, .tile.w4 { grid-column:span 4; }
@@ -628,7 +599,7 @@ html[data-theme="dark"] .band-fn { background:#00383B; }
 @media(max-width:760px){
   .tile, .tile.w4, .tile.w6 { grid-column:span 6; min-height:120px; }
   .tile.w6 .tile-name { font-size:16px; }
-  .band-fn { padding:16px 14px 18px; border-radius:18px; }
+  .band-fn { margin-top:24px; padding-top:20px; }
 }
 @media(max-width:460px){
   .tile, .tile.w4, .tile.w6 { grid-column:span 6; min-height:118px; padding:13px 13px 11px; }
