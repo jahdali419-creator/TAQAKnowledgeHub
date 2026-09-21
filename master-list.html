@@ -2,6 +2,7 @@
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
+<script>try{if(localStorage.getItem('taqa-theme-v2')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
@@ -127,7 +128,6 @@ html[data-theme="dark"] .nav-i[aria-pressed="true"]{color:#00272A;}
 html[data-theme="dark"] .nav-i[aria-current] svg,
 html[data-theme="dark"] .nav-i[aria-pressed="true"] svg,
 html[data-theme="dark"] .nav-i[aria-pressed="true"] b{color:#00272A;}
-.side-foot{margin-top:auto;padding-top:14px;}
 
 /* ── Canvas ── */
 .main{min-width:0;padding:20px 26px 64px;max-width:1520px;}
@@ -259,7 +259,6 @@ html[data-theme="dark"] .att .due svg{color:#FD691D;}
   #cuts{display:contents;}
   .nav-i{width:auto;flex-shrink:0;white-space:nowrap;padding:8px 11px;}
   .nav-i b{margin-inline-start:5px;}
-  .side-foot{margin-top:0;padding-top:0;flex-shrink:0;}
   .main{padding:16px 16px 54px;}
   .hero{padding:22px 20px 24px;min-height:0;}
   .hero h2{font-size:20px;}
@@ -474,11 +473,6 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
     <span>Dashboard</span></a>
 
-  <div class="side-foot">
-    <button class="nav-i" onclick="toggleDark()" aria-label="Switch light or dark">
-      <svg id="theme-icon" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>
-      <span>Theme</span></button>
-  </div>
 </aside>
 
 <main class="main viz" id="main">
@@ -506,6 +500,10 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
         <span>As</span>
         <select id="role-select" onchange="setRole(this.value)" aria-label="Viewing role"></select>
       </div>
+      <button class="btn" id="theme-btn" onclick="toggleDark()" aria-label="Switch between light and dark">
+        <svg id="theme-icon" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>
+        <span id="theme-label">Dark</span>
+      </button>
       <button class="btn" id="export-btn" onclick="exportCsv()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export
@@ -637,13 +635,19 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
 <script>
 const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
 const MOON='M6.2 2.3a.55.55 0 0 1 .2.62 5.2 5.2 0 0 0 6.7 6.7.55.55 0 0 1 .68.75A6.3 6.3 0 1 1 5.6 2.1a.55.55 0 0 1 .6.2Z';
-(function(){var t;try{t=localStorage.getItem('taqa-theme');}catch(e){}
-  if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');
-    var p=document.querySelector('#theme-icon path');if(p)p.setAttribute('d',MOON);}})();
-function toggleDark(){var d=document.documentElement.getAttribute('data-theme')==='dark',n=d?'light':'dark';
+function paintTheme(n){
   document.documentElement.setAttribute('data-theme',n);
-  var p=document.querySelector('#theme-icon path');if(p)p.setAttribute('d',n==='dark'?MOON:SUN);
-  try{localStorage.setItem('taqa-theme',n);}catch(e){}}
+  var p=document.querySelector('#theme-icon path');
+  if(p)p.setAttribute('d',n==='dark'?MOON:SUN);
+  var l=document.getElementById('theme-label');
+  if(l)l.textContent=n==='dark'?'Light':'Dark';
+}
+(function(){var t;try{t=localStorage.getItem('taqa-theme-v2');}catch(e){}
+  paintTheme(t==='dark'?'dark':'light');})();
+function toggleDark(){
+  var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  paintTheme(n);
+  try{localStorage.setItem('taqa-theme-v2',n);}catch(e){}}
 
 const D=TAQA_MASTER_DOCS, L=TAQA_DOC_LOOKUPS, A=TAQA_DOC;
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
