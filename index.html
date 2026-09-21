@@ -442,99 +442,181 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 .seg-acc-item:hover::after { animation:shineSwipe 0.6s ease forwards; }
 @keyframes shineSwipe { from{left:-130%;opacity:1;} to{left:165%;opacity:1;} }
 
-/* ── Command Center ── */
-.cmd-center {
-  background:rgba(0,93,99,0.05); border-radius:12px; padding:24px;
-  border:1px solid rgba(0,93,99,0.15);
-  box-shadow:0 4px 20px rgba(0,93,99,0.08);
+/* ── Discipline bands ──────────────────────────────────────────────────────
+   Two bands, because the twelve areas are two kinds of thing. Operations
+   deliver work and sit on white. Functions set rules that bind every segment,
+   so they sit on a Teal Green ground and read as a layer above, not a peer.
+   Tile width follows document count, so the grid is asymmetric because the
+   data is, not because asymmetry looks busy.                               */
+.band { margin-bottom:22px; }
+.band-head {
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:16px; flex-wrap:wrap; margin-bottom:14px;
 }
-.cmd-header {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:20px; padding-bottom:16px;
-  border-bottom:1px solid rgba(0,93,99,0.12);
-}
-.cmd-header-left { display:flex; align-items:center; gap:10px; }
-.cmd-live-dot {
-  width:8px; height:8px; border-radius:50%; background:#00BBB6; flex-shrink:0;
-  box-shadow:0 0 0 3px rgba(0,187,182,0.18);
-  animation:alertPulse 2s ease-in-out infinite;
-}
-.cmd-header-title {
+.band-title { display:flex; align-items:center; gap:10px; }
+.band-title h3 {
   font-family:'BwGradual','Urbanist',sans-serif; font-size:13px; font-weight:700;
-  letter-spacing:1.8px; text-transform:uppercase; color:var(--text);
+  letter-spacing:1.6px; text-transform:uppercase; color:var(--text);
 }
-.cmd-header-live {
-  font-size:9.5px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase;
-  color:#00BBB6; background:rgba(0,187,182,0.1); border:1px solid rgba(0,187,182,0.22);
-  border-radius:4px; padding:2px 8px;
+.band-dot {
+  width:7px; height:7px; border-radius:50%; background:var(--primary); flex-shrink:0;
+  box-shadow:0 0 0 3px rgba(0,93,99,0.14);
 }
-.cmd-header-count { font-size:11px; color:var(--text-muted); letter-spacing:0.3px; }
-.cmd-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-.cmd-card {
+.band-note { font-size:12px; color:var(--text-muted); }
+.band-note b { color:var(--text); font-weight:600; font-variant-numeric:tabular-nums; }
+
+/* The grid. Twelve columns so a tile can take 6, 4 or 3 of them. */
+.bento { display:grid; grid-template-columns:repeat(12,1fr); gap:10px; }
+.tile {
+  grid-column:span 3; position:relative; isolation:isolate; overflow:hidden;
+  display:flex; flex-direction:column; min-height:132px;
+  padding:16px 17px 14px; text-decoration:none;
   background:var(--bg-white); border:1px solid var(--border);
-  border-top:2px solid var(--primary);
-  border-radius:8px; padding:14px 14px 12px;
-  text-decoration:none; display:flex; flex-direction:column;
+  border-radius:16px;
+  box-shadow:0 1px 2px rgba(0,88,90,0.04);
+  opacity:0; transform:translateY(10px);
+  animation:tileIn 480ms cubic-bezier(0.16,1,0.3,1) forwards;
+  animation-delay:calc(var(--i,0) * 45ms);
+  transition:transform 260ms cubic-bezier(0.16,1,0.3,1),
+             box-shadow 260ms cubic-bezier(0.16,1,0.3,1),
+             border-color 260ms cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes tileIn { to { opacity:1; transform:none; } }
+.tile.w6 { grid-column:span 6; min-height:156px; }
+.tile.w4 { grid-column:span 4; }
+
+/* The cursor lights the tile from where it actually is. Two custom properties
+   set on pointermove; nothing re-renders and nothing but opacity animates. */
+.tile::before {
+  content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  opacity:0; transition:opacity 260ms ease;
+  background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),
+    rgba(0,93,99,0.10), transparent 62%);
+}
+.tile::after {
+  content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  border-radius:inherit; opacity:0; transition:opacity 260ms ease;
+  background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%),
+    rgba(0,187,178,0.26), transparent 60%);
+  -webkit-mask:linear-gradient(#000,#000) content-box, linear-gradient(#000,#000);
+  mask:linear-gradient(#000,#000) content-box, linear-gradient(#000,#000);
+  -webkit-mask-composite:xor; mask-composite:exclude; padding:1px;
+}
+@media (hover:hover) and (pointer:fine) {
+  .tile:hover { transform:translateY(-3px); box-shadow:0 14px 30px rgba(0,88,90,0.13); }
+  .tile:hover::before, .tile:hover::after { opacity:1; }
+}
+.tile:active { transform:translateY(-1px); }
+.tile:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
+
+.tile-rank {
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:10px; font-weight:700;
+  letter-spacing:1.2px; color:var(--text-light);
+  font-variant-numeric:tabular-nums;
+}
+.tile-name {
+  font-family:'BwGradual','Urbanist',sans-serif; font-weight:700; color:var(--text);
+  font-size:15px; line-height:1.25; margin-top:9px; letter-spacing:-0.2px;
+}
+.tile.w6 .tile-name { font-size:19px; }
+.tile-tag {
+  font-size:10px; letter-spacing:0.7px; text-transform:uppercase;
+  color:var(--text-muted); margin-top:4px;
+}
+.tile-foot {
+  margin-top:auto; padding-top:12px; padding-bottom:9px; display:flex;
+  align-items:center; justify-content:space-between; gap:10px;
+}
+.tile-docs {
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:19px; font-weight:800;
+  color:var(--text); font-variant-numeric:tabular-nums; letter-spacing:-0.5px;
+}
+.tile-docs span { font-size:11px; font-weight:500; color:var(--text-muted);
+  letter-spacing:0; margin-inline-start:5px; }
+.tile-flag {
+  display:inline-flex; align-items:center; gap:4px; flex-shrink:0;
+  font-size:11px; font-weight:700; color:#C8102E; font-variant-numeric:tabular-nums;
+}
+.tile-flag svg { width:12px; height:12px; }
+.tile-clear { font-size:11px; font-weight:600; color:var(--primary); }
+/* Share of the band, drawn where a card edge would otherwise say nothing. */
+.tile-bar { position:absolute; inset-inline:12px; bottom:10px; height:3px; border-radius:2px;
+  background:rgba(0,88,90,0.10); overflow:hidden; }
+.tile-bar i {
+  display:block; height:100%; border-radius:2px; background:var(--primary); opacity:.55;
+  transform-origin:left center; transform:scaleX(0);
+  animation:barIn 620ms cubic-bezier(0.16,1,0.3,1) forwards;
+  animation-delay:calc(var(--i,0) * 45ms + 160ms);
+}
+@keyframes barIn { to { transform:scaleX(1); } }
+html[dir="rtl"] .tile-bar i { transform-origin:right center; }
+
+/* The functions band inverts: rules sit over the work, so they sit on teal. */
+.band-fn {
+  background:#005D63; border-radius:22px; padding:20px 20px 22px;
   position:relative; overflow:hidden;
-  transition:transform 0.28s cubic-bezier(0.16,1,0.3,1), box-shadow 0.28s, border-color 0.28s;
 }
-.cmd-card::after {
-  content:''; position:absolute; top:0; left:-130%; width:52%; height:100%;
-  background:linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
-  transform:skewX(-16deg); pointer-events:none;
+.band-fn::before {
+  content:''; position:absolute; top:-70px; inset-inline-end:-50px;
+  width:240px; height:240px; border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle, rgba(0,187,178,0.20) 0%, transparent 68%);
 }
-.cmd-card:hover::after { animation:shineSwipe 0.55s ease forwards; }
-.cmd-card::before {
-  content:''; position:absolute; bottom:0; left:0; right:0; height:55%;
-  background:linear-gradient(to top, var(--seg-color,#005D63), transparent);
-  opacity:0; pointer-events:none; transition:opacity 0.4s; border-radius:0 0 8px 8px;
+.band-fn .band-head { position:relative; z-index:1; margin-bottom:4px; }
+.band-fn .band-title h3 { color:#fff; }
+.band-fn .band-dot { background:#4DD9D3; box-shadow:0 0 0 3px rgba(77,217,211,0.20); }
+.band-fn .band-note { color:rgba(255,255,255,0.62); }
+.band-fn .band-note b { color:#fff; }
+.band-fn-line {
+  position:relative; z-index:1; font-size:12px; line-height:1.6;
+  color:rgba(255,255,255,0.70); margin-bottom:16px; max-width:62ch;
 }
-.cmd-card:hover::before { opacity:0.09; }
-html[data-theme="dark"] .cmd-card::before { opacity:0; }
-html[data-theme="dark"] .cmd-card:hover::before { opacity:0.13; }
-.cmd-card:hover {
-  transform:translateY(-4px);
-  box-shadow:0 12px 32px rgba(0,93,99,0.18);
-  border-color:var(--primary);
+.band-fn .bento { position:relative; z-index:1; }
+.band-fn .tile {
+  background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.12);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
 }
-.cmd-card-top {
-  display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
+.band-fn .tile-rank { color:rgba(255,255,255,0.45); }
+.band-fn .tile-name { color:#fff; }
+.band-fn .tile-tag { color:rgba(255,255,255,0.55); }
+.band-fn .tile-docs { color:#fff; }
+.band-fn .tile-docs span { color:rgba(255,255,255,0.60); }
+.band-fn .tile-clear { color:#4DD9D3; }
+.band-fn .tile-flag { color:#FFB8A8; }
+.band-fn .tile-bar { background:rgba(255,255,255,0.14); }
+.band-fn .tile-bar i { background:#4DD9D3; opacity:.85; }
+.band-fn .tile::before { background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),
+  rgba(255,255,255,0.12), transparent 62%); }
+.band-fn .tile::after { background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%),
+  rgba(255,255,255,0.40), transparent 60%); }
+@media (hover:hover) and (pointer:fine) {
+  .band-fn .tile:hover { box-shadow:inset 0 1px 0 rgba(255,255,255,0.18),
+    0 14px 30px rgba(0,20,21,0.30); border-color:rgba(255,255,255,0.30); }
 }
-.cmd-card-num {
-  font-size:9.5px; font-weight:700; letter-spacing:1px;
-  color:var(--text-light); font-family:'BwGradual','Urbanist',sans-serif;
+html[data-theme="dark"] .tile { background:#19263a; border-color:#243044; }
+html[data-theme="dark"] .tile-flag { color:#E99FAB; }
+html[data-theme="dark"] .tile-bar { background:rgba(255,255,255,0.10); }
+html[data-theme="dark"] .band-fn { background:#00383B; }
+
+@media(max-width:1100px){
+  .tile, .tile.w4 { grid-column:span 4; }
+  .tile.w6 { grid-column:span 8; }
 }
-.cmd-indicator { width:7px; height:7px; border-radius:50%; }
-.cmd-indicator.alert {
-  background:#E74C3C; box-shadow:0 0 0 2px rgba(231,76,60,0.22);
-  animation:cmdAlertPulse 2s ease-in-out infinite;
+@media(max-width:760px){
+  .tile, .tile.w4, .tile.w6 { grid-column:span 6; min-height:120px; }
+  .tile.w6 .tile-name { font-size:16px; }
+  .band-fn { padding:16px 14px 18px; border-radius:18px; }
 }
-.cmd-indicator.clear { background:#00BBB6; box-shadow:0 0 0 2px rgba(0,187,182,0.2); }
-@keyframes cmdAlertPulse {
-  0%,100%{box-shadow:0 0 0 2px rgba(231,76,60,0.22);}
-  50%{box-shadow:0 0 0 5px rgba(231,76,60,0);}
+@media(max-width:460px){
+  .tile, .tile.w4, .tile.w6 { grid-column:span 6; min-height:118px; padding:13px 13px 11px; }
+  .tile-name, .tile.w6 .tile-name { font-size:14px; }
+  .tile-docs { font-size:17px; }
+  .bento { gap:8px; }
 }
-.cmd-card-name {
-  font-family:'BwGradual','Urbanist',sans-serif; font-size:13px; font-weight:700;
-  color:var(--text); line-height:1.3; margin-bottom:3px;
+@media (prefers-reduced-motion: reduce){
+  .tile { opacity:1; transform:none; animation:none; }
+  .tile-bar i { transform:none; animation:none; }
 }
-.cmd-card-tag {
-  font-size:9.5px; color:var(--text-muted);
-  text-transform:uppercase; letter-spacing:0.7px; margin-bottom:12px; flex:1;
-}
-.cmd-card-footer {
-  display:flex; align-items:center; justify-content:space-between;
-  border-top:1px solid var(--border); padding-top:9px;
-}
-.cmd-card-docs { font-size:11px; color:var(--text-muted); }
-.cmd-card-alert-count { font-size:10.5px; font-weight:700; color:#E74C3C; }
-.cmd-card-clear { font-size:10.5px; font-weight:600; color:var(--primary); }
-html[data-theme="dark"] .cmd-center { background:rgba(0,93,99,0.1); border-color:rgba(0,93,99,0.22); }
-html[data-theme="dark"] .cmd-card { background:#19263a; border-color:#243044; }
-html[data-theme="dark"] .cmd-card-footer { border-color:#243044; }
-html[data-theme="dark"] .cmd-header { border-color:rgba(0,93,99,0.2); }
-@media(max-width:900px) { .cmd-grid { grid-template-columns:repeat(3,1fr); } }
-@media(max-width:600px) { .cmd-grid { grid-template-columns:repeat(2,1fr); } }
 
 /* Sidebar */
 .panel-sidebar { display:flex; flex-direction:column; }
@@ -973,7 +1055,6 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
 }
 @media(max-width:480px) {
   .segments-grid { grid-template-columns:1fr; }
-  .cmd-grid { grid-template-columns:1fr; }
   .cmd-header-count { width:100%; }
   .sidebar-tools { grid-template-columns:1fr; }
   .hero-search-bar input { font-size:14px; }
@@ -1163,90 +1244,21 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
         <span class="section-hl-tag">Explore by Discipline</span>
         <h2 class="section-hl-title">One platform. Every discipline.</h2>
       </div>
-      <div class="cmd-center reveal">
-        <div class="cmd-header">
-          <div class="cmd-header-left">
-            <span class="cmd-live-dot"></span>
-            <span class="cmd-header-title">Operational Segments</span>
-            <span class="cmd-header-live">Live Status</span>
-          </div>
-          <span class="cmd-header-count">12 Segments · 553 Documents</span>
+      <div class="band reveal">
+        <div class="band-head">
+          <div class="band-title"><span class="band-dot"></span><h3>Operational Segments</h3></div>
+          <span class="band-note" id="band-seg-note"></span>
         </div>
-        <div class="cmd-grid">
+        <div class="bento" id="band-seg"></div>
+      </div>
 
-          <a href="segment.html?id=coiled-tubing" class="cmd-card reveal" style="transition-delay:0.05s" data-id="coiled-tubing">
-            <div class="cmd-card-top"><span class="cmd-card-num">01</span></div>
-            <div class="cmd-card-name">Coiled Tubing</div>
-            <div class="cmd-card-tag">Operations</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">35 docs</span><span class="cmd-card-alert-count">⚠ 3</span></div>          </a>
-
-          <a href="segment.html?id=fracturing" class="cmd-card reveal" style="transition-delay:0.10s" data-id="fracturing">
-            <div class="cmd-card-top"><span class="cmd-card-num">02</span></div>
-            <div class="cmd-card-name">Fracturing</div>
-            <div class="cmd-card-tag">Stimulation</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">49 docs</span><span class="cmd-card-alert-count">⚠ 5</span></div>          </a>
-
-          <a href="segment.html?id=wireline" class="cmd-card reveal" style="transition-delay:0.15s" data-id="wireline">
-            <div class="cmd-card-top"><span class="cmd-card-num">03</span></div>
-            <div class="cmd-card-name">Wireline</div>
-            <div class="cmd-card-tag">Logging</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">34 docs</span><span class="cmd-card-clear">Clear</span></div>          </a>
-
-          <a href="segment.html?id=drilling" class="cmd-card reveal" style="transition-delay:0.20s" data-id="drilling">
-            <div class="cmd-card-top"><span class="cmd-card-num">04</span></div>
-            <div class="cmd-card-name">Drilling</div>
-            <div class="cmd-card-tag">Well Operations</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">57 docs</span><span class="cmd-card-alert-count">⚠ 7</span></div>          </a>
-
-          <a href="segment.html?id=cementing" class="cmd-card reveal" style="transition-delay:0.25s" data-id="cementing">
-            <div class="cmd-card-top"><span class="cmd-card-num">05</span></div>
-            <div class="cmd-card-name">Cementing</div>
-            <div class="cmd-card-tag">Well Integrity</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">34 docs</span><span class="cmd-card-clear">Clear</span></div>          </a>
-
-          <a href="segment.html?id=inspection" class="cmd-card reveal" style="transition-delay:0.30s" data-id="inspection">
-            <div class="cmd-card-top"><span class="cmd-card-num">06</span></div>
-            <div class="cmd-card-name">Inspection Services</div>
-            <div class="cmd-card-tag">Compliance</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">44 docs</span><span class="cmd-card-alert-count">⚠ 3</span></div>          </a>
-
-          <a href="segment.html?id=well-safety" class="cmd-card reveal" style="transition-delay:0.35s" data-id="well-safety">
-            <div class="cmd-card-top"><span class="cmd-card-num">07</span></div>
-            <div class="cmd-card-name">Well Safety</div>
-            <div class="cmd-card-tag">HSE Critical</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">52 docs</span><span class="cmd-card-alert-count">⚠ 8</span></div>          </a>
-
-          <a href="segment.html?id=qhse" class="cmd-card reveal" style="transition-delay:0.40s" data-id="qhse">
-            <div class="cmd-card-top"><span class="cmd-card-num">08</span></div>
-            <div class="cmd-card-name">QHSE</div>
-            <div class="cmd-card-tag">Quality &amp; Safety</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">50 docs</span><span class="cmd-card-alert-count">⚠ 4</span></div>          </a>
-
-          <a href="segment.html?id=tws-maintenance" class="cmd-card reveal" style="transition-delay:0.45s" data-id="tws-maintenance">
-            <div class="cmd-card-top"><span class="cmd-card-num">09</span></div>
-            <div class="cmd-card-name">TWS Maintenance</div>
-            <div class="cmd-card-tag">Maintenance</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">39 docs</span><span class="cmd-card-clear">Clear</span></div>          </a>
-
-          <a href="segment.html?id=hr" class="cmd-card reveal" style="transition-delay:0.50s" data-id="hr">
-            <div class="cmd-card-top"><span class="cmd-card-num">10</span></div>
-            <div class="cmd-card-name">Human Resources</div>
-            <div class="cmd-card-tag">HR &amp; People</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">38 docs</span><span class="cmd-card-clear">Clear</span></div>          </a>
-
-          <a href="segment.html?id=well-testing" class="cmd-card reveal" style="transition-delay:0.55s" data-id="well-testing">
-            <div class="cmd-card-top"><span class="cmd-card-num">11</span></div>
-            <div class="cmd-card-name">Well Testing</div>
-            <div class="cmd-card-tag">Testing Services</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">31 docs</span><span class="cmd-card-alert-count">⚠ 2</span></div>          </a>
-
-          <a href="segment.html?id=cybersecurity" class="cmd-card reveal" style="transition-delay:0.60s" data-id="cybersecurity">
-            <div class="cmd-card-top"><span class="cmd-card-num">12</span></div>
-            <div class="cmd-card-name">Cybersecurity</div>
-            <div class="cmd-card-tag">IT &amp; Data Security</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">30 docs</span><span class="cmd-card-alert-count">⚠ 4</span></div>          </a>
-
+      <div class="band band-fn reveal">
+        <div class="band-head">
+          <div class="band-title"><span class="band-dot"></span><h3>Corporate Functions</h3></div>
+          <span class="band-note" id="band-fn-note"></span>
         </div>
+        <p class="band-fn-line">These set rules that apply across every segment. A policy published here binds the wellsite as much as the office.</p>
+        <div class="bento" id="band-fn"></div>
       </div>
 
       <div class="seg-accordion" id="seg-accordion" style="display:none">
@@ -1807,8 +1819,8 @@ document.addEventListener('click',function(e){
   var strip=document.createElement('div');
   strip.className='rv-strip';
   strip.innerHTML='<span class="rv-label">Recently visited</span>'+chips;
-  var grid=document.querySelector('.cmd-grid');
-  if(grid&&grid.parentNode)grid.parentNode.insertBefore(strip,grid);
+  var anchor=document.getElementById('band-seg');
+  if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(strip,anchor);
 })();
 </script>
 <script>
@@ -1898,7 +1910,7 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
   var STEPS=[
     {
       title:'Welcome to TAQA Knowledge Hub',
-      desc:'Your single platform for all field documents, procedures, and expert support across 12 operational segments. Let us show you around.',
+      desc:'Your single platform for all field documents, procedures, and expert support across nine operational segments and three corporate functions. Let us show you around.',
       target:null
     },
     {
@@ -2029,6 +2041,7 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
 })();
 </script>
 
+<script src="documents-master.js"></script>
 <script src="segments-data.js"></script>
 <script>
 (function(){
@@ -2061,6 +2074,87 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
   // Update live header count text
   var cc=document.querySelector('.cmd-header-count');
   if(cc)cc.textContent=_totalSegs+' Segments · '+_totalDocs+' Documents';
+})();
+</script>
+<script>
+/* ── Discipline bands ──────────────────────────────────────────────────────
+   Every figure comes from the register, so the home page and the master list
+   can never quote different numbers. Tile width follows document count.   */
+(function(){
+  if (typeof TAQA_MASTER_DOCS === 'undefined') return;
+  var D = TAQA_MASTER_DOCS, L = TAQA_DOC_LOOKUPS, A = TAQA_DOC;
+  var FUNCTIONS = ['qhse','hr','cybersecurity'];
+  var TAG = {
+    'coiled-tubing':'Operations','fracturing':'Stimulation','wireline':'Logging',
+    'drilling':'Well Operations','cementing':'Well Integrity','inspection':'Compliance',
+    'well-safety':'HSE Critical','well-testing':'Testing Services',
+    'tws-maintenance':'Maintenance','qhse':'Quality & Safety','hr':'HR & People',
+    'cybersecurity':'IT & Data Security'
+  };
+  var LATE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" ' +
+             'stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 1.8"/></svg>';
+
+  var controlled = D.filter(A.controlled);
+  var rows = Object.keys(L.segments).map(function(id){
+    var mine = controlled.filter(function(d){ return d.segment === id; });
+    return { id:id, name:L.segments[id].name, docs:mine.length,
+             overdue:mine.filter(A.overdue).length,
+             kind:FUNCTIONS.indexOf(id) > -1 ? 'fn' : 'seg' };
+  }).filter(function(x){ return x.docs; })
+    .sort(function(a,b){ return b.docs - a.docs; });
+
+  // Widths follow the data: the two biggest take half a row each, the next
+  // three a third, the rest a quarter.
+  function widths(n){
+    if (n >= 9) return ['w6','w6','w4','w4','w4'];
+    if (n >= 3) return ['w6'];
+    return [];
+  }
+
+  function draw(list, hostId, noteId, noun){
+    var host = document.getElementById(hostId), note = document.getElementById(noteId);
+    if (!host) return;
+    var total = list.reduce(function(a,x){ return a + x.docs; }, 0);
+    var max   = list.length ? list[0].docs : 1;
+    var w     = widths(list.length);
+    host.innerHTML = list.map(function(x, i){
+      var cls = w[i] || '';
+      var late = x.overdue
+        ? '<span class="tile-flag">' + LATE + x.overdue + '</span>'
+        : '<span class="tile-clear">Up to date</span>';
+      return '<a class="tile ' + cls + '" style="--i:' + i + '" data-id="' + x.id + '" ' +
+             'href="segment.html?id=' + x.id + '">' +
+               '<span class="tile-rank">' + (i < 9 ? '0' : '') + (i + 1) + '</span>' +
+               '<span class="tile-name">' + x.name + '</span>' +
+               '<span class="tile-tag">' + (TAG[x.id] || '') + '</span>' +
+               '<span class="tile-foot">' +
+                 '<span class="tile-docs">' + x.docs + '<span>docs</span></span>' + late +
+               '</span>' +
+               '<span class="tile-bar"><i style="width:' +
+                 Math.round(x.docs / max * 100) + '%;--i:' + i + '"></i></span>' +
+             '</a>';
+    }).join('');
+    if (note) {
+      note.innerHTML = '<b>' + list.length + '</b> ' + noun +
+                       ' · <b>' + total + '</b> controlled documents';
+    }
+  }
+
+  draw(rows.filter(function(x){ return x.kind === 'seg'; }), 'band-seg', 'band-seg-note', 'segments');
+  draw(rows.filter(function(x){ return x.kind === 'fn';  }), 'band-fn',  'band-fn-note',  'functions');
+
+  // The cursor lights the tile from where it actually is. Pointer devices
+  // only, and it writes two custom properties rather than re-rendering.
+  if (window.matchMedia && matchMedia('(hover:hover) and (pointer:fine)').matches) {
+    document.querySelectorAll('.bento').forEach(function(grid){
+      grid.addEventListener('pointermove', function(e){
+        var t = e.target.closest('.tile'); if (!t) return;
+        var r = t.getBoundingClientRect();
+        t.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        t.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
+    });
+  }
 })();
 </script>
 <script src="shared.js"></script>
