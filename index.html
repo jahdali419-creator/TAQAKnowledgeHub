@@ -2090,25 +2090,25 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     { name:'Cementing',          from:'cementing',    tag:'Well Integrity' },
     { name:'Well Testing',       from:'well-testing', tag:'Testing Services' },
     { name:'Wireline Services',  from:'wireline',     tag:'Logging' },
-    { name:'Slickline',                               tag:'Logging' },
-    { name:'Well Completions',                        tag:'Well Operations' },
-    { name:'Marine Services',                         tag:'Marine' }
+    { name:'Slickline',        from:'slickline',        tag:'Logging' },
+    { name:'Well Completions', from:'well-completions', tag:'Well Operations' },
+    { name:'Marine Services',  from:'marine-services',  tag:'Marine' }
   ];
   var FUNCTIONS = [
     { name:'QHSE',                        from:'qhse',          tag:'Quality & Safety' },
     { name:'GRC',                         from:'cybersecurity', tag:'Governance, Risk & Compliance' },
     { name:'Group Human Resources',       from:'hr',            tag:'HR & People' },
-    { name:'Finance',                       tag:'Finance' },
-    { name:'Information Technology',        tag:'IT' },
-    { name:'Supply Chain',                  tag:'Procurement' },
-    { name:'Legal',                         tag:'Legal' },
-    { name:'Learning Center',               tag:'Training' },
-    { name:'Commercial & Sales',            tag:'Commercial' },
-    { name:'Facility Management',           tag:'Facilities' },
-    { name:'Administration',                tag:'Admin' },
-    { name:'Venture Management',            tag:'Corporate Development' },
-    { name:'New Business Development',      tag:'Corporate Development' },
-    { name:'Geothermal Centre of Excellence', tag:'Advisory' }
+    { name:'Finance',                  from:'finance',            tag:'Finance' },
+    { name:'Information Technology',   from:'it',                 tag:'IT' },
+    { name:'Supply Chain',             from:'supply-chain',       tag:'Procurement' },
+    { name:'Legal',                    from:'legal',              tag:'Legal' },
+    { name:'Learning Center',          from:'learning-center',    tag:'Training' },
+    { name:'Commercial & Sales',       from:'commercial',         tag:'Commercial' },
+    { name:'Facility Management',      from:'facility-management',tag:'Facilities' },
+    { name:'Administration',           from:'administration',     tag:'Admin' },
+    { name:'Venture Management',       from:'venture-management', tag:'Corporate Development' },
+    { name:'New Business Development', from:'new-business',       tag:'Corporate Development' },
+    { name:'Geothermal Centre of Excellence', from:'geothermal-coe', tag:'Advisory' }
   ];
   // Not one of the eleven. Its documents reassign to the segment that owns
   // the equipment, so they are counted here until that migration runs.
@@ -2161,7 +2161,8 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     var note = document.getElementById(noteId);
     if (note) {
       note.innerHTML = '<b>' + list.length + '</b> ' + noun + ' · <b>' + total +
-        '</b> controlled documents · <b>' + waiting.length + '</b> awaiting';
+        '</b> controlled documents' +
+        (waiting.length ? ' · <b>' + waiting.length + '</b> awaiting' : '');
     }
     var chips = document.getElementById(chipId);
     if (chips) {

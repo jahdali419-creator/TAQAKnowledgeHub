@@ -116,6 +116,118 @@ const TAQA_DOC_LOOKUPS = {
       "bu": null,
       "provisional": true,
       "note": "Cybersecurity sits under GRC by decision of the business. No short form is assigned in TQ-QHSE-S001 5.3, so \"GRC\" is provisional pending QHSE assignment."
+    },
+    "slickline": {
+      "name": "Slickline",
+      "spl": "SLK",
+      "splName": "Slickline",
+      "bu": null,
+      "provisional": true,
+      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"SLK\" is provisional pending QHSE assignment."
+    },
+    "well-completions": {
+      "name": "Well Completions",
+      "spl": "WCS",
+      "splName": "Well Completions",
+      "bu": null,
+      "provisional": true,
+      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"WCS\" is provisional pending QHSE assignment."
+    },
+    "marine-services": {
+      "name": "Marine Services",
+      "spl": "MRS",
+      "splName": "Marine Services",
+      "bu": null,
+      "provisional": true,
+      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"MRS\" is provisional pending QHSE assignment."
+    },
+    "finance": {
+      "name": "Finance",
+      "spl": "FIN",
+      "splName": "Finance",
+      "bu": null,
+      "provisional": true,
+      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"FIN\" is provisional pending QHSE assignment."
+    },
+    "it": {
+      "name": "Information Technology",
+      "spl": "IT",
+      "splName": "Information Technology",
+      "bu": null,
+      "provisional": true,
+      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"IT\" is provisional pending QHSE assignment."
+    },
+    "supply-chain": {
+      "name": "Supply Chain",
+      "spl": "SCM",
+      "splName": "Supply Chain",
+      "bu": null,
+      "provisional": true,
+      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"SCM\" is provisional pending QHSE assignment."
+    },
+    "legal": {
+      "name": "Legal",
+      "spl": "LGL",
+      "splName": "Legal",
+      "bu": null,
+      "provisional": true,
+      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"LGL\" is provisional pending QHSE assignment."
+    },
+    "learning-center": {
+      "name": "Learning Center",
+      "spl": "LC",
+      "splName": "Learning Center",
+      "bu": null,
+      "provisional": true,
+      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"LC\" is provisional pending QHSE assignment."
+    },
+    "commercial": {
+      "name": "Commercial & Sales",
+      "spl": "CSL",
+      "splName": "Commercial & Sales",
+      "bu": null,
+      "provisional": true,
+      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"CSL\" is provisional pending QHSE assignment."
+    },
+    "facility-management": {
+      "name": "Facility Management",
+      "spl": "FM",
+      "splName": "Facility Management",
+      "bu": null,
+      "provisional": true,
+      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"FM\" is provisional pending QHSE assignment."
+    },
+    "administration": {
+      "name": "Administration",
+      "spl": "ADM",
+      "splName": "Administration",
+      "bu": null,
+      "provisional": true,
+      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"ADM\" is provisional pending QHSE assignment."
+    },
+    "venture-management": {
+      "name": "Venture Management",
+      "spl": "VM",
+      "splName": "Venture Management",
+      "bu": null,
+      "provisional": true,
+      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"VM\" is provisional pending QHSE assignment."
+    },
+    "new-business": {
+      "name": "New Business Development",
+      "spl": "NBD",
+      "splName": "New Business Development",
+      "bu": null,
+      "provisional": true,
+      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"NBD\" is provisional pending QHSE assignment."
+    },
+    "geothermal-coe": {
+      "name": "Geothermal Centre of Excellence",
+      "spl": "GEO",
+      "splName": "Geothermal Centre of Excellence",
+      "bu": null,
+      "provisional": true,
+      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"GEO\" is provisional pending QHSE assignment."
     }
   },
   "types": {
@@ -747,7 +859,50 @@ const TAQA_MASTER_DOCS = [{"docNumber":"TQ-TWS-CTSS-SOP-001","legacyId":"CT-001"
 {"docNumber":"TQ-TWS-FS-SOP-005-AR","legacyId":"FRAC-005","title":"Proppant Handling SOP (النسخة العربية)","segment":"fracturing","docType":"sop","revision":"3.0","issueDate":"2026-02-03","approvedDate":"2026-01-03","nextReviewDate":"2028-02-03","reviewOverdue":false,"status":"current","supersedes":null,"supersededBy":null,"classification":"confidential","language":"ar","translationOf":"TQ-TWS-FS-SOP-005","numberStatus":"conformant"},
 {"docNumber":"TQ-TWS-FS-SOP-006-AR","legacyId":"FRAC-006","title":"Treatment Execution SOP (النسخة العربية)","segment":"fracturing","docType":"sop","revision":"3.0","issueDate":"2026-02-12","approvedDate":"2026-01-12","nextReviewDate":"2028-02-12","reviewOverdue":false,"status":"current","supersedes":null,"supersededBy":null,"classification":"internal","language":"ar","translationOf":"TQ-TWS-FS-SOP-006","numberStatus":"conformant"},
 {"docNumber":"TQ-TWS-FS-SOP-007-AR","legacyId":"FRAC-007","title":"Emergency Shutdown Procedure (النسخة العربية)","segment":"fracturing","docType":"sop","revision":"3.0","issueDate":"2026-07-22","approvedDate":"2026-06-22","nextReviewDate":"2028-07-22","reviewOverdue":false,"status":"current","supersedes":null,"supersededBy":null,"classification":"internal","language":"ar","translationOf":"TQ-TWS-FS-SOP-007","numberStatus":"conformant"},
-{"docNumber":"TQ-TWS-FS-SOP-008-AR","legacyId":"FRAC-008","title":"Post-Job Flowback SOP (النسخة العربية)","segment":"fracturing","docType":"sop","revision":"3.0","issueDate":"2025-12-27","approvedDate":"2025-11-27","nextReviewDate":"2027-12-27","reviewOverdue":false,"status":"current","supersedes":null,"supersededBy":null,"classification":"internal","language":"ar","translationOf":"TQ-TWS-FS-SOP-008","numberStatus":"conformant"}];
+{"docNumber":"TQ-TWS-FS-SOP-008-AR","legacyId":"FRAC-008","title":"Post-Job Flowback SOP (النسخة العربية)","segment":"fracturing","docType":"sop","revision":"3.0","issueDate":"2025-12-27","approvedDate":"2025-11-27","nextReviewDate":"2027-12-27","reviewOverdue":false,"status":"current","supersedes":null,"supersededBy":null,"classification":"internal","language":"ar","translationOf":"TQ-TWS-FS-SOP-008","numberStatus":"conformant"},
+{"docNumber": "TQ-SLK-SOP-001", "legacyId": null, "title": "Slickline Pressure Control Equipment Rig-Up", "segment": "slickline", "docType": "sop", "revision": "1.0", "issueDate": "2024-07-30", "approvedDate": "2024-07-07", "nextReviewDate": "2026-07-20", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-SLK-SOP-002", "legacyId": null, "title": "Wireline Valve Function Test", "segment": "slickline", "docType": "sop", "revision": "1.0", "issueDate": "2025-12-27", "approvedDate": "2025-11-09", "nextReviewDate": "2027-12-17", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-SLK-WI-003", "legacyId": null, "title": "Toolstring Make-Up and Inspection", "segment": "slickline", "docType": "wi", "revision": "1.0", "issueDate": "2024-05-06", "approvedDate": "2024-03-16", "nextReviewDate": "2027-04-21", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-WCS-SOP-001", "legacyId": null, "title": "Completion String Running Procedure", "segment": "well-completions", "docType": "sop", "revision": "1.0", "issueDate": "2025-03-11", "approvedDate": "2025-02-23", "nextReviewDate": "2027-03-01", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-WCS-SOP-002", "legacyId": null, "title": "Production Packer Setting and Testing", "segment": "well-completions", "docType": "sop", "revision": "1.0", "issueDate": "2023-12-18", "approvedDate": "2023-11-08", "nextReviewDate": "2025-12-07", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-WCS-WI-003", "legacyId": null, "title": "Downhole Gauge Installation", "segment": "well-completions", "docType": "wi", "revision": "1.0", "issueDate": "2024-01-06", "approvedDate": "2023-12-20", "nextReviewDate": "2026-12-21", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-MRS-SOP-001", "legacyId": null, "title": "Vessel Mobilisation Checklist", "segment": "marine-services", "docType": "sop", "revision": "1.0", "issueDate": "2025-02-21", "approvedDate": "2024-12-29", "nextReviewDate": "2027-02-11", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-MRS-SOP-002", "legacyId": null, "title": "Cargo Securing and Sea Fastening", "segment": "marine-services", "docType": "sop", "revision": "1.0", "issueDate": "2024-03-03", "approvedDate": "2024-02-15", "nextReviewDate": "2026-02-21", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-MRS-SOP-003", "legacyId": null, "title": "Man Overboard Response", "segment": "marine-services", "docType": "sop", "revision": "4.0", "issueDate": "2025-08-25", "approvedDate": "2025-07-24", "nextReviewDate": "2027-08-15", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-FIN-P-001", "legacyId": null, "title": "Delegation of Authority Policy", "segment": "finance", "docType": "policy", "revision": "1.0", "issueDate": "2025-08-02", "approvedDate": "2025-06-15", "nextReviewDate": "2027-07-23", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-FIN-P-002", "legacyId": null, "title": "Travel and Expense Policy", "segment": "finance", "docType": "policy", "revision": "2.0", "issueDate": "2024-08-31", "approvedDate": "2024-07-13", "nextReviewDate": "2026-08-21", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-FIN-SOP-003", "legacyId": null, "title": "Month-End Close Procedure", "segment": "finance", "docType": "sop", "revision": "2.0", "issueDate": "2025-10-25", "approvedDate": "2025-09-04", "nextReviewDate": "2027-10-15", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-IT-P-001", "legacyId": null, "title": "Acceptable Use Policy", "segment": "it", "docType": "policy", "revision": "1.0", "issueDate": "2024-04-22", "approvedDate": "2024-04-02", "nextReviewDate": "2026-04-12", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-IT-SOP-002", "legacyId": null, "title": "IT Change Management Procedure", "segment": "it", "docType": "sop", "revision": "2.0", "issueDate": "2026-01-22", "approvedDate": "2025-11-30", "nextReviewDate": "2028-01-12", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-IT-SOP-003", "legacyId": null, "title": "Backup and Restore Procedure", "segment": "it", "docType": "sop", "revision": "3.0", "issueDate": "2023-08-12", "approvedDate": "2023-06-16", "nextReviewDate": "2025-08-01", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-SCM-P-001", "legacyId": null, "title": "Supplier Qualification Policy", "segment": "supply-chain", "docType": "policy", "revision": "3.0", "issueDate": "2023-10-14", "approvedDate": "2023-08-24", "nextReviewDate": "2025-10-03", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-SCM-SOP-002", "legacyId": null, "title": "Purchase Requisition and Approval Procedure", "segment": "supply-chain", "docType": "sop", "revision": "2.0", "issueDate": "2024-09-18", "approvedDate": "2024-08-20", "nextReviewDate": "2026-09-08", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-SCM-WI-003", "legacyId": null, "title": "Goods Receipt and Inspection", "segment": "supply-chain", "docType": "wi", "revision": "3.0", "issueDate": "2025-12-08", "approvedDate": "2025-10-19", "nextReviewDate": "2028-11-22", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-LGL-P-001", "legacyId": null, "title": "Contract Review and Approval Policy", "segment": "legal", "docType": "policy", "revision": "3.0", "issueDate": "2023-08-15", "approvedDate": "2023-07-11", "nextReviewDate": "2025-08-04", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-LGL-P-002", "legacyId": null, "title": "Delegation of Signing Authority", "segment": "legal", "docType": "policy", "revision": "4.0", "issueDate": "2025-12-26", "approvedDate": "2025-12-05", "nextReviewDate": "2027-12-16", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-LGL-SOP-003", "legacyId": null, "title": "Legal Hold Procedure", "segment": "legal", "docType": "sop", "revision": "2.0", "issueDate": "2025-06-21", "approvedDate": "2025-05-17", "nextReviewDate": "2027-06-11", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-LC-P-001", "legacyId": null, "title": "Competency Assessment Policy", "segment": "learning-center", "docType": "policy", "revision": "1.0", "issueDate": "2023-08-27", "approvedDate": "2023-07-18", "nextReviewDate": "2025-08-16", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-LC-SOP-002", "legacyId": null, "title": "Training Needs Analysis Procedure", "segment": "learning-center", "docType": "sop", "revision": "4.0", "issueDate": "2024-08-20", "approvedDate": "2024-07-16", "nextReviewDate": "2026-08-10", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-LC-SOP-003", "legacyId": null, "title": "Instructor Qualification Procedure", "segment": "learning-center", "docType": "sop", "revision": "3.0", "issueDate": "2023-11-02", "approvedDate": "2023-10-15", "nextReviewDate": "2025-10-22", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-CSL-P-001", "legacyId": null, "title": "Bid Approval Policy", "segment": "commercial", "docType": "policy", "revision": "1.0", "issueDate": "2023-09-27", "approvedDate": "2023-07-31", "nextReviewDate": "2025-09-16", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-CSL-SOP-002", "legacyId": null, "title": "Customer Contract Handover Procedure", "segment": "commercial", "docType": "sop", "revision": "4.0", "issueDate": "2024-08-28", "approvedDate": "2024-07-04", "nextReviewDate": "2026-08-18", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-CSL-P-003", "legacyId": null, "title": "Pricing Authority Matrix", "segment": "commercial", "docType": "policy", "revision": "4.0", "issueDate": "2024-10-19", "approvedDate": "2024-08-21", "nextReviewDate": "2026-10-09", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-FM-P-001", "legacyId": null, "title": "Building Access Policy", "segment": "facility-management", "docType": "policy", "revision": "3.0", "issueDate": "2024-06-13", "approvedDate": "2024-05-29", "nextReviewDate": "2026-06-03", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-FM-SOP-002", "legacyId": null, "title": "Preventive Maintenance Scheduling Procedure", "segment": "facility-management", "docType": "sop", "revision": "1.0", "issueDate": "2025-06-14", "approvedDate": "2025-04-22", "nextReviewDate": "2027-06-04", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-FM-WI-003", "legacyId": null, "title": "Contractor Site Induction", "segment": "facility-management", "docType": "wi", "revision": "3.0", "issueDate": "2023-08-17", "approvedDate": "2023-07-31", "nextReviewDate": "2026-08-01", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-ADM-P-001", "legacyId": null, "title": "Records Retention Policy", "segment": "administration", "docType": "policy", "revision": "4.0", "issueDate": "2025-09-02", "approvedDate": "2025-08-04", "nextReviewDate": "2027-08-23", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-ADM-SOP-002", "legacyId": null, "title": "Office Services Procedure", "segment": "administration", "docType": "sop", "revision": "4.0", "issueDate": "2024-03-15", "approvedDate": "2024-01-30", "nextReviewDate": "2026-03-05", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-ADM-SOP-003", "legacyId": null, "title": "Visitor Management Procedure", "segment": "administration", "docType": "sop", "revision": "2.0", "issueDate": "2024-02-22", "approvedDate": "2024-01-04", "nextReviewDate": "2026-02-11", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-VM-P-001", "legacyId": null, "title": "Investment Approval Policy", "segment": "venture-management", "docType": "policy", "revision": "4.0", "issueDate": "2023-12-25", "approvedDate": "2023-11-06", "nextReviewDate": "2025-12-14", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-VM-SOP-002", "legacyId": null, "title": "Due Diligence Procedure", "segment": "venture-management", "docType": "sop", "revision": "2.0", "issueDate": "2024-05-20", "approvedDate": "2024-03-24", "nextReviewDate": "2026-05-10", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-VM-SOP-003", "legacyId": null, "title": "Joint Venture Reporting Procedure", "segment": "venture-management", "docType": "sop", "revision": "2.0", "issueDate": "2025-07-19", "approvedDate": "2025-06-30", "nextReviewDate": "2027-07-09", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-NBD-P-001", "legacyId": null, "title": "Market Entry Policy", "segment": "new-business", "docType": "policy", "revision": "2.0", "issueDate": "2025-07-19", "approvedDate": "2025-06-21", "nextReviewDate": "2027-07-09", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-NBD-SOP-002", "legacyId": null, "title": "Opportunity Screening Procedure", "segment": "new-business", "docType": "sop", "revision": "2.0", "issueDate": "2026-04-30", "approvedDate": "2026-03-16", "nextReviewDate": "2028-04-19", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-NBD-SOP-003", "legacyId": null, "title": "Partnership Evaluation Procedure", "segment": "new-business", "docType": "sop", "revision": "1.0", "issueDate": "2024-12-02", "approvedDate": "2024-10-31", "nextReviewDate": "2026-11-22", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-GEO-SOP-001", "legacyId": null, "title": "Geothermal Well Design Review Procedure", "segment": "geothermal-coe", "docType": "sop", "revision": "3.0", "issueDate": "2025-07-30", "approvedDate": "2025-06-20", "nextReviewDate": "2027-07-20", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-GEO-SOP-002", "legacyId": null, "title": "Resource Assessment Procedure", "segment": "geothermal-coe", "docType": "sop", "revision": "1.0", "issueDate": "2024-08-10", "approvedDate": "2024-07-19", "nextReviewDate": "2026-07-31", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-GEO-WI-003", "legacyId": null, "title": "Technology Readiness Review", "segment": "geothermal-coe", "docType": "wi", "revision": "4.0", "issueDate": "2023-11-01", "approvedDate": "2023-09-05", "nextReviewDate": "2026-10-16", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"}
+];
 
 const TAQA_DOC_STATS = {
   "total": 560,
