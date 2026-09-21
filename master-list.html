@@ -74,13 +74,13 @@ input[type=search]{cursor:text;}
 input[type=search]::placeholder{color:var(--ink-4);}
 input[type=search]::-webkit-search-cancel-button{cursor:pointer;}
 
-/* ── Brand mark and the About popover, kept from the old top bar ── */
-.brand-mark{width:26px;height:26px;border-radius:var(--r2);background:var(--brand);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.brand-mark svg{width:14px;height:14px;}
-.brand-txt{font-family:'BwGradual','Urbanist',sans-serif;font-size:13px;color:var(--ink);}
-.brand-txt b{font-weight:800;}
-.brand-txt i{font-style:normal;font-weight:500;color:var(--ink-3);}
+/* ── Brand lockup and the About popover ── */
+.side-brand img{display:block;width:150px;height:auto;}
+.side-brand .logo-dk{display:none;}
+html[data-theme="dark"] .side-brand .logo-lt{display:none;}
+html[data-theme="dark"] .side-brand .logo-dk{display:block;}
+.side-sub{display:block;font:500 11.5px/1 'BwGradual',sans-serif;color:var(--ink-3);
+  letter-spacing:.02em;margin-top:7px;}
 .pop-wrap{position:relative;}
 .pop{position:absolute;top:calc(100% + 8px);inset-inline-start:0;width:min(420px,88vw);z-index:50;
   background:var(--paper);border:1px solid var(--rule-firm);border-radius:var(--r3);padding:15px 17px;
@@ -102,8 +102,7 @@ html[dir="rtl"] .pop{transform-origin:top right;}
 .side{background:var(--paper);border-inline-end:1px solid var(--rule);
   position:sticky;top:0;height:100dvh;overflow-y:auto;overscroll-behavior:contain;
   display:flex;flex-direction:column;padding:18px 14px 20px;}
-.side-brand{display:flex;align-items:center;gap:10px;padding:4px 8px 20px;text-decoration:none;}
-.side-brand .brand-mark{width:30px;height:30px;}
+.side-brand{display:block;padding:4px 8px 20px;text-decoration:none;}
 .side-sec{font:700 9.5px/1 'BwGradual',sans-serif;letter-spacing:.15em;text-transform:uppercase;
   color:var(--ink-4);padding:16px 10px 8px;}
 .side-rule{height:1px;background:var(--rule);margin:14px 6px;}
@@ -251,8 +250,9 @@ html[data-theme="dark"] .att .due svg{color:#FD691D;}
   .side{position:static;height:auto;flex-direction:row;align-items:center;gap:3px;
     overflow-x:auto;overflow-y:hidden;padding:9px 12px;
     border-inline-end:0;border-bottom:1px solid var(--rule);}
-  .side-brand{padding:0 12px 0 2px;flex-shrink:0;}
-  .side-brand .brand-txt i{display:none;}
+  .side-brand{padding:0 14px 0 2px;flex-shrink:0;}
+  .side-brand img{width:96px;}
+  .side-sub{display:none;}
   .side-sec,.side-rule{display:none;}
   /* the cuts are a block list in the rail, so let their buttons become
      direct children of the row instead of stacking inside a wrapper */
@@ -442,8 +442,9 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
 
 <aside class="side" aria-label="Main navigation">
   <a href="index.html" class="side-brand" aria-label="TAQA Knowledge Hub home">
-    <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3L4 7v5c0 4.5 3.5 8.7 8 9.9 4.5-1.2 8-5.4 8-9.9V7l-8-4z" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.65)" stroke-width="1.6"/><path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-    <span class="brand-txt"><b>TAQA</b> <i>Knowledge Hub</i></span>
+    <img class="logo-lt" src="icons/taqa-logo.png" alt="TAQA" width="340" height="145">
+    <img class="logo-dk" src="icons/taqa-logo-reverse.png" alt="TAQA" width="340" height="145">
+    <span class="side-sub">Knowledge Hub</span>
   </a>
 
   <a class="nav-i" href="index.html">
