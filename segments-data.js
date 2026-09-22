@@ -597,36 +597,6 @@ const TAQA_SEGMENTS = {
       software:[]
     }
   },
-  'pt-energy-transition': {
-    name:"Energy Transition & Sustainability", icon:'\u25CB', tag:"Products & Technology",
-    desc:"Carbon capture well integrity, emissions reporting and flare reduction.",
-    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Policies', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
-    sops:2, manuals:1, policies:1, alerts:0, lessons:1, software:0,
-    contributors:[],
-    docs:{
-      sops:["Carbon Capture Well Integrity Review Procedure", "Emissions Measurement and Reporting Procedure"],
-      manuals:["Flare Reduction Technology Manual"],
-      policies:["Energy Transition Commitment Policy"],
-      alerts:[],
-      lessons:["CO2 Injection Pilot, First Year Findings"],
-      software:[]
-    }
-  },
-  'argas': {
-    name:"ARGAS", icon:'\u25CB', tag:"Joint Venture",
-    desc:"Geophysical surveying and land seismic acquisition.",
-    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Policies', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
-    sops:3, manuals:1, policies:1, alerts:1, lessons:0, software:0,
-    contributors:[],
-    docs:{
-      sops:["Seismic Crew Mobilisation Procedure", "Vibroseis Source Quality Control Procedure", "Survey Data Delivery and Archive Procedure"],
-      manuals:["Land Seismic Acquisition Manual"],
-      policies:["Field Party HSE Policy"],
-      alerts:["Shot Hole Clearance Distances Updated"],
-      lessons:[],
-      software:[]
-    }
-  },
   'geothermal-coe': {
     name:"Geothermal Center of Excellence", icon:'\u25CB', tag:"Advisory",
     desc:"Geothermal well design review and resource assessment advisory.",

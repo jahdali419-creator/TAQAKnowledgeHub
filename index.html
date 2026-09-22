@@ -458,37 +458,65 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 
 .gate {
   position:relative; isolation:isolate; overflow:hidden; text-align:start;
-  display:flex; flex-direction:column; gap:0; min-height:196px;
-  padding:20px 21px 18px; cursor:pointer; font-family:inherit;
+  display:flex; flex-direction:column; gap:0; min-height:192px;
+  padding:21px 22px 19px; cursor:pointer; font-family:inherit;
   background:var(--bg-white); border:1px solid var(--border); border-radius:18px;
   box-shadow:0 1px 2px rgba(0,88,90,0.05);
-  transition:transform 280ms cubic-bezier(0.16,1,0.3,1),
-             box-shadow 280ms cubic-bezier(0.16,1,0.3,1),
-             border-color 280ms cubic-bezier(0.16,1,0.3,1);
+  transition:transform 320ms cubic-bezier(0.16,1,0.3,1),
+             box-shadow 320ms cubic-bezier(0.16,1,0.3,1),
+             border-color 320ms cubic-bezier(0.16,1,0.3,1);
 }
+/* Cursor-following light. Sits behind the content on its own layer. */
 .gate::before {
   content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
-  opacity:0; transition:opacity 280ms ease;
+  opacity:0; transition:opacity 320ms ease;
   background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),
     rgba(0,93,99,0.09), transparent 60%);
 }
+/* A teal rule draws itself across the top edge on hover and stays while open. */
+.gate::after {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, var(--primary), #00BBB6);
+  transform:scaleX(0); transform-origin:left center;
+  transition:transform 480ms cubic-bezier(0.16,1,0.3,1);
+}
 @media (hover:hover) and (pointer:fine){
-  .gate:hover { transform:translateY(-3px); box-shadow:0 16px 34px rgba(0,88,90,0.14);
+  .gate:hover { transform:translateY(-3px); box-shadow:0 18px 38px rgba(0,88,90,0.15);
     border-color:rgba(0,93,99,0.28); }
   .gate:hover::before { opacity:1; }
-  .gate:hover .gate-go svg { transform:translateX(3px); }
+  .gate:hover::after { transform:scaleX(1); }
+  .gate:hover .gate-go { background:var(--primary); border-color:var(--primary); color:#fff; }
 }
 .gate:active { transform:translateY(-1px); }
 .gate:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
 .gate[aria-expanded="true"] {
   border-color:var(--primary);
-  box-shadow:0 0 0 1px var(--primary) inset, 0 10px 26px rgba(0,88,90,0.12);
+  box-shadow:0 0 0 1px var(--primary) inset, 0 12px 28px rgba(0,88,90,0.13);
 }
+.gate[aria-expanded="true"]::after { transform:scaleX(1); }
+
+/* The call to action is a mark in the corner, not a line of text competing
+   with the count below it. */
+.gate-go {
+  position:absolute; top:17px; right:17px; width:34px; height:34px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:50%; border:1px solid var(--border); color:var(--primary);
+  background:transparent;
+  transition:background 280ms cubic-bezier(0.16,1,0.3,1),
+             border-color 280ms cubic-bezier(0.16,1,0.3,1),
+             color 280ms cubic-bezier(0.16,1,0.3,1);
+}
+.gate-go svg { width:15px; height:15px;
+  transition:transform 380ms cubic-bezier(0.16,1,0.3,1); }
+.gate[aria-expanded="true"] .gate-go {
+  background:var(--primary); border-color:var(--primary); color:#fff;
+}
+.gate[aria-expanded="true"] .gate-go svg { transform:rotate(90deg); }
 
 .gate-top { display:flex; align-items:baseline; gap:10px; }
 .gate-n {
-  font-family:'BwGradual','Urbanist',sans-serif; font-size:40px; font-weight:800;
-  line-height:1; letter-spacing:-1.4px; color:var(--primary);
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:42px; font-weight:800;
+  line-height:1; letter-spacing:-1.6px; color:var(--primary);
   font-variant-numeric:tabular-nums;
 }
 .gate-k {
@@ -496,34 +524,38 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
   color:var(--text-light);
 }
 .gate-t {
-  font-family:'BwGradual','Urbanist',sans-serif; font-size:17px; font-weight:700;
-  color:var(--text); letter-spacing:-0.3px; margin-top:11px;
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:17.5px; font-weight:700;
+  color:var(--text); letter-spacing:-0.3px; margin-top:12px;
 }
-.gate-d { font-size:12.5px; line-height:1.6; color:var(--text-muted); margin-top:5px; max-width:42ch; }
-.gate-chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:13px; }
-.gate-chips span {
-  font-size:10.5px; font-weight:500; color:var(--text-muted);
-  padding:3px 9px; border-radius:999px; background:var(--bg); border:1px solid var(--border);
+.gate-d { font-size:12.5px; line-height:1.55; color:var(--text-muted); margin-top:5px; }
+
+/* How much of this group is inside its review date. The bar is the only
+   place the ratio is visible, so it carries the meaning, not decoration. */
+.gate-meter {
+  margin-top:auto; height:5px; border-radius:999px; overflow:hidden;
+  background:var(--border);
+}
+.gate-meter i {
+  display:block; height:100%; width:0; border-radius:999px;
+  background:linear-gradient(90deg, var(--primary), #00BBB6);
+  transition:width 900ms cubic-bezier(0.16,1,0.3,1) 220ms;
 }
 .gate-foot {
-  margin-top:auto; padding-top:16px; display:flex; align-items:center;
+  margin-top:9px; display:flex; align-items:baseline;
   justify-content:space-between; gap:10px;
 }
-/* Three doors across leaves the footer about 230px, so the count keeps one
-   line and the call to action is never pushed under it. */
-.gate-m { font-size:11.5px; color:var(--text-muted); font-variant-numeric:tabular-nums;
+.gate-stat { font-size:11.5px; color:var(--text-muted); font-variant-numeric:tabular-nums;
   white-space:nowrap; }
-.gate-m b { color:var(--text); font-weight:700; }
-.gate-m i { font-style:normal; color:#C8102E; font-weight:700; }
-html[data-theme="dark"] .gate-m i { color:#E99FAB; }
-.gate-go {
-  display:inline-flex; align-items:center; gap:5px; flex-shrink:0;
-  font-size:12px; font-weight:600; color:var(--primary);
-}
-.gate-go svg { width:15px; height:15px; transition:transform 280ms cubic-bezier(0.16,1,0.3,1); }
-.gate[aria-expanded="true"] .gate-go svg { transform:rotate(90deg); }
+.gate-stat b { color:var(--text); font-weight:700; }
+.gate-stat.late { color:#C8102E; font-weight:600; }
 html[data-theme="dark"] .gate { background:#19263a; border-color:#243044; }
-html[data-theme="dark"] .gate-chips span { background:rgba(255,255,255,0.04); border-color:#243044; }
+html[data-theme="dark"] .gate-go { border-color:#2d3a4e; }
+html[data-theme="dark"] .gate-meter { background:#243044; }
+html[data-theme="dark"] .gate-stat.late { color:#E99FAB; }
+@media (prefers-reduced-motion: reduce){
+  .gate-meter i { transition:none; }
+  .gate::after { transition:none; }
+}
 
 /* The panel opens by growing its own row rather than by animating height,
    so nothing below it jumps and only the grid track is interpolated. */
@@ -1262,7 +1294,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
       <div class="stats-list">
         <div class="stat-row">
           <span class="stat-row-label">Total Documents</span>
-          <span class="stat-row-value" data-target="610">0</span>
+          <span class="stat-row-value" data-target="599">0</span>
         </div>
         <div class="stat-row">
           <span class="stat-row-label">Business Segments</span>
@@ -1292,7 +1324,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
 <div class="stats-strip reveal">
   <div class="stats-strip-inner">
     <div class="stats-strip-item">
-      <span class="stats-strip-num" data-target="610">0</span>
+      <span class="stats-strip-num" data-target="599">0</span>
       <span class="stats-strip-label">Documents</span>
     </div>
     <div class="stats-strip-divider"></div>
@@ -1340,41 +1372,44 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
       </div>
       <div class="gates">
         <button type="button" class="gate reveal" id="gate-seg" data-group="seg" aria-expanded="false" aria-controls="gate-panel">
-          <span class="gate-top"><span class="gate-n" id="gate-seg-n">0</span><span class="gate-k">areas</span></span>
+          <span class="gate-go" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
+          </span>
+          <span class="gate-top"><span class="gate-n" id="gate-seg-n" data-target="0">0</span><span class="gate-k">areas</span></span>
           <span class="gate-t">Operational Segments</span>
-          <span class="gate-d">Service lines that deliver the work. Procedures, manuals and lessons from the wellsite.</span>
-          <span class="gate-chips" id="gate-seg-chips"></span>
+          <span class="gate-d">Service lines that deliver the work.</span>
+          <span class="gate-meter" aria-hidden="true"><i id="gate-seg-bar"></i></span>
           <span class="gate-foot">
-            <span class="gate-m" id="gate-seg-m"></span>
-            <span class="gate-go">Open
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
-            </span>
+            <span class="gate-stat"><b id="gate-seg-docs">0</b> documents</span>
+            <span class="gate-stat late" id="gate-seg-late"></span>
           </span>
         </button>
 
         <button type="button" class="gate reveal reveal-delay-1" id="gate-fn" data-group="fn" aria-expanded="false" aria-controls="gate-panel">
-          <span class="gate-top"><span class="gate-n" id="gate-fn-n">0</span><span class="gate-k">areas</span></span>
+          <span class="gate-go" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
+          </span>
+          <span class="gate-top"><span class="gate-n" id="gate-fn-n" data-target="0">0</span><span class="gate-k">areas</span></span>
           <span class="gate-t">Corporate Functions</span>
-          <span class="gate-d">Functions that set the rules. A policy published here binds the wellsite as much as the office.</span>
-          <span class="gate-chips" id="gate-fn-chips"></span>
+          <span class="gate-d">Functions that set the rules.</span>
+          <span class="gate-meter" aria-hidden="true"><i id="gate-fn-bar"></i></span>
           <span class="gate-foot">
-            <span class="gate-m" id="gate-fn-m"></span>
-            <span class="gate-go">Open
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
-            </span>
+            <span class="gate-stat"><b id="gate-fn-docs">0</b> documents</span>
+            <span class="gate-stat late" id="gate-fn-late"></span>
           </span>
         </button>
 
         <button type="button" class="gate reveal reveal-delay-2" id="gate-pt" data-group="pt" aria-expanded="false" aria-controls="gate-panel">
-          <span class="gate-top"><span class="gate-n" id="gate-pt-n">0</span><span class="gate-k">areas</span></span>
+          <span class="gate-go" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
+          </span>
+          <span class="gate-top"><span class="gate-n" id="gate-pt-n" data-target="0">0</span><span class="gate-k">areas</span></span>
           <span class="gate-t">Products &amp; Technology</span>
-          <span class="gate-d">The technical home of each discipline. Product manuals, bulletins and qualification records.</span>
-          <span class="gate-chips" id="gate-pt-chips"></span>
+          <span class="gate-d">Technical home of each discipline.</span>
+          <span class="gate-meter" aria-hidden="true"><i id="gate-pt-bar"></i></span>
           <span class="gate-foot">
-            <span class="gate-m" id="gate-pt-m"></span>
-            <span class="gate-go">Open
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
-            </span>
+            <span class="gate-stat"><b id="gate-pt-docs">0</b> documents</span>
+            <span class="gate-stat late" id="gate-pt-late"></span>
           </span>
         </button>
       </div>
@@ -2259,12 +2294,12 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     { name:'Geothermal Center of Excellence', from:'geothermal-coe', tag:'Advisory' }
   ];
   var PRODUCTS = [
-    { name:'Drilling Solutions Center of Excellence',   from:'pt-drilling-coe',
-      tag:'Edmonton, Canada',          short:'Drilling Solutions' },
-    { name:'Well Completions Center of Excellence',     from:'pt-completions-coe',
-      tag:'Aberdeen, United Kingdom',  short:'Well Completions' },
-    { name:'Well Intervention Center of Excellence',    from:'pt-intervention-coe',
-      tag:'Stavanger, Norway',         short:'Well Intervention' }
+    { name:'Drilling Solutions Center of Excellence',  from:'pt-drilling-coe',
+      tag:'Edmonton, Canada' },
+    { name:'Well Completions Center of Excellence',    from:'pt-completions-coe',
+      tag:'Aberdeen, United Kingdom' },
+    { name:'Well Intervention Center of Excellence',   from:'pt-intervention-coe',
+      tag:'Stavanger, Norway' }
   ];
   var PENDING_MOVE = 'tws-maintenance';
   var LATE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" ' +
@@ -2278,8 +2313,7 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
   function rowsOf(list){
     return list.map(function(x){
       var st = statsFor(x.from);
-      return { id:x.from, name:x.name, short:x.short || x.name, tag:x.tag,
-               docs:st.docs, overdue:st.overdue };
+      return { id:x.from, name:x.name, tag:x.tag, docs:st.docs, overdue:st.overdue };
     }).sort(function(a,b){ return b.docs - a.docs; });
   }
 
@@ -2289,19 +2323,36 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     pt:  { rows:rowsOf(PRODUCTS),  title:'Products & Technology', noun:'centers' }
   };
 
-  // ── The two doors ───────────────────────────────────────────────────────
+  // ── The three doors ─────────────────────────────────────────────────────
+  var bars = [];
   Object.keys(GROUPS).forEach(function(k){
     var g = GROUPS[k];
     var docs = g.rows.reduce(function(a,x){ return a + x.docs; }, 0);
     var late = g.rows.reduce(function(a,x){ return a + x.overdue; }, 0);
-    document.getElementById('gate-' + k + '-n').textContent = g.rows.length;
-    document.getElementById('gate-' + k + '-m').innerHTML =
-      '<b>' + docs + '</b> documents' + (late ? ' · <i>' + late + '</i> overdue' : '');
-    // A few names so the door says what is behind it.
-    document.getElementById('gate-' + k + '-chips').innerHTML =
-      g.rows.slice(0,3).map(function(x){ return '<span>' + x.short + '</span>'; }).join('') +
-      (g.rows.length > 3 ? '<span>+' + (g.rows.length - 3) + ' more</span>' : '');
+    // The big number rides the page's own counter, so it counts up in step
+    // with the strip above it rather than appearing fully formed.
+    document.getElementById('gate-' + k + '-n').dataset.target = g.rows.length;
+    document.getElementById('gate-' + k + '-docs').textContent = docs;
+    document.getElementById('gate-' + k + '-late').innerHTML =
+      late ? '<b>' + late + '</b> overdue' : 'all in date';
+    bars.push({ el:document.getElementById('gate-' + k + '-bar'),
+                pct: docs ? Math.round((docs - late) / docs * 100) : 0 });
   });
+
+  // The meters fill when the doors come into view, not while they are still
+  // below the fold, so the motion is something you actually see.
+  if ('IntersectionObserver' in window) {
+    var mo = new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if (!e.isIntersecting) return;
+        bars.forEach(function(b){ b.el.style.width = b.pct + '%'; });
+        mo.disconnect();
+      });
+    }, { threshold:0.25 });
+    mo.observe(document.querySelector('.gates'));
+  } else {
+    bars.forEach(function(b){ b.el.style.width = b.pct + '%'; });
+  }
 
   // ── Opening one ─────────────────────────────────────────────────────────
   var panel = document.getElementById('gate-panel'),
