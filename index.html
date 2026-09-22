@@ -452,13 +452,14 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
    Two doors instead of twenty five tiles. Each rises from below on scroll
    through the page's existing .reveal observer, and opens its own group
    underneath rather than navigating away.                                 */
-.gates { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.gates { display:grid; grid-template-columns:repeat(3,1fr); gap:13px; }
+@media(max-width:1180px){ .gates { grid-template-columns:1fr 1fr; } }
 @media(max-width:760px){ .gates { grid-template-columns:1fr; } }
 
 .gate {
   position:relative; isolation:isolate; overflow:hidden; text-align:start;
   display:flex; flex-direction:column; gap:0; min-height:196px;
-  padding:22px 24px 20px; cursor:pointer; font-family:inherit;
+  padding:20px 21px 18px; cursor:pointer; font-family:inherit;
   background:var(--bg-white); border:1px solid var(--border); border-radius:18px;
   box-shadow:0 1px 2px rgba(0,88,90,0.05);
   transition:transform 280ms cubic-bezier(0.16,1,0.3,1),
@@ -486,8 +487,8 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 
 .gate-top { display:flex; align-items:baseline; gap:10px; }
 .gate-n {
-  font-family:'BwGradual','Urbanist',sans-serif; font-size:44px; font-weight:800;
-  line-height:1; letter-spacing:-1.6px; color:var(--primary);
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:40px; font-weight:800;
+  line-height:1; letter-spacing:-1.4px; color:var(--primary);
   font-variant-numeric:tabular-nums;
 }
 .gate-k {
@@ -495,10 +496,10 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
   color:var(--text-light);
 }
 .gate-t {
-  font-family:'BwGradual','Urbanist',sans-serif; font-size:18px; font-weight:700;
-  color:var(--text); letter-spacing:-0.3px; margin-top:12px;
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:17px; font-weight:700;
+  color:var(--text); letter-spacing:-0.3px; margin-top:11px;
 }
-.gate-d { font-size:12.5px; line-height:1.6; color:var(--text-muted); margin-top:5px; max-width:44ch; }
+.gate-d { font-size:12.5px; line-height:1.6; color:var(--text-muted); margin-top:5px; max-width:42ch; }
 .gate-chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:13px; }
 .gate-chips span {
   font-size:10.5px; font-weight:500; color:var(--text-muted);
@@ -506,15 +507,18 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 }
 .gate-foot {
   margin-top:auto; padding-top:16px; display:flex; align-items:center;
-  justify-content:space-between; gap:12px;
+  justify-content:space-between; gap:10px;
 }
-.gate-m { font-size:12px; color:var(--text-muted); font-variant-numeric:tabular-nums; }
+/* Three doors across leaves the footer about 230px, so the count keeps one
+   line and the call to action is never pushed under it. */
+.gate-m { font-size:11.5px; color:var(--text-muted); font-variant-numeric:tabular-nums;
+  white-space:nowrap; }
 .gate-m b { color:var(--text); font-weight:700; }
 .gate-m i { font-style:normal; color:#C8102E; font-weight:700; }
 html[data-theme="dark"] .gate-m i { color:#E99FAB; }
 .gate-go {
-  display:inline-flex; align-items:center; gap:6px; flex-shrink:0;
-  font-size:12.5px; font-weight:600; color:var(--primary);
+  display:inline-flex; align-items:center; gap:5px; flex-shrink:0;
+  font-size:12px; font-weight:600; color:var(--primary);
 }
 .gate-go svg { width:15px; height:15px; transition:transform 280ms cubic-bezier(0.16,1,0.3,1); }
 .gate[aria-expanded="true"] .gate-go svg { transform:rotate(90deg); }
@@ -1258,7 +1262,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
       <div class="stats-list">
         <div class="stat-row">
           <span class="stat-row-label">Total Documents</span>
-          <span class="stat-row-value" data-target="576">0</span>
+          <span class="stat-row-value" data-target="602">0</span>
         </div>
         <div class="stat-row">
           <span class="stat-row-label">Business Segments</span>
@@ -1288,23 +1292,23 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
 <div class="stats-strip reveal">
   <div class="stats-strip-inner">
     <div class="stats-strip-item">
-      <span class="stats-strip-num" data-target="576">0</span>
+      <span class="stats-strip-num" data-target="602">0</span>
       <span class="stats-strip-label">Documents</span>
     </div>
     <div class="stats-strip-divider"></div>
     <div class="stats-strip-item">
       <span class="stats-strip-num" data-target="11">0</span>
-      <span class="stats-strip-label">Segments</span>
-    </div>
-    <div class="stats-strip-divider"></div>
-    <div class="stats-strip-item">
-      <span class="stats-strip-num" data-target="197">0</span>
-      <span class="stats-strip-label">Glossary Terms</span>
+      <span class="stats-strip-label">Operational Segments</span>
     </div>
     <div class="stats-strip-divider"></div>
     <div class="stats-strip-item">
       <span class="stats-strip-num" data-target="14">0</span>
       <span class="stats-strip-label">Corporate Functions</span>
+    </div>
+    <div class="stats-strip-divider"></div>
+    <div class="stats-strip-item">
+      <span class="stats-strip-num" data-target="4">0</span>
+      <span class="stats-strip-label">Products &amp; Technology</span>
     </div>
   </div>
 </div>
@@ -1355,6 +1359,19 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
           <span class="gate-chips" id="gate-fn-chips"></span>
           <span class="gate-foot">
             <span class="gate-m" id="gate-fn-m"></span>
+            <span class="gate-go">Open
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
+            </span>
+          </span>
+        </button>
+
+        <button type="button" class="gate reveal reveal-delay-2" id="gate-pt" data-group="pt" aria-expanded="false" aria-controls="gate-panel">
+          <span class="gate-top"><span class="gate-n" id="gate-pt-n">0</span><span class="gate-k">areas</span></span>
+          <span class="gate-t">Products &amp; Technology</span>
+          <span class="gate-d">The companies that build the tools. Product manuals, bulletins and qualification records.</span>
+          <span class="gate-chips" id="gate-pt-chips"></span>
+          <span class="gate-foot">
+            <span class="gate-m" id="gate-pt-m"></span>
             <span class="gate-go">Open
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
             </span>
@@ -2167,11 +2184,12 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
   var FN_IDS  = ['qhse','cybersecurity','hr','finance','it','supply-chain','legal',
                  'learning-center','commercial','facility-management','administration',
                  'venture-management','new-business','geothermal-coe'];
+  var PT_IDS  = ['pt-cougar','pt-tendeka','pt-energy-transition','argas'];
 
   var controlled = D.filter(A.controlled);
   var totalDocs  = controlled.length;
   var totalAlert = controlled.filter(function(d){ return d.docType === 'alert'; }).length;
-  var segN = SEG_IDS.length, fnN = FN_IDS.length;
+  var segN = SEG_IDS.length, fnN = FN_IDS.length, ptN = PT_IDS.length;
 
   function set(el, n){ if (el) el.dataset.target = n; }
 
@@ -2180,9 +2198,10 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
         num = item.querySelector('[data-target]');
     if (!lbl || !num) return;
     var t = lbl.textContent.trim();
-    if (t.indexOf('Document') !== -1)      set(num, totalDocs);
-    else if (t.indexOf('Function') !== -1) set(num, fnN);
-    else if (t.indexOf('Segment') !== -1)  set(num, segN);
+    if (t.indexOf('Document') !== -1)        set(num, totalDocs);
+    else if (t.indexOf('Function') !== -1)   set(num, fnN);
+    else if (t.indexOf('Technology') !== -1) set(num, ptN);
+    else if (t.indexOf('Segment') !== -1)    set(num, segN);
   });
 
   document.querySelectorAll('.stat-row').forEach(function(row){
@@ -2190,15 +2209,16 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
         val = row.querySelector('.stat-row-value');
     if (!lbl || !val) return;
     var t = lbl.textContent.trim();
-    if (t.indexOf('Document') !== -1)      set(val, totalDocs);
-    else if (t.indexOf('Function') !== -1) set(val, fnN);
-    else if (t.indexOf('Segment') !== -1)  set(val, segN);
-    else if (t.indexOf('Alert') !== -1)    set(val, totalAlert);
-    else if (t.indexOf('User') !== -1)     row.style.display = 'none';
+    if (t.indexOf('Document') !== -1)        set(val, totalDocs);
+    else if (t.indexOf('Function') !== -1)   set(val, fnN);
+    else if (t.indexOf('Technology') !== -1) set(val, ptN);
+    else if (t.indexOf('Segment') !== -1)    set(val, segN);
+    else if (t.indexOf('Alert') !== -1)      set(val, totalAlert);
+    else if (t.indexOf('User') !== -1)       row.style.display = 'none';
   });
 
   var cc = document.querySelector('.cmd-header-count');
-  if (cc) cc.textContent = segN + ' segments · ' + fnN + ' functions · ' + totalDocs + ' documents';
+  if (cc) cc.textContent = (segN + fnN + ptN) + ' areas · ' + totalDocs + ' documents';
 })();
 </script>
 <script>
@@ -2238,6 +2258,12 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     { name:'New Business Development', from:'new-business',       tag:'Corporate Development' },
     { name:'Geothermal Centre of Excellence', from:'geothermal-coe', tag:'Advisory' }
   ];
+  var PRODUCTS = [
+    { name:'Cougar',    from:'pt-cougar',            tag:'Drilling Tools' },
+    { name:'Tendeka',   from:'pt-tendeka',           tag:'Completions Technology' },
+    { name:'Energy Transition & Sustainability', from:'pt-energy-transition', tag:'Sustainability' },
+    { name:'ARGAS',     from:'argas',                tag:'Joint Venture' }
+  ];
   var PENDING_MOVE = 'tws-maintenance';
   var LATE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" ' +
              'stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 1.8"/></svg>';
@@ -2256,7 +2282,8 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
 
   var GROUPS = {
     seg: { rows:rowsOf(SEGMENTS), title:'Operational Segments', noun:'segments' },
-    fn:  { rows:rowsOf(FUNCTIONS), title:'Corporate Functions', noun:'functions' }
+    fn:  { rows:rowsOf(FUNCTIONS), title:'Corporate Functions', noun:'functions' },
+    pt:  { rows:rowsOf(PRODUCTS),  title:'Products & Technology', noun:'companies' }
   };
 
   // ── The two doors ───────────────────────────────────────────────────────
@@ -2269,8 +2296,8 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
       '<b>' + docs + '</b> documents' + (late ? ' · <i>' + late + '</i> overdue' : '');
     // A few names so the door says what is behind it.
     document.getElementById('gate-' + k + '-chips').innerHTML =
-      g.rows.slice(0,4).map(function(x){ return '<span>' + x.name + '</span>'; }).join('') +
-      (g.rows.length > 4 ? '<span>+' + (g.rows.length - 4) + ' more</span>' : '');
+      g.rows.slice(0,3).map(function(x){ return '<span>' + x.name + '</span>'; }).join('') +
+      (g.rows.length > 3 ? '<span>+' + (g.rows.length - 3) + ' more</span>' : '');
   });
 
   // ── Opening one ─────────────────────────────────────────────────────────
@@ -2306,10 +2333,15 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
       '<b>' + g.rows.length + '</b> ' + g.noun + ' · <b>' + docs + '</b> controlled documents';
     wait.innerHTML = '';
     var mv = statsFor(PENDING_MOVE);
-    move.innerHTML = (k === 'seg' && mv.docs)
-      ? '<b>' + mv.docs + '</b> documents still sit under TWS Maintenance. Each one reassigns ' +
-        'to the segment that owns the equipment, so they are not counted above.'
-      : '';
+    if (k === 'seg' && mv.docs) {
+      move.innerHTML = '<b>' + mv.docs + '</b> documents still sit under TWS Maintenance. Each one ' +
+        'reassigns to the segment that owns the equipment, so they are not counted above.';
+    } else if (k === 'pt') {
+      move.innerHTML = 'ARGAS is a joint venture. It is shown here until QHSE confirms which ' +
+        'business unit it reports into.';
+    } else {
+      move.innerHTML = '';
+    }
   }
 
   function toggle(k, btn){

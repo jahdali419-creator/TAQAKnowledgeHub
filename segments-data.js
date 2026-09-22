@@ -552,6 +552,66 @@ const TAQA_SEGMENTS = {
       alerts:[], lessons:[], software:[]
     }
   },
+  'pt-cougar': {
+    name:"Cougar", icon:'\u25CB', tag:"Products & Technology",
+    desc:"Downhole drilling tools, drilling optimisation products and tool redress.",
+    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Policies', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
+    sops:3, manuals:2, policies:1, alerts:1, lessons:1, software:0,
+    contributors:[],
+    docs:{
+      sops:["Drilling Jar Assembly and Test Procedure", "Downhole Tool Redress Procedure", "Tool Failure Investigation Procedure"],
+      manuals:["Drilling Optimisation Tool Product Manual", "Agitator System Operating Manual"],
+      policies:["Product Quality Release Policy"],
+      alerts:["Jar Mandrel Inspection Interval Revised"],
+      lessons:["Premature Jar Firing on High Dogleg Sections"],
+      software:[]
+    }
+  },
+  'pt-tendeka': {
+    name:"Tendeka", icon:'\u25CB', tag:"Products & Technology",
+    desc:"Completions technology: inflow control, swellable packers and sand screens.",
+    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Policies', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
+    sops:3, manuals:2, policies:1, alerts:0, lessons:1, software:0,
+    contributors:[],
+    docs:{
+      sops:["Inflow Control Device Installation Procedure", "Swellable Packer Handling and Running Procedure", "Sand Screen Make-Up Procedure"],
+      manuals:["FloSure Autonomous ICD Product Manual", "Completion Simulation Software User Manual"],
+      policies:["Technology Qualification Policy"],
+      alerts:[],
+      lessons:["Screen Plugging Traced to Brine Incompatibility"],
+      software:[]
+    }
+  },
+  'pt-energy-transition': {
+    name:"Energy Transition & Sustainability", icon:'\u25CB', tag:"Products & Technology",
+    desc:"Carbon capture well integrity, emissions reporting and flare reduction.",
+    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Policies', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
+    sops:2, manuals:1, policies:1, alerts:0, lessons:1, software:0,
+    contributors:[],
+    docs:{
+      sops:["Carbon Capture Well Integrity Review Procedure", "Emissions Measurement and Reporting Procedure"],
+      manuals:["Flare Reduction Technology Manual"],
+      policies:["Energy Transition Commitment Policy"],
+      alerts:[],
+      lessons:["CO2 Injection Pilot, First Year Findings"],
+      software:[]
+    }
+  },
+  'argas': {
+    name:"ARGAS", icon:'\u25CB', tag:"Joint Venture",
+    desc:"Geophysical surveying and land seismic acquisition.",
+    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Policies', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
+    sops:3, manuals:1, policies:1, alerts:1, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Seismic Crew Mobilisation Procedure", "Vibroseis Source Quality Control Procedure", "Survey Data Delivery and Archive Procedure"],
+      manuals:["Land Seismic Acquisition Manual"],
+      policies:["Field Party HSE Policy"],
+      alerts:["Shot Hole Clearance Distances Updated"],
+      lessons:[],
+      software:[]
+    }
+  },
   'geothermal-coe': {
     name:"Geothermal Centre of Excellence", icon:'\u25CB', tag:"Advisory",
     desc:"Geothermal well design review and resource assessment advisory.",
