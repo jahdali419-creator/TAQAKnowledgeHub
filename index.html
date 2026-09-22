@@ -529,8 +529,8 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 }
 .gate-d { font-size:12.5px; line-height:1.55; color:var(--text-muted); margin-top:5px; }
 
-/* How much of this group is inside its review date. The bar is the only
-   place the ratio is visible, so it carries the meaning, not decoration. */
+/* How much of the hub's library this group holds. Review status belongs to
+   document control, so it is not on a page everyone opens. */
 .gate-meter {
   margin-top:auto; height:5px; border-radius:999px; overflow:hidden;
   background:var(--border);
@@ -547,11 +547,9 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 .gate-stat { font-size:11.5px; color:var(--text-muted); font-variant-numeric:tabular-nums;
   white-space:nowrap; }
 .gate-stat b { color:var(--text); font-weight:700; }
-.gate-stat.late { color:#C8102E; font-weight:600; }
 html[data-theme="dark"] .gate { background:#19263a; border-color:#243044; }
 html[data-theme="dark"] .gate-go { border-color:#2d3a4e; }
 html[data-theme="dark"] .gate-meter { background:#243044; }
-html[data-theme="dark"] .gate-stat.late { color:#E99FAB; }
 @media (prefers-reduced-motion: reduce){
   .gate-meter i { transition:none; }
   .gate::after { transition:none; }
@@ -667,12 +665,6 @@ html[data-theme="dark"] .gate-stat.late { color:#E99FAB; }
 }
 .tile-docs span { font-size:11px; font-weight:500; color:var(--text-muted);
   letter-spacing:0; margin-inline-start:5px; }
-.tile-flag {
-  display:inline-flex; align-items:center; gap:4px; flex-shrink:0;
-  font-size:11px; font-weight:700; color:#C8102E; font-variant-numeric:tabular-nums;
-}
-.tile-flag svg { width:12px; height:12px; }
-.tile-clear { font-size:11px; font-weight:600; color:var(--primary); }
 /* Share of the band, drawn where a card edge would otherwise say nothing. */
 .tile-bar { position:absolute; inset-inline:12px; bottom:10px; height:3px; border-radius:2px;
   background:rgba(0,88,90,0.10); overflow:hidden; }
@@ -721,7 +713,6 @@ html[dir="rtl"] .tile-bar i { transform-origin:right center; }
 .band-fn-line b { color:var(--text); font-weight:600; }
 
 html[data-theme="dark"] .tile { background:#19263a; border-color:#243044; }
-html[data-theme="dark"] .tile-flag { color:#E99FAB; }
 html[data-theme="dark"] .tile-bar { background:rgba(255,255,255,0.10); }
 
 @media(max-width:1100px){
@@ -1381,7 +1372,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
           <span class="gate-meter" aria-hidden="true"><i id="gate-seg-bar"></i></span>
           <span class="gate-foot">
             <span class="gate-stat"><b id="gate-seg-docs">0</b> documents</span>
-            <span class="gate-stat late" id="gate-seg-late"></span>
+            <span class="gate-stat" id="gate-seg-share"></span>
           </span>
         </button>
 
@@ -1395,7 +1386,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
           <span class="gate-meter" aria-hidden="true"><i id="gate-fn-bar"></i></span>
           <span class="gate-foot">
             <span class="gate-stat"><b id="gate-fn-docs">0</b> documents</span>
-            <span class="gate-stat late" id="gate-fn-late"></span>
+            <span class="gate-stat" id="gate-fn-share"></span>
           </span>
         </button>
 
@@ -1409,7 +1400,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
           <span class="gate-meter" aria-hidden="true"><i id="gate-pt-bar"></i></span>
           <span class="gate-foot">
             <span class="gate-stat"><b id="gate-pt-docs">0</b> documents</span>
-            <span class="gate-stat late" id="gate-pt-late"></span>
+            <span class="gate-stat" id="gate-pt-share"></span>
           </span>
         </button>
       </div>
@@ -2302,18 +2293,16 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
       tag:'Stavanger, Norway' }
   ];
   var PENDING_MOVE = 'tws-maintenance';
-  var LATE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" ' +
-             'stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 1.8"/></svg>';
 
   var controlled = D.filter(A.controlled);
   function statsFor(id){
     var mine = controlled.filter(function(d){ return d.segment === id; });
-    return { docs:mine.length, overdue:mine.filter(A.overdue).length };
+    return { docs:mine.length };
   }
   function rowsOf(list){
     return list.map(function(x){
       var st = statsFor(x.from);
-      return { id:x.from, name:x.name, tag:x.tag, docs:st.docs, overdue:st.overdue };
+      return { id:x.from, name:x.name, tag:x.tag, docs:st.docs };
     }).sort(function(a,b){ return b.docs - a.docs; });
   }
 
@@ -2324,19 +2313,17 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
   };
 
   // ── The three doors ─────────────────────────────────────────────────────
-  var bars = [];
+  var bars = [], library = controlled.length;
   Object.keys(GROUPS).forEach(function(k){
     var g = GROUPS[k];
     var docs = g.rows.reduce(function(a,x){ return a + x.docs; }, 0);
-    var late = g.rows.reduce(function(a,x){ return a + x.overdue; }, 0);
+    var pct = library ? Math.round(docs / library * 100) : 0;
     // The big number rides the page's own counter, so it counts up in step
     // with the strip above it rather than appearing fully formed.
     document.getElementById('gate-' + k + '-n').dataset.target = g.rows.length;
     document.getElementById('gate-' + k + '-docs').textContent = docs;
-    document.getElementById('gate-' + k + '-late').innerHTML =
-      late ? '<b>' + late + '</b> overdue' : 'all in date';
-    bars.push({ el:document.getElementById('gate-' + k + '-bar'),
-                pct: docs ? Math.round((docs - late) / docs * 100) : 0 });
+    document.getElementById('gate-' + k + '-share').innerHTML = '<b>' + pct + '%</b> of the hub';
+    bars.push({ el:document.getElementById('gate-' + k + '-bar'), pct:pct });
   });
 
   // The meters fill when the doors come into view, not while they are still
@@ -2368,16 +2355,13 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     // three the same pattern leaves an orphan, so give them a clean row.
     var w = g.rows.length === 3 ? ['w4','w4','w4'] : ['w6','w6','w4','w4','w4'];
     grid.innerHTML = g.rows.map(function(x, i){
-      var late = x.overdue
-        ? '<span class="tile-flag">' + LATE + x.overdue + '</span>'
-        : '<span class="tile-clear">Up to date</span>';
       return '<a class="tile ' + (w[i] || 'w4') + '" style="--i:' + i + '" data-id="' + x.id + '" ' +
              'href="segment.html?id=' + x.id + '">' +
                '<span class="tile-rank">' + (i < 9 ? '0' : '') + (i + 1) + '</span>' +
                '<span class="tile-name">' + x.name + '</span>' +
                '<span class="tile-tag">' + (x.tag || '') + '</span>' +
                '<span class="tile-foot">' +
-                 '<span class="tile-docs">' + x.docs + '<span>docs</span></span>' + late +
+                 '<span class="tile-docs">' + x.docs + '<span>docs</span></span>' +
                '</span>' +
                '<span class="tile-bar"><i style="width:' +
                  Math.round(x.docs / max * 100) + '%;--i:' + i + '"></i></span>' +
