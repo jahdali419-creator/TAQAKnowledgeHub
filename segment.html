@@ -501,28 +501,6 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .doc-action-btn.primary-action{flex:1;}
 }
 
-/* A policy binds this area whether or not this area wrote it, so it is said
-   here rather than left for someone to find on the home page. */
-.co-bar {
-  display:flex; align-items:center; gap:12px; text-decoration:none;
-  max-width:1240px; margin:16px auto -4px; padding:11px 16px;
-  border-radius:13px; border:1px solid rgba(0,93,99,0.22);
-  background:linear-gradient(135deg, rgba(0,93,99,0.1), rgba(0,187,182,0.05));
-  transition:border-color 220ms ease, background 220ms ease, transform 220ms ease;
-}
-.co-bar:hover { border-color:rgba(0,93,99,0.4); transform:translateY(-1px);
-  background:linear-gradient(135deg, rgba(0,93,99,0.15), rgba(0,187,182,0.08)); }
-.co-mark { width:26px; height:26px; flex-shrink:0; color:var(--primary);
-  display:inline-flex; align-items:center; justify-content:center; }
-.co-mark svg { width:19px; height:19px; }
-.co-txt { flex:1; min-width:0; font-size:12.5px; color:var(--text-muted); line-height:1.5; }
-.co-txt b { color:var(--text); font-weight:700; }
-.co-go { font-size:12px; font-weight:700; color:var(--primary); flex-shrink:0; }
-html[data-theme="dark"] .co-bar {
-  border-color:rgba(0,187,182,0.24);
-  background:linear-gradient(135deg, rgba(0,187,182,0.1), rgba(0,93,99,0.06));
-}
-@media(max-width:640px){ .co-bar { margin:14px 16px -4px; } .co-go { display:none; } }
 </style>
 </head>
 <body>
@@ -618,13 +596,6 @@ html[data-theme="dark"] .co-bar {
 
 </div><!-- /seg-hero-banner -->
 
-<a class="co-bar" href="index.html#segments" id="co-bar">
-  <span class="co-mark" aria-hidden="true">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3.6v5.1c0 4.6-3.2 8.2-8 9.3-4.8-1.1-8-4.7-8-9.3V6.6L12 3z"/><path d="M9 12l2 2 4-4"/></svg>
-  </span>
-  <span class="co-txt"><b id="co-n">0</b> company policies also apply here. Signed by the CEO, they bind every area.</span>
-  <span class="co-go" aria-hidden="true">See them &#8594;</span>
-</a>
 
 
 <!-- ── Tabs ── -->
@@ -2024,17 +1995,6 @@ function copyQRUrl() {
   const v = document.getElementById('qr-url-in').value;
   navigator.clipboard.writeText(v).then(() => { if(window.showToast) window.showToast('Link copied!'); });
 }
-</script>
-
-<script src="documents-master.js"></script>
-<script>
-(function(){
-  if (typeof TAQA_MASTER_DOCS === 'undefined') return;
-  var n = TAQA_MASTER_DOCS.filter(function(d){ return d.scope === 'company'; }).length;
-  var el = document.getElementById('co-n'), bar = document.getElementById('co-bar');
-  if (!n) { if (bar) bar.style.display = 'none'; return; }
-  if (el) el.textContent = n;
-})();
 </script>
 <script src="shared.js"></script>
 <script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>
