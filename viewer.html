@@ -561,7 +561,7 @@ const params = new URLSearchParams(location.search);
 const segId = (params.get('seg') || 'drilling').replace(/[^a-z0-9-]/g,'').slice(0,60) || 'drilling';
 const docType = (params.get('type') || 'sop').replace(/[^a-z0-9-]/g,'').slice(0,20) || 'sop';
 const docTitle = decodeURIComponent(params.get('title') || 'Document').replace(/<[^>]*>/g,'').trim().slice(0,300) || 'Document';
-const docId = decodeURIComponent(params.get('doc') || '').replace(/[^A-Za-z0-9-_]/g,'').slice(0,120);
+const docId = decodeURIComponent(params.get('doc') || '').replace(/[^A-Za-z0-9-_&.]/g,'').slice(0,120);
 const segInfo = SEGS[segId] || {name:'TAQA',tag:'Segment'};
 const typeColor = TYPE_COLORS[docType] || TYPE_COLORS.sop;
 const typeText = TYPE_TC[docType] || TYPE_TC.sop;
@@ -597,10 +597,13 @@ iconEl.textContent = typeShort;
 document.getElementById('doc-title').textContent = docTitle;
 
 // Badges
+// A document number can hold an ampersand, TQ-P&T-WIC-S001, so it is escaped
+// before it goes anywhere near innerHTML.
+function esc(v){ return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 document.getElementById('doc-badges').innerHTML =
   '<span class="badge seg">' + segInfo.name + '</span>' +
   '<span class="badge seg">' + segInfo.tag + '</span>' +
-  (docId ? '<span class="badge docid">Document ID: ' + docId + '</span>' : '');
+  (docId ? '<span class="badge docid">Document ID: ' + esc(docId) + '</span>' : '');
 
 // Document control block.
 // Resolved from the Master Document List (documents-master.js). Nothing here is
@@ -608,8 +611,11 @@ document.getElementById('doc-badges').innerHTML =
 // SCORE, never a placeholder. ISO 9001 7.5.2 a), API Q2 4.4.3.
 const MD = (typeof TAQA_MASTER_DOCS !== 'undefined') ? TAQA_MASTER_DOCS : [];
 const MA = (typeof TAQA_DOC !== 'undefined') ? TAQA_DOC : null;
+const _bare = docTitle.replace(/^((?:TQ|TAQA)-[^\s]+|[A-Z][A-Z0-9]*-\d+)\s+/, '').trim();
 const _rec = MA ? (MA.byNumber(docId) || MA.byLegacy(docId) ||
-              MD.find(d => d.title === docTitle && d.segment === segId) || null) : null;
+              MD.find(d => d.title === docTitle && d.segment === segId) ||
+              MD.find(d => d.title === _bare && d.segment === segId) ||
+              MD.find(d => d.title === _bare) || null) : null;
 
 const _fmt = v => v ? new Date(v).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : null;
 function cell(label, value, clause, extraCls){
