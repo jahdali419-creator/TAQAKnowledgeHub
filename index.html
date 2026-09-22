@@ -1255,12 +1255,6 @@ html[data-theme="dark"] .section-hl-title { color:var(--text); }
   letter-spacing:1.5px; text-transform:uppercase; color:var(--text); }
 .fhead span { font-size:11px; color:var(--text-muted); }
 .fhead span b { color:var(--text); font-weight:700; font-variant-numeric:tabular-nums; }
-.fnote { font-size:11.5px; line-height:1.6; color:var(--text-muted);
-  margin:14px 3px 2px; padding-inline-start:11px;
-  border-inline-start:2px solid rgba(0,88,90,0.18); }
-.focus[data-state="focus"] .fnote { margin-top:16px; }
-.fnote b { color:var(--text); font-weight:700; }
-.fnote:empty { display:none; }
 
 
 html[data-theme="dark"] .focus {
@@ -1284,7 +1278,6 @@ html[data-theme="dark"] .frow {
 }
 html[data-theme="dark"] .fc-meter { background:rgba(255,255,255,0.12); }
 html[data-theme="dark"] .fc-go, html[data-theme="dark"] .fr-go { border-color:rgba(255,255,255,0.17); }
-html[data-theme="dark"] .fnote { border-inline-start-color:rgba(0,187,182,0.35); }
 
 @media(max-width:900px){
   .focus[data-state="focus"] .fstage { grid-template-columns:1fr; }
@@ -1605,7 +1598,6 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
         <div class="fstage">
           <div class="fside">
             <div class="fswitch" id="fswitch"></div>
-            <p class="fnote" id="fnote"></p>
           </div>
           <div class="flist" id="flist"></div>
         </div>
@@ -2484,7 +2476,6 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     { name:'Well Intervention Center of Excellence',   from:'pt-intervention-coe',
       tag:'Stavanger, Norway' }
   ];
-  var PENDING_MOVE = 'tws-maintenance';
   var ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" ' +
     'stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/>' +
     '<path d="M13 6.5L18.5 12 13 17.5"/></svg>';
@@ -2517,7 +2508,6 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
   var focus  = document.getElementById('focus'),
       switcher = document.getElementById('fswitch'),
       list   = document.getElementById('flist'),
-      note   = document.getElementById('fnote'),
       open   = 'seg';
 
   // ── The three cards ─────────────────────────────────────────────────
@@ -2570,17 +2560,6 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
                  '<span class="fr-go">' + ARROW + '</span>' +
                '</a>';
       }).join('');
-    var mv = statsFor(PENDING_MOVE);
-    if (k === 'seg' && mv.docs) {
-      note.innerHTML = '<b>' + mv.docs + '</b> documents still sit under TWS Maintenance. ' +
-        'Each one reassigns to the segment that owns the equipment, so they are not ' +
-        'counted above.';
-    } else if (k === 'pt') {
-      note.innerHTML = 'Each center is the technical home for its discipline across every ' +
-        'segment that runs it.';
-    } else {
-      note.innerHTML = '';
-    }
   }
 
   // ── Moving between the two states ───────────────────────────────────
@@ -2638,7 +2617,6 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     flip(function(){
       open = null;
       focus.dataset.state = 'browse';
-      note.innerHTML = '';
       cards.forEach(function(c){
         c.el.classList.remove('on');
         c.el.setAttribute('aria-pressed','false');
