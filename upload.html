@@ -336,6 +336,35 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .form-input,.form-select{font-size:16px;}
   .dup-warn-panel,.dup-error-panel{padding:12px 14px;}
 }
+
+/* ── A policy is a different animal, so the form says so ── */
+.policy-rules {
+  margin:0 0 20px; padding:16px 18px; border-radius:14px;
+  background:linear-gradient(135deg, rgba(0,93,99,0.09), rgba(0,187,182,0.045));
+  border:1px solid rgba(0,93,99,0.2);
+}
+.pr-head { display:flex; align-items:center; gap:9px; font-family:'BwGradual','Urbanist',sans-serif;
+  font-size:13.5px; font-weight:700; color:var(--primary); margin-bottom:10px; }
+.pr-head svg { width:18px; height:18px; flex-shrink:0; }
+.pr-list { margin:0; padding-inline-start:18px; display:flex; flex-direction:column; gap:6px; }
+.pr-list li { font-size:12.5px; line-height:1.6; color:var(--text-muted); }
+.pr-list b { color:var(--text); font-weight:700; }
+.policy-request {
+  margin:0 0 20px; padding:18px 20px; border-radius:14px;
+  background:rgba(255,184,28,0.1); border:1px solid rgba(255,184,28,0.4);
+}
+.pq-head { font-family:'BwGradual','Urbanist',sans-serif; font-size:14px; font-weight:700;
+  color:var(--text); margin-bottom:7px; }
+.policy-request p { font-size:12.5px; line-height:1.65; color:var(--text-muted); margin:0 0 13px; }
+.pq-go { display:inline-block; padding:9px 17px; border-radius:9px; background:var(--primary);
+  color:#fff; font-size:12.5px; font-weight:700; text-decoration:none; }
+.pq-go:hover { background:var(--primary-hover); }
+.locked-note { font-size:11.5px; color:var(--text-muted); margin-top:5px; }
+.locked-note b { color:var(--primary); }
+html[data-theme="dark"] .policy-rules {
+  background:linear-gradient(135deg, rgba(0,187,182,0.1), rgba(0,93,99,0.05));
+  border-color:rgba(0,187,182,0.24);
+}
 </style>
 </head>
 <body>
@@ -431,34 +460,49 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
           <div class="form-group">
             <label class="form-label">Segment <span>*</span></label>
             <select class="form-select" id="seg-select" required onchange="onSegmentChange(this.value)">
-              <option value="" disabled selected>Select segment</option>
-              <option value="coiled-tubing">Coiled Tubing</option>
-              <option value="fracturing">Fracturing</option>
-              <option value="wireline">Wireline</option>
-              <option value="drilling">Drilling</option>
-              <option value="cementing">Cementing</option>
-              <option value="inspection">Inspection Services</option>
-              <option value="well-safety">Well Safety</option>
-              <option value="cybersecurity">Cybersecurity</option>
-              <option value="qhse">QHSE</option>
-              <option value="tws-maintenance">TWS Maintenance</option>
-              <option value="hr">Human Resources</option>
-              <option value="well-testing">Well Testing</option>
+              <option value="" disabled selected>Select area</option>
             </select>
           </div>
           <div class="form-group">
             <label class="form-label">Document Type <span>*</span></label>
-            <select class="form-select" id="doc-type-select" required onchange="toggleSoftwareFields(this.value)">
+            <select class="form-select" id="doc-type-select" required onchange="onTypeChange(this.value)">
               <option value="" disabled selected>Select type</option>
-              <option>SOP</option>
-              <option>Manual</option>
-              <option>Policy</option>
-              <option>Technical Alert</option>
-              <option>Lesson Learned</option>
-              <option value="Software">Software / Tool</option>
             </select>
           </div>
         </div>
+        <div class="policy-rules" id="policy-rules" hidden>
+          <div class="pr-head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3.6v5.1c0 4.6-3.2 8.2-8 9.3-4.8-1.1-8-4.7-8-9.3V6.6L12 3z"/><path d="M9 12l2 2 4-4"/></svg>
+            A policy follows different rules
+          </div>
+          <ul class="pr-list">
+            <li><b>No area owns it.</b> It is filed as Company Wide and binds every segment, function and center.</li>
+            <li><b>The CEO approves it</b>, not an Operation Director.</li>
+            <li><b>It numbers as TAQA-&lt;Function&gt;-P0XX</b>, the corporate series, not the TQ series in 5.3.</li>
+            <li><b>It is Internal and cannot be restricted.</b> TQ-QHSE-S001 5.5 says policies shall be accessible to all employees.</li>
+            <li>Review cycle 24 months.</li>
+          </ul>
+          <div class="form-row" style="margin-top:14px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Issuing Function <span>*</span></label>
+              <select class="form-select" id="policy-fn" onchange="autoFillRefId()">
+                <option value="" disabled selected>Which function issues it?</option>
+                <option value="QHSE">QHSE</option>
+                <option value="GRC">Governance, Risk &amp; Compliance</option>
+                <option value="CS">Cyber Security</option>
+                <option value="HR">Human Resources</option>
+                <option value="FIN">Finance</option>
+                <option value="LGL">Legal</option>
+                <option value="P&amp;T">Products &amp; Technology</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Approver</label>
+              <input type="text" class="form-input" id="policy-approver" value="Chief Executive Officer" readonly>
+            </div>
+          </div>
+        </div>
+
         <div class="form-group">
           <label class="form-label">Document Status <span>*</span></label>
           <div class="doc-status-toggle">
@@ -603,8 +647,16 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
         </div>
       </div>
 
+      <div class="policy-request" id="policy-request" hidden>
+        <div class="pq-head">Need a company policy changed?</div>
+        <p>Company policy is written and issued by QMS and signed by the CEO, so it
+           cannot be uploaded here. Raise a change request against the policy instead
+           and QMS will take it from there.</p>
+        <a class="pq-go" href="support-ticket.html?topic=policy-change">Request a policy change &#8594;</a>
+      </div>
+
       <div class="submit-row">
-        <button type="submit" class="btn-submit">Submit for Review →</button>
+        <button type="submit" class="btn-submit" id="submit-btn">Submit for Review &#8594;</button>
         <a href="index.html" class="btn-cancel">Cancel</a>
       </div>
     </form>
@@ -687,6 +739,8 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 <footer></footer>
 </div>
 
+<script src="documents-master.js"></script>
+<script src="roles.js"></script>
 <script src="segments-data.js"></script>
 <script>
 function toggleSoftwareFields(val) {
@@ -855,63 +909,149 @@ function submitUpload(e) {
 }
 
 // ── Reference ID Auto-Generation ──
-const SEG_ID_FORMATS = {
-  'coiled-tubing':   { SOP:'CT-{N}',     Manual:'CT-MAN-{N}',   Policy:'CT-POL-{N}',   'Technical Alert':'ALERT-CT-{N}',   'Lesson Learned':'LL-CT-{N}',   Software:'CT-SW-{N}'   },
-  'fracturing':      { SOP:'FRAC-{N}',   Manual:'FRAC-MAN-{N}', Policy:'FRAC-POL-{N}', 'Technical Alert':'ALERT-FRAC-{N}', 'Lesson Learned':'LL-FRAC-{N}', Software:'FRAC-SW-{N}' },
-  'wireline':        { SOP:'WL-{N}',     Manual:'WL-MAN-{N}',   Policy:'WL-POL-{N}',   'Technical Alert':'ALERT-WL-{N}',   'Lesson Learned':'LL-WL-{N}',   Software:'WL-SW-{N}'   },
-  'drilling':        { SOP:'DRL-{N}',    Manual:'DRL-MAN-{N}',  Policy:'DRL-POL-{N}',  'Technical Alert':'ALERT-DRL-{N}',  'Lesson Learned':'LL-DRL-{N}',  Software:'DRL-SW-{N}'  },
-  'cementing':       { SOP:'CEM-{N}',    Manual:'CEM-MAN-{N}',  Policy:'CEM-POL-{N}',  'Technical Alert':'ALERT-CEM-{N}',  'Lesson Learned':'LL-CEM-{N}',  Software:'CEM-SW-{N}'  },
-  'inspection':      { SOP:'INS-{N}',    Manual:'INS-MAN-{N}',  Policy:'INS-POL-{N}',  'Technical Alert':'ALERT-INS-{N}',  'Lesson Learned':'LL-INS-{N}',  Software:'INS-SW-{N}'  },
-  'well-safety':     { SOP:'WS-{N}',     Manual:'WS-MAN-{N}',   Policy:'WS-POL-{N}',   'Technical Alert':'ALERT-WS-{N}',   'Lesson Learned':'LL-WS-{N}',   Software:'WS-SW-{N}'   },
-  'qhse':            { SOP:'QHSE-{N}',   Manual:'QHSE-MAN-{N}', Policy:'QHSE-POL-{N}', 'Technical Alert':'ALERT-QHSE-{N}', 'Lesson Learned':'LL-QHSE-{N}', Software:'QHSE-SW-{N}' },
-  'hr':              { SOP:'HR-{N}',     Manual:'HR-MAN-{N}',   Policy:'HR-POL-{N}',   'Technical Alert':'ALERT-HR-{N}',   'Lesson Learned':'LL-HR-{N}',   Software:'HR-SW-{N}'   },
-  'tws-maintenance': { SOP:'TWS-{N}',    Manual:'TWS-MAN-{N}',  Policy:'TWS-POL-{N}',  'Technical Alert':'ALERT-TWS-{N}',  'Lesson Learned':'LL-TWS-{N}',  Software:'TWS-SW-{N}'  },
-  'well-testing':    { SOP:'WT-{N}',     Manual:'WT-MAN-{N}',   Policy:'WT-POL-{N}',   'Technical Alert':'ALERT-WT-{N}',   'Lesson Learned':'LL-WT-{N}',   Software:'WT-SW-{N}'   },
-  'cybersecurity':   { SOP:'CS-PROC-{N}',Manual:'CS-STD-{N}',   Policy:'CS-POL-{N}',   'Technical Alert':'CS-COMP-{N}',    'Lesson Learned':'CS-AWR-{N}',  Software:'CS-SW-{N}'   }
-};
-const DOC_TYPE_COUNT = { SOP:'sops', Manual:'manuals', Policy:'policies', 'Technical Alert':'alerts', 'Lesson Learned':'lessons', Software:'software' };
 
 let isAutoFilling = false;
 
-function generateRefId(segId, docType) {
-  const tpl = (SEG_ID_FORMATS[segId] || {})[docType];
-  if (!tpl) return '';
-  const seg = (typeof TAQA_SEGMENTS !== 'undefined') ? TAQA_SEGMENTS[segId] : null;
-  if (!seg) return '';
+/* ── What this form may offer, and to whom ───────────────────────────────
+   Built from the register rather than typed here, so an area added in Azure
+   appears by itself and a renamed one cannot go stale.
 
-  // Derive the exact prefix that appears before the number in each doc title
-  const prefix = tpl.replace('-{N}', '');
-  const docsKey = DOC_TYPE_COUNT[docType];
-  const docList = (seg.docs && seg.docs[docsKey]) ? seg.docs[docsKey] : [];
+   A POLICY is the exception the business asked for. It is a company
+   commitment signed by the CEO, so it belongs to no area and only QMS may
+   file one. The option is absent for every other role rather than shown and
+   disabled: a document owner in Coiled Tubing has no business filing company
+   policy, and a greyed control invites the argument. */
+(function(){
+  var L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : null;
+  if (!L) return;
 
-  // Scan every title in that list for "PREFIX-NNN" and find the highest number
-  const escaped = prefix.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-  const pat = new RegExp('^' + escaped + '-(\\d+)', 'i');
-  let maxNum = 0;
-  docList.forEach(title => {
-    const m = title.match(pat);
-    if (m) maxNum = Math.max(maxNum, parseInt(m[1], 10));
-  });
+  var isQMS = (typeof TAQA_ROLE !== 'undefined') && TAQA_ROLE.current() === 'qms';
+  window.TAQA_UPLOAD_IS_QMS = isQMS;
 
-  // Fall back to the segment count when titles don't carry numbered prefixes
-  if (maxNum === 0) maxNum = seg[docsKey] || 0;
+  // ── Areas: everything real, minus the company tier, which is not an area ──
+  var segSel = document.getElementById('seg-select');
+  if (segSel) {
+    var ids = Object.keys(L.segments)
+      .filter(function(k){ return k !== 'company'; })
+      .sort(function(a,b){ return L.segments[a].name.localeCompare(L.segments[b].name); });
+    segSel.innerHTML = '<option value="" disabled selected>Select area</option>' +
+      ids.map(function(k){
+        return '<option value="' + k + '">' + L.segments[k].name + '</option>';
+      }).join('');
+  }
 
-  return tpl.replace('{N}', String(maxNum + 1).padStart(3, '0'));
+  // ── Types: the register's own list, with Policy gated ──
+  var typeSel = document.getElementById('doc-type-select');
+  if (typeSel) {
+    var order = ['policy','standard','sop','manual','alert','lesson','software'];
+    typeSel.innerHTML = '<option value="" disabled selected>Select type</option>' +
+      order.filter(function(t){
+        if (!L.types[t]) return false;
+        if (t === 'policy') return isQMS;        // absent, not disabled
+        return true;
+      }).map(function(t){
+        return '<option value="' + t + '">' + L.types[t].label + '</option>';
+      }).join('');
+  }
+
+  // Everyone who cannot write policy is told where to go instead.
+  var req = document.getElementById('policy-request');
+  if (req && !isQMS) req.hidden = false;
+})();
+
+/* Choosing Policy rewrites the form: no area, a function instead, the CEO as
+   approver, and a classification that cannot be raised. 5.5 says a policy
+   shall be accessible to all employees, so Confidential is not available. */
+function onTypeChange(val){
+  var isPolicy = (val === 'policy');
+  var rules    = document.getElementById('policy-rules');
+  var segGroup = document.getElementById('seg-select') ? document.getElementById('seg-select').closest('.form-group') : null;
+  var segSel   = document.getElementById('seg-select');
+  var btn      = document.getElementById('submit-btn');
+
+  if (rules) rules.hidden = !isPolicy;
+  if (segGroup) segGroup.style.display = isPolicy ? 'none' : '';
+  if (segSel) {
+    segSel.required = !isPolicy;
+    if (isPolicy) segSel.value = '';
+  }
+  if (btn) btn.innerHTML = isPolicy
+    ? 'Submit to QMS for CEO approval &#8594;'
+    : 'Submit for Review &#8594;';
+
+  var fn = document.getElementById('policy-fn');
+  if (fn) fn.required = isPolicy;
+
+  toggleSoftwareFields(val === 'software' ? 'Software' : val);
+  autoFillRefId();
 }
 
-function autoFillRefId() {
-  const segId    = (document.getElementById('seg-select') || {}).value;
-  const docType  = (document.getElementById('doc-type-select') || {}).value;
-  const refField = document.getElementById('doc-ref-id');
-  const statusEl = document.getElementById('doc-id-status');
-  if (!segId || !docType || !refField) return;
-  if (refField.dataset.autofilled === 'user') return; // user typed manually, respect it
-  const id = generateRefId(segId, docType);
-  if (!id) return;
+/* ── Numbering, per TQ-QHSE-S001 5.3 ─────────────────────────────────────
+   The old table here produced legacy ids like CT-001, which is the shape the
+   register is trying to retire. A number is now built from the business unit,
+   the short form and the type letter, and it is marked provisional when the
+   standard has not assigned one of those parts. */
+function taqaRefId(){
+  var L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : null;
+  var D = (typeof TAQA_MASTER_DOCS !== 'undefined') ? TAQA_MASTER_DOCS : [];
+  if (!L) return null;
+  var type = (document.getElementById('doc-type-select') || {}).value;
+  if (!type || !L.types[type]) return null;
+  var letter = L.types[type].letter;
+
+  if (type === 'policy') {
+    var fn = (document.getElementById('policy-fn') || {}).value;
+    if (!fn) return null;
+    var used = D.filter(function(d){
+      return d.scope === 'company' && d.docNumber &&
+             d.docNumber.indexOf('TAQA-' + fn + '-P') === 0;
+    }).map(function(d){ return parseInt(d.docNumber.slice(-3), 10) || 0; });
+    var nextP = (used.length ? Math.max.apply(null, used) : 0) + 1;
+    return { id:'TAQA-' + fn + '-P' + String(nextP).padStart(3,'0'),
+             note:'Corporate policy series. Not the scheme 5.3 sets out for other documents.' };
+  }
+
+  var segId = (document.getElementById('seg-select') || {}).value;
+  var e = segId && L.segments[segId];
+  if (!e) return null;
+  if (!letter) return { id:'', note:'This type carries no letter in 5.3, so it takes no number.' };
+
+  var stem = 'TQ-' + (e.bu ? e.bu + '-' : '') + e.spl + '-' + letter;
+  var sep  = (letter.length > 1) ? '-' : '';
+  var re   = new RegExp('^' + stem.replace(/[.*+?^${}()|[\]\\&]/g, '\\$&') + sep + '(\\d+)$');
+  var nums = D.map(function(d){
+    var m = d.docNumber && d.docNumber.match(re); return m ? parseInt(m[1],10) : 0;
+  });
+  var next = (nums.length ? Math.max.apply(null, nums) : 0) + 1;
+
+  var why = [];
+  if (!e.bu) why.push('no business unit is assigned to ' + e.name);
+  if (e.provisional) why.push('"' + e.spl + '" is not a short form assigned in 5.3');
+  if (L.types[type].provisional) why.push('"' + letter + '" is not a type letter defined in section 4');
+
+  return { id: stem + sep + String(next).padStart(3,'0'),
+           note: why.length ? 'Provisional: ' + why.join(', ') + '.' : '' };
+}
+
+function autoFillRefId(){
+  var refField = document.getElementById('doc-ref-id');
+  var statusEl = document.getElementById('doc-id-status');
+  if (!refField) return;
+  if (refField.dataset.autofilled === 'user') return;   // a typed number is respected
+  var r = taqaRefId();
+  if (!r) {                     // nothing to build one from yet, so say nothing
+    refField.value = '';
+    if (statusEl) statusEl.innerHTML = '';
+    return;
+  }
   isAutoFilling = true;
-  refField.value = id;
+  refField.value = r.id;
   refField.dataset.autofilled = 'auto';
-  statusEl.innerHTML = '<span class="id-ok">⚡ Auto-generated · edit if needed</span>';
+  if (statusEl) {
+    statusEl.innerHTML = r.note
+      ? '<span class="id-warn">' + r.note + '</span>'
+      : '<span class="id-ok">Follows 5.3. Edit if needed.</span>';
+  }
   isAutoFilling = false;
 }
 
@@ -921,19 +1061,23 @@ let docStatus = 'new';
 
 const STOP_WORDS = new Set(['the','a','an','of','in','for','and','or','to','with','at','by','from','on','is','are','its','this','that','was','been','rev','revision','version','update']);
 
-function segmentTitles(segId) {
-  if (typeof TAQA_SEGMENTS === 'undefined' || !TAQA_SEGMENTS[segId]) return [];
-  const seg = TAQA_SEGMENTS[segId];
-  return [
-    ...(seg.docs.sops||[]),...(seg.docs.manuals||[]),...(seg.docs.policies||[]),
-    ...(seg.docs.alerts||[]),...(seg.docs.lessons||[])
-  ].map(t => String(t).replace(/^⚠️\s*/,''));
+// What this area already holds, read from the register rather than from the
+// page copy in segments-data.js, so a supersedes list can never offer a
+// document that was withdrawn or miss one that was just filed.
+function areaDocs(segId) {
+  if (typeof TAQA_MASTER_DOCS === 'undefined' || !segId) return [];
+  return TAQA_MASTER_DOCS.filter(function(d){
+    return d.segment === segId && d.docType !== 'software' &&
+           d.status !== 'obsolete' && d.status !== 'superseded';
+  });
 }
-
+function segmentTitles(segId) {
+  return areaDocs(segId).map(function(d){
+    return (d.docNumber ? d.docNumber + '  ' : '') + d.title;
+  });
+}
 function segmentIds(segId) {
-  const titles = segmentTitles(segId);
-  // extract leading IDs: uppercase alphanumeric-hyphen token at start of title
-  return titles.map(t => { const m=t.match(/^([A-Z0-9][A-Z0-9\-]+)\b/); return m?m[1]:null; }).filter(Boolean);
+  return areaDocs(segId).map(function(d){ return d.docNumber; }).filter(Boolean);
 }
 
 function kw(s){ return s.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(w=>w.length>2&&!STOP_WORDS.has(w)); }
