@@ -607,9 +607,9 @@ html[data-theme="dark"] .co-bar {
         </div>
       </div>
       <div class="seg-hero-stats">
+        <div class="mini-stat"><div class="mini-stat-num" id="ms-policies">,</div><div class="mini-stat-label">Standards</div></div>
         <div class="mini-stat"><div class="mini-stat-num" id="ms-sops">,</div><div class="mini-stat-label" id="ms-label-sops">SOPs</div></div>
         <div class="mini-stat"><div class="mini-stat-num" id="ms-manuals">,</div><div class="mini-stat-label" id="ms-label-manuals">Manuals</div></div>
-        <div class="mini-stat"><div class="mini-stat-num" id="ms-policies">,</div><div class="mini-stat-label">Standards</div></div>
         <div class="mini-stat"><div class="mini-stat-num" id="ms-lessons">,</div><div class="mini-stat-label" id="ms-label-lessons">Lessons</div></div>
         <div class="mini-stat"><div class="mini-stat-num" id="ms-software" style="color:#38bdf8;">,</div><div class="mini-stat-label">Software</div></div>
       </div>
@@ -631,9 +631,9 @@ html[data-theme="dark"] .co-bar {
 <div class="tabs-outer">
   <div class="tabs" id="tab-bar">
     <button class="tab-btn" data-tab="all">All <span class="tab-count" id="tc-all" style="background:var(--gradient);color:#fff;">,</span></button>
+    <button class="tab-btn" data-tab="policies">Standards <span class="tab-count" id="tc-policies">,</span></button>
     <button class="tab-btn active" data-tab="sops">SOPs <span class="tab-count" id="tc-sops">,</span></button>
     <button class="tab-btn" data-tab="manuals">Manuals <span class="tab-count" id="tc-manuals">,</span></button>
-    <button class="tab-btn" data-tab="policies">Standards <span class="tab-count" id="tc-policies">,</span></button>
     <button class="tab-btn" data-tab="alerts">Alerts <span class="tab-alert-count" id="tc-alerts">,</span><span class="alert-pulse-dot" id="alert-pulse-dot"></span></button>
     <button class="tab-btn" data-tab="lessons">Lessons Learned <span class="tab-count" id="tc-lessons">,</span></button>
     <button class="tab-btn" data-tab="software">Software <span class="tab-count" id="tc-software" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8);">,</span></button>
@@ -1677,7 +1677,7 @@ function goPage(type,page){
 }
 
 // ── Tab Switching ──
-const TAB_LABELS = {sops:'SOPs', manuals:'Manuals', policies:'Standards', alerts:'Alerts', lessons:'Lessons Learned', software:'Software & Tools'};
+const TAB_LABELS = {policies:'Standards', sops:'SOPs', manuals:'Manuals', alerts:'Alerts', lessons:'Lessons Learned', software:'Software & Tools'};
 // ── Tab switching (All + individual) ──
 const _contentOuter = document.querySelector('.content-outer');
 
@@ -1747,7 +1747,7 @@ openTab(startTab);
 
 // Update All tab total count after lists render
 setTimeout(() => {
-  const types = ['sops','manuals','policies','alerts','lessons','software'];
+  const types = ['policies','sops','manuals','alerts','lessons','software'];
   const total = types.reduce((s, t) => s + (_st(t).all.length || 0), 0);
   const el = document.getElementById('tc-all');
   if (el) el.textContent = total;
