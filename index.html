@@ -1126,29 +1126,38 @@ html[data-theme="dark"] .section-hl-title { color:var(--text); }
   background:linear-gradient(158deg, rgba(255,255,255,0.6), rgba(255,255,255,0) 44%);
 }
 .fstage { display:grid; grid-template-columns:1fr; gap:14px; }
-.focus[data-state="focus"] .fstage { grid-template-columns:292px 1fr; align-items:start; }
+.focus[data-state="focus"] .fstage { grid-template-columns:318px 1fr; align-items:start; }
 
 .fside { min-width:0; }
-/* In the chosen state the switcher rides along, so the left column keeps
-   doing something while a long list scrolls past it. */
-.focus[data-state="focus"] .fside { position:sticky; top:84px; }
+/* The two halves are different jobs, so they are different materials. The
+   chosen side is tinted glass with the brand in it and its cards raised on
+   top; the list side stays clear, so the eye reads one as the place you are
+   and the other as the things in it. */
+.focus[data-state="focus"] .fside {
+  position:sticky; top:84px;
+  padding:13px; border-radius:19px;
+  background:linear-gradient(162deg, rgba(0,93,99,0.19), rgba(0,187,182,0.09) 72%);
+  border:1px solid rgba(0,93,99,0.2);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.5);
+  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+}
 .fswitch { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
 .focus[data-state="focus"] .fswitch { grid-template-columns:1fr; gap:10px; align-content:start; }
 
 .fcard {
   position:relative; overflow:hidden; text-align:start; cursor:pointer;
-  font-family:inherit; padding:0; height:212px;
+  font-family:inherit; padding:0; height:224px;
   border-radius:16px;
-  background:rgba(255,255,255,0.62);
-  border:1px solid rgba(255,255,255,0.8);
-  box-shadow:0 1px 2px rgba(0,88,90,0.05);
+  background:rgba(255,255,255,0.86);
+  border:1px solid rgba(255,255,255,0.9);
+  box-shadow:0 2px 6px rgba(0,88,90,0.08);
   transition:background 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
 }
-.focus[data-state="focus"] .fcard { height:64px; }
-.focus[data-state="focus"] .fcard.on { height:212px; }
+.focus[data-state="focus"] .fcard { height:68px; }
+.focus[data-state="focus"] .fcard.on { height:224px; }
 .fcard:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
 .fcard.on {
-  background:rgba(255,255,255,0.86);
+  background:rgba(255,255,255,0.97);
   border-color:var(--primary);
   box-shadow:0 0 0 1px var(--primary) inset, 0 14px 30px rgba(0,88,90,0.14);
 }
@@ -1170,27 +1179,27 @@ html[data-theme="dark"] .section-hl-title { color:var(--text); }
 .focus[data-state="focus"] .fcard:not(.on) .fc-mini { opacity:1; }
 
 .fc-top { display:flex; align-items:baseline; gap:9px; }
-.fc-n { font-family:'BwGradual','Urbanist',sans-serif; font-size:42px; font-weight:800;
+.fc-n { font-family:'BwGradual','Urbanist',sans-serif; font-size:46px; font-weight:800;
   line-height:1; letter-spacing:-1.6px; color:var(--primary); font-variant-numeric:tabular-nums; }
 .fc-k { font-size:10px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase;
   color:var(--text-light); }
-.fc-t { font-family:'BwGradual','Urbanist',sans-serif; font-size:17px; font-weight:700;
+.fc-t { font-family:'BwGradual','Urbanist',sans-serif; font-size:19px; font-weight:700;
   color:var(--text); letter-spacing:-0.3px; margin-top:14px; }
-.fc-d { font-size:12.5px; line-height:1.55; color:var(--text-muted); margin-top:6px; }
+.fc-d { font-size:13px; line-height:1.55; color:var(--text-muted); margin-top:6px; }
 .fc-meter { margin-top:auto; height:5px; border-radius:999px; overflow:hidden;
   background:rgba(0,88,90,0.14); }
 .fc-meter i { display:block; height:100%; width:0; min-width:4px; border-radius:999px;
   background:linear-gradient(90deg, var(--primary), #00BBB6);
   transition:width 820ms cubic-bezier(0.22,1,0.36,1) 180ms; }
 .fc-foot { margin-top:11px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.fc-stat { font-size:12px; color:var(--text-muted); font-variant-numeric:tabular-nums; }
+.fc-stat { font-size:12.5px; color:var(--text-muted); font-variant-numeric:tabular-nums; }
 .fc-stat b { color:var(--text); font-weight:700; }
-.fc-share { font-size:11px; font-weight:700; color:var(--primary); font-variant-numeric:tabular-nums; }
+.fc-share { font-size:11.5px; font-weight:700; color:var(--primary); font-variant-numeric:tabular-nums; }
 
-.fc-mn { font-family:'BwGradual','Urbanist',sans-serif; font-size:23px; font-weight:800;
-  line-height:1; letter-spacing:-0.8px; color:var(--primary); font-variant-numeric:tabular-nums;
-  min-width:30px; }
-.fc-mt { flex:1; font-family:'BwGradual','Urbanist',sans-serif; font-size:13.5px;
+.fc-mn { font-family:'BwGradual','Urbanist',sans-serif; font-size:26px; font-weight:800;
+  line-height:1; letter-spacing:-0.9px; color:var(--primary); font-variant-numeric:tabular-nums;
+  min-width:34px; }
+.fc-mt { flex:1; font-family:'BwGradual','Urbanist',sans-serif; font-size:15px;
   font-weight:700; color:var(--text); letter-spacing:-0.2px; }
 .fc-go, .fr-go {
   width:28px; height:28px; flex-shrink:0;
@@ -1201,7 +1210,9 @@ html[data-theme="dark"] .section-hl-title { color:var(--text); }
              color 240ms cubic-bezier(0.22,1,0.36,1),
              transform 240ms cubic-bezier(0.22,1,0.36,1);
 }
-.fc-go svg, .fr-go svg { width:12px; height:12px; }
+.fc-go svg { width:13px; height:13px; }
+.fr-go { width:26px; height:26px; }
+.fr-go svg { width:11px; height:11px; }
 .fcard.on .fc-go svg { transform:rotate(180deg); }
 
 /* The areas, as a list. A master and detail layout wants rows, not a bento:
@@ -1209,10 +1220,10 @@ html[data-theme="dark"] .section-hl-title { color:var(--text); }
 .flist { display:flex; flex-direction:column; gap:5px; height:0; overflow:hidden; opacity:0; }
 .focus[data-state="focus"] .flist { height:auto; overflow:visible; opacity:1; }
 .frow {
-  display:flex; align-items:center; gap:14px; text-decoration:none;
-  padding:11px 15px; border-radius:13px;
-  background:rgba(255,255,255,0.5);
-  border:1px solid rgba(255,255,255,0.62);
+  display:flex; align-items:center; gap:13px; text-decoration:none;
+  padding:10px 14px; border-radius:12px;
+  background:rgba(255,255,255,0.4);
+  border:1px solid rgba(255,255,255,0.5);
   opacity:0; transform:translateX(16px);
   animation:frowIn 460ms cubic-bezier(0.22,1,0.36,1) forwards;
   animation-delay:calc(var(--i,0) * 26ms + 150ms);
@@ -1227,22 +1238,22 @@ html[data-theme="dark"] .section-hl-title { color:var(--text); }
     color:#fff; transform:translateX(2px); }
 }
 .frow:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
-.fr-n { font-family:'BwGradual','Urbanist',sans-serif; font-size:12px; font-weight:800;
+.fr-n { font-family:'BwGradual','Urbanist',sans-serif; font-size:11px; font-weight:800;
   color:var(--text-light); font-variant-numeric:tabular-nums; min-width:20px; }
 .fr-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
-.fr-name { font-family:'BwGradual','Urbanist',sans-serif; font-size:14.5px; font-weight:700;
-  color:var(--text); letter-spacing:-0.2px; }
-.fr-tag { font-size:10px; letter-spacing:0.7px; text-transform:uppercase; color:var(--text-muted); }
-.fr-docs { font-family:'BwGradual','Urbanist',sans-serif; font-size:17px; font-weight:800;
+.fr-name { font-family:'BwGradual','Urbanist',sans-serif; font-size:13.5px; font-weight:700;
+  color:var(--text); letter-spacing:-0.15px; }
+.fr-tag { font-size:9.5px; letter-spacing:0.7px; text-transform:uppercase; color:var(--text-light); }
+.fr-docs { font-family:'BwGradual','Urbanist',sans-serif; font-size:15.5px; font-weight:800;
   color:var(--text); font-variant-numeric:tabular-nums; letter-spacing:-0.4px; flex-shrink:0; }
-.fr-docs span { font-size:10.5px; font-weight:500; color:var(--text-muted);
+.fr-docs span { font-size:10px; font-weight:500; color:var(--text-muted);
   letter-spacing:0; margin-inline-start:4px; }
 
 .fhead { display:flex; align-items:baseline; justify-content:space-between; gap:16px;
   flex-wrap:wrap; margin-bottom:10px; padding:0 3px; }
-.fhead h4 { font-family:'BwGradual','Urbanist',sans-serif; font-size:11.5px; font-weight:700;
+.fhead h4 { font-family:'BwGradual','Urbanist',sans-serif; font-size:11px; font-weight:700;
   letter-spacing:1.5px; text-transform:uppercase; color:var(--text); }
-.fhead span { font-size:11.5px; color:var(--text-muted); }
+.fhead span { font-size:11px; color:var(--text-muted); }
 .fhead span b { color:var(--text); font-weight:700; font-variant-numeric:tabular-nums; }
 .fnote { font-size:11.5px; line-height:1.6; color:var(--text-muted);
   margin:14px 3px 2px; padding-inline-start:11px;
@@ -1259,12 +1270,17 @@ html[data-theme="dark"] .focus {
 html[data-theme="dark"] .focus::before {
   background:linear-gradient(158deg, rgba(255,255,255,0.08), rgba(255,255,255,0) 44%);
 }
+html[data-theme="dark"] .focus[data-state="focus"] .fside {
+  background:linear-gradient(162deg, rgba(0,187,182,0.16), rgba(0,93,99,0.09) 72%);
+  border-color:rgba(0,187,182,0.24);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.06);
+}
 html[data-theme="dark"] .fcard {
-  background:rgba(30,44,66,0.6); border-color:rgba(255,255,255,0.09);
+  background:rgba(30,44,66,0.72); border-color:rgba(255,255,255,0.10);
 }
 html[data-theme="dark"] .fcard.on { background:rgba(30,44,66,0.9); border-color:var(--primary); }
 html[data-theme="dark"] .frow {
-  background:rgba(30,44,66,0.5); border-color:rgba(255,255,255,0.07);
+  background:rgba(30,44,66,0.42); border-color:rgba(255,255,255,0.06);
 }
 html[data-theme="dark"] .fc-meter { background:rgba(255,255,255,0.12); }
 html[data-theme="dark"] .fc-go, html[data-theme="dark"] .fr-go { border-color:rgba(255,255,255,0.17); }
