@@ -299,7 +299,7 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 .main-wrapper { padding:48px 48px; }
 .main-inner {
   max-width:1200px; margin:0 auto;
-  display:grid; grid-template-columns:1fr 310px; gap:44px; align-items:stretch;
+  display:grid; grid-template-columns:1fr 310px; gap:44px; align-items:start;
 }
 
 /* Panel header */
@@ -458,14 +458,22 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 
 .gate {
   position:relative; isolation:isolate; overflow:hidden; text-align:start;
-  display:flex; flex-direction:column; gap:0; min-height:192px;
-  padding:21px 22px 19px; cursor:pointer; font-family:inherit;
+  display:flex; flex-direction:column; gap:0; min-height:230px;
+  padding:24px 24px 20px; cursor:pointer; font-family:inherit;
   background:var(--bg-white); border:1px solid var(--border); border-radius:18px;
-  box-shadow:0 1px 2px rgba(0,88,90,0.05);
+  /* The two flat shadows draw the edge of a second sheet under the card, so a
+     closed door reads as something with pages behind it. */
+  box-shadow:0 1px 2px rgba(0,88,90,0.05),
+             0 7px 0 -4px var(--bg-white),
+             0 7px 0 -3px var(--border);
   transition:transform 320ms cubic-bezier(0.16,1,0.3,1),
              box-shadow 320ms cubic-bezier(0.16,1,0.3,1),
              border-color 320ms cubic-bezier(0.16,1,0.3,1);
 }
+/* The cards arrive one after another, far enough apart to read as a sequence. */
+.gates .gate:nth-child(2) { transition-delay:0.09s; }
+.gates .gate:nth-child(3) { transition-delay:0.18s; }
+
 /* Cursor-following light. Sits behind the content on its own layer. */
 .gate::before {
   content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
@@ -481,7 +489,10 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
   transition:transform 480ms cubic-bezier(0.16,1,0.3,1);
 }
 @media (hover:hover) and (pointer:fine){
-  .gate:hover { transform:translateY(-3px); box-shadow:0 18px 38px rgba(0,88,90,0.15);
+  .gate:hover { transform:translateY(-3px);
+    box-shadow:0 18px 38px rgba(0,88,90,0.15),
+               0 7px 0 -4px var(--bg-white),
+               0 7px 0 -3px var(--border);
     border-color:rgba(0,93,99,0.28); }
   .gate:hover::before { opacity:1; }
   .gate:hover::after { transform:scaleX(1); }
@@ -489,16 +500,58 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 }
 .gate:active { transform:translateY(-1px); }
 .gate:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
+/* An open door has nothing behind it any more, so the sheet edge goes. */
 .gate[aria-expanded="true"] {
   border-color:var(--primary);
   box-shadow:0 0 0 1px var(--primary) inset, 0 12px 28px rgba(0,88,90,0.13);
 }
 .gate[aria-expanded="true"]::after { transform:scaleX(1); }
 
-/* The call to action is a mark in the corner, not a line of text competing
-   with the count below it. */
+.gate-top { display:flex; align-items:baseline; gap:10px; }
+.gate-n {
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:44px; font-weight:800;
+  line-height:1; letter-spacing:-1.7px; color:var(--primary);
+  font-variant-numeric:tabular-nums;
+}
+.gate-k {
+  font-size:10.5px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase;
+  color:var(--text-light);
+}
+.gate-t {
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:18px; font-weight:700;
+  color:var(--text); letter-spacing:-0.3px; margin-top:16px;
+}
+.gate-d { font-size:12.5px; line-height:1.6; color:var(--text-muted); margin-top:6px; }
+
+/* How much of the hub's library this group holds. Review status belongs to
+   document control, so it is not on a page everyone opens. */
+.gate-meter-row {
+  margin-top:auto; padding-top:18px; display:flex; align-items:center; gap:10px;
+}
+.gate-meter {
+  flex:1; height:5px; border-radius:999px; overflow:hidden; background:var(--border);
+}
+.gate-meter i {
+  display:block; height:100%; width:0; min-width:4px; border-radius:999px;
+  background:linear-gradient(90deg, var(--primary), #00BBB6);
+  transition:width 900ms cubic-bezier(0.16,1,0.3,1);
+}
+.gate-share {
+  font-size:11px; font-weight:700; color:var(--primary);
+  font-variant-numeric:tabular-nums; flex-shrink:0;
+}
+.gate-foot {
+  margin-top:12px; display:flex; align-items:center;
+  justify-content:space-between; gap:10px;
+}
+.gate-stat { font-size:12px; color:var(--text-muted); font-variant-numeric:tabular-nums;
+  white-space:nowrap; }
+.gate-stat b { color:var(--text); font-weight:700; }
+
+/* The call to action sits where the eye finishes the card, not where a close
+   button would live. */
 .gate-go {
-  position:absolute; top:17px; right:17px; width:34px; height:34px;
+  width:36px; height:36px; flex-shrink:0;
   display:inline-flex; align-items:center; justify-content:center;
   border-radius:50%; border:1px solid var(--border); color:var(--primary);
   background:transparent;
@@ -513,41 +566,15 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 }
 .gate[aria-expanded="true"] .gate-go svg { transform:rotate(90deg); }
 
-.gate-top { display:flex; align-items:baseline; gap:10px; }
-.gate-n {
-  font-family:'BwGradual','Urbanist',sans-serif; font-size:42px; font-weight:800;
-  line-height:1; letter-spacing:-1.6px; color:var(--primary);
-  font-variant-numeric:tabular-nums;
+html[data-theme="dark"] .gate {
+  background:#19263a; border-color:#243044;
+  box-shadow:0 1px 2px rgba(0,0,0,0.25),
+             0 7px 0 -4px #19263a,
+             0 7px 0 -3px #243044;
 }
-.gate-k {
-  font-size:10.5px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase;
-  color:var(--text-light);
+html[data-theme="dark"] .gate[aria-expanded="true"] {
+  box-shadow:0 0 0 1px var(--primary) inset, 0 12px 28px rgba(0,0,0,0.35);
 }
-.gate-t {
-  font-family:'BwGradual','Urbanist',sans-serif; font-size:17.5px; font-weight:700;
-  color:var(--text); letter-spacing:-0.3px; margin-top:12px;
-}
-.gate-d { font-size:12.5px; line-height:1.55; color:var(--text-muted); margin-top:5px; }
-
-/* How much of the hub's library this group holds. Review status belongs to
-   document control, so it is not on a page everyone opens. */
-.gate-meter {
-  margin-top:auto; height:5px; border-radius:999px; overflow:hidden;
-  background:var(--border);
-}
-.gate-meter i {
-  display:block; height:100%; width:0; border-radius:999px;
-  background:linear-gradient(90deg, var(--primary), #00BBB6);
-  transition:width 900ms cubic-bezier(0.16,1,0.3,1) 220ms;
-}
-.gate-foot {
-  margin-top:9px; display:flex; align-items:baseline;
-  justify-content:space-between; gap:10px;
-}
-.gate-stat { font-size:11.5px; color:var(--text-muted); font-variant-numeric:tabular-nums;
-  white-space:nowrap; }
-.gate-stat b { color:var(--text); font-weight:700; }
-html[data-theme="dark"] .gate { background:#19263a; border-color:#243044; }
 html[data-theme="dark"] .gate-go { border-color:#2d3a4e; }
 html[data-theme="dark"] .gate-meter { background:#243044; }
 @media (prefers-reduced-motion: reduce){
@@ -562,6 +589,7 @@ html[data-theme="dark"] .gate-meter { background:#243044; }
   transition:grid-template-rows 440ms cubic-bezier(0.16,1,0.3,1);
 }
 .gate-panel.open { grid-template-rows:1fr; }
+.gate-panel.instant { transition:none; }
 .gate-panel > div { min-height:0; }
 .gate-body { padding-top:18px; }
 .gate-head {
@@ -743,7 +771,7 @@ html[data-theme="dark"] .tile-bar { background:rgba(255,255,255,0.10); }
   color:var(--text-muted); margin-bottom:14px; padding-bottom:14px;
   border-bottom:1px solid var(--border); display:block;
 }
-.sidebar-tools { display:flex; flex-direction:column; gap:12px; flex:1; }
+.sidebar-tools { display:flex; flex-direction:column; gap:12px; }
 .sidebar-tool {
   background:var(--bg-white); border:1px solid var(--border); border-radius:var(--radius);
   padding:20px; text-decoration:none; color:var(--text);
@@ -777,7 +805,6 @@ html[data-theme="dark"] .tile-bar { background:rgba(255,255,255,0.10); }
   display:flex; flex-direction:column; position:relative; overflow:hidden;
   transition:transform 0.22s, box-shadow 0.22s;
   box-shadow:0 4px 20px rgba(0,93,99,0.28);
-  flex:1;
 }
 .sidebar-tool-featured:hover { transform:translateY(-2px); box-shadow:0 10px 32px rgba(0,93,99,0.42); }
 .sidebar-tool-featured::after {
@@ -1363,44 +1390,50 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
       </div>
       <div class="gates">
         <button type="button" class="gate reveal" id="gate-seg" data-group="seg" aria-expanded="false" aria-controls="gate-panel">
-          <span class="gate-go" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
-          </span>
           <span class="gate-top"><span class="gate-n" id="gate-seg-n" data-target="0">0</span><span class="gate-k">areas</span></span>
           <span class="gate-t">Operational Segments</span>
           <span class="gate-d">Service lines that deliver the work.</span>
-          <span class="gate-meter" aria-hidden="true"><i id="gate-seg-bar"></i></span>
+          <span class="gate-meter-row">
+            <span class="gate-meter" aria-hidden="true"><i id="gate-seg-bar"></i></span>
+            <span class="gate-share" id="gate-seg-share">0%</span>
+          </span>
           <span class="gate-foot">
             <span class="gate-stat"><b id="gate-seg-docs">0</b> documents</span>
-            <span class="gate-stat" id="gate-seg-share"></span>
+            <span class="gate-go" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
+            </span>
           </span>
         </button>
 
-        <button type="button" class="gate reveal reveal-delay-1" id="gate-fn" data-group="fn" aria-expanded="false" aria-controls="gate-panel">
-          <span class="gate-go" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
-          </span>
+        <button type="button" class="gate reveal" id="gate-fn" data-group="fn" aria-expanded="false" aria-controls="gate-panel">
           <span class="gate-top"><span class="gate-n" id="gate-fn-n" data-target="0">0</span><span class="gate-k">areas</span></span>
           <span class="gate-t">Corporate Functions</span>
           <span class="gate-d">Functions that set the rules.</span>
-          <span class="gate-meter" aria-hidden="true"><i id="gate-fn-bar"></i></span>
+          <span class="gate-meter-row">
+            <span class="gate-meter" aria-hidden="true"><i id="gate-fn-bar"></i></span>
+            <span class="gate-share" id="gate-fn-share">0%</span>
+          </span>
           <span class="gate-foot">
             <span class="gate-stat"><b id="gate-fn-docs">0</b> documents</span>
-            <span class="gate-stat" id="gate-fn-share"></span>
+            <span class="gate-go" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
+            </span>
           </span>
         </button>
 
-        <button type="button" class="gate reveal reveal-delay-2" id="gate-pt" data-group="pt" aria-expanded="false" aria-controls="gate-panel">
-          <span class="gate-go" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
-          </span>
+        <button type="button" class="gate reveal" id="gate-pt" data-group="pt" aria-expanded="false" aria-controls="gate-panel">
           <span class="gate-top"><span class="gate-n" id="gate-pt-n" data-target="0">0</span><span class="gate-k">areas</span></span>
           <span class="gate-t">Products &amp; Technology</span>
           <span class="gate-d">Technical home of each discipline.</span>
-          <span class="gate-meter" aria-hidden="true"><i id="gate-pt-bar"></i></span>
+          <span class="gate-meter-row">
+            <span class="gate-meter" aria-hidden="true"><i id="gate-pt-bar"></i></span>
+            <span class="gate-share" id="gate-pt-share">0%</span>
+          </span>
           <span class="gate-foot">
             <span class="gate-stat"><b id="gate-pt-docs">0</b> documents</span>
-            <span class="gate-stat" id="gate-pt-share"></span>
+            <span class="gate-go" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
+            </span>
           </span>
         </button>
       </div>
@@ -2322,23 +2355,33 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     // with the strip above it rather than appearing fully formed.
     document.getElementById('gate-' + k + '-n').dataset.target = g.rows.length;
     document.getElementById('gate-' + k + '-docs').textContent = docs;
-    document.getElementById('gate-' + k + '-share').innerHTML = '<b>' + pct + '%</b> of the hub';
+    var share = document.getElementById('gate-' + k + '-share');
+    share.textContent = pct + '%';
+    share.title = pct + '% of all documents in the hub';
     bars.push({ el:document.getElementById('gate-' + k + '-bar'), pct:pct });
   });
 
   // The meters fill when the doors come into view, not while they are still
   // below the fold, so the motion is something you actually see.
+  // A card takes 600ms to arrive and the third starts 180ms late, so the
+  // meters hold until the row has settled instead of racing it.
+  function fillBars(){
+    bars.forEach(function(b, i){
+      b.el.style.transitionDelay = (0.62 + i * 0.09) + 's';
+      b.el.style.width = b.pct + '%';
+    });
+  }
   if ('IntersectionObserver' in window) {
     var mo = new IntersectionObserver(function(es){
       es.forEach(function(e){
         if (!e.isIntersecting) return;
-        bars.forEach(function(b){ b.el.style.width = b.pct + '%'; });
+        fillBars();
         mo.disconnect();
       });
     }, { threshold:0.25 });
     mo.observe(document.querySelector('.gates'));
   } else {
-    bars.forEach(function(b){ b.el.style.width = b.pct + '%'; });
+    fillBars();
   }
 
   // ── Opening one ─────────────────────────────────────────────────────────
@@ -2396,6 +2439,17 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     });
     panel.classList.add('open');
     open = k;
+  }
+
+  // Operational Segments is open on arrival. It fills what would otherwise be
+  // an empty half-screen, and it shows what a door does before anyone clicks.
+  var firstBtn = document.getElementById('gate-seg');
+  if (firstBtn) {
+    panel.classList.add('instant');
+    toggle('seg', firstBtn);
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){ panel.classList.remove('instant'); });
+    });
   }
 
   document.querySelectorAll('.gate').forEach(function(btn){
