@@ -464,12 +464,12 @@ select { text-overflow:ellipsis; padding-inline-end:30px; }
   <div style="font-size:10px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;color:var(--primary);margin-bottom:10px;position:relative;z-index:1;">Part of <em style="font-style:italic;color:#005D63;font-weight:700;">Tech Hub</em> <span style="opacity:0.7;font-style:normal;">(working name)</span></div>
   <div class="ai-badge hw hw-1"><span class="ai-spark">✦</span> AI-Powered Document Intelligence</div>
   <h1 class="hub-title"><span class="hw hw-2 hw-i">Ask</span> <span class="hw hw-3 hw-i">Anything</span> <span class="hw hw-4 hw-i">About</span><br><span class="hw hw-5 hw-i"><span class="grad">TAQA Operations</span></span></h1>
-  <p class="hub-sub hw hw-6">Answers sourced directly from 523 operational documents across all eleven TAQA business segments.</p>
+  <p class="hub-sub hw hw-6">Answers sourced from the register, every controlled document in every area.</p>
 
   <div class="stats-pills hw hw-7">
-    <div class="stat-pill"><span class="stat-dot"></span>523 Documents</div>
+    <div class="stat-pill"><span class="stat-dot"></span><span id="ai-doc-n">600</span> Documents</div>
     <span class="stat-sep">·</span>
-    <div class="stat-pill"><span class="stat-dot"></span>11 Segments</div>
+    <div class="stat-pill"><span class="stat-dot"></span><span id="ai-area-n">24</span> Areas</div>
     <span class="stat-sep">·</span>
     <div class="stat-pill"><span class="stat-dot"></span>SOPs · Manuals · Alerts</div>
   </div>
@@ -519,7 +519,7 @@ select { text-overflow:ellipsis; padding-inline-end:30px; }
   <div class="thinking-block" id="thinking-block">
     <div class="thinking-avatar">✦</div>
     <div>
-      <div class="thinking-label">Searching 523 documents...</div>
+      <div class="thinking-label">Searching the register...</div>
       <div class="thinking-dots">
         <div class="thinking-dot"></div>
         <div class="thinking-dot"></div>
@@ -635,7 +635,7 @@ const RESPONSES = {
   },
   'default': {
     answer: `<h4>Search Results</h4>
-    <p>I found relevant information across multiple TAQA segments. Based on the 492 documents in the Knowledge Hub, here is a summary of the most relevant procedures and standards:</p>
+    <p>I found relevant information across multiple TAQA segments. Based on the documents in the Knowledge Hub, here is a summary of the most relevant procedures and standards:</p>
     <p>For operational procedures, refer to the relevant segment's <strong>Standard Operating Procedures (SOPs)</strong>. For equipment specifications, consult the <strong>Technical Manuals</strong>. For compliance requirements, review the <strong>Policies</strong> section.</p>
     <p>To get more specific results, try narrowing your question or selecting a segment filter above. You can also browse documents directly by navigating to a segment page.</p>
     <p><strong>Note:</strong> This is a demo interface. Full AI-powered search will be connected to the Claude API in the next phase, enabling real document Q&amp;A with citations.</p>`,
@@ -805,6 +805,22 @@ document.addEventListener('click',function(e){
   document.body.classList.add('page-exit');
   setTimeout(()=>window.location.href=h,270);
 });
+</script>
+
+<script src="documents-master.js"></script>
+<script>
+/* Two counts on this page were typed three times between them and said 523
+   and 492 on the same screen. They come from the register now. */
+(function(){
+  if (typeof TAQA_MASTER_DOCS === 'undefined') return;
+  var T = TAQA_DOC_LOOKUPS.types;
+  var n = TAQA_MASTER_DOCS.filter(function(d){ return (T[d.docType]||{}).controlled !== false; }).length;
+  var areas = Object.keys(TAQA_DOC_LOOKUPS.segments)
+    .filter(function(k){ var g = TAQA_DOC_LOOKUPS.segments[k].group;
+                         return g === 'segment' || g === 'function' || g === 'product'; }).length;
+  var a = document.getElementById('ai-doc-n'); if (a) a.textContent = n;
+  var b = document.getElementById('ai-area-n'); if (b) b.textContent = areas;
+})();
 </script>
 <script src="shared.js"></script>
 <script src="fixes.js"></script>
