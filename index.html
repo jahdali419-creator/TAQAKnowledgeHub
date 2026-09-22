@@ -1262,7 +1262,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
       <div class="stats-list">
         <div class="stat-row">
           <span class="stat-row-label">Total Documents</span>
-          <span class="stat-row-value" data-target="602">0</span>
+          <span class="stat-row-value" data-target="610">0</span>
         </div>
         <div class="stat-row">
           <span class="stat-row-label">Business Segments</span>
@@ -1292,7 +1292,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
 <div class="stats-strip reveal">
   <div class="stats-strip-inner">
     <div class="stats-strip-item">
-      <span class="stats-strip-num" data-target="602">0</span>
+      <span class="stats-strip-num" data-target="610">0</span>
       <span class="stats-strip-label">Documents</span>
     </div>
     <div class="stats-strip-divider"></div>
@@ -1307,7 +1307,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
     </div>
     <div class="stats-strip-divider"></div>
     <div class="stats-strip-item">
-      <span class="stats-strip-num" data-target="4">0</span>
+      <span class="stats-strip-num" data-target="3">0</span>
       <span class="stats-strip-label">Products &amp; Technology</span>
     </div>
   </div>
@@ -1368,7 +1368,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
         <button type="button" class="gate reveal reveal-delay-2" id="gate-pt" data-group="pt" aria-expanded="false" aria-controls="gate-panel">
           <span class="gate-top"><span class="gate-n" id="gate-pt-n">0</span><span class="gate-k">areas</span></span>
           <span class="gate-t">Products &amp; Technology</span>
-          <span class="gate-d">The companies that build the tools. Product manuals, bulletins and qualification records.</span>
+          <span class="gate-d">The technical home of each discipline. Product manuals, bulletins and qualification records.</span>
           <span class="gate-chips" id="gate-pt-chips"></span>
           <span class="gate-foot">
             <span class="gate-m" id="gate-pt-m"></span>
@@ -2184,7 +2184,7 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
   var FN_IDS  = ['qhse','cybersecurity','hr','finance','it','supply-chain','legal',
                  'learning-center','commercial','facility-management','administration',
                  'venture-management','new-business','geothermal-coe'];
-  var PT_IDS  = ['pt-cougar','pt-tendeka','pt-energy-transition','argas'];
+  var PT_IDS  = ['pt-drilling-coe','pt-completions-coe','pt-intervention-coe'];
 
   var controlled = D.filter(A.controlled);
   var totalDocs  = controlled.length;
@@ -2256,13 +2256,15 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     { name:'Administration',           from:'administration',     tag:'Admin' },
     { name:'Venture Management',       from:'venture-management', tag:'Corporate Development' },
     { name:'New Business Development', from:'new-business',       tag:'Corporate Development' },
-    { name:'Geothermal Centre of Excellence', from:'geothermal-coe', tag:'Advisory' }
+    { name:'Geothermal Center of Excellence', from:'geothermal-coe', tag:'Advisory' }
   ];
   var PRODUCTS = [
-    { name:'Cougar',    from:'pt-cougar',            tag:'Drilling Tools' },
-    { name:'Tendeka',   from:'pt-tendeka',           tag:'Completions Technology' },
-    { name:'Energy Transition & Sustainability', from:'pt-energy-transition', tag:'Sustainability' },
-    { name:'ARGAS',     from:'argas',                tag:'Joint Venture' }
+    { name:'Drilling Solutions Center of Excellence',   from:'pt-drilling-coe',
+      tag:'Edmonton, Canada',          short:'Drilling Solutions' },
+    { name:'Well Completions Center of Excellence',     from:'pt-completions-coe',
+      tag:'Aberdeen, United Kingdom',  short:'Well Completions' },
+    { name:'Well Intervention Center of Excellence',    from:'pt-intervention-coe',
+      tag:'Stavanger, Norway',         short:'Well Intervention' }
   ];
   var PENDING_MOVE = 'tws-maintenance';
   var LATE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" ' +
@@ -2276,14 +2278,15 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
   function rowsOf(list){
     return list.map(function(x){
       var st = statsFor(x.from);
-      return { id:x.from, name:x.name, tag:x.tag, docs:st.docs, overdue:st.overdue };
+      return { id:x.from, name:x.name, short:x.short || x.name, tag:x.tag,
+               docs:st.docs, overdue:st.overdue };
     }).sort(function(a,b){ return b.docs - a.docs; });
   }
 
   var GROUPS = {
     seg: { rows:rowsOf(SEGMENTS), title:'Operational Segments', noun:'segments' },
     fn:  { rows:rowsOf(FUNCTIONS), title:'Corporate Functions', noun:'functions' },
-    pt:  { rows:rowsOf(PRODUCTS),  title:'Products & Technology', noun:'companies' }
+    pt:  { rows:rowsOf(PRODUCTS),  title:'Products & Technology', noun:'centers' }
   };
 
   // ── The two doors ───────────────────────────────────────────────────────
@@ -2296,7 +2299,7 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
       '<b>' + docs + '</b> documents' + (late ? ' · <i>' + late + '</i> overdue' : '');
     // A few names so the door says what is behind it.
     document.getElementById('gate-' + k + '-chips').innerHTML =
-      g.rows.slice(0,3).map(function(x){ return '<span>' + x.name + '</span>'; }).join('') +
+      g.rows.slice(0,3).map(function(x){ return '<span>' + x.short + '</span>'; }).join('') +
       (g.rows.length > 3 ? '<span>+' + (g.rows.length - 3) + ' more</span>' : '');
   });
 
@@ -2310,7 +2313,9 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
   function draw(k){
     var g = GROUPS[k];
     var max = g.rows.length ? g.rows[0].docs : 1;
-    var w = ['w6','w6','w4','w4','w4'];
+    // Two wide leaders then thirds reads well for a long list; with exactly
+    // three the same pattern leaves an orphan, so give them a clean row.
+    var w = g.rows.length === 3 ? ['w4','w4','w4'] : ['w6','w6','w4','w4','w4'];
     grid.innerHTML = g.rows.map(function(x, i){
       var late = x.overdue
         ? '<span class="tile-flag">' + LATE + x.overdue + '</span>'
@@ -2337,8 +2342,8 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
       move.innerHTML = '<b>' + mv.docs + '</b> documents still sit under TWS Maintenance. Each one ' +
         'reassigns to the segment that owns the equipment, so they are not counted above.';
     } else if (k === 'pt') {
-      move.innerHTML = 'ARGAS is a joint venture. It is shown here until QHSE confirms which ' +
-        'business unit it reports into.';
+      move.innerHTML = 'Each center is the technical home for its discipline across every ' +
+        'segment that runs it.';
     } else {
       move.innerHTML = '';
     }

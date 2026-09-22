@@ -552,8 +552,8 @@ const TAQA_SEGMENTS = {
       alerts:[], lessons:[], software:[]
     }
   },
-  'pt-cougar': {
-    name:"Cougar", icon:'\u25CB', tag:"Products & Technology",
+  'pt-drilling-coe': {
+    name:"Drilling Solutions Center of Excellence", icon:'\u25CB', tag:"Edmonton, Canada",
     desc:"Downhole drilling tools, drilling optimisation products and tool redress.",
     tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Policies', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
     sops:3, manuals:2, policies:1, alerts:1, lessons:1, software:0,
@@ -567,8 +567,8 @@ const TAQA_SEGMENTS = {
       software:[]
     }
   },
-  'pt-tendeka': {
-    name:"Tendeka", icon:'\u25CB', tag:"Products & Technology",
+  'pt-completions-coe': {
+    name:"Well Completions Center of Excellence", icon:'\u25CB', tag:"Aberdeen, United Kingdom",
     desc:"Completions technology: inflow control, swellable packers and sand screens.",
     tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Policies', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
     sops:3, manuals:2, policies:1, alerts:0, lessons:1, software:0,
@@ -579,6 +579,21 @@ const TAQA_SEGMENTS = {
       policies:["Technology Qualification Policy"],
       alerts:[],
       lessons:["Screen Plugging Traced to Brine Incompatibility"],
+      software:[]
+    }
+  },
+  'pt-intervention-coe': {
+    name:"Well Intervention Center of Excellence", icon:'\u25CB', tag:"Stavanger, Norway",
+    desc:"Through-tubing intervention tools, tractors, fishing and milling assemblies.",
+    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Policies', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
+    sops:3, manuals:2, policies:1, alerts:1, lessons:1, software:0,
+    contributors:[],
+    docs:{
+      sops:["Through-Tubing Intervention Tool Qualification Procedure", "Fishing Tool Redress and Test Procedure", "Milling Assembly Build and Dress Procedure"],
+      manuals:["Coiled Tubing Tractor Operating Manual", "Downhole Video Tool Product Manual"],
+      policies:["Intervention Technology Readiness Policy"],
+      alerts:["Tractor Wheel Wear Limits Revised"],
+      lessons:["Milling Assembly Failure, North Sea Campaign"],
       software:[]
     }
   },
@@ -613,7 +628,7 @@ const TAQA_SEGMENTS = {
     }
   },
   'geothermal-coe': {
-    name:"Geothermal Centre of Excellence", icon:'\u25CB', tag:"Advisory",
+    name:"Geothermal Center of Excellence", icon:'\u25CB', tag:"Advisory",
     desc:"Geothermal well design review and resource assessment advisory.",
     tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:2, manuals:1, policies:0, alerts:0, lessons:0, software:0,
