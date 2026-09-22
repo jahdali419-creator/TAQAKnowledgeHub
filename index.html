@@ -1478,6 +1478,20 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
   .sidebar-tools { grid-template-columns:1fr; }
   .hero-search-bar input { font-size:14px; }
 }
+
+/* Three families, three columns, so the menu reads like the home page. */
+.nav-dropdown-panel.seg-cols { width:min(640px, calc(100vw - 24px));
+  grid-template-columns:repeat(3,1fr); gap:6px; padding:12px; align-items:start; }
+.seg-dd-col { min-width:0; }
+.seg-dd-head {
+  font-size:9.5px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase;
+  color:var(--primary); padding:2px 8px 7px; white-space:nowrap;
+}
+.seg-dd-col .seg-dd-item { padding:6px 8px; }
+.seg-dd-col .seg-dd-name { font-size:11.5px; line-height:1.35; white-space:normal; }
+@media(max-width:900px){
+  .nav-dropdown-panel.seg-cols { grid-template-columns:1fr 1fr; }
+}
 </style>
 </head>
 <body>
@@ -1506,7 +1520,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
         Segments
         <svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <div class="nav-dropdown-panel" role="menu">
+      <div class="nav-dropdown-panel seg-cols" role="menu">
         <a href="segment.html?id=coiled-tubing" class="seg-dd-item"><span class="seg-dd-name">Coiled Tubing</span><span class="seg-dd-tag">Operations</span></a>
         <a href="segment.html?id=fracturing" class="seg-dd-item"><span class="seg-dd-name">Fracturing</span><span class="seg-dd-tag">Stimulation</span></a>
         <a href="segment.html?id=wireline" class="seg-dd-item"><span class="seg-dd-name">Wireline</span><span class="seg-dd-tag">Logging</span></a>
@@ -2465,6 +2479,40 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
 <script src="documents-master.js"></script>
 <script src="segments-data.js"></script>
 <script>
+/* ── The Segments menu ─────────────────────────────────────────────────
+   Built from the register, in the three families the business settled on,
+   so a renamed or retired area cannot survive here the way Well Safety,
+   Inspection Services and Cybersecurity did. TWS Maintenance is left out:
+   its documents reassign to the segments that own the equipment, so it is
+   not somewhere to send anyone. */
+(function(){
+  var panel = document.querySelector('#seg-dropdown-li .nav-dropdown-panel');
+  if (!panel || typeof TAQA_DOC_LOOKUPS === 'undefined') return;
+  var S = TAQA_DOC_LOOKUPS.segments;
+
+  var FAMILIES = [
+    { group:'segment',  title:'Operational Segments' },
+    { group:'function', title:'Corporate Functions' },
+    { group:'product',  title:'Products & Technology' }
+  ];
+
+  panel.innerHTML = FAMILIES.map(function(f){
+    var ids = Object.keys(S)
+      .filter(function(k){ return S[k].group === f.group; })
+      .sort(function(a,b){ return S[a].name.localeCompare(S[b].name); });
+    if (!ids.length) return '';
+    return '<div class="seg-dd-col">' +
+             '<div class="seg-dd-head">' + f.title + '</div>' +
+             ids.map(function(k){
+               return '<a href="segment.html?id=' + k + '" class="seg-dd-item">' +
+                        '<span class="seg-dd-name">' + S[k].name + '</span>' +
+                      '</a>';
+             }).join('') +
+           '</div>';
+  }).join('');
+})();
+</script>
+<script>
 /* ── Headline figures ──────────────────────────────────────────────────────
    The hero panel, the strip and the two doors all read the same register,
    so no two places on this page can quote a different number.            */
@@ -2520,41 +2568,32 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
    can never quote different numbers.                                     */
 (function(){
   if (typeof TAQA_MASTER_DOCS === 'undefined') return;
-  var D = TAQA_MASTER_DOCS, A = TAQA_DOC;
+  var D = TAQA_MASTER_DOCS, L = TAQA_DOC_LOOKUPS, A = TAQA_DOC;
 
-  var SEGMENTS = [
-    { name:'Drilling Services',  from:'drilling',     tag:'Well Operations' },
-    { name:'Safety Services',    from:'well-safety',  tag:'HSE Critical' },
-    { name:'Fracturing',         from:'fracturing',   tag:'Stimulation' },
-    { name:'Inspection',         from:'inspection',   tag:'Compliance' },
-    { name:'Coiled Tubing',      from:'coiled-tubing',tag:'Operations' },
-    { name:'Cementing',          from:'cementing',    tag:'Well Integrity' },
-    { name:'Well Testing',       from:'well-testing', tag:'Testing Services' },
-    { name:'Wireline Services',  from:'wireline',     tag:'Logging' },
-    { name:'Slickline',          from:'slickline',        tag:'Logging' },
-    { name:'Well Completions',   from:'well-completions', tag:'Well Operations' },
-    { name:'Marine Services',    from:'marine-services',  tag:'Marine' }
-  ];
-  var FUNCTIONS = [
-    { name:'QHSE',                       from:'qhse',            tag:'Quality & Safety' },
-    { name:'Governance, Risk & Compliance', from:'cybersecurity', tag:'GRC' },
-    { name:'Human Resources',            from:'hr',              tag:'HR & People' },
-    { name:'Finance',                    from:'finance',         tag:'Finance' },
-    { name:'Information Technology',     from:'it',              tag:'IT' },
-    { name:'Supply Chain',               from:'supply-chain',    tag:'Procurement' },
-    { name:'Legal',                      from:'legal',           tag:'Legal' },
-    { name:'Learning and Development',   from:'learning-center', tag:'Training' },
-    { name:'Commercial & Sales',         from:'commercial',      tag:'Commercial' },
-    { name:'Geothermal Center of Excellence', from:'geothermal-coe', tag:'Advisory' }
-  ];
-  var PRODUCTS = [
-    { name:'Drilling Solutions Center of Excellence',  from:'pt-drilling-coe',
-      tag:'Edmonton, Canada' },
-    { name:'Well Completions Center of Excellence',    from:'pt-completions-coe',
-      tag:'Aberdeen, United Kingdom' },
-    { name:'Well Intervention Center of Excellence',   from:'pt-intervention-coe',
-      tag:'Stavanger, Norway' }
-  ];
+  // The three families come from the register's own "group" field. They used to
+  // be three arrays typed here, which is how Well Safety and Cybersecurity and
+  // a Venture Management that no longer exists all outlived their removal.
+  // A tag is display copy, so it stays here, keyed by id.
+  var TAGS = {
+    drilling:'Well Operations', 'well-safety':'HSE Critical', fracturing:'Stimulation',
+    inspection:'Compliance', 'coiled-tubing':'Operations', cementing:'Well Integrity',
+    'well-testing':'Testing Services', wireline:'Logging', slickline:'Logging',
+    'well-completions':'Well Operations', 'marine-services':'Marine',
+    qhse:'Quality & Safety', cybersecurity:'GRC', hr:'HR & People', finance:'Finance',
+    it:'IT', 'supply-chain':'Procurement', legal:'Legal',
+    'learning-center':'Training', commercial:'Commercial', 'geothermal-coe':'Advisory',
+    'pt-drilling-coe':'Edmonton, Canada', 'pt-completions-coe':'Aberdeen, United Kingdom',
+    'pt-intervention-coe':'Stavanger, Norway'
+  };
+  function family(group){
+    return Object.keys(L.segments)
+      .filter(function(k){ return L.segments[k].group === group; })
+      .map(function(k){ return { name:L.segments[k].name, from:k, tag:TAGS[k] || '' }; });
+  }
+  var SEGMENTS = family('segment'),
+      FUNCTIONS = family('function'),
+      PRODUCTS  = family('product');
+
   var ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" ' +
     'stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/>' +
     '<path d="M13 6.5L18.5 12 13 17.5"/></svg>';

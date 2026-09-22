@@ -22,6 +22,7 @@
 const TAQA_DOC_LOOKUPS = {
   "segments": {
     "company": {
+      "group": "company",
       "name": "Company Wide",
       "spl": "TAQA",
       "splName": "Company wide policies, signed by the CEO",
@@ -30,6 +31,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": "The corporate policy series numbers as TAQA-<Function>-P0XX, which is not the scheme TQ-QHSE-S001 5.3 sets out for any other document. Pending a decision from QHSE on whether the two series converge."
     },
     "coiled-tubing": {
+      "group": "segment",
       "name": "Coiled Tubing",
       "spl": "CTSS",
       "splName": "Coil Tubing & Stimulation Services",
@@ -38,6 +40,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": null
     },
     "fracturing": {
+      "group": "segment",
       "name": "Fracturing",
       "spl": "FS",
       "splName": "Fracturing Services",
@@ -46,6 +49,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": null
     },
     "wireline": {
+      "group": "segment",
       "name": "Wireline Services",
       "spl": "WS",
       "splName": "Wireline Services",
@@ -54,6 +58,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": null
     },
     "drilling": {
+      "group": "segment",
       "name": "Drilling Services",
       "spl": "DSS",
       "splName": "Drilling Solutions Services",
@@ -62,6 +67,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": null
     },
     "cementing": {
+      "group": "segment",
       "name": "Cementing",
       "spl": "CMT",
       "splName": "Cementing Services",
@@ -70,6 +76,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": null
     },
     "inspection": {
+      "group": "segment",
       "name": "Inspection",
       "spl": "WIS",
       "splName": "Well Inspection Services",
@@ -78,6 +85,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": null
     },
     "well-safety": {
+      "group": "segment",
       "name": "Safety Services",
       "spl": "WSS",
       "splName": "Well Safety Services",
@@ -86,6 +94,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": null
     },
     "well-testing": {
+      "group": "segment",
       "name": "Well Testing",
       "spl": "WTS",
       "splName": "Well Testing Services",
@@ -94,6 +103,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": null
     },
     "tws-maintenance": {
+      "group": "pending",
       "name": "TWS Maintenance",
       "spl": "MNT",
       "splName": "Maintenance",
@@ -102,6 +112,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": null
     },
     "qhse": {
+      "group": "function",
       "name": "QHSE",
       "spl": "QHSE",
       "splName": "Quality Health, Safety & Environment",
@@ -110,6 +121,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": null
     },
     "hr": {
+      "group": "function",
       "name": "Human Resources",
       "spl": "HR",
       "splName": "Human Resource",
@@ -118,6 +130,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": null
     },
     "cybersecurity": {
+      "group": "function",
       "name": "Governance, Risk & Compliance",
       "spl": "GRC",
       "splName": "Governance, Risk & Compliance",
@@ -126,6 +139,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": "Cybersecurity sits under GRC by decision of the business. No short form is assigned in TQ-QHSE-S001 5.3, so \"GRC\" is provisional pending QHSE assignment."
     },
     "slickline": {
+      "group": "segment",
       "name": "Slickline",
       "spl": "SLK",
       "splName": "Slickline",
@@ -134,6 +148,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"SLK\" is provisional pending QHSE assignment."
     },
     "well-completions": {
+      "group": "segment",
       "name": "Well Completions",
       "spl": "WCS",
       "splName": "Well Completions",
@@ -142,6 +157,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"WCS\" is provisional pending QHSE assignment."
     },
     "marine-services": {
+      "group": "segment",
       "name": "Marine Services",
       "spl": "MRS",
       "splName": "Marine Services",
@@ -150,6 +166,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"MRS\" is provisional pending QHSE assignment."
     },
     "finance": {
+      "group": "function",
       "name": "Finance",
       "spl": "FIN",
       "splName": "Finance",
@@ -158,6 +175,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"FIN\" is provisional pending QHSE assignment."
     },
     "it": {
+      "group": "function",
       "name": "Information Technology",
       "spl": "IT",
       "splName": "Information Technology",
@@ -166,6 +184,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"IT\" is provisional pending QHSE assignment."
     },
     "supply-chain": {
+      "group": "function",
       "name": "Supply Chain",
       "spl": "SCM",
       "splName": "Supply Chain",
@@ -174,6 +193,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"SCM\" is provisional pending QHSE assignment."
     },
     "legal": {
+      "group": "function",
       "name": "Legal",
       "spl": "LGL",
       "splName": "Legal",
@@ -182,6 +202,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"LGL\" is provisional pending QHSE assignment."
     },
     "learning-center": {
+      "group": "function",
       "name": "Learning and Development",
       "spl": "LD",
       "splName": "Learning and Development",
@@ -190,6 +211,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"LC\" is provisional pending QHSE assignment."
     },
     "commercial": {
+      "group": "function",
       "name": "Commercial & Sales",
       "spl": "CSL",
       "splName": "Commercial & Sales",
@@ -198,6 +220,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"CSL\" is provisional pending QHSE assignment."
     },
     "pt-drilling-coe": {
+      "group": "product",
       "name": "Drilling Solutions Center of Excellence",
       "spl": "DSC",
       "splName": "Drilling Solutions Center of Excellence, Edmonton",
@@ -206,6 +229,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": "Products & Technology, Edmonton, Canada. TQ-QHSE-S001 5.3 lists P&T as a business unit but assigns no short form to its centers, so \"DSC\" is provisional pending QHSE assignment."
     },
     "pt-completions-coe": {
+      "group": "product",
       "name": "Well Completions Center of Excellence",
       "spl": "WCC",
       "splName": "Well Completions Center of Excellence, Aberdeen",
@@ -214,6 +238,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": "Products & Technology, Aberdeen, United Kingdom. No short form is assigned in TQ-QHSE-S001 5.3, so \"WCC\" is provisional pending QHSE assignment."
     },
     "pt-intervention-coe": {
+      "group": "product",
       "name": "Well Intervention Center of Excellence",
       "spl": "WIC",
       "splName": "Well Intervention Center of Excellence, Stavanger",
@@ -222,6 +247,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": "Products & Technology, Stavanger, Norway. No short form is assigned in TQ-QHSE-S001 5.3, so \"WIC\" is provisional pending QHSE assignment."
     },
     "geothermal-coe": {
+      "group": "function",
       "name": "Geothermal Center of Excellence",
       "spl": "GEO",
       "splName": "Geothermal Center of Excellence",

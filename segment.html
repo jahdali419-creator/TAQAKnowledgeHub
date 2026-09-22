@@ -501,6 +501,20 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .doc-action-btn.primary-action{flex:1;}
 }
 
+
+/* Three families, three columns, so the menu reads like the home page. */
+.nav-dropdown-panel.seg-cols { width:min(640px, calc(100vw - 24px));
+  grid-template-columns:repeat(3,1fr); gap:6px; padding:12px; align-items:start; }
+.seg-dd-col { min-width:0; }
+.seg-dd-head {
+  font-size:9.5px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase;
+  color:var(--primary); padding:2px 8px 7px; white-space:nowrap;
+}
+.seg-dd-col .seg-dd-item { padding:6px 8px; }
+.seg-dd-col .seg-dd-name { font-size:11.5px; line-height:1.35; white-space:normal; }
+@media(max-width:900px){
+  .nav-dropdown-panel.seg-cols { grid-template-columns:1fr 1fr; }
+}
 </style>
 </head>
 <body>
@@ -520,7 +534,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
         Segments
         <svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <div class="nav-dropdown-panel" role="menu">
+      <div class="nav-dropdown-panel seg-cols" role="menu">
         <a href="segment.html?id=coiled-tubing" class="seg-dd-item"><span class="seg-dd-name">Coiled Tubing</span><span class="seg-dd-tag">Operations</span></a>
         <a href="segment.html?id=fracturing" class="seg-dd-item"><span class="seg-dd-name">Fracturing</span><span class="seg-dd-tag">Stimulation</span></a>
         <a href="segment.html?id=wireline" class="seg-dd-item"><span class="seg-dd-name">Wireline</span><span class="seg-dd-tag">Logging</span></a>
@@ -1994,6 +2008,41 @@ function copyQRUrl() {
   const v = document.getElementById('qr-url-in').value;
   navigator.clipboard.writeText(v).then(() => { if(window.showToast) window.showToast('Link copied!'); });
 }
+</script>
+<script src="documents-master.js"></script>
+<script>
+/* ── The Segments menu ─────────────────────────────────────────────────
+   Built from the register, in the three families the business settled on,
+   so a renamed or retired area cannot survive here the way Well Safety,
+   Inspection Services and Cybersecurity did. TWS Maintenance is left out:
+   its documents reassign to the segments that own the equipment, so it is
+   not somewhere to send anyone. */
+(function(){
+  var panel = document.querySelector('#seg-dropdown-li .nav-dropdown-panel');
+  if (!panel || typeof TAQA_DOC_LOOKUPS === 'undefined') return;
+  var S = TAQA_DOC_LOOKUPS.segments;
+
+  var FAMILIES = [
+    { group:'segment',  title:'Operational Segments' },
+    { group:'function', title:'Corporate Functions' },
+    { group:'product',  title:'Products & Technology' }
+  ];
+
+  panel.innerHTML = FAMILIES.map(function(f){
+    var ids = Object.keys(S)
+      .filter(function(k){ return S[k].group === f.group; })
+      .sort(function(a,b){ return S[a].name.localeCompare(S[b].name); });
+    if (!ids.length) return '';
+    return '<div class="seg-dd-col">' +
+             '<div class="seg-dd-head">' + f.title + '</div>' +
+             ids.map(function(k){
+               return '<a href="segment.html?id=' + k + '" class="seg-dd-item">' +
+                        '<span class="seg-dd-name">' + S[k].name + '</span>' +
+                      '</a>';
+             }).join('') +
+           '</div>';
+  }).join('');
+})();
 </script>
 <script src="shared.js"></script>
 <script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>
