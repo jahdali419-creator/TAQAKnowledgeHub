@@ -471,7 +471,7 @@ html[data-theme="dark"] .policy-rules {
   <div class="page-hero-content">
     <span class="page-hero-tag">Document Upload</span>
     <h1>Upload a Document</h1>
-    <p>Submit new SOPs, manuals, policies, technical alerts, or lessons learned. All documents go through an approval workflow before going live.</p>
+    <p>Submit a standard, procedure, manual, technical alert or lesson learned. All documents go through an approval workflow before going live.</p>
     <div style="margin-top:18px;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);">Part of <em style="color:#4DD9D3;font-style:italic;font-weight:700;text-transform:none;letter-spacing:0;">Tech Hub</em> <span style="opacity:0.7;font-style:normal;">(working name)</span></div>
   </div>
 </div>
@@ -558,13 +558,6 @@ html[data-theme="dark"] .policy-rules {
               <label class="form-label">Issuing Function <span>*</span></label>
               <select class="form-select" id="policy-fn" onchange="autoFillRefId()">
                 <option value="" disabled selected>Which function issues it?</option>
-                <option value="QHSE">QHSE</option>
-                <option value="GRC">Governance, Risk &amp; Compliance</option>
-                <option value="CS">Cyber Security</option>
-                <option value="HR">Human Resources</option>
-                <option value="FIN">Finance</option>
-                <option value="LGL">Legal</option>
-                <option value="P&amp;T">Products &amp; Technology</option>
               </select>
             </div>
             <div class="form-group" style="margin-bottom:0;">
@@ -710,7 +703,7 @@ html[data-theme="dark"] .policy-rules {
         <span class="approval-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#00BBB6" stroke-width="1.5"/><path d="M8 7v5M8 5v.5" stroke="#00BBB6" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         <div class="approval-text">
           <strong>Approval Workflow</strong>
-          <small>Documents are reviewed by the Knowledge Team Lead before being published. You'll receive an email notification when your document is approved or if any changes are needed.</small>
+          <small>Documents are reviewed by QMS, then approved by the authority the type names, before being published. You'll receive an email notification when your document is approved or if any changes are needed.</small>
         </div>
       </div>
 
@@ -734,7 +727,7 @@ html[data-theme="dark"] .policy-rules {
         </div>
         <div class="wf-step">
           <div class="wf-dot pending">2</div>
-          <div class="wf-text"><strong>Review</strong><small>Knowledge Team Lead reviews within 1 business day.</small></div>
+          <div class="wf-text"><strong>Review</strong><small>QMS checks the record and the numbering.</small></div>
         </div>
         <div class="wf-step">
           <div class="wf-dot wait">3</div>
@@ -758,7 +751,7 @@ html[data-theme="dark"] .policy-rules {
         <span class="type-chip">PPTX</span>
         <span class="type-chip">PPT</span>
       </div>
-      <p style="font-size:12px;color:var(--text-muted);margin-top:12px;line-height:1.6;">Max 50 MB per file. For files larger than 50 MB, contact the Knowledge Team for alternative upload options.</p>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:12px;line-height:1.6;">Max 500 MB per file. For anything larger, contact the Knowledge Team.</p>
     </div>
 
     <div class="info-card">
@@ -959,20 +952,94 @@ function submitUpload(e) {
     if (dz) { dz.style.borderColor = '#ef4444'; setTimeout(() => dz.style.borderColor = '', 1800); }
     return;
   }
+  // It used to mint a random UPL reference and discard everything typed. The
+  // record is assembled here instead, in the shape TAQA_MASTER_DOCS stores, so
+  // what the back end has to accept is written down rather than implied.
+  const rec = buildRecord();
+  if (!rec.docNumber) {
+    showUploadToast('No document number', 'Go back and choose an area and a type so a number can be assigned.', ICON_WARN);
+    return;
+  }
+  console.info('[upload] record to POST', rec);
+  window.TAQA_LAST_UPLOAD = rec;
+
   setUploadStep(3);
-  const ref = 'UPL-' + new Date().getFullYear() + '-' + Math.floor(1000+Math.random()*9000);
-  document.getElementById('upload-ref').textContent = ref;
-  document.getElementById('toast-title').textContent = 'Upload Submitted!';
-  document.getElementById('toast-sub').textContent = 'Queued for review. Ref: ' + ref;
+  const ref = rec.docNumber;
+  // showUploadToast() sets toast-sub's textContent, which wipes the #upload-ref
+  // span inside it. After any earlier toast, "File Added" for instance, this
+  // line threw and the submit died halfway. Write the sub line directly.
+  var refEl = document.getElementById('upload-ref');
+  if (refEl) refEl.textContent = ref;
+  document.getElementById('toast-title').textContent = 'Submitted for review';
+  document.getElementById('toast-sub').textContent = 'Queued as ' + ref;
   document.getElementById('toast-icon').innerHTML = ICON_OK;
   const toast = document.getElementById('toast');
   toast.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { toast.classList.remove('show'); setUploadStep(1); }, 5000);
+  // reset() restores native controls only, so the generated number, the policy
+  // panel and the step you were on all survived it. Clear them by hand.
   e.target.reset();
   selectedFiles = [];
   fileList.innerHTML = '';
   fileQueue.style.display = 'none';
+  const ref2 = document.getElementById('doc-ref-id');
+  if (ref2) { ref2.value = ''; delete ref2.dataset.autofilled; }
+  const chip = document.getElementById('numchip');
+  if (chip) { chip.hidden = true; chip.classList.remove('editing'); }
+  const rules = document.getElementById('policy-rules');
+  if (rules) rules.hidden = true;
+  const st = document.getElementById('doc-id-status'); if (st) st.innerHTML = '';
+  docStatus = 'new'; setDocStatus('new');
+  unlockStep1();
+  goStep(1);
+}
+
+/* Everything the register would store, assembled from the form. A field the
+   form cannot answer is left null rather than guessed, which is the honest
+   way to hand a gap to the people building the back end. */
+function buildRecord(){
+  const L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : {segments:{},types:{}};
+  const typeKey = (document.getElementById('doc-type-select') || {}).value || null;
+  const isPolicy = typeKey === 'policy';
+  const t = L.types[typeKey] || {};
+  const segKey = isPolicy ? 'company' : ((document.getElementById('seg-select') || {}).value || null);
+  const e = L.segments[segKey] || {};
+  const today = new Date();
+  const due = new Date(today.getTime());
+  due.setMonth(due.getMonth() + (t.reviewCycleMonths || 24));
+  const iso = d => d.toISOString().slice(0,10);
+  const sup = (document.getElementById('supersedes-select') || {}).value || null;
+
+  return {
+    docNumber:      (document.getElementById('doc-ref-id') || {}).value || null,
+    legacyId:       null,
+    title:          (document.getElementById('doc-title-input') || {}).value.trim() || null,
+    segment:        segKey,
+    docType:        typeKey,
+    scope:          isPolicy ? 'company' : 'area',
+    revision:       docStatus === 'revision' ? null : '1.0',
+    issueDate:      iso(today),
+    approvedDate:   null,                 // set when the approver signs
+    nextReviewDate: iso(due),
+    reviewOverdue:  false,
+    status:         'draft',              // API Q2 4.4.3 b): no authority until approved
+    supersedes:     sup,
+    supersededBy:   null,
+    classification: 'internal',           // 5.5: a policy must stay accessible to all
+    language:       'en',
+    translationOf:  null,
+    numberStatus:   (e.provisional || t.provisional) ? 'provisional' : 'conformant',
+    summary:        (document.getElementById('summary-main') || {}).value.trim() || null,
+    audience:       (document.getElementById('audience-select') || {}).value || null,
+    keywords:       ((document.getElementById('keywords-input') || {}).value || '')
+                      .split(',').map(x => x.trim()).filter(Boolean),
+    related:        (document.getElementById('related-input') || {}).value.trim() || null,
+    changeNote:     (document.getElementById('change-input') || {}).value.trim() || null,
+    issuingFunction: isPolicy ? ((document.getElementById('policy-fn') || {}).value || null) : null,
+    files:          selectedFiles.map(f => ({ name:f.name, size:f.size })),
+    submittedBy:    'from the signed-in identity, not typed on this form'
+  };
 }
 
 // ── Reference ID Auto-Generation ──
@@ -1023,6 +1090,22 @@ let isAutoFilling = false;
   }
 
   // ── Types: the register's own list, with Policy gated ──
+  // The issuing function list was typed by hand and wrong in both directions:
+  // it omitted five of the ten functions, so IT, Supply Chain, Learning and
+  // Development, Commercial and Geothermal could not issue a policy at all,
+  // and it offered CS, which is the pre-rename identity of GRC, and P&T,
+  // which is a business unit rather than a function.
+  var fnSel = document.getElementById('policy-fn');
+  if (fnSel) {
+    fnSel.innerHTML = '<option value="" disabled selected>Which function issues it?</option>' +
+      Object.keys(L.segments)
+        .filter(function(k){ return L.segments[k].group === 'function'; })
+        .sort(function(a,b){ return L.segments[a].name.localeCompare(L.segments[b].name); })
+        .map(function(k){
+          return '<option value="' + L.segments[k].spl + '">' + L.segments[k].name + '</option>';
+        }).join('');
+  }
+
   var typeSel = document.getElementById('doc-type-select');
   if (typeSel) {
     var order = ['policy','standard','sop','manual','alert','lesson','software'];
