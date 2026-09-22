@@ -5,7 +5,7 @@
 <script>try{var _t=localStorage.getItem('taqa-theme-v2');if(_t)document.documentElement.setAttribute('data-theme',_t);}catch(e){}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Focus preview · TAQA Knowledge Hub</title>
+<title>Current layout · TAQA Knowledge Hub</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#005D63">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1107,150 +1107,6 @@ html[data-theme="dark"] .continue-icon{background:rgba(0,187,182,0.12);color:#00
 }
 html[data-theme="dark"] .section-hl-title { color:var(--text); }
 
-/* ── Focus layout, preview ─────────────────────────────────────────────
-   One sheet of glass. Three cards sit on it in a row until you choose one,
-   and choosing rearranges them into a switcher on the left with the areas
-   opening beside it. The page's background blobs show through the sheet,
-   which is what makes the glass read as glass rather than as grey paint. */
-.focus {
-  position:relative; border-radius:22px; padding:16px;
-  background:rgba(255,255,255,0.52);
-  border:1px solid rgba(255,255,255,0.72);
-  box-shadow:0 1px 2px rgba(0,88,90,0.05), 0 20px 48px rgba(0,88,90,0.09);
-  -webkit-backdrop-filter:blur(24px) saturate(155%);
-  backdrop-filter:blur(24px) saturate(155%);
-}
-/* The light that catches the top edge of a real pane. */
-.focus::before {
-  content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
-  background:linear-gradient(158deg, rgba(255,255,255,0.6), rgba(255,255,255,0) 44%);
-}
-.fstage { display:grid; grid-template-columns:1fr; gap:14px; }
-.focus[data-state="focus"] .fstage { grid-template-columns:292px 1fr; align-items:start; }
-
-.fside { min-width:0; }
-/* In the chosen state the switcher rides along, so the left column keeps
-   doing something while a long list scrolls past it. */
-.focus[data-state="focus"] .fside { position:sticky; top:84px; }
-.fswitch { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
-.focus[data-state="focus"] .fswitch { grid-template-columns:1fr; gap:10px; align-content:start; }
-
-.fcard {
-  position:relative; overflow:hidden; text-align:start; cursor:pointer;
-  font-family:inherit; padding:0; height:212px;
-  border-radius:16px;
-  background:rgba(255,255,255,0.62);
-  border:1px solid rgba(255,255,255,0.8);
-  box-shadow:0 1px 2px rgba(0,88,90,0.05);
-  transition:background 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
-}
-.focus[data-state="focus"] .fcard { height:64px; }
-.focus[data-state="focus"] .fcard.on { height:212px; }
-.fcard:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
-.fcard.on {
-  background:rgba(255,255,255,0.86);
-  border-color:var(--primary);
-  box-shadow:0 0 0 1px var(--primary) inset, 0 14px 30px rgba(0,88,90,0.14);
-}
-@media (hover:hover) and (pointer:fine){
-  .fcard:not(.on):hover { background:rgba(255,255,255,0.88);
-    border-color:rgba(0,93,99,0.3); box-shadow:0 12px 26px rgba(0,88,90,0.12); }
-  .fcard:not(.on):hover .fc-go { background:var(--primary); border-color:var(--primary); color:#fff; }
-}
-
-/* Two faces on one card, crossfaded. The box changes size around them while
-   they stay their own size, so nothing stretches on the way. */
-.fc-full, .fc-mini {
-  position:absolute; inset:0; transform-origin:top left;
-  transition:opacity 280ms ease;
-}
-.fc-full { display:flex; flex-direction:column; padding:20px 20px 17px; }
-.fc-mini { display:flex; align-items:center; gap:13px; padding:0 17px; opacity:0; }
-.focus[data-state="focus"] .fcard:not(.on) .fc-full { opacity:0; }
-.focus[data-state="focus"] .fcard:not(.on) .fc-mini { opacity:1; }
-
-.fc-top { display:flex; align-items:baseline; gap:9px; }
-.fc-n { font-family:'BwGradual','Urbanist',sans-serif; font-size:42px; font-weight:800;
-  line-height:1; letter-spacing:-1.6px; color:var(--primary); font-variant-numeric:tabular-nums; }
-.fc-k { font-size:10px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase;
-  color:var(--text-light); }
-.fc-t { font-family:'BwGradual','Urbanist',sans-serif; font-size:17px; font-weight:700;
-  color:var(--text); letter-spacing:-0.3px; margin-top:14px; }
-.fc-d { font-size:12.5px; line-height:1.55; color:var(--text-muted); margin-top:6px; }
-.fc-meter { margin-top:auto; height:5px; border-radius:999px; overflow:hidden;
-  background:rgba(0,88,90,0.14); }
-.fc-meter i { display:block; height:100%; width:0; min-width:4px; border-radius:999px;
-  background:linear-gradient(90deg, var(--primary), #00BBB6);
-  transition:width 820ms cubic-bezier(0.22,1,0.36,1) 180ms; }
-.fc-foot { margin-top:11px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.fc-stat { font-size:12px; color:var(--text-muted); font-variant-numeric:tabular-nums; }
-.fc-stat b { color:var(--text); font-weight:700; }
-.fc-share { font-size:11px; font-weight:700; color:var(--primary); font-variant-numeric:tabular-nums; }
-
-.fc-mn { font-family:'BwGradual','Urbanist',sans-serif; font-size:23px; font-weight:800;
-  line-height:1; letter-spacing:-0.8px; color:var(--primary); font-variant-numeric:tabular-nums;
-  min-width:30px; }
-.fc-mt { flex:1; font-family:'BwGradual','Urbanist',sans-serif; font-size:13.5px;
-  font-weight:700; color:var(--text); letter-spacing:-0.2px; }
-.fc-go, .fr-go {
-  width:28px; height:28px; flex-shrink:0;
-  display:inline-flex; align-items:center; justify-content:center;
-  border-radius:50%; border:1px solid rgba(0,88,90,0.18); color:var(--primary);
-  transition:background 240ms cubic-bezier(0.22,1,0.36,1),
-             border-color 240ms cubic-bezier(0.22,1,0.36,1),
-             color 240ms cubic-bezier(0.22,1,0.36,1),
-             transform 240ms cubic-bezier(0.22,1,0.36,1);
-}
-.fc-go svg, .fr-go svg { width:12px; height:12px; }
-.fcard.on .fc-go svg { transform:rotate(180deg); }
-
-/* The areas, as a list. A master and detail layout wants rows, not a bento:
-   a row holds the full name of a Center of Excellence without squeezing it. */
-.flist { display:flex; flex-direction:column; gap:5px; height:0; overflow:hidden; opacity:0; }
-.focus[data-state="focus"] .flist { height:auto; overflow:visible; opacity:1; }
-.frow {
-  display:flex; align-items:center; gap:14px; text-decoration:none;
-  padding:11px 15px; border-radius:13px;
-  background:rgba(255,255,255,0.5);
-  border:1px solid rgba(255,255,255,0.62);
-  opacity:0; transform:translateX(16px);
-  animation:frowIn 460ms cubic-bezier(0.22,1,0.36,1) forwards;
-  animation-delay:calc(var(--i,0) * 26ms + 150ms);
-  transition:background 220ms ease, border-color 220ms ease,
-             box-shadow 220ms ease;
-}
-@keyframes frowIn { to { opacity:1; transform:none; } }
-@media (hover:hover) and (pointer:fine){
-  .frow:hover { background:rgba(255,255,255,0.95); border-color:rgba(0,93,99,0.24);
-    box-shadow:0 8px 20px rgba(0,88,90,0.10); }
-  .frow:hover .fr-go { background:var(--primary); border-color:var(--primary);
-    color:#fff; transform:translateX(2px); }
-}
-.frow:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
-.fr-n { font-family:'BwGradual','Urbanist',sans-serif; font-size:12px; font-weight:800;
-  color:var(--text-light); font-variant-numeric:tabular-nums; min-width:20px; }
-.fr-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
-.fr-name { font-family:'BwGradual','Urbanist',sans-serif; font-size:14.5px; font-weight:700;
-  color:var(--text); letter-spacing:-0.2px; }
-.fr-tag { font-size:10px; letter-spacing:0.7px; text-transform:uppercase; color:var(--text-muted); }
-.fr-docs { font-family:'BwGradual','Urbanist',sans-serif; font-size:17px; font-weight:800;
-  color:var(--text); font-variant-numeric:tabular-nums; letter-spacing:-0.4px; flex-shrink:0; }
-.fr-docs span { font-size:10.5px; font-weight:500; color:var(--text-muted);
-  letter-spacing:0; margin-inline-start:4px; }
-
-.fhead { display:flex; align-items:baseline; justify-content:space-between; gap:16px;
-  flex-wrap:wrap; margin-bottom:10px; padding:0 3px; }
-.fhead h4 { font-family:'BwGradual','Urbanist',sans-serif; font-size:11.5px; font-weight:700;
-  letter-spacing:1.5px; text-transform:uppercase; color:var(--text); }
-.fhead span { font-size:11.5px; color:var(--text-muted); }
-.fhead span b { color:var(--text); font-weight:700; font-variant-numeric:tabular-nums; }
-.fnote { font-size:11.5px; line-height:1.6; color:var(--text-muted);
-  margin:14px 3px 2px; padding-inline-start:11px;
-  border-inline-start:2px solid rgba(0,88,90,0.18); }
-.focus[data-state="focus"] .fnote { margin-top:16px; }
-.fnote b { color:var(--text); font-weight:700; }
-.fnote:empty { display:none; }
-
 .fpreview {
   display:flex; align-items:center; gap:10px; flex-wrap:wrap;
   margin:0 0 14px; padding:9px 14px; border-radius:12px;
@@ -1260,36 +1116,6 @@ html[data-theme="dark"] .section-hl-title { color:var(--text); }
 .fpreview b { font-weight:700; }
 .fpreview a { color:var(--primary); font-weight:700; text-decoration:none;
   border-bottom:1px solid rgba(0,93,99,0.35); }
-
-html[data-theme="dark"] .focus {
-  background:rgba(22,33,50,0.55); border-color:rgba(255,255,255,0.08);
-  box-shadow:0 1px 2px rgba(0,0,0,0.3), 0 20px 48px rgba(0,0,0,0.34);
-}
-html[data-theme="dark"] .focus::before {
-  background:linear-gradient(158deg, rgba(255,255,255,0.08), rgba(255,255,255,0) 44%);
-}
-html[data-theme="dark"] .fcard {
-  background:rgba(30,44,66,0.6); border-color:rgba(255,255,255,0.09);
-}
-html[data-theme="dark"] .fcard.on { background:rgba(30,44,66,0.9); border-color:var(--primary); }
-html[data-theme="dark"] .frow {
-  background:rgba(30,44,66,0.5); border-color:rgba(255,255,255,0.07);
-}
-html[data-theme="dark"] .fc-meter { background:rgba(255,255,255,0.12); }
-html[data-theme="dark"] .fc-go, html[data-theme="dark"] .fr-go { border-color:rgba(255,255,255,0.17); }
-html[data-theme="dark"] .fnote { border-inline-start-color:rgba(0,187,182,0.35); }
-
-@media(max-width:900px){
-  .focus[data-state="focus"] .fstage { grid-template-columns:1fr; }
-  .focus[data-state="focus"] .fside { position:static; }
-  .focus[data-state="focus"] .fswitch { grid-template-columns:1fr 1fr; }
-  .focus[data-state="focus"] .fcard.on { grid-column:1/-1; }
-  .fswitch { grid-template-columns:1fr; }
-}
-@media (prefers-reduced-motion: reduce){
-  .frow { animation:none; opacity:1; transform:none; }
-  .fc-meter i { transition:none; }
-}
 
 /* ── Footer Credit ── */
 .footer-credit {
@@ -1590,18 +1416,66 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
         <h2 class="section-hl-title">One platform. Every discipline.</h2>
       </div>
       <div class="fpreview reveal">
-        <b>Preview layout.</b> Pick a card and the other two fold into a switcher,
-        with its areas opening beside them.
-        <a href="classic.html">Open the current layout</a>
+        <b>Current layout.</b> The three cards open a panel underneath them.
+        <a href="index.html">Open the focus preview</a>
       </div>
-      <div class="focus reveal" id="focus" data-state="focus">
-        <div class="fstage">
-          <div class="fside">
-            <div class="fswitch" id="fswitch"></div>
-            <p class="fnote" id="fnote"></p>
-          </div>
-          <div class="flist" id="flist"></div>
-        </div>
+      <div class="gates">
+        <button type="button" class="gate reveal" id="gate-seg" data-group="seg" aria-expanded="false" aria-controls="gate-panel">
+          <span class="gate-top"><span class="gate-n" id="gate-seg-n" data-target="0">0</span><span class="gate-k">areas</span></span>
+          <span class="gate-t">Operational Segments</span>
+          <span class="gate-d">Service lines that deliver the work.</span>
+          <span class="gate-meter-row">
+            <span class="gate-meter" aria-hidden="true"><i id="gate-seg-bar"></i></span>
+            <span class="gate-share" id="gate-seg-share">0%</span>
+          </span>
+          <span class="gate-foot">
+            <span class="gate-stat"><b id="gate-seg-docs">0</b> documents</span>
+            <span class="gate-go" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
+            </span>
+          </span>
+        </button>
+
+        <button type="button" class="gate reveal" id="gate-fn" data-group="fn" aria-expanded="false" aria-controls="gate-panel">
+          <span class="gate-top"><span class="gate-n" id="gate-fn-n" data-target="0">0</span><span class="gate-k">areas</span></span>
+          <span class="gate-t">Corporate Functions</span>
+          <span class="gate-d">Functions that set the rules.</span>
+          <span class="gate-meter-row">
+            <span class="gate-meter" aria-hidden="true"><i id="gate-fn-bar"></i></span>
+            <span class="gate-share" id="gate-fn-share">0%</span>
+          </span>
+          <span class="gate-foot">
+            <span class="gate-stat"><b id="gate-fn-docs">0</b> documents</span>
+            <span class="gate-go" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
+            </span>
+          </span>
+        </button>
+
+        <button type="button" class="gate reveal" id="gate-pt" data-group="pt" aria-expanded="false" aria-controls="gate-panel">
+          <span class="gate-top"><span class="gate-n" id="gate-pt-n" data-target="0">0</span><span class="gate-k">areas</span></span>
+          <span class="gate-t">Products &amp; Technology</span>
+          <span class="gate-d">Technical home of each discipline.</span>
+          <span class="gate-meter-row">
+            <span class="gate-meter" aria-hidden="true"><i id="gate-pt-bar"></i></span>
+            <span class="gate-share" id="gate-pt-share">0%</span>
+          </span>
+          <span class="gate-foot">
+            <span class="gate-stat"><b id="gate-pt-docs">0</b> documents</span>
+            <span class="gate-go" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
+            </span>
+          </span>
+        </button>
+      </div>
+
+      <div class="gate-panel" id="gate-panel">
+        <div><div class="gate-body">
+          <div class="gate-head"><h4 id="gate-title"></h4><span id="gate-note"></span></div>
+          <div class="bento" id="gate-grid"></div>
+          <div class="waiting" id="gate-wait"></div>
+          <p class="band-move" id="band-seg-move"></p>
+        </div></div>
       </div>
 
       <div class="seg-accordion" id="seg-accordion" style="display:none">
@@ -2438,12 +2312,12 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
 })();
 </script>
 <script>
-/* ── Focus layout ──────────────────────────────────────────────────────
-   Every figure comes from the register, so this preview and the master list
-   can never quote different numbers.                                     */
+/* ── Discipline bands ──────────────────────────────────────────────────────
+   Every figure comes from the register, so the home page and the master list
+   can never quote different numbers. Tile width follows document count.   */
 (function(){
   if (typeof TAQA_MASTER_DOCS === 'undefined') return;
-  var D = TAQA_MASTER_DOCS, A = TAQA_DOC;
+  var D = TAQA_MASTER_DOCS, L = TAQA_DOC_LOOKUPS, A = TAQA_DOC;
 
   var SEGMENTS = [
     { name:'Drilling Services',  from:'drilling',     tag:'Well Operations' },
@@ -2483,180 +2357,196 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
       tag:'Stavanger, Norway' }
   ];
   var PENDING_MOVE = 'tws-maintenance';
-  var ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" ' +
-    'stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/>' +
-    '<path d="M13 6.5L18.5 12 13 17.5"/></svg>';
 
-  var controlled = D.filter(A.controlled), library = controlled.length;
+  var controlled = D.filter(A.controlled);
   function statsFor(id){
-    return { docs:controlled.filter(function(d){ return d.segment === id; }).length };
+    var mine = controlled.filter(function(d){ return d.segment === id; });
+    return { docs:mine.length };
   }
   function rowsOf(list){
     return list.map(function(x){
-      return { id:x.from, name:x.name, tag:x.tag, docs:statsFor(x.from).docs };
+      var st = statsFor(x.from);
+      return { id:x.from, name:x.name, tag:x.tag, docs:st.docs };
     }).sort(function(a,b){ return b.docs - a.docs; });
   }
 
-  var ORDER = ['seg','fn','pt'];
   var GROUPS = {
-    seg: { rows:rowsOf(SEGMENTS), title:'Operational Segments', noun:'segments',
-           desc:'Service lines that deliver the work.' },
-    fn:  { rows:rowsOf(FUNCTIONS), title:'Corporate Functions', noun:'functions',
-           desc:'Functions that set the rules.' },
-    pt:  { rows:rowsOf(PRODUCTS), title:'Products &amp; Technology', noun:'centers',
-           desc:'Technical home of each discipline.' }
+    seg: { rows:rowsOf(SEGMENTS), title:'Operational Segments', noun:'segments' },
+    fn:  { rows:rowsOf(FUNCTIONS), title:'Corporate Functions', noun:'functions' },
+    pt:  { rows:rowsOf(PRODUCTS),  title:'Products & Technology', noun:'centers' }
   };
-  ORDER.forEach(function(k){
+
+  // ── The three doors ─────────────────────────────────────────────────────
+  var bars = [], library = controlled.length;
+  Object.keys(GROUPS).forEach(function(k){
     var g = GROUPS[k];
-    g.docs = g.rows.reduce(function(a,x){ return a + x.docs; }, 0);
-    g.pct  = library ? Math.round(g.docs / library * 100) : 0;
+    var docs = g.rows.reduce(function(a,x){ return a + x.docs; }, 0);
+    var pct = library ? Math.round(docs / library * 100) : 0;
+    // The big number rides the page's own counter, so it counts up in step
+    // with the strip above it rather than appearing fully formed.
+    document.getElementById('gate-' + k + '-n').dataset.target = g.rows.length;
+    document.getElementById('gate-' + k + '-docs').textContent = docs;
+    var share = document.getElementById('gate-' + k + '-share');
+    share.textContent = pct + '%';
+    share.title = pct + '% of all documents in the hub';
+    bars.push({ el:document.getElementById('gate-' + k + '-bar'), pct:pct });
   });
 
-  var focus  = document.getElementById('focus'),
-      switcher = document.getElementById('fswitch'),
-      list   = document.getElementById('flist'),
-      note   = document.getElementById('fnote'),
-      open   = 'seg';
-
-  // ── The three cards ─────────────────────────────────────────────────
-  switcher.innerHTML = ORDER.map(function(k){
-    var g = GROUPS[k];
-    return '<button type="button" class="fcard' + (k === open ? ' on' : '') + '" ' +
-           'data-group="' + k + '" aria-pressed="' + (k === open) + '">' +
-             '<span class="fc-full">' +
-               '<span class="fc-top"><span class="fc-n">' + g.rows.length + '</span>' +
-                 '<span class="fc-k">areas</span></span>' +
-               '<span class="fc-t">' + g.title + '</span>' +
-               '<span class="fc-d">' + g.desc + '</span>' +
-               '<span class="fc-meter"><i data-pct="' + g.pct + '"></i></span>' +
-               '<span class="fc-foot">' +
-                 '<span class="fc-stat"><b>' + g.docs + '</b> documents</span>' +
-                 '<span class="fc-share">' + g.pct + '%</span>' +
-               '</span>' +
-             '</span>' +
-             '<span class="fc-mini">' +
-               '<span class="fc-mn">' + g.rows.length + '</span>' +
-               '<span class="fc-mt">' + g.title + '</span>' +
-               '<span class="fc-go">' + ARROW + '</span>' +
-             '</span>' +
-           '</button>';
-  }).join('');
-
-  var cards = ORDER.map(function(k){
-    var el = switcher.querySelector('.fcard[data-group="' + k + '"]');
-    return { k:k, el:el, faces:[el.querySelector('.fc-full'), el.querySelector('.fc-mini')] };
-  });
-
-  function fillMeters(){
-    switcher.querySelectorAll('.fc-meter i').forEach(function(i){
-      i.style.width = i.dataset.pct + '%';
+  // The meters fill when the doors come into view, not while they are still
+  // below the fold, so the motion is something you actually see.
+  // A card takes 600ms to arrive and the third starts 180ms late, so the
+  // meters hold until the row has settled instead of racing it.
+  function fillBars(){
+    bars.forEach(function(b, i){
+      b.el.style.transitionDelay = (0.62 + i * 0.09) + 's';
+      b.el.style.width = b.pct + '%';
     });
   }
-
-  // ── The list beside it ──────────────────────────────────────────────
-  function draw(k){
-    var g = GROUPS[k];
-    list.innerHTML =
-      '<div class="fhead"><h4>' + g.title + '</h4><span><b>' + g.rows.length + '</b> ' +
-        g.noun + ' · <b>' + g.docs + '</b> controlled documents</span></div>' +
-      g.rows.map(function(x, i){
-        return '<a class="frow" style="--i:' + i + '" href="segment.html?id=' + x.id + '">' +
-                 '<span class="fr-n">' + (i < 9 ? '0' : '') + (i + 1) + '</span>' +
-                 '<span class="fr-main"><span class="fr-name">' + x.name + '</span>' +
-                   '<span class="fr-tag">' + (x.tag || '') + '</span></span>' +
-                 '<span class="fr-docs">' + x.docs + '<span>docs</span></span>' +
-                 '<span class="fr-go">' + ARROW + '</span>' +
-               '</a>';
-      }).join('');
-    var mv = statsFor(PENDING_MOVE);
-    if (k === 'seg' && mv.docs) {
-      note.innerHTML = '<b>' + mv.docs + '</b> documents still sit under TWS Maintenance. ' +
-        'Each one reassigns to the segment that owns the equipment, so they are not ' +
-        'counted above.';
-    } else if (k === 'pt') {
-      note.innerHTML = 'Each center is the technical home for its discipline across every ' +
-        'segment that runs it.';
-    } else {
-      note.innerHTML = '';
-    }
-  }
-
-  // ── Moving between the two states ───────────────────────────────────
-  // The cards are measured where they are, the layout is changed, then they
-  // are put back where they were and released. Their faces take the inverse
-  // scale for the ride, so the box resizes without the text stretching.
-  var MOVE = 'transform 560ms cubic-bezier(0.22,1,0.36,1)';
-
-  function flip(mutate){
-    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      mutate(); return;
-    }
-    var first = cards.map(function(c){ return c.el.getBoundingClientRect(); });
-    mutate();
-    var last = cards.map(function(c){ return c.el.getBoundingClientRect(); });
-    cards.forEach(function(c, i){
-      var f = first[i], l = last[i];
-      if (!l.width || !l.height) return;
-      var dx = f.left - l.left, dy = f.top - l.top,
-          sx = f.width / l.width, sy = f.height / l.height;
-      if (Math.abs(dx) < 1 && Math.abs(dy) < 1 &&
-          Math.abs(sx - 1) < 0.005 && Math.abs(sy - 1) < 0.005) return;
-      c.el.style.transition = 'none';
-      c.el.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')';
-      c.faces.forEach(function(face){
-        face.style.transition = 'none';
-        face.style.transform = 'scale(' + (1 / sx) + ',' + (1 / sy) + ')';
-      });
-    });
-    requestAnimationFrame(function(){
-      cards.forEach(function(c){
-        c.el.style.transition = MOVE;
-        c.el.style.transform = '';
-        c.faces.forEach(function(face){
-          face.style.transition = MOVE + ', opacity 280ms ease';
-          face.style.transform = '';
-        });
-      });
-    });
-  }
-
-  function select(k){
-    flip(function(){
-      open = k;
-      focus.dataset.state = 'focus';
-      cards.forEach(function(c){
-        c.el.classList.toggle('on', c.k === k);
-        c.el.setAttribute('aria-pressed', String(c.k === k));
-      });
-      draw(k);
-    });
-  }
-
-  function browse(){
-    flip(function(){
-      open = null;
-      focus.dataset.state = 'browse';
-      note.innerHTML = '';
-      cards.forEach(function(c){
-        c.el.classList.remove('on');
-        c.el.setAttribute('aria-pressed','false');
-      });
-    });
-  }
-
-  switcher.addEventListener('click', function(e){
-    var btn = e.target.closest('.fcard'); if (!btn) return;
-    var k = btn.dataset.group;
-    if (open === k) browse(); else select(k);
-  });
-
-  draw(open);
   if ('IntersectionObserver' in window) {
     var mo = new IntersectionObserver(function(es){
-      es.forEach(function(e){ if (e.isIntersecting) { fillMeters(); mo.disconnect(); } });
-    }, { threshold:0.2 });
-    mo.observe(focus);
-  } else { fillMeters(); }
+      es.forEach(function(e){
+        if (!e.isIntersecting) return;
+        fillBars();
+        mo.disconnect();
+      });
+    }, { threshold:0.25 });
+    mo.observe(document.querySelector('.gates'));
+  } else {
+    fillBars();
+  }
+
+  // ── Opening one ─────────────────────────────────────────────────────────
+  var panel = document.getElementById('gate-panel'),
+      grid  = document.getElementById('gate-grid'),
+      wait  = document.getElementById('gate-wait'),
+      move  = document.getElementById('band-seg-move'),
+      open  = null;
+
+  function draw(k){
+    var g = GROUPS[k];
+    // Two wide leaders then thirds reads well for a long list; with exactly
+    // three the same pattern leaves an orphan, so give them a clean row.
+    var w = g.rows.length === 3 ? ['w4','w4','w4'] : ['w6','w6','w4','w4','w4'];
+    var ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>';
+    grid.innerHTML = g.rows.map(function(x, i){
+      return '<a class="tile ' + (w[i] || 'w4') + '" data-id="' + x.id + '" ' +
+             'href="segment.html?id=' + x.id + '">' +
+               '<span class="tile-ghost" aria-hidden="true">' +
+                 (i < 9 ? '0' : '') + (i + 1) + '</span>' +
+               '<span class="tile-name">' + x.name + '</span>' +
+               '<span class="tile-tag">' + (x.tag || '') + '</span>' +
+               '<span class="tile-foot">' +
+                 '<span class="tile-docs">' + x.docs + '<span>docs</span></span>' +
+                 '<span class="tile-go" aria-hidden="true">' + ARROW + '</span>' +
+               '</span>' +
+             '</a>';
+    }).join('');
+    document.getElementById('gate-title').textContent = g.title;
+    var docs = g.rows.reduce(function(a,x){ return a + x.docs; }, 0);
+    document.getElementById('gate-note').innerHTML =
+      '<b>' + g.rows.length + '</b> ' + g.noun + ' · <b>' + docs + '</b> controlled documents';
+    wait.innerHTML = '';
+    var mv = statsFor(PENDING_MOVE);
+    if (k === 'seg' && mv.docs) {
+      move.innerHTML = '<b>' + mv.docs + '</b> documents still sit under TWS Maintenance. Each one ' +
+        'reassigns to the segment that owns the equipment, so they are not counted above.';
+    } else if (k === 'pt') {
+      move.innerHTML = 'Each center is the technical home for its discipline across every ' +
+        'segment that runs it.';
+    } else {
+      move.innerHTML = '';
+    }
+  }
+
+  var body = panel.firstElementChild;     // the measured block
+
+  function heightOf(){ return body.offsetHeight; }
+
+  // Pin the panel to the height it has right now. This has to happen before
+  // the contents change, or the reading is already the new height and there
+  // is nothing left to travel.
+  function lock(){ panel.style.height = panel.offsetHeight + 'px'; void panel.offsetHeight; }
+
+  // Going back to auto once it lands keeps it honest when the window resizes.
+  function glideTo(px){
+    panel.style.height = px + 'px';
+    clearTimeout(panel._settle);
+    panel._settle = setTimeout(function(){
+      if (open) panel.style.height = 'auto';
+    }, 440);
+  }
+
+  function markButtons(btn){
+    document.querySelectorAll('.gate').forEach(function(b){
+      b.setAttribute('aria-expanded', String(b === btn));
+    });
+  }
+
+  function toggle(k, btn){
+    if (open === k) {                       // clicking the open door closes it
+      panel.classList.remove('shown');
+      lock();
+      glideTo(0);
+      btn.setAttribute('aria-expanded','false');
+      open = null; return;
+    }
+    if (open) {
+      // One door is already open. Fade what is there, put the new contents in
+      // behind the fade, then glide the height and bring it back. No jump.
+      panel.classList.remove('shown');
+      markButtons(btn);
+      open = k;
+      clearTimeout(panel._swap);
+      panel._swap = setTimeout(function(){
+        lock();
+        draw(k);
+        glideTo(heightOf());
+        requestAnimationFrame(function(){ panel.classList.add('shown'); });
+      }, 190);
+      return;
+    }
+    draw(k);
+    markButtons(btn);
+    open = k;
+    lock();
+    glideTo(heightOf());
+    requestAnimationFrame(function(){ panel.classList.add('shown'); });
+  }
+
+  // Operational Segments is open on arrival. It fills what would otherwise be
+  // an empty half-screen, and it shows what a door does before anyone clicks.
+  var firstBtn = document.getElementById('gate-seg');
+  if (firstBtn) {
+    panel.classList.add('instant');
+    draw('seg');
+    markButtons(firstBtn);
+    open = 'seg';
+    panel.style.height = 'auto';
+    panel.classList.add('shown');
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){ panel.classList.remove('instant'); });
+    });
+  }
+
+  document.querySelectorAll('.gate').forEach(function(btn){
+    btn.addEventListener('click', function(){ toggle(btn.dataset.group, btn); });
+    btn.addEventListener('pointermove', function(e){
+      var r = btn.getBoundingClientRect();
+      btn.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      btn.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  });
+
+  if (window.matchMedia && matchMedia('(hover:hover) and (pointer:fine)').matches) {
+    grid.addEventListener('pointermove', function(e){
+      var t = e.target.closest('.tile'); if (!t) return;
+      var r = t.getBoundingClientRect();
+      t.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      t.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  }
 })();
 </script>
 <script src="shared.js"></script>
