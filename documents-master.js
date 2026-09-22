@@ -102,7 +102,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": null
     },
     "hr": {
-      "name": "Group Human Resources",
+      "name": "Human Resources",
       "spl": "HR",
       "splName": "Human Resource",
       "bu": null,
@@ -110,7 +110,7 @@ const TAQA_DOC_LOOKUPS = {
       "note": null
     },
     "cybersecurity": {
-      "name": "GRC",
+      "name": "Governance, Risk & Compliance",
       "spl": "GRC",
       "splName": "Governance, Risk & Compliance",
       "bu": null,
@@ -174,9 +174,9 @@ const TAQA_DOC_LOOKUPS = {
       "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"LGL\" is provisional pending QHSE assignment."
     },
     "learning-center": {
-      "name": "Learning Center",
-      "spl": "LC",
-      "splName": "Learning Center",
+      "name": "Learning and Development",
+      "spl": "LD",
+      "splName": "Learning and Development",
       "bu": null,
       "provisional": true,
       "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"LC\" is provisional pending QHSE assignment."
@@ -188,38 +188,6 @@ const TAQA_DOC_LOOKUPS = {
       "bu": null,
       "provisional": true,
       "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"CSL\" is provisional pending QHSE assignment."
-    },
-    "facility-management": {
-      "name": "Facility Management",
-      "spl": "FM",
-      "splName": "Facility Management",
-      "bu": null,
-      "provisional": true,
-      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"FM\" is provisional pending QHSE assignment."
-    },
-    "administration": {
-      "name": "Administration",
-      "spl": "ADM",
-      "splName": "Administration",
-      "bu": null,
-      "provisional": true,
-      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"ADM\" is provisional pending QHSE assignment."
-    },
-    "venture-management": {
-      "name": "Venture Management",
-      "spl": "VM",
-      "splName": "Venture Management",
-      "bu": null,
-      "provisional": true,
-      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"VM\" is provisional pending QHSE assignment."
-    },
-    "new-business": {
-      "name": "New Business Development",
-      "spl": "NBD",
-      "splName": "New Business Development",
-      "bu": null,
-      "provisional": true,
-      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"NBD\" is provisional pending QHSE assignment."
     },
     "pt-drilling-coe": {
       "name": "Drilling Solutions Center of Excellence",
@@ -905,24 +873,12 @@ const TAQA_MASTER_DOCS = [{"docNumber":"TQ-TWS-CTSS-SOP-001","legacyId":"CT-001"
 {"docNumber": "TQ-LGL-P-001", "legacyId": null, "title": "Contract Review and Approval Policy", "segment": "legal", "docType": "policy", "revision": "3.0", "issueDate": "2023-08-15", "approvedDate": "2023-07-11", "nextReviewDate": "2025-08-04", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
 {"docNumber": "TQ-LGL-P-002", "legacyId": null, "title": "Delegation of Signing Authority", "segment": "legal", "docType": "policy", "revision": "4.0", "issueDate": "2025-12-26", "approvedDate": "2025-12-05", "nextReviewDate": "2027-12-16", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
 {"docNumber": "TQ-LGL-SOP-003", "legacyId": null, "title": "Legal Hold Procedure", "segment": "legal", "docType": "sop", "revision": "2.0", "issueDate": "2025-06-21", "approvedDate": "2025-05-17", "nextReviewDate": "2027-06-11", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-LC-P-001", "legacyId": null, "title": "Competency Assessment Policy", "segment": "learning-center", "docType": "policy", "revision": "1.0", "issueDate": "2023-08-27", "approvedDate": "2023-07-18", "nextReviewDate": "2025-08-16", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-LC-SOP-002", "legacyId": null, "title": "Training Needs Analysis Procedure", "segment": "learning-center", "docType": "sop", "revision": "4.0", "issueDate": "2024-08-20", "approvedDate": "2024-07-16", "nextReviewDate": "2026-08-10", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-LC-SOP-003", "legacyId": null, "title": "Instructor Qualification Procedure", "segment": "learning-center", "docType": "sop", "revision": "3.0", "issueDate": "2023-11-02", "approvedDate": "2023-10-15", "nextReviewDate": "2025-10-22", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-LD-P-001", "legacyId": null, "title": "Competency Assessment Policy", "segment": "learning-center", "docType": "policy", "revision": "1.0", "issueDate": "2023-08-27", "approvedDate": "2023-07-18", "nextReviewDate": "2025-08-16", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-LD-SOP-002", "legacyId": null, "title": "Training Needs Analysis Procedure", "segment": "learning-center", "docType": "sop", "revision": "4.0", "issueDate": "2024-08-20", "approvedDate": "2024-07-16", "nextReviewDate": "2026-08-10", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-LD-SOP-003", "legacyId": null, "title": "Instructor Qualification Procedure", "segment": "learning-center", "docType": "sop", "revision": "3.0", "issueDate": "2023-11-02", "approvedDate": "2023-10-15", "nextReviewDate": "2025-10-22", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
 {"docNumber": "TQ-CSL-P-001", "legacyId": null, "title": "Bid Approval Policy", "segment": "commercial", "docType": "policy", "revision": "1.0", "issueDate": "2023-09-27", "approvedDate": "2023-07-31", "nextReviewDate": "2025-09-16", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
 {"docNumber": "TQ-CSL-SOP-002", "legacyId": null, "title": "Customer Contract Handover Procedure", "segment": "commercial", "docType": "sop", "revision": "4.0", "issueDate": "2024-08-28", "approvedDate": "2024-07-04", "nextReviewDate": "2026-08-18", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
 {"docNumber": "TQ-CSL-P-003", "legacyId": null, "title": "Pricing Authority Matrix", "segment": "commercial", "docType": "policy", "revision": "4.0", "issueDate": "2024-10-19", "approvedDate": "2024-08-21", "nextReviewDate": "2026-10-09", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-FM-P-001", "legacyId": null, "title": "Building Access Policy", "segment": "facility-management", "docType": "policy", "revision": "3.0", "issueDate": "2024-06-13", "approvedDate": "2024-05-29", "nextReviewDate": "2026-06-03", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-FM-SOP-002", "legacyId": null, "title": "Preventive Maintenance Scheduling Procedure", "segment": "facility-management", "docType": "sop", "revision": "1.0", "issueDate": "2025-06-14", "approvedDate": "2025-04-22", "nextReviewDate": "2027-06-04", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-FM-WI-003", "legacyId": null, "title": "Contractor Site Induction", "segment": "facility-management", "docType": "wi", "revision": "3.0", "issueDate": "2023-08-17", "approvedDate": "2023-07-31", "nextReviewDate": "2026-08-01", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-ADM-P-001", "legacyId": null, "title": "Records Retention Policy", "segment": "administration", "docType": "policy", "revision": "4.0", "issueDate": "2025-09-02", "approvedDate": "2025-08-04", "nextReviewDate": "2027-08-23", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-ADM-SOP-002", "legacyId": null, "title": "Office Services Procedure", "segment": "administration", "docType": "sop", "revision": "4.0", "issueDate": "2024-03-15", "approvedDate": "2024-01-30", "nextReviewDate": "2026-03-05", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-ADM-SOP-003", "legacyId": null, "title": "Visitor Management Procedure", "segment": "administration", "docType": "sop", "revision": "2.0", "issueDate": "2024-02-22", "approvedDate": "2024-01-04", "nextReviewDate": "2026-02-11", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-VM-P-001", "legacyId": null, "title": "Investment Approval Policy", "segment": "venture-management", "docType": "policy", "revision": "4.0", "issueDate": "2023-12-25", "approvedDate": "2023-11-06", "nextReviewDate": "2025-12-14", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-VM-SOP-002", "legacyId": null, "title": "Due Diligence Procedure", "segment": "venture-management", "docType": "sop", "revision": "2.0", "issueDate": "2024-05-20", "approvedDate": "2024-03-24", "nextReviewDate": "2026-05-10", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-VM-SOP-003", "legacyId": null, "title": "Joint Venture Reporting Procedure", "segment": "venture-management", "docType": "sop", "revision": "2.0", "issueDate": "2025-07-19", "approvedDate": "2025-06-30", "nextReviewDate": "2027-07-09", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-NBD-P-001", "legacyId": null, "title": "Market Entry Policy", "segment": "new-business", "docType": "policy", "revision": "2.0", "issueDate": "2025-07-19", "approvedDate": "2025-06-21", "nextReviewDate": "2027-07-09", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-NBD-SOP-002", "legacyId": null, "title": "Opportunity Screening Procedure", "segment": "new-business", "docType": "sop", "revision": "2.0", "issueDate": "2026-04-30", "approvedDate": "2026-03-16", "nextReviewDate": "2028-04-19", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-NBD-SOP-003", "legacyId": null, "title": "Partnership Evaluation Procedure", "segment": "new-business", "docType": "sop", "revision": "1.0", "issueDate": "2024-12-02", "approvedDate": "2024-10-31", "nextReviewDate": "2026-11-22", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
 {"docNumber": "TQ-P&T-DSC-SOP-001", "legacyId": null, "title": "Drilling Jar Assembly and Test Procedure", "segment": "pt-drilling-coe", "docType": "sop", "revision": "5.0", "issueDate": "2025-06-12", "approvedDate": "2025-05-08", "nextReviewDate": "2027-06-12", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
 {"docNumber": "TQ-P&T-DSC-SOP-002", "legacyId": null, "title": "Downhole Tool Redress Procedure", "segment": "pt-drilling-coe", "docType": "sop", "revision": "3.0", "issueDate": "2024-11-04", "approvedDate": "2024-09-30", "nextReviewDate": "2026-11-04", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
 {"docNumber": "TQ-P&T-DSC-SOP-003", "legacyId": null, "title": "Tool Failure Investigation Procedure", "segment": "pt-drilling-coe", "docType": "sop", "revision": "2.0", "issueDate": "2024-02-19", "approvedDate": "2024-01-15", "nextReviewDate": "2026-02-19", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},

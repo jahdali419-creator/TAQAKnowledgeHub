@@ -246,7 +246,7 @@ const TAQA_SEGMENTS = {
     }
   },
   'hr': {
-    name:'Group Human Resources', icon:'👥', tag:'HR & People',
+    name:'Human Resources', icon:'👥', tag:'HR & People',
     desc:'TAQA HR policies, employee standards, code of conduct, organizational guidelines, and personnel procedures for all employees.',
     sops:10, manuals:8, policies:15, alerts:0, lessons:5, software:1,
     docs:{
@@ -325,7 +325,7 @@ const TAQA_SEGMENTS = {
     }
   },
   'cybersecurity': {
-    name:'GRC', icon:'🔐', tag:'Governance, Risk & Compliance',
+    name:'Governance, Risk & Compliance', icon:'🔐', tag:'GRC',
     desc:'Cybersecurity governance, policies, standards, operational procedures, security awareness programs, and compliance documentation for TAQA\'s IT and OT environments.',
     sops:10, manuals:8, policies:12, alerts:5, lessons:6, software:2,
     tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Compliance', lessons:'Awareness'},
@@ -475,7 +475,7 @@ const TAQA_SEGMENTS = {
     }
   },
   'learning-center': {
-    name:"Learning Center", icon:'\u25CB', tag:"Training",
+    name:"Learning and Development", icon:'\u25CB', tag:"Training",
     desc:"Competency frameworks, training delivery and instructor standards.",
     tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:2, manuals:0, policies:1, alerts:0, lessons:0, software:0,
@@ -497,58 +497,6 @@ const TAQA_SEGMENTS = {
       sops:["Customer Contract Handover Procedure"],
       manuals:[],
       policies:["Bid Approval Policy", "Pricing Authority Matrix"],
-      alerts:[], lessons:[], software:[]
-    }
-  },
-  'facility-management': {
-    name:"Facility Management", icon:'\u25CB', tag:"Facilities",
-    desc:"Buildings, site access and planned maintenance.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
-    sops:1, manuals:1, policies:1, alerts:0, lessons:0, software:0,
-    contributors:[],
-    docs:{
-      sops:["Preventive Maintenance Scheduling Procedure"],
-      manuals:["Contractor Site Induction"],
-      policies:["Building Access Policy"],
-      alerts:[], lessons:[], software:[]
-    }
-  },
-  'administration': {
-    name:"Administration", icon:'\u25CB', tag:"Admin",
-    desc:"Records, office services and visitor control.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
-    sops:2, manuals:0, policies:1, alerts:0, lessons:0, software:0,
-    contributors:[],
-    docs:{
-      sops:["Office Services Procedure", "Visitor Management Procedure"],
-      manuals:[],
-      policies:["Records Retention Policy"],
-      alerts:[], lessons:[], software:[]
-    }
-  },
-  'venture-management': {
-    name:"Venture Management", icon:'\u25CB', tag:"Corporate Development",
-    desc:"Investment approval, due diligence and joint venture governance.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
-    sops:2, manuals:0, policies:1, alerts:0, lessons:0, software:0,
-    contributors:[],
-    docs:{
-      sops:["Due Diligence Procedure", "Joint Venture Reporting Procedure"],
-      manuals:[],
-      policies:["Investment Approval Policy"],
-      alerts:[], lessons:[], software:[]
-    }
-  },
-  'new-business': {
-    name:"New Business Development", icon:'\u25CB', tag:"Corporate Development",
-    desc:"Opportunity screening, market entry and partnerships.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
-    sops:2, manuals:0, policies:1, alerts:0, lessons:0, software:0,
-    contributors:[],
-    docs:{
-      sops:["Opportunity Screening Procedure", "Partnership Evaluation Procedure"],
-      manuals:[],
-      policies:["Market Entry Policy"],
       alerts:[], lessons:[], software:[]
     }
   },
