@@ -425,6 +425,7 @@ const TAQA_SEGMENTS = {
   'finance': {
     name:"Finance", icon:'\u25CB', tag:"Finance",
     desc:"Financial authority, reporting and expenditure control.",
+    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:1, manuals:0, policies:2, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -437,6 +438,7 @@ const TAQA_SEGMENTS = {
   'it': {
     name:"Information Technology", icon:'\u25CB', tag:"IT",
     desc:"IT service delivery, change control and platform operations.",
+    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:2, manuals:0, policies:1, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -449,6 +451,7 @@ const TAQA_SEGMENTS = {
   'supply-chain': {
     name:"Supply Chain", icon:'\u25CB', tag:"Procurement",
     desc:"Sourcing, supplier qualification and goods receipt.",
+    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:1, manuals:1, policies:1, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -461,6 +464,7 @@ const TAQA_SEGMENTS = {
   'legal': {
     name:"Legal", icon:'\u25CB', tag:"Legal",
     desc:"Contracting authority, legal review and compliance obligations.",
+    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:1, manuals:0, policies:2, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -473,6 +477,7 @@ const TAQA_SEGMENTS = {
   'learning-center': {
     name:"Learning Center", icon:'\u25CB', tag:"Training",
     desc:"Competency frameworks, training delivery and instructor standards.",
+    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:2, manuals:0, policies:1, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -485,6 +490,7 @@ const TAQA_SEGMENTS = {
   'commercial': {
     name:"Commercial & Sales", icon:'\u25CB', tag:"Commercial",
     desc:"Bidding, pricing authority and customer contract handover.",
+    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:1, manuals:0, policies:2, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -497,6 +503,7 @@ const TAQA_SEGMENTS = {
   'facility-management': {
     name:"Facility Management", icon:'\u25CB', tag:"Facilities",
     desc:"Buildings, site access and planned maintenance.",
+    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:1, manuals:1, policies:1, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -509,6 +516,7 @@ const TAQA_SEGMENTS = {
   'administration': {
     name:"Administration", icon:'\u25CB', tag:"Admin",
     desc:"Records, office services and visitor control.",
+    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:2, manuals:0, policies:1, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -521,6 +529,7 @@ const TAQA_SEGMENTS = {
   'venture-management': {
     name:"Venture Management", icon:'\u25CB', tag:"Corporate Development",
     desc:"Investment approval, due diligence and joint venture governance.",
+    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:2, manuals:0, policies:1, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -533,6 +542,7 @@ const TAQA_SEGMENTS = {
   'new-business': {
     name:"New Business Development", icon:'\u25CB', tag:"Corporate Development",
     desc:"Opportunity screening, market entry and partnerships.",
+    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:2, manuals:0, policies:1, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -545,6 +555,7 @@ const TAQA_SEGMENTS = {
   'geothermal-coe': {
     name:"Geothermal Centre of Excellence", icon:'\u25CB', tag:"Advisory",
     desc:"Geothermal well design review and resource assessment advisory.",
+    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:2, manuals:1, policies:0, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
