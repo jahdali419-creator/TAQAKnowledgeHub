@@ -582,16 +582,25 @@ html[data-theme="dark"] .gate-meter { background:#243044; }
   .gate::after { transition:none; }
 }
 
-/* The panel opens by growing its own row rather than by animating height,
-   so nothing below it jumps and only the grid track is interpolated. */
+/* The panel animates a measured height. A grid track of 0fr to 1fr handles
+   opening, but swapping one door for another changes the content height with
+   nothing to interpolate, which is the jump that made it feel like a popup. */
 .gate-panel {
-  display:grid; grid-template-rows:0fr; overflow:hidden;
-  transition:grid-template-rows 440ms cubic-bezier(0.16,1,0.3,1);
+  height:0; overflow:hidden;
+  transition:height 420ms cubic-bezier(0.22,1,0.36,1);
 }
-.gate-panel.open { grid-template-rows:1fr; }
 .gate-panel.instant { transition:none; }
-.gate-panel > div { min-height:0; }
-.gate-body { padding-top:18px; }
+/* The contents arrive as one calm block. Eleven tiles each rising on their
+   own timer, while the container was still growing, was the other half of it. */
+.gate-body {
+  padding-top:18px;
+  opacity:0; transform:translateY(8px);
+  transition:opacity 300ms ease, transform 380ms cubic-bezier(0.22,1,0.36,1);
+}
+.gate-panel.shown .gate-body { opacity:1; transform:none; }
+.gate-panel:not(.shown) .gate-body {
+  transition:opacity 170ms ease, transform 170ms ease;
+}
 .gate-head {
   display:flex; align-items:baseline; justify-content:space-between; gap:16px;
   flex-wrap:wrap; margin-bottom:12px;
@@ -632,14 +641,10 @@ html[data-theme="dark"] .gate-meter { background:#243044; }
   background:var(--bg-white); border:1px solid var(--border);
   border-radius:16px;
   box-shadow:0 1px 2px rgba(0,88,90,0.04);
-  opacity:0; transform:translateY(10px);
-  animation:tileIn 480ms cubic-bezier(0.16,1,0.3,1) forwards;
-  animation-delay:calc(var(--i,0) * 45ms);
   transition:transform 260ms cubic-bezier(0.16,1,0.3,1),
              box-shadow 260ms cubic-bezier(0.16,1,0.3,1),
              border-color 260ms cubic-bezier(0.16,1,0.3,1);
 }
-@keyframes tileIn { to { opacity:1; transform:none; } }
 .tile.w6 { grid-column:span 6; min-height:156px; }
 .tile.w4 { grid-column:span 4; }
 .tile.w3 { grid-column:span 3; }
@@ -700,7 +705,7 @@ html[data-theme="dark"] .gate-meter { background:#243044; }
   display:block; height:100%; border-radius:2px; background:var(--primary); opacity:.55;
   transform-origin:left center; transform:scaleX(0);
   animation:barIn 620ms cubic-bezier(0.16,1,0.3,1) forwards;
-  animation-delay:calc(var(--i,0) * 45ms + 160ms);
+  animation-delay:220ms;
 }
 @keyframes barIn { to { transform:scaleX(1); } }
 html[dir="rtl"] .tile-bar i { transform-origin:right center; }
@@ -799,37 +804,50 @@ html[data-theme="dark"] .tile-bar { background:rgba(255,255,255,0.10); }
 }
 
 /* ── Featured Tool Card ── */
+/* Two dark blocks in the rail outweighed the three white cards that are the
+   point of the page. The glossary goes light with a teal edge, and Tech Hub
+   stays dark as the single anchor at the bottom. */
 .sidebar-tool-featured {
-  background:var(--gradient); border-radius:var(--radius);
-  padding:22px 20px 20px; text-decoration:none; color:#fff;
+  background:var(--bg-white); border:1px solid var(--border);
+  border-inline-start:3px solid var(--primary);
+  border-radius:var(--radius);
+  padding:20px 20px 18px; text-decoration:none; color:var(--text);
   display:flex; flex-direction:column; position:relative; overflow:hidden;
-  transition:transform 0.22s, box-shadow 0.22s;
-  box-shadow:0 4px 20px rgba(0,93,99,0.28);
+  transition:transform 0.22s, box-shadow 0.22s, border-color 0.22s;
+  box-shadow:0 1px 2px rgba(0,88,90,0.05);
 }
-.sidebar-tool-featured:hover { transform:translateY(-2px); box-shadow:0 10px 32px rgba(0,93,99,0.42); }
+.sidebar-tool-featured:hover { transform:translateY(-2px);
+  box-shadow:0 12px 28px rgba(0,88,90,0.13); }
 .sidebar-tool-featured::after {
-  content:''; position:absolute; top:-30px; right:-30px;
+  content:''; position:absolute; top:-34px; right:-34px;
   width:110px; height:110px; border-radius:50%;
-  background:rgba(255,255,255,0.08); pointer-events:none;
+  background:rgba(0,187,182,0.10); pointer-events:none;
 }
 .sidebar-tool-featured-tag {
   font-size:10.5px; font-weight:700; text-transform:uppercase;
-  letter-spacing:0.8px; color:rgba(255,255,255,0.65); margin-bottom:6px; display:block;
+  letter-spacing:0.8px; color:var(--primary); margin-bottom:6px; display:block;
 }
 .sidebar-tool-featured-title {
   font-family:'BwGradual','Urbanist',sans-serif; font-size:17px; font-weight:700;
-  color:#fff; margin-bottom:8px; letter-spacing:-0.2px;
+  color:var(--text); margin-bottom:8px; letter-spacing:-0.2px;
 }
 .sidebar-tool-featured-desc {
-  font-size:12.5px; color:rgba(255,255,255,0.78); line-height:1.62; margin-bottom:16px;
+  font-size:12.5px; color:var(--text-muted); line-height:1.62; margin-bottom:16px;
 }
 .sidebar-tool-featured-btn {
-  display:inline-block; background:rgba(255,255,255,0.18);
-  border:1px solid rgba(255,255,255,0.28); border-radius:6px;
-  padding:7px 16px; font-size:12px; font-weight:600; color:#fff;
-  transition:background 0.2s;
+  display:inline-block; background:var(--primary);
+  border:1px solid var(--primary); border-radius:8px;
+  padding:8px 16px; font-size:12px; font-weight:600; color:#fff;
+  transition:background 0.2s, border-color 0.2s;
 }
-.sidebar-tool-featured:hover .sidebar-tool-featured-btn { background:rgba(255,255,255,0.28); }
+.sidebar-tool-featured:hover .sidebar-tool-featured-btn {
+  background:var(--primary-hover); border-color:var(--primary-hover);
+}
+html[data-theme="dark"] .sidebar-tool-featured {
+  background:#19263a; border-color:#243044; border-inline-start-color:#00BBB6;
+}
+html[data-theme="dark"] .sidebar-tool-featured-tag { color:#4DD9D3; }
+html[data-theme="dark"] .sidebar-tool-featured::after { background:rgba(0,187,182,0.07); }
 
 /* ── Compact Tool Row ── */
 .sidebar-tool-compact {
@@ -2427,18 +2445,59 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     }
   }
 
-  function toggle(k, btn){
-    if (open === k) {                       // clicking the open door closes it
-      panel.classList.remove('open');
-      btn.setAttribute('aria-expanded','false');
-      open = null; return;
-    }
-    draw(k);
+  var body = panel.firstElementChild;     // the measured block
+
+  function heightOf(){ return body.offsetHeight; }
+
+  // Pin the panel to the height it has right now. This has to happen before
+  // the contents change, or the reading is already the new height and there
+  // is nothing left to travel.
+  function lock(){ panel.style.height = panel.offsetHeight + 'px'; void panel.offsetHeight; }
+
+  // Going back to auto once it lands keeps it honest when the window resizes.
+  function glideTo(px){
+    panel.style.height = px + 'px';
+    clearTimeout(panel._settle);
+    panel._settle = setTimeout(function(){
+      if (open) panel.style.height = 'auto';
+    }, 440);
+  }
+
+  function markButtons(btn){
     document.querySelectorAll('.gate').forEach(function(b){
       b.setAttribute('aria-expanded', String(b === btn));
     });
-    panel.classList.add('open');
+  }
+
+  function toggle(k, btn){
+    if (open === k) {                       // clicking the open door closes it
+      panel.classList.remove('shown');
+      lock();
+      glideTo(0);
+      btn.setAttribute('aria-expanded','false');
+      open = null; return;
+    }
+    if (open) {
+      // One door is already open. Fade what is there, put the new contents in
+      // behind the fade, then glide the height and bring it back. No jump.
+      panel.classList.remove('shown');
+      markButtons(btn);
+      open = k;
+      clearTimeout(panel._swap);
+      panel._swap = setTimeout(function(){
+        lock();
+        draw(k);
+        glideTo(heightOf());
+        requestAnimationFrame(function(){ panel.classList.add('shown'); });
+      }, 190);
+      return;
+    }
+    draw(k);
+    markButtons(btn);
     open = k;
+    lock();
+    glideTo(heightOf());
+    requestAnimationFrame(function(){ panel.classList.add('shown'); });
   }
 
   // Operational Segments is open on arrival. It fills what would otherwise be
@@ -2446,7 +2505,11 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
   var firstBtn = document.getElementById('gate-seg');
   if (firstBtn) {
     panel.classList.add('instant');
-    toggle('seg', firstBtn);
+    draw('seg');
+    markButtons(firstBtn);
+    open = 'seg';
+    panel.style.height = 'auto';
+    panel.classList.add('shown');
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){ panel.classList.remove('instant'); });
     });
