@@ -500,6 +500,29 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .doc-actions{flex-wrap:wrap;}
   .doc-action-btn.primary-action{flex:1;}
 }
+
+/* A policy binds this area whether or not this area wrote it, so it is said
+   here rather than left for someone to find on the home page. */
+.co-bar {
+  display:flex; align-items:center; gap:12px; text-decoration:none;
+  max-width:1240px; margin:16px auto -4px; padding:11px 16px;
+  border-radius:13px; border:1px solid rgba(0,93,99,0.22);
+  background:linear-gradient(135deg, rgba(0,93,99,0.1), rgba(0,187,182,0.05));
+  transition:border-color 220ms ease, background 220ms ease, transform 220ms ease;
+}
+.co-bar:hover { border-color:rgba(0,93,99,0.4); transform:translateY(-1px);
+  background:linear-gradient(135deg, rgba(0,93,99,0.15), rgba(0,187,182,0.08)); }
+.co-mark { width:26px; height:26px; flex-shrink:0; color:var(--primary);
+  display:inline-flex; align-items:center; justify-content:center; }
+.co-mark svg { width:19px; height:19px; }
+.co-txt { flex:1; min-width:0; font-size:12.5px; color:var(--text-muted); line-height:1.5; }
+.co-txt b { color:var(--text); font-weight:700; }
+.co-go { font-size:12px; font-weight:700; color:var(--primary); flex-shrink:0; }
+html[data-theme="dark"] .co-bar {
+  border-color:rgba(0,187,182,0.24);
+  background:linear-gradient(135deg, rgba(0,187,182,0.1), rgba(0,93,99,0.06));
+}
+@media(max-width:640px){ .co-bar { margin:14px 16px -4px; } .co-go { display:none; } }
 </style>
 </head>
 <body>
@@ -586,7 +609,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
       <div class="seg-hero-stats">
         <div class="mini-stat"><div class="mini-stat-num" id="ms-sops">,</div><div class="mini-stat-label" id="ms-label-sops">SOPs</div></div>
         <div class="mini-stat"><div class="mini-stat-num" id="ms-manuals">,</div><div class="mini-stat-label" id="ms-label-manuals">Manuals</div></div>
-        <div class="mini-stat"><div class="mini-stat-num" id="ms-policies">,</div><div class="mini-stat-label">Policies</div></div>
+        <div class="mini-stat"><div class="mini-stat-num" id="ms-policies">,</div><div class="mini-stat-label">Standards</div></div>
         <div class="mini-stat"><div class="mini-stat-num" id="ms-lessons">,</div><div class="mini-stat-label" id="ms-label-lessons">Lessons</div></div>
         <div class="mini-stat"><div class="mini-stat-num" id="ms-software" style="color:#38bdf8;">,</div><div class="mini-stat-label">Software</div></div>
       </div>
@@ -595,13 +618,22 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 
 </div><!-- /seg-hero-banner -->
 
+<a class="co-bar" href="index.html#segments" id="co-bar">
+  <span class="co-mark" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3.6v5.1c0 4.6-3.2 8.2-8 9.3-4.8-1.1-8-4.7-8-9.3V6.6L12 3z"/><path d="M9 12l2 2 4-4"/></svg>
+  </span>
+  <span class="co-txt"><b id="co-n">0</b> company policies also apply here. Signed by the CEO, they bind every area.</span>
+  <span class="co-go" aria-hidden="true">See them &#8594;</span>
+</a>
+
+
 <!-- ── Tabs ── -->
 <div class="tabs-outer">
   <div class="tabs" id="tab-bar">
     <button class="tab-btn" data-tab="all">All <span class="tab-count" id="tc-all" style="background:var(--gradient);color:#fff;">,</span></button>
     <button class="tab-btn active" data-tab="sops">SOPs <span class="tab-count" id="tc-sops">,</span></button>
     <button class="tab-btn" data-tab="manuals">Manuals <span class="tab-count" id="tc-manuals">,</span></button>
-    <button class="tab-btn" data-tab="policies">Policies <span class="tab-count" id="tc-policies">,</span></button>
+    <button class="tab-btn" data-tab="policies">Standards <span class="tab-count" id="tc-policies">,</span></button>
     <button class="tab-btn" data-tab="alerts">Alerts <span class="tab-alert-count" id="tc-alerts">,</span><span class="alert-pulse-dot" id="alert-pulse-dot"></span></button>
     <button class="tab-btn" data-tab="lessons">Lessons Learned <span class="tab-count" id="tc-lessons">,</span></button>
     <button class="tab-btn" data-tab="software">Software <span class="tab-count" id="tc-software" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8);">,</span></button>
@@ -1069,7 +1101,7 @@ const SEGMENTS = {
     name:'Governance, Risk & Compliance', icon:'🔐', tag:'GRC',
     desc:'Cybersecurity governance, policies, standards, operational procedures, security awareness programs, and compliance documentation for TAQA\'s IT and OT environments.',
     sops:10, manuals:8, policies:12, alerts:5, lessons:6, software:2,
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Compliance', lessons:'Awareness'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Compliance', lessons:'Awareness'},
     contributors:[{name:'Mohammed Al Obaid', role:'Cybersecurity Director'},{name:'Afnan Al Khabty', role:'Senior Cyber Security Analyst'}],
     docs:{
       sops:['CS-PROC-001 Incident Response Procedure','CS-PROC-002 Access Control Request Procedure',
@@ -1141,7 +1173,7 @@ const SEGMENTS = {
   'finance': {
     name:"Finance", icon:'\u25CB', tag:"Finance",
     desc:"Financial authority, reporting and expenditure control.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:1, manuals:0, policies:2, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -1154,7 +1186,7 @@ const SEGMENTS = {
   'it': {
     name:"Information Technology", icon:'\u25CB', tag:"IT",
     desc:"IT service delivery, change control and platform operations.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:2, manuals:0, policies:1, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -1167,7 +1199,7 @@ const SEGMENTS = {
   'supply-chain': {
     name:"Supply Chain", icon:'\u25CB', tag:"Procurement",
     desc:"Sourcing, supplier qualification and goods receipt.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:1, manuals:1, policies:1, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -1180,7 +1212,7 @@ const SEGMENTS = {
   'legal': {
     name:"Legal", icon:'\u25CB', tag:"Legal",
     desc:"Contracting authority, legal review and compliance obligations.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:1, manuals:0, policies:2, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -1193,7 +1225,7 @@ const SEGMENTS = {
   'learning-center': {
     name:"Learning and Development", icon:'\u25CB', tag:"Training",
     desc:"Competency frameworks, training delivery and instructor standards.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:2, manuals:0, policies:1, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -1206,7 +1238,7 @@ const SEGMENTS = {
   'commercial': {
     name:"Commercial & Sales", icon:'\u25CB', tag:"Commercial",
     desc:"Bidding, pricing authority and customer contract handover.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:1, manuals:0, policies:2, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -1219,7 +1251,7 @@ const SEGMENTS = {
   'pt-drilling-coe': {
     name:"Drilling Solutions Center of Excellence", icon:'\u25CB', tag:"Edmonton, Canada",
     desc:"Downhole drilling tools, drilling optimisation products and tool redress.",
-    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Policies', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Standards', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
     sops:3, manuals:2, policies:1, alerts:1, lessons:1, software:0,
     contributors:[],
     docs:{
@@ -1234,7 +1266,7 @@ const SEGMENTS = {
   'pt-completions-coe': {
     name:"Well Completions Center of Excellence", icon:'\u25CB', tag:"Aberdeen, United Kingdom",
     desc:"Completions technology: inflow control, swellable packers and sand screens.",
-    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Policies', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Standards', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
     sops:3, manuals:2, policies:1, alerts:0, lessons:1, software:0,
     contributors:[],
     docs:{
@@ -1249,7 +1281,7 @@ const SEGMENTS = {
   'pt-intervention-coe': {
     name:"Well Intervention Center of Excellence", icon:'\u25CB', tag:"Stavanger, Norway",
     desc:"Through-tubing intervention tools, tractors, fishing and milling assemblies.",
-    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Policies', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Standards', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
     sops:3, manuals:2, policies:1, alerts:1, lessons:1, software:0,
     contributors:[],
     docs:{
@@ -1264,7 +1296,7 @@ const SEGMENTS = {
   'geothermal-coe': {
     name:"Geothermal Center of Excellence", icon:'\u25CB', tag:"Advisory",
     desc:"Geothermal well design review and resource assessment advisory.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:2, manuals:1, policies:0, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -1645,7 +1677,7 @@ function goPage(type,page){
 }
 
 // ── Tab Switching ──
-const TAB_LABELS = {sops:'SOPs', manuals:'Manuals', policies:'Policies', alerts:'Alerts', lessons:'Lessons Learned', software:'Software & Tools'};
+const TAB_LABELS = {sops:'SOPs', manuals:'Manuals', policies:'Standards', alerts:'Alerts', lessons:'Lessons Learned', software:'Software & Tools'};
 // ── Tab switching (All + individual) ──
 const _contentOuter = document.querySelector('.content-outer');
 
@@ -1698,7 +1730,7 @@ openTab(startTab);
   const cfg = {
     sops:    {pill:'SOP', cls:'sop',      title:'Standard Operating Procedures'},
     manuals: {pill:'MNL', cls:'manual',   title:'Technical Manuals'},
-    policies:{pill:'POL', cls:'policy',   title:'Policies & Standards'},
+    policies:{pill:'S',   cls:'policy',   title:'Standards'},
     alerts:  {pill:'ALT', cls:'alert',    title:'Technical Alerts'},
     lessons: {pill:'LSN', cls:'lesson',   title:'Lessons Learned'},
     software:{pill:'ZIP', cls:'software', title:'Software & Tools'},
@@ -1992,6 +2024,17 @@ function copyQRUrl() {
   const v = document.getElementById('qr-url-in').value;
   navigator.clipboard.writeText(v).then(() => { if(window.showToast) window.showToast('Link copied!'); });
 }
+</script>
+
+<script src="documents-master.js"></script>
+<script>
+(function(){
+  if (typeof TAQA_MASTER_DOCS === 'undefined') return;
+  var n = TAQA_MASTER_DOCS.filter(function(d){ return d.scope === 'company'; }).length;
+  var el = document.getElementById('co-n'), bar = document.getElementById('co-bar');
+  if (!n) { if (bar) bar.style.display = 'none'; return; }
+  if (el) el.textContent = n;
+})();
 </script>
 <script src="shared.js"></script>
 <script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>

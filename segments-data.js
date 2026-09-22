@@ -328,7 +328,7 @@ const TAQA_SEGMENTS = {
     name:'Governance, Risk & Compliance', icon:'🔐', tag:'GRC',
     desc:'Cybersecurity governance, policies, standards, operational procedures, security awareness programs, and compliance documentation for TAQA\'s IT and OT environments.',
     sops:10, manuals:8, policies:12, alerts:5, lessons:6, software:2,
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Compliance', lessons:'Awareness'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Compliance', lessons:'Awareness'},
     contributors:[{name:'Mohammed Al Obaid', role:'Cybersecurity Director'},{name:'Afnan Al Khabty', role:'Senior Cyber Security Analyst'}],
     docs:{
       sops:['CS-PROC-001 Incident Response Procedure','CS-PROC-002 Access Control Request Procedure',
@@ -425,7 +425,7 @@ const TAQA_SEGMENTS = {
   'finance': {
     name:"Finance", icon:'\u25CB', tag:"Finance",
     desc:"Financial authority, reporting and expenditure control.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:1, manuals:0, policies:2, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -438,7 +438,7 @@ const TAQA_SEGMENTS = {
   'it': {
     name:"Information Technology", icon:'\u25CB', tag:"IT",
     desc:"IT service delivery, change control and platform operations.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:2, manuals:0, policies:1, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -451,7 +451,7 @@ const TAQA_SEGMENTS = {
   'supply-chain': {
     name:"Supply Chain", icon:'\u25CB', tag:"Procurement",
     desc:"Sourcing, supplier qualification and goods receipt.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:1, manuals:1, policies:1, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -464,7 +464,7 @@ const TAQA_SEGMENTS = {
   'legal': {
     name:"Legal", icon:'\u25CB', tag:"Legal",
     desc:"Contracting authority, legal review and compliance obligations.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:1, manuals:0, policies:2, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -477,7 +477,7 @@ const TAQA_SEGMENTS = {
   'learning-center': {
     name:"Learning and Development", icon:'\u25CB', tag:"Training",
     desc:"Competency frameworks, training delivery and instructor standards.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:2, manuals:0, policies:1, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -490,7 +490,7 @@ const TAQA_SEGMENTS = {
   'commercial': {
     name:"Commercial & Sales", icon:'\u25CB', tag:"Commercial",
     desc:"Bidding, pricing authority and customer contract handover.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:1, manuals:0, policies:2, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{
@@ -503,7 +503,7 @@ const TAQA_SEGMENTS = {
   'pt-drilling-coe': {
     name:"Drilling Solutions Center of Excellence", icon:'\u25CB', tag:"Edmonton, Canada",
     desc:"Downhole drilling tools, drilling optimisation products and tool redress.",
-    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Policies', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Standards', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
     sops:3, manuals:2, policies:1, alerts:1, lessons:1, software:0,
     contributors:[],
     docs:{
@@ -518,7 +518,7 @@ const TAQA_SEGMENTS = {
   'pt-completions-coe': {
     name:"Well Completions Center of Excellence", icon:'\u25CB', tag:"Aberdeen, United Kingdom",
     desc:"Completions technology: inflow control, swellable packers and sand screens.",
-    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Policies', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Standards', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
     sops:3, manuals:2, policies:1, alerts:0, lessons:1, software:0,
     contributors:[],
     docs:{
@@ -533,7 +533,7 @@ const TAQA_SEGMENTS = {
   'pt-intervention-coe': {
     name:"Well Intervention Center of Excellence", icon:'\u25CB', tag:"Stavanger, Norway",
     desc:"Through-tubing intervention tools, tractors, fishing and milling assemblies.",
-    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Policies', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Standards', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
     sops:3, manuals:2, policies:1, alerts:1, lessons:1, software:0,
     contributors:[],
     docs:{
@@ -548,7 +548,7 @@ const TAQA_SEGMENTS = {
   'geothermal-coe': {
     name:"Geothermal Center of Excellence", icon:'\u25CB', tag:"Advisory",
     desc:"Geothermal well design review and resource assessment advisory.",
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
     sops:2, manuals:1, policies:0, alerts:0, lessons:0, software:0,
     contributors:[],
     docs:{

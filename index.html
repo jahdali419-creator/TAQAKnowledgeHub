@@ -1296,6 +1296,75 @@ html[data-theme="dark"] .fc-go, html[data-theme="dark"] .fr-go { border-color:rg
   .fc-meter i { transition:none; }
 }
 
+/* ── The company charter ───────────────────────────────────────────────
+   A policy is a different kind of thing from a segment's paperwork, so it
+   gets a different surface. Dark teal above the glass, because the eye
+   reads dark as the roof and everything under it as what it covers. */
+.charter {
+  width:100%; display:flex; align-items:center; gap:18px; text-align:start;
+  font-family:inherit; cursor:pointer; margin-bottom:13px;
+  padding:17px 20px; border-radius:18px; position:relative; overflow:hidden;
+  background:linear-gradient(135deg, #00474C 0%, #005D63 55%, #00767A 100%);
+  border:1px solid rgba(0,187,182,0.3); color:#fff;
+  box-shadow:0 10px 26px rgba(0,88,90,0.22);
+  transition:transform 300ms cubic-bezier(0.22,1,0.36,1),
+             box-shadow 300ms cubic-bezier(0.22,1,0.36,1);
+}
+.charter::after {
+  content:''; position:absolute; top:-58px; inset-inline-end:-30px;
+  width:190px; height:190px; border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle, rgba(0,187,182,0.3), transparent 62%);
+}
+@media (hover:hover) and (pointer:fine){
+  .charter:hover { transform:translateY(-2px); box-shadow:0 16px 34px rgba(0,88,90,0.3); }
+  .charter:hover .ch-go { background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.5); }
+}
+.charter:focus-visible { outline:2px solid #00BBB6; outline-offset:3px; }
+.ch-main { flex:1; min-width:0; }
+.ch-tag { display:block; font-size:10px; font-weight:700; letter-spacing:1.6px;
+  text-transform:uppercase; color:#7FE3DF; margin-bottom:6px; }
+.ch-t { display:block; font-family:'BwGradual','Urbanist',sans-serif; font-size:16px;
+  font-weight:700; letter-spacing:-0.2px; color:#fff; }
+.ch-t b { font-size:20px; font-weight:800; color:#fff; font-variant-numeric:tabular-nums;
+  margin-inline-end:3px; }
+.ch-d { display:block; font-size:12px; line-height:1.55; color:rgba(255,255,255,0.72);
+  margin-top:5px; max-width:74ch; }
+.ch-go {
+  width:36px; height:36px; flex-shrink:0; display:inline-flex;
+  align-items:center; justify-content:center; border-radius:50%;
+  border:1px solid rgba(255,255,255,0.32); background:rgba(255,255,255,0.1); color:#fff;
+  transition:background 260ms ease, border-color 260ms ease;
+}
+.ch-go svg { width:15px; height:15px;
+  transition:transform 380ms cubic-bezier(0.22,1,0.36,1); }
+.charter[aria-expanded="true"] .ch-go svg { transform:rotate(90deg); }
+
+.charter-panel { height:0; overflow:hidden; margin-bottom:0;
+  transition:height 420ms cubic-bezier(0.22,1,0.36,1), margin-bottom 420ms cubic-bezier(0.22,1,0.36,1); }
+.charter-panel.open { margin-bottom:13px; }
+.ch-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+@media(max-width:760px){ .ch-grid { grid-template-columns:1fr; } }
+.ch-row {
+  display:flex; align-items:center; gap:12px; text-decoration:none;
+  padding:11px 14px; border-radius:12px;
+  background:rgba(255,255,255,0.56); border:1px solid rgba(255,255,255,0.7);
+  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  transition:background 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+@media (hover:hover) and (pointer:fine){
+  .ch-row:hover { background:rgba(255,255,255,0.95); border-color:rgba(0,93,99,0.24);
+    box-shadow:0 8px 20px rgba(0,88,90,0.1); }
+}
+.ch-num { font-family:'BwGradual','Urbanist',sans-serif; font-size:10.5px; font-weight:800;
+  letter-spacing:0.2px; color:var(--primary); font-variant-numeric:tabular-nums;
+  min-width:116px; flex-shrink:0; }
+.ch-name { flex:1; min-width:0; font-size:12.5px; font-weight:600; color:var(--text); }
+.ch-flag { font-size:9.5px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase;
+  color:var(--text-light); flex-shrink:0; }
+html[data-theme="dark"] .ch-row {
+  background:rgba(30,44,66,0.6); border-color:rgba(255,255,255,0.09); }
+@media (prefers-reduced-motion: reduce){ .charter-panel { transition:none; } }
+
 /* ── Footer Credit ── */
 .footer-credit {
   font-size:11.5px; color:var(--text-muted); margin-top:4px;
@@ -1518,7 +1587,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
       <div class="stats-list">
         <div class="stat-row">
           <span class="stat-row-label">Total Documents</span>
-          <span class="stat-row-value" data-target="587">0</span>
+          <span class="stat-row-value" data-target="600">0</span>
         </div>
         <div class="stat-row">
           <span class="stat-row-label">Business Segments</span>
@@ -1548,7 +1617,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
 <div class="stats-strip reveal">
   <div class="stats-strip-inner">
     <div class="stats-strip-item">
-      <span class="stats-strip-num" data-target="587">0</span>
+      <span class="stats-strip-num" data-target="600">0</span>
       <span class="stats-strip-label">Documents</span>
     </div>
     <div class="stats-strip-divider"></div>
@@ -1594,6 +1663,18 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
         <span class="section-hl-tag">Explore by Discipline</span>
         <h2 class="section-hl-title">One platform. Every discipline.</h2>
       </div>
+      <button type="button" class="charter reveal" id="charter" aria-expanded="false" aria-controls="charter-list">
+        <span class="ch-main">
+          <span class="ch-tag">Company wide</span>
+          <span class="ch-t"><b id="ch-n">0</b> policies every segment, function and center follows</span>
+          <span class="ch-d">Signed by the CEO. A policy is the top of the hierarchy in section 4, so it is never owned by one area.</span>
+        </span>
+        <span class="ch-go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
+        </span>
+      </button>
+      <div class="charter-panel" id="charter-list"></div>
+
       <div class="focus reveal" id="focus" data-state="focus">
         <div class="fstage">
           <div class="fside">
@@ -1624,7 +1705,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
               <a href="segment.html?id=coiled-tubing" class="seg-acc-open">Open Library →</a>
               <span class="seg-acc-stat">12 SOPs</span>
               <span class="seg-acc-stat">9 Manuals</span>
-              <span class="seg-acc-stat">6 Policies</span>
+              <span class="seg-acc-stat">6 Standards</span>
               <span class="seg-acc-stat has-alert">3 Alerts</span>
               <span class="seg-acc-stat">5 Lessons</span>
             </div>
@@ -1650,7 +1731,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
               <a href="segment.html?id=fracturing" class="seg-acc-open">Open Library →</a>
               <span class="seg-acc-stat">18 SOPs</span>
               <span class="seg-acc-stat">11 Manuals</span>
-              <span class="seg-acc-stat">8 Policies</span>
+              <span class="seg-acc-stat">8 Standards</span>
               <span class="seg-acc-stat has-alert">5 Alerts</span>
               <span class="seg-acc-stat">7 Lessons</span>
             </div>
@@ -1675,7 +1756,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
               <a href="segment.html?id=wireline" class="seg-acc-open">Open Library →</a>
               <span class="seg-acc-stat">10 SOPs</span>
               <span class="seg-acc-stat">8 Manuals</span>
-              <span class="seg-acc-stat">5 Policies</span>
+              <span class="seg-acc-stat">5 Standards</span>
               <span class="seg-acc-stat">6 Lessons</span>
             </div>
           </div></div>
@@ -1700,7 +1781,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
               <a href="segment.html?id=drilling" class="seg-acc-open">Open Library →</a>
               <span class="seg-acc-stat">20 SOPs</span>
               <span class="seg-acc-stat">12 Manuals</span>
-              <span class="seg-acc-stat">10 Policies</span>
+              <span class="seg-acc-stat">10 Standards</span>
               <span class="seg-acc-stat has-alert">7 Alerts</span>
               <span class="seg-acc-stat">8 Lessons</span>
             </div>
@@ -1725,7 +1806,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
               <a href="segment.html?id=cementing" class="seg-acc-open">Open Library →</a>
               <span class="seg-acc-stat">12 SOPs</span>
               <span class="seg-acc-stat">8 Manuals</span>
-              <span class="seg-acc-stat">7 Policies</span>
+              <span class="seg-acc-stat">7 Standards</span>
               <span class="seg-acc-stat">5 Lessons</span>
             </div>
           </div></div>
@@ -1750,7 +1831,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
               <a href="segment.html?id=inspection" class="seg-acc-open">Open Library →</a>
               <span class="seg-acc-stat">14 SOPs</span>
               <span class="seg-acc-stat">10 Manuals</span>
-              <span class="seg-acc-stat">8 Policies</span>
+              <span class="seg-acc-stat">8 Standards</span>
               <span class="seg-acc-stat has-alert">3 Alerts</span>
               <span class="seg-acc-stat">6 Lessons</span>
             </div>
@@ -1776,7 +1857,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
               <a href="segment.html?id=well-safety" class="seg-acc-open">Open Library →</a>
               <span class="seg-acc-stat">16 SOPs</span>
               <span class="seg-acc-stat">10 Manuals</span>
-              <span class="seg-acc-stat">9 Policies</span>
+              <span class="seg-acc-stat">9 Standards</span>
               <span class="seg-acc-stat has-alert">8 Alerts</span>
               <span class="seg-acc-stat">9 Lessons</span>
             </div>
@@ -1802,7 +1883,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
               <a href="segment.html?id=qhse" class="seg-acc-open">Open Library →</a>
               <span class="seg-acc-stat">14 SOPs</span>
               <span class="seg-acc-stat">9 Manuals</span>
-              <span class="seg-acc-stat">18 Policies</span>
+              <span class="seg-acc-stat">18 Standards</span>
               <span class="seg-acc-stat has-alert">4 Alerts</span>
               <span class="seg-acc-stat">7 Lessons</span>
             </div>
@@ -1827,7 +1908,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
               <a href="segment.html?id=tws-maintenance" class="seg-acc-open">Open Library →</a>
               <span class="seg-acc-stat">14 SOPs</span>
               <span class="seg-acc-stat">11 Manuals</span>
-              <span class="seg-acc-stat">8 Policies</span>
+              <span class="seg-acc-stat">8 Standards</span>
               <span class="seg-acc-stat">6 Lessons</span>
             </div>
           </div></div>
@@ -1851,7 +1932,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
               <a href="segment.html?id=hr" class="seg-acc-open">Open Library →</a>
               <span class="seg-acc-stat">10 SOPs</span>
               <span class="seg-acc-stat">8 Manuals</span>
-              <span class="seg-acc-stat">15 Policies</span>
+              <span class="seg-acc-stat">15 Standards</span>
               <span class="seg-acc-stat">5 Lessons</span>
             </div>
           </div></div>
@@ -1876,7 +1957,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
               <a href="segment.html?id=well-testing" class="seg-acc-open">Open Library →</a>
               <span class="seg-acc-stat">10 SOPs</span>
               <span class="seg-acc-stat">8 Manuals</span>
-              <span class="seg-acc-stat">5 Policies</span>
+              <span class="seg-acc-stat">5 Standards</span>
               <span class="seg-acc-stat has-alert">2 Alerts</span>
               <span class="seg-acc-stat">6 Lessons</span>
             </div>
@@ -1902,7 +1983,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
               <a href="segment.html?id=cybersecurity" class="seg-acc-open">Open Library →</a>
               <span class="seg-acc-stat">8 Procedures</span>
               <span class="seg-acc-stat">7 Standards</span>
-              <span class="seg-acc-stat">6 Policies</span>
+              <span class="seg-acc-stat">6 Standards</span>
               <span class="seg-acc-stat">5 Awareness</span>
               <span class="seg-acc-stat has-alert">4 Compliance</span>
             </div>
@@ -2480,7 +2561,9 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     'stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/>' +
     '<path d="M13 6.5L18.5 12 13 17.5"/></svg>';
 
-  var controlled = D.filter(A.controlled), library = controlled.length;
+  var controlled = D.filter(A.controlled),
+      company    = controlled.filter(function(d){ return d.scope === 'company'; }),
+      library    = controlled.length;
   function statsFor(id){
     return { docs:controlled.filter(function(d){ return d.segment === id; }).length };
   }
@@ -2629,6 +2712,38 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     var k = btn.dataset.group;
     if (open === k) browse(); else select(k);
   });
+
+  // ── The company charter ─────────────────────────────────────────────
+  // It opens and closes the same way a door does, so the page has one
+  // behaviour rather than two.
+  (function(){
+    var btn  = document.getElementById('charter'),
+        pane = document.getElementById('charter-list');
+    if (!btn || !pane) return;
+    document.getElementById('ch-n').textContent = company.length;
+    pane.innerHTML = '<div class="ch-grid">' + company.map(function(d){
+      return '<a class="ch-row" href="master-list.html?q=' + encodeURIComponent(d.docNumber) + '">' +
+               '<span class="ch-num">' + d.docNumber + '</span>' +
+               '<span class="ch-name">' + d.title + '</span>' +
+               (d.numberStatus === 'provisional'
+                 ? '<span class="ch-flag">Number pending</span>' : '') +
+             '</a>';
+    }).join('') + '</div>';
+
+    var body = pane.firstElementChild, shown = false;
+    btn.addEventListener('click', function(){
+      shown = !shown;
+      pane.style.height = pane.offsetHeight + 'px';
+      void pane.offsetHeight;
+      pane.classList.toggle('open', shown);
+      pane.style.height = (shown ? body.offsetHeight : 0) + 'px';
+      btn.setAttribute('aria-expanded', String(shown));
+      clearTimeout(pane._settle);
+      pane._settle = setTimeout(function(){
+        if (shown) pane.style.height = 'auto';
+      }, 440);
+    });
+  })();
 
   draw(open);
   if ('IntersectionObserver' in window) {
