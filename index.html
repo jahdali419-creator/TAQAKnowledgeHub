@@ -637,7 +637,7 @@ html[data-theme="dark"] .gate-meter { background:#243044; }
 .tile {
   grid-column:span 3; position:relative; isolation:isolate; overflow:hidden;
   display:flex; flex-direction:column; min-height:132px;
-  padding:16px 17px 14px; text-decoration:none;
+  padding:18px 17px 15px; text-decoration:none;
   background:var(--bg-white); border:1px solid var(--border);
   border-radius:16px;
   box-shadow:0 1px 2px rgba(0,88,90,0.04);
@@ -668,20 +668,29 @@ html[data-theme="dark"] .gate-meter { background:#243044; }
   -webkit-mask-composite:xor; mask-composite:exclude; padding:1px;
 }
 @media (hover:hover) and (pointer:fine) {
-  .tile:hover { transform:translateY(-3px); box-shadow:0 14px 30px rgba(0,88,90,0.13); }
+  .tile:hover { transform:translateY(-3px); box-shadow:0 14px 30px rgba(0,88,90,0.13);
+    border-color:rgba(0,93,99,0.24); }
   .tile:hover::before, .tile:hover::after { opacity:1; }
+  .tile:hover .tile-ghost { opacity:0.10; transform:translateY(4px); }
+  .tile:hover .tile-go { background:var(--primary); border-color:var(--primary);
+    color:#fff; transform:translateX(2px); }
 }
 .tile:active { transform:translateY(-1px); }
 .tile:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
 
-.tile-rank {
-  font-family:'BwGradual','Urbanist',sans-serif; font-size:10px; font-weight:700;
-  letter-spacing:1.2px; color:var(--text-light);
-  font-variant-numeric:tabular-nums;
+/* The rank is set as a watermark, cropped by the tile's own edge. It gives
+   the card depth without adding a line anyone has to read. */
+.tile-ghost {
+  position:absolute; top:-18px; inset-inline-end:4px; z-index:-1; pointer-events:none;
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:74px; font-weight:800;
+  line-height:1; letter-spacing:-4px; color:var(--primary); opacity:0.055;
+  font-variant-numeric:tabular-nums; user-select:none;
+  transition:opacity 320ms ease, transform 460ms cubic-bezier(0.16,1,0.3,1);
 }
+.tile.w6 .tile-ghost { font-size:92px; top:-24px; }
 .tile-name {
   font-family:'BwGradual','Urbanist',sans-serif; font-weight:700; color:var(--text);
-  font-size:15px; line-height:1.25; margin-top:9px; letter-spacing:-0.2px;
+  font-size:15px; line-height:1.25; letter-spacing:-0.2px;
 }
 .tile.w6 .tile-name { font-size:19px; }
 .tile-tag {
@@ -689,7 +698,7 @@ html[data-theme="dark"] .gate-meter { background:#243044; }
   color:var(--text-muted); margin-top:4px;
 }
 .tile-foot {
-  margin-top:auto; padding-top:12px; padding-bottom:9px; display:flex;
+  margin-top:auto; padding-top:14px; display:flex;
   align-items:center; justify-content:space-between; gap:10px;
 }
 .tile-docs {
@@ -698,17 +707,18 @@ html[data-theme="dark"] .gate-meter { background:#243044; }
 }
 .tile-docs span { font-size:11px; font-weight:500; color:var(--text-muted);
   letter-spacing:0; margin-inline-start:5px; }
-/* Share of the band, drawn where a card edge would otherwise say nothing. */
-.tile-bar { position:absolute; inset-inline:12px; bottom:10px; height:3px; border-radius:2px;
-  background:rgba(0,88,90,0.10); overflow:hidden; }
-.tile-bar i {
-  display:block; height:100%; border-radius:2px; background:var(--primary); opacity:.55;
-  transform-origin:left center; transform:scaleX(0);
-  animation:barIn 620ms cubic-bezier(0.16,1,0.3,1) forwards;
-  animation-delay:220ms;
+/* The same ring the doors carry, so a tile and a card speak one language. */
+.tile-go {
+  width:30px; height:30px; flex-shrink:0;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:50%; border:1px solid var(--border); color:var(--primary);
+  transition:background 260ms cubic-bezier(0.16,1,0.3,1),
+             border-color 260ms cubic-bezier(0.16,1,0.3,1),
+             color 260ms cubic-bezier(0.16,1,0.3,1),
+             transform 260ms cubic-bezier(0.16,1,0.3,1);
 }
-@keyframes barIn { to { transform:scaleX(1); } }
-html[dir="rtl"] .tile-bar i { transform-origin:right center; }
+.tile-go svg { width:13px; height:13px; }
+html[dir="rtl"] .tile-go svg { transform:scaleX(-1); }
 
 /* The functions band inverts: rules sit over the work, so they sit on teal. */
 /* Approved entities with nothing filed yet. A chip, not a tile: an empty card
@@ -746,7 +756,9 @@ html[dir="rtl"] .tile-bar i { transform-origin:right center; }
 .band-fn-line b { color:var(--text); font-weight:600; }
 
 html[data-theme="dark"] .tile { background:#19263a; border-color:#243044; }
-html[data-theme="dark"] .tile-bar { background:rgba(255,255,255,0.10); }
+html[data-theme="dark"] .tile-go { border-color:#2d3a4e; }
+html[data-theme="dark"] .tile-ghost { opacity:0.09; color:#00BBB6; }
+html[data-theme="dark"] .tile:hover .tile-ghost { opacity:0.16; }
 
 @media(max-width:1100px){
   .tile, .tile.w4 { grid-column:span 4; }
@@ -765,7 +777,7 @@ html[data-theme="dark"] .tile-bar { background:rgba(255,255,255,0.10); }
 }
 @media (prefers-reduced-motion: reduce){
   .tile { opacity:1; transform:none; animation:none; }
-  .tile-bar i { transform:none; animation:none; }
+  .tile-ghost { transition:none; }
 }
 
 /* Sidebar */
@@ -2411,21 +2423,23 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
 
   function draw(k){
     var g = GROUPS[k];
-    var max = g.rows.length ? g.rows[0].docs : 1;
     // Two wide leaders then thirds reads well for a long list; with exactly
     // three the same pattern leaves an orphan, so give them a clean row.
     var w = g.rows.length === 3 ? ['w4','w4','w4'] : ['w6','w6','w4','w4','w4'];
+    var ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>';
     grid.innerHTML = g.rows.map(function(x, i){
-      return '<a class="tile ' + (w[i] || 'w4') + '" style="--i:' + i + '" data-id="' + x.id + '" ' +
+      return '<a class="tile ' + (w[i] || 'w4') + '" data-id="' + x.id + '" ' +
              'href="segment.html?id=' + x.id + '">' +
-               '<span class="tile-rank">' + (i < 9 ? '0' : '') + (i + 1) + '</span>' +
+               '<span class="tile-ghost" aria-hidden="true">' +
+                 (i < 9 ? '0' : '') + (i + 1) + '</span>' +
                '<span class="tile-name">' + x.name + '</span>' +
                '<span class="tile-tag">' + (x.tag || '') + '</span>' +
                '<span class="tile-foot">' +
                  '<span class="tile-docs">' + x.docs + '<span>docs</span></span>' +
+                 '<span class="tile-go" aria-hidden="true">' + ARROW + '</span>' +
                '</span>' +
-               '<span class="tile-bar"><i style="width:' +
-                 Math.round(x.docs / max * 100) + '%;--i:' + i + '"></i></span>' +
              '</a>';
     }).join('');
     document.getElementById('gate-title').textContent = g.title;
