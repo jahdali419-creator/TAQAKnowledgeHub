@@ -548,17 +548,8 @@ html[data-theme="dark"] .doc-num {
         <svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div class="nav-dropdown-panel seg-cols" role="menu">
-        <a href="segment.html?id=coiled-tubing" class="seg-dd-item"><span class="seg-dd-name">Coiled Tubing</span><span class="seg-dd-tag">Operations</span></a>
-        <a href="segment.html?id=fracturing" class="seg-dd-item"><span class="seg-dd-name">Fracturing</span><span class="seg-dd-tag">Stimulation</span></a>
-        <a href="segment.html?id=wireline" class="seg-dd-item"><span class="seg-dd-name">Wireline</span><span class="seg-dd-tag">Logging</span></a>
-        <a href="segment.html?id=drilling" class="seg-dd-item"><span class="seg-dd-name">Drilling</span><span class="seg-dd-tag">Well Operations</span></a>
-        <a href="segment.html?id=cementing" class="seg-dd-item"><span class="seg-dd-name">Cementing</span><span class="seg-dd-tag">Well Integrity</span></a>
-        <a href="segment.html?id=inspection" class="seg-dd-item"><span class="seg-dd-name">Inspection Services</span><span class="seg-dd-tag">Compliance</span></a>
-        <a href="segment.html?id=well-safety" class="seg-dd-item"><span class="seg-dd-name">Well Safety</span><span class="seg-dd-tag">HSE Critical</span></a>
-        <a href="segment.html?id=qhse" class="seg-dd-item"><span class="seg-dd-name">QHSE</span><span class="seg-dd-tag">Quality & Safety</span></a>
-        <a href="segment.html?id=tws-maintenance" class="seg-dd-item"><span class="seg-dd-name">TWS Maintenance</span><span class="seg-dd-tag">Maintenance</span></a>
-        <a href="segment.html?id=hr" class="seg-dd-item"><span class="seg-dd-name">Human Resources</span><span class="seg-dd-tag">HR & People</span></a>
-        <a href="segment.html?id=well-testing" class="seg-dd-item"><span class="seg-dd-name">Well Testing</span><span class="seg-dd-tag">Testing Services</span></a>
+        <!-- Built from the register at runtime. Nothing is listed here, so a
+             renamed area cannot survive as stale markup. -->
       </div>
     </li>
     <li><a href="ai-search.html">Document Search</a></li>
@@ -676,7 +667,7 @@ html[data-theme="dark"] .doc-num {
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search policies..." oninput="filterDocs(this,'policies')"></div>
       <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'policies','default')">Default</button><button class="sort-btn" onclick="setSort(this,'policies','az')">A, Z</button></div>
-      <span class="doc-count-label">Showing <strong id="vis-policies">,</strong> policies</span>
+      <span class="doc-count-label">Showing <strong id="vis-policies">,</strong> standards</span>
     </div>
     <div class="docs-grid" id="list-policies"></div>
   </div>
@@ -1488,7 +1479,7 @@ function getDocSummary(title, type) {
   return 'Contains operational guidance, technical specifications, and procedural requirements for field personnel and supervisors involved in these activities.';
 }
 
-const LIST_TYPE_MAP = {sops:'sop',manuals:'manual',policies:'policy',lessons:'lesson',alerts:'alert'};
+const LIST_TYPE_MAP = {sops:'sop',manuals:'manual',policies:'standard',lessons:'lesson',alerts:'alert'};
 
 function buildDocCard(title, type, idx) {
   const labels = {sop:'SOP',manual:'Manual',policy:'Policy',alert:'Alert',lesson:'Lesson Learned'};
@@ -1500,7 +1491,7 @@ function buildDocCard(title, type, idx) {
   const segRevs = (typeof TAQA_SEGMENTS !== 'undefined' && TAQA_SEGMENTS[segId]) ? (TAQA_SEGMENTS[segId].docRevisions || {}) : {};
   const revInfo = segRevs[title];
   const revBadge = revInfo ? `<span class="doc-rev-badge">Rev ${revInfo.current}</span>` : '';
-  const _ti={sop:'SOP',manual:'MNL',policy:'POL',lesson:'LSN',alert:'ALT'};
+  const _ti={sop:'SOP',manual:'WI',standard:'S',policy:'P',lesson:'LL',alert:'ALT'};
   const icon=`<div class="doc-type-icon ${type}">${_ti[type]||type.slice(0,3).toUpperCase()}</div>`;
   const isBm = window.TAQA_Bookmarks ? window.TAQA_Bookmarks.has(title, segId) : false;
   const _p = splitEntry(title);
@@ -1996,7 +1987,7 @@ function loadRecent() {
   const cards = document.getElementById('recent-cards');
   if (!strip || !cards) return;
   cards.innerHTML = items.slice(0,3).map(i => {
-    const typeLabel = {sop:'SOP',manual:'Manual',policy:'Policy',lesson:'Lesson',alert:'Alert'}[i.type] || i.type;
+    const typeLabel = {sop:'SOP',manual:'Manual',standard:'Standard',policy:'Policy',lesson:'Lesson',alert:'Alert'}[i.type] || i.type;
     return `<div class="recent-card" onclick="openDocModal('${i.title.replace(/'/g,"&#39;")}','${i.type}')">
       <div class="recent-card-title">${i.title}</div>
       <div class="recent-card-meta">${typeLabel} · ${i.segName}</div>

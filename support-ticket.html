@@ -386,19 +386,9 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Operational Segment <span>*</span></label>
-            <select class="form-select" required>
-              <option value="" disabled selected>Select segment</option>
-              <option>Coiled Tubing</option>
-              <option>Fracturing</option>
-              <option>Wireline</option>
-              <option>Drilling</option>
-              <option>Cementing</option>
-              <option>Inspection Services</option>
-              <option>Well Safety</option>
-              <option>QHSE</option>
-              <option>TWS Maintenance</option>
-              <option>Human Resources</option>
+            <label class="form-label">Area <span>*</span></label>
+            <select class="form-select" id="ticket-area" required>
+              <option value="" disabled selected>Select area</option>
             </select>
           </div>
         </div>
@@ -656,7 +646,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
           <span class="expert-dot away"></span>
         </div>
         <div class="expert-info">
-          <div class="expert-name">Well Safety Expert</div>
+          <div class="expert-name">Safety Services Expert</div>
           <div class="expert-seg">Safety Critical · BOP Systems</div>
         </div>
         <span class="expert-chevron">›</span>
@@ -1001,6 +991,28 @@ document.addEventListener('click',function(e){
   document.body.classList.add('page-exit');
   setTimeout(()=>window.location.href=h,270);
 });
+</script>
+
+<script src="documents-master.js"></script>
+<script>
+/* The area list was ten options typed by hand under names the business
+   retired. It comes from the register now, grouped the same way the rest of
+   the site groups them. */
+(function(){
+  var sel = document.getElementById('ticket-area');
+  if (!sel || typeof TAQA_DOC_LOOKUPS === 'undefined') return;
+  var S = TAQA_DOC_LOOKUPS.segments;
+  var FAM = [['segment','Operational Segments'],['function','Corporate Functions'],
+             ['product','Products & Technology']];
+  sel.innerHTML = '<option value="" disabled selected>Select area</option>' +
+    FAM.map(function(f){
+      var ids = Object.keys(S).filter(function(k){ return S[k].group === f[0]; })
+        .sort(function(a,b){ return S[a].name.localeCompare(S[b].name); });
+      return ids.length ? '<optgroup label="' + f[1] + '">' + ids.map(function(k){
+        return '<option value="' + k + '">' + S[k].name + '</option>';
+      }).join('') + '</optgroup>' : '';
+    }).join('');
+})();
 </script>
 <script src="shared.js"></script>
 <script src="fixes.js"></script>

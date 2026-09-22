@@ -601,9 +601,9 @@ window.showToast=function(msg,type){
   document.body.appendChild(fab);
   var panel=document.createElement('div');panel.className='bm-panel';panel.id='bm-panel';
   document.body.appendChild(panel);
-  var TC={sop:'rgba(0,93,99,0.12)',manual:'rgba(59,130,246,0.1)',policy:'rgba(245,158,11,0.1)',lesson:'rgba(34,197,94,0.1)',alert:'rgba(253,105,29,0.1)',software:'rgba(56,189,248,0.12)'};
-  var TT={sop:'#00BBB6',manual:'#60a5fa',policy:'#f59e0b',lesson:'#4ade80',alert:'#FD691D',software:'#38bdf8'};
-  var TS={sop:'SOP',manual:'MNL',policy:'POL',lesson:'LSN',alert:'ALT',software:'ZIP'};
+  var TC={sop:'rgba(0,93,99,0.12)',manual:'rgba(59,130,246,0.1)',standard:'rgba(0,187,182,0.12)',policy:'rgba(245,158,11,0.1)',lesson:'rgba(34,197,94,0.1)',alert:'rgba(253,105,29,0.1)',software:'rgba(56,189,248,0.12)'};
+  var TT={sop:'#00BBB6',manual:'#60a5fa',standard:'#008675',policy:'#f59e0b',lesson:'#4ade80',alert:'#FD691D',software:'#38bdf8'};
+  var TS={sop:'SOP',manual:'WI',standard:'S',policy:'P',lesson:'LL',alert:'ALT',software:'ZIP'};
   function updateBmBadge(){
     var n=window.TAQA_Bookmarks.getAll().length;
     var b=document.getElementById('bm-cnt');
