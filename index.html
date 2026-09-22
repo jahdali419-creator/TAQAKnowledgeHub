@@ -448,6 +448,102 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
    so they sit on a Teal Green ground and read as a layer above, not a peer.
    Tile width follows document count, so the grid is asymmetric because the
    data is, not because asymmetry looks busy.                               */
+/* ── Gateway cards ─────────────────────────────────────────────────────────
+   Two doors instead of twenty five tiles. Each rises from below on scroll
+   through the page's existing .reveal observer, and opens its own group
+   underneath rather than navigating away.                                 */
+.gates { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media(max-width:760px){ .gates { grid-template-columns:1fr; } }
+
+.gate {
+  position:relative; isolation:isolate; overflow:hidden; text-align:start;
+  display:flex; flex-direction:column; gap:0; min-height:196px;
+  padding:22px 24px 20px; cursor:pointer; font-family:inherit;
+  background:var(--bg-white); border:1px solid var(--border); border-radius:18px;
+  box-shadow:0 1px 2px rgba(0,88,90,0.05);
+  transition:transform 280ms cubic-bezier(0.16,1,0.3,1),
+             box-shadow 280ms cubic-bezier(0.16,1,0.3,1),
+             border-color 280ms cubic-bezier(0.16,1,0.3,1);
+}
+.gate::before {
+  content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  opacity:0; transition:opacity 280ms ease;
+  background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),
+    rgba(0,93,99,0.09), transparent 60%);
+}
+@media (hover:hover) and (pointer:fine){
+  .gate:hover { transform:translateY(-3px); box-shadow:0 16px 34px rgba(0,88,90,0.14);
+    border-color:rgba(0,93,99,0.28); }
+  .gate:hover::before { opacity:1; }
+  .gate:hover .gate-go svg { transform:translateX(3px); }
+}
+.gate:active { transform:translateY(-1px); }
+.gate:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
+.gate[aria-expanded="true"] {
+  border-color:var(--primary);
+  box-shadow:0 0 0 1px var(--primary) inset, 0 10px 26px rgba(0,88,90,0.12);
+}
+
+.gate-top { display:flex; align-items:baseline; gap:10px; }
+.gate-n {
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:44px; font-weight:800;
+  line-height:1; letter-spacing:-1.6px; color:var(--primary);
+  font-variant-numeric:tabular-nums;
+}
+.gate-k {
+  font-size:10.5px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase;
+  color:var(--text-light);
+}
+.gate-t {
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:18px; font-weight:700;
+  color:var(--text); letter-spacing:-0.3px; margin-top:12px;
+}
+.gate-d { font-size:12.5px; line-height:1.6; color:var(--text-muted); margin-top:5px; max-width:44ch; }
+.gate-chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:13px; }
+.gate-chips span {
+  font-size:10.5px; font-weight:500; color:var(--text-muted);
+  padding:3px 9px; border-radius:999px; background:var(--bg); border:1px solid var(--border);
+}
+.gate-foot {
+  margin-top:auto; padding-top:16px; display:flex; align-items:center;
+  justify-content:space-between; gap:12px;
+}
+.gate-m { font-size:12px; color:var(--text-muted); font-variant-numeric:tabular-nums; }
+.gate-m b { color:var(--text); font-weight:700; }
+.gate-m i { font-style:normal; color:#C8102E; font-weight:700; }
+html[data-theme="dark"] .gate-m i { color:#E99FAB; }
+.gate-go {
+  display:inline-flex; align-items:center; gap:6px; flex-shrink:0;
+  font-size:12.5px; font-weight:600; color:var(--primary);
+}
+.gate-go svg { width:15px; height:15px; transition:transform 280ms cubic-bezier(0.16,1,0.3,1); }
+.gate[aria-expanded="true"] .gate-go svg { transform:rotate(90deg); }
+html[data-theme="dark"] .gate { background:#19263a; border-color:#243044; }
+html[data-theme="dark"] .gate-chips span { background:rgba(255,255,255,0.04); border-color:#243044; }
+
+/* The panel opens by growing its own row rather than by animating height,
+   so nothing below it jumps and only the grid track is interpolated. */
+.gate-panel {
+  display:grid; grid-template-rows:0fr; overflow:hidden;
+  transition:grid-template-rows 440ms cubic-bezier(0.16,1,0.3,1);
+}
+.gate-panel.open { grid-template-rows:1fr; }
+.gate-panel > div { min-height:0; }
+.gate-body { padding-top:18px; }
+.gate-head {
+  display:flex; align-items:baseline; justify-content:space-between; gap:16px;
+  flex-wrap:wrap; margin-bottom:12px;
+}
+.gate-head h4 {
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:12px; font-weight:700;
+  letter-spacing:1.5px; text-transform:uppercase; color:var(--text);
+}
+.gate-head span { font-size:12px; color:var(--text-muted); }
+.gate-head span b { color:var(--text); font-weight:700; font-variant-numeric:tabular-nums; }
+@media (prefers-reduced-motion: reduce){
+  .gate-panel { transition:none; }
+}
+
 .band { margin-bottom:22px; }
 .band-head {
   display:flex; align-items:baseline; justify-content:space-between;
@@ -1162,7 +1258,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
       <div class="stats-list">
         <div class="stat-row">
           <span class="stat-row-label">Total Documents</span>
-          <span class="stat-row-value" data-target="523">0</span>
+          <span class="stat-row-value" data-target="576">0</span>
         </div>
         <div class="stat-row">
           <span class="stat-row-label">Business Segments</span>
@@ -1170,7 +1266,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
         </div>
         <div class="stat-row">
           <span class="stat-row-label">Active Technical Alerts</span>
-          <span class="stat-row-value" data-target="25">0</span>
+          <span class="stat-row-value" data-target="37">0</span>
         </div>
         <div class="stat-row">
           <span class="stat-row-label">Registered Users</span>
@@ -1192,7 +1288,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
 <div class="stats-strip reveal">
   <div class="stats-strip-inner">
     <div class="stats-strip-item">
-      <span class="stats-strip-num" data-target="523">0</span>
+      <span class="stats-strip-num" data-target="576">0</span>
       <span class="stats-strip-label">Documents</span>
     </div>
     <div class="stats-strip-divider"></div>
@@ -1202,13 +1298,13 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
     </div>
     <div class="stats-strip-divider"></div>
     <div class="stats-strip-item">
-      <span class="stats-strip-num" data-target="160" data-suffix="+">0</span>
+      <span class="stats-strip-num" data-target="197">0</span>
       <span class="stats-strip-label">Glossary Terms</span>
     </div>
     <div class="stats-strip-divider"></div>
     <div class="stats-strip-item">
-      <span class="stats-strip-num" data-target="1">0</span>
-      <span class="stats-strip-label">Platform</span>
+      <span class="stats-strip-num" data-target="14">0</span>
+      <span class="stats-strip-label">Corporate Functions</span>
     </div>
   </div>
 </div>
@@ -1238,24 +1334,41 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
         <span class="section-hl-tag">Explore by Discipline</span>
         <h2 class="section-hl-title">One platform. Every discipline.</h2>
       </div>
-      <div class="band reveal">
-        <div class="band-head">
-          <div class="band-title"><span class="band-dot"></span><h3>Operational Segments</h3></div>
-          <span class="band-note" id="band-seg-note"></span>
-        </div>
-        <div class="bento" id="band-seg"></div>
-        <div class="waiting" id="band-seg-wait"></div>
-        <p class="band-move" id="band-seg-move"></p>
+      <div class="gates">
+        <button type="button" class="gate reveal" id="gate-seg" data-group="seg" aria-expanded="false" aria-controls="gate-panel">
+          <span class="gate-top"><span class="gate-n" id="gate-seg-n">0</span><span class="gate-k">areas</span></span>
+          <span class="gate-t">Operational Segments</span>
+          <span class="gate-d">Service lines that deliver the work. Procedures, manuals and lessons from the wellsite.</span>
+          <span class="gate-chips" id="gate-seg-chips"></span>
+          <span class="gate-foot">
+            <span class="gate-m" id="gate-seg-m"></span>
+            <span class="gate-go">Open
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
+            </span>
+          </span>
+        </button>
+
+        <button type="button" class="gate reveal reveal-delay-1" id="gate-fn" data-group="fn" aria-expanded="false" aria-controls="gate-panel">
+          <span class="gate-top"><span class="gate-n" id="gate-fn-n">0</span><span class="gate-k">areas</span></span>
+          <span class="gate-t">Corporate Functions</span>
+          <span class="gate-d">Functions that set the rules. A policy published here binds the wellsite as much as the office.</span>
+          <span class="gate-chips" id="gate-fn-chips"></span>
+          <span class="gate-foot">
+            <span class="gate-m" id="gate-fn-m"></span>
+            <span class="gate-go">Open
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
+            </span>
+          </span>
+        </button>
       </div>
 
-      <div class="band band-fn reveal">
-        <div class="band-head">
-          <div class="band-title"><span class="band-dot"></span><h3>Corporate Functions</h3></div>
-          <span class="band-note" id="band-fn-note"></span>
-        </div>
-        <p class="band-fn-line">These set rules that apply across every segment. A policy published here binds the wellsite as much as the office.</p>
-        <div class="bento" id="band-fn"></div>
-        <div class="waiting" id="band-fn-wait"></div>
+      <div class="gate-panel" id="gate-panel">
+        <div><div class="gate-body">
+          <div class="gate-head"><h4 id="gate-title"></h4><span id="gate-note"></span></div>
+          <div class="bento" id="gate-grid"></div>
+          <div class="waiting" id="gate-wait"></div>
+          <p class="band-move" id="band-seg-move"></p>
+        </div></div>
       </div>
 
       <div class="seg-accordion" id="seg-accordion" style="display:none">
@@ -1582,7 +1695,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
           <a href="glossary.html" class="sidebar-tool-featured reveal">
             <span class="sidebar-tool-featured-tag">Field Reference</span>
             <div class="sidebar-tool-featured-title">Field Glossary</div>
-            <p class="sidebar-tool-featured-desc">Instantly look up any oilfield abbreviation, BOP, CT, ROP, WOB, and 160+ more. Employees can also add new terms.</p>
+            <p class="sidebar-tool-featured-desc">Instantly look up any oilfield abbreviation, BOP, CT, ROP, WOB, and 190+ more. Employees can also add new terms.</p>
             <span class="sidebar-tool-featured-btn">Open Glossary →</span>
           </a>
 
@@ -2041,36 +2154,51 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
 <script src="documents-master.js"></script>
 <script src="segments-data.js"></script>
 <script>
+/* ── Headline figures ──────────────────────────────────────────────────────
+   The hero panel, the strip and the two doors all read the same register,
+   so no two places on this page can quote a different number.            */
 (function(){
-  if(typeof TAQA_SEGMENTS==='undefined') return;
-  function _cnt(seg){if(!seg||!seg.docs)return 0;return Object.values(seg.docs).reduce(function(s,a){return s+(Array.isArray(a)?a.length:0);},0);}
-  var _segs=Object.values(TAQA_SEGMENTS);
-  var _totalDocs=_segs.reduce(function(s,seg){return s+_cnt(seg);},0);
-  var _totalAlerts=_segs.reduce(function(s,seg){return s+(seg.docs&&Array.isArray(seg.docs.alerts)?seg.docs.alerts.length:0);},0);
-  var _totalSegs=_segs.length;
-  // Update stats strip counters
+  if (typeof TAQA_MASTER_DOCS === 'undefined') return;
+  var D = TAQA_MASTER_DOCS, A = TAQA_DOC;
+
+  var SEG_IDS = ['drilling','well-safety','fracturing','inspection','coiled-tubing',
+                 'cementing','well-testing','wireline','slickline','well-completions',
+                 'marine-services'];
+  var FN_IDS  = ['qhse','cybersecurity','hr','finance','it','supply-chain','legal',
+                 'learning-center','commercial','facility-management','administration',
+                 'venture-management','new-business','geothermal-coe'];
+
+  var controlled = D.filter(A.controlled);
+  var totalDocs  = controlled.length;
+  var totalAlert = controlled.filter(function(d){ return d.docType === 'alert'; }).length;
+  var segN = SEG_IDS.length, fnN = FN_IDS.length;
+
+  function set(el, n){ if (el) el.dataset.target = n; }
+
   document.querySelectorAll('.stats-strip-item').forEach(function(item){
-    var lbl=item.querySelector('.stats-strip-label');
-    var num=item.querySelector('[data-target]');
-    if(!lbl||!num)return;
-    var t=lbl.textContent.trim();
-    if(t.indexOf('Document')!==-1)num.dataset.target=_totalDocs;
-    else if(t.indexOf('Segment')!==-1)num.dataset.target=_totalSegs;
+    var lbl = item.querySelector('.stats-strip-label'),
+        num = item.querySelector('[data-target]');
+    if (!lbl || !num) return;
+    var t = lbl.textContent.trim();
+    if (t.indexOf('Document') !== -1)      set(num, totalDocs);
+    else if (t.indexOf('Function') !== -1) set(num, fnN);
+    else if (t.indexOf('Segment') !== -1)  set(num, segN);
   });
-  // Update sidebar stats list
+
   document.querySelectorAll('.stat-row').forEach(function(row){
-    var lbl=row.querySelector('.stat-row-label');
-    var val=row.querySelector('.stat-row-value');
-    if(!lbl||!val)return;
-    var t=lbl.textContent.trim();
-    if(t.indexOf('Document')!==-1)val.dataset.target=_totalDocs;
-    else if(t.indexOf('Segment')!==-1)val.dataset.target=_totalSegs;
-    else if(t.indexOf('Alert')!==-1)val.dataset.target=_totalAlerts;
-    else if(t.indexOf('User')!==-1)row.style.display='none';
+    var lbl = row.querySelector('.stat-row-label'),
+        val = row.querySelector('.stat-row-value');
+    if (!lbl || !val) return;
+    var t = lbl.textContent.trim();
+    if (t.indexOf('Document') !== -1)      set(val, totalDocs);
+    else if (t.indexOf('Function') !== -1) set(val, fnN);
+    else if (t.indexOf('Segment') !== -1)  set(val, segN);
+    else if (t.indexOf('Alert') !== -1)    set(val, totalAlert);
+    else if (t.indexOf('User') !== -1)     row.style.display = 'none';
   });
-  // Update live header count text
-  var cc=document.querySelector('.cmd-header-count');
-  if(cc)cc.textContent=_totalSegs+' Segments · '+_totalDocs+' Documents';
+
+  var cc = document.querySelector('.cmd-header-count');
+  if (cc) cc.textContent = segN + ' segments · ' + fnN + ' functions · ' + totalDocs + ' documents';
 })();
 </script>
 <script>
@@ -2090,14 +2218,14 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     { name:'Cementing',          from:'cementing',    tag:'Well Integrity' },
     { name:'Well Testing',       from:'well-testing', tag:'Testing Services' },
     { name:'Wireline Services',  from:'wireline',     tag:'Logging' },
-    { name:'Slickline',        from:'slickline',        tag:'Logging' },
-    { name:'Well Completions', from:'well-completions', tag:'Well Operations' },
-    { name:'Marine Services',  from:'marine-services',  tag:'Marine' }
+    { name:'Slickline',          from:'slickline',        tag:'Logging' },
+    { name:'Well Completions',   from:'well-completions', tag:'Well Operations' },
+    { name:'Marine Services',    from:'marine-services',  tag:'Marine' }
   ];
   var FUNCTIONS = [
-    { name:'QHSE',                        from:'qhse',          tag:'Quality & Safety' },
-    { name:'GRC',                         from:'cybersecurity', tag:'Governance, Risk & Compliance' },
-    { name:'Group Human Resources',       from:'hr',            tag:'HR & People' },
+    { name:'QHSE',                     from:'qhse',               tag:'Quality & Safety' },
+    { name:'GRC',                      from:'cybersecurity',      tag:'Governance, Risk & Compliance' },
+    { name:'Group Human Resources',    from:'hr',                 tag:'HR & People' },
     { name:'Finance',                  from:'finance',            tag:'Finance' },
     { name:'Information Technology',   from:'it',                 tag:'IT' },
     { name:'Supply Chain',             from:'supply-chain',       tag:'Procurement' },
@@ -2110,38 +2238,53 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     { name:'New Business Development', from:'new-business',       tag:'Corporate Development' },
     { name:'Geothermal Centre of Excellence', from:'geothermal-coe', tag:'Advisory' }
   ];
-  // Not one of the eleven. Its documents reassign to the segment that owns
-  // the equipment, so they are counted here until that migration runs.
   var PENDING_MOVE = 'tws-maintenance';
-
   var LATE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" ' +
              'stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 1.8"/></svg>';
+
   var controlled = D.filter(A.controlled);
   function statsFor(id){
     var mine = controlled.filter(function(d){ return d.segment === id; });
     return { docs:mine.length, overdue:mine.filter(A.overdue).length };
   }
-
-  function draw(list, hostId, noteId, chipId, noun){
-    var host = document.getElementById(hostId);
-    if (!host) return;
-    var live = [], waiting = [];
-    list.forEach(function(x){
-      if (!x.from) { waiting.push(x); return; }
+  function rowsOf(list){
+    return list.map(function(x){
       var st = statsFor(x.from);
-      live.push({ id:x.from, name:x.name, tag:x.tag, docs:st.docs, overdue:st.overdue });
-    });
-    live.sort(function(a,b){ return b.docs - a.docs; });
+      return { id:x.from, name:x.name, tag:x.tag, docs:st.docs, overdue:st.overdue };
+    }).sort(function(a,b){ return b.docs - a.docs; });
+  }
 
-    var total = live.reduce(function(a,x){ return a + x.docs; }, 0);
-    var max   = live.length ? live[0].docs : 1;
-    // Width follows document count, and each row still has to add to twelve.
-    var w = live.length === 3 ? ['w6','w3','w3']
-          : live.length === 2 ? ['w6','w6']
-          : live.length === 1 ? ['w12']
-          : ['w6','w6','w4','w4','w4'];
+  var GROUPS = {
+    seg: { rows:rowsOf(SEGMENTS), title:'Operational Segments', noun:'segments' },
+    fn:  { rows:rowsOf(FUNCTIONS), title:'Corporate Functions', noun:'functions' }
+  };
 
-    host.innerHTML = live.map(function(x, i){
+  // ── The two doors ───────────────────────────────────────────────────────
+  Object.keys(GROUPS).forEach(function(k){
+    var g = GROUPS[k];
+    var docs = g.rows.reduce(function(a,x){ return a + x.docs; }, 0);
+    var late = g.rows.reduce(function(a,x){ return a + x.overdue; }, 0);
+    document.getElementById('gate-' + k + '-n').textContent = g.rows.length;
+    document.getElementById('gate-' + k + '-m').innerHTML =
+      '<b>' + docs + '</b> documents' + (late ? ' · <i>' + late + '</i> overdue' : '');
+    // A few names so the door says what is behind it.
+    document.getElementById('gate-' + k + '-chips').innerHTML =
+      g.rows.slice(0,4).map(function(x){ return '<span>' + x.name + '</span>'; }).join('') +
+      (g.rows.length > 4 ? '<span>+' + (g.rows.length - 4) + ' more</span>' : '');
+  });
+
+  // ── Opening one ─────────────────────────────────────────────────────────
+  var panel = document.getElementById('gate-panel'),
+      grid  = document.getElementById('gate-grid'),
+      wait  = document.getElementById('gate-wait'),
+      move  = document.getElementById('band-seg-move'),
+      open  = null;
+
+  function draw(k){
+    var g = GROUPS[k];
+    var max = g.rows.length ? g.rows[0].docs : 1;
+    var w = ['w6','w6','w4','w4','w4'];
+    grid.innerHTML = g.rows.map(function(x, i){
       var late = x.overdue
         ? '<span class="tile-flag">' + LATE + x.overdue + '</span>'
         : '<span class="tile-clear">Up to date</span>';
@@ -2157,43 +2300,47 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
                  Math.round(x.docs / max * 100) + '%;--i:' + i + '"></i></span>' +
              '</a>';
     }).join('');
-
-    var note = document.getElementById(noteId);
-    if (note) {
-      note.innerHTML = '<b>' + list.length + '</b> ' + noun + ' · <b>' + total +
-        '</b> controlled documents' +
-        (waiting.length ? ' · <b>' + waiting.length + '</b> awaiting' : '');
-    }
-    var chips = document.getElementById(chipId);
-    if (chips) {
-      chips.innerHTML = waiting.length
-        ? '<span class="wait-label">Approved, no documents filed yet</span>' +
-          waiting.map(function(x){
-            return '<span class="wait-chip">' + x.name + '</span>'; }).join('')
-        : '';
-    }
+    document.getElementById('gate-title').textContent = g.title;
+    var docs = g.rows.reduce(function(a,x){ return a + x.docs; }, 0);
+    document.getElementById('gate-note').innerHTML =
+      '<b>' + g.rows.length + '</b> ' + g.noun + ' · <b>' + docs + '</b> controlled documents';
+    wait.innerHTML = '';
+    var mv = statsFor(PENDING_MOVE);
+    move.innerHTML = (k === 'seg' && mv.docs)
+      ? '<b>' + mv.docs + '</b> documents still sit under TWS Maintenance. Each one reassigns ' +
+        'to the segment that owns the equipment, so they are not counted above.'
+      : '';
   }
 
-  draw(SEGMENTS,  'band-seg', 'band-seg-note', 'band-seg-wait', 'segments');
-  draw(FUNCTIONS, 'band-fn',  'band-fn-note',  'band-fn-wait',  'functions');
-
-  // The 39 documents that have not been reassigned yet are named rather than
-  // dropped, so the bands and the register still add up to 534.
-  var mv = statsFor(PENDING_MOVE), foot = document.getElementById('band-seg-move');
-  if (foot && mv.docs) {
-    foot.innerHTML = '<b>' + mv.docs + '</b> documents still sit under TWS Maintenance. ' +
-      'Each one reassigns to the segment that owns the equipment, so they are not ' +
-      'counted above.';
+  function toggle(k, btn){
+    if (open === k) {                       // clicking the open door closes it
+      panel.classList.remove('open');
+      btn.setAttribute('aria-expanded','false');
+      open = null; return;
+    }
+    draw(k);
+    document.querySelectorAll('.gate').forEach(function(b){
+      b.setAttribute('aria-expanded', String(b === btn));
+    });
+    panel.classList.add('open');
+    open = k;
   }
+
+  document.querySelectorAll('.gate').forEach(function(btn){
+    btn.addEventListener('click', function(){ toggle(btn.dataset.group, btn); });
+    btn.addEventListener('pointermove', function(e){
+      var r = btn.getBoundingClientRect();
+      btn.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      btn.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  });
 
   if (window.matchMedia && matchMedia('(hover:hover) and (pointer:fine)').matches) {
-    document.querySelectorAll('.bento').forEach(function(grid){
-      grid.addEventListener('pointermove', function(e){
-        var t = e.target.closest('.tile'); if (!t) return;
-        var r = t.getBoundingClientRect();
-        t.style.setProperty('--mx', (e.clientX - r.left) + 'px');
-        t.style.setProperty('--my', (e.clientY - r.top) + 'px');
-      });
+    grid.addEventListener('pointermove', function(e){
+      var t = e.target.closest('.tile'); if (!t) return;
+      var r = t.getBoundingClientRect();
+      t.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      t.style.setProperty('--my', (e.clientY - r.top) + 'px');
     });
   }
 })();
