@@ -349,16 +349,6 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 .pr-list { margin:0; padding-inline-start:18px; display:flex; flex-direction:column; gap:6px; }
 .pr-list li { font-size:12.5px; line-height:1.6; color:var(--text-muted); }
 .pr-list b { color:var(--text); font-weight:700; }
-.policy-request {
-  margin:0 0 20px; padding:18px 20px; border-radius:14px;
-  background:rgba(255,184,28,0.1); border:1px solid rgba(255,184,28,0.4);
-}
-.pq-head { font-family:'BwGradual','Urbanist',sans-serif; font-size:14px; font-weight:700;
-  color:var(--text); margin-bottom:7px; }
-.policy-request p { font-size:12.5px; line-height:1.65; color:var(--text-muted); margin:0 0 13px; }
-.pq-go { display:inline-block; padding:9px 17px; border-radius:9px; background:var(--primary);
-  color:#fff; font-size:12.5px; font-weight:700; text-decoration:none; }
-.pq-go:hover { background:var(--primary-hover); }
 .locked-note { font-size:11.5px; color:var(--text-muted); margin-top:5px; }
 .locked-note b { color:var(--primary); }
 html[data-theme="dark"] .policy-rules {
@@ -647,14 +637,6 @@ html[data-theme="dark"] .policy-rules {
         </div>
       </div>
 
-      <div class="policy-request" id="policy-request" hidden>
-        <div class="pq-head">Need a company policy changed?</div>
-        <p>Company policy is written and issued by QMS and signed by the CEO, so it
-           cannot be uploaded here. Raise a change request against the policy instead
-           and QMS will take it from there.</p>
-        <a class="pq-go" href="support-ticket.html?topic=policy-change">Request a policy change &#8594;</a>
-      </div>
-
       <div class="submit-row">
         <button type="submit" class="btn-submit" id="submit-btn">Submit for Review &#8594;</button>
         <a href="index.html" class="btn-cancel">Cancel</a>
@@ -931,8 +913,12 @@ let isAutoFilling = false;
   // ── Areas: everything real, minus the company tier, which is not an area ──
   var segSel = document.getElementById('seg-select');
   if (segSel) {
+    // "company" is the policy tier, not an area. "tws-maintenance" is a holding
+    // pen: its documents reassign to the segment that owns the equipment, so
+    // nothing new should be filed into it.
+    var NOT_FILEABLE = ['company', 'tws-maintenance'];
     var ids = Object.keys(L.segments)
-      .filter(function(k){ return k !== 'company'; })
+      .filter(function(k){ return NOT_FILEABLE.indexOf(k) === -1; })
       .sort(function(a,b){ return L.segments[a].name.localeCompare(L.segments[b].name); });
     segSel.innerHTML = '<option value="" disabled selected>Select area</option>' +
       ids.map(function(k){
@@ -954,9 +940,6 @@ let isAutoFilling = false;
       }).join('');
   }
 
-  // Everyone who cannot write policy is told where to go instead.
-  var req = document.getElementById('policy-request');
-  if (req && !isQMS) req.hidden = false;
 })();
 
 /* Choosing Policy rewrites the form: no area, a function instead, the CEO as
