@@ -138,6 +138,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .form-section-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:13px;font-weight:600;color:var(--primary-light);
   text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--glass-border);}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+/* An area name runs to "Well Completions Center of Excellence", which needs
+   about 256px. Half of this form is 179px, so the box was eating the name.
+   The area gets two thirds of the row and the type, which is shorter, gets
+   the rest. Below 640px they stack and each has the full width. */
+.form-row.wide-first{grid-template-columns:1.9fr 1fr;}
+@media(max-width:640px){ .form-row,.form-row.wide-first{grid-template-columns:1fr;} }
+/* Where a select still cannot be widened, it ends in an ellipsis rather than
+   mid letter, and the full text is on the title attribute. */
+.form-select{text-overflow:ellipsis;padding-inline-end:38px;}
 .form-group{margin-bottom:16px;}
 .form-group:last-child{margin-bottom:0;}
 .form-label{display:block;font-size:13px;font-weight:500;color:var(--text-muted);margin-bottom:7px;}
@@ -446,7 +455,7 @@ html[data-theme="dark"] .policy-rules {
             <label class="fl-label">Document Title<span class="req">*</span></label>
           </div>
         </div>
-        <div class="form-row">
+        <div class="form-row wide-first">
           <div class="form-group">
             <label class="form-label">Segment <span>*</span></label>
             <select class="form-select" id="seg-select" required onchange="onSegmentChange(this.value)">
@@ -917,13 +926,24 @@ let isAutoFilling = false;
     // pen: its documents reassign to the segment that owns the equipment, so
     // nothing new should be filed into it.
     var NOT_FILEABLE = ['company', 'tws-maintenance'];
-    var ids = Object.keys(L.segments)
-      .filter(function(k){ return NOT_FILEABLE.indexOf(k) === -1; })
-      .sort(function(a,b){ return L.segments[a].name.localeCompare(L.segments[b].name); });
+    // Grouped by family rather than run together alphabetically, so twenty four
+    // areas are something you can find your way around.
+    var FAMILIES = [
+      ['segment',  'Operational Segments'],
+      ['function', 'Corporate Functions'],
+      ['product',  'Products & Technology']
+    ];
     segSel.innerHTML = '<option value="" disabled selected>Select area</option>' +
-      ids.map(function(k){
-        return '<option value="' + k + '">' + L.segments[k].name + '</option>';
+      FAMILIES.map(function(f){
+        var ids = Object.keys(L.segments)
+          .filter(function(k){ return NOT_FILEABLE.indexOf(k) === -1 && L.segments[k].group === f[0]; })
+          .sort(function(a,b){ return L.segments[a].name.localeCompare(L.segments[b].name); });
+        if (!ids.length) return '';
+        return '<optgroup label="' + f[1] + '">' + ids.map(function(k){
+          return '<option value="' + k + '">' + L.segments[k].name + '</option>';
+        }).join('') + '</optgroup>';
       }).join('');
+    segSel.addEventListener('change', function(){ this.title = this.selectedOptions[0].textContent; });
   }
 
   // ── Types: the register's own list, with Policy gated ──

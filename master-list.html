@@ -433,6 +433,13 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
   .ct{flex:1 1 50%;min-width:50%;border-bottom:1px solid var(--rule-soft);}
   .head{align-items:flex-start;}
 }
+
+/* Six filters share this row, so a long area name cannot be given more room.
+   It ends in an ellipsis instead of mid letter, and the full name is on the
+   title attribute for a hover or a screen reader. */
+.filter-bar select, #f-seg, #f-type, #f-status, #f-cls, #f-lang, #role-select {
+  text-overflow:ellipsis; padding-inline-end:30px;
+}
 </style>
 </head>
 <body>
@@ -1108,6 +1115,21 @@ function heroLine(){
 renderRole(); readUrl();
 if(quick){const c=CT.find(x=>x.k===quick); if(c&&c.control&&!TAQA_ROLES[role()].controlPanel)quick='controlled';}
 renderCuts(); render(); drawSummary();
+</script>
+
+<script>
+/* A truncated option still has to be readable, so the control carries its own
+   selected text as a tooltip and updates it on every change. */
+(function(){
+  function label(sel){
+    var o = sel.selectedOptions && sel.selectedOptions[0];
+    sel.title = o ? o.textContent.trim() : '';
+  }
+  document.querySelectorAll('select').forEach(function(sel){
+    label(sel);
+    sel.addEventListener('change', function(){ label(sel); });
+  });
+})();
 </script>
 </body>
 </html>
