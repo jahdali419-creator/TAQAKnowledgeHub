@@ -742,6 +742,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <span class="stp-arrow">↑</span>
 </button>
 
+<script src="documents-master.js"></script>
 <script>
 // ── Segment Data ──
 const SEGMENTS = {
@@ -1291,6 +1292,42 @@ const SEGMENTS = {
     }
   }
 };
+
+// ── The register decides what this area holds ─────────────────────────
+// The object above is page copy: an icon, a description, a set of tab labels.
+// Its counts and its document lists were a second copy of the register, and
+// they had drifted. Coiled Tubing said twelve SOPs while the register held
+// nineteen. Counts and lists are now read from the register, so an upload or
+// a withdrawal moves this page without anyone editing it.
+(function(){
+  if (typeof TAQA_MASTER_DOCS === 'undefined' || typeof TAQA_DOC_LOOKUPS === 'undefined') return;
+  var BUCKET = { sop:'sops', manual:'manuals', standard:'policies',
+                 alert:'alerts', lesson:'lessons', software:'software' };
+  var L = TAQA_DOC_LOOKUPS.segments;
+
+  Object.keys(L).forEach(function(id){
+    var copy = SEGMENTS[id] || {};
+    var docs = { sops:[], manuals:[], policies:[], alerts:[], lessons:[], software:[] };
+    TAQA_MASTER_DOCS.forEach(function(d){
+      if (d.segment !== id) return;
+      if (d.status === 'obsolete' || d.status === 'superseded') return;
+      var k = BUCKET[d.docType];
+      if (!k) return;
+      docs[k].push(d.docNumber ? d.docNumber + '  ' + d.title : d.title);
+    });
+    SEGMENTS[id] = {
+      name: L[id].name,                                   // the register owns the name
+      icon: copy.icon || '\u25CB',
+      tag:  copy.tag  || L[id].splName || '',
+      desc: copy.desc || (L[id].splName || L[id].name) + '.',
+      tabLabels: copy.tabLabels,
+      contributors: copy.contributors || [],
+      sops:docs.sops.length, manuals:docs.manuals.length, policies:docs.policies.length,
+      alerts:docs.alerts.length, lessons:docs.lessons.length, software:docs.software.length,
+      docs: docs
+    };
+  });
+})();
 
 // ── URL Params ──
 const params = new URLSearchParams(window.location.search);
@@ -2009,7 +2046,6 @@ function copyQRUrl() {
   navigator.clipboard.writeText(v).then(() => { if(window.showToast) window.showToast('Link copied!'); });
 }
 </script>
-<script src="documents-master.js"></script>
 <script>
 /* ── The Segments menu ─────────────────────────────────────────────────
    Built from the register, in the three families the business settled on,
