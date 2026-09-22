@@ -142,7 +142,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
    about 256px. Half of this form is 179px, so the box was eating the name.
    The area gets two thirds of the row and the type, which is shorter, gets
    the rest. Below 640px they stack and each has the full width. */
-.form-row.wide-first{grid-template-columns:1.9fr 1fr;}
+.form-row.wide-first{grid-template-columns:1.5fr 1fr;}
 @media(max-width:640px){ .form-row,.form-row.wide-first{grid-template-columns:1fr;} }
 /* Where a select still cannot be widened, it ends in an ellipsis rather than
    mid letter, and the full text is on the title attribute. */
@@ -364,6 +364,81 @@ html[data-theme="dark"] .policy-rules {
   background:linear-gradient(135deg, rgba(0,187,182,0.1), rgba(0,93,99,0.05));
   border-color:rgba(0,187,182,0.24);
 }
+
+/* ── One question at a time ────────────────────────────────────────────
+   The step bar at the top of this page promised three steps and delivered
+   one long scroll of eighteen boxes. The steps are real now, and half the
+   boxes are gone: three textareas asked the same question in different
+   words, and a name, an email and an owner are things an identity provider
+   knows without asking. */
+.ustep-panel { animation:panelIn 380ms cubic-bezier(0.22,1,0.36,1); }
+.ustep-panel[hidden] { display:none; }
+@keyframes panelIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+.sect-note { font-size:12.5px; line-height:1.65; color:var(--text-muted); margin:-6px 0 20px; max-width:62ch; }
+.step-nav {
+  display:flex; align-items:center; gap:14px; margin-top:22px;
+  padding-top:20px; border-top:1px solid var(--glass-border);
+}
+.step-hint { flex:1; font-size:12px; color:var(--text-muted); }
+.btn-step {
+  padding:12px 24px; border-radius:11px; border:none; cursor:pointer;
+  background:var(--gradient); color:#fff; font-size:14px; font-weight:700;
+  font-family:inherit; transition:transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+  box-shadow:0 6px 18px rgba(0,93,99,0.28);
+}
+.btn-step:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 10px 26px rgba(0,93,99,0.36); }
+.btn-step:disabled { opacity:0.4; cursor:not-allowed; box-shadow:none; }
+.btn-back {
+  padding:12px 18px; border-radius:11px; cursor:pointer; font-family:inherit;
+  background:transparent; border:1px solid var(--glass-border);
+  color:var(--text-muted); font-size:13.5px; font-weight:600;
+  transition:border-color 0.2s, color 0.2s;
+}
+.btn-back:hover { border-color:var(--primary); color:var(--primary); }
+
+/* The number is generated, so it is shown as a result and edited on purpose. */
+.numchip {
+  display:flex; align-items:center; gap:12px; margin-top:4px;
+  padding:13px 16px; border-radius:12px;
+  background:linear-gradient(135deg, rgba(0,93,99,0.1), rgba(0,187,182,0.05));
+  border:1px solid rgba(0,93,99,0.2);
+}
+.nc-k { font-size:10.5px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase;
+  color:var(--primary); flex-shrink:0; }
+.nc-v { flex:1; font-family:'BwGradual','Urbanist',sans-serif; font-size:16px; font-weight:800;
+  letter-spacing:0.3px; color:var(--text); font-variant-numeric:tabular-nums; }
+.nc-edit { display:none; flex:1; background:transparent; border:none; outline:none;
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:16px; font-weight:800;
+  color:var(--text); border-bottom:1px solid var(--primary); }
+.numchip.editing .nc-v { display:none; }
+.numchip.editing .nc-edit { display:block; }
+.nc-btn { background:transparent; border:none; cursor:pointer; font-family:inherit;
+  font-size:12px; font-weight:700; color:var(--primary); flex-shrink:0; }
+
+.more-detail { margin-top:6px; border-top:1px solid var(--glass-border); padding-top:14px; }
+.more-detail summary { cursor:pointer; font-size:12.5px; font-weight:600; color:var(--primary);
+  list-style:none; }
+.more-detail summary::-webkit-details-marker { display:none; }
+.more-detail summary::before { content:'+ '; font-weight:800; }
+.more-detail[open] summary::before { content:'- '; }
+
+/* The record as it will be filed, before it is filed. */
+.rec-card { border:1px solid var(--glass-border); border-radius:14px; overflow:hidden; }
+.rec-row { display:grid; grid-template-columns:190px 1fr; gap:16px;
+  padding:12px 18px; border-bottom:1px solid var(--glass-border); font-size:13.5px; }
+.rec-row:last-child { border-bottom:none; }
+.rec-row:nth-child(odd) { background:var(--glass-2); }
+.rec-k { color:var(--text-muted); font-size:12.5px; }
+.rec-v { color:var(--text); font-weight:600; word-break:break-word; }
+.rec-v .derived { display:inline-block; margin-inline-start:8px; font-size:10px; font-weight:700;
+  letter-spacing:0.8px; text-transform:uppercase; color:var(--primary);
+  background:rgba(0,93,99,0.09); padding:2px 7px; border-radius:20px; }
+.rec-v .warn { color:#d97706; font-weight:600; font-size:12px; display:block; margin-top:3px; }
+.whoami { margin-top:16px; padding:13px 16px; border-radius:12px;
+  background:var(--glass-2); border:1px solid var(--glass-border);
+  font-size:12.5px; color:var(--text-muted); line-height:1.6; }
+.whoami b { color:var(--text); }
+@media(max-width:640px){ .rec-row { grid-template-columns:1fr; gap:3px; } }
 </style>
 </head>
 <body>
@@ -415,7 +490,8 @@ html[data-theme="dark"] .policy-rules {
 
   <div class="upload-card">
 
-    <!-- ── Drop Zone ── -->
+    <!-- ══ Step 1: the file ══ -->
+    <section class="ustep-panel" id="panel-1">
     <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
       <span class="drop-icon"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 28V16M20 16L15 21M20 16L25 21" stroke="#00BBB6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 30C6.686 30 4 27.314 4 24C4 21.12 5.954 18.69 8.64 18.13C8.226 17.146 8 16.1 8 15C8 10.582 11.582 7 16 7C19.456 7 22.414 9.094 23.618 12.11C24.37 11.41 25.376 11 26.5 11C28.985 11 31 13.015 31 15.5C31 15.906 30.948 16.3 30.85 16.676C32.718 17.448 34 19.278 34 21.5C34 24.538 31.538 27 28.5 27H28" stroke="#00BBB6" stroke-width="2" stroke-linecap="round"/></svg></span>
       <div class="drop-title">Drag & drop your file here</div>
@@ -438,23 +514,19 @@ html[data-theme="dark"] .policy-rules {
       <span id="hash-status"></span>
     </div>
 
-    <!-- ── Document Details ── -->
+      <div class="step-nav" id="nav-1">
+        <span class="step-hint" id="hint-1">Add a file to continue.</span>
+        <button type="button" class="btn-step" onclick="goStep(2)" id="go-2" disabled>Continue &#8594;</button>
+      </div>
+    </section>
+
     <form id="upload-form" onsubmit="submitUpload(event)">
+
+      <!-- ══ Step 2: where it belongs ══ -->
+      <section class="ustep-panel" id="panel-2" hidden>
       <div class="form-section">
-        <div class="form-section-title">Document Details</div>
-        <div class="form-group">
-          <label class="form-label">Document Reference ID <span>*</span></label>
-          <div class="doc-id-row">
-            <input type="text" class="form-input" id="doc-ref-id" placeholder="e.g. CT-SOP-007, DRL-POL-003, ALERT-WS-001" oninput="checkDocId()" autocomplete="off">
-            <div class="doc-id-status" id="doc-id-status"></div>
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="fl-wrap">
-            <input type="text" class="form-input" id="doc-title-input" placeholder=" " required oninput="runDupChecks()">
-            <label class="fl-label">Document Title<span class="req">*</span></label>
-          </div>
-        </div>
+        <div class="form-section-title">Where it belongs</div>
+        <p class="sect-note">Two answers decide the rest: which area owns it, and what kind of document it is. The controlled number follows from them.</p>
         <div class="form-row wide-first">
           <div class="form-group">
             <label class="form-label">Segment <span>*</span></label>
@@ -522,16 +594,6 @@ html[data-theme="dark"] .policy-rules {
             <div style="font-size:11.5px;color:var(--text-muted);margin-top:5px;">The selected document will be archived when this revision is approved by the admin.</div>
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Revision Number</label>
-            <input type="text" class="form-input" placeholder="e.g. Rev 1.0, v2.3">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Document Date</label>
-            <input type="date" class="form-input">
-          </div>
-        </div>
         <div class="form-row" id="software-fields" style="display:none;">
           <div class="form-group">
             <label class="form-label">Software Version <span>*</span></label>
@@ -542,17 +604,33 @@ html[data-theme="dark"] .policy-rules {
             <input type="text" class="form-input" placeholder="e.g. Windows 10/11, Windows Server 2019">
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Document Author / Owner</label>
-          <input type="text" class="form-input" placeholder="Name of document owner or originating department">
+        <div class="numchip" id="numchip" hidden>
+          <span class="nc-k">Controlled number</span>
+          <span class="nc-v" id="doc-ref-id-view">,</span>
+          <input type="text" class="nc-edit" id="doc-ref-id" oninput="checkDocId()" autocomplete="off" aria-label="Controlled number">
+          <button type="button" class="nc-btn" id="nc-edit-btn" onclick="editNumber()">Edit</button>
         </div>
+        <div class="doc-id-status" id="doc-id-status"></div>
       </div>
 
+      <div class="step-nav">
+        <button type="button" class="btn-back" onclick="goStep(1)">&#8592; Back</button>
+        <span class="step-hint" id="hint-2"></span>
+        <button type="button" class="btn-step" onclick="goStep(3)" id="go-3">Continue &#8594;</button>
+      </div>
+      </section>
+
+      <!-- ══ Step 3: what it is ══ -->
+      <section class="ustep-panel" id="panel-3" hidden>
       <div class="form-section">
-        <div class="form-section-title">Document Summary <span style="color:var(--accent);font-style:normal;">*</span></div>
-        <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:18px;line-height:1.6;">
-          Provide a clear and complete summary of the document. This summary will be displayed to all users in the document library so they can quickly understand the document before opening it.
-        </p>
+        <div class="form-section-title">What it is</div>
+        <p class="sect-note">This is what a person sees in the library before they open the file, so it is worth getting right.</p>
+        <div class="form-group">
+          <div class="fl-wrap">
+            <input type="text" class="form-input" id="doc-title-input" placeholder=" " required oninput="runDupChecks()">
+            <label class="fl-label">Document Title<span class="req">*</span></label>
+          </div>
+        </div>
         <div class="form-group">
           <label class="form-label">What does this document cover? <span>*</span></label>
           <textarea class="form-textarea" id="summary-main" style="min-height:110px;"
@@ -561,24 +639,12 @@ html[data-theme="dark"] .policy-rules {
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Purpose / Objective <span>*</span></label>
-            <textarea class="form-textarea" style="min-height:80px;"
-              placeholder="Why does this document exist? What problem does it solve or what requirement does it fulfill?" required></textarea>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Scope of Application <span>*</span></label>
-            <textarea class="form-textarea" style="min-height:80px;"
-              placeholder="Which operations, locations, job roles, or equipment does this document apply to?" required></textarea>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Target Audience <span>*</span></label>
-            <select class="form-select" required>
-              <option value="" disabled selected>Who is this document for?</option>
+            <label class="form-label">Who it applies to <span>*</span></label>
+            <select class="form-select" id="audience-select" required>
+              <option value="" disabled selected>Choose the audience</option>
               <option>Field Operators</option>
               <option>Supervisors &amp; Engineers</option>
-              <option>All Segment Personnel</option>
+              <option>All personnel in this area</option>
               <option>Management</option>
               <option>Safety &amp; QHSE Personnel</option>
               <option>Maintenance Technicians</option>
@@ -586,38 +652,40 @@ html[data-theme="dark"] .policy-rules {
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Key Topics / Keywords</label>
-            <input type="text" class="form-input" placeholder="e.g. well control, BOP, H2S, pressure testing, separate with commas">
+            <label class="form-label">Keywords</label>
+            <input type="text" class="form-input" id="keywords-input" placeholder="well control, BOP, H2S, pressure testing">
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Prerequisites / Related Documents</label>
-          <textarea class="form-textarea" style="min-height:70px;"
-            placeholder="List any documents that should be read before this one, or any related SOPs, manuals, or policies that are referenced in this document."></textarea>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Change Summary <span style="font-size:11px;font-weight:400;color:var(--text-muted);">(for revised documents)</span></label>
-          <textarea class="form-textarea" style="min-height:70px;"
-            placeholder="If this is a revised version, describe what changed from the previous version and the reason for the revision."></textarea>
-        </div>
+
+        <details class="more-detail">
+          <summary>Add related documents or a change note</summary>
+          <div class="form-group" style="margin-top:14px;">
+            <label class="form-label">Related documents</label>
+            <textarea class="form-textarea" id="related-input" style="min-height:66px;"
+              placeholder="Anything that should be read first, or that this one refers to."></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">What changed in this revision</label>
+            <textarea class="form-textarea" id="change-input" style="min-height:66px;"
+              placeholder="Only needed if this replaces an existing document."></textarea>
+          </div>
+        </details>
       </div>
 
+      <div class="step-nav">
+        <button type="button" class="btn-back" onclick="goStep(2)">&#8592; Back</button>
+        <span class="step-hint" id="hint-3"></span>
+        <button type="button" class="btn-step" onclick="goStep(4)" id="go-4">Review &#8594;</button>
+      </div>
+      </section>
+
+      <!-- ══ Step 4: the record before it exists ══ -->
+      <section class="ustep-panel" id="panel-4" hidden>
       <div class="form-section">
-        <div class="form-section-title">Submitted By</div>
-        <div class="form-row">
-          <div class="form-group">
-            <div class="fl-wrap">
-              <input type="text" class="form-input" placeholder=" " required>
-              <label class="fl-label">Your Name<span class="req">*</span></label>
-            </div>
-          </div>
-          <div class="form-group">
-            <div class="fl-wrap">
-              <input type="email" class="form-input" placeholder=" " required>
-              <label class="fl-label">Your Email<span class="req">*</span></label>
-            </div>
-          </div>
-        </div>
+        <div class="form-section-title">Check the record</div>
+        <p class="sect-note">This is the register entry that will be created. Nothing below was typed by you unless it says so.</p>
+        <div class="rec-card" id="rec-card"></div>
+        <div class="whoami" id="whoami"></div>
       </div>
 
       <!-- Exact duplicate warning -->
@@ -647,9 +715,11 @@ html[data-theme="dark"] .policy-rules {
       </div>
 
       <div class="submit-row">
+        <button type="button" class="btn-back" onclick="goStep(3)">&#8592; Back</button>
         <button type="submit" class="btn-submit" id="submit-btn">Submit for Review &#8594;</button>
         <a href="index.html" class="btn-cancel">Cancel</a>
       </div>
+      </section>
     </form>
   </div>
 
@@ -803,6 +873,10 @@ function extOf(name) {
   return i === -1 ? '' : String(name).slice(i + 1).toLowerCase();
 }
 
+function unlockStep1(){
+  var b = document.getElementById('go-2');
+  if (b) b.disabled = !stepReady(1);
+}
 function addFiles(files) {
   let added = 0;
   const rejected = [];
@@ -831,6 +905,7 @@ function addFiles(files) {
   });
 
   fileQueue.style.display = selectedFiles.length ? 'block' : 'none';
+  unlockStep1();
   if (added > 0) {
     showUploadToast('File Added', files[0].name.length > 32 ? files[0].name.substring(0,32)+'…' : files[0].name, ICON_ADD);
     computeAndCheckHash(files[0]);
@@ -848,6 +923,7 @@ function removeFile(id, name) {
   const el = document.getElementById(id);
   if (el) el.remove();
   fileQueue.style.display = selectedFiles.length ? 'block' : 'none';
+  unlockStep1();
   showUploadToast('File Removed', name.length > 36 ? name.substring(0,36)+'…' : name, ICON_REMOVE);
 }
 
@@ -1243,6 +1319,160 @@ document.addEventListener('click',function(e){
   e.preventDefault();
   document.body.classList.add('page-exit');
   setTimeout(()=>window.location.href=h,270);
+});
+
+/* ── Steps ─────────────────────────────────────────────────────────────
+   Four panels, one at a time, each gated on the answers it needs. The bar
+   at the top of the page has always shown steps; now it means them. */
+var _step = 1, _maxStep = 1;
+
+function goStep(n){
+  if (n > _step && !stepReady(_step)) return;
+  _step = n;
+  _maxStep = Math.max(_maxStep, n);
+  for (var i = 1; i <= 4; i++) {
+    var panel = document.getElementById('panel-' + i);
+    if (panel) panel.hidden = (i !== n);
+  }
+  paintStepBar();
+  if (n === 4) paintRecord();
+  var card = document.querySelector('.upload-card');
+  if (card) window.scrollTo({ top: card.offsetTop - 90, behavior: 'smooth' });
+}
+
+// Steps 1 and 2 map onto the first two lamps; 3 and 4 share the last one.
+function paintStepBar(){
+  var lamp = { 1:1, 2:2, 3:2, 4:3 }[_step];
+  for (var i = 1; i <= 3; i++) {
+    var el = document.getElementById('ustep-' + i);
+    if (!el) continue;
+    el.classList.toggle('active', i === lamp);
+    el.classList.toggle('done', i < lamp);
+  }
+  for (var j = 1; j <= 2; j++) {
+    var ln = document.getElementById('ustep-line-' + j);
+    if (ln) ln.classList.toggle('done', j < lamp);
+  }
+}
+
+function stepReady(n){
+  var say = function(id, msg){ var e = document.getElementById(id); if (e) e.textContent = msg || ''; };
+  if (n === 1) {
+    var ok = (typeof selectedFiles !== 'undefined') && selectedFiles.length > 0;
+    say('hint-1', ok ? '' : 'Add a file to continue.');
+    return ok;
+  }
+  if (n === 2) {
+    var type = document.getElementById('doc-type-select').value;
+    var seg  = document.getElementById('seg-select').value;
+    var isPolicy = type === 'policy';
+    var fn = (document.getElementById('policy-fn') || {}).value;
+    if (!type)                  { say('hint-2', 'Choose a document type.'); return false; }
+    if (isPolicy && !fn)        { say('hint-2', 'Choose the issuing function.'); return false; }
+    if (!isPolicy && !seg)      { say('hint-2', 'Choose the area that owns it.'); return false; }
+    if (docStatus === 'revision' && !document.getElementById('supersedes-select').value) {
+      say('hint-2', 'Choose the document this revision replaces.'); return false;
+    }
+    say('hint-2', ''); return true;
+  }
+  if (n === 3) {
+    var t = document.getElementById('doc-title-input').value.trim();
+    var sum = document.getElementById('summary-main').value.trim();
+    var aud = document.getElementById('audience-select').value;
+    if (!t)   { say('hint-3', 'A title is needed.'); return false; }
+    if (!sum) { say('hint-3', 'A summary is needed, it is what people read first.'); return false; }
+    if (!aud) { say('hint-3', 'Say who it applies to.'); return false; }
+    say('hint-3', ''); return true;
+  }
+  return true;
+}
+
+function editNumber(){
+  var chip = document.getElementById('numchip');
+  var f = document.getElementById('doc-ref-id');
+  chip.classList.add('editing');
+  f.dataset.autofilled = 'user';
+  f.focus(); f.select();
+}
+
+// Keep the read-only face of the number in step with the field behind it.
+(function(){
+  var f = document.getElementById('doc-ref-id');
+  if (!f) return;
+  var sync = function(){
+    var v = document.getElementById('doc-ref-id-view');
+    if (v) v.textContent = f.value || 'Not assigned yet';
+    var chip = document.getElementById('numchip');
+    if (chip) chip.hidden = !f.value;
+  };
+  new MutationObserver(sync).observe(f, { attributes:true, attributeFilter:['value'] });
+  f.addEventListener('input', sync);
+  setInterval(sync, 400);
+})();
+
+/* ── The record, before it exists ──────────────────────────────────────
+   Everything the register would store, with each value marked as typed or
+   derived, so nobody is surprised by what gets filed. */
+function paintRecord(){
+  var L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : null;
+  var box = document.getElementById('rec-card');
+  if (!L || !box) return;
+
+  var typeKey = document.getElementById('doc-type-select').value;
+  var t = L.types[typeKey] || {};
+  var isPolicy = typeKey === 'policy';
+  var segKey = isPolicy ? 'company' : document.getElementById('seg-select').value;
+  var e = L.segments[segKey] || {};
+  var num = document.getElementById('doc-ref-id').value;
+  var note = (document.getElementById('doc-id-status') || {}).textContent || '';
+
+  var today = new Date();
+  var due = new Date(today.getTime());
+  due.setMonth(due.getMonth() + (t.reviewCycleMonths || 24));
+  var fmt = function(d){ return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); };
+
+  var D = function(){ return '<span class="derived">derived</span>'; };
+  var rows = [
+    ['Document number', (num || 'Not assigned') + (note.trim() ? '<span class="warn">' + note.trim() + '</span>' : '')],
+    ['Title', document.getElementById('doc-title-input').value.trim() || ',' ],
+    ['Type', (t.label || typeKey || ',')+ D()],
+    [isPolicy ? 'Scope' : 'Area', (e.name || ',') + (isPolicy ? ' ' + D() : '')],
+    ['Revision', (docStatus === 'revision' ? 'Supersedes ' +
+        (document.getElementById('supersedes-select').value || 'a document not yet chosen')
+      : 'Rev 1.0, first issue') + D()],
+    ['Owner', (t.owner || ',') + D()],
+    ['Approver', (isPolicy ? 'Chief Executive Officer' : (t.approver || ',')) + D()],
+    ['Review cycle', (t.reviewCycleMonths || 24) + ' months' + D()],
+    ['Next review due', fmt(due) + D()],
+    ['Retention', (t.retentionYears || 10) + ' years' + D() +
+      '<span class="warn">TQ-QHSE-S001 7.5 says five. API Q2 4.5 requires ten, so ten is used.</span>'],
+    ['Classification', isPolicy
+      ? 'Internal, and it cannot be raised<span class="warn">TQ-QHSE-S001 5.5: a policy shall be accessible to all employees.</span>'
+      : 'Internal' + D()],
+    ['Applies to', document.getElementById('audience-select').value || ','],
+    ['Status on filing', 'Draft, pending approval' + D()]
+  ];
+  box.innerHTML = rows.map(function(r){
+    return '<div class="rec-row"><div class="rec-k">' + r[0] + '</div><div class="rec-v">' + r[1] + '</div></div>';
+  }).join('');
+
+  var who = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE.def() : null;
+  var w = document.getElementById('whoami');
+  if (w) w.innerHTML = 'Filed as <b>' + (who ? who.label : 'Employee') +
+    '</b>. Your name, your email and the document owner come from your sign-in, ' +
+    'so there is nothing here to type. In Azure these are Entra ID claims.';
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  paintStepBar();
+  ['doc-type-select','seg-select','policy-fn','supersedes-select'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('change', function(){ stepReady(2); });
+  });
+  ['doc-title-input','summary-main','audience-select'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', function(){ stepReady(3); });
+  });
 });
 </script>
 <script src="shared.js"></script>
