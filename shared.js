@@ -1049,3 +1049,35 @@ document.addEventListener('keydown',function(e){
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
   else apply();
 })();
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Nothing sits under the chevron
+   ──────────────────────────────────────────────────────────────────────────
+   A select with appearance:none draws its own arrow as a background image.
+   Three pages set padding to 14px and then painted a 12px arrow 14px in from
+   the end, so the arrow occupied space the text was still allowed to use and
+   a long option ran straight underneath it.
+
+   Reserving the space is the fix, and it belongs in one rule rather than in
+   each page's stylesheet, so a select added later cannot reintroduce it.
+   Logical padding, so it reserves the correct side in Arabic too.
+
+   The same guard covers any input that carries an icon on its end side.
+   ────────────────────────────────────────────────────────────────────────── */
+(function () {
+  var s = document.createElement('style');
+  s.id = 'taqa-field-space';
+  s.textContent =
+    'select.form-select,select.sf-select,select[data-arrow]{' +
+      'padding-inline-end:40px!important;' +
+      'background-position:right 14px center!important;' +
+      'text-overflow:ellipsis;' +
+    '}' +
+    'html[dir="rtl"] select.form-select,html[dir="rtl"] select.sf-select{' +
+      'background-position:left 14px center!important;' +
+    '}' +
+    /* A select is a one-line control: an option longer than the box should be
+       cut with an ellipsis rather than run on under the edge. */
+    'select.form-select,select.sf-select{white-space:nowrap;overflow:hidden;}';
+  document.head.appendChild(s);
+})();
