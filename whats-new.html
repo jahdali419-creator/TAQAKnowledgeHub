@@ -18,13 +18,20 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
 /* TAQA identity, matching the register. Neutrals are built from Monument
-   Gray so the greys run warm rather than blue. */
+   Gray so the greys run warm rather than blue. --ink-4 is the hairline tone:
+   it draws disabled chrome and nothing else, because at 1.8:1 on paper no
+   reader can make a word out of it. Text that used to sit on it is on --ink-3. */
 :root{
-  --ink:#1E1C1A; --ink-2:#524D48; --ink-3:#877E76; --ink-4:#BEB8B2;
-  --paper:#FFFFFF; --canvas:#F4F4F3; --inset:#F9F8F8;
+  --ink:#1E1C1A; --ink-2:#524D48; --ink-3:#756A61; --ink-4:#BEB8B2;
+  --paper:#FFFFFF; --canvas:#F4F4F3; --inset:#EDEBE8;
   --rule:rgba(117,106,97,.26); --rule-soft:rgba(117,106,97,.15); --rule-firm:rgba(117,106,97,.44);
-  --brand:#005D63; --brand-soft:rgba(0,93,99,.07);
-  --due:#C8102E; --out:#756A61; --prov:#005D63;
+  /* Teal splits in two. --primary is the ground a mark or a pill sits on and
+     holds still across both themes so white stays legible against it.
+     --primary-ink is the only teal allowed to colour text, and it has to lift
+     to the legacy teal once the ground goes dark. */
+  --primary:#005D63; --primary-ink:#005D63; --primary-light:#00BBB6;
+  --brand:var(--primary-ink); --brand-soft:rgba(0,93,99,.07);
+  --due:#C8102E; --out:#756A61; --prov:var(--primary-ink);
   --r1:4px; --r2:7px; --r3:10px;
   --mono:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
   --read:'Inter',system-ui,sans-serif;
@@ -32,11 +39,12 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 }
 /* The brand allows white or Teal Green grounds. Dark mode takes the teal one. */
 html[data-taqa-theme="dark"]{
-  --ink:#FFFFFF; --ink-2:#C7DBDD; --ink-3:#8CB6B9; --ink-4:#619B9E;
+  --ink:#C7DBDD; --ink-2:#8CB6B9; --ink-3:#619B9E; --ink-4:#00484B;
   --paper:#002326; --canvas:#001314; --inset:#002D30;
   --rule:rgba(0,187,182,.20); --rule-soft:rgba(0,187,182,.11); --rule-firm:rgba(0,187,182,.34);
-  --brand:#00BBB6; --brand-soft:rgba(0,187,182,.13);
-  --due:#FD691D; --out:#8CB6B9; --prov:#00BBB6;
+  --primary:#005D63; --primary-ink:#00BBB6; --primary-light:#00BBB6;
+  --brand-soft:rgba(0,187,182,.13);
+  --due:#FD691D; --out:#8CB6B9;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{overflow-x:clip;}
@@ -62,7 +70,9 @@ a{color:var(--brand);text-decoration:none;}
 nav{height:54px;padding:0 22px;display:flex;align-items:center;gap:6px;
   background:var(--paper);border-bottom:1px solid var(--rule);}
 .brand{display:flex;align-items:center;gap:9px;}
-.brand-mark{width:26px;height:26px;border-radius:var(--r2);background:var(--brand);
+/* The mark carries a white tick, so its ground stays the deep teal in dark
+   mode too. Swapping it for the legacy teal put white on a near-white value. */
+.brand-mark{width:26px;height:26px;border-radius:var(--r2);background:var(--primary);
   display:flex;align-items:center;justify-content:center;}
 .brand-mark svg{width:14px;height:14px;}
 .brand-txt{font-family:'BwGradual','Urbanist',sans-serif;font-size:13px;color:var(--ink);}
@@ -75,7 +85,7 @@ nav{height:54px;padding:0 22px;display:flex;align-items:center;gap:6px;
 
 .frame{max-width:1080px;margin:0 auto;padding:26px 22px 70px;}
 .kicker{font:700 9.5px/1 'BwGradual',sans-serif;letter-spacing:.17em;text-transform:uppercase;
-  color:var(--ink-4);margin-bottom:7px;}
+  color:var(--ink-3);margin-bottom:7px;}
 h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:24px;font-weight:800;color:var(--ink);
   letter-spacing:-.02em;line-height:1.18;}
 .lede{font-family:var(--read);font-size:13px;color:var(--ink-3);margin-top:7px;max-width:70ch;}
@@ -88,7 +98,7 @@ h2{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;font-weight:800;
   margin:34px 0 3px;display:flex;align-items:center;gap:9px;}
 h2 em{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;
   border-radius:var(--r1);background:var(--inset);border:1px solid var(--rule);
-  font:700 10.5px/1 var(--mono);color:var(--ink-3);}
+  font:700 10.5px/1 var(--mono);color:var(--ink-2);}
 .sub{font-family:var(--read);font-size:12.5px;color:var(--ink-3);margin-bottom:13px;max-width:78ch;}
 
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(252px,1fr));gap:11px;}
@@ -99,27 +109,26 @@ a.card:active{transform:scale(.99);}
 @media (hover:hover) and (pointer:fine){a.card:hover{border-color:var(--rule-firm);}}
 .card .n{font:800 26px/1 'BwGradual',sans-serif;color:var(--ink);letter-spacing:-.03em;
   font-variant-numeric:tabular-nums;}
-.card .n.due{color:var(--due);} .card .n.prov{color:var(--prov);} .card .n.out{color:#C8102E;}
+.card .n.due{color:var(--due);} .card .n.prov{color:var(--prov);} .card .n.out{color:var(--due);}
 .card h3{font:700 12.5px/1.35 'BwGradual',sans-serif;color:var(--ink);}
 .card p{font-family:var(--read);font-size:12px;color:var(--ink-3);line-height:1.6;}
 .card .go{font-size:11.5px;font-weight:600;color:var(--brand);margin-top:5px;}
-.card .ref{font:500 10.5px/1.4 var(--mono);color:var(--ink-4);margin-top:3px;}
-.card.flat{border-inline-start:2px solid #C8102E;}
-html[data-taqa-theme="dark"] .card.flat{border-inline-start-color:#D34058;}
+.card .ref{font:500 10.5px/1.4 var(--mono);color:var(--ink-3);margin-top:3px;}
+.card.flat{border-inline-start:2px solid var(--due);}
 
 .tscroll{overflow-x:auto;border-radius:var(--r3);}
 table{width:100%;min-width:520px;border-collapse:collapse;background:var(--paper);border:1px solid var(--rule);
   border-radius:var(--r3);overflow:hidden;}
 th{text-align:start;padding:10px 16px;background:var(--inset);border-bottom:1px solid var(--rule-firm);
-  font:700 9.5px/1 'BwGradual',sans-serif;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-4);}
+  font:700 9.5px/1 'BwGradual',sans-serif;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-2);}
 td{padding:11px 16px;border-bottom:1px solid var(--rule-soft);vertical-align:top;font-size:12.5px;}
 tr:last-child td{border-bottom:none;}
 code{font-family:var(--mono);font-size:11.5px;background:var(--inset);border:1px solid var(--rule);
   padding:1px 5px;border-radius:var(--r1);color:var(--ink);white-space:nowrap;}
-code.was{color:var(--ink-4);}
+code.was{color:var(--ink-2);}
 td b{color:var(--ink);font-weight:600;}
 
-.foot{margin-top:38px;padding-top:18px;border-top:1px solid var(--rule);font-size:12px;color:var(--ink-4);
+.foot{margin-top:38px;padding-top:18px;border-top:1px solid var(--rule);font-size:12px;color:var(--ink-3);
   display:flex;gap:14px;flex-wrap:wrap;}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{transition-duration:.01ms!important;}}
 @media(max-width:900px){.nav-links{display:none;}.frame{padding:18px 14px 56px;}}
