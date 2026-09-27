@@ -1326,6 +1326,85 @@ html[data-taqa-theme="dark"] .fc-go, html[data-taqa-theme="dark"] .fr-go { borde
 @media(max-width:620px){
   .focus[data-state="focus"] .fswitch { grid-template-columns:1fr; }
 }
+/* ── Phone and tablet: two levels that look like two levels ─────────────
+   Stacked, the desktop arrangement became a box inside a box inside a box:
+   the glass sheet, the tinted side panel, then a 224px card for the chosen
+   group that was mostly air, with two more cards under it and then eleven
+   rows each drawn as another box. The groups and their members wore the
+   same material, so nothing said which was the choice and which was the
+   result of choosing.
+
+   Below 900px the three groups are one row of equal tiles, the way a
+   segmented control reads: pick one of three. The chosen tile is filled
+   with the brand teal. Its members open in a single card directly under it,
+   with a notch pointing back at the tile that opened them, and the rows are
+   divided by hairlines instead of being boxes of their own. */
+@media(max-width:900px){
+  .focus { padding:0; background:none; border:0; box-shadow:none;
+    -webkit-backdrop-filter:none; backdrop-filter:none; }
+  .focus::before { display:none; }
+  .focus[data-state="focus"] .fstage,
+  .fstage { grid-template-columns:1fr; gap:14px; }
+  .focus[data-state="focus"] .fside { position:static; padding:0; background:none;
+    border:0; box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none; }
+
+  .fswitch,
+  .focus[data-state="focus"] .fswitch { grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+  .fcard,
+  .focus[data-state="focus"] .fcard,
+  .focus[data-state="focus"] .fcard.on { height:auto; grid-column:auto; }
+  .fcard { border-radius:14px; background:var(--bg-white,#fff);
+    border:1px solid rgba(117,106,97,0.22); box-shadow:0 1px 2px rgba(0,88,90,0.06); }
+
+  /* One face on a phone: the count, then the name. */
+  .fc-full { display:none; }
+  .fc-mini,
+  .focus[data-state="focus"] .fcard:not(.on) .fc-mini {
+    position:static; opacity:1; display:flex; flex-direction:column;
+    align-items:flex-start; justify-content:flex-start; gap:6px;
+    padding:13px 12px 14px; min-height:92px; }
+  .fc-mn { font-size:26px; min-width:0; }
+  .fc-mt { flex:none; font-size:12.5px; line-height:1.25; letter-spacing:0; }
+  .fc-go { display:none; }
+
+  .fcard.on,
+  .focus[data-state="focus"] .fcard.on {
+    background:var(--primary); border-color:var(--primary);
+    box-shadow:0 6px 16px rgba(0,88,90,0.22); }
+  .fcard.on .fc-mn, .fcard.on .fc-mt { color:#fff; }
+
+  /* The members, as one card that belongs to the chosen tile. */
+  .focus[data-state="focus"] .flist {
+    position:relative; gap:0; margin-top:4px; padding:6px 4px 4px;
+    background:var(--bg-white,#fff); border-radius:16px;
+    border:1px solid rgba(117,106,97,0.22);
+    box-shadow:0 1px 2px rgba(0,88,90,0.06), 0 10px 26px rgba(0,88,90,0.07); }
+  .focus[data-state="focus"] .flist::before {
+    content:''; position:absolute; top:-7px; inset-inline-start:var(--caret,16.67%);
+    width:12px; height:12px; margin-inline-start:-6px; transform:rotate(45deg);
+    background:inherit; border-top:1px solid rgba(117,106,97,0.22);
+    border-left:1px solid rgba(117,106,97,0.22); }
+  .fhead { margin:8px 10px 4px; padding:0; flex-direction:column; align-items:flex-start; gap:2px; }
+  .fhead h4 { font-size:15px; letter-spacing:-0.2px; text-transform:none; }
+  .frow { padding:12px 10px; }
+
+  .frow { border:0; border-radius:0; background:none;
+    box-shadow:none; gap:12px; }
+  .frow + .frow { border-top:1px solid rgba(117,106,97,0.16); }
+  .fr-n { display:none; }
+  .fr-name { font-size:14.5px; }
+  .fr-tag { font-size:10px; }
+  .fr-go { width:18px; height:18px; border:0; }
+
+  html[data-taqa-theme="dark"] .fcard { background:#002326; border-color:rgba(0,187,182,0.18); }
+  html[data-taqa-theme="dark"] .fcard.on { background:var(--primary); border-color:#00BBB6; }
+  html[data-taqa-theme="dark"] .focus[data-state="focus"] .flist {
+    background:#002326; border-color:rgba(0,187,182,0.20); box-shadow:none; }
+  html[data-taqa-theme="dark"] .focus[data-state="focus"] .flist::before {
+    border-color:rgba(0,187,182,0.20); }
+  html[data-taqa-theme="dark"] .frow { background:none; }
+  html[data-taqa-theme="dark"] .frow + .frow { border-top-color:rgba(0,187,182,0.12); }
+}
 @media (prefers-reduced-motion: reduce){
   .frow { animation:none; opacity:1; transform:none; }
   .fc-meter i { transition:none; }
@@ -2440,6 +2519,7 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
   // ── The list beside it ──────────────────────────────────────────────
   function draw(k){
     var g = GROUPS[k];
+    list.style.setProperty('--caret', (ORDER.indexOf(k) * 2 + 1) / 6 * 100 + '%');
     list.innerHTML =
       '<div class="fhead"><h4>' + g.title + '</h4><span><b>' + g.rows.length + '</b> ' +
         g.noun + ' · <b>' + g.docs + '</b> controlled documents</span></div>' +

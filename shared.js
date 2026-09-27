@@ -416,7 +416,11 @@ window.showToast=function(msg,type){
     'transition:transform 0.2s,box-shadow 0.2s;margin-bottom:10px;}'+
     '.pwa-install-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,93,99,0.5);}'+
     '.pwa-later{display:block;width:100%;padding:13px;background:none;border:none;'+
-    'font-size:13.5px;color:#756A61;cursor:pointer;font-family:"Inter",sans-serif;text-align:center;}';
+    'font-size:13.5px;color:#756A61;cursor:pointer;font-family:"Inter",sans-serif;text-align:center;}'+
+    /* The sheet only restated its title for the dark ground, so the line under
+       it, the steps and Maybe later kept the light-theme grey at 3.07:1. */
+    'html[data-taqa-theme="dark"] .pwa-sub,html[data-taqa-theme="dark"] .pwa-step-t,'+
+    'html[data-taqa-theme="dark"] .pwa-later{color:#8CB6B9;}';
   document.head.appendChild(s);
 
   var overlay=document.createElement('div');
