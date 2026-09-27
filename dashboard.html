@@ -357,6 +357,16 @@ select { text-overflow:ellipsis; padding-inline-end:30px; }
 html[data-taqa-theme="dark"] .deleg-card{background:#19263a;border-color:#243044;}
 html[data-taqa-theme="dark"] .deleg-form input{background:#0e1824;border-color:#243044;color:#dde4ef;}
 </style>
+<style>
+.av-unassigned{background:#94a3b8!important;color:#fff!important;}
+.dash-unknown{max-width:640px;margin:60px auto;padding:28px 30px;text-align:center;
+  border:1px solid var(--border);border-radius:16px;background:var(--bg-white);}
+.dash-unknown h2{font-family:'BwGradual','Urbanist',sans-serif;font-size:19px;color:var(--text);margin-bottom:8px;}
+.dash-unknown p{font-size:13.5px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;}
+.dash-unknown a{font-size:13px;font-weight:600;color:#fff;background:var(--primary);
+  border-radius:8px;padding:9px 18px;text-decoration:none;}
+html[data-taqa-theme="dark"] .dash-unknown{background:#19263a;border-color:#243044;}
+</style>
 </head>
 <body>
 <div class="page-wrapper">
@@ -1072,7 +1082,82 @@ const DASH_DATA = {
 // ── Init dashboard from URL param ──
 const dashParams = new URLSearchParams(window.location.search);
 const dashSegId = dashParams.get('id') || 'coiled-tubing';
-const dash = DASH_DATA[dashSegId] || DASH_DATA['coiled-tubing'];
+/* ── Which area's desk this is ──────────────────────────────────────────
+   DASH_DATA was hand-written and covered twelve areas of the register's
+   twenty-six, and an area it did not cover silently fell through to Coiled
+   Tubing: you opened Legal and were shown someone else's documents under
+   Legal's name, which is the same fault segment.html had when an unknown id
+   fell through to Drilling.
+
+   Writing the other fourteen by hand would have meant four hundred more
+   lines of copy to drift out of date, so the entry is assembled instead:
+   the register owns the name and the counts, and DASH_DATA now supplies
+   only the things a register cannot know, which is who the people are.
+
+   Where nobody has been named, the desk says so. An invented controller
+   would read as an answer; "not yet named" is the truth and is a list QHSE
+   can work from.                                                        */
+function dashFor(id){
+  var L = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments) || {};
+  var info = L[id];
+  if (!info) {
+    return { unknown:true, name:'Area not found', owner:null, contributors:[],
+             pending:[], published:0 };
+  }
+  var hand = DASH_DATA[id] || {};
+  var area = (typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.area(id) : { live:0 };
+  return {
+    unknown:      false,
+    name:         info.name || id,                 // the register owns the name
+    accountable:  info.splName || null,            // the role the standard names
+    owner:        hand.owner || null,              // a person, only if one is known
+    contributors: hand.contributors || [],
+    pending:      hand.pending || [],              // illustrative cards, where they exist
+    published:    area.live,
+    activity:     hand.activity || activityFrom(id)
+  };
+}
+
+/* An area with no hand-written feed gets a real one: what the register says
+   actually happened here, newest first. Better than an empty panel, and
+   better than invented names, because every line can be checked against a
+   document number. */
+function activityFrom(id){
+  if (typeof TAQA_STORE === 'undefined') return [];
+  var esc = function(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  var when = function(iso){
+    if (!iso) return 'Date not recorded';
+    var days = Math.round((Date.now() - new Date(iso)) / 86400000);
+    if (isNaN(days)) return 'Date not recorded';
+    if (days < 1)  return 'Today';
+    if (days < 30) return days + ' day' + (days===1?'':'s') + ' ago';
+    if (days < 365) { var m = Math.round(days/30); return m + ' month' + (m===1?'':'s') + ' ago'; }
+    var y = Math.round(days/365); return y + ' year' + (y===1?'':'s') + ' ago';
+  };
+  var rows = TAQA_STORE.all()
+    .filter(function(d){ return d.segment === id; })
+    .map(function(d){
+      var draft = d.status === 'draft';
+      var over  = (typeof TAQA_DOC !== 'undefined') && TAQA_DOC.overdue(d);
+      return {
+        at: d.submittedAt || d.issueDate || d.approvedDate || null,
+        dot: draft ? 'dot-orange' : over ? 'dot-red' : 'dot-green',
+        text: draft
+          ? 'Awaiting ' + ((typeof TAQA_APPROVAL !== 'undefined' && TAQA_APPROVAL.waitingOn(d)) || 'approval') +
+            ': <strong>' + esc(d.docNumber || d.title) + '</strong>'
+          : over
+            ? 'Review overdue on <strong>' + esc(d.docNumber || d.title) + '</strong>'
+            : 'Issued <strong>' + esc(d.docNumber || d.title) + '</strong> revision ' + esc(d.revision || '1.0'),
+        time: when(d.submittedAt || d.issueDate)
+      };
+    })
+    .sort(function(a,b){ return new Date(b.at||0) - new Date(a.at||0); })
+    .slice(0, 6);
+  return rows.length ? rows
+    : [{ dot:'dot-green', text:'Nothing recorded against this area yet.', time:'' }];
+}
+const dash = dashFor(dashSegId);
 
 function animateCount(el, target, duration) {
   duration = duration || 650;
@@ -1107,12 +1192,35 @@ function buildSimilarDocs(title, segId, limit) {
 }
 
 function initDashboard() {
+  if (dash.unknown) {
+    document.title = 'Area not found · TAQA Knowledge Hub';
+    var main = document.querySelector('.dash-main, main, .page-wrapper') || document.body;
+    main.innerHTML = '<div class="dash-unknown"><h2>No area with this identifier</h2>' +
+      '<p>The link points at an area the register does not hold, so there is no desk ' +
+      'to show. Opening someone else\'s segment under this name would be worse than ' +
+      'showing nothing.</p><a href="master-list.html">Open the Master List</a></div>';
+    return;
+  }
   document.title = dash.name + ', Control Panel · TAQA Knowledge Hub';
   document.getElementById('dash-seg-name').textContent = dash.name + ' Segment';
-  document.getElementById('dash-owner-avatar').textContent = dash.owner.initials;
-  document.getElementById('dash-owner-avatar').className = 'dash-user-avatar ' + dash.owner.av;
-  document.getElementById('dash-owner-name').textContent = dash.owner.name;
-  document.getElementById('dash-owner-role').textContent = 'Segment Controller · ' + dash.name;
+  var av = document.getElementById('dash-owner-avatar'),
+      nm = document.getElementById('dash-owner-name'),
+      rl = document.getElementById('dash-owner-role');
+  if (dash.owner) {
+    av.textContent = dash.owner.initials;
+    av.className   = 'dash-user-avatar ' + dash.owner.av;
+    nm.textContent = dash.owner.name;
+    rl.textContent = 'Segment Controller · ' + dash.name;
+  } else {
+    // No name, so say no name. TQ-QHSE-S001 3.1 puts this on line management.
+    av.textContent = '?';
+    av.className   = 'dash-user-avatar av-unassigned';
+    nm.textContent = 'No document controller named';
+    // splName repeats the area name for some areas, so "Legal · Legal" is not
+    // worth printing twice.
+    rl.textContent = (dash.accountable && dash.accountable !== dash.name)
+      ? dash.accountable + ' · ' + dash.name : dash.name;
+  }
   document.getElementById('modal-seg-name').textContent = dash.name;
 
   // Back link
@@ -1323,8 +1431,8 @@ function initDashboard() {
   const roleBadge = r => r==='Owner'?'crole-owner':r==='Editor'?'crole-editor':'crole-viewer';
   const avColors = ['av-teal','av-blue','av-orange','av-purple'];
   const ownerRow = `<div class="contributor-row">
-    <div class="contributor-avatar ${dash.owner.av}">${dash.owner.initials}</div>
-    <div class="contributor-info"><div class="contributor-name">${dash.owner.name}</div><div class="contributor-role">${dash.owner.title}</div></div>
+    <div class="contributor-avatar ${dash.owner ? dash.owner.av : 'av-unassigned'}">${dash.owner ? dash.owner.initials : '?'}</div>
+    <div class="contributor-info"><div class="contributor-name">${dash.owner ? dash.owner.name : 'No document controller named'}</div><div class="contributor-role">${dash.owner ? dash.owner.title : (dash.accountable || 'To be assigned by line management')}</div></div>
     <span class="contributor-role-badge crole-owner">Owner</span></div>`;
   const cRows = dash.contributors.map(c => `<div class="contributor-row">
     <div class="contributor-avatar ${c.av}">${c.initials}</div>
@@ -1337,7 +1445,7 @@ function initDashboard() {
   document.getElementById('contributors-list').innerHTML = ownerRow + cRows + viewerRow;
 
   // Activity
-  document.getElementById('activity-feed').innerHTML = dash.activity.map(a => `
+  document.getElementById('activity-feed').innerHTML = (dash.activity || []).map(a => `
     <div class="activity-item">
       <div class="activity-dot ${a.dot}"></div>
       <div><div class="activity-text">${a.text}</div><div class="activity-time">${a.time}</div></div>

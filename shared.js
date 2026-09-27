@@ -821,11 +821,12 @@ document.addEventListener('keydown',function(e){
   if (typeof TAQA_ROLE === 'undefined' || typeof TAQA_ROLES === 'undefined') return;
   if (document.getElementById('taqa-door')) return;
 
+  // Short names and one short line each. The menu is a choice, not a briefing.
   var DESK = {
-    employee: { short:'Employee',  line:'Read and trust. Find the current revision before a job.' },
-    owner:    { short:'Director',  line:'Your segment. Approve what the register names you approver for.' },
-    qms:      { short:'QMS',       line:'The register. Countersign, withdraw, renumber, export.' },
-    auditor:  { short:'Auditor',   line:'Read only, everything, including the export. Changes nothing.' }
+    employee: { short:'Employee',  name:'Employee',         line:'Read the register' },
+    owner:    { short:'Director',  name:'Segment Director', line:'Approve your segment' },
+    qms:      { short:'QMS',       name:'QMS',              line:'Countersign and release' },
+    auditor:  { short:'Auditor',   name:'Auditor',          line:'Read only, everything' }
   };
 
   var css = document.createElement('style');
@@ -840,21 +841,28 @@ document.addEventListener('keydown',function(e){
     '.door-dot.d-auditor{background:#8E44AD;}' +
     '.door-cap{white-space:nowrap;}' +
     '@media(max-width:760px){.door-cap{display:none;}.door-btn{padding:0 9px;}}' +
-    '.door-menu{position:absolute;top:calc(100% + 8px);inset-inline-end:0;z-index:3000;width:290px;' +
-      'background:var(--bg-white,#fff);border:1px solid var(--border,#e2e5e9);border-radius:14px;' +
-      'box-shadow:0 12px 36px rgba(0,88,90,.16);padding:7px;display:none;}' +
+    '.door-menu{position:absolute;top:calc(100% + 8px);inset-inline-end:0;z-index:3000;width:236px;' +
+      'background:var(--bg-white,#fff);border:1px solid var(--border,#e2e5e9);border-radius:13px;' +
+      'box-shadow:0 14px 40px rgba(0,88,90,.15);padding:6px;display:none;}' +
     '.door-menu.open{display:block;}' +
-    '.door-hd{font-size:9.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;' +
-      'color:var(--text-light,#9aa5b4);padding:7px 9px 5px;}' +
-    '.door-i{display:flex;align-items:flex-start;gap:9px;width:100%;text-align:start;padding:8px 9px;' +
-      'border:none;background:transparent;border-radius:9px;cursor:pointer;font-family:inherit;transition:background .15s;}' +
+    '.door-hd{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;' +
+      'color:var(--text-light,#9aa5b4);padding:7px 10px 6px;}' +
+    /* Grid, so the name and its line stack and the tick keeps its own column. */
+    '.door-i{display:grid;grid-template-columns:auto 1fr auto;column-gap:9px;row-gap:1px;' +
+      'align-items:center;width:100%;text-align:start;padding:7px 10px;border:none;' +
+      'background:transparent;border-radius:9px;cursor:pointer;font-family:inherit;transition:background .15s;}' +
     '.door-i:hover{background:rgba(0,93,99,.06);}' +
-    '.door-i[aria-current="true"]{background:rgba(0,93,99,.09);}' +
-    '.door-i .dt{font-size:12.5px;font-weight:700;color:var(--text,#1c2b3a);}' +
-    '.door-i .dd{font-size:11px;line-height:1.45;color:var(--text-muted,#6b7a8d);margin-top:2px;}' +
-    '.door-note{font-size:10.5px;line-height:1.5;color:var(--text-muted,#6b7a8d);' +
-      'padding:8px 9px 5px;margin-top:4px;border-top:1px solid var(--border,#e2e5e9);}' +
+    '.door-i[aria-current="true"]{background:rgba(0,93,99,.08);}' +
+    '.door-i .dt{grid-column:2;font-size:13px;font-weight:700;color:var(--text,#1c2b3a);line-height:1.25;}' +
+    '.door-i .dd{grid-column:2;font-size:11px;color:var(--text-muted,#6b7a8d);line-height:1.3;}' +
+    '.door-i .dk{grid-column:3;grid-row:1/3;color:var(--primary,#005D63);opacity:0;font-size:12px;font-weight:800;}' +
+    '.door-i[aria-current="true"] .dk{opacity:1;}' +
+    '.door-i .door-dot{grid-column:1;grid-row:1/3;}' +
+    '.door-note{font-size:10px;line-height:1.45;color:var(--text-light,#9aa5b4);' +
+      'padding:7px 10px 4px;margin-top:3px;border-top:1px solid var(--border,#e2e5e9);}' +
     'html[data-taqa-theme="dark"] .door-menu{background:#19263a;border-color:#243044;}' +
+    'html[data-taqa-theme="dark"] .door-i .dk{color:#00BBB6;}' +
+    'html[data-taqa-theme="dark"] .door-i[aria-current="true"]{background:rgba(0,187,182,.10);}' +
     'html[data-taqa-theme="dark"] .door-i:hover{background:rgba(0,187,182,.08);}' +
     'html[data-taqa-theme="dark"] .door-btn{border-color:#243044;color:#dde4ef;}' +
     /* Acting as a delegate is never quiet. */
@@ -890,17 +898,17 @@ document.addEventListener('keydown',function(e){
     var menu = document.createElement('div');
     menu.className = 'door-menu';
     menu.innerHTML =
-      '<div class="door-hd">View the hub as</div>' +
+      '<div class="door-hd">View as</div>' +
       TAQA_ROLE_ORDER.map(function (r) {
-        var x = DESK[r] || { short: TAQA_ROLES[r].label, line: '' };
+        var x = DESK[r] || { name: TAQA_ROLES[r].label, line: '' };
         return '<button type="button" class="door-i" data-role="' + r + '" ' +
                  'aria-current="' + (r === k) + '">' +
-                 '<span class="door-dot d-' + r + '" style="margin-top:4px"></span>' +
-                 '<span><span class="dt">' + TAQA_ROLES[r].label + '</span>' +
-                 '<span class="dd">' + x.line + '</span></span></button>';
+                 '<span class="door-dot d-' + r + '"></span>' +
+                 '<span class="dt">' + x.name + '</span>' +
+                 '<span class="dd">' + x.line + '</span>' +
+                 '<span class="dk">\u2713</span></button>';
       }).join('') +
-      '<div class="door-note">A preview control. In Azure the door is set by your ' +
-        'Entra ID group and there is nothing to choose.</div>';
+      '<div class="door-note">Preview only. Azure uses Entra ID.</div>';
 
     wrap.appendChild(btn); wrap.appendChild(menu);
     anchor.parentNode.insertBefore(wrap, anchor);
@@ -927,10 +935,9 @@ document.addEventListener('keydown',function(e){
     if (!d) return;
     var bar = document.createElement('div');
     bar.className = 'deleg-bar';
-    bar.innerHTML = '<span>Acting as delegate for <b>' + d.fromName + '</b>, ' +
-      (d.segment || 'their segment') + ', until <b>' + d.until + '</b>' +
-      (d.includesApproval ? ', approval included' : ', approval not included') + '.</span>' +
-      '<span class="db-end"><button type="button" id="deleg-stop">Stop acting</button></span>';
+    bar.innerHTML = '<span>Delegate for <b>' + d.fromName + '</b> until <b>' + d.until + '</b>' +
+      (d.includesApproval ? '' : ', without approval') + '</span>' +
+      '<span class="db-end"><button type="button" id="deleg-stop">Stop</button></span>';
     document.body.insertBefore(bar, document.body.firstChild);
     document.getElementById('deleg-stop').addEventListener('click', function () {
       TAQA_DELEGATION.actAs(null); location.reload();
