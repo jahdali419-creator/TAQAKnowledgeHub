@@ -151,7 +151,7 @@ window.showToast=function(msg,type){
     '.auto-bc a{color:var(--text-muted,#756A61);text-decoration:none;transition:color 0.2s;}'+
     '.auto-bc a:hover{color:var(--primary,#005D63);}'+
     '.auto-bc .bc-sep{opacity:0.4;}'+
-    '.auto-bc .bc-cur{color:var(--primary,#005D63);font-weight:600;}'+
+    '.auto-bc .bc-cur{color:var(--primary-ink,#005D63);font-weight:600;}'+
     'html[data-taqa-theme="dark"] .auto-bc{border-color:rgba(255,255,255,0.05);}';
   document.head.appendChild(s);
   var bc=document.createElement('div');
