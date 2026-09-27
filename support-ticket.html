@@ -26,7 +26,7 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
   --dark:#f4f5f7;--dark-2:#eaecf0;--dark-3:#ffffff;
   --glass:rgba(255,255,255,0.85);--glass-2:rgba(255,255,255,0.98);
   --glass-border:rgba(0,0,0,0.09);--glass-border-hover:rgba(0,93,99,0.35);
-  --text:#1a2235;--text-muted:#64748b;--gradient:#005D63; /* flat brand teal - no gradient */
+  --text:#1a2235;--text-muted:#64748b;--text-light:#8a97a8;--gradient:#005D63; /* flat brand teal - no gradient */
 }
 *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
 @keyframes pageFadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
@@ -87,14 +87,24 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 
 /* ── Form Card ── */
 .form-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;padding:36px;backdrop-filter:blur(12px);}
-.form-section{margin-bottom:28px;}
-.form-section-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:12px;font-weight:700;color:var(--primary-light);
-  text-transform:uppercase;letter-spacing:1.2px;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--glass-border);}
+.form-section{margin-bottom:26px;}
+/* Three weights, three jobs. The label was the same grey as the placeholder,
+   so the question and the example read as one flat block of text and the form
+   looked like a wall. The question is near-black, the hint is small and grey,
+   and the placeholder is a short example, not a paragraph. */
+.form-section-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:11px;font-weight:800;color:var(--text);
+  text-transform:uppercase;letter-spacing:1.3px;margin-bottom:16px;padding-bottom:9px;border-bottom:1px solid var(--glass-border);}
+.form-section-title .fs-opt{float:inline-end;font-weight:600;letter-spacing:0.3px;text-transform:none;
+  color:var(--text-light);font-size:11px;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.form-group{margin-bottom:16px;}
+@media(max-width:620px){.form-row{grid-template-columns:1fr;}}
+.form-group{margin-bottom:15px;}
 .form-group:last-child{margin-bottom:0;}
-.form-label{display:block;font-size:13px;font-weight:500;color:var(--text-muted);margin-bottom:7px;}
-.form-label span{color:var(--accent);}
+.form-label{display:block;font-family:'BwGradual','Urbanist',sans-serif;
+  font-size:12.5px;font-weight:700;color:var(--text);letter-spacing:-0.05px;margin-bottom:5px;}
+.form-label span{color:var(--accent);font-weight:700;}
+.form-hint{display:block;font-size:11.5px;line-height:1.45;color:var(--text-light);
+  margin:-1px 0 6px;max-width:62ch;}
 .form-input,.form-select,.form-textarea{
   width:100%;padding:11px 15px;
   background:var(--glass-2);border:1px solid var(--glass-border);border-radius:10px;
@@ -102,12 +112,42 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   transition:border-color 0.25s,box-shadow 0.25s;
 }
 .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:rgba(0,187,182,0.4);box-shadow:0 0 0 3px rgba(0,93,99,0.08);}
-.form-input::placeholder,.form-textarea::placeholder{color:var(--text-muted);}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--text-light);font-size:13px;}
 .form-select{cursor:pointer;appearance:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a8ba0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 14px center;}
 .form-select option{background:#fff;color:var(--text);}
-.form-textarea{resize:vertical;min-height:100px;line-height:1.65;}
+.form-textarea{resize:vertical;min-height:84px;line-height:1.6;}
+
+/* Optional detail, folded away. Everything here helps the expert, and none of
+   it should stand between someone with a problem and the Send button. */
+.more{border:1px solid var(--glass-border);border-radius:12px;background:var(--glass-2);overflow:hidden;}
+.more>summary{list-style:none;cursor:pointer;padding:13px 16px;display:flex;align-items:center;gap:9px;
+  flex-wrap:wrap;font-family:'BwGradual','Urbanist',sans-serif;font-size:12.5px;font-weight:700;color:var(--text);}
+.more>summary>span:first-of-type{white-space:nowrap;}
+@media(max-width:560px){
+  .more>summary{gap:2px;}
+  .more-note{flex:1 0 100%;order:3;}
+}
+.more>summary::-webkit-details-marker{display:none;}
+.more>summary::after{content:'';margin-inline-start:auto;width:7px;height:7px;flex-shrink:0;
+  border-right:1.8px solid var(--text-light);border-bottom:1.8px solid var(--text-light);
+  transform:rotate(45deg);transition:transform 200ms var(--ease,cubic-bezier(.22,1,.36,1));}
+.more[open]>summary::after{transform:rotate(-135deg);}
+.more>summary:hover{background:rgba(0,93,99,0.04);}
+.more-note{font-weight:500;color:var(--text-light);font-size:11.5px;}
+.more-body{padding:4px 16px 16px;border-top:1px solid var(--glass-border);}
+
+/* Who is asking comes from the sign-in, so it is shown, not re-typed. */
+.whoami{display:flex;align-items:center;gap:11px;padding:12px 15px;border-radius:12px;
+  background:rgba(0,93,99,0.05);border:1px solid rgba(0,93,99,0.13);margin-bottom:15px;}
+.whoami-av{width:34px;height:34px;border-radius:9px;flex-shrink:0;background:var(--primary);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-family:'BwGradual','Urbanist',sans-serif;
+  font-size:12px;font-weight:800;}
+.whoami-t{font-size:13px;font-weight:700;color:var(--text);font-family:'BwGradual','Urbanist',sans-serif;}
+.whoami-s{font-size:11.5px;color:var(--text-light);margin-top:1px;}
+html[data-taqa-theme="dark"] .more{background:rgba(255,255,255,0.03);}
+html[data-taqa-theme="dark"] .whoami{background:rgba(0,187,182,0.07);border-color:rgba(0,187,182,0.16);}
 
 /* ── Priority ── */
 .priority-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
@@ -270,7 +310,7 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;back
 .nav-links a.active::after{display:none!important;}
 .dark-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:border-color 0.2s,color 0.2s,background 0.2s;flex-shrink:0;padding:0;}
 .dark-toggle:hover{border-color:var(--primary);color:var(--primary);background:rgba(0,93,99,0.06);}
-html[data-taqa-theme="dark"]{--dark:#0e1824;--glass:rgba(25,38,58,0.88);--glass-border:rgba(255,255,255,0.07);--text:#dde4ef;--text-muted:#7e94ab;}
+html[data-taqa-theme="dark"]{--dark:#0e1824;--glass:rgba(25,38,58,0.88);--glass-border:rgba(255,255,255,0.07);--text:#dde4ef;--text-muted:#7e94ab;--text-light:#6b8199;}
 html[data-taqa-theme="dark"] body{background:#0e1824;}
 html[data-taqa-theme="dark"] nav{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.06);}
 html[data-taqa-theme="dark"] .nav-brand-name{color:#dde4ef;}html[data-taqa-theme="dark"] .nav-brand-hub{color:#7e94ab;}
@@ -366,20 +406,29 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="form-card">
     <form id="ticket-form" onsubmit="submitTicket(event)">
 
-      <!-- ── Section 1: Issue Details ── -->
+      <!-- ── The problem ──────────────────────────────────────────────
+           Five things are asked for up front and nothing else. Everything
+           that helps but is not needed to start moved into the optional
+           block below, because a wall of boxes is how a form stops people
+           asking at all.                                                  -->
       <div class="form-section">
-        <div class="form-section-title">Issue Details</div>
+        <div class="form-section-title">The problem</div>
         <div class="form-group">
           <div class="fl-wrap">
             <input type="text" class="form-input" placeholder=" " id="issue-title" required>
-            <label class="fl-label">Brief title of your issue<span class="req">*</span></label>
+            <label class="fl-label">Title<span class="req">*</span></label>
           </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">What is happening? <span>*</span></label>
+          <span class="form-hint">Readings, alarms or what you can see. Numbers help most.</span>
+          <textarea class="form-textarea" placeholder="Pressure held at 3,200 psi then dropped to 900 over two minutes" required></textarea>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Issue Category <span>*</span></label>
+            <label class="form-label">Category <span>*</span></label>
             <select class="form-select" required>
-              <option value="" disabled selected>Select category</option>
+              <option value="" disabled selected>Choose one</option>
               <option>Equipment Troubleshooting</option>
               <option>Installation / Commissioning</option>
               <option>Procedure Clarification</option>
@@ -395,48 +444,44 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
           <div class="form-group">
             <label class="form-label">Area <span>*</span></label>
             <select class="form-select" id="ticket-area" required>
-              <option value="" disabled selected>Select area</option>
+              <option value="" disabled selected>Choose one</option>
             </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Equipment / System Involved</label>
-            <input type="text" class="form-input" placeholder="e.g. CT BHA, BOP, Pump Unit 3">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Location / Well / Site</label>
-            <input type="text" class="form-input" placeholder="e.g. Haradh-14, Rig 7, Location B">
           </div>
         </div>
       </div>
 
-      <!-- ── Section 2: Problem Description ── -->
+      <!-- ── Optional detail ───────────────────────────────────────────── -->
       <div class="form-section">
-        <div class="form-section-title">Describe the Problem</div>
-        <div class="form-group">
-          <label class="form-label">What is happening? <span>*</span></label>
-          <textarea class="form-textarea" style="min-height:90px;"
-            placeholder="Describe exactly what the problem is. Be specific, include measurements, readings, alarms, or observed conditions." required></textarea>
-        </div>
-        <div class="form-group">
-          <label class="form-label">What were you doing when it occurred?</label>
-          <textarea class="form-textarea" style="min-height:80px;"
-            placeholder="Describe the operation in progress, e.g. running in hole, pumping, perforating, pressure testing..."></textarea>
-        </div>
-        <div class="form-group">
-          <label class="form-label">What have you already tried?</label>
-          <textarea class="form-textarea" style="min-height:80px;"
-            placeholder="List any steps already taken to diagnose or resolve the issue. This prevents the expert from repeating actions you have already done."></textarea>
-        </div>
+        <details class="more">
+          <summary><span>Add detail</span><span class="more-note">Optional. It gets you a better answer.</span></summary>
+          <div class="more-body">
+            <div class="form-row" style="margin-top:14px;">
+              <div class="form-group">
+                <label class="form-label">Equipment</label>
+                <input type="text" class="form-input" placeholder="CT BHA, BOP, Pump Unit 3">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Location</label>
+                <input type="text" class="form-input" placeholder="Haradh-14, Rig 7">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">What were you doing?</label>
+              <textarea class="form-textarea" style="min-height:70px;" placeholder="Running in hole, pumping, pressure testing"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">What have you tried?</label>
+              <span class="form-hint">Saves the expert repeating what you have already done.</span>
+              <textarea class="form-textarea" style="min-height:70px;" placeholder="Reset the panel, re-torqued the connection"></textarea>
+            </div>
+          </div>
+        </details>
       </div>
 
       <!-- ── Section 3: Photo Evidence ── -->
       <div class="form-section">
-        <div class="form-section-title">Photo Evidence</div>
-        <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px;line-height:1.6;">
-          Upload photos of the issue. Once uploaded, use the annotation tools to circle or mark the exact problem area using rectangles, circles, arrows, or freehand. Add colors to highlight specific parts.
-        </p>
+        <div class="form-section-title">Photos <span class="fs-opt">Optional</span></div>
+        <p class="form-hint" style="margin-bottom:12px;">Mark the problem area once a photo is added.</p>
 
         <div class="photo-drop" id="photo-drop" onclick="document.getElementById('photo-input').click()">
           <div class="photo-drop-icon">
@@ -507,64 +552,60 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 
       <!-- ── Section 4: Urgency ── -->
       <div class="form-section">
-        <div class="form-section-title">Urgency Level</div>
+        <div class="form-section-title">Urgency</div>
+        <p class="form-hint" style="margin:-4px 0 12px;">Sets the response time. Move it up only if it truly applies.</p>
         <div class="priority-grid">
-          <label class="priority-pill sel-critical" id="pill-critical" onclick="selectPriority('critical')">
+          <label class="priority-pill" id="pill-critical" onclick="selectPriority('critical')">
             <input type="radio" name="priority" value="critical">
-            <div class="priority-dot" style="background:#dc2626;box-shadow:0 0 0 4px rgba(220,38,38,0.18);"></div>
+            <div class="priority-dot" style="background:#e5e7eb;"></div>
             <strong>Critical</strong>
-            <small>Operations stopped or safety risk</small>
+            <small>Stopped, or a safety risk</small>
           </label>
           <label class="priority-pill" id="pill-high" onclick="selectPriority('high')">
             <input type="radio" name="priority" value="high">
             <div class="priority-dot" style="background:#e5e7eb;"></div>
             <strong>High</strong>
-            <small>Operations impacted, need workaround</small>
+            <small>Impacted, needs a workaround</small>
           </label>
-          <label class="priority-pill" id="pill-medium" onclick="selectPriority('medium')">
-            <input type="radio" name="priority" value="medium">
-            <div class="priority-dot" style="background:#e5e7eb;"></div>
+          <label class="priority-pill sel-medium" id="pill-medium" onclick="selectPriority('medium')">
+            <input type="radio" name="priority" value="medium" checked>
+            <div class="priority-dot" style="background:#eab308;box-shadow:0 0 0 4px rgba(234,179,8,0.18);"></div>
             <strong>Medium</strong>
-            <small>Operations continuing with issue</small>
+            <small>Continuing with the issue</small>
           </label>
           <label class="priority-pill" id="pill-low" onclick="selectPriority('low')">
             <input type="radio" name="priority" value="low">
             <div class="priority-dot" style="background:#e5e7eb;"></div>
             <strong>Low</strong>
-            <small>Non-urgent, no impact on ops</small>
+            <small>No impact on operations</small>
           </label>
         </div>
       </div>
 
-      <!-- ── Section 5: Your Details ── -->
+      <!-- ── Who is asking ─────────────────────────────────────────────
+           Name, employee ID and email were four boxes asking for things the
+           sign-in already knows. They are shown instead of retyped, which is
+           also the only version an expert can trust: a typed name proves
+           nothing. Only the radio number is asked for, because the hub has
+           no way to know it.                                              -->
       <div class="form-section">
-        <div class="form-section-title">Your Details</div>
-        <div class="form-row">
-          <div class="form-group">
-            <div class="fl-wrap">
-              <input type="text" class="form-input" placeholder=" " required>
-              <label class="fl-label">Full Name<span class="req">*</span></label>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Employee ID</label>
-            <input type="text" class="form-input" placeholder="e.g. TAQA-1234">
-          </div>
+        <div class="form-section-title">You</div>
+        <div class="whoami">
+          <span class="whoami-av" id="who-av">--</span>
+          <span>
+            <span class="whoami-t" id="who-name">From your TAQA sign-in</span>
+            <span class="whoami-s" id="who-sub">Name, ID and email come across with the ticket</span>
+          </span>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Email <span>*</span></label>
-            <input type="email" class="form-input" placeholder="name@taqa.com.sa" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Mobile / Radio</label>
-            <input type="text" class="form-input" placeholder="For urgent field response">
-          </div>
+        <div class="form-group">
+          <label class="form-label">Mobile or radio</label>
+          <span class="form-hint">Only used if the answer cannot wait for email.</span>
+          <input type="text" class="form-input" placeholder="+966 5.. .. or Channel 4">
         </div>
       </div>
 
       <div class="submit-row">
-        <button type="submit" class="btn-submit">Submit to Expert →</button>
+        <button type="submit" class="btn-submit">Send to Expert</button>
         <a href="index.html" class="btn-cancel">Cancel</a>
       </div>
 
@@ -1011,7 +1052,7 @@ document.addEventListener('click',function(e){
   var S = TAQA_DOC_LOOKUPS.segments;
   var FAM = [['segment','Operational Segments'],['function','Corporate Functions'],
              ['product','Products & Technology']];
-  sel.innerHTML = '<option value="" disabled selected>Select area</option>' +
+  sel.innerHTML = '<option value="" disabled selected>Choose one</option>' +
     FAM.map(function(f){
       var ids = Object.keys(S).filter(function(k){ return S[k].group === f[0]; })
         .sort(function(a,b){ return S[a].name.localeCompare(S[b].name); });
@@ -1023,6 +1064,28 @@ document.addEventListener('click',function(e){
 </script>
 <script src="roles.js"></script>
 <script src="store.js"></script>
+<script>
+/* The ticket carries who sent it, so the form shows that rather than asking
+   for it. In Azure these come from the Entra ID claim; here they come from
+   the same role model the rest of the hub uses. */
+(function(){
+  if (typeof TAQA_ROLE === 'undefined') return;
+  function paint(){
+    var cap = TAQA_ROLE.effective(), scoped = cap.scope === 'own';
+    var role = (TAQA_ROLES[TAQA_ROLE.current()] || {}).label || 'Employee';
+    var where = scoped ? TAQA_ROLE.areaName() : null;
+    var n = document.getElementById('who-name'),
+        u = document.getElementById('who-sub'),
+        a = document.getElementById('who-av');
+    if (!n) return;
+    n.textContent = scoped ? TAQA_ROLE.areaTitle() + ', ' + where : role;
+    u.textContent = 'Name, employee ID and email come across with the ticket';
+    a.textContent = (role.match(/\b[A-Z]/g) || ['T']).slice(0,2).join('');
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paint);
+  else paint();
+})();
+</script>
 <script src="shared.js"></script>
 <script src="fixes.js"></script>
 <script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-taqa-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>

@@ -492,6 +492,14 @@ window.showToast=function(msg,type){
     if(document.getElementById('pwa-later')&&e.target===document.getElementById('pwa-later'))dismiss();
   });
 
+  // Never over a form someone is part-way through. On a phone the sheet covers
+  // the lower half of the screen, which on Ask Expert lands squarely on the
+  // urgency choice, and an install prompt is not worth interrupting a person
+  // reporting a problem on a rig.
+  var onForm = /support-ticket|upload/.test(location.pathname) ||
+               !!document.querySelector('form .form-card, form .upload-form-card');
+  if (onForm) return;
+
   if(isIPhone){
     // Show to all iPhone users, Safari gets install steps, others get "open in Safari" guidance
     setTimeout(showSheet,2500);
