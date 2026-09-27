@@ -272,6 +272,7 @@ html[data-taqa-theme="dark"] .pg-btn:hover:not(:disabled):not(.pg-dots){border-c
   margin-bottom:5px;line-height:1.32;letter-spacing:-0.1px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
   overflow-wrap:anywhere;}
+.doc-review-late{color:var(--stop-ink,#C8102E);font-weight:600;}
 .doc-summary{font-size:12.5px;color:var(--text-muted);line-height:1.55;margin-bottom:9px;max-width:620px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .doc-info-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
@@ -1539,48 +1540,27 @@ function issuedOf(num, idx){
 const MONTHS_FULL = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function fmtDate(i){ return `${rnd(MONTHS)} 2026`; }
 
-function getDocSummary(title, type) {
-  const t = title.toLowerCase();
-  if (type === 'lesson') return 'Documents the sequence of events, root cause analysis, contributing factors, and the corrective and preventive actions implemented following this incident or observation.';
-  if (t.includes('pre-job') || t.includes('safety meeting') || t.includes('safety check'))
-    return 'Defines the mandatory pre-operation checks, hazard assessments, toolbox talk requirements, and authorization sign-offs before commencing field activities.';
-  if (t.includes('emergency') || t.includes('shutdown') || t.includes('response'))
-    return 'Outlines the immediate response sequence, personnel responsibilities, notification chain, and recovery steps to be followed during emergency scenarios.';
-  if (t.includes('rig-up') || t.includes('rig-down'))
-    return 'Provides step-by-step instructions for equipment rig-up and rig-down, including connection verification, torque specifications, and pre-operation function checks.';
-  if (t.includes('pressure test') || t.includes('testing') || t.includes('certification'))
-    return 'Specifies test criteria, acceptance limits, equipment setup, test sequences, and documentation requirements for pressure or functional testing activities.';
-  if (t.includes('bop') || t.includes('well control') || t.includes('kill') || t.includes('shut-in'))
-    return 'Covers well control response actions, BOP operating procedures, kill weight calculations, and responsibilities for supervisors and drilling crew during well control events.';
-  if (t.includes('h2s') || t.includes('hydrogen sulfide') || t.includes('toxic'))
-    return 'Details H2S detection thresholds, alarm response levels, PPE requirements, evacuation protocols, and personnel accountability procedures in H2S-risk environments.';
-  if (t.includes('inspection') || t.includes('ndt') || t.includes('mpi') || t.includes('visual'))
-    return 'Defines inspection methods, equipment acceptance criteria, rejection standards, calibration requirements, and documentation procedures for inspection activities.';
-  if (t.includes('maintenance') || t.includes('overhaul') || t.includes('pm schedule'))
-    return 'Describes preventive and corrective maintenance tasks, intervals, torque values, replacement criteria, and return-to-service verification steps.';
-  if (t.includes('policy') || t.includes('authorization'))
-    return 'Establishes the governing rules, approval authorities, scope of application, personnel responsibilities, and compliance requirements for this operational area.';
-  if (t.includes('manual') && (t.includes('operations') || t.includes('ops')))
-    return 'Comprehensive technical reference covering equipment specifications, operating parameters, system interfaces, troubleshooting guides, and maintenance schedules.';
-  if (t.includes('chemical') || t.includes('fluid') || t.includes('additive'))
-    return 'Covers safe handling, storage, compatibility, MSDS references, spill response, and disposal requirements for chemicals and fluid systems used in operations.';
-  if (t.includes('cement') || t.includes('slurry') || t.includes('mixing'))
-    return 'Provides slurry design parameters, mixing procedures, quality control tests, placement methods, and post-job evaluation criteria for cementing operations.';
-  if (t.includes('directional') || t.includes('survey') || t.includes('deviation'))
-    return 'Covers directional drilling planning, steering tool operation, survey acceptance criteria, and wellbore trajectory monitoring requirements.';
-  if (t.includes('permit') || t.includes('work permit') || t.includes('jsa') || t.includes('jha'))
-    return 'Defines the permit-to-work issuance process, hazard identification requirements, control measures, authorization levels, and closure procedures.';
-  if (t.includes('calibration'))
-    return 'Specifies calibration intervals, reference standards, acceptable drift tolerances, calibration procedures, and out-of-tolerance response for measurement equipment.';
-  if (t.includes('report') || t.includes('reporting') || t.includes('end of well'))
-    return 'Outlines reporting requirements, data fields, review and approval process, distribution list, and record retention standards for operational reporting.';
-  if (type === 'sop')
-    return 'Provides a step-by-step operational procedure covering prerequisites, required equipment and personnel, execution sequence, quality checkpoints, and completion criteria.';
-  if (type === 'manual')
-    return 'Serves as the primary technical reference for equipment operation, system design, maintenance requirements, and troubleshooting guidance for field and engineering personnel.';
-  if (type === 'policy')
-    return 'Defines organizational requirements, roles and responsibilities, minimum standards, and compliance obligations applicable to all personnel conducting these activities.';
-  return 'Contains operational guidance, technical specifications, and procedural requirements for field personnel and supervisors involved in these activities.';
+/* The register holds no abstract, so a card states what it does hold: the
+   revision in force, who may read it, and when it is next due for review.
+   A document past its review date says so, because that is the one thing a
+   reader needs to know before acting on it. A title the register does not
+   carry gets no line at all rather than an invented one. */
+function docControlLine(num){
+  var d = (num && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(num) : null;
+  if (!d) return '';
+  var bits = [];
+  if (d.revision) bits.push('Rev ' + d.revision);
+  if (d.classification) bits.push(d.classification.charAt(0).toUpperCase() + d.classification.slice(1));
+  var due = d.nextReviewDate ? new Date(d.nextReviewDate) : null;
+  if (due && !isNaN(due)) {
+    var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var when = MON[due.getMonth()] + ' ' + due.getFullYear();
+    var late = Math.floor((Date.now() - due) / 86400000);
+    bits.push(late > 0
+      ? '<span class="doc-review-late">Review was due ' + when + ', ' + late + ' days late</span>'
+      : 'Review due ' + when);
+  }
+  return bits.join(' \u00b7 ');
 }
 
 const LIST_TYPE_MAP = {sops:'sop',manuals:'manual',policies:'standard',lessons:'lesson',alerts:'alert'};
@@ -1588,7 +1568,7 @@ const LIST_TYPE_MAP = {sops:'sop',manuals:'manual',policies:'standard',lessons:'
 function buildDocCard(title, type, idx) {
   const labels = {sop:'SOP',manual:'Manual',policy:'Policy',alert:'Alert',lesson:'Lesson Learned'};
   const typeClass = type;
-  const summary = getDocSummary(title, type);
+  const summary = docControlLine(splitEntry(title).num);
   const safeTitle = title.replace(/'/g,"&#39;").replace(/"/g,"&quot;");
   const safeType = typeClass;
   const _p = splitEntry(title);
@@ -1617,7 +1597,7 @@ function buildDocCard(title, type, idx) {
     <div class="doc-body">
       <div class="doc-eyebrow">${_p.num?`<span class="doc-num">${_p.num}</span>`:''}${revBadge}${newBadge}${isDocRead(title)?'<span class="doc-read-badge">✓ Read</span>':''}</div>
       <div class="doc-info-title">${_p.title}</div>
-      <div class="doc-summary">${summary}</div>
+      ${summary?`<div class="doc-summary">${summary}</div>`:''}
       <div class="doc-info-meta">
         <span class="doc-meta-item">${ownerOf(_p.num)}</span>
         <span class="doc-meta-item">${issuedOf(_p.num, idx)}</span>
@@ -2027,7 +2007,7 @@ function openDocModal(title, type) {
   icon.className = 'doc-modal-type-icon ' + type;
   icon.textContent = label.toUpperCase().substring(0,3);
   document.getElementById('dm-title').textContent = title;
-  document.getElementById('dm-summary').textContent = getDocSummary(title, type);
+  document.getElementById('dm-summary').innerHTML = docControlLine(splitEntry(title).num);
   document.getElementById('dm-scope').textContent = SCOPES[type] || SCOPES.sop;
   const vi = Math.floor(Math.random()*FAKE_VERSIONS.length);
   const di = Math.floor(Math.random()*FAKE_DATES.length);

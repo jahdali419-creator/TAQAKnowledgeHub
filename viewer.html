@@ -146,6 +146,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .section-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;
   color:var(--primary-ink);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
 .section-label::after{content:'';flex:1;height:1px;background:rgba(0,187,182,0.15);}
+.doc-review-late{color:var(--stop-ink,#C8102E);font-weight:600;}
 .section-text{font-size:14px;color:var(--text-muted);line-height:1.78;}
 
 /* PDF placeholder */
@@ -575,21 +576,30 @@ const SIZES=['1.2 MB','845 KB','2.1 MB','3.4 MB','560 KB','1.8 MB','920 KB'];
 function rnd(a){return a[Math.abs(hashStr(docTitle||'x'))%a.length];}
 function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=((h<<5)-h)+s.charCodeAt(i);return h;}
 
-function getDocSummary(title, type) {
-  const t = (title||'').toLowerCase();
-  if(type==='lesson') return 'Documents the sequence of events, root cause analysis, contributing factors, and the corrective and preventive actions implemented following this incident or observation.';
-  if(t.includes('pre-job')||t.includes('safety meeting')||t.includes('safety check')) return 'Defines the mandatory pre-operation checks, hazard assessments, toolbox talk requirements, and authorization sign-offs before commencing field activities.';
-  if(t.includes('emergency')||t.includes('shutdown')||t.includes('response')) return 'Outlines the immediate response sequence, personnel responsibilities, notification chain, and recovery steps to be followed during emergency scenarios.';
-  if(t.includes('rig-up')||t.includes('rig-down')) return 'Provides step-by-step instructions for equipment rig-up and rig-down, including connection verification, torque specifications, and pre-operation function checks.';
-  if(t.includes('pressure test')||t.includes('testing')||t.includes('certification')) return 'Specifies test criteria, acceptance limits, equipment setup, test sequences, and documentation requirements for pressure or functional testing activities.';
-  if(t.includes('bop')||t.includes('well control')||t.includes('kill')||t.includes('shut-in')) return 'Covers well control response actions, BOP operating procedures, kill weight calculations, and responsibilities for supervisors and drilling crew during well control events.';
-  if(t.includes('h2s')||t.includes('hydrogen sulfide')) return 'Details H2S detection thresholds, alarm response levels, PPE requirements, evacuation protocols, and personnel accountability procedures in H2S-risk environments.';
-  if(t.includes('inspection')||t.includes('ndt')||t.includes('mpi')) return 'Defines inspection methods, equipment acceptance criteria, rejection standards, calibration requirements, and documentation procedures for inspection activities.';
-  if(t.includes('maintenance')||t.includes('overhaul')) return 'Describes preventive and corrective maintenance tasks, intervals, torque values, replacement criteria, and return-to-service verification steps.';
-  if(type==='sop') return 'Provides a step-by-step operational procedure covering prerequisites, required equipment and personnel, execution sequence, quality checkpoints, and completion criteria.';
-  if(type==='manual') return 'Serves as the primary technical reference for equipment operation, system design, maintenance requirements, and troubleshooting guidance for field and engineering personnel.';
-  if(type==='policy') return 'Defines organizational requirements, roles and responsibilities, minimum standards, and compliance obligations applicable to all personnel conducting these activities.';
-  return 'Contains operational guidance, technical specifications, and procedural requirements for field personnel and supervisors involved in these activities.';
+/* The register holds no abstract, so a card states what it does hold: the
+   revision in force, who may read it, and when it is next due for review.
+   A document past its review date says so, because that is the one thing a
+   reader needs to know before acting on it. A title the register does not
+   carry gets no line at all rather than an invented one. */
+function docControlLine(ref){
+  var d = (ref && typeof ref === 'object') ? ref
+        : (ref && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(ref)
+        : (ref && typeof TAQA_DOC !== 'undefined') ? (TAQA_DOC.byNumber(ref) || TAQA_DOC.byLegacy(ref))
+        : null;
+  if (!d) return '';
+  var bits = [];
+  if (d.revision) bits.push('Rev ' + d.revision);
+  if (d.classification) bits.push(d.classification.charAt(0).toUpperCase() + d.classification.slice(1));
+  var due = d.nextReviewDate ? new Date(d.nextReviewDate) : null;
+  if (due && !isNaN(due)) {
+    var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var when = MON[due.getMonth()] + ' ' + due.getFullYear();
+    var late = Math.floor((Date.now() - due) / 86400000);
+    bits.push(late > 0
+      ? '<span class="doc-review-late">Review was due ' + when + ', ' + late + ' days late</span>'
+      : 'Review due ' + when);
+  }
+  return bits.join(' \u00b7 ');
 }
 
 const params = new URLSearchParams(location.search);
@@ -767,7 +777,7 @@ if (_denied) {
 }
 
 // Summary & Scope
-document.getElementById('doc-summary').textContent = getDocSummary(docTitle, docType);
+document.getElementById('doc-summary').innerHTML = docControlLine(_rec);
 document.getElementById('doc-scope').textContent = SCOPES[docType] || SCOPES.sop;
 
 // Version History
@@ -945,7 +955,7 @@ function showQuickRef() {
       chip('Issued', null) + chip('Segment', segInfo.tag);
 
   // Summary as bullet points
-  var summary = getDocSummary(docTitle, docType);
+  var summary = docControlLine(_rec);
   var sentences = summary.split(/(?<=\.)\s+/).filter(function(s){ return s.trim().length > 10; });
   var bul = document.getElementById('qref-bullets');
   bul.innerHTML = sentences.slice(0, 4).map(function(s){
@@ -1007,8 +1017,8 @@ document.addEventListener('click',function(e){
   setTimeout(()=>window.location.href=h,270);
 });
 </script>
-<script src="search-index.js"></script>
 <script src="store.js"></script>
+<script src="search-index.js"></script>
 <script src="shared.js"></script>
 <script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
