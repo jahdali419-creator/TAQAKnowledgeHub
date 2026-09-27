@@ -258,31 +258,31 @@
         box-shadow: 0 24px 64px rgba(0,0,0,0.2);
         animation: pageFadeIn 0.2s ease;
       }
-      html[data-taqa-theme="dark"] .reject-modal { background: #19263a; }
+      html[data-taqa-theme="dark"] .reject-modal { background: #142322; }
       .reject-modal h3 {
         font-family: 'Urbanist', sans-serif; font-size: 17px; font-weight: 800;
-        color: var(--text, #1a2235); margin-bottom: 4px;
+        color: var(--text, #1A2C2C); margin-bottom: 4px;
       }
       .reject-modal p {
-        font-size: 13px; color: var(--text-muted, #64748b); margin-bottom: 18px;
+        font-size: 13px; color: var(--text-muted, #5F7272); margin-bottom: 18px;
       }
       .reject-reason-input {
         width: 100%; padding: 10px 14px;
         border: 1px solid var(--border, rgba(0,0,0,0.08)); border-radius: 10px;
         font-size: 13.5px; font-family: 'Inter', sans-serif;
-        color: var(--text, #1a2235); background: #fff;
+        color: var(--text, #1A2C2C); background: #fff;
         outline: none; resize: vertical; min-height: 90px;
         transition: border-color 0.2s;
       }
       html[data-taqa-theme="dark"] .reject-reason-input {
-        background: #111e2d; border-color: #243044; color: #dde4ef;
+        background: #101C1B; border-color: #22302F; color: #DDE6E4;
       }
       .reject-reason-input:focus {
         border-color: #ef4444;
         box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
       }
       .reject-reason-input.error { border-color: #ef4444 !important; }
-      .reject-char-hint { font-size: 11px; color: var(--text-dim, #94a3b8); margin-top: 4px; }
+      .reject-char-hint { font-size: 11px; color: var(--text-dim, #756A61); margin-top: 4px; }
       .reject-modal-actions { display: flex; gap: 10px; margin-top: 20px; }
       .btn-reject-confirm {
         flex: 1; padding: 11px; border-radius: 10px;
@@ -295,7 +295,7 @@
       .btn-reject-cancel {
         padding: 11px 20px; border-radius: 10px; background: transparent;
         border: 1px solid var(--border, rgba(0,0,0,0.08));
-        color: var(--text-muted, #64748b); font-size: 14px; font-weight: 500;
+        color: var(--text-muted, #5F7272); font-size: 14px; font-weight: 500;
         cursor: pointer; font-family: 'Inter', sans-serif;
       }
       /* ── Remove Confirm ── */
@@ -306,7 +306,7 @@
         padding: 8px 12px; margin-top: 8px; font-size: 12.5px;
       }
       .remove-confirm-bar.show { display: flex; }
-      .remove-confirm-bar span { color: var(--text-muted, #64748b); }
+      .remove-confirm-bar span { color: var(--text-muted, #5F7272); }
       .remove-confirm-bar strong { color: #ef4444; }
       .btn-confirm-remove {
         background: #ef4444; color: #fff; border: none;
@@ -317,7 +317,7 @@
       .btn-confirm-remove:hover { opacity: 0.85; }
       .btn-cancel-remove {
         background: none; border: 1px solid var(--border, rgba(0,0,0,0.08));
-        color: var(--text-muted, #64748b); padding: 5px 12px; border-radius: 7px;
+        color: var(--text-muted, #5F7272); padding: 5px 12px; border-radius: 7px;
         font-size: 12px; cursor: pointer; font-family: 'Inter', sans-serif;
       }
       /* ── Delegate Modal ── */
@@ -333,13 +333,13 @@
         box-shadow: 0 24px 64px rgba(0,0,0,0.2);
         animation: pageFadeIn 0.2s ease;
       }
-      html[data-taqa-theme="dark"] .delegate-modal { background: #19263a; }
+      html[data-taqa-theme="dark"] .delegate-modal { background: #142322; }
       .delegate-modal h3 {
         font-family: 'Urbanist', sans-serif; font-size: 17px; font-weight: 800;
-        color: var(--text, #1a2235); margin-bottom: 4px;
+        color: var(--text, #1A2C2C); margin-bottom: 4px;
       }
       .delegate-modal .dm-sub {
-        font-size: 13px; color: var(--text-muted, #64748b); margin-bottom: 20px;
+        font-size: 13px; color: var(--text-muted, #5F7272); margin-bottom: 20px;
         line-height: 1.5;
       }
       .delegate-active-banner {
@@ -352,18 +352,18 @@
       .delegate-form-group { margin-bottom: 14px; }
       .delegate-form-group label {
         font-size: 11px; font-weight: 600; text-transform: uppercase;
-        letter-spacing: 0.5px; color: var(--text-muted, #64748b);
+        letter-spacing: 0.5px; color: var(--text-muted, #5F7272);
         display: block; margin-bottom: 6px;
       }
       .delegate-input {
         width: 100%; padding: 10px 14px;
         border: 1px solid var(--border, rgba(0,0,0,0.08)); border-radius: 10px;
         font-size: 14px; font-family: 'Inter', sans-serif;
-        color: var(--text, #1a2235); background: #fff; outline: none;
+        color: var(--text, #1A2C2C); background: #fff; outline: none;
         transition: border-color 0.2s;
       }
       html[data-taqa-theme="dark"] .delegate-input {
-        background: #111e2d; border-color: #243044; color: #dde4ef;
+        background: #101C1B; border-color: #22302F; color: #DDE6E4;
       }
       .delegate-input:focus {
         border-color: var(--primary-light, #00BFB2);
@@ -393,7 +393,7 @@
       .btn-delegate-cancel {
         padding: 11px 18px; border-radius: 10px; background: transparent;
         border: 1px solid var(--border, rgba(0,0,0,0.08));
-        color: var(--text-muted, #64748b); font-size: 14px; font-weight: 500;
+        color: var(--text-muted, #5F7272); font-size: 14px; font-weight: 500;
         cursor: pointer; font-family: 'Inter', sans-serif;
       }
       /* ── Delegate button in hero ── */
@@ -804,7 +804,7 @@
         vertical-align: middle;
       }
       .glossary-pending-notice {
-        font-size: 12px; color: var(--text-dim, #94a3b8);
+        font-size: 12px; color: var(--text-dim, #756A61);
         margin-top: 4px; font-style: italic;
       }
     `);
