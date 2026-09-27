@@ -127,7 +127,7 @@
         gap: 6px;
         background: rgba(245,158,11,0.07);
         border: 1px solid rgba(245,158,11,0.22);
-        border-left: 3px solid #f59e0b;
+        border-left: 3px solid #FFB81C;
         border-radius: 8px;
         padding: 6px 12px;
         margin: 0 auto 12px;
@@ -258,35 +258,35 @@
         box-shadow: 0 24px 64px rgba(0,0,0,0.2);
         animation: pageFadeIn 0.2s ease;
       }
-      html[data-taqa-theme="dark"] .reject-modal { background: #142322; }
+      html[data-taqa-theme="dark"] .reject-modal { background: #002326; }
       .reject-modal h3 {
         font-family: 'Urbanist', sans-serif; font-size: 17px; font-weight: 800;
-        color: var(--text, #1A2C2C); margin-bottom: 4px;
+        color: var(--text, #1E1C1A); margin-bottom: 4px;
       }
       .reject-modal p {
-        font-size: 13px; color: var(--text-muted, #5F7272); margin-bottom: 18px;
+        font-size: 13px; color: var(--text-muted, #756A61); margin-bottom: 18px;
       }
       .reject-reason-input {
         width: 100%; padding: 10px 14px;
         border: 1px solid var(--border, rgba(0,0,0,0.08)); border-radius: 10px;
         font-size: 13.5px; font-family: 'Inter', sans-serif;
-        color: var(--text, #1A2C2C); background: #fff;
+        color: var(--text, #1E1C1A); background: #fff;
         outline: none; resize: vertical; min-height: 90px;
         transition: border-color 0.2s;
       }
       html[data-taqa-theme="dark"] .reject-reason-input {
-        background: #101C1B; border-color: #22302F; color: #DDE6E4;
+        background: #002D30; border-color: #003A3D; color: #C7DBDD;
       }
       .reject-reason-input:focus {
-        border-color: #ef4444;
+        border-color: #C8102E;
         box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
       }
-      .reject-reason-input.error { border-color: #ef4444 !important; }
+      .reject-reason-input.error { border-color: #C8102E !important; }
       .reject-char-hint { font-size: 11px; color: var(--text-dim, #756A61); margin-top: 4px; }
       .reject-modal-actions { display: flex; gap: 10px; margin-top: 20px; }
       .btn-reject-confirm {
         flex: 1; padding: 11px; border-radius: 10px;
-        background: #ef4444; color: #fff; font-size: 14px; font-weight: 600;
+        background: #C8102E; color: #fff; font-size: 14px; font-weight: 600;
         border: none; cursor: pointer; font-family: 'Inter', sans-serif;
         transition: opacity 0.2s;
       }
@@ -295,7 +295,7 @@
       .btn-reject-cancel {
         padding: 11px 20px; border-radius: 10px; background: transparent;
         border: 1px solid var(--border, rgba(0,0,0,0.08));
-        color: var(--text-muted, #5F7272); font-size: 14px; font-weight: 500;
+        color: var(--text-muted, #756A61); font-size: 14px; font-weight: 500;
         cursor: pointer; font-family: 'Inter', sans-serif;
       }
       /* ── Remove Confirm ── */
@@ -306,10 +306,10 @@
         padding: 8px 12px; margin-top: 8px; font-size: 12.5px;
       }
       .remove-confirm-bar.show { display: flex; }
-      .remove-confirm-bar span { color: var(--text-muted, #5F7272); }
-      .remove-confirm-bar strong { color: #ef4444; }
+      .remove-confirm-bar span { color: var(--text-muted, #756A61); }
+      .remove-confirm-bar strong { color: var(--stop-ink,#C8102E); }
       .btn-confirm-remove {
-        background: #ef4444; color: #fff; border: none;
+        background: #C8102E; color: #fff; border: none;
         padding: 5px 14px; border-radius: 7px; font-size: 12px;
         font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif;
         transition: opacity 0.2s;
@@ -317,7 +317,7 @@
       .btn-confirm-remove:hover { opacity: 0.85; }
       .btn-cancel-remove {
         background: none; border: 1px solid var(--border, rgba(0,0,0,0.08));
-        color: var(--text-muted, #5F7272); padding: 5px 12px; border-radius: 7px;
+        color: var(--text-muted, #756A61); padding: 5px 12px; border-radius: 7px;
         font-size: 12px; cursor: pointer; font-family: 'Inter', sans-serif;
       }
       /* ── Delegate Modal ── */
@@ -333,13 +333,13 @@
         box-shadow: 0 24px 64px rgba(0,0,0,0.2);
         animation: pageFadeIn 0.2s ease;
       }
-      html[data-taqa-theme="dark"] .delegate-modal { background: #142322; }
+      html[data-taqa-theme="dark"] .delegate-modal { background: #002326; }
       .delegate-modal h3 {
         font-family: 'Urbanist', sans-serif; font-size: 17px; font-weight: 800;
-        color: var(--text, #1A2C2C); margin-bottom: 4px;
+        color: var(--text, #1E1C1A); margin-bottom: 4px;
       }
       .delegate-modal .dm-sub {
-        font-size: 13px; color: var(--text-muted, #5F7272); margin-bottom: 20px;
+        font-size: 13px; color: var(--text-muted, #756A61); margin-bottom: 20px;
         line-height: 1.5;
       }
       .delegate-active-banner {
@@ -352,18 +352,18 @@
       .delegate-form-group { margin-bottom: 14px; }
       .delegate-form-group label {
         font-size: 11px; font-weight: 600; text-transform: uppercase;
-        letter-spacing: 0.5px; color: var(--text-muted, #5F7272);
+        letter-spacing: 0.5px; color: var(--text-muted, #756A61);
         display: block; margin-bottom: 6px;
       }
       .delegate-input {
         width: 100%; padding: 10px 14px;
         border: 1px solid var(--border, rgba(0,0,0,0.08)); border-radius: 10px;
         font-size: 14px; font-family: 'Inter', sans-serif;
-        color: var(--text, #1A2C2C); background: #fff; outline: none;
+        color: var(--text, #1E1C1A); background: #fff; outline: none;
         transition: border-color 0.2s;
       }
       html[data-taqa-theme="dark"] .delegate-input {
-        background: #101C1B; border-color: #22302F; color: #DDE6E4;
+        background: #002D30; border-color: #003A3D; color: #C7DBDD;
       }
       .delegate-input:focus {
         border-color: var(--primary-light, #00BFB2);
@@ -386,14 +386,14 @@
       .btn-delegate-save:hover { opacity: 0.88; }
       .btn-delegate-clear {
         padding: 11px 18px; border-radius: 10px;
-        background: rgba(239,68,68,0.08); color: #ef4444;
+        background: rgba(200,16,46,0.08); color: var(--stop-ink,#C8102E);
         border: 1px solid rgba(239,68,68,0.2); font-size: 13px; font-weight: 600;
         cursor: pointer; font-family: 'Inter', sans-serif;
       }
       .btn-delegate-cancel {
         padding: 11px 18px; border-radius: 10px; background: transparent;
         border: 1px solid var(--border, rgba(0,0,0,0.08));
-        color: var(--text-muted, #5F7272); font-size: 14px; font-weight: 500;
+        color: var(--text-muted, #756A61); font-size: 14px; font-weight: 500;
         cursor: pointer; font-family: 'Inter', sans-serif;
       }
       /* ── Delegate button in hero ── */
@@ -474,12 +474,12 @@
         if (badge) { badge.textContent = 'Rejected'; badge.className = 'pending-status-badge badge-rejected'; }
         const actions = rejectTargetCard.querySelector('.pending-actions');
         if (actions) {
-          actions.innerHTML = `<span style="font-size:12px;color:#ef4444;font-weight:600;">✕ Rejected, reason sent to submitter</span>`;
+          actions.innerHTML = `<span style="font-size:12px;color:var(--stop-ink,#C8102E);font-weight:600;">✕ Rejected, reason sent to submitter</span>`;
         }
 
         // Add reason to card
         const reasonEl = document.createElement('div');
-        reasonEl.style.cssText = 'font-size:12px;color:#ef4444;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.15);border-radius:8px;padding:8px 12px;margin-top:10px;line-height:1.5;';
+        reasonEl.style.cssText = 'font-size:12px;color:var(--stop-ink,#C8102E);background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.15);border-radius:8px;padding:8px 12px;margin-top:10px;line-height:1.5;';
         var strongEl = document.createElement('strong');
         strongEl.textContent = 'Rejection reason:';
         reasonEl.appendChild(strongEl);
@@ -799,7 +799,7 @@
       .glossary-pending-badge {
         display: inline-block; padding: 2px 9px; border-radius: 99px;
         font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
-        background: rgba(245,158,11,0.12); color: #f59e0b;
+        background: rgba(245,158,11,0.12); color: var(--warn-ink,#8A6200);
         border: 1px solid rgba(245,158,11,0.25); margin-left: 8px;
         vertical-align: middle;
       }
@@ -830,7 +830,7 @@
             if (newest) {
               newest.dataset.pendingMarked = '1';
               newest.style.opacity = '0.75';
-              newest.style.borderLeft = '3px solid #f59e0b';
+              newest.style.borderLeft = '3px solid #FFB81C';
 
               // Add pending badge next to the term name
               const termName = newest.querySelector('h3, h4, .term-name, strong, [class*="term-title"]');

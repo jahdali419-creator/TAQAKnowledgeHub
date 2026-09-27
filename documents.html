@@ -22,11 +22,12 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 <noscript></noscript>
 <style>
 :root{
-  --primary:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
-  --bg:#F4F6F6;--bg-white:#ffffff;
+  --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
+  --accent-ink:#A8431A;
+  --bg:#F4F4F3;--bg-white:#ffffff;--inset:#EDEBE8;
   --glass:rgba(255,255,255,0.85);
   --glass-border-hover:rgba(0,93,99,0.35);
-  --text:#1A2C2C;--text-muted:#5F7272;--text-dim:#756A61;
+  --text:#1E1C1A;--text-muted:#756A61;--text-dim:#756A61;
   --radius:14px;--gradient:#005D63; /* flat brand teal - no gradient */
   --border:rgba(0,0,0,0.08);
 }
@@ -47,50 +48,53 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   box-shadow:0 4px 18px rgba(0,93,99,0.38);}
 .nav-brand-icon svg{width:20px;height:20px;}
 .nav-brand-text{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;}
-.nav-brand-name{font-weight:800;color:var(--primary);}
-.nav-brand-hub{font-weight:500;color:#5F7272;}
+.nav-brand-name{font-weight:800;color:var(--primary-ink);}
+.nav-brand-hub{font-weight:500;color:var(--text-muted);}
 .nav-links{display:flex;gap:2px;list-style:none;align-items:center;}
 .nav-links a{padding:7px 15px;border-radius:6px;text-decoration:none;font-size:13.5px;
   font-weight:500;color:var(--text-muted);transition:background 0.2s,color 0.2s;}
-.nav-links a:hover{background:#EEF1F1;color:var(--text);}
+.nav-links a:hover{background:var(--inset);color:var(--text);}
 .nav-right{display:flex;gap:10px;align-items:center;}
 .nav-role-badge{padding:4px 12px;border-radius:20px;font-size:11.5px;font-weight:600;
-  background:rgba(0,93,99,0.1);color:var(--primary);border:1px solid rgba(0,93,99,0.2);letter-spacing:0.3px;}
+  background:rgba(0,93,99,0.1);color:var(--primary-ink);border:1px solid rgba(0,93,99,0.2);letter-spacing:0.3px;}
 .btn{padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
   border:none;font-family:'Inter',sans-serif;transition:all 0.2s;text-decoration:none;
   display:inline-flex;align-items:center;gap:6px;}
 .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
-.btn-ghost:hover{border-color:var(--glass-border-hover);color:var(--primary);}
+.btn-ghost:hover{border-color:var(--glass-border-hover);color:var(--primary-ink);}
 .btn-primary{background:var(--gradient);color:#fff;box-shadow:0 4px 14px rgba(0,93,99,0.25);}
 .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,93,99,0.32);}
 .dark-toggle{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:transparent;
   cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}
-.dark-toggle:hover{border-color:var(--glass-border-hover);color:var(--primary);}
+.dark-toggle:hover{border-color:var(--glass-border-hover);color:var(--primary-ink);}
 
 /* ── Hero ── */
-.docs-hero{margin-top:68px;background:linear-gradient(135deg,#06121a 0%,#0d2030 100%);
+.docs-hero{margin-top:68px;background:linear-gradient(135deg,#001314 0%,#002326 100%);
   padding:40px 48px;position:relative;overflow:hidden;border-bottom:1px solid rgba(0,187,182,0.12);}
 .docs-hero::before{content:'';position:absolute;top:-80px;right:-80px;width:320px;height:320px;
   border-radius:50%;background:radial-gradient(circle,rgba(0,187,182,0.08) 0%,transparent 70%);pointer-events:none;}
 .docs-hero::after{content:'';position:absolute;bottom:-60px;left:30%;width:200px;height:200px;
   border-radius:50%;background:radial-gradient(circle,rgba(0,93,99,0.06) 0%,transparent 70%);pointer-events:none;}
-.docs-breadcrumb{padding-bottom:16px;font-size:11px;font-weight:500;color:rgba(255,255,255,0.35);
+/* Everything on this band is white over deep teal, in both themes. At 10 to
+   11px a 35% white measured close to 3:1, so the small labels here run at 60%;
+   the 13.5px sub-heading is large enough to stay at 50%. */
+.docs-breadcrumb{padding-bottom:16px;font-size:11px;font-weight:500;color:rgba(255,255,255,0.6);
   display:flex;align-items:center;gap:6px;max-width:1200px;margin:0 auto;position:relative;z-index:1;flex-wrap:wrap;}
-.docs-breadcrumb a{color:rgba(255,255,255,0.35);text-decoration:none;transition:color 0.2s;}
-.docs-breadcrumb a:hover{color:#00BBB6;}
+.docs-breadcrumb a{color:rgba(255,255,255,0.6);text-decoration:none;transition:color 0.2s;}
+.docs-breadcrumb a:hover{color:var(--primary-light);}
 .docs-breadcrumb .bc-sep{opacity:0.35;}
 .docs-breadcrumb .bc-cur{color:rgba(0,187,182,0.85);font-weight:600;}
 .docs-hero-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;
   justify-content:space-between;gap:32px;position:relative;z-index:1;flex-wrap:wrap;}
 .docs-hero-tag{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
-  color:rgba(0,187,182,0.7);margin-bottom:10px;display:block;}
+  color:var(--primary-light);margin-bottom:10px;display:block;}
 .docs-hero-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:28px;font-weight:800;color:#fff;
   margin-bottom:6px;letter-spacing:-0.3px;}
 .docs-hero-sub{font-size:13.5px;color:rgba(255,255,255,0.5);}
 .docs-hero-stats{display:flex;gap:28px;flex-wrap:wrap;}
 .docs-stat{text-align:center;}
 .docs-stat-num{font-family:'BwGradual','Urbanist',sans-serif;font-size:26px;font-weight:800;color:#fff;display:block;line-height:1;}
-.docs-stat-label{font-size:10px;color:rgba(255,255,255,0.35);margin-top:5px;text-transform:uppercase;letter-spacing:1px;}
+.docs-stat-label{font-size:10px;color:rgba(255,255,255,0.6);margin-top:5px;text-transform:uppercase;letter-spacing:1px;}
 
 /* ── Main ── */
 .docs-outer{max-width:1200px;margin:0 auto;padding:32px 48px 80px;}
@@ -113,8 +117,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .pub-filter-pill{display:inline-flex;align-items:center;gap:4px;padding:5px 13px;border-radius:20px;
   font-size:11px;font-weight:600;border:1px solid var(--border);background:transparent;
   color:var(--text-muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;white-space:nowrap;}
-.pub-filter-pill:hover{border-color:var(--primary);color:var(--primary);}
-.pub-filter-pill.active{background:rgba(0,93,99,0.1);border-color:var(--primary);color:var(--primary);}
+.pub-filter-pill:hover{border-color:var(--primary);color:var(--primary-ink);}
+.pub-filter-pill.active{background:rgba(0,93,99,0.1);border-color:var(--primary);color:var(--primary-ink);}
 .pub-filter-pill[data-filter="all"].active{background:var(--text);border-color:var(--text);color:#fff;}
 .pill-count{font-size:10px;opacity:0.6;font-weight:500;}
 
@@ -147,7 +151,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
    It sits above the title now and the title may take two lines. */
 .pub-doc-title{font-weight:500;max-width:0;overflow:hidden;}
 .pdt-num{display:block;font-family:'BwGradual','Urbanist',sans-serif;font-size:9.5px;
-  font-weight:800;letter-spacing:0.9px;text-transform:uppercase;color:var(--primary);
+  font-weight:800;letter-spacing:0.9px;text-transform:uppercase;color:var(--primary-ink);
   opacity:0.8;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis;margin-bottom:2px;}
 .pdt-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
@@ -165,9 +169,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   .pub-table colgroup col:nth-child(5){width:14%;}
   .pub-doc-type-badge{padding:3px 8px;letter-spacing:0.2px;}
 }
+/* One calm teal treatment for every type but Alert, which stays in the
+   warning family: the word in the chip already says which type it is. Both
+   inks go through a token because the chip keeps its tint on the dark card,
+   where the light-ground teal measured under 2:1. */
 .pub-type-sop,.pub-type-manual,.pub-type-policy,.pub-type-lesson{
-  background:rgba(0,93,99,0.07);color:#00585A;}
-.pub-type-alert{background:rgba(253,105,29,0.12);color:#C2521A;}
+  background:rgba(0,93,99,0.07);color:var(--primary-ink);}
+.pub-type-alert{background:rgba(253,105,29,0.12);color:var(--accent-ink);}
 .pub-table-date{color:var(--text-muted);font-size:12px;white-space:nowrap;}
 /* "Relevant SPL / Function" is a real owner value and does not fit on one line
    in a 16% column, so let it use two rather than cutting it. */
@@ -175,18 +183,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
    it needs rather than losing the last few pixels of a real value. */
 .pub-table-by{color:var(--text);font-size:12px;font-weight:500;max-width:0;
   line-height:1.4;overflow-wrap:break-word;}
-.pub-remove-btn{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:#7C8A8A;
+.pub-remove-btn{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-dim);
   background:transparent;border:1px solid transparent;cursor:pointer;
   padding:4px 10px;border-radius:6px;font-family:'Inter',sans-serif;font-weight:500;
   transition:all 0.15s;white-space:nowrap;}
 .pub-remove-btn:hover,.pub-remove-btn:focus-visible{
   color:#C8102E;background:rgba(200,16,46,0.07);border-color:rgba(200,16,46,0.22);}
-.pub-table tbody tr:hover .pub-remove-btn{color:#9A5560;}
+.pub-table tbody tr:hover .pub-remove-btn{color:var(--text);}
 .pub-table th.sortable{cursor:pointer;user-select:none;}
 .pub-table th.sortable:hover{color:var(--text);}
 .pub-table th.sortable::after{content:'⇅';margin-left:5px;opacity:0.25;font-size:9px;font-weight:400;letter-spacing:0;}
-.pub-table th.sort-asc::after{content:'↑';opacity:1;color:var(--primary);}
-.pub-table th.sort-desc::after{content:'↓';opacity:1;color:var(--primary);}
+.pub-table th.sort-asc::after{content:'↑';opacity:1;color:var(--primary-ink);}
+.pub-table th.sort-desc::after{content:'↓';opacity:1;color:var(--primary-ink);}
 
 /* ── Table footer ── */
 .pub-table-footer{display:flex;align-items:center;justify-content:space-between;
@@ -195,7 +203,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .pub-more-count{font-weight:600;color:var(--text);}
 .pub-no-results{padding:48px 18px;text-align:center;font-size:13.5px;color:var(--text-muted);display:none;}
 .pub-no-results svg{display:block;margin:0 auto 12px;opacity:0.2;}
-.pub-show-all-btn{font-size:12.5px;font-weight:600;color:var(--primary);background:none;
+.pub-show-all-btn{font-size:12.5px;font-weight:600;color:var(--primary-ink);background:none;
   border:none;cursor:pointer;padding:4px 0;font-family:'Inter',sans-serif;}
 .pub-show-all-btn:hover{text-decoration:underline;}
 
@@ -206,31 +214,35 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
 
 /* ── Toast ── */
 .dash-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
-  background:#1A2C2C;color:#fff;padding:12px 24px;border-radius:50px;font-size:13.5px;font-weight:500;
+  background:#1E1C1A;color:#fff;padding:12px 24px;border-radius:50px;font-size:13.5px;font-weight:500;
   box-shadow:0 8px 32px rgba(0,0,0,0.2);opacity:0;transition:all 0.3s;z-index:9999;pointer-events:none;
   display:flex;align-items:center;gap:10px;}
 .dash-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .dash-toast-dot{width:8px;height:8px;border-radius:50%;background:#00BBB6;flex-shrink:0;}
 
 /* ── Dark Mode ── */
-html[data-taqa-theme="dark"]{--bg:#0C1717;--bg-white:#142322;--border:#22302F;--text:#DDE6E4;--text-muted:#8DA3A1;--text-dim:#5C7270;}
-html[data-taqa-theme="dark"] body{background:#0C1717;}
-html[data-taqa-theme="dark"] nav{background:rgba(14,24,36,0.95)!important;border-color:#22302F;}
-html[data-taqa-theme="dark"] .dark-toggle{border-color:#22302F;color:#8DA3A1;}
-html[data-taqa-theme="dark"] .btn-ghost{border-color:#22302F;color:#8DA3A1;}
+html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--accent-ink:#FF9B5E;--bg:#001314;--bg-white:#002326;--inset:#002D30;--border:#003A3D;--text:#C7DBDD;--text-muted:#8CB6B9;--text-dim:#619B9E;}
+html[data-taqa-theme="dark"] body{background:#001314;}
+html[data-taqa-theme="dark"] nav{background:rgba(0,35,38,0.95)!important;border-color:#003A3D;}
+html[data-taqa-theme="dark"] .dark-toggle{border-color:#003A3D;color:#619B9E;}
+html[data-taqa-theme="dark"] .btn-ghost{border-color:#003A3D;color:#619B9E;}
 html[data-taqa-theme="dark"] .nav-role-badge{background:rgba(0,187,182,0.12);border-color:rgba(0,187,182,0.2);}
-html[data-taqa-theme="dark"] .docs-hero{background:linear-gradient(135deg,#050d14 0%,#091520 100%);}
-html[data-taqa-theme="dark"] .docs-table-card{background:#142322;border-color:#22302F;}
-html[data-taqa-theme="dark"] .pub-table th{border-color:#22302F;color:#8DA3A1;background:rgba(255,255,255,0.02);}
-html[data-taqa-theme="dark"] .pub-table td{border-color:#1e2d3f;}
+html[data-taqa-theme="dark"] .docs-hero{background:linear-gradient(135deg,#001011 0%,#001C1E 100%);}
+html[data-taqa-theme="dark"] .docs-table-card{background:#002326;border-color:#003A3D;}
+html[data-taqa-theme="dark"] .pub-table th{border-color:#003A3D;color:#619B9E;background:rgba(255,255,255,0.02);}
+html[data-taqa-theme="dark"] .pub-table td{border-color:#002D30;}
 html[data-taqa-theme="dark"] .pub-table tbody tr:hover td{background:rgba(0,93,99,0.07);}
-html[data-taqa-theme="dark"] .pub-table-search{border-color:#22302F;}
-html[data-taqa-theme="dark"] .pub-table-search-input{color:#DDE6E4;}
-html[data-taqa-theme="dark"] .pub-type-filters{border-color:#22302F;}
-html[data-taqa-theme="dark"] .pub-filter-pill{border-color:#22302F;color:#8DA3A1;}
-html[data-taqa-theme="dark"] .pub-filter-pill.active{background:rgba(0,187,182,0.12);border-color:#00BBB6;color:#00BBB6;}
-html[data-taqa-theme="dark"] .pub-filter-pill[data-filter="all"].active{background:#DDE6E4;color:#0C1717;border-color:#DDE6E4;}
-html[data-taqa-theme="dark"] .pub-table-footer{border-color:#22302F;background:rgba(255,255,255,0.01);}
+html[data-taqa-theme="dark"] .pub-table-search{border-color:#003A3D;}
+html[data-taqa-theme="dark"] .pub-table-search-input{color:#C7DBDD;}
+html[data-taqa-theme="dark"] .pub-type-filters{border-color:#003A3D;}
+html[data-taqa-theme="dark"] .pub-filter-pill{border-color:#003A3D;color:#619B9E;}
+html[data-taqa-theme="dark"] .pub-filter-pill.active{background:rgba(0,187,182,0.12);border-color:#00BBB6;color:var(--primary-ink);}
+html[data-taqa-theme="dark"] .pub-filter-pill[data-filter="all"].active{background:#C7DBDD;color:#001314;border-color:#C7DBDD;}
+html[data-taqa-theme="dark"] .pub-table-footer{border-color:#003A3D;background:rgba(255,255,255,0.01);}
+/* TAQA red is a light-ground ink; on the dark card it drops to about 3:1, so
+   the warning ink for dark grounds carries the hover instead. */
+html[data-taqa-theme="dark"] .pub-remove-btn:hover,
+html[data-taqa-theme="dark"] .pub-remove-btn:focus-visible{color:var(--accent-ink);}
 
 /* ── Responsive ── */
 @media(max-width:900px){
