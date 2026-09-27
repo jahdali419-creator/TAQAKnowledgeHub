@@ -111,6 +111,15 @@
     return isControlled(d) && (d.status === 'current' || d.status === 'under-review');
   }
   function isPending(d) { return d.status === 'draft'; }
+  /* A draft that shipped in the file carries no stage, so treat it as waiting
+     on its approver. Otherwise fifteen real drafts would sit in no queue at
+     all and look like nobody had to do anything about them. */
+  function stageOf(d) {
+    if (d.status !== 'draft') return null;
+    return d.approvalStage || 'director';
+  }
+  function awaitingDirector(d) { return stageOf(d) === 'director'; }
+  function awaitingQms(d)      { return stageOf(d) === 'qms'; }
   function isVisible(d, role) {
     if (typeof TAQA_ROLE === 'undefined') return isLive(d);
     return isLive(d) && TAQA_ROLE.canSee(d, role || TAQA_ROLE.current());
@@ -121,6 +130,8 @@
     controlled: isControlled,
     live:       isLive,
     pending:    isPending,
+    'awaiting-director': awaitingDirector,
+    'awaiting-qms':      awaitingQms,
     visible:    isVisible
   };
 
@@ -183,6 +194,9 @@
     var row = {};
     for (var k in rec) if (Object.prototype.hasOwnProperty.call(rec, k)) row[k] = rec[k];
     row.status = row.status || 'draft';
+    // Enters the first of the two release steps: the named approver for its
+    // type has to sign before QMS ever sees it.
+    if (row.status === 'draft' && !row.approvalStage) row.approvalStage = 'director';
     row.submittedAt = row.submittedAt || new Date().toISOString();
     row.locallyAdded = true;
     load().push(row);
@@ -218,6 +232,70 @@
     return hit;
   }
 
+  /* ── The two release steps ───────────────────────────────────────────
+     Kept here rather than in a page, so the dashboard cannot release a
+     document by a route the rules never saw. Each refuses unless the caller's
+     effective role may take that step on that document right now.          */
+  function findDoc(docNumber) {
+    var hit = null;
+    all().forEach(function (d) { if (d.docNumber === docNumber) hit = d; });
+    return hit;
+  }
+
+  function approve(docNumber, signer) {
+    var d = findDoc(docNumber);
+    if (!d) return { ok: false, error: 'No such document.' };
+    if (typeof TAQA_APPROVAL === 'undefined') return { ok: false, error: 'Rules not loaded.' };
+    if (!TAQA_APPROVAL.canApprove(d)) return { ok: false, error: 'You cannot approve this document.' };
+    patch(docNumber, {
+      approvalStage: 'qms',
+      approvedBy: signer || actingName(),
+      approvedDate: new Date().toISOString().slice(0, 10)
+    });
+    return { ok: true, next: 'QMS countersignature' };
+  }
+
+  function countersign(docNumber, signer) {
+    var d = findDoc(docNumber);
+    if (!d) return { ok: false, error: 'No such document.' };
+    if (typeof TAQA_APPROVAL === 'undefined') return { ok: false, error: 'Rules not loaded.' };
+    if (!TAQA_APPROVAL.canCountersign(d)) return { ok: false, error: 'You cannot countersign this document.' };
+    patch(docNumber, {
+      approvalStage: null, status: 'current',
+      countersignedBy: signer || actingName(),
+      issueDate: d.issueDate || new Date().toISOString().slice(0, 10)
+    });
+    return { ok: true, next: 'released' };
+  }
+
+  /* The name that goes on the signature. A delegate signs in their own name,
+     noting who they acted for, because an audit trail that records the absent
+     Director as signer is worse than no trail at all. */
+  function actingName() {
+    if (typeof TAQA_DELEGATION === 'undefined') return 'Unknown';
+    var d = TAQA_DELEGATION.current();
+    if (d) return d.to + ' (delegate for ' + d.fromName + ')';
+    var r = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE.def() : null;
+    return (r && r.label) || 'Unknown';
+  }
+
+  /* Field-level write, used by both steps. Locally added rows are edited in
+     place; shipped rows get an overlay entry, same as setStatus. */
+  function patch(docNumber, fields) {
+    var local = null;
+    load().forEach(function (d) { if (d.docNumber === docNumber) local = d; });
+    if (local) {
+      for (var k in fields) if (Object.prototype.hasOwnProperty.call(fields, k)) local[k] = fields[k];
+      save();
+    } else {
+      var o = overrides();
+      o[docNumber] = o[docNumber] || {};
+      for (var j in fields) if (Object.prototype.hasOwnProperty.call(fields, j)) o[docNumber][j] = fields[j];
+      saveOverrides();
+    }
+    announce({ action: 'patch', docNumber: docNumber, fields: fields });
+  }
+
   function remove(docNumber) {
     _added = load().filter(function (d) { return d.docNumber !== docNumber; });
     save();
@@ -248,6 +326,8 @@
   root.TAQA_STORE = {
     all: all, rows: rows, count: count, area: area, areasIn: areasIn,
     add: add, setStatus: setStatus, remove: remove, reset: reset,
+    approve: approve, countersign: countersign, patch: patch,
+    stageOf: stageOf, findDoc: findDoc, actingName: actingName,
     onChange: onChange, added: load,
     isControlled: isControlled, isLive: isLive,
     EVENT: EVT, KEY: KEY
