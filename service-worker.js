@@ -1,4 +1,4 @@
-const CACHE = 'taqa-hub-v52';
+const CACHE = 'taqa-hub-v53';
 
 // Detect base path automatically, works on GitHub Pages and Azure
 const BASE = self.location.pathname.replace('service-worker.js', '');
@@ -11,6 +11,15 @@ const CORE = [
   BASE + 'shared.js',
   BASE + 'fixes.js',
   BASE + 'segments-data.js',
+  // The register, the role rules and the counting layer. Without these three
+  // an offline page loads its shell and then shows no documents and no counts
+  // at all, which looked like an empty hub rather than a cache miss.
+  BASE + 'documents-master.js',
+  BASE + 'roles.js',
+  BASE + 'store.js',
+  BASE + 'master-list.html',
+  BASE + 'dashboard.html',
+  BASE + 'whats-new.html',
   BASE + 'documents.html',
   BASE + 'search-index.js',
   BASE + 'ai-search.html',

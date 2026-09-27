@@ -637,6 +637,7 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
 
 <script src="roles.js"></script>
 <script src="documents-master.js"></script>
+<script src="store.js"></script>
 <script>
 const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
 const MOON='M6.2 2.3a.55.55 0 0 1 .2.62 5.2 5.2 0 0 0 6.7 6.7.55.55 0 0 1 .68.75A6.3 6.3 0 1 1 5.6 2.1a.55.55 0 0 1 .6.2Z';
@@ -698,7 +699,12 @@ function writeUrl(){
 }
 
 function role(){return TAQA_ROLE.current();}
-function visible(){return D.filter(d=>TAQA_ROLE.canSee(d,role()));}
+// Reads the store, not the shipped array, so a document submitted through the
+// upload form is in this list the moment a role is allowed to see it.
+function visible(){
+  const src = (typeof TAQA_STORE!=='undefined') ? TAQA_STORE.all() : D;
+  return src.filter(d=>TAQA_ROLE.canSee(d,role()));
+}
 
 let popOpen=false;
 function togglePop(){
@@ -1069,7 +1075,7 @@ function tileAttention(){
   document.getElementById('att-pill').textContent=
     Math.round(open/(rows.length||1)*100)+'% of the register';
   document.getElementById('f-att').innerHTML=
-    '<b>'+rows.length+'</b> controlled documents in scope';
+    '<b>'+rows.length+'</b> controlled documents visible to you';
 }
 
 function renderCuts(){
@@ -1106,15 +1112,28 @@ function drawSummary(){
 function heroLine(){
   const rows=visible().filter(d=>A.controlled(d));
   const segs=new Set(rows.map(d=>d.segment)).size;
+  // This line said "400 controlled documents" while the home page said 600.
+  // Both were right: the list only ever shows what your role may see. It now
+  // says so, and names the size of the register behind it, so the two figures
+  // read as one fact rather than as a contradiction.
+  const total = (typeof TAQA_STORE!=='undefined') ? TAQA_STORE.count('controlled') : rows.length;
+  const hidden = total - rows.length;
   document.getElementById('hero-line').innerHTML=
-    '<b>'+rows.length+'</b> controlled documents across <b>'+segs+'</b> segments. '+
-    'Number, revision, owner, issue date and review date on every record, so the '+
+    '<b>'+rows.length+'</b> controlled documents across <b>'+segs+'</b> areas'+
+    (hidden>0 ? ', of <b>'+total+'</b> in the register. The rest are drafts and '+
+                'withdrawn revisions your role does not see.' : '.')+
+    ' Number, revision, owner, issue date and review date on every record, so the '+
     'current revision can be confirmed before a job starts.';
 }
 
 renderRole(); readUrl();
 if(quick){const c=CT.find(x=>x.k===quick); if(c&&c.control&&!TAQA_ROLES[role()].controlPanel)quick='controlled';}
 renderCuts(); render(); drawSummary();
+// An upload or an approval in another tab changes the register under this
+// list, so redraw rather than showing a count that is quietly out of date.
+if (typeof TAQA_STORE !== 'undefined') window.addEventListener(TAQA_STORE.EVENT, function(){
+  renderCuts(); render(); drawSummary();
+});
 </script>
 
 <script>

@@ -584,8 +584,9 @@ html[data-theme="dark"] .doc-num {
         <h1 id="seg-name">Loading...</h1>
         <p class="seg-hero-desc" id="seg-desc">Loading segment description...</p>
         <div class="seg-hero-meta">
-          <div class="seg-meta-item"><strong id="seg-total">,</strong> Total Documents</div>
+          <div class="seg-meta-item"><strong id="seg-total">,</strong> Documents in Force</div>
           <div class="seg-meta-item"><strong id="seg-alerts">,</strong> Active Alerts</div>
+          <div class="seg-meta-item" id="seg-pending-wrap" hidden><strong id="seg-pending">0</strong> Awaiting Approval</div>
           <div class="seg-meta-item">Updated <strong id="seg-updated">recently</strong></div>
           <div class="seg-meta-item" id="seg-contributors-row" style="display:none;"><strong id="seg-contributors">,</strong></div>
         </div>
@@ -747,6 +748,8 @@ html[data-theme="dark"] .doc-num {
 </button>
 
 <script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script src="store.js"></script>
 <script>
 // ── Segment Data ──
 const SEGMENTS = {
@@ -1304,17 +1307,27 @@ const SEGMENTS = {
 // nineteen. Counts and lists are now read from the register, so an upload or
 // a withdrawal moves this page without anyone editing it.
 (function(){
-  if (typeof TAQA_MASTER_DOCS === 'undefined' || typeof TAQA_DOC_LOOKUPS === 'undefined') return;
-  var BUCKET = { sop:'sops', manual:'manuals', standard:'policies',
+  if (typeof TAQA_STORE === 'undefined' || typeof TAQA_DOC_LOOKUPS === 'undefined') return;
+  // 'policy' was missing, so opening Company Wide as an area showed an empty
+  // library and a total of zero against the register's twelve. An area issues
+  // standards and the company issues policies; both belong in the same tab.
+  var BUCKET = { sop:'sops', manual:'manuals', standard:'policies', policy:'policies',
                  alert:'alerts', lesson:'lessons', software:'software' };
   var L = TAQA_DOC_LOOKUPS.segments;
 
+  // This page used to apply its own test for what counts, "anything not
+  // withdrawn", which is why Coiled Tubing read 40 here and 42 on the home
+  // page. It now asks the store for the live population, the same one every
+  // other page asks for, and software assets are counted separately because
+  // TQ-QHSE-S001 does not place them under document control.
   Object.keys(L).forEach(function(id){
     var copy = SEGMENTS[id] || {};
     var docs = { sops:[], manuals:[], policies:[], alerts:[], lessons:[], software:[] };
-    TAQA_MASTER_DOCS.forEach(function(d){
+    TAQA_STORE.all().forEach(function(d){
       if (d.segment !== id) return;
-      if (d.status === 'obsolete' || d.status === 'superseded') return;
+      var live = TAQA_STORE.isLive(d),
+          asset = !TAQA_STORE.isControlled(d) && d.status !== 'obsolete';
+      if (!live && !asset) return;
       var k = BUCKET[d.docType];
       if (!k) return;
       docs[k].push(d.docNumber ? d.docNumber + '  ' + d.title : d.title);
@@ -1375,8 +1388,26 @@ document.getElementById('breadcrumb-name').textContent = seg.name;
 document.getElementById('seg-tag').textContent = seg.tag;
 document.getElementById('seg-name').textContent = seg.name;
 document.getElementById('seg-desc').textContent = seg.desc;
-document.getElementById('seg-total').textContent = seg.sops + seg.manuals + seg.policies + seg.alerts + seg.lessons + (seg.software||0);
+// Software is an asset, not a controlled document (TQ-QHSE-S001 4.4), so it is
+// counted on its own tab and left out of this figure. Adding it in was why this
+// header read 39 while the register and documents.html both said 36.
+document.getElementById('seg-total').textContent = seg.sops + seg.manuals + seg.policies + seg.alerts + seg.lessons;
 document.getElementById('seg-alerts').textContent = seg.alerts || 'None';
+// A document submitted here is a draft until QMS approves it, so it is not in
+// the library count above. Show it anyway: someone who has just uploaded needs
+// to see their document land somewhere.
+(function(){
+  if (typeof TAQA_STORE === 'undefined') return;
+  function paintPending(){
+    var n = TAQA_STORE.count('pending', { segment: segId }),
+        w = document.getElementById('seg-pending-wrap'),
+        v = document.getElementById('seg-pending');
+    if (!w || !v) return;
+    v.textContent = n;
+    w.hidden = !n;
+  }
+  TAQA_STORE.onChange(paintPending);
+})();
 document.getElementById('ms-sops').textContent = seg.sops;
 document.getElementById('ms-manuals').textContent = seg.manuals;
 document.getElementById('ms-policies').textContent = seg.policies;

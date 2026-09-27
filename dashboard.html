@@ -645,6 +645,9 @@ select { text-overflow:ellipsis; padding-inline-end:30px; }
   <span id="dash-toast-msg">Done</span>
 </div>
 
+<script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script src="store.js"></script>
 <script src="segments-data.js"></script>
 <script>
 let pendingCount = 0;
@@ -1035,21 +1038,45 @@ function initDashboard() {
   document.getElementById('dash-bc-seg').textContent = dash.name;
 
   // Stats
-  pendingCount = dash.pending.length;
-  const realPublished=(typeof TAQA_SEGMENTS!=='undefined'&&TAQA_SEGMENTS[dashSegId]&&TAQA_SEGMENTS[dashSegId].docs)
+  // Published used to be summed from segments-data.js, a second copy of the
+  // library that drifted from the register. Both figures now come from the
+  // store, so this dashboard agrees with the segment page it manages and a
+  // document uploaded a moment ago is already in the queue below.
+  const ST = (typeof TAQA_STORE !== 'undefined') ? TAQA_STORE : null;
+  const submitted = ST ? ST.rows('pending', { segment: dashSegId }) : [];
+  pendingCount = dash.pending.length + submitted.length;
+  const realPublished = ST ? ST.area(dashSegId).live
+    : ((typeof TAQA_SEGMENTS!=='undefined'&&TAQA_SEGMENTS[dashSegId]&&TAQA_SEGMENTS[dashSegId].docs)
     ?Object.values(TAQA_SEGMENTS[dashSegId].docs).reduce((s,a)=>s+(Array.isArray(a)?a.length:0),0)
-    :dash.published;
+    :dash.published);
   animateCount(document.getElementById('stat-pending'), pendingCount, 500);
   animateCount(document.getElementById('stat-published'), realPublished, 800);
   animateCount(document.getElementById('stat-contributors'), dash.contributors.length + 1, 650);
   document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
 
-  // Pending cards
+  // Pending cards. A document submitted through upload.html is a real draft in
+  // the register, so it queues here beside the sample ones and is approved the
+  // same way. Newest first, because that is the one the submitter is waiting on.
+  const TYPE_NAME = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.types) || {};
+  // Drafts that shipped in the register are awaiting approval just as much as
+  // one uploaded a minute ago, so both queue here and both publish for real.
+  const submittedCards = submitted.slice().reverse().map(d => ({
+    type: (TYPE_NAME[d.docType] || {}).label || d.docType,
+    docId: d.docNumber,
+    title: d.title,
+    submitter: 'You',
+    when: 'Just now',
+    size: d.fileSize || '',
+    preview: 'Submitted through the upload form. Awaiting QMS review of the record and the numbering.',
+    fromStore: true
+  }));
+  const queue = submittedCards.concat(dash.pending);
+
   const pendingList = document.getElementById('pending-list');
-  if (!dash.pending.length) {
+  if (!queue.length) {
     pendingList.innerHTML = '<div class="empty-pending"><div class="empty-pending-icon">✓</div><h3>All caught up!</h3><p>No documents awaiting review in this segment.</p></div>';
   } else {
-    pendingList.innerHTML = dash.pending.map((p, i) => {
+    pendingList.innerHTML = queue.map((p, i) => {
       const simDocs = buildSimilarDocs(p.title, dashSegId, 3);
       const simPanel = simDocs.length ? `
         <div class="dup-sim-panel">
@@ -1076,7 +1103,7 @@ function initDashboard() {
         <div class="pending-doc-preview">${p.preview}</div>
         ${exactBanner}${supersRow}${simPanel}
         <div class="pending-actions">
-          <button class="btn-approve" onclick="approveDoc(${i+1})">✓ Approve</button>
+          <button class="btn-approve" data-store-doc="${p.fromStore ? p.docId : ''}" onclick="approveDoc(${i+1})">✓ Approve</button>
           <button class="btn-reject" onclick="rejectDoc(${i+1})">✕ Reject</button>
           <button class="btn-preview-link">Preview Document</button>
           <span class="action-result" id="result-${i+1}"></span>
@@ -1143,6 +1170,10 @@ function approveDoc(id) {
   actions.querySelector('.btn-reject').style.opacity = '0.4';
   result.textContent = '✓ Published to segment';
   result.className = 'action-result show approved-txt';
+  // A card backed by a real register record is published for real: the draft
+  // becomes current, and every in-force count on every open page moves with it.
+  const storeDoc = actions.querySelector('.btn-approve').dataset.storeDoc;
+  if (storeDoc && typeof TAQA_STORE !== 'undefined') TAQA_STORE.setStatus(storeDoc, 'current');
   pendingCount = Math.max(0, pendingCount - 1);
   document.getElementById('stat-pending').textContent = pendingCount;
   document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');

@@ -809,18 +809,24 @@ document.addEventListener('click',function(e){
 </script>
 
 <script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script src="store.js"></script>
 <script>
 /* Two counts on this page were typed three times between them and said 523
    and 492 on the same screen. They come from the register now. */
 (function(){
-  if (typeof TAQA_MASTER_DOCS === 'undefined') return;
-  var T = TAQA_DOC_LOOKUPS.types;
-  var n = TAQA_MASTER_DOCS.filter(function(d){ return (T[d.docType]||{}).controlled !== false; }).length;
-  var areas = Object.keys(TAQA_DOC_LOOKUPS.segments)
-    .filter(function(k){ var g = TAQA_DOC_LOOKUPS.segments[k].group;
-                         return g === 'segment' || g === 'function' || g === 'product'; }).length;
-  var a = document.getElementById('ai-doc-n'); if (a) a.textContent = n;
-  var b = document.getElementById('ai-area-n'); if (b) b.textContent = areas;
+  if (typeof TAQA_STORE === 'undefined') return;
+  // The area figure counted three families and left out Company Wide and the
+  // area still waiting on QHSE, so it said 24 while the master list said 26.
+  // Both now count every area that holds documents.
+  function paint(){
+    var n = TAQA_STORE.count('live');
+    var areas = Object.keys(TAQA_DOC_LOOKUPS.segments)
+      .filter(function(k){ return TAQA_STORE.area(k).live > 0; }).length;
+    var a = document.getElementById('ai-doc-n'); if (a) a.textContent = n;
+    var b = document.getElementById('ai-area-n'); if (b) b.textContent = areas;
+  }
+  TAQA_STORE.onChange(paint);
 })();
 </script>
 <script src="shared.js"></script>

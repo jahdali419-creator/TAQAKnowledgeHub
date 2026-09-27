@@ -336,6 +336,9 @@ html[data-theme="dark"] .pub-table-footer{border-color:#243044;background:rgba(2
   <span id="dash-toast-msg">Done</span>
 </div>
 
+<script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script src="store.js"></script>
 <script src="segments-data.js"></script>
 <script>
 // Abbreviated owner/contributor names per segment for "By" column
@@ -363,27 +366,33 @@ let pubShowAll = true; // show all by default on this dedicated page
 const docParams = new URLSearchParams(window.location.search);
 const docSegId = docParams.get('id') || 'coiled-tubing';
 
+// This page used to build its own list out of segments-data.js and invent a
+// date and an author for every row, counting a document set that existed
+// nowhere else: it showed 35 documents for an area the register held 42 of.
+// It reads the register now, with the real issue date and the real owner, so
+// the table, the pills and the hero stats all describe the same documents the
+// rest of the hub does, and an approved upload appears here without an edit.
 function buildAllDocs(segId) {
-  const seg = typeof TAQA_SEGMENTS !== 'undefined' ? TAQA_SEGMENTS[segId] : null;
-  if (!seg) return [];
-  const pool = OWNERS_DATA[segId] || ['M. Jahdali'];
+  if (typeof TAQA_STORE === 'undefined') return [];
   const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  let mi = 4, yr = 2026, cnt = 0;
-  function nextDate() {
-    const d = MO[mi] + ' ' + yr; cnt++;
-    if (cnt % 4 === 0) { mi--; if (mi < 0) { mi = 11; yr--; } }
-    return d;
-  }
-  const docs = []; let ai = 0;
-  const add = (arr, type) => (arr || []).forEach(t => {
-    docs.push({ title: String(t).replace(/^⚠️\s*/, ''), type, date: nextDate(), by: pool[ai++ % pool.length] });
-  });
-  add(seg.docs.sops, 'sop');
-  add(seg.docs.manuals, 'manual');
-  add(seg.docs.policies, 'policy');
-  add(seg.docs.alerts, 'alert');
-  add(seg.docs.lessons, 'lesson');
-  return docs;
+  const fmt = iso => {
+    if (!iso) return 'Not recorded';
+    const d = new Date(iso);
+    return isNaN(d) ? 'Not recorded' : MO[d.getMonth()] + ' ' + d.getFullYear();
+  };
+  // The register stores an area's own rules as standards; this page's table
+  // has always called that column policy, so keep the key and relabel above.
+  const TYPE_KEY = { sop:'sop', manual:'manual', standard:'policy',
+                     policy:'policy', alert:'alert', lesson:'lesson' };
+  const ORDER = { sop:0, manual:1, policy:2, alert:3, lesson:4 };
+  return TAQA_STORE.rows('live', { segment: segId })
+    .map(d => ({
+      title: (d.docNumber ? d.docNumber + '  ' : '') + d.title,
+      type: TYPE_KEY[d.docType] || 'sop',
+      date: fmt(d.issueDate),
+      by: (typeof TAQA_DOC !== 'undefined' && TAQA_DOC.owner(d)) || 'Not recorded'
+    }))
+    .sort((a, b) => (ORDER[a.type] - ORDER[b.type]) || a.title.localeCompare(b.title));
 }
 
 function getTypeLabels(segId) {

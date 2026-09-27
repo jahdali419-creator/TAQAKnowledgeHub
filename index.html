@@ -1579,7 +1579,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
       <div class="stats-panel-title">Platform Overview</div>
       <div class="stats-list">
         <div class="stat-row">
-          <span class="stat-row-label">Total Documents</span>
+          <span class="stat-row-label">Documents in Force</span>
           <span class="stat-row-value" data-target="600">0</span>
         </div>
         <div class="stat-row">
@@ -1591,8 +1591,8 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
           <span class="stat-row-value" data-target="37">0</span>
         </div>
         <div class="stat-row">
-          <span class="stat-row-label">Registered Users</span>
-          <span class="stat-row-value" data-target="1200">0</span>
+          <span class="stat-row-label">Awaiting QMS Approval</span>
+          <span class="stat-row-value" data-target="0">0</span>
         </div>
       </div>
     </div>
@@ -1787,7 +1787,7 @@ function animateCounter(el, target, delay) {
       const ease = 1 - Math.pow(1 - p, 2);
       el.textContent = Math.floor(ease * target).toLocaleString();
       if (p < 1) requestAnimationFrame(step);
-      else el.textContent = target.toLocaleString() + suffix;
+      else { el.textContent = target.toLocaleString() + suffix; el.dataset.counted = '1'; }
     };
     requestAnimationFrame(step);
   }, delay);
@@ -2154,6 +2154,8 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
 </script>
 
 <script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script src="store.js"></script>
 <script src="segments-data.js"></script>
 <script>
 /* ── The Segments menu ─────────────────────────────────────────────────
@@ -2208,22 +2210,27 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
    The hero panel, the strip and the two doors all read the same register,
    so no two places on this page can quote a different number.            */
 (function(){
-  if (typeof TAQA_MASTER_DOCS === 'undefined') return;
-  var D = TAQA_MASTER_DOCS, A = TAQA_DOC;
+  if (typeof TAQA_STORE === 'undefined') return;
+  var S = TAQA_STORE;
 
-  var SEG_IDS = ['drilling','well-safety','fracturing','inspection','coiled-tubing',
-                 'cementing','well-testing','wireline','slickline','well-completions',
-                 'marine-services'];
-  var FN_IDS  = ['qhse','cybersecurity','hr','finance','it','supply-chain','legal',
-                 'learning-center','commercial','geothermal-coe'];
-  var PT_IDS  = ['pt-drilling-coe','pt-completions-coe','pt-intervention-coe'];
+  // The three families used to be three lists of ids typed out here, which is
+  // how this page came to claim ten segments while the register held eleven.
+  // They are now whatever the register says they are.
+  function paint(){
+  var totalDocs  = S.count('live');
+  var totalAlert = S.count('live', { docType:'alert' });
+  var segN = S.areasIn('segment').length,
+      fnN  = S.areasIn('function').length,
+      ptN  = S.areasIn('product').length;
 
-  var controlled = D.filter(A.controlled);
-  var totalDocs  = controlled.length;
-  var totalAlert = controlled.filter(function(d){ return d.docType === 'alert'; }).length;
-  var segN = SEG_IDS.length, fnN = FN_IDS.length, ptN = PT_IDS.length;
-
-  function set(el, n){ if (el) el.dataset.target = n; }
+  // Re-animating from zero on every repaint would make an upload look like a
+  // reload, so a figure that is already on screen is nudged, not restarted.
+  function set(el, n){
+    if (!el) return;
+    el.dataset.target = n;
+    var shown = parseInt((el.textContent||'0').replace(/\D/g,''),10);
+    if (el.dataset.counted === '1' && shown !== n) el.textContent = n;
+  }
 
   document.querySelectorAll('.stats-strip-item').forEach(function(item){
     var lbl = item.querySelector('.stats-strip-label'),
@@ -2246,11 +2253,13 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     else if (t.indexOf('Technology') !== -1) set(val, ptN);
     else if (t.indexOf('Segment') !== -1)    set(val, segN);
     else if (t.indexOf('Alert') !== -1)      set(val, totalAlert);
-    else if (t.indexOf('User') !== -1)       row.style.display = 'none';
+    else if (t.indexOf('Approval') !== -1)   set(val, S.count('pending'));
   });
 
   var cc = document.querySelector('.cmd-header-count');
-  if (cc) cc.textContent = (segN + fnN + ptN) + ' areas · ' + totalDocs + ' documents';
+  if (cc) cc.textContent = (segN + fnN + ptN) + ' areas · ' + totalDocs + ' documents in force';
+  }
+  S.onChange(paint);
 })();
 </script>
 <script>
@@ -2289,11 +2298,15 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     'stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/>' +
     '<path d="M13 6.5L18.5 12 13 17.5"/></svg>';
 
-  var controlled = D.filter(A.controlled),
+  // Counts come from the store, so this sheet and the headline strip above it
+  // are reading the same population and an upload moves both.
+  var ST         = (typeof TAQA_STORE !== 'undefined') ? TAQA_STORE : null,
+      controlled = ST ? ST.rows('live') : D.filter(A.controlled),
       company    = controlled.filter(function(d){ return d.scope === 'company'; }),
       library    = controlled.length;
   function statsFor(id){
-    return { docs:controlled.filter(function(d){ return d.segment === id; }).length };
+    return { docs: ST ? ST.area(id).live
+                      : controlled.filter(function(d){ return d.segment === id; }).length };
   }
   function rowsOf(list){
     return list.map(function(x){

@@ -795,6 +795,7 @@ html[data-theme="dark"] .policy-rules {
 
 <script src="documents-master.js"></script>
 <script src="roles.js"></script>
+<script src="store.js"></script>
 <script src="segments-data.js"></script>
 <script>
 function toggleSoftwareFields(val) {
@@ -963,6 +964,13 @@ function submitUpload(e) {
   console.info('[upload] record to POST', rec);
   window.TAQA_LAST_UPLOAD = rec;
 
+  // The record used to stop here, on a global nobody read, which is why no
+  // figure anywhere on the site ever moved when someone uploaded. Commit it
+  // to the register instead. It lands as a draft, per TQ-QHSE-S001 4.4, so
+  // the register total and the pending queue move now and the in-force counts
+  // move when QMS approves it. Every open page repaints off this one call.
+  if (typeof TAQA_STORE !== 'undefined') TAQA_STORE.add(rec);
+
   setUploadStep(3);
   const ref = rec.docNumber;
   // showUploadToast() sets toast-sub's textContent, which wipes the #upload-ref
@@ -971,7 +979,8 @@ function submitUpload(e) {
   var refEl = document.getElementById('upload-ref');
   if (refEl) refEl.textContent = ref;
   document.getElementById('toast-title').textContent = 'Submitted for review';
-  document.getElementById('toast-sub').textContent = 'Queued as ' + ref;
+  document.getElementById('toast-sub').textContent =
+    'Queued as ' + ref + '. In the register now, in force once QMS approves.';
   document.getElementById('toast-icon').innerHTML = ICON_OK;
   const toast = document.getElementById('toast');
   toast.classList.add('show');
