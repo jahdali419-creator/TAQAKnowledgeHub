@@ -841,7 +841,7 @@ html[data-taqa-theme="dark"] .tile:hover .tile-ghost { opacity:0.16; }
 }
 .sidebar-tool-featured-tag {
   font-size:10.5px; font-weight:700; text-transform:uppercase;
-  letter-spacing:0.8px; color:rgba(255,255,255,0.65); margin-bottom:6px; display:block;
+  letter-spacing:0.8px; color:rgba(255,255,255,0.82); margin-bottom:6px; display:block;
 }
 .sidebar-tool-featured-title {
   font-family:'BwGradual','Urbanist',sans-serif; font-size:17px; font-weight:700;
@@ -1097,6 +1097,9 @@ html[data-taqa-theme="dark"] .stats-strip-divider { background:#003A3D; }
   border-radius:8px;padding:7px 16px;text-decoration:none;transition:background .2s;}
 .desk-go:hover{background:var(--primary-hover);}
 html[data-taqa-theme="dark"] .desk{background:#002326;border-color:#003A3D;}
+/* In dark theme the light tint lands on the desk's own colour and the pill
+   disappears behind the line, so the role is tinted in the dark teal instead. */
+html[data-taqa-theme="dark"] .desk-who{background:rgba(0,187,182,0.12);}
 @media(max-width:640px){.desk{padding:12px 20px;}.desk-line{flex:1 1 100%;order:3;}}
 /* ── Continue Reading Strip ── */
 .continue-strip{background:var(--bg-white);border-bottom:1px solid var(--border);padding:12px 48px;}
@@ -1411,7 +1414,7 @@ html[data-taqa-theme="dark"] .ch-row {
 }
 .sidebar-brand-card-name {
   font-family:'BwGradual','Urbanist',sans-serif; font-size:22px; font-weight:700; font-style:italic;
-  color:#4DD9D3; letter-spacing:-0.3px; display:block; margin-bottom:4px;
+  color:var(--primary-light); letter-spacing:-0.3px; display:block; margin-bottom:4px;
 }
 .sidebar-brand-card-wip {
   display:inline-block; margin-bottom:8px;
@@ -1424,9 +1427,9 @@ html[data-taqa-theme="dark"] .ch-row {
 }
 .sidebar-brand-card-credit {
   font-size:10px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase;
-  color:rgba(255,255,255,0.28);
+  color:rgba(255,255,255,0.6);
 }
-.sidebar-brand-card-credit span { color:rgba(0,187,182,0.7); }
+.sidebar-brand-card-credit span { color:var(--primary-light); }
 
 /* ── Mobile Nav ── */
 .nav-hamburger {
@@ -1627,7 +1630,7 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
 </div>
 
 <div class="hero-scroll-hint" id="scroll-hint">
-    <span style="font-size:10px; color:rgba(255,255,255,0.45); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:8px; display:block;">Built by <span style="color:#4DD9D3;">TAQA LEARNING CENTER</span></span>
+    <span style="font-size:10px; color:rgba(255,255,255,0.6); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:8px; display:block;">Built by <span style="color:var(--primary-light);">TAQA LEARNING CENTER</span></span>
     <span class="hero-scroll-text">Scroll</span>
     <div class="hero-scroll-chevron"></div>
   </div>
@@ -1797,7 +1800,7 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
 <footer>
   <div class="footer-inner">
     <div>
-      <div class="footer-brand">TAQA Knowledge Hub &nbsp;·&nbsp; <em style="color:#00BBB6; font-style:italic; font-weight:700;">Tech Hub</em> <span style="opacity:0.7;font-style:normal;">(working name)</span></div>
+      <div class="footer-brand">TAQA Knowledge Hub &nbsp;·&nbsp; <em style="color:var(--primary-ink); font-style:italic; font-weight:700;">Tech Hub</em> <span style="opacity:0.7;font-style:normal;">(working name)</span></div>
       <div class="footer-copy">© 2026 TAQA, Industrialization &amp; Energy Services Company. All rights reserved.</div>
       <div class="footer-credit">Built by <span style="color:var(--primary-ink); font-weight:600;">TAQA LEARNING CENTER</span></div>
     </div>
@@ -1965,9 +1968,9 @@ document.addEventListener('click',function(e){
     '.rv-chip:hover{background:rgba(0,187,182,0.08);border-color:rgba(0,187,182,0.35);color:var(--primary-ink);}'+
     '.rv-chip-tag{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--primary-ink);background:rgba(0,93,99,0.08);border-radius:20px;padding:1px 7px;}'+
     'html[data-taqa-theme="dark"] .rv-chip{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);}'+
-    'html[data-taqa-theme="dark"] .rv-chip:hover{background:rgba(0,187,182,0.1);border-color:rgba(0,187,182,0.3);color:#4DD9D3;}'+
+    'html[data-taqa-theme="dark"] .rv-chip:hover{background:rgba(0,187,182,0.1);border-color:rgba(0,187,182,0.3);color:var(--primary-ink);}'+
     'html[data-taqa-theme="dark"] .rv-chip-tag{color:rgba(0,187,182,0.75);background:rgba(0,187,182,0.1);}'+
-    'html[data-taqa-theme="dark"] .rv-label{color:rgba(255,255,255,0.3);}';
+    'html[data-taqa-theme="dark"] .rv-label{color:var(--text-light);}';
   document.head.appendChild(s);
   var chips=recent.map(function(r){
     return '<a href="segment.html?id='+r.id+'" class="rv-chip"><span class="rv-chip-tag">'+r.tag+'</span>'+r.name+'</a>';
@@ -2039,9 +2042,12 @@ document.addEventListener('click',function(e){
   display:none;
 }
 html[data-taqa-theme="dark"] #tour-card{background:#002D30;box-shadow:0 24px 64px rgba(0,0,0,0.5);}
-#tour-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:15px;color:#756A61;cursor:pointer;line-height:1;padding:4px;}
-#tour-close:hover{color:#756A61;}
-#tc-step{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#00BBB6;margin-bottom:6px;}
+/* This card flips from white to #002D30 with the theme, so its inks have to be
+   tokens. The grey and the teal were fixed values, and each of them was landing
+   on the wrong one of the two grounds. */
+#tour-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:15px;color:var(--text-light);cursor:pointer;line-height:1;padding:4px;}
+#tour-close:hover{color:var(--text-light);}
+#tc-step{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--primary-ink);margin-bottom:6px;}
 #tc-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:17px;font-weight:800;color:#1E1C1A;margin-bottom:8px;line-height:1.3;}
 html[data-taqa-theme="dark"] #tc-title{color:#C7DBDD;}
 #tc-desc{font-size:13.5px;color:#756A61;line-height:1.65;margin:0 0 18px;}
@@ -2053,8 +2059,8 @@ html[data-taqa-theme="dark"] #tc-desc{color:#8CB6B9;}
 html[data-taqa-theme="dark"] .t-dot{background:#00484B;}
 html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
 #tc-btns{display:flex;gap:8px;align-items:center;}
-#tc-skip{background:none;border:none;font-size:13px;color:#756A61;cursor:pointer;padding:7px 10px;border-radius:8px;font-family:'Inter',sans-serif;transition:color .2s;}
-#tc-skip:hover{color:#756A61;}
+#tc-skip{background:none;border:none;font-size:13px;color:var(--text-light);cursor:pointer;padding:7px 10px;border-radius:8px;font-family:'Inter',sans-serif;transition:color .2s;}
+#tc-skip:hover{color:var(--text-light);}
 #tc-next{background:#005D63;color:#fff;border:none;padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .2s;}
 #tc-next:hover{opacity:.88;}
 </style>
