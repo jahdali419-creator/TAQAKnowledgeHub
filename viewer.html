@@ -30,9 +30,11 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
   /* Captions and empty-field values already asked for --text-dim, which nobody
      had ever defined, so they fell back to full-strength ink. Tier 3. */
   --text-dim:#756A61;
-  /* Orange and red only become legible as text once darkened, so warning text
-     takes its ink from here while the fills keep the accent itself. */
-  --alert-ink:#A8431A;
+  /* The five state inks the hub shares. shared.js declares the same values but
+     injects late, so the page carries its own copy and is never briefly wrong.
+     Each is the accent darkened until it can hold small text; the undarkened
+     accent stays on the fill and the border beside it. */
+  --stop-ink:#C8102E;--warn-ink:#8A6200;--alert-ink:#A8431A;--ok-ink:#00705F;--info-ink:#0076A8;
   --gradient:#005D63; /* flat brand teal - no gradient */
 }
 *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
@@ -97,13 +99,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .lcb b{display:block;font-size:13px;margin-bottom:3px;}
 .lcb span{font-size:12.5px;line-height:1.65;display:block;}
 .lcb a{color:inherit;font-weight:700;}
-/* The stripe and the tint carry which state this is; the heading takes the one
-   warning ink, which is why these no longer need a per-theme override. Draft is
-   the one banner that is not a warning, so it reads in the brand ink. */
-.lcb-obsolete{background:rgba(200,16,46,.07);border-color:rgba(200,16,46,.30);border-left:3px solid #C8102E;color:var(--alert-ink);}
-.lcb-superseded{background:rgba(255,184,28,.10);border-color:rgba(255,184,28,.34);border-left:3px solid #FFB81C;color:var(--alert-ink);}
-.lcb-review{background:rgba(255,184,28,.08);border-color:rgba(255,184,28,.28);border-left:3px solid #FFB81C;color:var(--alert-ink);}
-.lcb-draft{background:rgba(0,118,168,.07);border-color:rgba(0,118,168,.28);border-left:3px solid #0076A8;color:var(--primary-ink);}
+/* Each banner reads in the ink of the border beside it, because an obsolete
+   document is the one state a reader must not mistake for a document merely
+   under review. The ink is the state ink, so neither needs a dark override.
+   Draft carries no fill: the informational blue has no contrast left over a
+   tint of itself, and it is legible on paper. */
+.lcb-obsolete{background:rgba(200,16,46,.07);border-color:rgba(200,16,46,.30);border-left:3px solid #C8102E;color:var(--stop-ink);}
+.lcb-superseded{background:rgba(255,184,28,.10);border-color:rgba(255,184,28,.34);border-left:3px solid #FFB81C;color:var(--warn-ink);}
+.lcb-review{background:rgba(255,184,28,.08);border-color:rgba(255,184,28,.28);border-left:3px solid #FFB81C;color:var(--warn-ink);}
+.lcb-draft{background:transparent;border-color:rgba(0,118,168,.28);border-left:3px solid #0076A8;color:var(--info-ink);}
 .lcb-prov{background:rgba(253,105,29,.07);border-color:rgba(253,105,29,.28);border-left:3px solid #FD691D;color:var(--alert-ink);}
 /* The explanation sits on a tinted panel, where the muted ink falls under 4.5,
    so it takes the full text ink and lets the heading carry the colour. */
@@ -116,10 +120,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .meta-clause{font-size:8.5px;color:var(--text-dim);letter-spacing:.2px;margin-top:3px;}
 .meta-val a{color:var(--primary-ink);text-decoration:none;font-weight:700;}
 .meta-val a:hover{text-decoration:underline;}
-.mv-over{color:var(--alert-ink);}
-/* An in-date review is the ordinary state, so it reads in the brand ink. TAQA
-   green is a fill colour and is not legible at this size on either ground. */
-.mv-ok{color:var(--primary-ink);}
+/* An overdue review is the same red a withdrawn document gets, and an in-date
+   one the same green as anything else that is in order. */
+.mv-over{color:var(--stop-ink);}
+.mv-ok{color:var(--ok-ink);}
 .meta-cell{background:rgba(0,93,99,0.04);border:1px solid var(--glass-border);border-radius:10px;padding:12px 14px;}
 .meta-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;font-weight:600;}
 .meta-val{font-size:13px;font-weight:600;color:var(--text);}
@@ -150,7 +154,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .pdf-toolbar{display:flex;align-items:center;gap:10px;padding:12px 20px;
   border-bottom:1px solid var(--glass-border);background:rgba(0,93,99,0.03);}
 .pdf-tb-label{font-size:11.5px;font-weight:600;color:var(--text-muted);flex:1;}
-.pdf-tb-badge{padding:2px 10px;border-radius:50px;background:rgba(255,184,28,0.14);border:1px solid rgba(255,184,28,0.30);color:var(--alert-ink);font-size:10.5px;font-weight:600;}
+.pdf-tb-badge{padding:2px 10px;border-radius:50px;background:rgba(255,184,28,0.14);border:1px solid rgba(255,184,28,0.30);color:var(--warn-ink);font-size:10.5px;font-weight:600;}
 .pdf-preview{background:linear-gradient(160deg,#F4F4F3 0%,#FFFFFF 100%);min-height:320px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px 24px;text-align:center;}
 .pdf-icon{width:64px;height:80px;background:rgba(255,255,255,0.9);border-radius:6px;
@@ -178,7 +182,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   border-radius:6px;padding:6px 10px;font-family:'Inter',sans-serif;}
 
 /* Dark mode */
-html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--dark:#001314;--glass:rgba(0,45,48,0.88);--glass-border:rgba(255,255,255,0.07);--text:#C7DBDD;--text-muted:#8CB6B9;--text-dim:#619B9E;--alert-ink:#FF9B5E;}
+html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--dark:#001314;--glass:rgba(0,45,48,0.88);--glass-border:rgba(255,255,255,0.07);--text:#C7DBDD;--text-muted:#8CB6B9;--text-dim:#619B9E;
+  --stop-ink:#FF8A94;--warn-ink:#FFB81C;--alert-ink:#FF9B5E;--ok-ink:#4FD1B5;--info-ink:#6BC5EE;}
 html[data-taqa-theme="dark"] body{background:#001314;}
 html[data-taqa-theme="dark"] nav{background:rgba(0,35,38,0.92);border-color:rgba(255,255,255,0.06);}
 html[data-taqa-theme="dark"] .nav-brand-name{color:#C7DBDD;}
@@ -271,7 +276,8 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 /* This card is meant to be printed, so it stays on white paper whatever the
    theme is. Pinning the inks here keeps the light-ground values on it while the
    rest of the page is dark. */
-#qref-card{background:#fff;--primary-ink:#005D63;--alert-ink:#A8431A;--text:#1E1C1A;--text-muted:#524D48;
+#qref-card{background:#fff;--primary-ink:#005D63;--text:#1E1C1A;--text-muted:#524D48;
+  --stop-ink:#C8102E;--warn-ink:#8A6200;--alert-ink:#A8431A;--ok-ink:#00705F;--info-ink:#0076A8;
   border-radius:20px;width:100%;max-width:640px;margin:auto;
   box-shadow:0 32px 80px rgba(0,0,0,0.3);transform:scale(0.96);transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);}
 #qref-overlay.open #qref-card{transform:scale(1);}
