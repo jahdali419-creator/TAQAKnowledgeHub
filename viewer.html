@@ -26,7 +26,7 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 :root{
   --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
   --dark:#F4F4F3;--glass:rgba(255,255,255,0.88);--glass-2:rgba(255,255,255,0.98);
-  --glass-border:rgba(0,0,0,0.08);--text:#1E1C1A;--text-muted:#756A61;
+  --glass-border:rgba(0,0,0,0.08);--text:#1E1C1A;--text-muted:#524D48;
   /* Captions and empty-field values already asked for --text-dim, which nobody
      had ever defined, so they fell back to full-strength ink. Tier 3. */
   --text-dim:#756A61;
@@ -122,7 +122,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .meta-val a:hover{text-decoration:underline;}
 /* An overdue review is the same red a withdrawn document gets, and an in-date
    one the same green as anything else that is in order. */
-.mv-over{color:var(--stop-ink);}
+.mv-over{color:var(--warn-ink);}
 .mv-ok{color:var(--ok-ink);}
 .meta-cell{background:rgba(0,93,99,0.04);border:1px solid var(--glass-border);border-radius:10px;padding:12px 14px;}
 .meta-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;font-weight:600;}
@@ -146,7 +146,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .section-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;
   color:var(--primary-ink);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
 .section-label::after{content:'';flex:1;height:1px;background:rgba(0,187,182,0.15);}
-.doc-review-late{color:var(--stop-ink,#C8102E);font-weight:600;}
+.doc-review-late{color:var(--warn-ink,#8A6200);font-weight:600;}
 .section-text{font-size:14px;color:var(--text-muted);line-height:1.78;}
 
 /* PDF placeholder */
@@ -217,6 +217,9 @@ html[data-taqa-theme="dark"] .qr-inline-url{background:rgba(255,255,255,0.04);}
   .meta-cell{background:#F9F8F7!important;border:1px solid #ddd!important;}
   .section-label{color:var(--primary-ink)!important;}
   .section-label::after{background:#ddd!important;}
+  /* Paper is white whichever theme was on screen, so print takes the light inks. */
+  html[data-taqa-theme="dark"]{--primary-ink:#005D63;--text:#1E1C1A;--text-muted:#524D48;--text-dim:#756A61;
+    --stop-ink:#C8102E;--warn-ink:#8A6200;--alert-ink:#A8431A;--ok-ink:#00705F;--info-ink:#0076A8;}
 }
 
 /* Related documents */
@@ -288,7 +291,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   font-family:'Inter',sans-serif;border:1px solid rgba(0,0,0,0.12);background:transparent;color:#524D48;
   display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;}
 .qref-tbtn:hover{border-color:rgba(0,93,99,0.3);color:var(--primary-ink);}
-.qref-tbtn.sun-on{background:#fef9c3;border-color:#eab308;color:#854d0e;}
+.qref-tbtn.sun-on{background:rgba(255,184,28,0.18);border-color:#FFB81C;color:var(--warn-ink,#8A6200);}
 .qref-tbtn.close-btn{background:#EDEBE8;border-color:transparent;}
 .qref-tbtn.print-btn{background:#005D63;color:#fff;border:none;box-shadow:0 3px 10px rgba(0,93,99,0.3);}
 #qref-body{padding:28px 32px 32px;}
@@ -593,7 +596,9 @@ function docControlLine(ref){
   var bits = [];
   if (d.revision) bits.push('Rev ' + d.revision);
   if (d.classification) bits.push(d.classification.charAt(0).toUpperCase() + d.classification.slice(1));
-  var due = d.nextReviewDate ? new Date(d.nextReviewDate) : null;
+  var withdrawn = d.status === 'obsolete' || d.status === 'superseded';
+  var due = (!withdrawn && d.nextReviewDate) ? new Date(d.nextReviewDate) : null;
+  if (withdrawn) bits.push('Withdrawn');
   if (due && !isNaN(due)) {
     var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     var when = MON[due.getMonth()] + ' ' + due.getFullYear();
@@ -607,9 +612,14 @@ function docControlLine(ref){
 
 const params = new URLSearchParams(location.search);
 const segId = (params.get('seg') || 'drilling').replace(/[^a-z0-9-]/g,'').slice(0,60) || 'drilling';
-const docType = (params.get('type') || 'sop').replace(/[^a-z0-9-]/g,'').slice(0,20) || 'sop';
 const docTitle = decodeURIComponent(params.get('title') || 'Document').replace(/<[^>]*>/g,'').trim().slice(0,300) || 'Document';
 const docId = decodeURIComponent(params.get('doc') || '').replace(/[^A-Za-z0-9-_&.]/g,'').slice(0,120);
+// The register says what a document is; the link only says what the page that
+// linked here thought it was. A CEO Policy reached through a link that said
+// type=standard used to be drawn as a Standard in the square, the print view
+// and the QR card while its owner and approver came from the register.
+const _typeRec = (docId && typeof TAQA_DOC !== 'undefined') ? (TAQA_DOC.byNumber(docId) || TAQA_DOC.byLegacy(docId)) : null;
+const docType = (_typeRec && _typeRec.docType) || (params.get('type') || 'sop').replace(/[^a-z0-9-]/g,'').slice(0,20) || 'sop';
 const segInfo = SEGS[segId] || {name:'TAQA',tag:'Segment'};
 const typeColor = TYPE_COLORS[docType] || TYPE_COLORS.sop;
 const typeText = TYPE_TC[docType] || TYPE_TC.sop;
@@ -633,7 +643,10 @@ document.getElementById('bc-title').textContent = docTitle.length > 50 ? docTitl
 // Back button
 document.getElementById('back-btn').href = (segId === 'company')
   ? 'master-list.html'
-  : 'segment.html?id=' + segId + '&tab=' + docType + 's';
+  : 'segment.html?id=' + segId + '&tab=' +
+    // Pluralising the type sent a Standard to tab=standards and software to
+    // tab=softwares, neither of which exists, so Back opened an empty page.
+    (({sop:'sops',manual:'manuals',standard:'policies',policy:'policies',alert:'alerts',lesson:'lessons',software:'software'})[docType] || 'all');
 
 // Type icon
 const iconEl = document.getElementById('doc-icon');
@@ -744,7 +757,7 @@ if (_denied) {
       MA.numberNote(_rec) || 'This number is provisional pending assignment by QHSE.']);
   const WARN = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
   document.getElementById('lifecycle-banner').innerHTML = B.map(b =>
-    '<div class="lcb lcb-' + b[0] + '">' + WARN + '<div><b>' + b[1] + '</b><span class="n">' + b[2] + '</span></div></div>').join('');
+    '<div class="lcb lcb-' + b[0] + '">' + WARN + '<div><b>' + esc(b[1]) + '</b><span class="n">' + esc(b[2]) + '</span></div></div>').join('');
 
   // API Q2 4.4.3: a withdrawn document must be prevented from unintended use.
   // Downloading, printing or pinning it offline all create an uncontrolled copy,
@@ -780,7 +793,8 @@ if (_denied) {
 }
 
 // Summary & Scope
-document.getElementById('doc-summary').innerHTML = docControlLine(_rec);
+// A reader the role check turned away keeps the refusal, not the record.
+if (!_denied) document.getElementById('doc-summary').innerHTML = docControlLine(_rec);
 document.getElementById('doc-scope').textContent = SCOPES[docType] || SCOPES.sop;
 
 // Version History

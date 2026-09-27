@@ -72,7 +72,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .page-hero-overlay{position:absolute;inset:0;background:linear-gradient(105deg,rgba(0,19,20,0.93) 0%,rgba(0,19,20,0.76) 55%,rgba(0,93,99,0.25) 100%);}
 .page-hero-content{position:relative;z-index:2;max-width:1000px;margin:0 auto;}
 .page-hero-tag{display:inline-block;padding:4px 14px;margin-bottom:16px;
-  background:rgba(0,187,182,0.12);border:1px solid rgba(0,187,182,0.28);
+  background:rgba(0,19,20,0.55);border:1px solid rgba(0,187,182,0.28);
   border-radius:50px;font-size:11px;color:var(--primary-light);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;}
 .page-hero-content h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:clamp(26px,4vw,42px);font-weight:800;letter-spacing:-0.8px;color:#fff;margin-bottom:12px;}
 .page-hero-content p{font-size:15px;color:rgba(255,255,255,0.62);line-height:1.75;max-width:560px;}
@@ -206,11 +206,11 @@ input.photo-input{display:none;}
 .annot-group:last-child{border-right:none;padding-right:0;}
 .annot-group-label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;
   color:var(--text-muted);margin-right:4px;}
-.tool-btn{width:32px;height:32px;border-radius:7px;border:1px solid var(--glass-border);
+.tool-btn{width:32px;height:32px;border-radius:7px;border:1px solid var(--glass-border);color:var(--text-muted);
   background:var(--glass);cursor:pointer;display:flex;align-items:center;justify-content:center;
   transition:all 0.2s;flex-shrink:0;}
 .tool-btn:hover{border-color:var(--glass-border-hover);background:var(--dark-2);}
-.tool-btn.active{background:rgba(0,93,99,0.12);border-color:rgba(0,187,182,0.35);}
+.tool-btn.active{background:rgba(0,93,99,0.12);border-color:rgba(0,187,182,0.35);color:var(--primary-ink);}
 .tool-btn svg{pointer-events:none;}
 .color-btn{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
 .color-btn:hover,.color-btn.active{border-color:#fff;box-shadow:0 0 0 2px var(--primary);transform:scale(1.15);}
@@ -281,7 +281,7 @@ input.photo-input{display:none;}
 .expert-info{flex:1;min-width:0;}
 .expert-name{font-size:13px;font-weight:600;color:var(--text);}
 .expert-seg{font-size:11px;color:var(--text-muted);margin-top:1px;}
-.expert-chevron{font-size:17px;color:var(--text-muted);flex-shrink:0;opacity:0.28;transition:opacity 0.2s,color 0.2s;line-height:1;}
+.expert-chevron{font-size:17px;color:var(--text-light);flex-shrink:0;transition:color 0.2s;line-height:1;}
 .expert-item:hover .expert-chevron{opacity:1;color:var(--primary-ink);}
 html[data-taqa-theme="dark"] .expert-dot{border-color:#002326;}
 html[data-taqa-theme="dark"] .expert-item:hover{background:rgba(0,187,182,0.06);}
@@ -328,7 +328,7 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;back
 /* The neutral tokens all have to be restated here, not just the text ones: the
    toast reads --dark-3 and the annotation toolbar reads --glass-2, so leaving
    either at its light value painted a white panel on the dark page. */
-html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--dark:#001314;--dark-2:#002D30;--dark-3:#002326;
+html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--glass-border-hover:rgba(0,187,182,0.45);--dark:#001314;--dark-2:#002D30;--dark-3:#002326;
   --glass:rgba(0,45,48,0.88);--glass-2:rgba(0,19,20,0.98);--glass-border:rgba(255,255,255,0.07);
   --text:#C7DBDD;--text-muted:#8CB6B9;--text-light:#619B9E;
   --stop-ink:#FF8A94;--alert-ink:#FF9B5E;--warn-ink:#FFB81C;--ok-ink:#4FD1B5;--info-ink:#6BC5EE;}
@@ -343,7 +343,6 @@ html[data-taqa-theme="dark"] .form-group input,html[data-taqa-theme="dark"] .for
    above sets the shorthand, which drops the image with it, so the dark copy
    has to come after it and outrank it. */
 html[data-taqa-theme="dark"] .form-group select.form-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23619B9E' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;}
-html[data-taqa-theme="dark"] .form-group label{color:#619B9E;}
 html[data-taqa-theme="dark"] .sidebar-card{background:#002326;border-color:#00484B;}
 html[data-taqa-theme="dark"] .sidebar-section-title{color:#619B9E;}
 html[data-taqa-theme="dark"] footer{background:#002326;border-color:#00484B;}
@@ -373,6 +372,10 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 .stp-arrow{font-size:13px;color:var(--primary-ink);position:relative;z-index:1;font-weight:800;}
 
 @media(max-width:640px){
+  /* At phone width the text runs the full band, and the overlay's 25% end
+     sat over the brightest part of the photo: the lead paragraph fell to
+     2:1 at the right edge. On a phone the band is evenly dark. */
+  .page-hero-overlay{background:linear-gradient(180deg,rgba(0,19,20,0.88),rgba(0,19,20,0.82));}
   nav{padding:0 20px;}
   .nav-right .btn,.nav-right a.btn{display:none!important;}
   .page-hero{padding:100px 20px 44px;}
@@ -393,7 +396,6 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 /* shared.js paints the trail on var(--primary), which is a ground colour, so
    on the dark canvas the current crumb was teal on near-black. The extra html
    raises specificity over the sheet shared.js appends after ours. */
-html .auto-bc .bc-cur{color:var(--primary-ink);}
 </style>
 </head>
 <body>
@@ -815,7 +817,7 @@ function submitTicket(e) {
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 6000);
   e.target.reset();
-  selectPriority('critical');
+  selectPriority('medium');
   annotImages = {};
   document.getElementById('photo-thumbs').innerHTML = '';
   document.getElementById('annot-section').classList.remove('visible');

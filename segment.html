@@ -283,7 +283,9 @@ html[data-taqa-theme="dark"] .pg-btn:hover:not(:disabled):not(.pg-dots){border-c
   margin-bottom:5px;line-height:1.32;letter-spacing:-0.1px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
   overflow-wrap:anywhere;}
-.doc-review-late{color:var(--stop-ink,#C8102E);font-weight:600;}
+/* An overdue review is a warning, the same yellow family as the viewer's
+   review banner. The stop red is kept for withdrawn and obsolete. */
+.doc-review-late{color:var(--warn-ink,#8A6200);font-weight:600;}
 .doc-summary{font-size:12.5px;color:var(--text-muted);line-height:1.55;margin-bottom:9px;max-width:620px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .doc-info-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
@@ -366,6 +368,11 @@ html[data-taqa-theme="dark"] .doc-card.is-alert:hover{
 
 /* ── Print ── */
 @media print{
+  /* Paper is white whichever theme was on screen, so marks print in the
+     light inks; the dark-theme teal measured 2.4:1 on paper. */
+  .doc-type-icon,.doc-type-badge,.doc-num{color:#005D63!important;}
+  .doc-type-icon.alert,.doc-type-badge.alert{color:#A8431A!important;}
+  .doc-meta-item,.doc-summary{color:#524D48!important;}
   nav,.seg-hero-banner,footer,.doc-toolbar,.tabs-outer,.scroll-top-btn,.doc-actions,.alert-pulse-dot,.doc-new-badge{display:none!important;}
   body{background:#fff!important;color:#111!important;}
   .page-wrapper{background:#fff!important;}
@@ -455,7 +462,9 @@ html[data-taqa-theme="dark"] .scroll-top-btn{background:rgba(0,35,38,0.92);borde
   width:52px;height:52px;border-radius:13px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
   font-family:'BwGradual','Urbanist',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.5px;margin-bottom:14px;
+  background:rgba(0,93,99,0.07);color:var(--primary-ink);border:1px solid rgba(0,93,99,0.14);
 }
+.doc-modal-type-icon.alert{background:rgba(253,105,29,0.10);color:var(--alert-ink,#A8431A);border-color:rgba(253,105,29,0.22);}
 .doc-modal-body{flex:1;overflow-y:auto;padding:24px 28px 32px;}
 .doc-modal-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px;line-height:1.3;}
 .doc-modal-badge-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
@@ -646,7 +655,7 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
         </div>
       </div>
       <div class="seg-hero-stats">
-        <div class="mini-stat"><div class="mini-stat-num" id="ms-policies">,</div><div class="mini-stat-label">Standards</div></div>
+        <div class="mini-stat"><div class="mini-stat-num" id="ms-policies">,</div><div class="mini-stat-label" id="ms-label-policies">Standards</div></div>
         <div class="mini-stat"><div class="mini-stat-num" id="ms-sops">,</div><div class="mini-stat-label" id="ms-label-sops">SOPs</div></div>
         <div class="mini-stat"><div class="mini-stat-num" id="ms-manuals">,</div><div class="mini-stat-label" id="ms-label-manuals">Manuals</div></div>
         <div class="mini-stat"><div class="mini-stat-num" id="ms-lessons">,</div><div class="mini-stat-label" id="ms-label-lessons">Lessons</div></div>
@@ -1485,7 +1494,7 @@ document.getElementById('tc-software').textContent = seg.software||0;
 
 // ── Tab label & mini-stat overrides ──
 if(seg.tabLabels){
-  const labelMap = {sops:'ms-label-sops', manuals:'ms-label-manuals', lessons:'ms-label-lessons'};
+  const labelMap = {sops:'ms-label-sops', manuals:'ms-label-manuals', policies:'ms-label-policies', lessons:'ms-label-lessons'};
   document.querySelectorAll('#tab-bar .tab-btn').forEach(btn=>{
     const t = btn.dataset.tab;
     if(seg.tabLabels[t]){
@@ -1534,14 +1543,10 @@ if(seg.contributors && seg.contributors.length){
 }
 
 // ── Build Document Lists ──
-const AUTHORS = seg.contributors
-  ? seg.contributors.map(c=>c.name)
-  : ['Mohammed Al-Ghamdi','Ahmed Al-Zahrani','Saud Al-Harbi','Faisal Al-Otaibi','Khalid Al-Shehri',
-    'Omar Al-Dosari','Nasser Al-Qahtani','Tariq Al-Mutairi','Saleh Al-Asmari'];
-const SIZES = ['1.2 MB','845 KB','2.1 MB','3.4 MB','560 KB','1.8 MB','920 KB','4.2 MB','1.1 MB','780 KB'];
-const MONTHS = ['Jan','Feb','Mar','Apr','May'];
-
-function rnd(arr){ return (arr && arr.length) ? arr[Math.floor(Math.random()*arr.length)] : ''; }
+/* A list of nine invented staff names, a list of invented file sizes and a
+   random-month picker used to live here as fallbacks. They were dormant, but
+   a fallback that invents a person or a date is still a way to show something
+   the register does not hold. What the register does not know now says so. */
 
 /* The register knows who owns a document and when it was issued, so neither
    needs to be made up. It printed "undefined" because seg.contributors is an
@@ -1552,7 +1557,7 @@ function ownerOf(num){
     var o = TAQA_DOC.owner(d);
     if (o && o !== ',') return o;
   }
-  return rnd(AUTHORS) || 'Owner not recorded';
+  return 'Owner not recorded';
 }
 function issuedOf(num, idx){
   var d = (num && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(num) : null;
@@ -1563,7 +1568,7 @@ function issuedOf(num, idx){
   return fmtDate(idx);
 }
 const MONTHS_FULL = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-function fmtDate(i){ return `${rnd(MONTHS)} 2026`; }
+function fmtDate(i){ return 'Date not recorded'; }
 
 /* The register holds no abstract, so a card states what it does hold: the
    revision in force, who may read it, and when it is next due for review.
@@ -1599,7 +1604,10 @@ function buildDocCard(title, type, idx) {
   const labels = {sop:'SOP',manual:'Manual',standard:'Standard',policy:'Policy',alert:'Alert',lesson:'Lesson Learned'};
   const typeClass = type;
   const summary = docControlLine(splitEntry(title).num);
-  const safeTitle = title.replace(/'/g,"&#39;").replace(/"/g,"&quot;");
+  // Titles go into data attributes, never into JavaScript source. The parser
+  // decodes &#39; back to an apostrophe before the handler compiles, so
+  // "Manager's Guide to HR Processes" used to break its own View and QR.
+  const safeTitle = title.replace(/&/g,'&amp;').replace(/'/g,"&#39;").replace(/"/g,"&quot;").replace(/</g,'&lt;');
   const safeType = typeClass;
   const _p = splitEntry(title);
   const newBadge = (function(){
@@ -1623,7 +1631,7 @@ function buildDocCard(title, type, idx) {
     `&title=${encodeURIComponent(_p.title)}` +
     (_p.num ? `&doc=${encodeURIComponent(_p.num)}` : '');
   return `
-  <div class="doc-card${type==='alert'?' is-alert':''}">
+  <div class="doc-card${type==='alert'?' is-alert':''}" data-title="${safeTitle}" data-type="${safeType}">
     ${icon}
     <div class="doc-body">
       <div class="doc-eyebrow">${_p.num?`<span class="doc-num">${_p.num}</span>`:''}${revBadge}${newBadge}${isDocRead(title)?'<span class="doc-read-badge">✓ Read</span>':''}</div>
@@ -1635,13 +1643,13 @@ function buildDocCard(title, type, idx) {
       </div>
     </div>
     <div class="doc-actions">
-      <a class="doc-action-btn primary-action" href="${viewerHref}" onclick="saveRecent('${safeTitle}','${safeType}');markDocRead('${safeTitle}');if(window.TAQA_Track)window.TAQA_Track('open','${safeTitle}',{type:'${safeType}',seg:'${segId}'})">
+      <a class="doc-action-btn primary-action" href="${viewerHref}" onclick="var c=this.closest('.doc-card');saveRecent(c.dataset.title,c.dataset.type);markDocRead(c.dataset.title);if(window.TAQA_Track)window.TAQA_Track('open',c.dataset.title,{type:c.dataset.type,seg:'${segId}'})">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         View
       </a>
       <div class="doc-act-pair">
         <button class="doc-action-btn bm-btn${isBm?' bm-on':''}" data-title="${safeTitle}" data-type="${safeType}" onclick="toggleDocBm(this)" title="${isBm?'Remove bookmark':'Bookmark'}">${isBm?'★':'☆'}</button>
-        <button class="doc-action-btn" onclick="showDocQR('${safeTitle}','${safeType}')" title="QR Code">
+        <button class="doc-action-btn" onclick="var c=this.closest('.doc-card');showDocQR(c.dataset.title,c.dataset.type)" title="QR Code">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="5" y="5" width="3" height="3"/><rect x="16" y="5" width="3" height="3"/><rect x="16" y="16" width="3" height="3"/><rect x="5" y="16" width="3" height="3"/></svg>
         </button>
       </div>
@@ -1683,6 +1691,21 @@ function _renderPage(type){
     return st.isSoftware?buildSoftwareCard(t,i):st.isAlert?buildAlertCard(t,i):buildDocCard(t,LIST_TYPE_MAP[type]||type,i);
   };
 
+  if(items.length===0 && st.all.length>0){
+    // The tab holds documents; the search matched none of them. Saying
+    // nothing was ever uploaded here would be false.
+    const inp=document.querySelector('#panel-'+type+' .doc-search input');
+    const q=(inp&&inp.value||'').trim();
+    const btn=document.querySelector('#tab-bar .tab-btn[data-tab="'+type+'"]');
+    const lbl=btn?(btn.firstChild&&btn.firstChild.nodeType===3?btn.firstChild.textContent:btn.textContent).trim().replace(/\s*\d+$/,''):'documents';
+    const noun=type==='all'?'documents':lbl.split(/\s+/).map(w=>/[A-Z].*[A-Z]/.test(w)?w:w.toLowerCase()).join(' ');
+    const esc=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    el.innerHTML='<div class="empty-state"><h3>No '+esc(noun)+' match '+(q?'\u201c'+esc(q)+'\u201d':'this search')+'</h3>'+
+      '<p>Try fewer words, or search every area from Document Search.</p></div>';
+    if(vis)vis.textContent='0';
+    _renderPagination(type);
+    return;
+  }
   if(items.length===0){
     const tl={sops:'procedures',manuals:'manuals',policies:'policies',lessons:'lessons learned',all:'documents'};
     el.innerHTML=st.isAlert
@@ -1718,30 +1741,26 @@ renderList('alerts', seg.docs.alerts, true);
 renderList('lessons', seg.docs.lessons, false);
 renderSoftware(seg.docs.software || []);
 
+/* A software asset is listed, not controlled: TQ-QHSE-S001 does not place
+   tools under document control. This card used to invent a version (v1.0), a
+   platform (Windows) and a size (a lone comma), add a boilerplate sentence and
+   two emoji, and offer a Download that was a <button> with nothing behind it.
+   It now shows what the register holds and who distributes the tool. */
 function buildSoftwareCard(raw, idx) {
-  const parts = raw.split(' | ');
-  const name = parts[0] || raw;
-  const ver = parts[1] || 'v1.0';
-  const platform = parts[2] || 'Windows';
-  const size = parts[3] || ',';
-  const safeName = name.replace(/'/g,"&#39;").replace(/"/g,"&quot;");
+  const name = String(raw).split(' | ')[0] || raw;
+  const T = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.types.software) || {};
+  const owner = T.owner || 'Digital Transformation';
+  const esc = v => String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const mark = T.mark || 'ZIP';
   return `
-  <div class="doc-card">
-    <div class="doc-type-icon software">ZIP</div>
-    <div>
-      <div class="doc-info-title">${name}<span class="sw-version">${ver}</span></div>
-      <div class="doc-summary">Operational software tool for this segment. Download the installer package and follow the setup guide included in the archive.</div>
+  <div class="doc-card is-asset">
+    <div class="doc-type-icon software">${mark}</div>
+    <div class="doc-body">
+      <div class="doc-info-title">${esc(name)}</div>
+      <div class="doc-summary">Software asset, listed here but not under document control</div>
       <div class="doc-info-meta">
-        <span class="doc-type-badge software">Software</span>
-        <span class="doc-meta-item">💻 ${platform}</span>
-        <span class="doc-meta-item">📦 ${size}</span>
+        <span class="doc-meta-item">Distributed by ${esc(owner)}</span>
       </div>
-    </div>
-    <div class="doc-actions">
-      <button class="doc-action-btn primary-action" title="Download">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Download
-      </button>
     </div>
   </div>`;
 }
@@ -1854,14 +1873,26 @@ function openTab(name) {
     });
     const next = document.getElementById('panel-' + name);
     if (next) next.classList.add('active');
-    if (bcTab) bcTab.textContent = TAB_LABELS[name] || name;
+    // Read the label off the tab itself, so Company Wide's breadcrumb says
+    // Policies under a tab that says Policies.
+    const lab = activeBtn && (activeBtn.firstChild && activeBtn.firstChild.nodeType === 3
+      ? activeBtn.firstChild.textContent : activeBtn.textContent).trim().replace(/\s*\d+$/, '');
+    if (bcTab) bcTab.textContent = lab || TAB_LABELS[name] || name;
   }
 }
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => openTab(btn.dataset.tab));
 });
-openTab(startTab);
+// Company Wide has no SOPs, so the default tab was hidden and the page opened
+// on an invisible tab saying no procedures were uploaded, over twelve policies.
+(function(){
+  const b = document.querySelector('#tab-bar .tab-btn[data-tab="' + startTab + '"]');
+  if (b && b.style.display !== 'none') { openTab(startTab); return; }
+  const first = [...document.querySelectorAll('#tab-bar .tab-btn')]
+    .find(x => x.dataset.tab !== 'all' && x.style.display !== 'none');
+  openTab(first ? first.dataset.tab : 'all');
+})();
 
 // Inject section headings (shown only in All mode via CSS)
 (function(){
@@ -1917,9 +1948,11 @@ function applySortToState(type) {
   const st = _st(type);
   if (mode === 'az') {
     st.filtered.sort((a, b) => {
-      const ta = (typeof a === 'object' ? a.title : a).toLowerCase();
-      const tb = (typeof b === 'object' ? b.title : b).toLowerCase();
-      return ta < tb ? -1 : ta > tb ? 1 : 0;
+      // Each entry is 'NUMBER  Title', so comparing the whole string sorted
+      // by document number and put every unnumbered tool first.
+      const ta = splitEntry(typeof a === 'object' ? a.title : a).title;
+      const tb = splitEntry(typeof b === 'object' ? b.title : b).title;
+      return ta.localeCompare(tb, undefined, {sensitivity:'base'});
     });
   } else {
     // Restore original order: keep only items currently in filtered, in st.all order
@@ -2017,26 +2050,36 @@ const SCOPES = {
   lesson:'Shared across relevant segments for awareness and preventive action. All supervisors must review and brief their teams.',
   alert:'Requires immediate acknowledgment from all segment supervisors. Applicable to ongoing and planned operations until further notice.'
 };
-const FAKE_VERSIONS = ['Rev 1.0','Rev 2.1','v3.0','v4.2','Rev 5.0','v2.3'];
-const FAKE_DATES = ['Jan 2026','Mar 2026','Apr 2026','May 2026','Feb 2026'];
+/* The modal used to fill Revision and Issued from two short lists with
+   Math.random(), so a document showed a different revision and date each time
+   it was opened, and it drew its square from the first three letters of the
+   type label (STA, ALE, LES). Every field now comes from the register record,
+   and a field the register does not hold says so. */
 function openDocModal(title, type) {
-  const color = TYPE_COLORS[type] || 'var(--primary-ink)';
-  const label = TYPE_LABELS[type] || type;
+  const _e = splitEntry(title);
+  const rec = (_e.num && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(_e.num) : null;
+  if (rec && rec.docType) type = rec.docType;
+  const L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : {types:{},segments:{}};
+  const T = L.types[type] || {};
+  const label = T.label || TYPE_LABELS[type] || type;
+  const mark = T.mark || ({sop:'SOP',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT',software:'ZIP'})[type] || type.slice(0,3).toUpperCase();
+  const areaName = (rec && L.segments[rec.segment] && L.segments[rec.segment].name) || seg.name;
+  const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const when = d => { const x = d ? new Date(d) : null; return (x && !isNaN(x)) ? MON[x.getMonth()] + ' ' + x.getFullYear() : 'Not recorded'; };
+  const esc = v => String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const icon = document.getElementById('dm-icon');
   icon.className = 'doc-modal-type-icon ' + type;
-  icon.textContent = label.toUpperCase().substring(0,3);
-  document.getElementById('dm-title').textContent = title;
-  document.getElementById('dm-summary').innerHTML = docControlLine(splitEntry(title).num);
-  document.getElementById('dm-scope').textContent = SCOPES[type] || SCOPES.sop;
-  const vi = Math.floor(Math.random()*FAKE_VERSIONS.length);
-  const di = Math.floor(Math.random()*FAKE_DATES.length);
+  icon.textContent = mark;
+  document.getElementById('dm-title').textContent = _e.title;
+  document.getElementById('dm-summary').innerHTML = docControlLine(_e.num);
+  document.getElementById('dm-scope').textContent = SCOPES[type] || SCOPES[type === 'standard' ? 'policy' : 'sop'];
   document.getElementById('dm-meta').innerHTML = `
-    <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Document Type</div><div class="doc-modal-meta-val">${label}</div></div>
-    <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Segment</div><div class="doc-modal-meta-val">${seg.name}</div></div>
-    <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Revision</div><div class="doc-modal-meta-val">${FAKE_VERSIONS[vi]}</div></div>
-    <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Issued</div><div class="doc-modal-meta-val">${FAKE_DATES[di]}</div></div>
+    <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Document Type</div><div class="doc-modal-meta-val">${esc(label)}</div></div>
+    <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Area</div><div class="doc-modal-meta-val">${esc(areaName)}</div></div>
+    <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Revision</div><div class="doc-modal-meta-val">${esc(rec && rec.revision ? 'Rev ' + rec.revision : 'Not recorded')}</div></div>
+    <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Issued</div><div class="doc-modal-meta-val">${esc(when(rec && rec.issueDate))}</div></div>
   `;
-  document.getElementById('dm-badges').innerHTML = `<span class="doc-type-badge ${type}">${label}</span>`;
+  document.getElementById('dm-badges').innerHTML = `<span class="doc-type-badge ${type}">${esc(label)}</span>`;
   document.getElementById('doc-modal-overlay').classList.add('open');
   document.getElementById('doc-modal-panel').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -2135,8 +2178,14 @@ function toggleDocBm(btn) {
   const title = btn.dataset.title;
   const type = btn.dataset.type;
   const added = window.TAQA_Bookmarks.toggle({title, type, segId, segName: seg.name});
-  btn.textContent = added ? '★' : '☆';
-  btn.classList.toggle('bm-on', added);
+  // The same document can be on screen twice, in All and in its own tab, and
+  // tabs render once, so update every star for it, not only the one tapped.
+  document.querySelectorAll('.bm-btn').forEach(function(x){
+    if (x.dataset.title !== title) return;
+    x.textContent = added ? '★' : '☆';
+    x.classList.toggle('bm-on', added);
+    x.title = added ? 'Remove bookmark' : 'Bookmark';
+  });
   if (window.updateBmBadge) window.updateBmBadge();
   if (window.showToast) window.showToast(added ? 'Bookmarked!' : 'Bookmark removed', added ? 'success' : 'info');
 }

@@ -178,13 +178,16 @@
       let activeSegment = 'all';
 
       // Intercept chip clicks
-      document.querySelectorAll('.seg-chip, [class*="seg-filter"], [class*="filter-chip"]').forEach(chip => {
+      // Exact classes only. A substring match on seg-filter also caught the
+      // .seg-filters strip itself, so every chip click bubbled up, handed the
+      // strip the active class, and painted the whole bar solid teal.
+      document.querySelectorAll('.seg-chip, .filter-chip').forEach(chip => {
         chip.addEventListener('click', function () {
           const chipText = (this.textContent || '').trim().toLowerCase();
           activeSegment = chipText === 'all' ? 'all' : chipText;
 
           // Visual update, add our active class
-          document.querySelectorAll('.seg-chip, [class*="seg-filter"], [class*="filter-chip"]')
+          document.querySelectorAll('.seg-chip, .filter-chip')
             .forEach(c => c.classList.remove('seg-chip-active-real'));
           this.classList.add('seg-chip-active-real');
         });
@@ -223,7 +226,7 @@
       }
 
       // Also filter any existing results when chip changes
-      document.querySelectorAll('.seg-chip, [class*="seg-filter"]').forEach(chip => {
+      document.querySelectorAll('.seg-chip, .filter-chip').forEach(chip => {
         chip.addEventListener('click', function () {
           if (activeSegment === 'all') return;
           document.querySelectorAll(

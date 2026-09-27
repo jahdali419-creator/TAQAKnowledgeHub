@@ -340,7 +340,7 @@ html[data-taqa-theme="dark"] .pub-table-footer{border-color:#003A3D;background:r
       <div class="docs-stat"><span class="docs-stat-num" id="stat-total">,</span><div class="docs-stat-label">Total</div></div>
       <div class="docs-stat"><span class="docs-stat-num" id="stat-sops">,</span><div class="docs-stat-label" id="stat-label-sops">SOPs</div></div>
       <div class="docs-stat"><span class="docs-stat-num" id="stat-manuals">,</span><div class="docs-stat-label" id="stat-label-manuals">Manuals</div></div>
-      <div class="docs-stat"><span class="docs-stat-num" id="stat-policies">,</span><div class="docs-stat-label">Standards</div></div>
+      <div class="docs-stat"><span class="docs-stat-num" id="stat-policies">,</span><div class="docs-stat-label" id="stat-label-policies">Standards</div></div>
       <div class="docs-stat"><span class="docs-stat-num" id="stat-alerts">,</span><div class="docs-stat-label" id="stat-label-alerts">Alerts</div></div>
       <div class="docs-stat"><span class="docs-stat-num" id="stat-lessons">,</span><div class="docs-stat-label" id="stat-label-lessons">Lessons</div></div>
     </div>
@@ -455,6 +455,7 @@ function buildAllDocs(segId) {
       num: d.docNumber || '',
       title: d.title,
       type: TYPE_KEY[d.docType] || 'sop',
+      kind: d.docType,   // what the register says it is; the column key above is shared
       date: fmt(d.issueDate),
       by: (typeof TAQA_DOC !== 'undefined' && TAQA_DOC.owner(d)) || 'Not recorded'
     }))
@@ -483,7 +484,7 @@ function renderPubTable(docs, tl) {
         ${d.num ? `<span class="pdt-num">${d.num}</span>` : ''}
         <span class="pdt-t">${d.title}</span>
       </td>
-      <td><span class="pub-doc-type-badge ${tc[d.type]||'pub-type-sop'}">${tl[d.type]||d.type}</span></td>
+      <td><span class="pub-doc-type-badge ${tc[d.type]||'pub-type-sop'}">${d.kind==='policy'?'Policy':(tl[d.type]||d.type)}</span></td>
       <td class="pub-table-date">${d.date}</td>
       <td class="pub-table-by">${d.by}</td>
       <td><button class="pub-remove-btn" onclick="removeDoc(this)">${ri}Remove</button></td>
@@ -639,6 +640,14 @@ function initDocPage() {
   document.getElementById('back-to-dashboard').href = 'dashboard.html?id=' + docSegId;
 
   const docs = buildAllDocs(docSegId);
+  // Standards and Policies share one column. Company Wide's column holds only
+  // the twelve CEO-signed Policies, which this page used to badge and count
+  // as Standards; the column is named for what it actually holds.
+  const inCol = docs.filter(d => d.type === 'policy');
+  const polOnly = inCol.length > 0 && inCol.every(d => d.kind === 'policy');
+  if (polOnly) tl.policy = 'Policy';
+  const spl = document.getElementById('stat-label-policies');
+  if (spl) spl.textContent = polOnly ? 'Policies' : 'Standards';
   renderPubTable(docs, tl);
   initPubPills(tl);
   updatePillCounts(docs);

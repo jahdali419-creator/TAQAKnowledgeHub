@@ -25,7 +25,7 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
   --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
   --dark:#F4F4F3;--inset:#EDEBE8;--glass:rgba(255,255,255,0.88);--glass-2:rgba(255,255,255,0.98);
   --glass-border:rgba(0,0,0,0.08);--glass-border-hover:rgba(0,93,99,0.35);
-  --text:#1E1C1A;--text-muted:#756A61;--gradient:#005D63; /* flat brand teal - no gradient */
+  --text:#1E1C1A;--text-muted:#524D48;--gradient:#005D63; /* flat brand teal - no gradient */
   /* One faint teal wash for every document-type chip. The word in the chip
      already names the type, so the six hues it used to run were a colour code
      nobody had learnt. Alert is the exception and keeps the orange family. */
@@ -119,7 +119,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   backdrop-filter:blur(8px);
 }
 .stat-dot{width:6px;height:6px;border-radius:50%;background:var(--primary-light);flex-shrink:0;}
-.stat-sep{color:rgba(0,0,0,0.18);font-size:12px;}
+.stat-sep{color:#BEB8B2;font-size:12px;}
+html[data-taqa-theme="dark"] .stat-sep{color:#00484B;}
 
 /* ── Search Card ── */
 .search-card{
@@ -152,7 +153,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   resize:none;line-height:1.6;min-height:28px;max-height:180px;
   padding:0;
 }
-#query-input::placeholder{color:var(--text-muted);opacity:0.65;}
+#query-input::placeholder{color:var(--text-muted);}
 
 /* ── Send Button ── */
 .send-btn{
@@ -310,9 +311,9 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;back
 html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--dark:#001314;--inset:#002D30;--glass:rgba(0,45,48,0.88);
   /* The answer bubble is painted with var(--glass-2) and this block never
      restated it, so dark mode handed a white bubble dark-theme text. */
-  --glass-2:rgba(0,19,20,0.98);
+  --glass-2:rgba(0,35,38,0.98);
   --glass-border:rgba(255,255,255,0.07);--text:#C7DBDD;--text-muted:#8CB6B9;
-  --brand-soft:rgba(0,187,182,.13);--alert-soft:rgba(253,105,29,.16);--alert-ink:#FF9B5E;}
+  --brand-soft:rgba(0,187,182,.10);--alert-soft:rgba(253,105,29,.16);--alert-ink:#FF9B5E;}
 html[data-taqa-theme="dark"] body{background:#001314;}
 html[data-taqa-theme="dark"] nav{background:rgba(0,35,38,0.92);border-color:rgba(255,255,255,0.06);}
 html[data-taqa-theme="dark"] .nav-brand-name{color:#C7DBDD;}html[data-taqa-theme="dark"] .nav-brand-hub{color:#619B9E;}
@@ -324,7 +325,6 @@ html[data-taqa-theme="dark"] .search-bottom-row{border-color:rgba(255,255,255,0.
 html[data-taqa-theme="dark"] .filter-chip{border-color:rgba(255,255,255,0.1);color:#619B9E;}
 html[data-taqa-theme="dark"] .filter-chip.active{background:rgba(0,93,99,0.2);border-color:rgba(0,187,182,0.3);color:#00BBB6;}
 html[data-taqa-theme="dark"] .stat-pill{background:rgba(0,45,48,0.8);border-color:rgba(255,255,255,0.07);}
-html[data-taqa-theme="dark"] .msg-ai{background:#002326;border-color:#003A3D;}
 html[data-taqa-theme="dark"] .results-area{background:transparent;}
 html[data-taqa-theme="dark"] .prompt-chip{background:rgba(0,45,48,0.8);border-color:rgba(255,255,255,0.09);color:#619B9E;}
 html[data-taqa-theme="dark"] .prompt-chip:hover{background:rgba(0,93,99,0.15);border-color:rgba(0,187,182,0.25);color:#00BBB6;}
@@ -429,7 +429,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
    the same mistake as a register that does not say so. */
 .ir-state{display:inline-block;margin-inline-start:6px;padding:0 6px;border-radius:20px;
   font-size:9px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;vertical-align:1px;}
-.ir-state-draft{background:rgba(0,118,168,.10);color:var(--info-ink,#0076A8);}
+.ir-state-draft{background:rgba(0,118,168,.05);color:var(--info-ink,#0076A8);}
 .ir-state-under-review{background:rgba(255,184,28,.14);color:var(--warn-ink,#8A6200);}
 .ir-badge{
   flex-shrink:0;padding:2px 8px;border-radius:5px;
@@ -439,6 +439,8 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 .ir-body{flex:1;min-width:0;}
 .ir-title{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ir-title mark{background:rgba(0,187,182,0.22);color:var(--primary-ink);border-radius:2px;padding:0 1px;font-style:normal;}
+/* Teal on a teal wash failed in dark; the wash alone marks the match there. */
+html[data-taqa-theme="dark"] .ir-title mark{color:var(--text);}
 .ir-seg{font-size:11px;color:var(--text-muted);margin-top:2px;}
 .ir-arrow{font-size:15px;color:var(--text-muted);flex-shrink:0;transition:color 0.15s;}
 .ir-item:hover .ir-arrow{color:var(--primary-ink);}
@@ -462,12 +464,11 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
 /* shared.js paints the breadcrumb on var(--primary), which is a ground colour,
    so on the dark canvas the current crumb sat at about 2.5 to 1. The leading
    html raises specificity over the sheet shared.js appends after ours. */
-html .auto-bc .bc-cur{color:var(--primary-ink);}
-html .auto-bc a:hover{color:var(--primary-ink);}
 /* fixes.js gives the AI disclaimer an amber of its own that measures 4.42 on
    the banner tint. Its dark rule is selector-heavy, so this one carries the
    theme attribute and body to outrank it in both themes. */
-html[data-taqa-theme] body .ai-safety-banner{color:var(--alert-ink);}
+html[data-taqa-theme] body .ai-safety-banner{color:var(--alert-ink);background:var(--alert-soft);
+  border-color:rgba(253,105,29,.28);border-inline-start:3px solid #FD691D;}
 </style>
 </head>
 <body>
@@ -638,7 +639,7 @@ const RESPONSES = {
       {title:'WS-003 Well Shut-In Procedure',seg:'Safety Services',type:'SOP'},
       {title:'WS-004 Hard vs Soft Shut-In',seg:'Safety Services',type:'SOP'},
       {title:'Well Control Manual v6.0',seg:'Drilling Services',type:'Manual'},
-      {title:'QHSE-016 Document Control',seg:'QHSE',type:'Policy'}
+      {title:'TQ-QHSE-SOP-016 Document Control',seg:'QHSE',type:'SOP'}
     ]
   },
   'bop test': {
@@ -673,12 +674,12 @@ const RESPONSES = {
   'default': {
     answer: `<h4>Search Results</h4>
     <p>I found relevant information across multiple TAQA segments. Based on the documents in the Knowledge Hub, here is a summary of the most relevant procedures and standards:</p>
-    <p>For operational procedures, refer to the relevant segment's <strong>Standard Operating Procedures (SOPs)</strong>. For equipment specifications, consult the <strong>Technical Manuals</strong>. For compliance requirements, review the <strong>Policies</strong> section.</p>
+    <p>For operational procedures, refer to the relevant segment's <strong>Standard Operating Procedures (SOPs)</strong>. For equipment specifications, consult the <strong>Technical Manuals</strong>. For compliance requirements, review the area's <strong>Standards</strong>; the company-wide Policies signed by the CEO sit above them.</p>
     <p>To get more specific results, try narrowing your question or selecting a segment filter above. You can also browse documents directly by navigating to a segment page.</p>
     <p><strong>Note:</strong> This is a demo interface. Full AI-powered search will be connected to the Claude API in the next phase, enabling real document Q&amp;A with citations.</p>`,
     sources: [
       {title:'Knowledge Hub Documentation',seg:'All Segments',type:'Manual'},
-      {title:'QHSE-016 Document Control SOP',seg:'QHSE',type:'SOP'}
+      {title:'TQ-QHSE-SOP-016 Document Control',seg:'QHSE',type:'SOP'}
     ]
   }
 };
@@ -884,14 +885,23 @@ document.addEventListener('click',function(e){
   // type, so every badge takes the one teal wash; Alert stays orange because
   // it is an operational warning.
   var TYPE_CFG={
-    sop:{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:'SOP'},
-    manual:{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:'Manual'},
-    policy:{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:'Policy'},
-    alert:{bg:'var(--alert-soft)',color:'var(--alert-ink)',label:'Alert'},
-    lesson:{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:'Lesson'},
-    software:{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:'Software'}
+    sop:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
+    manual:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
+    standard:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
+    policy:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
+    alert:{bg:'var(--alert-soft)',color:'var(--alert-ink)'},
+    lesson:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
+    software:{bg:'var(--brand-soft)',color:'var(--primary-ink)'}
   };
-  var TAB_MAP={sop:'sops',manual:'manuals',policy:'policies',alert:'alerts',lesson:'lessons',software:'software'};
+  // The badge text is the register's mark, so a result reads the same as its
+  // card: WI, ST, POL, LL, where this map used to spell out Manual and Lesson
+  // and had no Standard at all, 134 of them fell through to the raw type.
+  (function(){ var T=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.types)||{};
+    var fb={sop:'SOP',manual:'WI',standard:'ST',policy:'POL',alert:'ALT',lesson:'LL',software:'ZIP'};
+    Object.keys(TYPE_CFG).forEach(function(k){ TYPE_CFG[k].label=(T[k]&&T[k].mark)||fb[k]; }); })();
+  // A Standard lives in the same tab as a Policy; without this every Standard
+  // result opened a tab that does not exist, so the library came up empty.
+  var TAB_MAP={sop:'sops',manual:'manuals',standard:'policies',policy:'policies',alert:'alerts',lesson:'lessons',software:'software'};
 
   function esc(s){return s.replace(/[&<>"']/g,function(c){{return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}})}
 

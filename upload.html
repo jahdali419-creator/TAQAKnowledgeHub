@@ -276,7 +276,6 @@ html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--dark:#001314;--glass:rgba(0
    On the dark canvas that is teal on near-black, so the current crumb is
    pulled back onto the ink. The extra html raises specificity over the
    sheet shared.js appends after ours. */
-html .auto-bc .bc-cur{color:var(--primary-ink);}
 html[data-taqa-theme="dark"] .form-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23619B9E' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");}
 html[data-taqa-theme="dark"] body{background:#001314;}
 html[data-taqa-theme="dark"] nav{background:rgba(0,35,38,0.92);border-color:rgba(255,255,255,0.06);}
@@ -1189,7 +1188,7 @@ function onTypeChange(val){
    standard has not assigned one of those parts. */
 function taqaRefId(){
   var L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : null;
-  var D = (typeof TAQA_MASTER_DOCS !== 'undefined') ? TAQA_MASTER_DOCS : [];
+  var D = registerDocs();   // includes drafts filed in this browser, so a second upload takes the next number
   if (!L) return null;
   var type = (document.getElementById('doc-type-select') || {}).value;
   if (!type || !L.types[type]) return null;
@@ -1260,9 +1259,13 @@ const STOP_WORDS = new Set(['the','a','an','of','in','for','and','or','to','with
 // What this area already holds, read from the register rather than from the
 // page copy in segments-data.js, so a supersedes list can never offer a
 // document that was withdrawn or miss one that was just filed.
+function registerDocs() {
+  if (typeof TAQA_STORE !== 'undefined') return TAQA_STORE.all();
+  return (typeof TAQA_MASTER_DOCS !== 'undefined') ? TAQA_MASTER_DOCS : [];
+}
 function areaDocs(segId) {
-  if (typeof TAQA_MASTER_DOCS === 'undefined' || !segId) return [];
-  return TAQA_MASTER_DOCS.filter(function(d){
+  if (!segId) return [];
+  return registerDocs().filter(function(d){
     return d.segment === segId && d.docType !== 'software' &&
            d.status !== 'obsolete' && d.status !== 'superseded';
   });

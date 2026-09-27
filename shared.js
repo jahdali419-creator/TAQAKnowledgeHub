@@ -90,7 +90,7 @@
     '.toast-wrap{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;}'+
     '.toast{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:12px;font-size:13px;font-weight:600;letter-spacing:0.2px;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.28);pointer-events:none;animation:toastIn 0.3s cubic-bezier(.34,1.56,.64,1) forwards;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);}'+
     '.toast.success{background:rgba(0,93,99,0.96);color:#fff;border:1px solid rgba(0,187,182,0.35);}'+
-    '.toast.error{background:rgba(220,38,38,0.96);color:#fff;border:1px solid rgba(239,68,68,0.4);}'+
+    '.toast.error{background:rgba(200,16,46,0.96);color:#fff;border:1px solid rgba(200,16,46,0.5);}'+
     '.toast.info{background:rgba(19,35,35,0.96);color:#C7DBDD;border:1px solid rgba(255,255,255,0.12);}'+
     '.toast.out{animation:toastOut 0.25s ease forwards;}'+
     '@keyframes toastIn{from{opacity:0;transform:translateY(10px) scale(0.95);}to{opacity:1;transform:translateY(0) scale(1);}}'+
@@ -138,28 +138,11 @@ window.showToast=function(msg,type){
   },{passive:true});
 })();
 
-// ── Auto breadcrumb for static pages ──
-(function(){
-  var p=location.pathname;
-  var map={'ai-search':'AI Search','glossary':'Field Glossary','upload':'Upload Document','support-ticket':'Ask an Expert'};
-  var label=null;
-  for(var k in map){if(p.indexOf(k)>-1){label=map[k];break;}}
-  if(!label)return;
-  var s=document.createElement('style');
-  s.textContent=
-    '.auto-bc{padding:9px 32px;font-size:11px;font-weight:500;color:var(--text-muted,#756A61);display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--glass-border,rgba(255,255,255,0.08));}'+
-    '.auto-bc a{color:var(--text-muted,#756A61);text-decoration:none;transition:color 0.2s;}'+
-    '.auto-bc a:hover{color:var(--primary,#005D63);}'+
-    '.auto-bc .bc-sep{opacity:0.4;}'+
-    '.auto-bc .bc-cur{color:var(--primary-ink,#005D63);font-weight:600;}'+
-    'html[data-taqa-theme="dark"] .auto-bc{border-color:rgba(255,255,255,0.05);}';
-  document.head.appendChild(s);
-  var bc=document.createElement('div');
-  bc.className='auto-bc';
-  bc.innerHTML='<a href="index.html">Home</a><span class="bc-sep">›</span><span class="bc-cur">'+label+'</span>';
-  var nav=document.querySelector('nav');
-  if(nav&&nav.parentNode)nav.parentNode.insertBefore(bc,nav.nextSibling);
-})();
+// An automatic breadcrumb used to be injected here on the four pages without
+// their own (search, glossary, upload, ask an expert). It was inserted
+// straight after the fixed nav, so it sat at the top of the page underneath
+// it and was never visible. Each of those pages names itself in its own
+// hero and highlights itself in the nav, so it is not replaced.
 
 // ── Reading progress bar ──
 (function(){
@@ -460,7 +443,7 @@ window.showToast=function(msg,type){
     '<div class="pwa-steps">'+
       '<div class="pwa-step"><div class="pwa-step-n" style="font-size:14px;">!</div>'+
         '<div class="pwa-step-t"><strong>Open this page in Safari</strong> to install the app.<br>'+
-        '<span style="font-size:11.5px;margin-top:3px;display:block;color:#756A61;">Apple only allows app installation through Safari, this is an Apple restriction, not ours.</span></div>'+
+        '<span style="font-size:11.5px;margin-top:3px;display:block;">Apple only allows app installation through Safari, this is an Apple restriction, not ours.</span></div>'+
       '</div>'+
     '</div>'+
     '<button class="pwa-later" id="pwa-later">Got it</button>';
@@ -556,20 +539,26 @@ window.showToast=function(msg,type){
   var KEY='taqa-bookmarks';
   function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){return[];}}
   function save(a){try{localStorage.setItem(KEY,JSON.stringify(a));}catch(e){}}
+  // A bookmark is one document whichever page made it. Cards carry
+  // "NUMBER  Title" and the viewer carries the bare title, so both are
+  // compared with the number stripped off the front.
+  function bmBare(t){ return String(t||'').replace(/^\S+\s{2,}/,''); }
+  function bmNum(t){ var m=String(t||'').match(/^(\S+)\s{2,}/); return m?m[1]:''; }
+  function bmSame(i,title,segId){ return i.segId===segId && bmBare(i.title)===bmBare(title); }
   window.TAQA_Bookmarks={
     add:function(item){
-      var a=load().filter(function(i){return!(i.title===item.title&&i.segId===item.segId);});
+      var a=load().filter(function(i){return!bmSame(i,item.title,item.segId);});
       item.ts=Date.now();a.unshift(item);save(a.slice(0,50));
     },
     remove:function(title,segId){
-      save(load().filter(function(i){return!(i.title===title&&i.segId===segId);}));
+      save(load().filter(function(i){return!bmSame(i,title,segId);}));
     },
     toggle:function(item){
       if(this.has(item.title,item.segId)){this.remove(item.title,item.segId);return false;}
       this.add(item);return true;
     },
     has:function(title,segId){
-      return load().some(function(i){return i.title===title&&i.segId===segId;});
+      return load().some(function(i){return bmSame(i,title,segId);});
     },
     getAll:function(){return load();}
   };
@@ -609,6 +598,7 @@ window.showToast=function(msg,type){
     'html[data-taqa-theme="dark"] .bm-pt{color:#C7DBDD;}'+
     'html[data-taqa-theme="dark"] .bm-ph{border-color:rgba(255,255,255,0.06);}'+
     'html[data-taqa-theme="dark"] .bm-t{color:#C7DBDD;}'+
+    'html[data-taqa-theme="dark"] .bm-m,html[data-taqa-theme="dark"] .bm-empty,html[data-taqa-theme="dark"] .bm-clr{color:#8CB6B9;}'+
     'html[data-taqa-theme="dark"] .bm-item:hover{background:rgba(0,187,182,0.06);}';
   document.head.appendChild(s);
   var fab=document.createElement('button');
@@ -646,18 +636,24 @@ window.showToast=function(msg,type){
       '<div class="bm-list">'+
       items.map(function(it){
         var bg=TC[it.type]||TC.sop,tc=TT[it.type]||TT.sop,lbl=TS[it.type]||'DOC';
-        return '<a class="bm-item" href="viewer.html?seg='+it.segId+'&type='+it.type+'&title='+encodeURIComponent(it.title)+'">'+
+        var bare=bmBare(it.title), num=bmNum(it.title);
+        var esc=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+        return '<a class="bm-item" href="viewer.html?seg='+encodeURIComponent(it.segId)+'&type='+encodeURIComponent(it.type||'')+'&title='+encodeURIComponent(bare)+(num?'&doc='+encodeURIComponent(num):'')+'">'+
           '<div class="bm-ico" style="background:'+bg+';color:'+tc+'">'+lbl+'</div>'+
-          '<div class="bm-inf"><div class="bm-t">'+it.title+'</div><div class="bm-m">'+it.segName+' · '+lbl+'</div></div>'+
+          '<div class="bm-inf"><div class="bm-t">'+esc(bare)+'</div><div class="bm-m">'+esc(it.segName)+' · '+lbl+'</div></div>'+
           '<button class="bm-x" data-t="'+it.title.replace(/"/g,'&quot;')+'" data-s="'+it.segId+'" title="Remove">×</button>'+
         '</a>';
       }).join('')+'</div>';
+  }
+  window.updateBmBadge=updateBmBadge;
+  window.renderBmPanel=renderBmPanel;
+  // Attached once, here, rather than inside renderBmPanel.
     panel.addEventListener('click',function(e){
       var x=e.target.closest('.bm-x');
       if(x){e.preventDefault();e.stopPropagation();
         window.TAQA_Bookmarks.remove(x.dataset.t,x.dataset.s);
         renderBmPanel();
-        document.querySelectorAll('.bm-btn[data-title="'+x.dataset.t.replace(/"/g,'&quot;')+'"]').forEach(function(b){b.textContent='☆';b.classList.remove('bm-on');});
+        document.querySelectorAll('.bm-btn').forEach(function(b){if(bmBare(b.dataset.title)===bmBare(x.dataset.t)){b.textContent='☆';b.classList.remove('bm-on');}});
       }
       if(e.target.id==='bm-clr'){
         try{localStorage.removeItem('taqa-bookmarks');}catch(err){}
@@ -676,10 +672,7 @@ window.showToast=function(msg,type){
         }catch(err){}
         if(window.showToast)window.showToast('Bookmarks exported','success');
       }
-    },{once:false});
-  }
-  window.updateBmBadge=updateBmBadge;
-  window.renderBmPanel=renderBmPanel;
+    });
   fab.addEventListener('click',function(e){e.stopPropagation();renderBmPanel();panel.classList.toggle('open');});
   document.addEventListener('click',function(e){
     if(!panel.contains(e.target)&&!fab.contains(e.target))panel.classList.remove('open');
@@ -706,7 +699,8 @@ document.addEventListener('keydown',function(e){
 // ── Focus ring CSS ──
 (function(){
   var s=document.createElement('style');
-  s.textContent=':focus-visible{outline:2px solid #00BBB6!important;outline-offset:3px!important;border-radius:4px!important;}';
+  s.textContent=':focus-visible{outline:2px solid #005D63!important;outline-offset:3px!important;}'+
+    'html[data-taqa-theme="dark"] :focus-visible{outline-color:#00BBB6!important;}';
   document.head.appendChild(s);
 })();
 
@@ -1089,7 +1083,13 @@ document.addEventListener('keydown',function(e){
       '.bm-fab,.scroll-top-btn,#back-to-top{transition:opacity .2s ease,transform .2s ease!important;}' +
       'html.taqa-fab-away .bm-fab,html.taqa-fab-away .scroll-top-btn,html.taqa-fab-away #back-to-top{' +
         'opacity:0!important;transform:translateY(28px)!important;pointer-events:none!important;}' +
+      'html.taqa-fab-away .bm-fab:focus-visible,html.taqa-fab-away .scroll-top-btn:focus-visible,html.taqa-fab-away #back-to-top:focus-visible{' +
+        'opacity:1!important;transform:none!important;pointer-events:auto!important;}' +
     '}' +
+    /* The scroll-to-top button fades to opacity 0 until the page has scrolled
+       300px, but kept taking taps while invisible, over the card controls
+       beneath it. It only accepts a tap while it can be seen. */
+    '.scroll-top-btn{pointer-events:none;}.scroll-top-btn.stp-visible{pointer-events:auto;}' +
     '[hidden]{display:none!important;}' +
     'select.form-select,select.sf-select,select[data-arrow]{' +
       'padding-inline-end:40px!important;' +
@@ -1115,9 +1115,12 @@ document.addEventListener('keydown',function(e){
     if (ticking) return; ticking = true;
     requestAnimationFrame(function(){
       var y = window.pageYOffset || 0;
-      if (y > last + 6 && y > 160) root.classList.add('taqa-fab-away');
-      else if (y < last - 6 || y <= 160) root.classList.remove('taqa-fab-away');
-      last = y; ticking = false;
+      // Measure from the last point a decision was made, not the last frame,
+      // so a slow scroll still adds up to a change of direction.
+      if (y <= 160) { root.classList.remove('taqa-fab-away'); last = y; }
+      else if (y > last + 6) { root.classList.add('taqa-fab-away'); last = y; }
+      else if (y < last - 6) { root.classList.remove('taqa-fab-away'); last = y; }
+      ticking = false;
     });
   }, {passive:true});
 })();

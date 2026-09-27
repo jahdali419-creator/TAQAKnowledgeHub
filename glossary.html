@@ -31,7 +31,7 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
   --dark:#F4F4F3;--dark-2:#EDEBE8;--dark-3:#ffffff; /* canvas: warm ramp, not the cool grey it carried */
   --glass:rgba(255,255,255,0.85);--glass-2:rgba(255,255,255,0.98);
   --glass-border:rgba(0,0,0,0.09);--glass-border-hover:rgba(0,93,99,0.35);
-  --text:#1E1C1A;--text-muted:#756A61;--gradient:#005D63; /* flat brand teal - no gradient */
+  --text:#1E1C1A;--text-muted:#524D48;--gradient:#005D63; /* flat brand teal - no gradient */
 }
 *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
 @keyframes pageFadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
@@ -200,7 +200,7 @@ html[data-taqa-theme="dark"] .term-card.tc-open{border-color:rgba(0,187,182,0.3)
 .cat-drilling,.cat-wellcontrol,.cat-production,.cat-safety,.cat-engineering,
 .cat-logging,.cat-commercial,.cat-maintenance,.cat-general{
   background:rgba(0,93,99,0.07);color:var(--primary-ink);}
-.cat-wellcontrol{background:rgba(200,16,46,0.08);color:#A81026;}
+.cat-wellcontrol{background:rgba(200,16,46,0.08);color:var(--stop-ink,#C8102E);}
 .cat-custom{background:rgba(253,105,29,0.1);color:var(--alert-ink);}
 .cat-hr,.cat-cybersecurity{background:rgba(0,93,99,0.07);color:var(--primary-ink);}
 .hl{background:rgba(0,187,182,0.18);color:var(--primary-ink);border-radius:3px;padding:0 2px;font-weight:600;}
@@ -249,20 +249,20 @@ html[data-taqa-theme="dark"] .term-card.tc-open{border-color:rgba(0,187,182,0.3)
 .csr-num{font-size:12px;font-weight:700;color:var(--primary-ink);min-width:22px;text-align:right;}
 
 /* ── Toast ── */
-.toast{position:fixed;bottom:28px;right:28px;z-index:9999;
+.gl-toast{position:fixed;bottom:28px;right:28px;z-index:9999;
   background:var(--glass-2);border:1px solid rgba(0,93,99,0.16);
   border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:12px;
   box-shadow:0 12px 40px rgba(0,0,0,0.13);min-width:256px;max-width:360px;
   transform:translateY(20px);opacity:0;visibility:hidden;
   transition:opacity 0.35s cubic-bezier(.4,0,.2,1),transform 0.35s cubic-bezier(.4,0,.2,1),visibility 0s linear 0.35s;
   pointer-events:none;}
-.toast.show{transform:none;opacity:1;visibility:visible;pointer-events:auto;
+.gl-toast.show{transform:none;opacity:1;visibility:visible;pointer-events:auto;
   transition:opacity 0.35s cubic-bezier(.4,0,.2,1),transform 0.35s cubic-bezier(.4,0,.2,1),visibility 0s linear 0s;}
-.toast-icon{width:36px;height:36px;border-radius:50%;background:var(--gradient);
+.gl-toast-icon{width:36px;height:36px;border-radius:50%;background:var(--gradient);
   display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.toast-body{flex:1;}
-.toast-title{font-size:13.5px;font-weight:700;color:var(--text);}
-.toast-sub{font-size:12px;color:var(--text-muted);margin-top:1px;}
+.gl-toast-body{flex:1;}
+.gl-toast-title{font-size:13.5px;font-weight:700;color:var(--text);}
+.gl-toast-sub{font-size:12px;color:var(--text-muted);margin-top:1px;}
 
 /* ── Scroll ring ── */
 .scroll-top-btn{position:fixed;bottom:28px;left:28px;z-index:900;width:46px;height:46px;
@@ -309,7 +309,7 @@ html[data-taqa-theme="dark"] .cat-logging,html[data-taqa-theme="dark"] .cat-comm
 html[data-taqa-theme="dark"] .cat-maintenance,html[data-taqa-theme="dark"] .cat-general,
 html[data-taqa-theme="dark"] .cat-hr,html[data-taqa-theme="dark"] .cat-cybersecurity{
   background:rgba(0,187,182,0.10);color:var(--primary-ink);}
-html[data-taqa-theme="dark"] .cat-wellcontrol{background:rgba(200,16,46,0.14);color:#F08898;}
+html[data-taqa-theme="dark"] .cat-wellcontrol{background:rgba(200,16,46,0.14);color:var(--stop-ink,#FF8A94);}
 html[data-taqa-theme="dark"] .cat-custom{background:rgba(253,105,29,0.14);color:var(--alert-ink);}
 html[data-taqa-theme="dark"] .tc-expand{color:var(--primary-ink);}
 html[data-taqa-theme="dark"] .tc-def{color:#8CB6B9;}
@@ -372,8 +372,8 @@ html[data-taqa-theme="dark"] .tc-def{color:#8CB6B9;}
   .sf-input,.sf-select,.sf-textarea{font-size:16px!important;}
   .page-hero-content p{font-size:13.5px;}
 }
-.wip-note{color:#756A61;}
-html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
+.wip-note{color:var(--text-light);}
+.sf-input::placeholder,.sf-textarea::placeholder{color:var(--text-muted);}
 </style>
 </head>
 <body>
@@ -455,6 +455,7 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
       <span class="cat-pill" data-cat="maintenance" onclick="filterCat(this)">Maintenance</span>
       <span class="cat-pill" data-cat="hr" onclick="filterCat(this)">Human Resources</span>
       <span class="cat-pill" data-cat="cybersecurity" onclick="filterCat(this)">Cybersecurity</span>
+      <span class="cat-pill" data-cat="doccontrol" onclick="filterCat(this)">Document Control</span>
     </div>
 
     <div class="alpha-nav" id="alpha-nav"></div>
@@ -533,11 +534,11 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
 </button>
 
 <!-- ── Toast ── -->
-<div class="toast" id="toast">
-  <div class="toast-icon" id="toast-icon"></div>
-  <div class="toast-body">
-    <div class="toast-title" id="toast-title"></div>
-    <div class="toast-sub" id="toast-sub"></div>
+<div class="gl-toast" id="toast">
+  <div class="gl-toast-icon" id="toast-icon"></div>
+  <div class="gl-toast-body">
+    <div class="gl-toast-title" id="toast-title"></div>
+    <div class="gl-toast-sub" id="toast-sub"></div>
   </div>
 </div>
 
@@ -549,6 +550,17 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
 <script>
 /* ── Glossary Data ─────────────────────────────────────────────── */
 const BUILT_IN = [
+  /* The marks on every document card's type square, as the register
+     (documents-master.js, TAQA_DOC_LOOKUPS.types) defines them. WI appears
+     twice in this glossary on purpose: Working Interest in the commercial
+     sense, Work Instruction on a document card. */
+  {abbr:'SOP',full:'Standard Operating Procedure',def:'A controlled document setting out how a task is done, step by step. Its number carries the code SOP, owned by the relevant SPL or function and approved by the operations director, reviewed every 24 months.',cat:'doccontrol'},
+  {abbr:'WI',full:'Work Instruction',def:'A controlled document, shown as WI on a document card: the detailed technical instruction or manual behind a procedure. Owned and approved by the subject matter expert, reviewed every 36 months.',cat:'doccontrol'},
+  {abbr:'ST',full:'Standard',def:'A controlled document setting the requirements an area must meet. Shown as ST on a card; in a document number its code is S, as in TQ-TDS-DSS-S001. Reviewed every 36 months.',cat:'doccontrol'},
+  {abbr:'POL',full:'Policy',def:'The top of the TQ-QHSE-S001 document hierarchy, signed by the CEO and applying to every segment, function and center. Shown as POL on a card; its numbering code is P. Reviewed every 24 months.',cat:'doccontrol'},
+  {abbr:'ALT',full:'Technical Alert',def:'A controlled notice of an operational hazard or change that needs attention before the next job. Owned by the QHSE manager, reviewed every 12 months.',cat:'doccontrol'},
+  {abbr:'LL',full:'Lesson Learned',def:'A controlled record of what happened, why, and what changed as a result, shared so it does not happen again. Owned and approved by the QHSE manager.',cat:'doccontrol'},
+  {abbr:'ZIP',full:'Software Asset',def:'A software tool listed in an area\'s library. Tools are distributed by Digital Transformation and are not placed under document control by TQ-QHSE-S001.',cat:'doccontrol'},
   /* Drilling */
   {abbr:'BHA',full:'Bottom Hole Assembly',def:'The lower portion of the drill string, consisting of drill collars, stabilizers, and the drill bit, providing weight and directional control during drilling.',cat:'drilling'},
   {abbr:'WOB',full:'Weight on Bit',def:'The compressive force applied to the drill bit by the drill string, measured in klbs. Higher WOB increases ROP but risks bit damage and drill string buckling.',cat:'drilling'},
@@ -761,13 +773,13 @@ const BUILT_IN = [
 const CAT_LABELS = {
   drilling:'Drilling',wellcontrol:'Well Control',production:'Production',
   safety:'Safety & HSE',engineering:'Engineering',logging:'Logging & Reservoir',
-  commercial:'Commercial',maintenance:'Maintenance',general:'General',
+  commercial:'Commercial',maintenance:'Maintenance',general:'General',doccontrol:'Document Control',
   hr:'Human Resources',cybersecurity:'Cybersecurity',custom:'Community'
 };
 const CAT_CLS = {
   drilling:'cat-drilling',wellcontrol:'cat-wellcontrol',production:'cat-production',
   safety:'cat-safety',engineering:'cat-engineering',logging:'cat-logging',
-  commercial:'cat-commercial',maintenance:'cat-maintenance',general:'cat-general',
+  commercial:'cat-commercial',maintenance:'cat-maintenance',general:'cat-general',doccontrol:'cat-general',
   hr:'cat-hr',cybersecurity:'cat-cybersecurity',custom:'cat-custom'
 };
 
@@ -856,7 +868,7 @@ function buildAlphaNav() {
   const nav = document.getElementById('alpha-nav');
   const allBtn = `<button class="alpha-btn${activeAlpha === 'all' ? ' active' : ''}" data-l="all" onclick="setAlpha(this,'all')">All</button>`;
   const btns = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l =>
-    `<button class="alpha-btn${!available.has(l) ? ' disabled' : ''}${activeAlpha === l ? ' active' : ''}" data-l="${l}" onclick="setAlpha(this,'${l}')">${l}</button>`
+    `<button class="alpha-btn${!available.has(l) ? ' disabled' : ''}${activeAlpha === l ? ' active' : ''}"${!available.has(l) ? ' disabled' : ''} data-l="${l}" onclick="setAlpha(this,'${l}')">${l}</button>`
   ).join('');
   nav.innerHTML = allBtn + btns;
 }
@@ -918,8 +930,8 @@ function submitTerm() {
   const full  = document.getElementById('sf-full').value.trim();
   const def   = document.getElementById('sf-def').value.trim();
   const cat   = document.getElementById('sf-cat').value;
-  if (!abbr || !full) { showToast('Missing Fields', 'Please fill in the abbreviation and full name.', 'warn'); return; }
-  if (allTerms.find(t => t.abbr === abbr)) { showToast('Already Exists', `"${abbr}" is already in the glossary.`, 'warn'); return; }
+  if (!abbr || !full) { showGlossaryToast('Missing Fields', 'Please fill in the abbreviation and full name.', 'warn'); return; }
+  if (allTerms.find(t => t.abbr === abbr)) { showGlossaryToast('Already Exists', `"${abbr}" is already in the glossary.`, 'warn'); return; }
   allTerms.push({ abbr, full, def: def || 'No definition provided.', cat: 'custom' });
   saveCustom();
   updateStats();
@@ -928,7 +940,7 @@ function submitTerm() {
   document.getElementById('sf-abbr').value = '';
   document.getElementById('sf-full').value = '';
   document.getElementById('sf-def').value = '';
-  showToast('Term Added', `"${abbr}" is now in the glossary`, 'ok');
+  showGlossaryToast('Term Added', `"${abbr}" is now in the glossary`, 'ok');
   activeCat = 'all'; activeAlpha = 'all'; searchQ = '';
   document.getElementById('glossary-input').value = '';
   document.getElementById('glossary-clear').classList.add('hidden');
@@ -942,7 +954,10 @@ function submitTerm() {
 /* ── Toast ─────────────────────────────────────────────────────── */
 const ICON_OK   = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const ICON_WARN = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5v4M8 11.5v.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`;
-function showToast(title, sub, type = 'ok') {
+/* Named for this page on purpose. shared.js loads later and assigns
+   window.showToast, which silently replaced this function, and its global
+   .toast styles restyled this element, so the page's own toast never ran. */
+function showGlossaryToast(title, sub, type = 'ok') {
   document.getElementById('toast-title').textContent = title;
   document.getElementById('toast-sub').textContent = sub;
   const icon = document.getElementById('toast-icon');
