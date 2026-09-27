@@ -337,19 +337,10 @@ a.hero-label:focus-visible { outline:2px solid var(--primary-light); outline-off
   border-radius:20px; padding:5px 13px; white-space:nowrap; flex-shrink:0; margin-top:2px;
 }
 
-/* ── Segment colour map ── */
-[data-id="coiled-tubing"]  { --seg-color:#E67E22; }
-[data-id="fracturing"]     { --seg-color:#E74C3C; }
-[data-id="wireline"]       { --seg-color:#0076A8; }
-[data-id="drilling"]       { --seg-color:#1A5276; }
-[data-id="cementing"]      { --seg-color:#8E44AD; }
-[data-id="inspection"]     { --seg-color:#16A085; }
-[data-id="well-safety"]    { --seg-color:#FD691D; }
-[data-id="qhse"]           { --seg-color:#27AE60; }
-[data-id="tws-maintenance"]{ --seg-color:#D35400; }
-[data-id="hr"]             { --seg-color:#2471A3; }
-[data-id="well-testing"]   { --seg-color:#1ABC9C; }
-[data-id="cybersecurity"]  { --seg-color:#968C83; }
+/* A per-segment colour map lived here: twelve hues including a violet and
+   two off-brand blues. Nothing on the page carries data-id any more, so it
+   coloured nothing, and it would have told whoever builds the back end
+   that each segment has a brand colour. It does not. */
 
 /* ── Segment Accordion ── */
 .seg-accordion {
@@ -1123,6 +1114,9 @@ html[data-taqa-theme="dark"] .continue-strip{background:#002326;border-color:#00
 html[data-taqa-theme="dark"] .continue-card{background:rgba(0,187,182,0.04);border-color:rgba(0,187,182,0.15);}
 html[data-taqa-theme="dark"] .continue-card:hover{background:rgba(0,187,182,0.08);}
 html[data-taqa-theme="dark"] .continue-icon{background:rgba(0,187,182,0.12);color:#00BBB6;}
+/* An alert keeps the orange family here as it does on every card. */
+.continue-icon.is-alert{background:rgba(253,105,29,0.12);color:var(--alert-ink,#A8431A);}
+html[data-taqa-theme="dark"] .continue-icon.is-alert{background:rgba(253,105,29,0.16);color:var(--alert-ink,#FF9B5E);}
 @media(max-width:640px){
   .continue-strip{padding:10px 20px;}
   .continue-inner{gap:10px;}
@@ -1436,7 +1430,7 @@ html[data-taqa-theme="dark"] .fc-go, html[data-taqa-theme="dark"] .fr-go { borde
 .charter:focus-visible { outline:2px solid #00BBB6; outline-offset:3px; }
 .ch-main { flex:1; min-width:0; }
 .ch-tag { display:block; font-size:10px; font-weight:700; letter-spacing:1.6px;
-  text-transform:uppercase; color:#7FE3DF; margin-bottom:6px; }
+  text-transform:uppercase; color:rgba(255,255,255,0.78); margin-bottom:6px; }
 .ch-t { display:block; font-family:'BwGradual','Urbanist',sans-serif; font-size:16px;
   font-weight:700; letter-spacing:-0.2px; color:#fff; }
 .ch-t b { font-size:20px; font-weight:800; color:#fff; font-variant-numeric:tabular-nums;
@@ -1696,19 +1690,19 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
       <div class="stats-list">
         <div class="stat-row">
           <span class="stat-row-label">Documents in Force</span>
-          <span class="stat-row-value" data-target="">—</span>
+          <span class="stat-row-value" data-target="">…</span>
         </div>
         <div class="stat-row">
           <span class="stat-row-label">Business Segments</span>
-          <span class="stat-row-value" data-target="">—</span>
+          <span class="stat-row-value" data-target="">…</span>
         </div>
         <div class="stat-row">
           <span class="stat-row-label">Active Technical Alerts</span>
-          <span class="stat-row-value" data-target="">—</span>
+          <span class="stat-row-value" data-target="">…</span>
         </div>
         <div class="stat-row">
           <span class="stat-row-label">Awaiting QMS Approval</span>
-          <span class="stat-row-value" data-target="">—</span>
+          <span class="stat-row-value" data-target="">…</span>
         </div>
       </div>
     </div>
@@ -1726,22 +1720,22 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
 <div class="stats-strip reveal">
   <div class="stats-strip-inner">
     <div class="stats-strip-item">
-      <span class="stats-strip-num" data-target="">—</span>
+      <span class="stats-strip-num" data-target="">…</span>
       <span class="stats-strip-label">Documents</span>
     </div>
     <div class="stats-strip-divider"></div>
     <div class="stats-strip-item">
-      <span class="stats-strip-num" data-target="">—</span>
+      <span class="stats-strip-num" data-target="">…</span>
       <span class="stats-strip-label">Operational Segments</span>
     </div>
     <div class="stats-strip-divider"></div>
     <div class="stats-strip-item">
-      <span class="stats-strip-num" data-target="">—</span>
+      <span class="stats-strip-num" data-target="">…</span>
       <span class="stats-strip-label">Corporate Functions</span>
     </div>
     <div class="stats-strip-divider"></div>
     <div class="stats-strip-item">
-      <span class="stats-strip-num" data-target="">—</span>
+      <span class="stats-strip-num" data-target="">…</span>
       <span class="stats-strip-label">Products &amp; Technology</span>
     </div>
   </div>
@@ -1886,7 +1880,7 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
 <footer>
   <div class="footer-inner">
     <div>
-      <div class="footer-brand">TAQA Knowledge Hub &nbsp;·&nbsp; <em style="color:var(--primary-ink); font-style:italic; font-weight:700;">Tech Hub</em> <span style="opacity:0.7;font-style:normal;">(working name)</span></div>
+      <div class="footer-brand">TAQA Knowledge Hub &nbsp;·&nbsp; <em style="color:var(--primary-ink); font-style:italic; font-weight:700;">Tech Hub</em> <span style="font-style:normal;">(working name)</span></div>
       <div class="footer-copy">© 2026 TAQA, Industrialization &amp; Energy Services Company. All rights reserved.</div>
       <div class="footer-credit">Built by <span style="color:var(--primary-ink); font-weight:600;">TAQA LEARNING CENTER</span></div>
     </div>
@@ -2055,7 +2049,7 @@ document.addEventListener('click',function(e){
     '.rv-chip-tag{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--primary-ink);background:rgba(0,93,99,0.08);border-radius:20px;padding:1px 7px;}'+
     'html[data-taqa-theme="dark"] .rv-chip{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);}'+
     'html[data-taqa-theme="dark"] .rv-chip:hover{background:rgba(0,187,182,0.1);border-color:rgba(0,187,182,0.3);color:var(--primary-ink);}'+
-    'html[data-taqa-theme="dark"] .rv-chip-tag{color:rgba(0,187,182,0.75);background:rgba(0,187,182,0.1);}'+
+    'html[data-taqa-theme="dark"] .rv-chip-tag{color:#00BBB6;background:rgba(0,187,182,0.1);}'+
     'html[data-taqa-theme="dark"] .rv-label{color:var(--text-light);}';
   document.head.appendChild(s);
   var chips=recent.map(function(r){
@@ -2080,11 +2074,18 @@ document.addEventListener('click',function(e){
     if(!lastOpen) return;
     var type = (lastOpen.x && lastOpen.x.type) || 'sop';
     var seg  = (lastOpen.x && lastOpen.x.seg)  || '';
-    var labels = {sop:'SOP',manual:'MNL',policy:'POL',lesson:'LSN',alert:'ALT',software:'ZIP'};
-    var segName = seg ? seg.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}) : 'Document';
+    // The type mark and the area name both come from the register, like every
+    // other page: this map said MNL and LSN, had no Standard at all, and the
+    // name was rebuilt from the URL, so centres came out as "Pt Drilling Coe".
+    var TY = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.types) || {};
+    var labels = {sop:'SOP',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT',software:'ZIP'};
+    Object.keys(TY).forEach(function(k){ if (TY[k] && TY[k].mark) labels[k] = TY[k].mark; });
+    var SG = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments) || {};
+    var segName = seg ? ((SG[seg] && SG[seg].name) || seg.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();})) : 'Document';
     document.getElementById('continue-title').textContent = lastOpen.k;
     document.getElementById('continue-meta').textContent  = segName + ' · ' + (labels[type] || 'DOC');
     document.getElementById('continue-icon').textContent  = labels[type] || 'DOC';
+    document.getElementById('continue-icon').classList.toggle('is-alert', type === 'alert');
     document.getElementById('continue-card').href = 'viewer.html?seg=' + (seg||'') + '&type=' + type + '&title=' + encodeURIComponent(lastOpen.k);
     document.getElementById('continue-strip').style.display = '';
   } catch(e) {}
@@ -2132,7 +2133,7 @@ html[data-taqa-theme="dark"] #tour-card{background:#002D30;box-shadow:0 24px 64p
    tokens. The grey and the teal were fixed values, and each of them was landing
    on the wrong one of the two grounds. */
 #tour-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:15px;color:var(--text-light);cursor:pointer;line-height:1;padding:4px;}
-#tour-close:hover{color:var(--text-light);}
+#tour-close:hover{color:var(--text);}
 #tc-step{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--primary-ink);margin-bottom:6px;}
 #tc-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:17px;font-weight:800;color:#1E1C1A;margin-bottom:8px;line-height:1.3;}
 html[data-taqa-theme="dark"] #tc-title{color:#C7DBDD;}
@@ -2146,7 +2147,7 @@ html[data-taqa-theme="dark"] .t-dot{background:#00484B;}
 html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
 #tc-btns{display:flex;gap:8px;align-items:center;}
 #tc-skip{background:none;border:none;font-size:13px;color:var(--text-light);cursor:pointer;padding:7px 10px;border-radius:8px;font-family:'Inter',sans-serif;transition:color .2s;}
-#tc-skip:hover{color:var(--text-light);}
+#tc-skip:hover{color:var(--text);}
 #tc-next{background:#005D63;color:#fff;border:none;padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .2s;}
 #tc-next:hover{opacity:.88;}
 </style>

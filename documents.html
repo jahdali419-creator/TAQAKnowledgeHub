@@ -27,7 +27,10 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
   --bg:#F4F4F3;--bg-white:#ffffff;--inset:#EDEBE8;
   --glass:rgba(255,255,255,0.85);
   --glass-border-hover:rgba(0,93,99,0.35);
-  --text:#1E1C1A;--text-muted:#756A61;--text-dim:#756A61;
+  /* Muted and dim were the same value in light and different in dark, so
+     the step between them existed in one theme only. Muted is tier 2. */
+  --text:#1E1C1A;--text-muted:#524D48;--text-dim:#756A61;
+  --stop-ink:#C8102E;
   --radius:14px;--gradient:#005D63; /* flat brand teal - no gradient */
   --border:rgba(0,0,0,0.08);
 }
@@ -120,7 +123,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .pub-filter-pill:hover{border-color:var(--primary);color:var(--primary-ink);}
 .pub-filter-pill.active{background:rgba(0,93,99,0.1);border-color:var(--primary);color:var(--primary-ink);}
 .pub-filter-pill[data-filter="all"].active{background:var(--text);border-color:var(--text);color:#fff;}
-.pill-count{font-size:10px;opacity:0.6;font-weight:500;}
+/* The count takes the pill's own ink, so it passes in the resting pill and
+   in the filled active one alike; the lighter weight keeps it quieter than
+   the label. It used to be dimmed with opacity 0.6, which measured 2.4:1. */
+.pill-count{font-size:10px;font-weight:500;color:inherit;}
 
 /* ── Table ── */
 .pub-table{width:100%;border-collapse:collapse;table-layout:fixed;}
@@ -140,7 +146,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 @media(max-width:900px){
   .pub-table th{padding:10px 10px;letter-spacing:0.5px;}
   .pub-table td{padding:12px 10px;}
-  .pub-table th.sortable::after{margin-left:3px;}
+  .pub-table th.sortable::after{margin-inline-start:3px;}
 }
 .pub-table td{padding:12px 18px;font-size:13px;color:var(--text);
   border-bottom:1px solid rgba(0,0,0,0.04);vertical-align:middle;}
@@ -187,12 +193,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   background:transparent;border:1px solid transparent;cursor:pointer;
   padding:4px 10px;border-radius:6px;font-family:'Inter',sans-serif;font-weight:500;
   transition:all 0.15s;white-space:nowrap;}
-.pub-remove-btn:hover,.pub-remove-btn:focus-visible{
-  color:#C8102E;background:rgba(200,16,46,0.07);border-color:rgba(200,16,46,0.22);}
 .pub-table tbody tr:hover .pub-remove-btn{color:var(--text);}
+/* Hovering the button also hovers its row, and the row rule above is the
+   more specific of the two, so the red never showed in either theme. The
+   button's own state now outranks it by being written against the row. */
+.pub-table tbody tr .pub-remove-btn:hover,.pub-table tbody tr .pub-remove-btn:focus-visible{
+  color:var(--stop-ink,#C8102E);background:rgba(200,16,46,0.07);border-color:rgba(200,16,46,0.22);}
 .pub-table th.sortable{cursor:pointer;user-select:none;}
 .pub-table th.sortable:hover{color:var(--text);}
-.pub-table th.sortable::after{content:'⇅';margin-left:5px;opacity:0.25;font-size:9px;font-weight:400;letter-spacing:0;}
+/* The arrows are the only sign a column sorts. At opacity 0.25 they measured
+   about 1.4:1, under the 3:1 a control's cue needs, so they take the tier 3
+   ink at full strength and stay small instead. */
+.pub-table th.sortable::after{content:'⇅';margin-inline-start:5px;color:var(--text-dim);font-size:9px;font-weight:400;letter-spacing:0;}
 .pub-table th.sort-asc::after{content:'↑';opacity:1;color:var(--primary-ink);}
 .pub-table th.sort-desc::after{content:'↓';opacity:1;color:var(--primary-ink);}
 
@@ -221,7 +233,7 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
 .dash-toast-dot{width:8px;height:8px;border-radius:50%;background:#00BBB6;flex-shrink:0;}
 
 /* ── Dark Mode ── */
-html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--alert-ink:#FF9B5E;--bg:#001314;--bg-white:#002326;--inset:#002D30;--border:#003A3D;--text:#C7DBDD;--text-muted:#8CB6B9;--text-dim:#619B9E;}
+html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--alert-ink:#FF9B5E;--stop-ink:#FF8A94;--glass-border-hover:rgba(0,187,182,0.35);--bg:#001314;--bg-white:#002326;--inset:#002D30;--border:#003A3D;--text:#C7DBDD;--text-muted:#8CB6B9;--text-dim:#619B9E;}
 html[data-taqa-theme="dark"] body{background:#001314;}
 html[data-taqa-theme="dark"] nav{background:rgba(0,35,38,0.95)!important;border-color:#003A3D;}
 html[data-taqa-theme="dark"] .dark-toggle{border-color:#003A3D;color:#619B9E;}
@@ -239,10 +251,6 @@ html[data-taqa-theme="dark"] .pub-filter-pill{border-color:#003A3D;color:#619B9E
 html[data-taqa-theme="dark"] .pub-filter-pill.active{background:rgba(0,187,182,0.12);border-color:#00BBB6;color:var(--primary-ink);}
 html[data-taqa-theme="dark"] .pub-filter-pill[data-filter="all"].active{background:#C7DBDD;color:#001314;border-color:#C7DBDD;}
 html[data-taqa-theme="dark"] .pub-table-footer{border-color:#003A3D;background:rgba(255,255,255,0.01);}
-/* TAQA red is a light-ground ink; on the dark card it drops to about 3:1, so
-   the warning ink for dark grounds carries the hover instead. */
-html[data-taqa-theme="dark"] .pub-remove-btn:hover,
-html[data-taqa-theme="dark"] .pub-remove-btn:focus-visible{color:var(--stop-ink,#FF8A94);}
 
 /* ── Responsive ── */
 @media(max-width:900px){
