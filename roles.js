@@ -132,6 +132,10 @@ const TAQA_ROLE = {
     // Switching identity drops any delegation being acted under. Carrying it
     // across a role change would mean signing as someone you are no longer.
     try { if (typeof TAQA_DELEGATION !== 'undefined') TAQA_DELEGATION.actAs(null); } catch(e){}
+    // What a person may see changes with the role, so anything derived from
+    // the register has to be rebuilt rather than left showing the last role's
+    // answer. The search index is the one that would otherwise go stale.
+    try { window.dispatchEvent(new CustomEvent('taqa:role-changed', {detail:{role:r}})); } catch(e){}
   },
   def(r){ return TAQA_ROLES[r || TAQA_ROLE.current()]; },
 
@@ -157,6 +161,7 @@ const TAQA_ROLE = {
     // Holding a different area is being a different person, so a delegation
     // granted to you in the old one does not come with you.
     try { if (typeof TAQA_DELEGATION !== 'undefined') TAQA_DELEGATION.actAs(null); } catch(e){}
+    try { window.dispatchEvent(new CustomEvent('taqa:role-changed', {detail:{area:a}})); } catch(e){}
   },
 
   /* What the holder of an area is called. The three families do not share a
