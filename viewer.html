@@ -866,7 +866,12 @@ function toggleDark(){const isDark=document.documentElement.getAttribute('data-t
 function renderRelated(){
   var idx = window.TAQA_SEARCH_INDEX;
   if(!idx || !segId || !docType) return;
-  var related = idx.filter(function(d){ return d.s===segId && d.tp===docType && d.t!==docTitle; }).slice(0,4);
+  /* Related documents are a cross-reference, so only documents in force
+     belong here. A draft carries no authority (API Q2 4.4.3 b) and
+     offering one beside a released document implies it does. */
+  var related = idx.filter(function(d){
+    return d.s===segId && d.tp===docType && d.t!==docTitle && (d.st==='current'||d.st==='asset');
+  }).slice(0,4);
   if(!related.length) return;
   // Same calm treatment as the header icon: the three letters say which type
   // this is, so only an alert keeps its accent.
@@ -876,7 +881,8 @@ function renderRelated(){
   var grid = document.getElementById('related-grid');
   var section = document.getElementById('related-section');
   grid.innerHTML = related.map(function(d){
-    var href = 'viewer.html?seg='+d.s+'&type='+d.tp+'&title='+encodeURIComponent(d.t);
+    var href = 'viewer.html?seg='+d.s+'&type='+d.tp+'&title='+encodeURIComponent(d.t)+
+      (d.n?'&doc='+encodeURIComponent(d.n):'');
     return '<a class="related-card" href="'+href+'">'+
       '<div class="related-icon" style="background:'+(TC[d.tp]||TC.sop)+';color:'+(TT[d.tp]||TT.sop)+'">'+(TS[d.tp]||'DOC')+'</div>'+
       '<div class="related-title">'+d.t+'</div></a>';

@@ -424,6 +424,13 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 }
 .ir-item:last-of-type{border-bottom:none;}
 .ir-item:hover{background:rgba(0,187,182,0.05);}
+/* A draft or a document under review is in the index so its author can find
+   it, but it is not in force, and a search result that does not say so is
+   the same mistake as a register that does not say so. */
+.ir-state{display:inline-block;margin-inline-start:6px;padding:0 6px;border-radius:20px;
+  font-size:9px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;vertical-align:1px;}
+.ir-state-draft{background:rgba(0,118,168,.10);color:var(--info-ink,#0076A8);}
+.ir-state-under-review{background:rgba(255,184,28,.14);color:var(--warn-ink,#8A6200);}
 .ir-badge{
   flex-shrink:0;padding:2px 8px;border-radius:5px;
   font-size:10px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;
@@ -927,7 +934,7 @@ document.addEventListener('click',function(e){
           '<span class="ir-badge" style="background:'+c.bg+';color:'+c.color+'">'+c.label+'</span>'+
           '<div class="ir-body">'+
             '<div class="ir-title">'+highlight(d.t,q)+'</div>'+
-            '<div class="ir-seg">'+esc(d.sn)+'</div>'+
+            '<div class="ir-seg">'+esc(d.sn)+(d.st&&d.st!=='current'&&d.st!=='asset'?' <span class="ir-state ir-state-'+esc(d.st)+'">'+esc(d.st==='under-review'?'under review':d.st)+'</span>':'')+'</div>'+
           '</div>'+
           '<span class="ir-arrow">›</span>'+
         '</a>';
