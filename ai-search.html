@@ -23,9 +23,16 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 <style>
 :root{
   --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
-  --dark:#F4F6F6;--glass:rgba(255,255,255,0.88);--glass-2:rgba(255,255,255,0.98);
+  --dark:#F4F4F3;--inset:#EDEBE8;--glass:rgba(255,255,255,0.88);--glass-2:rgba(255,255,255,0.98);
   --glass-border:rgba(0,0,0,0.08);--glass-border-hover:rgba(0,93,99,0.35);
   --text:#1E1C1A;--text-muted:#756A61;--gradient:#005D63; /* flat brand teal - no gradient */
+  /* One faint teal wash for every document-type chip. The word in the chip
+     already names the type, so the six hues it used to run were a colour code
+     nobody had learnt. Alert is the exception and keeps the orange family. */
+  --brand-soft:rgba(0,93,99,.07);--alert-soft:rgba(253,105,29,.10);
+  /* Orange is legible as a fill long before it is legible as a glyph, so
+     warning TEXT runs through this darkened ink. */
+  --alert-ink:#A8431A;
 }
 *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
 @keyframes pageFadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
@@ -50,7 +57,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .nav-subtitle{font-size:11px;color:var(--text-muted);display:block;margin-top:-1px;}
 .nav-links{display:flex;gap:2px;list-style:none;}
 .nav-links a{padding:7px 15px;border-radius:6px;text-decoration:none;font-size:13.5px;font-weight:500;color:var(--text-muted);transition:background 0.2s,color 0.2s;position:relative;}
-.nav-links a:hover{background:#EEF1F1;color:var(--text);}
+.nav-links a:hover{background:var(--inset);color:var(--text);}
 .nav-links a.active{background:transparent;color:var(--primary-ink);font-weight:600;}
 .nav-links a.active::after{content:'';position:absolute;bottom:3px;left:15px;right:15px;height:2px;background:var(--primary);border-radius:2px;}
 .nav-right{display:flex;gap:10px;}
@@ -80,7 +87,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   display:inline-flex;align-items:center;gap:9px;padding:6px 18px;margin-bottom:26px;
   background:linear-gradient(135deg,rgba(0,93,99,0.09),rgba(0,187,182,0.06));
   border:1px solid rgba(0,187,182,0.28);border-radius:50px;
-  font-size:11.5px;color:var(--primary-light);font-weight:500;letter-spacing:0.3px;
+  font-size:11.5px;color:var(--primary-ink);font-weight:500;letter-spacing:0.3px;
   box-shadow:0 2px 16px rgba(0,187,182,0.12);
   position:relative;z-index:1;
 }
@@ -282,7 +289,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .source-card-seg{font-size:10.5px;color:var(--text-muted);}
 .source-card-type{font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:0.4px;}
 .source-card-arrow{font-size:14px;color:var(--text-muted);flex-shrink:0;transition:color 0.2s;}
-.source-card:hover .source-card-arrow{color:var(--primary-light);}
+.source-card:hover .source-card-arrow{color:var(--primary-ink);}
 
 /* ── Footer ── */
 footer{border-top:none;padding:0;background:transparent;position:relative;margin-top:auto;height:4px;}
@@ -300,7 +307,12 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;back
 .nav-links a.active::after{display:none!important;}
 .dark-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:border-color 0.2s,color 0.2s,background 0.2s;flex-shrink:0;padding:0;}
 .dark-toggle:hover{border-color:var(--primary);color:var(--primary-ink);background:rgba(0,93,99,0.06);}
-html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--dark:#001314;--glass:rgba(0,45,48,0.88);--glass-border:rgba(255,255,255,0.07);--text:#C7DBDD;--text-muted:#8CB6B9;}
+html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--dark:#001314;--inset:#002D30;--glass:rgba(0,45,48,0.88);
+  /* The answer bubble is painted with var(--glass-2) and this block never
+     restated it, so dark mode handed a white bubble dark-theme text. */
+  --glass-2:rgba(0,19,20,0.98);
+  --glass-border:rgba(255,255,255,0.07);--text:#C7DBDD;--text-muted:#8CB6B9;
+  --brand-soft:rgba(0,187,182,.13);--alert-soft:rgba(253,105,29,.16);--alert-ink:#FF9B5E;}
 html[data-taqa-theme="dark"] body{background:#001314;}
 html[data-taqa-theme="dark"] nav{background:rgba(0,35,38,0.92);border-color:rgba(255,255,255,0.06);}
 html[data-taqa-theme="dark"] .nav-brand-name{color:#C7DBDD;}html[data-taqa-theme="dark"] .nav-brand-hub{color:#619B9E;}
@@ -422,7 +434,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 .ir-title mark{background:rgba(0,187,182,0.22);color:var(--primary-ink);border-radius:2px;padding:0 1px;font-style:normal;}
 .ir-seg{font-size:11px;color:var(--text-muted);margin-top:2px;}
 .ir-arrow{font-size:15px;color:var(--text-muted);flex-shrink:0;transition:color 0.15s;}
-.ir-item:hover .ir-arrow{color:var(--primary-light);}
+.ir-item:hover .ir-arrow{color:var(--primary-ink);}
 .ir-footer{
   padding:9px 16px;font-size:11.5px;color:var(--text-muted);
   text-align:center;border-top:1px solid rgba(0,0,0,0.06);
@@ -439,6 +451,16 @@ html[data-taqa-theme="dark"] .ir-footer{background:rgba(255,255,255,0.02);border
 select { text-overflow:ellipsis; padding-inline-end:30px; }
 .wip-note{color:#756A61;}
 html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
+
+/* shared.js paints the breadcrumb on var(--primary), which is a ground colour,
+   so on the dark canvas the current crumb sat at about 2.5 to 1. The leading
+   html raises specificity over the sheet shared.js appends after ours. */
+html .auto-bc .bc-cur{color:var(--primary-ink);}
+html .auto-bc a:hover{color:var(--primary-ink);}
+/* fixes.js gives the AI disclaimer an amber of its own that measures 4.42 on
+   the banner tint. Its dark rule is selector-heavy, so this one carries the
+   theme attribute and body to outrank it in both themes. */
+html[data-taqa-theme] body .ai-safety-banner{color:var(--alert-ink);}
 </style>
 </head>
 <body>
@@ -701,17 +723,21 @@ function addMessage(type, content, sources) {
   } else {
     // Search results marked the type in four unrelated hues, none of them
     // TAQA's. A result list is scanned fast; colour should mean one thing.
-    const typeColor = {SOP:'#00686A',Manual:'#00686A',Policy:'#00686A',Alert:'#C2521A',default:'#00686A'};
+    // Tokens rather than hexes here: the teal it carried is a light-ground
+    // ink and the answer bubble is dark in dark mode, where it measured
+    // about 2 to 1.
+    const typeInk = {Alert:'var(--alert-ink)',default:'var(--primary-ink)'};
+    const typeTint = {Alert:'var(--alert-soft)',default:'var(--brand-soft)'};
     const srcsHTML = sources && sources.length ? `<div class="sources-block">
       <div class="sources-label">${sources.length} Source${sources.length>1?'s':''}</div>
       <div class="sources-list">${sources.map(s=>`
         <div class="source-card">
-          <div class="source-card-bar" style="background:${typeColor[s.type]||typeColor.default}"></div>
+          <div class="source-card-bar" style="background:${typeInk[s.type]||typeInk.default}"></div>
           <div class="source-card-body">
             <div class="source-card-title">${s.title}</div>
             <div class="source-card-meta">
               <span class="source-card-seg">${s.seg}</span>
-              <span class="source-card-type" style="background:${typeColor[s.type]||typeColor.default}22;border-color:${typeColor[s.type]||typeColor.default}33;color:${typeColor[s.type]||typeColor.default}">${s.type}</span>
+              <span class="source-card-type" style="background:${typeTint[s.type]||typeTint.default};border-color:${typeTint[s.type]||typeTint.default};color:${typeInk[s.type]||typeInk.default}">${s.type}</span>
             </div>
           </div>
           <span class="source-card-arrow">›</span>
@@ -770,7 +796,9 @@ resize();window.addEventListener('resize',resize);
 function initPts(){pts=[];let n=Math.floor(W*H/20000);
   for(let i=0;i<n;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,s:Math.random()*1.5+.3});}
 initPts();
-function draw(){ctx.fillStyle='#F4F6F6';ctx.fillRect(0,0,W,H);
+// The canvas is an opaque sheet over the body, so it has to carry the canvas
+// colour of whichever theme is live or it hands the dark page a white backdrop.
+function draw(){ctx.fillStyle=document.documentElement.getAttribute('data-taqa-theme')==='dark'?'#001314':'#F4F4F3';ctx.fillRect(0,0,W,H);
   const g=ctx.createRadialGradient(W*.5,H*.25,0,W*.5,H*.25,500);
   g.addColorStop(0,'rgba(0,93,99,0.05)');g.addColorStop(1,'transparent');
   ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
@@ -844,13 +872,17 @@ document.addEventListener('click',function(e){
 <script>
 // ── Instant Document Search ──
 (function(){
+  // Six types in six borrowed hues made the match list read as a code nobody
+  // has learnt, and none of the six were TAQA's. The label already names the
+  // type, so every badge takes the one teal wash; Alert stays orange because
+  // it is an operational warning.
   var TYPE_CFG={
-    sop:{bg:'#dbeafe',color:'#1d4ed8',label:'SOP'},
-    manual:{bg:'#ede9fe',color:'#6d28d9',label:'Manual'},
-    policy:{bg:'#dcfce7',color:'#15803d',label:'Policy'},
-    alert:{bg:'#fee2e2',color:'#b91c1c',label:'Alert'},
-    lesson:{bg:'#fef3c7',color:'#b45309',label:'Lesson'},
-    software:{bg:'#d1fae5',color:'#065f46',label:'Software'}
+    sop:{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:'SOP'},
+    manual:{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:'Manual'},
+    policy:{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:'Policy'},
+    alert:{bg:'var(--alert-soft)',color:'var(--alert-ink)',label:'Alert'},
+    lesson:{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:'Lesson'},
+    software:{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:'Software'}
   };
   var TAB_MAP={sop:'sops',manual:'manuals',policy:'policies',alert:'alerts',lesson:'lessons',software:'software'};
 
@@ -889,7 +921,7 @@ document.addEventListener('click',function(e){
       '<div class="ir-header"><span>Document Matches</span><span>'+
       (all.length>8?'Top 8 of '+all.length:all.length+' found')+'</span></div>'+
       shown.map(function(d){
-        var c=TYPE_CFG[d.tp]||{bg:'#C7DBDD',color:'#524D48',label:d.tp};
+        var c=TYPE_CFG[d.tp]||{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:d.tp};
         var href='segment.html?id='+d.s+'&tab='+(TAB_MAP[d.tp]||d.tp);
         return '<a class="ir-item" href="'+href+'" role="option">'+
           '<span class="ir-badge" style="background:'+c.bg+';color:'+c.color+'">'+c.label+'</span>'+
