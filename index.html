@@ -1079,6 +1079,22 @@ html[data-taqa-theme="dark"] .scroll-top-btn { background:rgba(14,24,36,0.92); b
 html[data-taqa-theme="dark"] .stats-strip { background:#19263a; border-color:#243044; }
 html[data-taqa-theme="dark"] .stats-strip-divider { background:#243044; }
 
+
+/* ── Your desk ── */
+.desk{background:var(--bg-white);border-bottom:1px solid var(--border);padding:13px 48px;}
+.desk-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.desk-who{font-size:10.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;
+  color:#fff;background:var(--primary);border-radius:20px;padding:4px 11px;flex-shrink:0;}
+.desk-who.d-owner{background:#FD691D;}
+.desk-who.d-qms{background:#008675;}
+.desk-who.d-auditor{background:#8E44AD;}
+.desk-line{font-size:13.5px;color:var(--text);flex:1;min-width:0;line-height:1.5;}
+.desk-line b{font-weight:800;font-variant-numeric:tabular-nums;}
+.desk-go{flex-shrink:0;font-size:12.5px;font-weight:600;color:#fff;background:var(--primary);
+  border-radius:8px;padding:7px 16px;text-decoration:none;transition:background .2s;}
+.desk-go:hover{background:var(--primary-hover);}
+html[data-taqa-theme="dark"] .desk{background:#19263a;border-color:#243044;}
+@media(max-width:640px){.desk{padding:12px 20px;}.desk-line{flex:1 1 100%;order:3;}}
 /* ── Continue Reading Strip ── */
 .continue-strip{background:var(--bg-white);border-bottom:1px solid var(--border);padding:12px 48px;}
 .continue-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
@@ -1634,6 +1650,18 @@ html[data-taqa-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
       <span class="stats-strip-num" data-target="">—</span>
       <span class="stats-strip-label">Products &amp; Technology</span>
     </div>
+  </div>
+</div>
+
+<!-- ── Your desk ──────────────────────────────────────────────────────
+     What is waiting on you, which is a different question for each door.
+     Hidden entirely for a role with nothing to act on, rather than shown
+     empty, because an empty queue for someone who holds no step is noise. -->
+<div class="desk reveal" id="desk" hidden>
+  <div class="desk-inner">
+    <span class="desk-who" id="desk-who"></span>
+    <span class="desk-line" id="desk-line"></span>
+    <a class="desk-go" id="desk-go" href="dashboard.html">Open</a>
   </div>
 </div>
 
@@ -2515,6 +2543,61 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
     }, { threshold:0.2 });
     mo.observe(focus);
   } else { fillMeters(); }
+})();
+</script>
+<script>
+/* ── Your desk ─────────────────────────────────────────────────────────
+   The one line on the home page that differs by door. Everything else on
+   this page is the same for everyone, which is the point: one hub, one
+   register, and only the actions change.                                */
+(function(){
+  if (typeof TAQA_STORE === 'undefined' || typeof TAQA_ROLE === 'undefined') return;
+  var desk = document.getElementById('desk');
+  if (!desk) return;
+
+  function paint(){
+    var k = TAQA_ROLE.current(), cap = TAQA_ROLE.effective(), R = TAQA_ROLES[k];
+    var who = document.getElementById('desk-who'),
+        line= document.getElementById('desk-line'),
+        go  = document.getElementById('desk-go');
+    var d = (typeof TAQA_DELEGATION !== 'undefined') && TAQA_DELEGATION.current();
+
+    who.className = 'desk-who d-' + k;
+    who.textContent = d ? 'Delegate' : R.label;
+
+    var n, txt, href = 'dashboard.html', cta = 'Open the queue';
+    if (cap.countersign) {
+      n = TAQA_STORE.count('awaiting-qms');
+      txt = n ? '<b>' + n + '</b> document' + (n===1?'':'s') +
+                ' approved and waiting on your countersignature.'
+              : 'Nothing is waiting on your countersignature. <b>' +
+                TAQA_STORE.count('awaiting-director') + '</b> still with their approvers.';
+      cta = n ? 'Countersign' : 'Open the register';
+      if (!n) href = 'master-list.html';
+    } else if (cap.approve) {
+      var seg = cap.ownSegment;
+      n = TAQA_STORE.rows('awaiting-director', seg ? { segment: seg } : null)
+            .filter(function(x){ return TAQA_APPROVAL.canApprove(x); }).length;
+      var over = seg ? TAQA_STORE.area(seg).overdue : 0;
+      txt = (n ? '<b>' + n + '</b> document' + (n===1?'':'s') + ' waiting on your sign-off'
+               : 'Nothing waiting on your sign-off') +
+            (over ? ', and <b>' + over + '</b> past review in your segment.' : '.');
+      href = 'dashboard.html?id=' + (seg || '');
+      cta = n ? 'Approve' : 'Open your segment';
+    } else if (k === 'auditor') {
+      txt = 'Read only across <b>' + TAQA_STORE.count('register') +
+            '</b> records, including the export. Nothing here changes on your account.';
+      href = 'master-list.html'; cta = 'Open the register';
+    } else {
+      // An employee has no queue. Give them the thing they actually came for.
+      txt = '<b>' + TAQA_STORE.count('live') + '</b> documents in force. ' +
+            'Check the revision before the job, not after.';
+      href = 'ai-search.html'; cta = 'Find a document';
+    }
+    line.innerHTML = txt; go.href = href; go.textContent = cta;
+    desk.hidden = false;
+  }
+  TAQA_STORE.onChange(paint);
 })();
 </script>
 <script src="shared.js"></script>

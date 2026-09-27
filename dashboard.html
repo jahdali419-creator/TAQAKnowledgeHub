@@ -317,6 +317,46 @@ html[data-taqa-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182
 /* Long option text ends in an ellipsis rather than being cut mid letter. */
 select { text-overflow:ellipsis; padding-inline-end:30px; }
 </style>
+<style id="deleg-css">
+.deleg-card{border:1px solid var(--border);border-radius:14px;background:var(--bg-white);
+  padding:16px 18px;margin-bottom:18px;}
+.deleg-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;}
+.deleg-t{font-family:'BwGradual','Urbanist',sans-serif;font-size:14px;font-weight:700;color:var(--text);}
+.deleg-s{font-size:12px;color:var(--text-muted);margin-top:3px;line-height:1.55;max-width:58ch;}
+.deleg-open,.deleg-grant{background:var(--primary);color:#fff;border:none;border-radius:8px;
+  padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0;}
+.deleg-open:hover,.deleg-grant:hover{background:var(--primary-hover,#00474C);}
+.deleg-cancel{background:transparent;border:1px solid var(--border);color:var(--text-muted);
+  border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;}
+.deleg-form{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.deleg-grid{display:grid;grid-template-columns:1fr 190px;gap:12px;}
+@media(max-width:620px){.deleg-grid{grid-template-columns:1fr;}}
+.deleg-form label{display:block;font-size:11px;font-weight:700;letter-spacing:.4px;
+  text-transform:uppercase;color:var(--text-muted);margin-bottom:11px;}
+.deleg-form input[type=text],.deleg-form input[type=date]{display:block;width:100%;margin-top:5px;
+  padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--bg-white);
+  color:var(--text);font-size:13px;font-family:inherit;font-weight:400;text-transform:none;letter-spacing:0;}
+.deleg-form input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,93,99,.12);}
+.deleg-check{display:flex;gap:9px;align-items:flex-start;text-transform:none;letter-spacing:0;
+  font-weight:400;font-size:12.5px;color:var(--text-muted);line-height:1.5;}
+.deleg-check input{margin-top:2px;flex-shrink:0;}
+.deleg-err{background:rgba(200,16,46,.07);border:1px solid rgba(200,16,46,.28);color:#C8102E;
+  border-radius:8px;padding:9px 12px;font-size:12.5px;margin-bottom:11px;}
+.deleg-actions{display:flex;gap:9px;}
+.deleg-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border);
+  font-size:12.5px;}
+.deleg-row .dr-main{flex:1;min-width:0;}
+.deleg-row .dr-who{font-weight:700;color:var(--text);}
+.deleg-row .dr-meta{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
+.deleg-row .dr-act{display:flex;gap:7px;flex-shrink:0;}
+.deleg-row button{border:1px solid var(--border);background:transparent;color:var(--text-muted);
+  border-radius:7px;padding:5px 11px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;}
+.deleg-row button.dr-use{border-color:var(--primary);color:var(--primary);}
+.deleg-row button:hover{background:rgba(0,93,99,.07);}
+.deleg-none{font-size:12px;color:var(--text-muted);padding:11px 0 0;border-top:1px solid var(--border);margin-top:12px;}
+html[data-taqa-theme="dark"] .deleg-card{background:#19263a;border-color:#243044;}
+html[data-taqa-theme="dark"] .deleg-form input{background:#0e1824;border-color:#243044;color:#dde4ef;}
+</style>
 </head>
 <body>
 <div class="page-wrapper">
@@ -401,8 +441,46 @@ select { text-overflow:ellipsis; padding-inline-end:30px; }
 
       <!-- Pending Approvals -->
       <div class="section-hd">
-        <div class="section-hd-title">Pending Approvals</div>
+        <div class="section-hd-title" id="queue-title">Pending Approvals</div>
         <span class="section-hd-count" id="pending-count">3 documents</span>
+      </div>
+
+      <!-- Delegation. Only a role that holds authority can hand any of it on. -->
+      <div id="deleg-box" hidden>
+        <div class="deleg-card">
+          <div class="deleg-hd">
+            <div>
+              <div class="deleg-t">Delegate your authority</div>
+              <div class="deleg-s">While you are away. Expires on its own, and the
+                document records who actually signed.</div>
+            </div>
+            <button type="button" class="deleg-open" id="deleg-open">Delegate</button>
+          </div>
+          <form class="deleg-form" id="deleg-form" hidden>
+            <div class="deleg-grid">
+              <label>Who holds it
+                <input type="text" id="dg-to" placeholder="Full name" autocomplete="off">
+              </label>
+              <label>Until
+                <input type="date" id="dg-until">
+              </label>
+            </div>
+            <label>Why
+              <input type="text" id="dg-reason" placeholder="Annual leave, 12 to 20 October" autocomplete="off">
+            </label>
+            <label class="deleg-check">
+              <input type="checkbox" id="dg-approval" checked>
+              <span>Include the approval signature. Without it they can prepare and
+                edit, but not release.</span>
+            </label>
+            <div class="deleg-err" id="dg-err" hidden></div>
+            <div class="deleg-actions">
+              <button type="submit" class="deleg-grant">Grant</button>
+              <button type="button" class="deleg-cancel" id="dg-cancel">Cancel</button>
+            </div>
+          </form>
+          <div id="deleg-list"></div>
+        </div>
       </div>
 
       <div id="pending-list">
@@ -1066,21 +1144,53 @@ function initDashboard() {
   const TYPE_NAME = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.types) || {};
   // Drafts that shipped in the register are awaiting approval just as much as
   // one uploaded a minute ago, so both queue here and both publish for real.
-  const submittedCards = submitted.slice().reverse().map(d => ({
+  // Which queue this is depends entirely on who is looking.
+  //
+  //   Segment Director  documents in their own segment awaiting the technical
+  //                     sign-off the register names them approver for
+  //   QMS               documents already approved, awaiting the countersignature
+  //   everyone else     no queue, because they hold neither step
+  //
+  // Each card asks the rules whether this person may act on that document now,
+  // so a button is never drawn that the store would refuse.
+  const MYROLE = TAQA_ROLE.current();
+  const CAP    = TAQA_ROLE.effective();
+  const STAGE  = CAP.countersign ? 'qms' : (CAP.approve ? 'director' : null);
+  const VERB   = STAGE === 'qms' ? 'Countersign' : 'Approve';
+
+  const actionable = !STAGE ? [] : ST.rows(STAGE === 'qms' ? 'awaiting-qms' : 'awaiting-director')
+    .filter(d => STAGE === 'qms' ? TAQA_APPROVAL.canCountersign(d) : TAQA_APPROVAL.canApprove(d));
+
+  const submittedCards = actionable.slice().reverse().map(d => ({
     type: (TYPE_NAME[d.docType] || {}).label || d.docType,
     docId: d.docNumber,
     title: d.title,
-    submitter: 'You',
-    when: 'Just now',
+    submitter: d.locallyAdded ? 'You' : (TAQA_DOC.owner(d) || 'Not recorded'),
+    when: d.submittedAt ? 'Just now' : 'In the register',
     size: d.fileSize || '',
-    preview: 'Submitted through the upload form. Awaiting QMS review of the record and the numbering.',
-    fromStore: true
+    preview: STAGE === 'qms'
+      ? 'Approved by ' + (d.approvedBy || 'the named approver') +
+        '. Check the number against 5.3, the revision and the dates, then release it.'
+      : 'Awaiting your technical sign-off as ' +
+        (TAQA_APPROVAL.approverFor(d) || 'the named approver') +
+        '. QMS countersigns the record afterwards.',
+    fromStore: true,
+    stage: STAGE
   }));
-  const queue = submittedCards.concat(dash.pending);
+  // The sample cards are a Director's queue, so they are not shown to QMS or to
+  // anyone who holds no step at all.
+  const queue = submittedCards.concat(STAGE === 'director' ? dash.pending : []);
 
   const pendingList = document.getElementById('pending-list');
   if (!queue.length) {
-    pendingList.innerHTML = '<div class="empty-pending"><div class="empty-pending-icon">✓</div><h3>All caught up!</h3><p>No documents awaiting review in this segment.</p></div>';
+    pendingList.innerHTML = !STAGE
+      ? '<div class="empty-pending"><div class="empty-pending-icon">●</div><h3>Nothing here is yours</h3>' +
+        '<p>Approving a document is the named approver\'s job, and releasing it is QMS. ' +
+        'As ' + TAQA_ROLES[MYROLE].label + ' you read the register, you do not sign it. ' +
+        'Switch the door in the top bar to see the other side.</p></div>'
+      : '<div class="empty-pending"><div class="empty-pending-icon">✓</div><h3>All caught up!</h3>' +
+        '<p>Nothing is waiting on your ' +
+        (STAGE === 'qms' ? 'countersignature' : 'sign-off') + '.</p></div>';
   } else {
     pendingList.innerHTML = queue.map((p, i) => {
       const simDocs = buildSimilarDocs(p.title, dashSegId, 3);
@@ -1109,7 +1219,7 @@ function initDashboard() {
         <div class="pending-doc-preview">${p.preview}</div>
         ${exactBanner}${supersRow}${simPanel}
         <div class="pending-actions">
-          <button class="btn-approve" data-store-doc="${p.fromStore ? p.docId : ''}" onclick="approveDoc(${i+1})">✓ Approve</button>
+          <button class="btn-approve" data-store-doc="${p.fromStore ? p.docId : ''}" data-stage="${p.stage||''}" onclick="approveDoc(${i+1})">✓ ${VERB}</button>
           <button class="btn-reject" onclick="rejectDoc(${i+1})">✕ Reject</button>
           <button class="btn-preview-link">Preview Document</button>
           <span class="action-result" id="result-${i+1}"></span>
@@ -1117,6 +1227,97 @@ function initDashboard() {
       </div>`;
     }).join('');
   }
+
+  // ── Delegation ──────────────────────────────────────────────────────
+  // Shown only to a role that holds authority to hand on. Every refusal comes
+  // from TAQA_DELEGATION.grant(), so the reason on screen is the rule itself
+  // rather than a second copy of it written here.
+  (function(){
+    var box = document.getElementById('deleg-box');
+    if (!box || typeof TAQA_DELEGATION === 'undefined') return;
+    if (!CAP.delegate) return;                 // a delegate cannot re-delegate
+    box.hidden = false;
+
+    var form = document.getElementById('deleg-form'),
+        err  = document.getElementById('dg-err'),
+        list = document.getElementById('deleg-list');
+
+    // Default to a fortnight out, which is the common case and still expires.
+    var d14 = new Date(Date.now() + 14 * 86400000).toISOString().slice(0,10);
+    document.getElementById('dg-until').value = d14;
+    document.getElementById('dg-until').min = new Date().toISOString().slice(0,10);
+
+    document.getElementById('deleg-open').addEventListener('click', function(){
+      form.hidden = !form.hidden;
+      if (!form.hidden) document.getElementById('dg-to').focus();
+    });
+    document.getElementById('dg-cancel').addEventListener('click', function(){
+      form.hidden = true; err.hidden = true;
+    });
+
+    function paintList(){
+      var all = TAQA_DELEGATION.list().filter(function(x){ return !x.revokedAt; });
+      if (!all.length) {
+        list.innerHTML = '<div class="deleg-none">Nothing delegated. Your authority is yours alone.</div>';
+        return;
+      }
+      list.innerHTML = all.map(function(x){
+        var live = TAQA_DELEGATION.isActive(x),
+            acting = (TAQA_DELEGATION.actingAs() === x.id);
+        return '<div class="deleg-row">' +
+          '<div class="dr-main"><div class="dr-who">' + esc(x.to) +
+            (x.includesApproval ? '' : ' <span style="font-weight:400;opacity:.7">(no approval)</span>') +
+          '</div><div class="dr-meta">' + esc(x.segment || 'segment') +
+            (x.docTypes ? ', ' + x.docTypes.join(' and ') : ', every type') +
+            ' &middot; until ' + x.until + ' &middot; ' + esc(x.reason) +
+            (live ? '' : ' &middot; expired') + '</div></div>' +
+          '<div class="dr-act">' +
+            (live ? '<button type="button" class="dr-use" data-act="' + x.id + '">' +
+                      (acting ? 'Acting' : 'Act as this') + '</button>' : '') +
+            '<button type="button" data-rev="' + x.id + '">Revoke</button>' +
+          '</div></div>';
+      }).join('');
+    }
+    function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+    list.addEventListener('click', function(e){
+      var rev = e.target.closest('[data-rev]'), use = e.target.closest('[data-act]');
+      if (rev) { TAQA_DELEGATION.revoke(rev.dataset.rev); location.reload(); }
+      // Acting as the delegate is how the third door is walked through here.
+      if (use) { TAQA_DELEGATION.actAs(use.dataset.act); location.reload(); }
+    });
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var out = TAQA_DELEGATION.grant({
+        fromRole: TAQA_ROLE.current(),
+        fromName: (dash.owner && dash.owner.name) || TAQA_ROLES[TAQA_ROLE.current()].label,
+        to: document.getElementById('dg-to').value,
+        segment: CAP.ownSegment || dashSegId,
+        reason: document.getElementById('dg-reason').value,
+        until: document.getElementById('dg-until').value,
+        includesApproval: document.getElementById('dg-approval').checked
+      });
+      if (!out.ok) { err.textContent = out.error; err.hidden = false; return; }
+      err.hidden = true; form.hidden = true; form.reset();
+      document.getElementById('dg-until').value = d14;
+      document.getElementById('dg-approval').checked = true;
+      paintList();
+      showToast('Delegated to ' + out.delegation.to + ' until ' + out.delegation.until, '#00BBB6');
+    });
+
+    paintList();
+  })();
+
+  // The heading names the step, so the two queues are never mistaken.
+  (function(){
+    var t = document.getElementById('queue-title');
+    if (!t) return;
+    t.textContent = STAGE === 'qms' ? 'Awaiting Your Countersignature'
+                  : STAGE === 'director' ? 'Awaiting Your Approval'
+                  : 'Approvals';
+  })();
 
   // Contributors
   const roleBadge = r => r==='Owner'?'crole-owner':r==='Editor'?'crole-editor':'crole-viewer';
@@ -1174,12 +1375,27 @@ function approveDoc(id) {
   actions.querySelector('.btn-reject').disabled = true;
   actions.querySelector('.btn-approve').style.opacity = '0.4';
   actions.querySelector('.btn-reject').style.opacity = '0.4';
-  result.textContent = '✓ Published to segment';
   result.className = 'action-result show approved-txt';
-  // A card backed by a real register record is published for real: the draft
-  // becomes current, and every in-force count on every open page moves with it.
-  const storeDoc = actions.querySelector('.btn-approve').dataset.storeDoc;
-  if (storeDoc && typeof TAQA_STORE !== 'undefined') TAQA_STORE.setStatus(storeDoc, 'current');
+  // Take the step this role actually holds, through the store, which checks the
+  // rules again and refuses if they do not hold. A dashboard must not be able to
+  // release a document by a route the rules never saw.
+  const btn = actions.querySelector('.btn-approve');
+  const storeDoc = btn.dataset.storeDoc, stage = btn.dataset.stage;
+  if (storeDoc && typeof TAQA_STORE !== 'undefined') {
+    const out = stage === 'qms' ? TAQA_STORE.countersign(storeDoc)
+                                : TAQA_STORE.approve(storeDoc);
+    if (!out || !out.ok) {
+      badge.className = 'pending-status-badge badge-pending';
+      badge.textContent = 'Awaiting Review';
+      card.classList.remove('approved');
+      result.textContent = '✕ ' + ((out && out.error) || 'Refused.');
+      result.className = 'action-result show';
+      return;
+    }
+    result.textContent = stage === 'qms'
+      ? '✓ Countersigned and released to the segment'
+      : '✓ Approved. Now with QMS for countersignature';
+  }
   pendingCount = Math.max(0, pendingCount - 1);
   document.getElementById('stat-pending').textContent = pendingCount;
   document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
