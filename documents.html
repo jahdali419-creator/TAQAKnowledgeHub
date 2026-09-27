@@ -120,19 +120,38 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 
 /* ── Table ── */
 .pub-table{width:100%;border-collapse:collapse;table-layout:fixed;}
-.pub-table colgroup col:nth-child(1){width:48%;}
-.pub-table colgroup col:nth-child(2){width:12%;}
+/* Rebalanced once the number moved above the title: the document column no
+   longer needs half the table, and the owner column was too narrow for
+   "Relevant SPL / Function", which is a real value and wrapped on every row. */
+.pub-table colgroup col:nth-child(1){width:42%;}
+.pub-table colgroup col:nth-child(2){width:11%;}
 .pub-table colgroup col:nth-child(3){width:13%;}
-.pub-table colgroup col:nth-child(4){width:16%;}
-.pub-table colgroup col:nth-child(5){width:11%;}
+.pub-table colgroup col:nth-child(4){width:21%;}
+.pub-table colgroup col:nth-child(5){width:13%;}
 .pub-table th{font-size:10.5px;font-weight:700;letter-spacing:0.9px;text-transform:uppercase;
   color:var(--text-muted);padding:10px 18px;text-align:left;border-bottom:1px solid var(--border);
   white-space:nowrap;background:rgba(0,0,0,0.013);}
+/* Narrow columns cannot hold a padded uppercase header on one line, and a
+   clipped column heading is worse than a tighter one. */
+@media(max-width:900px){
+  .pub-table th{padding:10px 10px;letter-spacing:0.5px;}
+  .pub-table td{padding:12px 10px;}
+  .pub-table th.sortable::after{margin-left:3px;}
+}
 .pub-table td{padding:12px 18px;font-size:13px;color:var(--text);
   border-bottom:1px solid rgba(0,0,0,0.04);vertical-align:middle;}
 .pub-table tbody tr:hover td{background:rgba(0,93,99,0.03);}
 .pub-table tbody tr:last-child td{border-bottom:none;}
-.pub-doc-title{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0;}
+/* The number used to run in front of the title inside one nowrap cell, so on a
+   48% column it ate the space and four hundred pixels of every title were cut.
+   It sits above the title now and the title may take two lines. */
+.pub-doc-title{font-weight:500;max-width:0;overflow:hidden;}
+.pdt-num{display:block;font-family:'BwGradual','Urbanist',sans-serif;font-size:9.5px;
+  font-weight:800;letter-spacing:0.9px;text-transform:uppercase;color:var(--primary);
+  opacity:0.8;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;margin-bottom:2px;}
+.pdt-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  line-height:1.35;overflow-wrap:anywhere;}
 .pub-doc-type-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;
   font-size:10px;font-weight:700;letter-spacing:0.3px;white-space:nowrap;}
 .pub-type-sop{background:rgba(0,168,132,0.12);color:#009e7a;}
@@ -141,8 +160,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .pub-type-alert{background:rgba(253,105,29,0.12);color:#e55a18;}
 .pub-type-lesson{background:rgba(139,92,246,0.12);color:#7c3aed;}
 .pub-table-date{color:var(--text-muted);font-size:12px;white-space:nowrap;}
-.pub-table-by{color:var(--text);font-size:12.5px;font-weight:500;white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis;max-width:0;}
+/* "Relevant SPL / Function" is a real owner value and does not fit on one line
+   in a 16% column, so let it use two rather than cutting it. */
+/* A table row can grow; a clamped cell cannot. Let the owner wrap to whatever
+   it needs rather than losing the last few pixels of a real value. */
+.pub-table-by{color:var(--text);font-size:12px;font-weight:500;max-width:0;
+  line-height:1.4;overflow-wrap:break-word;}
 .pub-remove-btn{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:#ef4444;
   background:rgba(239,68,68,0);border:1px solid transparent;cursor:pointer;
   padding:4px 10px;border-radius:6px;font-family:'Inter',sans-serif;font-weight:500;
@@ -394,7 +417,8 @@ function buildAllDocs(segId) {
   const ORDER = { sop:0, manual:1, policy:2, alert:3, lesson:4 };
   return TAQA_STORE.rows('live', { segment: segId })
     .map(d => ({
-      title: (d.docNumber ? d.docNumber + '  ' : '') + d.title,
+      num: d.docNumber || '',
+      title: d.title,
       type: TYPE_KEY[d.docType] || 'sop',
       date: fmt(d.issueDate),
       by: (typeof TAQA_DOC !== 'undefined' && TAQA_DOC.owner(d)) || 'Not recorded'
@@ -420,7 +444,10 @@ function renderPubTable(docs, tl) {
   const ri = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>`;
   document.getElementById('pub-docs-body').innerHTML = docs.map(d =>
     `<tr data-type="${d.type}">
-      <td class="pub-doc-title" title="${d.title}">${d.title}</td>
+      <td class="pub-doc-title" title="${d.num ? d.num + '  ' : ''}${d.title}">
+        ${d.num ? `<span class="pdt-num">${d.num}</span>` : ''}
+        <span class="pdt-t">${d.title}</span>
+      </td>
       <td><span class="pub-doc-type-badge ${tc[d.type]||'pub-type-sop'}">${tl[d.type]||d.type}</span></td>
       <td class="pub-table-date">${d.date}</td>
       <td class="pub-table-by">${d.by}</td>
