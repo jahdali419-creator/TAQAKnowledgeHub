@@ -2513,7 +2513,10 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
     if (!btn || !pane) return;
     document.getElementById('ch-n').textContent = company.length;
     pane.innerHTML = '<div class="ch-grid">' + company.map(function(d){
-      return '<a class="ch-row" href="master-list.html?q=' + encodeURIComponent(d.docNumber) + '">' +
+      return '<a class="ch-row" href="viewer.html?seg=company&type=' +
+               encodeURIComponent(d.docType || 'policy') +
+               '&title=' + encodeURIComponent(d.title) +
+               (d.numberStatus === 'provisional' ? '' : '&doc=' + encodeURIComponent(d.docNumber)) + '">' +
                '<span class="ch-num">' + d.docNumber + '</span>' +
                '<span class="ch-name">' + d.title + '</span>' +
                (d.numberStatus === 'provisional'

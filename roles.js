@@ -39,6 +39,7 @@ const TAQA_ROLES = {
     classifications: ['internal'],
     controlPanel: false,   // overdue queue, provisional numbering report
     export:       false,   // TQ-QHSE-F086 register export
+    registerView: false,   // the Master List, which is the controller's view
     approve:      false,   // technical sign-off
     countersign:  false,   // register release
     delegate:     false,
@@ -53,6 +54,8 @@ const TAQA_ROLES = {
     classifications: ['internal', 'confidential'],
     controlPanel: true,
     export:       false,
+    // A Director runs their own segment's desk, not the company register.
+    registerView: false,
     // Technical sign-off. The register has always named "Relevant Operation
     // Director" as approver on sop and standard while this file said the
     // Segment Director approved nothing, so the two disagreed on who releases
@@ -77,6 +80,7 @@ const TAQA_ROLES = {
     classifications: ['internal', 'confidential', 'restricted'],
     controlPanel: true,
     export:       true,
+    registerView: true,
     // Deliberately false. Technical suitability is the approver's judgement,
     // not the document controller's; QMS confirms the record instead. Where a
     // type names QHSE Manager as approver, that person holds approve, not this
@@ -95,6 +99,7 @@ const TAQA_ROLES = {
     classifications: ['internal', 'confidential', 'restricted'],
     controlPanel: true,
     export:       true,
+    registerView: true,
     approve:      false,
     countersign:  false,
     delegate:     false,
@@ -165,6 +170,21 @@ const TAQA_ROLE = {
          : g === 'company'  ? 'Corporate Sponsor'
          : 'Segment Director';
   },
+  /* May this person open the Master List?
+     The register view is the document controller's instrument: the F086
+     export, the overdue queue, the provisional numbering report, every
+     revision including withdrawn ones. QMS and an auditor need it; nobody
+     else has a job that requires it.
+
+     This does not narrow what an employee can reach. TQ-QHSE-S001 5.5 and
+     ISO 9001 7.5.3.1 a) require that anyone can confirm the current revision
+     before a job, and Search, the segment libraries and the viewer all still
+     do that for every role. What goes away is the control apparatus, not the
+     documents. */
+  canRegister(roleKey){
+    return !!(TAQA_ROLE.def(roleKey) || {}).registerView;
+  },
+
   areaName(id){
     var e = (typeof TAQA_DOC_LOOKUPS !== 'undefined' &&
              TAQA_DOC_LOOKUPS.segments[id || TAQA_ROLE.area()]) || {};

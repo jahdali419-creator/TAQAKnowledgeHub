@@ -642,6 +642,44 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
 </aside>
 
 <script src="roles.js"></script>
+<script>
+/* The register view refuses here, before the rest of the page is parsed.
+   Hiding the navigation entry does not protect a URL, and in Azure it is the
+   API that declines to return the register rather than the browser declining
+   to draw it; this states the same rule where it can be seen.
+
+   window.stop() rather than an exception: the page ends quietly instead of
+   leaving a console error behind and letting the scripts below it run on a
+   document that has just been replaced. */
+(function(){
+  if (typeof TAQA_ROLE === 'undefined' || TAQA_ROLE.canRegister()) return;
+  var who = (TAQA_ROLES[TAQA_ROLE.current()] || {}).label || 'your role';
+  document.documentElement.setAttribute('data-taqa-theme',
+    (function(){ try { return localStorage.getItem('taqa-theme-v3') === 'dark' ? 'dark' : 'light'; }
+                 catch(e){ return 'light'; } })());
+  document.body.innerHTML =
+    '<div style="max-width:620px;margin:16vh auto;padding:0 24px;text-align:center;' +
+      'font-family:Inter,system-ui,sans-serif">' +
+      '<div style="font-family:BwGradual,Urbanist,sans-serif;font-size:22px;font-weight:800;' +
+        'letter-spacing:-0.3px;margin-bottom:12px;color:#1c2b3a">' +
+        'The Master List is the document controller\u2019s view</div>' +
+      '<p style="font-size:14px;line-height:1.7;color:#6b7a8d;margin:0 0 10px">' +
+        'It carries the register export, the overdue queue and every revision ' +
+        'including withdrawn ones. QMS and an external auditor work from it. ' +
+        'You are signed in as <b style="color:#1c2b3a">' + who + '</b>.</p>' +
+      '<p style="font-size:14px;line-height:1.7;color:#6b7a8d;margin:0 0 24px">' +
+        'Every document you need is still open to you, and each one tells you ' +
+        'whether it is current before you use it.</p>' +
+      '<a href="ai-search.html" style="display:inline-block;font-size:13.5px;font-weight:600;' +
+        'color:#fff;background:#005D63;border-radius:9px;padding:11px 22px;text-decoration:none;' +
+        'margin-right:8px">Search the documents</a>' +
+      '<a href="index.html" style="display:inline-block;font-size:13.5px;font-weight:600;' +
+        'color:#005D63;border:1px solid #d7dde3;border-radius:9px;padding:11px 22px;' +
+        'text-decoration:none">Home</a></div>';
+  document.body.style.background = '#f4f4f3';
+  if (window.stop) window.stop();
+})();
+</script>
 <script src="documents-master.js"></script>
 <script src="store.js"></script>
 <script>

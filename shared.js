@@ -309,13 +309,17 @@ window.showToast=function(msg,type){
     var nav=document.querySelector('nav');
     if(nav){
       var p=location.pathname;
+      // The register entry is built only for a role that may open it, rather
+      // than built and then removed, which would depend on which of these two
+      // blocks happened to run first.
       var items=[
         {href:'index.html',label:'Home'},
-        {href:'ai-search.html',label:'Document Search'},
-        {href:'master-list.html',label:'Master List'},
-        {href:'glossary.html',label:'Field Glossary'},
-        {href:'support-ticket.html',label:'Ask Expert'}
+        {href:'ai-search.html',label:'Document Search'}
       ];
+      if (typeof TAQA_ROLE === 'undefined' || TAQA_ROLE.canRegister())
+        items.push({href:'master-list.html',label:'Master List'});
+      items.push({href:'glossary.html',label:'Field Glossary'},
+                 {href:'support-ticket.html',label:'Ask Expert'});
       var menu=document.createElement('div');
       menu.id='nav-mobile-menu';menu.className='nav-mobile-menu';
       items.forEach(function(l){
@@ -992,4 +996,48 @@ document.addEventListener('keydown',function(e){
   function go(){ build(); banner(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go);
   else go();
+})();
+
+/* ──────────────────────────────────────────────────────────────────────────
+   The register is the controller's view
+   ──────────────────────────────────────────────────────────────────────────
+   The Master List carries the F086 export, the overdue queue, the provisional
+   numbering report and every revision including withdrawn ones. QMS and an
+   auditor need that. An employee and a Segment Director do not, and showing
+   it to them invites a withdrawn revision to be read as a live one.
+
+   Hiding the nav item is not enough on its own, because the URL is guessable,
+   so master-list.html refuses directly as well. This handles the links: the
+   nav entry goes, and a link in the body retargets to Search, which answers
+   the question an employee actually had.
+
+   None of this narrows which documents a person may reach. TQ-QHSE-S001 5.5
+   and ISO 9001 7.5.3.1 a) are satisfied by Search, the segment libraries and
+   the viewer, all of which stay open to every role and all of which show the
+   lifecycle of the document in front of you.
+   ────────────────────────────────────────────────────────────────────────── */
+(function () {
+  if (typeof TAQA_ROLE === 'undefined') return;
+  function apply() {
+    if (TAQA_ROLE.canRegister()) return;
+
+    document.querySelectorAll('a[href^="master-list.html"]').forEach(function (a) {
+      var li = a.closest('li');
+      // A navigation entry to somewhere you cannot go is noise, so it goes.
+      if (li && li.parentElement && /nav-links|nav-mobile/.test(li.parentElement.className || '')) {
+        li.remove(); return;
+      }
+      if (a.closest('.nav-mobile-menu') && !a.closest('li')) { a.remove(); return; }
+      // A link in the body had a purpose. Send it at Search with whatever it
+      // was looking for, rather than at a page that will turn it away.
+      var q = '';
+      try { q = new URL(a.getAttribute('href'), location.href).searchParams.get('q') || ''; } catch (e) {}
+      a.setAttribute('href', 'ai-search.html' + (q ? '?q=' + encodeURIComponent(q) : ''));
+      if (/^\s*(the register|back to the register|open the register|master list|open the master list)\s*$/i
+            .test(a.textContent.trim()))
+        a.textContent = 'Search the documents';
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
+  else apply();
 })();
