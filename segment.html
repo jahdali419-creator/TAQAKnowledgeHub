@@ -236,7 +236,6 @@ html[data-taqa-theme="dark"] .pg-btn:hover:not(:disabled):not(.pg-dots){border-c
 .sort-btn.sort-on{background:rgba(0,93,99,0.08);border-color:rgba(0,93,99,0.25);color:var(--primary-ink);font-weight:600;}
 .sort-btn:hover{border-color:rgba(0,93,99,0.25);color:var(--primary-ink);}
 /* Mark as Read badge */
-.alert-sev-none{font-style:italic;opacity:0.75;}
 .doc-read-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--text-light);background:transparent;border:1px solid rgba(0,93,99,0.14);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:middle;}
 
 /* ── Document Cards ── */
@@ -253,10 +252,12 @@ html[data-taqa-theme="dark"] .pg-btn:hover:not(:disabled):not(.pg-dots){border-c
   display:flex;align-items:center;justify-content:center;
   font-family:'BwGradual','Urbanist',sans-serif;font-size:9.5px;font-weight:700;
   letter-spacing:0.6px;text-transform:uppercase;
+  background:rgba(0,93,99,0.07);color:var(--primary-ink);border:1px solid rgba(0,93,99,0.14);
 }
-.doc-type-icon.sop,.doc-type-icon.manual,.doc-type-icon.policy,
-.doc-type-icon.lesson,.doc-type-icon.software{
-  background:rgba(0,93,99,0.07);color:var(--primary-ink);border:1px solid rgba(0,93,99,0.12);}
+/* Every type gets the square from the base class. It used to be granted
+   type by type from a list, the list left out "standard", and every
+   Standard on every segment page drew a bare letter with no square behind
+   it. Only Alert overrides, because it is the one operational warning. */
 /* Orange as text needs the darkened ink on paper and a lifted one on the dark
    ground. The mid tone it used to carry cleared neither. */
 .doc-type-icon.alert{background:rgba(253,105,29,0.10);color:#A8431A;border:1px solid rgba(253,105,29,0.22);}
@@ -277,8 +278,7 @@ html[data-taqa-theme="dark"] .pg-btn:hover:not(:disabled):not(.pg-dots){border-c
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .doc-info-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .doc-meta-item{font-size:11.5px;color:var(--text-muted);display:flex;align-items:center;gap:4px;min-width:0;}
-.doc-type-badge{padding:2px 9px;border-radius:50px;font-size:10.5px;font-weight:600;}
-.doc-type-badge.sop,.doc-type-badge.manual,.doc-type-badge.policy,.doc-type-badge.lesson{
+.doc-type-badge{padding:2px 9px;border-radius:50px;font-size:10.5px;font-weight:600;
   background:rgba(0,93,99,0.07);color:var(--primary-ink);border:1px solid rgba(0,93,99,0.12);}
 .doc-type-badge.alert{background:rgba(253,105,29,0.1);color:#A8431A;border:1px solid rgba(253,105,29,0.2);}
 html[data-taqa-theme="dark"] .doc-type-icon.alert,html[data-taqa-theme="dark"] .doc-type-badge.alert,
@@ -316,21 +316,15 @@ html[data-taqa-theme="dark"] .sh-pill.alert{color:#FF9B5E;}
 html[data-taqa-theme="dark"] .qr-box{background:rgba(0,45,48,0.99);}
 html[data-taqa-theme="dark"] .qr-doc-title{color:#C7DBDD;}
 
-/* ── Alert Cards ── */
-.alert-card{
-  background:linear-gradient(135deg,rgba(253,105,29,0.06),rgba(253,105,29,0.02));
-  border:1px solid rgba(253,105,29,0.15);border-radius:14px;padding:20px 24px;
-  display:grid;grid-template-columns:auto 1fr auto;align-items:start;gap:20px;
-  transition:border-color 0.25s,box-shadow 0.25s;cursor:pointer;
-}
-.alert-card:hover{border-color:rgba(253,105,29,0.3);box-shadow:0 4px 16px rgba(0,0,0,0.08);}
-.alert-sev-badge{padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700;}
-/* The level is in the word and in the tint. The ink is the one the palette
-   allows for warm text, which the Tailwind reds and ambers never cleared. */
-.sev-high{background:rgba(200,16,46,0.10);color:#A8431A;border:1px solid rgba(200,16,46,0.22);}
-.sev-medium{background:rgba(253,105,29,0.12);color:#A8431A;border:1px solid rgba(253,105,29,0.2);}
-.sev-low{background:rgba(150,140,131,0.12);color:var(--text-muted);border:1px solid rgba(150,140,131,0.3);}
-html[data-taqa-theme="dark"] .sev-high,html[data-taqa-theme="dark"] .sev-medium{color:#FF9B5E;}
+/* ── Alerts ── */
+/* An alert is the one operational warning among the types, so it keeps a
+   thin Brave Orange rule on its leading edge and its square in the orange
+   family. That is enough to find one in the All tab. The whole card used to
+   be tinted peach, and a list of seven of them turned the screen orange. */
+.doc-card.is-alert,.doc-card.is-alert:hover,
+html[data-taqa-theme="dark"] .doc-card.is-alert,
+html[data-taqa-theme="dark"] .doc-card.is-alert:hover{
+  border-inline-start:3px solid #FD691D;padding-inline-start:22px;}
 
 /* ── Empty State ── */
 .empty-state{text-align:center;padding:80px 40px;}
@@ -364,7 +358,7 @@ html[data-taqa-theme="dark"] .sev-high,html[data-taqa-theme="dark"] .sev-medium{
   nav,.seg-hero-banner,footer,.doc-toolbar,.tabs-outer,.scroll-top-btn,.doc-actions,.alert-pulse-dot,.doc-new-badge{display:none!important;}
   body{background:#fff!important;color:#111!important;}
   .page-wrapper{background:#fff!important;}
-  .doc-card,.alert-card{border:1px solid #ddd!important;background:#fff!important;box-shadow:none!important;page-break-inside:avoid;margin-bottom:8px;}
+  .doc-card{border:1px solid #ddd!important;background:#fff!important;box-shadow:none!important;page-break-inside:avoid;margin-bottom:8px;}
   .doc-summary{color:#444!important;}
   .tab-panel{display:block!important;}
   .content-outer{padding:0!important;}
@@ -523,7 +517,6 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .doc-count-label{font-size:12px;}
   .doc-card-title{font-size:13.5px;}
   .doc-summary{-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;}
-  .alert-card{flex-direction:column;gap:12px;}
   .mini-stats{gap:12px;}
   .mini-stat{padding:12px 16px;}
   .manage-btn{font-size:10.5px;padding:5px 10px;}
@@ -1362,6 +1355,7 @@ const SEGMENTS = {
   Object.keys(L).forEach(function(id){
     var copy = SEGMENTS[id] || {};
     var docs = { sops:[], manuals:[], policies:[], alerts:[], lessons:[], software:[] };
+    var nStd = 0, nPol = 0;
     TAQA_STORE.all().forEach(function(d){
       if (d.segment !== id) return;
       var live = TAQA_STORE.isLive(d),
@@ -1369,6 +1363,7 @@ const SEGMENTS = {
       if (!live && !asset) return;
       var k = BUCKET[d.docType];
       if (!k) return;
+      if (d.docType === 'standard') nStd++; else if (d.docType === 'policy') nPol++;
       docs[k].push(d.docNumber ? d.docNumber + '  ' + d.title : d.title);
     });
     SEGMENTS[id] = {
@@ -1376,7 +1371,11 @@ const SEGMENTS = {
       icon: copy.icon || '\u25CB',
       tag:  copy.tag  || L[id].splName || '',
       desc: copy.desc || (L[id].splName || L[id].name) + '.',
-      tabLabels: copy.tabLabels,
+      // The shared tab is called Standards, which is wrong for Company Wide:
+      // what it issues are Policies, the top of the TQ-QHSE-S001 hierarchy.
+      tabLabels: (nPol && !nStd && !(copy.tabLabels && copy.tabLabels.policies))
+        ? Object.assign({}, copy.tabLabels || {}, { policies:'Policies' })
+        : copy.tabLabels,
       contributors: copy.contributors || [],
       sops:docs.sops.length, manuals:docs.manuals.length, policies:docs.policies.length,
       alerts:docs.alerts.length, lessons:docs.lessons.length, software:docs.software.length,
@@ -1491,6 +1490,21 @@ if(seg.tabLabels){
     }
   });
 }
+// Each search box names what it searches, taken from its own tab, so the
+// Standards tab stops inviting you to search policies and a function whose
+// tab says Notices searches notices. Acronyms keep their capitals.
+document.querySelectorAll('#tab-bar .tab-btn').forEach(function(btn){
+  var t = btn.dataset.tab; if (!t) return;
+  var inp = document.querySelector('#panel-' + t + ' .doc-search input');
+  if (!inp) return;
+  var raw = (btn.firstChild && btn.firstChild.nodeType === 3 ? btn.firstChild.textContent : btn.textContent)
+    .trim().replace(/\s*\d+$/, '');
+  var name = raw.split(/\s+/).map(function(w){ return /[A-Z].*[A-Z]/.test(w) ? w : w.toLowerCase(); }).join(' ');
+  if (name) inp.placeholder = 'Search ' + (t === 'all' ? 'all documents' : name) + '...';
+  var cnt = document.querySelector('#panel-' + t + ' .doc-count-label');
+  var tail = cnt && cnt.lastChild;
+  if (t !== 'all' && name && tail && tail.nodeType === 3) tail.textContent = ' ' + name;
+});
 // A tab with nothing in it is noise, and four of them on a new area is most
 // of the tab bar. The All tab still reaches everything.
 document.querySelectorAll('#tab-bar .tab-btn').forEach(function(btn){
@@ -1566,7 +1580,12 @@ function docControlLine(num){
 const LIST_TYPE_MAP = {sops:'sop',manuals:'manual',policies:'standard',lessons:'lesson',alerts:'alert'};
 
 function buildDocCard(title, type, idx) {
-  const labels = {sop:'SOP',manual:'Manual',policy:'Policy',alert:'Alert',lesson:'Lesson Learned'};
+  // The list a card sits in is not its type. Standards and the company's
+  // policies share one tab, so a CEO-signed Policy was drawn as a Standard.
+  // The register record says what the document is.
+  const _rec0 = (typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(splitEntry(title).num) : null;
+  if (_rec0 && _rec0.docType) type = _rec0.docType;
+  const labels = {sop:'SOP',manual:'Manual',standard:'Standard',policy:'Policy',alert:'Alert',lesson:'Lesson Learned'};
   const typeClass = type;
   const summary = docControlLine(splitEntry(title).num);
   const safeTitle = title.replace(/'/g,"&#39;").replace(/"/g,"&quot;");
@@ -1585,14 +1604,15 @@ function buildDocCard(title, type, idx) {
   const segRevs = (typeof TAQA_SEGMENTS !== 'undefined' && TAQA_SEGMENTS[segId]) ? (TAQA_SEGMENTS[segId].docRevisions || {}) : {};
   const revInfo = segRevs[title];
   const revBadge = revInfo ? `<span class="doc-rev-badge">Rev ${revInfo.current}</span>` : '';
-  const _ti={sop:'SOP',manual:'WI',standard:'S',policy:'P',lesson:'LL',alert:'ALT'};
-  const icon=`<div class="doc-type-icon ${type}">${_ti[type]||type.slice(0,3).toUpperCase()}</div>`;
+  const _T=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.types[type])||{};
+  const _mark=_T.mark||({sop:'SOP',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT'})[type]||type.slice(0,3).toUpperCase();
+  const icon=`<div class="doc-type-icon ${type}">${_mark}</div>`;
   const isBm = window.TAQA_Bookmarks ? window.TAQA_Bookmarks.has(title, segId) : false;
   const viewerHref = `viewer.html?seg=${segId}&type=${safeType}` +
     `&title=${encodeURIComponent(_p.title)}` +
     (_p.num ? `&doc=${encodeURIComponent(_p.num)}` : '');
   return `
-  <div class="doc-card">
+  <div class="doc-card${type==='alert'?' is-alert':''}">
     ${icon}
     <div class="doc-body">
       <div class="doc-eyebrow">${_p.num?`<span class="doc-num">${_p.num}</span>`:''}${revBadge}${newBadge}${isDocRead(title)?'<span class="doc-read-badge">✓ Read</span>':''}</div>
@@ -1618,25 +1638,13 @@ function buildDocCard(title, type, idx) {
   </div>`;
 }
 
+/* An alert used to have a card of its own: a peach fill on every card, one
+   sentence of invented guidance repeated on all of them, "Severity not
+   recorded" on every line, the owner typed in by hand, and a View that was
+   a <button> with no handler, so it opened nothing. Alerts are records in
+   the register like any other type, so they now take the same card. */
 function buildAlertCard(text, idx) {
-  const alertSummary = 'This technical alert requires immediate review by all supervisors and relevant field personnel. Refer to the full alert document for required actions, affected equipment or procedures, and implementation deadlines.';
-  const _a = splitEntry(text.replace('\u26a0\ufe0f ',''));
-  return `
-  <div class="alert-card">
-    <div>
-      ${_a.num ? `<div class="doc-eyebrow"><span class="doc-num">${_a.num}</span></div>` : ''}
-      <div class="doc-info-title">${_a.title}</div>
-      <div class="doc-summary">${alertSummary}</div>
-      <div class="doc-info-meta">
-        <span class="doc-meta-item alert-sev-none">Severity not recorded</span>
-        <span class="doc-meta-item">${issuedOf(_a && _a.num, idx)}</span>
-        <span class="doc-meta-item">QHSE Manager</span>
-      </div>
-    </div>
-    <div class="doc-actions">
-      <button class="doc-action-btn primary-action" title="View Alert">View</button>
-    </div>
-  </div>`;
+  return buildDocCard(String(text).replace(/^\u26a0\ufe0f?\s*/, ''), 'alert', idx);
 }
 
 const SKEL = `<div class="skeleton-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>`;

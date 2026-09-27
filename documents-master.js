@@ -256,10 +256,16 @@ const TAQA_DOC_LOOKUPS = {
       "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"GEO\" is provisional pending QHSE assignment."
     }
   },
+  // letter is the code TQ-QHSE-S001 puts in a document number (the S in
+  // TQ-TDS-DSS-S001) and stays exactly as the standard defines it. mark is
+  // what the type square on a card shows, read by every page from here so no
+  // two pages can disagree again: a single letter in that square reads as a
+  // person's initial, so Standard shows ST and Policy shows POL.
   "types": {
     "sop": {
       "label": "Standard Operating Procedure",
       "letter": "SOP",
+      "mark": "SOP",
       "owner": "Relevant SPL / Function",
       "approver": "Relevant Operation Director",
       "reviewCycleMonths": 24,
@@ -271,6 +277,7 @@ const TAQA_DOC_LOOKUPS = {
     "manual": {
       "label": "Work Instruction (Manual)",
       "letter": "WI",
+      "mark": "WI",
       "owner": "Subject Matter Expert",
       "approver": "Subject Matter Expert",
       "reviewCycleMonths": 36,
@@ -282,6 +289,7 @@ const TAQA_DOC_LOOKUPS = {
     "standard": {
       "label": "Standard",
       "letter": "S",
+      "mark": "ST",
       "owner": "Relevant SPL / Function",
       "approver": "Relevant Operation Director",
       "reviewCycleMonths": 36,
@@ -293,6 +301,7 @@ const TAQA_DOC_LOOKUPS = {
     "policy": {
       "label": "Policy",
       "letter": "P",
+      "mark": "POL",
       "owner": "Corporate Function VP",
       "approver": "CEO",
       "reviewCycleMonths": 24,
@@ -304,6 +313,7 @@ const TAQA_DOC_LOOKUPS = {
     "alert": {
       "label": "Technical Alert",
       "letter": "ALT",
+      "mark": "ALT",
       "owner": "QHSE Manager",
       "approver": "Corp Function VP / Director",
       "reviewCycleMonths": 12,
@@ -315,6 +325,7 @@ const TAQA_DOC_LOOKUPS = {
     "lesson": {
       "label": "Lesson Learned",
       "letter": "LL",
+      "mark": "LL",
       "owner": "QHSE Manager",
       "approver": "QHSE Manager",
       "reviewCycleMonths": 36,
@@ -326,6 +337,7 @@ const TAQA_DOC_LOOKUPS = {
     "software": {
       "label": "Software / Tool",
       "letter": null,
+      "mark": "ZIP",
       "owner": "Digital Transformation",
       "approver": ", ",
       "reviewCycleMonths": null,

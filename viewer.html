@@ -553,12 +553,15 @@ const TYPE_LABELS = (function(){
     });
   return out;
 })();
-// The letter is the one 5.3 puts in the number, not a badge invented here.
+// The square shows the register's mark for the type. It used to show the
+// numbering letter, which put a lone S at the top of every Standard; the
+// letter stays in the document number, where 5.3 puts it.
 const TYPE_SHORT = (function(){
   const out = { software:'ZIP' };
   if (typeof TAQA_DOC_LOOKUPS !== 'undefined')
     Object.keys(TAQA_DOC_LOOKUPS.types).forEach(function(k){
-      const l = TAQA_DOC_LOOKUPS.types[k].letter;
+      const t = TAQA_DOC_LOOKUPS.types[k];
+      const l = t.mark || t.letter;
       if (l) out[k] = l;
     });
   return out;
@@ -877,7 +880,12 @@ function renderRelated(){
   // this is, so only an alert keeps its accent.
   var TC={sop:'rgba(0,93,99,0.10)',manual:'rgba(0,93,99,0.10)',policy:'rgba(0,93,99,0.10)',lesson:'rgba(0,93,99,0.10)',alert:'rgba(253,105,29,0.10)',software:'rgba(0,93,99,0.10)'};
   var TT={sop:'var(--primary-ink)',manual:'var(--primary-ink)',policy:'var(--primary-ink)',lesson:'var(--primary-ink)',alert:'var(--alert-ink)',software:'var(--primary-ink)'};
-  var TS={sop:'SOP',manual:'MNL',policy:'POL',lesson:'LSN',alert:'ALT',software:'ZIP'};
+  // Marks from the register, so a related card can never call a type something
+  // the segment page does not. This map used to say MNL and LSN where every
+  // other page said WI and LL, and it had no entry for a Standard at all.
+  var TS=(function(){var m={sop:'SOP',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT',software:'ZIP'};
+    var T=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.types)||{};
+    Object.keys(T).forEach(function(k){if(T[k]&&T[k].mark)m[k]=T[k].mark;});return m;})();
   var grid = document.getElementById('related-grid');
   var section = document.getElementById('related-section');
   grid.innerHTML = related.map(function(d){

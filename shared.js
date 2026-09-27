@@ -615,7 +615,11 @@ window.showToast=function(msg,type){
   document.body.appendChild(panel);
   var TC={sop:'rgba(0,93,99,0.10)',manual:'rgba(0,93,99,0.10)',standard:'rgba(0,93,99,0.10)',policy:'rgba(0,93,99,0.10)',lesson:'rgba(0,93,99,0.10)',alert:'rgba(253,105,29,0.12)',software:'rgba(0,93,99,0.10)'};
   var TT={sop:'var(--primary-ink,#005D63)',manual:'var(--primary-ink,#005D63)',standard:'var(--primary-ink,#005D63)',policy:'var(--primary-ink,#005D63)',lesson:'var(--primary-ink,#005D63)',alert:'var(--alert-ink,#A8431A)',software:'var(--primary-ink,#005D63)'};
-  var TS={sop:'SOP',manual:'WI',standard:'S',policy:'P',lesson:'LL',alert:'ALT',software:'ZIP'};
+  // The square's letters come from the register so this panel can never
+  // disagree with the segment page about what a Standard is called.
+  var TS=(function(){var m={sop:'SOP',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT',software:'ZIP'};
+    var T=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.types)||{};
+    Object.keys(T).forEach(function(k){if(T[k]&&T[k].mark)m[k]=T[k].mark;});return m;})();
   function updateBmBadge(){
     var n=window.TAQA_Bookmarks.getAll().length;
     var b=document.getElementById('bm-cnt');
@@ -1075,6 +1079,13 @@ document.addEventListener('keydown',function(e){
   s.textContent =
     ':root{--alert-ink:#A8431A;--warn-ink:#8A6200;--ok-ink:#00705F;--stop-ink:#C8102E;--info-ink:#0076A8;}' +
     'html[data-taqa-theme="dark"]{--alert-ink:#FF9B5E;--warn-ink:#FFB81C;--ok-ink:#4FD1B5;--stop-ink:#FF8A94;--info-ink:#6BC5EE;}' +
+    /* On a phone the floating buttons sit over the right-hand side of every
+       card, which is exactly where a card keeps View, bookmark and QR. */
+    '@media (max-width:640px){' +
+      '.bm-fab,.scroll-top-btn,#back-to-top{transition:opacity .2s ease,transform .2s ease!important;}' +
+      'html.taqa-fab-away .bm-fab,html.taqa-fab-away .scroll-top-btn,html.taqa-fab-away #back-to-top{' +
+        'opacity:0!important;transform:translateY(28px)!important;pointer-events:none!important;}' +
+    '}' +
     '[hidden]{display:none!important;}' +
     'select.form-select,select.sf-select,select[data-arrow]{' +
       'padding-inline-end:40px!important;' +
@@ -1088,4 +1099,21 @@ document.addEventListener('keydown',function(e){
        cut with an ellipsis rather than run on under the edge. */
     'select.form-select,select.sf-select{white-space:nowrap;overflow:hidden;}';
   document.head.appendChild(s);
+})();
+
+// The floating buttons step aside while the reader scrolls down through a
+// list and come back the moment they scroll up, which is when they would
+// reach for one. The CSS above confines the effect to phone widths, where
+// the buttons otherwise cover each card's own controls.
+(function(){
+  var root = document.documentElement, last = window.pageYOffset || 0, ticking = false;
+  window.addEventListener('scroll', function(){
+    if (ticking) return; ticking = true;
+    requestAnimationFrame(function(){
+      var y = window.pageYOffset || 0;
+      if (y > last + 6 && y > 160) root.classList.add('taqa-fab-away');
+      else if (y < last - 6 || y <= 160) root.classList.remove('taqa-fab-away');
+      last = y; ticking = false;
+    });
+  }, {passive:true});
 })();
