@@ -2563,7 +2563,10 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
     var d = (typeof TAQA_DELEGATION !== 'undefined') && TAQA_DELEGATION.current();
 
     who.className = 'desk-who d-' + k;
-    who.textContent = d ? 'Delegate' : R.label;
+    // A director is a director OF somewhere. Saying only "Segment Director"
+    // leaves the one thing that decides what they can sign unstated.
+    who.textContent = d ? 'Delegate'
+      : (cap.scope === 'own' ? TAQA_ROLE.areaTitle() : R.label);
 
     var n, txt, href = 'dashboard.html', cta = 'Open the queue';
     if (cap.countersign) {
@@ -2579,9 +2582,11 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
       n = TAQA_STORE.rows('awaiting-director', seg ? { segment: seg } : null)
             .filter(function(x){ return TAQA_APPROVAL.canApprove(x); }).length;
       var over = seg ? TAQA_STORE.area(seg).overdue : 0;
+      var where = TAQA_ROLE.areaName(seg);
       txt = (n ? '<b>' + n + '</b> document' + (n===1?'':'s') + ' waiting on your sign-off'
                : 'Nothing waiting on your sign-off') +
-            (over ? ', and <b>' + over + '</b> past review in your segment.' : '.');
+            ' in <b>' + where + '</b>' +
+            (over ? ', and <b>' + over + '</b> past review there.' : '.');
       href = 'dashboard.html?id=' + (seg || '');
       cta = n ? 'Approve' : 'Open your segment';
     } else if (k === 'auditor') {

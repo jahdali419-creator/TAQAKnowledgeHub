@@ -1081,7 +1081,10 @@ const DASH_DATA = {
 
 // ── Init dashboard from URL param ──
 const dashParams = new URLSearchParams(window.location.search);
-const dashSegId = dashParams.get('id') || 'coiled-tubing';
+// No id means "my desk". For a role that holds one area that is their area;
+// for QMS, who holds all of them, it is wherever they were last working.
+const dashSegId = dashParams.get('id') ||
+  ((typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.area()) || 'coiled-tubing');
 /* ── Which area's desk this is ──────────────────────────────────────────
    DASH_DATA was hand-written and covered twelve areas of the register's
    twenty-six, and an area it did not cover silently fell through to Coiled
@@ -1192,6 +1195,8 @@ function buildSimilarDocs(title, segId, limit) {
 }
 
 function initDashboard() {
+  var esc = function(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
   if (dash.unknown) {
     document.title = 'Area not found · TAQA Knowledge Hub';
     var main = document.querySelector('.dash-main, main, .page-wrapper') || document.body;
@@ -1202,7 +1207,11 @@ function initDashboard() {
     return;
   }
   document.title = dash.name + ', Control Panel · TAQA Knowledge Hub';
-  document.getElementById('dash-seg-name').textContent = dash.name + ' Segment';
+  // Not every area is a segment. QHSE is a function and the Centres of
+  // Excellence say what they are in their own names, so appending "Segment"
+  // to all twenty-six was wrong for fourteen of them.
+  document.getElementById('dash-seg-name').textContent =
+    dash.name + (TAQA_ROLE.areaTitle(dashSegId) === 'Segment Director' ? ' Segment' : '');
   var av = document.getElementById('dash-owner-avatar'),
       nm = document.getElementById('dash-owner-name'),
       rl = document.getElementById('dash-owner-role');
@@ -1266,8 +1275,14 @@ function initDashboard() {
   const STAGE  = CAP.countersign ? 'qms' : (CAP.approve ? 'director' : null);
   const VERB   = STAGE === 'qms' ? 'Countersign' : 'Approve';
 
-  const actionable = !STAGE ? [] : ST.rows(STAGE === 'qms' ? 'awaiting-qms' : 'awaiting-director')
-    .filter(d => STAGE === 'qms' ? TAQA_APPROVAL.canCountersign(d) : TAQA_APPROVAL.canApprove(d));
+  // This page is ONE area's desk, so the queue is that area's queue. It was
+  // filtered by what the viewer could approve and not by the area on screen,
+  // so a Drilling director opening Coiled Tubing's desk saw Drilling's
+  // documents under Coiled Tubing's name: the wrong-segment fault again.
+  const MINE = CAP.scope === 'all' || dashSegId === CAP.ownSegment;
+  const actionable = !STAGE ? []
+    : ST.rows(STAGE === 'qms' ? 'awaiting-qms' : 'awaiting-director', { segment: dashSegId })
+        .filter(d => STAGE === 'qms' ? TAQA_APPROVAL.canCountersign(d) : TAQA_APPROVAL.canApprove(d));
 
   const submittedCards = actionable.slice().reverse().map(d => ({
     type: (TYPE_NAME[d.docType] || {}).label || d.docType,
@@ -1287,10 +1302,23 @@ function initDashboard() {
   }));
   // The sample cards are a Director's queue, so they are not shown to QMS or to
   // anyone who holds no step at all.
-  const queue = submittedCards.concat(STAGE === 'director' ? dash.pending : []);
+  const queue = submittedCards.concat(
+    (STAGE === 'director' && MINE) ? dash.pending : []);
 
   const pendingList = document.getElementById('pending-list');
-  if (!queue.length) {
+  if (!MINE) {
+    var waiting = ST.count('awaiting-director', { segment: dashSegId });
+    pendingList.innerHTML = '<div class="empty-pending"><div class="empty-pending-icon">\u25CF</div>' +
+      '<h3>Not your area</h3><p>You hold ' + esc(TAQA_ROLE.areaName(CAP.ownSegment)) +
+      '. ' + esc(dash.name) + ' has its own ' + esc(TAQA_ROLE.areaTitle(dashSegId).toLowerCase()) +
+      ', and ' + (waiting ? '<b>' + waiting + '</b> document' + (waiting===1?'':'s') +
+        ' here ' + (waiting===1?'is':'are') + ' waiting on them' : 'nothing here is waiting on them') +
+      '. You can read this desk, not sign at it.</p>' +
+      '<a href="dashboard.html?id=' + encodeURIComponent(CAP.ownSegment || '') +
+      '" style="display:inline-block;margin-top:14px;font-size:13px;font-weight:600;color:#fff;' +
+      'background:var(--primary);border-radius:8px;padding:9px 18px;text-decoration:none;">' +
+      'Back to your desk</a></div>';
+  } else if (!queue.length) {
     pendingList.innerHTML = !STAGE
       ? '<div class="empty-pending"><div class="empty-pending-icon">●</div><h3>Nothing here is yours</h3>' +
         '<p>Approving a document is the named approver\'s job, and releasing it is QMS. ' +
@@ -1422,7 +1450,9 @@ function initDashboard() {
   (function(){
     var t = document.getElementById('queue-title');
     if (!t) return;
-    t.textContent = STAGE === 'qms' ? 'Awaiting Your Countersignature'
+    // "Your" is only true at your own desk.
+    t.textContent = !MINE ? 'Awaiting ' + TAQA_ROLE.areaTitle(dashSegId) + ' Approval'
+                  : STAGE === 'qms' ? 'Awaiting Your Countersignature'
                   : STAGE === 'director' ? 'Awaiting Your Approval'
                   : 'Approvals';
   })();

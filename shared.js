@@ -858,6 +858,14 @@ document.addEventListener('keydown',function(e){
     '.door-i .dk{grid-column:3;grid-row:1/3;color:var(--primary,#005D63);opacity:0;font-size:12px;font-weight:800;}' +
     '.door-i[aria-current="true"] .dk{opacity:1;}' +
     '.door-i .door-dot{grid-column:1;grid-row:1/3;}' +
+    '.door-area{padding:9px 10px 4px;margin-top:3px;border-top:1px solid var(--border,#e2e5e9);}' +
+    '.door-area label{display:block;font-size:9px;font-weight:700;letter-spacing:1.2px;' +
+      'text-transform:uppercase;color:var(--text-light,#9aa5b4);margin-bottom:5px;}' +
+    '.door-area select{width:100%;padding:7px 9px;border:1px solid var(--border,#e2e5e9);' +
+      'border-radius:8px;background:var(--bg-white,#fff);color:var(--text,#1c2b3a);' +
+      'font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;}' +
+    '.door-area select:focus{outline:none;border-color:var(--primary,#005D63);}' +
+    'html[data-taqa-theme="dark"] .door-area select{background:#0e1824;border-color:#243044;color:#dde4ef;}' +
     '.door-note{font-size:10px;line-height:1.45;color:var(--text-light,#9aa5b4);' +
       'padding:7px 10px 4px;margin-top:3px;border-top:1px solid var(--border,#e2e5e9);}' +
     'html[data-taqa-theme="dark"] .door-menu{background:#19263a;border-color:#243044;}' +
@@ -886,14 +894,19 @@ document.addEventListener('keydown',function(e){
     wrap.id = 'taqa-door';
 
     var k = cur(), d = DESK[k] || DESK.employee;
+    var scoped = TAQA_ROLES[k].scope === 'own';
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'door-btn';
     btn.setAttribute('aria-haspopup', 'true');
     btn.setAttribute('aria-expanded', 'false');
-    btn.title = 'You are viewing as: ' + TAQA_ROLES[k].label;
+    // "Director" on its own does not say which of the twenty-six.
+    btn.title = scoped
+      ? TAQA_ROLE.areaTitle() + ', ' + TAQA_ROLE.areaName()
+      : 'You are viewing as: ' + TAQA_ROLES[k].label;
     btn.innerHTML = '<span class="door-dot d-' + k + '"></span>' +
-                    '<span class="door-cap">' + d.short + '</span>';
+                    '<span class="door-cap">' +
+                      (scoped ? TAQA_ROLE.areaName() : d.short) + '</span>';
 
     var menu = document.createElement('div');
     menu.className = 'door-menu';
@@ -908,6 +921,7 @@ document.addEventListener('keydown',function(e){
                  '<span class="dd">' + x.line + '</span>' +
                  '<span class="dk">\u2713</span></button>';
       }).join('') +
+      (scoped ? areaPicker(k) : '') +
       '<div class="door-note">Preview only. Azure uses Entra ID.</div>';
 
     wrap.appendChild(btn); wrap.appendChild(menu);
@@ -927,6 +941,37 @@ document.addEventListener('keydown',function(e){
       TAQA_ROLE.set(i.dataset.role);          // this also drops any delegation
       location.reload();
     });
+    menu.addEventListener('change', function (e) {
+      if (e.target.id !== 'door-area-sel') return;
+      e.stopPropagation();
+      TAQA_ROLE.setArea(e.target.value);
+      // Land on the desk for the area just taken, not the one just left.
+      if (/dashboard\.html/.test(location.pathname))
+        location.href = 'dashboard.html?id=' + encodeURIComponent(e.target.value);
+      else location.reload();
+    });
+  }
+
+  /* Every area has its own holder, so picking the role is only half of it.
+     Grouped by family, because a Function Head and a Segment Director are not
+     the same job and the list should not pretend otherwise. */
+  function areaPicker(k) {
+    if (typeof TAQA_DOC_LOOKUPS === 'undefined') return '';
+    var S = TAQA_DOC_LOOKUPS.segments, here = TAQA_ROLE.area();
+    var FAM = [['segment','Operational Segments'], ['function','Corporate Functions'],
+               ['product','Products & Technology'], ['company','Company Wide'],
+               ['pending','Pending Reassignment']];
+    var opts = FAM.map(function (f) {
+      var ids = Object.keys(S).filter(function (x) { return S[x].group === f[0]; })
+                  .sort(function (a, b) { return S[a].name.localeCompare(S[b].name); });
+      if (!ids.length) return '';
+      return '<optgroup label="' + f[1] + '">' + ids.map(function (x) {
+        return '<option value="' + x + '"' + (x === here ? ' selected' : '') + '>' +
+               S[x].name + '</option>'; }).join('') + '</optgroup>';
+    }).join('');
+    return '<div class="door-area"><label for="door-area-sel">' +
+             TAQA_ROLE.areaTitle() + ' of</label>' +
+           '<select id="door-area-sel">' + opts + '</select></div>';
   }
 
   function banner() {

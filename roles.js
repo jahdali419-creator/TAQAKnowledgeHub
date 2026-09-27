@@ -62,8 +62,12 @@ const TAQA_ROLES = {
     countersign:  false,
     delegate:     true,
     editMetadata: true,
-    scope:        'own',   // control views limited to ownSegment
-    ownSegment:   'coiled-tubing'   // demo value; real value comes from the SSO claim
+    // Scoped to one area, but WHICH area is not a property of the role. Every
+    // segment, function and centre has its own director, so the area belongs
+    // to the person, not to the job title. It lived here as a single value,
+    // which quietly said the company has one director and they run Coiled
+    // Tubing. See TAQA_ROLE.area().
+    scope:        'own'
   },
 
   qms: {
@@ -101,6 +105,8 @@ const TAQA_ROLES = {
 
 const TAQA_ROLE_ORDER = ['employee', 'owner', 'qms', 'auditor'];
 const TAQA_DEFAULT_ROLE = 'employee';
+// Only a starting point for the preview. The real value is an SSO claim.
+const TAQA_DEFAULT_AREA = 'coiled-tubing';
 
 // Storage is not always there. A sandboxed frame throws on localStorage, and
 // so does a browser with site data blocked. Keep the choice in memory as well,
@@ -124,6 +130,47 @@ const TAQA_ROLE = {
   },
   def(r){ return TAQA_ROLES[r || TAQA_ROLE.current()]; },
 
+  /* ── Which area this person holds ──────────────────────────────────
+     Separate from the role on purpose. "Segment Director" is a kind of
+     authority; Coiled Tubing or QHSE or the Drilling Centre of Excellence
+     is which one of them you are. Twenty-six areas, twenty-six holders,
+     one role.
+
+     In Azure this is the Entra ID claim and is not settable from the
+     browser at all. It is the single most important value for the back end
+     to get right, because it is the only thing stopping a director from
+     approving another segment's procedures. Here it is a preview control.  */
+  area(){
+    var a = null;
+    try { a = localStorage.getItem('taqa-demo-area'); } catch(e){}
+    if (a && typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments[a]) return a;
+    return TAQA_DEFAULT_AREA;
+  },
+  setArea(a){
+    if (typeof TAQA_DOC_LOOKUPS !== 'undefined' && !TAQA_DOC_LOOKUPS.segments[a]) return;
+    try { localStorage.setItem('taqa-demo-area', a); } catch(e){}
+    // Holding a different area is being a different person, so a delegation
+    // granted to you in the old one does not come with you.
+    try { if (typeof TAQA_DELEGATION !== 'undefined') TAQA_DELEGATION.actAs(null); } catch(e){}
+  },
+
+  /* What the holder of an area is called. The three families do not share a
+     job title, and calling the head of Legal a Segment Director reads as a
+     mistake to anyone who works here. */
+  areaTitle(id){
+    var g = (typeof TAQA_DOC_LOOKUPS !== 'undefined' &&
+             (TAQA_DOC_LOOKUPS.segments[id || TAQA_ROLE.area()] || {}).group) || 'segment';
+    return g === 'function' ? 'Function Head'
+         : g === 'product'  ? 'Centre Manager'
+         : g === 'company'  ? 'Corporate Sponsor'
+         : 'Segment Director';
+  },
+  areaName(id){
+    var e = (typeof TAQA_DOC_LOOKUPS !== 'undefined' &&
+             TAQA_DOC_LOOKUPS.segments[id || TAQA_ROLE.area()]) || {};
+    return e.name || (id || TAQA_ROLE.area());
+  },
+
   // Can this role see this document at all?
   // The back end must apply exactly this test before returning a record.
   canSee(doc, roleKey){
@@ -132,7 +179,7 @@ const TAQA_ROLE = {
     if (R.statuses.indexOf(doc.status) === -1 && doc.status !== 'asset') return false;
     if (doc.classification && R.classifications.indexOf(doc.classification) === -1) return false;
     // A draft carries no authority (API Q2 4.4.3 b), so an owner sees only their own.
-    if (doc.status === 'draft' && R.scope === 'own' && doc.segment !== R.ownSegment) return false;
+    if (doc.status === 'draft' && R.scope === 'own' && doc.segment !== TAQA_ROLE.area()) return false;
     return true;
   },
 
@@ -140,7 +187,7 @@ const TAQA_ROLE = {
   inControlScope(doc, roleKey){
     const R = TAQA_ROLE.def(roleKey);
     if (!R || !R.controlPanel) return false;
-    return R.scope === 'all' || doc.segment === R.ownSegment;
+    return R.scope === 'all' || doc.segment === TAQA_ROLE.area();
   },
 
   can(action, roleKey){
@@ -295,7 +342,7 @@ const TAQA_DELEGATION = {
       to: String(g.to).trim(),
       fromRole: g.fromRole || 'owner',
       fromName: g.fromName || TAQA_ROLES[g.fromRole || 'owner'].label,
-      segment: g.segment || grantor.ownSegment || null,
+      segment: g.segment || TAQA_ROLE.area() || null,
       docTypes: (g.docTypes && g.docTypes.length) ? g.docTypes.slice() : null,  // null means every type the grantor holds
       includesApproval: !!g.includesApproval,
       from: from.toISOString().slice(0,10),
@@ -345,7 +392,8 @@ TAQA_ROLE.effective = function(roleKey){
     approve: !!base.approve, countersign: !!base.countersign,
     delegate: !!base.delegate, editMetadata: !!base.editMetadata,
     controlPanel: !!base.controlPanel, export: !!base.export,
-    scope: base.scope, ownSegment: base.ownSegment || null,
+    scope: base.scope,
+    ownSegment: base.scope === 'own' ? TAQA_ROLE.area() : null,
     docTypes: null, delegated: null
   };
   // A delegation belongs to a person, not to a role. Applying it to whichever
@@ -360,7 +408,7 @@ TAQA_ROLE.effective = function(roleKey){
   cap.editMetadata = cap.editMetadata || !!grantor.editMetadata;
   cap.controlPanel = cap.controlPanel || !!grantor.controlPanel;
   cap.scope        = 'own';                 // a delegation is always scoped
-  cap.ownSegment   = d.segment || grantor.ownSegment || null;
+  cap.ownSegment   = d.segment || null;
   cap.docTypes     = d.docTypes;
   cap.delegate     = false;                 // a delegate cannot re-delegate
   cap.delegated    = d;
