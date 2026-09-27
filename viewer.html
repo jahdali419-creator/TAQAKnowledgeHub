@@ -1,8 +1,14 @@
 ﻿<!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-taqa-theme="light">
 <head>
 <meta charset="UTF-8">
-<script>try{if(localStorage.getItem('taqa-theme-v3')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Document Viewer, TAQA Knowledge Hub</title>
@@ -93,9 +99,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .lcb-draft{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.28);border-left:3px solid #3b82f6;color:#2563eb;}
 .lcb-prov{background:rgba(253,105,29,.07);border-color:rgba(253,105,29,.28);border-left:3px solid #FD691D;color:#c2410c;}
 .lcb span.n{color:var(--text-muted);}
-html[data-theme="dark"] .lcb-obsolete{color:#f87171;}
-html[data-theme="dark"] .lcb-superseded,html[data-theme="dark"] .lcb-review,html[data-theme="dark"] .lcb-prov{color:#fbbf24;}
-html[data-theme="dark"] .lcb-draft{color:#93c5fd;}
+html[data-taqa-theme="dark"] .lcb-obsolete{color:#f87171;}
+html[data-taqa-theme="dark"] .lcb-superseded,html[data-taqa-theme="dark"] .lcb-review,html[data-taqa-theme="dark"] .lcb-prov{color:#fbbf24;}
+html[data-taqa-theme="dark"] .lcb-draft{color:#93c5fd;}
 
 /* Meta grid */
 .meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
@@ -106,7 +112,7 @@ html[data-theme="dark"] .lcb-draft{color:#93c5fd;}
 .meta-val a:hover{text-decoration:underline;}
 .mv-over{color:#dc2626;}
 .mv-ok{color:#0f9d58;}
-html[data-theme="dark"] .mv-over{color:#f87171;}
+html[data-taqa-theme="dark"] .mv-over{color:#f87171;}
 .meta-cell{background:rgba(0,93,99,0.04);border:1px solid var(--glass-border);border-radius:10px;padding:12px 14px;}
 .meta-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;font-weight:600;}
 .meta-val{font-size:13px;font-weight:600;color:var(--text);}
@@ -165,18 +171,18 @@ html[data-theme="dark"] .mv-over{color:#f87171;}
   border-radius:6px;padding:6px 10px;font-family:'Inter',sans-serif;}
 
 /* Dark mode */
-html[data-theme="dark"]{--dark:#0e1824;--glass:rgba(25,38,58,0.88);--glass-border:rgba(255,255,255,0.07);--text:#dde4ef;--text-muted:#7e94ab;}
-html[data-theme="dark"] body{background:#0e1824;}
-html[data-theme="dark"] nav{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.06);}
-html[data-theme="dark"] .nav-brand-name{color:#dde4ef;}
-html[data-theme="dark"] .nav-brand-hub{color:#7e94ab;}
-html[data-theme="dark"] .dark-toggle{border-color:rgba(255,255,255,0.1);color:#7e94ab;}
-html[data-theme="dark"] .doc-header,.doc-view .content-card,.doc-view .pdf-wrap,.doc-view .qr-inline-box{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] .meta-cell{background:rgba(0,187,182,0.04);border-color:#243044;}
-html[data-theme="dark"] .pdf-preview{background:linear-gradient(160deg,#0e1824 0%,#111e2d 100%);}
-html[data-theme="dark"] .pdf-icon{background:rgba(25,38,58,0.9);border-color:rgba(0,187,182,0.15);}
-html[data-theme="dark"] .pdf-placeholder-title{color:#dde4ef;}
-html[data-theme="dark"] .qr-inline-url{background:rgba(255,255,255,0.04);}
+html[data-taqa-theme="dark"]{--dark:#0e1824;--glass:rgba(25,38,58,0.88);--glass-border:rgba(255,255,255,0.07);--text:#dde4ef;--text-muted:#7e94ab;}
+html[data-taqa-theme="dark"] body{background:#0e1824;}
+html[data-taqa-theme="dark"] nav{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.06);}
+html[data-taqa-theme="dark"] .nav-brand-name{color:#dde4ef;}
+html[data-taqa-theme="dark"] .nav-brand-hub{color:#7e94ab;}
+html[data-taqa-theme="dark"] .dark-toggle{border-color:rgba(255,255,255,0.1);color:#7e94ab;}
+html[data-taqa-theme="dark"] .doc-header,.doc-view .content-card,.doc-view .pdf-wrap,.doc-view .qr-inline-box{background:#19263a;border-color:#243044;}
+html[data-taqa-theme="dark"] .meta-cell{background:rgba(0,187,182,0.04);border-color:#243044;}
+html[data-taqa-theme="dark"] .pdf-preview{background:linear-gradient(160deg,#0e1824 0%,#111e2d 100%);}
+html[data-taqa-theme="dark"] .pdf-icon{background:rgba(25,38,58,0.9);border-color:rgba(0,187,182,0.15);}
+html[data-taqa-theme="dark"] .pdf-placeholder-title{color:#dde4ef;}
+html[data-taqa-theme="dark"] .qr-inline-url{background:rgba(255,255,255,0.04);}
 
 /* Read progress bar */
 #read-progress-bar{position:fixed;top:68px;left:0;height:3px;z-index:999;
@@ -207,9 +213,9 @@ html[data-theme="dark"] .qr-inline-url{background:rgba(255,255,255,0.04);}
   font-size:9px;font-weight:700;font-family:'BwGradual','Urbanist',sans-serif;flex-shrink:0;}
 .related-title{font-size:12px;font-weight:600;color:var(--text);line-height:1.4;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-html[data-theme="dark"] .related-section{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] .related-card{background:rgba(0,187,182,0.03);border-color:#243044;}
-html[data-theme="dark"] .related-card:hover{background:rgba(0,187,182,0.06);border-color:rgba(0,187,182,0.2);}
+html[data-taqa-theme="dark"] .related-section{background:#19263a;border-color:#243044;}
+html[data-taqa-theme="dark"] .related-card{background:rgba(0,187,182,0.03);border-color:#243044;}
+html[data-taqa-theme="dark"] .related-card:hover{background:rgba(0,187,182,0.06);border-color:rgba(0,187,182,0.2);}
 
 /* Page exit */
 @keyframes pageFadeOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-5px);}}
@@ -326,8 +332,8 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 .rev-meta{font-size:11.5px;color:var(--text-muted);}
 .rev-note{font-size:12.5px;color:var(--text-muted);line-height:1.65;margin-top:4px;}
 .rev-row.rev-current .rev-note{color:var(--text);}
-html[data-theme="dark"] .rev-dot{background:#19263a;}
-html[data-theme="dark"] .rev-row.rev-current .rev-dot{background:#818cf8;}
+html[data-taqa-theme="dark"] .rev-dot{background:#19263a;}
+html[data-taqa-theme="dark"] .rev-row.rev-current .rev-dot{background:#818cf8;}
 @media(max-width:600px){
   .rev-timeline{padding-left:0;}
   .rev-timeline::before{left:11px;}
@@ -801,8 +807,8 @@ function requestAccess() {
 // Dark mode
 const MOON='M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
 const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
-function toggleDark(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme-v3',next);}
-(function(){const s=localStorage.getItem('taqa-theme-v3');if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
+function toggleDark(){const isDark=document.documentElement.getAttribute('data-taqa-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-taqa-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme-v3',next);}
+(function(){const s=localStorage.getItem('taqa-theme-v3');if(s==='dark'){document.documentElement.setAttribute('data-taqa-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
 
 // Read progress bar
 (function(){

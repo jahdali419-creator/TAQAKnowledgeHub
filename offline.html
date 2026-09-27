@@ -1,8 +1,14 @@
 ﻿<!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-taqa-theme="light">
 <head>
 <meta charset="UTF-8">
-<script>try{if(localStorage.getItem('taqa-theme-v3')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Offline, TAQA Knowledge Hub</title>
 <style>

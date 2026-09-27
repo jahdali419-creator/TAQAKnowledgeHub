@@ -1,4 +1,4 @@
-const CACHE = 'taqa-hub-v53';
+const CACHE = 'taqa-hub-v54';
 
 // Detect base path automatically, works on GitHub Pages and Azure
 const BASE = self.location.pathname.replace('service-worker.js', '');
@@ -56,6 +56,9 @@ self.addEventListener('message', e => {
 });
 
 self.addEventListener('install', e => {
+  // Take over at once. Waiting for every tab to close is how the old worker
+  // stayed in charge for five days.
+  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE).then(c =>
       c.addAll(CORE).then(() =>
@@ -90,6 +93,30 @@ self.addEventListener('fetch', e => {
         .catch(() =>
           caches.match(e.request, { ignoreSearch: true }).then(cached => cached || caches.match(BASE + 'offline.html'))
         )
+    );
+    return;
+  }
+
+  // Scripts, styles and the register go to the network first, cache second.
+  //
+  // This used to be cache first with no revalidation, which meant a browser
+  // that had visited once kept running that day's JavaScript for as long as the
+  // cache survived: a page could load a new index.html from the network and
+  // then drive it with a five day old register beside it. For a document
+  // register that is not just a staleness bug, it is the failure API Q2 4.4.3
+  // is about, since the cached copy can describe a revision that has since been
+  // withdrawn. Fonts and images stay cache first; they do not carry meaning.
+  const url = new URL(e.request.url);
+  const fresh = /\.(js|css|json)$/.test(url.pathname) || e.request.destination === 'script';
+  if (fresh) {
+    e.respondWith(
+      fetch(e.request).then(res => {
+        if (res && res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
+        return res;
+      }).catch(() => caches.match(e.request, { ignoreSearch: true }))
     );
     return;
   }

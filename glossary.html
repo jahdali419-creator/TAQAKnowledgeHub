@@ -1,8 +1,14 @@
 ﻿<!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-taqa-theme="light">
 <head>
 <meta charset="UTF-8">
-<script>try{if(localStorage.getItem('taqa-theme-v3')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Field Glossary, TAQA Knowledge Hub</title>
@@ -161,13 +167,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .term-card.expandable .tc-def-wrap{position:relative;}
 .term-card.expandable .tc-def-wrap::after{content:'';position:absolute;bottom:0;left:0;right:0;height:28px;
   background:linear-gradient(transparent,rgba(255,255,255,0.92));pointer-events:none;transition:opacity 0.28s;}
-html[data-theme="dark"] .term-card.expandable .tc-def-wrap::after{background:linear-gradient(transparent,rgba(22,32,51,0.94));}
+html[data-taqa-theme="dark"] .term-card.expandable .tc-def-wrap::after{background:linear-gradient(transparent,rgba(22,32,51,0.94));}
 .term-card.tc-open .tc-def-wrap{max-height:800px;}
 .term-card.tc-open .tc-def-wrap::after{opacity:0;}
 .term-card.expandable{cursor:pointer;user-select:none;}
 .term-card.tc-open{border-color:rgba(0,93,99,0.42)!important;
   box-shadow:0 16px 48px rgba(0,93,99,0.14)!important;transform:translateY(-4px)!important;}
-html[data-theme="dark"] .term-card.tc-open{border-color:rgba(0,187,182,0.3)!important;
+html[data-taqa-theme="dark"] .term-card.tc-open{border-color:rgba(0,187,182,0.3)!important;
   box-shadow:0 16px 48px rgba(0,187,182,0.10)!important;}
 .tc-expand{display:none;align-items:center;gap:5px;padding:8px 0 2px;
   font-size:11px;font-weight:700;color:var(--primary);letter-spacing:0.3px;opacity:0.85;transition:opacity 0.2s;}
@@ -275,21 +281,21 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;back
 .footer-links a:hover{color:var(--primary);}
 
 /* ── Dark mode ── */
-html[data-theme="dark"]{
+html[data-taqa-theme="dark"]{
   --dark:#0e1521;--dark-2:#162033;--dark-3:#1c2b3a;
   --glass:rgba(22,32,51,0.90);--glass-2:rgba(28,43,58,0.98);
   --glass-border:rgba(255,255,255,0.08);--glass-border-hover:rgba(0,187,182,0.35);
   --text:#e2e8f0;--text-muted:#94a3b8;
 }
-html[data-theme="dark"] nav{background:rgba(14,21,33,0.92);}
-html[data-theme="dark"] .nav-brand-name{color:#00BBB6;}
-html[data-theme="dark"] footer{background:rgba(14,21,33,0.88);}
-html[data-theme="dark"] .sf-input,html[data-theme="dark"] .sf-select,html[data-theme="dark"] .sf-textarea{background:rgba(255,255,255,0.04);}
-html[data-theme="dark"] .glossary-search-bar{background:rgba(22,32,51,0.97);}
-html[data-theme="dark"] #glossary-input{color:#e2e8f0;}
-html[data-theme="dark"] #glossary-input::placeholder{color:#4b5563;}
-html[data-theme="dark"] .term-card::after{background:linear-gradient(105deg,transparent 0%,rgba(255,255,255,0.05) 50%,transparent 100%);}
-html[data-theme="dark"] .tc-def{color:#94a3b8;}
+html[data-taqa-theme="dark"] nav{background:rgba(14,21,33,0.92);}
+html[data-taqa-theme="dark"] .nav-brand-name{color:#00BBB6;}
+html[data-taqa-theme="dark"] footer{background:rgba(14,21,33,0.88);}
+html[data-taqa-theme="dark"] .sf-input,html[data-taqa-theme="dark"] .sf-select,html[data-taqa-theme="dark"] .sf-textarea{background:rgba(255,255,255,0.04);}
+html[data-taqa-theme="dark"] .glossary-search-bar{background:rgba(22,32,51,0.97);}
+html[data-taqa-theme="dark"] #glossary-input{color:#e2e8f0;}
+html[data-taqa-theme="dark"] #glossary-input::placeholder{color:#4b5563;}
+html[data-taqa-theme="dark"] .term-card::after{background:linear-gradient(105deg,transparent 0%,rgba(255,255,255,0.05) 50%,transparent 100%);}
+html[data-taqa-theme="dark"] .tc-def{color:#94a3b8;}
 
 /* ── Responsive ── */
 @media(max-width:960px){
@@ -933,14 +939,14 @@ function showToast(title, sub, type = 'ok') {
 const MOON_SVG = `<path d="M13 7a6 6 0 1 1-6-6 4.5 4.5 0 0 0 6 6Z" fill="currentColor"/>`;
 const SUN_SVG  = `<path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"`;
 function toggleDark() {
-  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+  const dark = document.documentElement.getAttribute('data-taqa-theme') === 'dark';
+  document.documentElement.setAttribute('data-taqa-theme', dark ? 'light' : 'dark');
   localStorage.setItem('taqa-theme-v3', dark ? 'light' : 'dark');
   document.getElementById('dark-icon').innerHTML = dark ? SUN_SVG + '"/>' : MOON_SVG;
 }
 (function initTheme() {
   const t = localStorage.getItem('taqa-theme-v3') || 'light';
-  document.documentElement.setAttribute('data-theme', t);
+  document.documentElement.setAttribute('data-taqa-theme', t);
   if (t === 'dark') document.getElementById('dark-icon').innerHTML = MOON_SVG;
 })();
 
@@ -985,7 +991,7 @@ renderCards();
 </script>
 <script src="shared.js"></script>
 <script src="fixes.js"></script>
-<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-taqa-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
 </body>
 </html>

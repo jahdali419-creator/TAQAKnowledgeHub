@@ -1,8 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-taqa-theme="light">
 <head>
 <meta charset="UTF-8">
-<script>try{if(localStorage.getItem('taqa-theme-v3')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
@@ -173,24 +179,24 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
 .dash-toast-dot{width:8px;height:8px;border-radius:50%;background:#00BBB6;flex-shrink:0;}
 
 /* ── Dark Mode ── */
-html[data-theme="dark"]{--bg:#0e1824;--bg-white:#19263a;--border:#243044;--text:#dde4ef;--text-muted:#7e94ab;--text-dim:#4d6070;}
-html[data-theme="dark"] body{background:#0e1824;}
-html[data-theme="dark"] nav{background:rgba(14,24,36,0.95)!important;border-color:#243044;}
-html[data-theme="dark"] .dark-toggle{border-color:#243044;color:#7e94ab;}
-html[data-theme="dark"] .btn-ghost{border-color:#243044;color:#7e94ab;}
-html[data-theme="dark"] .nav-role-badge{background:rgba(0,187,182,0.12);border-color:rgba(0,187,182,0.2);}
-html[data-theme="dark"] .docs-hero{background:linear-gradient(135deg,#050d14 0%,#091520 100%);}
-html[data-theme="dark"] .docs-table-card{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] .pub-table th{border-color:#243044;color:#7e94ab;background:rgba(255,255,255,0.02);}
-html[data-theme="dark"] .pub-table td{border-color:#1e2d3f;}
-html[data-theme="dark"] .pub-table tbody tr:hover td{background:rgba(0,93,99,0.07);}
-html[data-theme="dark"] .pub-table-search{border-color:#243044;}
-html[data-theme="dark"] .pub-table-search-input{color:#dde4ef;}
-html[data-theme="dark"] .pub-type-filters{border-color:#243044;}
-html[data-theme="dark"] .pub-filter-pill{border-color:#243044;color:#7e94ab;}
-html[data-theme="dark"] .pub-filter-pill.active{background:rgba(0,187,182,0.12);border-color:#00BBB6;color:#00BBB6;}
-html[data-theme="dark"] .pub-filter-pill[data-filter="all"].active{background:#dde4ef;color:#0e1824;border-color:#dde4ef;}
-html[data-theme="dark"] .pub-table-footer{border-color:#243044;background:rgba(255,255,255,0.01);}
+html[data-taqa-theme="dark"]{--bg:#0e1824;--bg-white:#19263a;--border:#243044;--text:#dde4ef;--text-muted:#7e94ab;--text-dim:#4d6070;}
+html[data-taqa-theme="dark"] body{background:#0e1824;}
+html[data-taqa-theme="dark"] nav{background:rgba(14,24,36,0.95)!important;border-color:#243044;}
+html[data-taqa-theme="dark"] .dark-toggle{border-color:#243044;color:#7e94ab;}
+html[data-taqa-theme="dark"] .btn-ghost{border-color:#243044;color:#7e94ab;}
+html[data-taqa-theme="dark"] .nav-role-badge{background:rgba(0,187,182,0.12);border-color:rgba(0,187,182,0.2);}
+html[data-taqa-theme="dark"] .docs-hero{background:linear-gradient(135deg,#050d14 0%,#091520 100%);}
+html[data-taqa-theme="dark"] .docs-table-card{background:#19263a;border-color:#243044;}
+html[data-taqa-theme="dark"] .pub-table th{border-color:#243044;color:#7e94ab;background:rgba(255,255,255,0.02);}
+html[data-taqa-theme="dark"] .pub-table td{border-color:#1e2d3f;}
+html[data-taqa-theme="dark"] .pub-table tbody tr:hover td{background:rgba(0,93,99,0.07);}
+html[data-taqa-theme="dark"] .pub-table-search{border-color:#243044;}
+html[data-taqa-theme="dark"] .pub-table-search-input{color:#dde4ef;}
+html[data-taqa-theme="dark"] .pub-type-filters{border-color:#243044;}
+html[data-taqa-theme="dark"] .pub-filter-pill{border-color:#243044;color:#7e94ab;}
+html[data-taqa-theme="dark"] .pub-filter-pill.active{background:rgba(0,187,182,0.12);border-color:#00BBB6;color:#00BBB6;}
+html[data-taqa-theme="dark"] .pub-filter-pill[data-filter="all"].active{background:#dde4ef;color:#0e1824;border-color:#dde4ef;}
+html[data-taqa-theme="dark"] .pub-table-footer{border-color:#243044;background:rgba(255,255,255,0.01);}
 
 /* ── Responsive ── */
 @media(max-width:900px){
@@ -582,8 +588,8 @@ initDocPage();
 // ── Dark Mode ──
 const MOON='M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
 const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
-function toggleDark(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme-v3',next);}
-(function(){const s=localStorage.getItem('taqa-theme-v3');if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
+function toggleDark(){const isDark=document.documentElement.getAttribute('data-taqa-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-taqa-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme-v3',next);}
+(function(){const s=localStorage.getItem('taqa-theme-v3');if(s==='dark'){document.documentElement.setAttribute('data-taqa-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
 </script>
 <script src="shared.js"></script>
 <script src="fixes.js"></script>

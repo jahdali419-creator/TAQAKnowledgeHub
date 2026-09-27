@@ -1,8 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light" dir="ltr">
+<html lang="en" data-taqa-theme="light" dir="ltr">
 <head>
 <meta charset="UTF-8">
-<script>try{if(localStorage.getItem('taqa-theme-v3')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
@@ -28,7 +34,7 @@
 }
 /* The brand allows two grounds, white or Teal Green. Dark mode takes the teal
    one rather than a generic near-black, so it still reads as TAQA. */
-html[data-theme="dark"]{
+html[data-taqa-theme="dark"]{
   --ink:#FFFFFF; --ink-2:#C7DBDD; --ink-3:#8CB6B9; --ink-4:#619B9E;
   --paper:#002326; --canvas:#001314; --inset:#002D30;
   --rule:rgba(0,187,182,.20); --rule-soft:rgba(0,187,182,.11); --rule-firm:rgba(0,187,182,.34);
@@ -77,8 +83,8 @@ input[type=search]::-webkit-search-cancel-button{cursor:pointer;}
 /* ── Brand lockup and the About popover ── */
 .side-brand img{display:block;width:150px;height:auto;}
 .side-brand .logo-dk{display:none;}
-html[data-theme="dark"] .side-brand .logo-lt{display:none;}
-html[data-theme="dark"] .side-brand .logo-dk{display:block;}
+html[data-taqa-theme="dark"] .side-brand .logo-lt{display:none;}
+html[data-taqa-theme="dark"] .side-brand .logo-dk{display:block;}
 .side-sub{display:block;font:500 11.5px/1 'BwGradual',sans-serif;color:var(--ink-3);
   letter-spacing:.02em;margin-top:7px;}
 .pop-wrap{position:relative;}
@@ -122,11 +128,11 @@ html[dir="rtl"] .pop{transform-origin:top right;}
 .nav-i[aria-current],.nav-i[aria-pressed="true"]{background:var(--brand);color:#FFFFFF;font-weight:600;}
 .nav-i[aria-current] svg,.nav-i[aria-pressed="true"] svg{color:#FFFFFF;}
 .nav-i[aria-pressed="true"] b{color:#FFFFFF;}
-html[data-theme="dark"] .nav-i[aria-current],
-html[data-theme="dark"] .nav-i[aria-pressed="true"]{color:#00272A;}
-html[data-theme="dark"] .nav-i[aria-current] svg,
-html[data-theme="dark"] .nav-i[aria-pressed="true"] svg,
-html[data-theme="dark"] .nav-i[aria-pressed="true"] b{color:#00272A;}
+html[data-taqa-theme="dark"] .nav-i[aria-current],
+html[data-taqa-theme="dark"] .nav-i[aria-pressed="true"]{color:#00272A;}
+html[data-taqa-theme="dark"] .nav-i[aria-current] svg,
+html[data-taqa-theme="dark"] .nav-i[aria-pressed="true"] svg,
+html[data-taqa-theme="dark"] .nav-i[aria-pressed="true"] b{color:#00272A;}
 
 /* ── Canvas ── */
 .main{min-width:0;padding:20px 26px 64px;max-width:1520px;}
@@ -237,7 +243,7 @@ html[dir="rtl"] .hero-art{-webkit-mask-image:linear-gradient(to left,transparent
 .att-t{display:block;font:600 12.5px/1.35 'BwGradual',sans-serif;color:var(--ink);}
 .att-s{display:block;font-family:var(--read);font-size:11px;color:var(--ink-3);margin-top:2px;}
 .att .due svg{color:#C8102E;}
-html[data-theme="dark"] .att .due svg{color:#FD691D;}
+html[data-taqa-theme="dark"] .att .due svg{color:#FD691D;}
 .pill{display:inline-flex;align-items:center;align-self:flex-start;padding:4px 10px;
   border-radius:var(--r-pill,999px);background:var(--brand-soft);color:var(--brand);
   font:700 11px/1 'BwGradual',sans-serif;font-variant-numeric:tabular-nums;margin-top:10px;}
@@ -329,14 +335,14 @@ tbody tr[aria-selected="true"]{background:var(--brand-soft);}
 .reg{background:rgba(255,255,255,.74);border-color:rgba(255,255,255,.86);
   box-shadow:0 1px 2px rgba(0,93,99,.06),0 8px 26px rgba(0,93,99,.09);}
 .bar{background:rgba(249,248,248,.74);border-color:rgba(255,255,255,.86);}
-html[data-theme="dark"] .reg{background:rgba(0,45,48,.60);border-color:rgba(0,187,182,.16);
+html[data-taqa-theme="dark"] .reg{background:rgba(0,45,48,.60);border-color:rgba(0,187,182,.16);
   box-shadow:0 1px 2px rgba(0,10,11,.38),0 8px 26px rgba(0,10,11,.34);}
-html[data-theme="dark"] .bar{background:rgba(0,35,38,.66);border-color:rgba(0,187,182,.16);}
+html[data-taqa-theme="dark"] .bar{background:rgba(0,35,38,.66);border-color:rgba(0,187,182,.16);}
 @supports not (backdrop-filter:blur(1px)){
   .reg{background:var(--paper);} .bar{background:var(--inset);}
 }
 thead th{background:rgba(249,248,248,.95);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
-html[data-theme="dark"] thead th{background:rgba(0,35,38,.95);}
+html[data-taqa-theme="dark"] thead th{background:rgba(0,35,38,.95);}
 
 /* Rows arrive in sequence the first time a page is drawn */
 tbody tr{opacity:0;transform:translateY(4px);animation:rowIn 260ms var(--out-ease) forwards;}
@@ -354,7 +360,7 @@ tbody tr{opacity:0;transform:translateY(4px);animation:rowIn 260ms var(--out-eas
              border-color 140ms var(--out-ease),transform 140ms var(--out-ease);}
 .pg:active{transform:scale(.94);}
 .pg[aria-current="page"]{background:var(--brand);border-color:var(--brand);color:#fff;}
-html[data-theme="dark"] .pg[aria-current="page"]{color:#00272A;}
+html[data-taqa-theme="dark"] .pg[aria-current="page"]{color:#00272A;}
 .pg:disabled{opacity:.35;cursor:default;}
 .pg.dots{cursor:default;color:var(--ink-4);min-width:18px;padding:0;}
 @media (hover:hover) and (pointer:fine){
@@ -375,7 +381,7 @@ html[data-theme="dark"] .pg[aria-current="page"]{color:#00272A;}
 .viz{--c-met:#008675; --c-part:#FD691D; --c-back:#0076A8; --c-qhse:#C8102E;
   --o1:#99BEC1; --o2:#669EA1; --o3:#337D82; --o4:#005D63;
   --neutral:#C0BAB5; --grid:#EAE8E6;}
-html[data-theme="dark"] .viz{--c-met:#008675; --c-back:#0076A8; --c-qhse:#D34058;
+html[data-taqa-theme="dark"] .viz{--c-met:#008675; --c-back:#0076A8; --c-qhse:#D34058;
   --o1:#005D63; --o2:#337D82; --o3:#669EA1; --o4:#99BEC1;
   --neutral:#4C8E92; --grid:#247479;}
 .viz .rise{opacity:0;transform:translateY(8px);}
@@ -642,7 +648,7 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
 const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
 const MOON='M6.2 2.3a.55.55 0 0 1 .2.62 5.2 5.2 0 0 0 6.7 6.7.55.55 0 0 1 .68.75A6.3 6.3 0 1 1 5.6 2.1a.55.55 0 0 1 .6.2Z';
 function paintTheme(n){
-  document.documentElement.setAttribute('data-theme',n);
+  document.documentElement.setAttribute('data-taqa-theme',n);
   var p=document.querySelector('#theme-icon path');
   if(p)p.setAttribute('d',n==='dark'?MOON:SUN);
   var l=document.getElementById('theme-label');
@@ -651,7 +657,7 @@ function paintTheme(n){
 (function(){var t;try{t=localStorage.getItem('taqa-theme-v3');}catch(e){}
   paintTheme(t==='dark'?'dark':'light');})();
 function toggleDark(){
-  var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  var n=document.documentElement.getAttribute('data-taqa-theme')==='dark'?'light':'dark';
   paintTheme(n);
   try{localStorage.setItem('taqa-theme-v3',n);}catch(e){}}
 

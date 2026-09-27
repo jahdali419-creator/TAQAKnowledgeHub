@@ -1,8 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light" dir="ltr">
+<html lang="en" data-taqa-theme="light" dir="ltr">
 <head>
 <meta charset="UTF-8">
-<script>try{if(localStorage.getItem('taqa-theme-v3')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
@@ -25,7 +31,7 @@
   --out-ease:cubic-bezier(.23,1,.32,1);
 }
 /* The brand allows white or Teal Green grounds. Dark mode takes the teal one. */
-html[data-theme="dark"]{
+html[data-taqa-theme="dark"]{
   --ink:#FFFFFF; --ink-2:#C7DBDD; --ink-3:#8CB6B9; --ink-4:#619B9E;
   --paper:#002326; --canvas:#001314; --inset:#002D30;
   --rule:rgba(0,187,182,.20); --rule-soft:rgba(0,187,182,.11); --rule-firm:rgba(0,187,182,.34);
@@ -99,7 +105,7 @@ a.card:active{transform:scale(.99);}
 .card .go{font-size:11.5px;font-weight:600;color:var(--brand);margin-top:5px;}
 .card .ref{font:500 10.5px/1.4 var(--mono);color:var(--ink-4);margin-top:3px;}
 .card.flat{border-inline-start:2px solid #C8102E;}
-html[data-theme="dark"] .card.flat{border-inline-start-color:#D34058;}
+html[data-taqa-theme="dark"] .card.flat{border-inline-start-color:#D34058;}
 
 .tscroll{overflow-x:auto;border-radius:var(--r3);}
 table{width:100%;min-width:520px;border-collapse:collapse;background:var(--paper);border:1px solid var(--rule);
@@ -256,10 +262,10 @@ td b{color:var(--ink);font-weight:600;}
 const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
 const MOON='M6.2 2.3a.55.55 0 0 1 .2.62 5.2 5.2 0 0 0 6.7 6.7.55.55 0 0 1 .68.75A6.3 6.3 0 1 1 5.6 2.1a.55.55 0 0 1 .6.2Z';
 (function(){var t;try{t=localStorage.getItem('taqa-theme-v3');}catch(e){}
-  if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');
+  if(t==='dark'){document.documentElement.setAttribute('data-taqa-theme','dark');
     var p=document.querySelector('#theme-icon path');if(p)p.setAttribute('d',MOON);}})();
-function toggleDark(){var d=document.documentElement.getAttribute('data-theme')==='dark',n=d?'light':'dark';
-  document.documentElement.setAttribute('data-theme',n);
+function toggleDark(){var d=document.documentElement.getAttribute('data-taqa-theme')==='dark',n=d?'light':'dark';
+  document.documentElement.setAttribute('data-taqa-theme',n);
   var p=document.querySelector('#theme-icon path');if(p)p.setAttribute('d',n==='dark'?MOON:SUN);
   try{localStorage.setItem('taqa-theme-v3',n);}catch(e){}}
 </script>

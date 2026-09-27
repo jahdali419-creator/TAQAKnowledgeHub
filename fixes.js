@@ -138,7 +138,7 @@
         position: relative;
         z-index: 1;
       }
-      html[data-theme="dark"] .ai-safety-banner {
+      html[data-taqa-theme="dark"] .ai-safety-banner {
         background: rgba(245,158,11,0.05);
         color: #c9930f;
         border-color: rgba(245,158,11,0.18);
@@ -258,7 +258,7 @@
         box-shadow: 0 24px 64px rgba(0,0,0,0.2);
         animation: pageFadeIn 0.2s ease;
       }
-      html[data-theme="dark"] .reject-modal { background: #19263a; }
+      html[data-taqa-theme="dark"] .reject-modal { background: #19263a; }
       .reject-modal h3 {
         font-family: 'Urbanist', sans-serif; font-size: 17px; font-weight: 800;
         color: var(--text, #1a2235); margin-bottom: 4px;
@@ -274,7 +274,7 @@
         outline: none; resize: vertical; min-height: 90px;
         transition: border-color 0.2s;
       }
-      html[data-theme="dark"] .reject-reason-input {
+      html[data-taqa-theme="dark"] .reject-reason-input {
         background: #111e2d; border-color: #243044; color: #dde4ef;
       }
       .reject-reason-input:focus {
@@ -333,7 +333,7 @@
         box-shadow: 0 24px 64px rgba(0,0,0,0.2);
         animation: pageFadeIn 0.2s ease;
       }
-      html[data-theme="dark"] .delegate-modal { background: #19263a; }
+      html[data-taqa-theme="dark"] .delegate-modal { background: #19263a; }
       .delegate-modal h3 {
         font-family: 'Urbanist', sans-serif; font-size: 17px; font-weight: 800;
         color: var(--text, #1a2235); margin-bottom: 4px;
@@ -362,7 +362,7 @@
         color: var(--text, #1a2235); background: #fff; outline: none;
         transition: border-color 0.2s;
       }
-      html[data-theme="dark"] .delegate-input {
+      html[data-taqa-theme="dark"] .delegate-input {
         background: #111e2d; border-color: #243044; color: #dde4ef;
       }
       .delegate-input:focus {
@@ -374,7 +374,7 @@
         border-radius: 8px; padding: 10px 14px; font-size: 12px;
         color: #92670a; margin-bottom: 16px; line-height: 1.5;
       }
-      html[data-theme="dark"] .delegate-scope-note { color: #d4a017; }
+      html[data-taqa-theme="dark"] .delegate-scope-note { color: #d4a017; }
       .delegate-modal-actions { display: flex; gap: 10px; margin-top: 20px; }
       .btn-delegate-save {
         flex: 1; padding: 11px; border-radius: 10px;
