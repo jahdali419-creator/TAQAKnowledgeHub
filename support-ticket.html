@@ -23,10 +23,15 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 <style>
 :root{
   --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
-  --dark:#F4F6F6;--dark-2:#EDEBE8;--dark-3:#ffffff;
+  --dark:#F4F4F3;--dark-2:#EDEBE8;--dark-3:#ffffff;
   --glass:rgba(255,255,255,0.85);--glass-2:rgba(255,255,255,0.98);
   --glass-border:rgba(0,0,0,0.09);--glass-border-hover:rgba(0,93,99,0.35);
-  --text:#1E1C1A;--text-muted:#756A61;--text-light:#756A61;--gradient:#005D63; /* flat brand teal - no gradient */
+  --text:#1E1C1A;--text-muted:#524D48;--text-light:#756A61;--gradient:#005D63; /* flat brand teal - no gradient */
+  /* The urgency levels are read as words; the colour only has to stay legible.
+     A raw accent used as text fails on one ground or the other, so each level
+     carries an ink that is darkened for the light card and lifted for the
+     dark one. Same names and values the rest of the hub uses. */
+  --stop-ink:#C8102E;--alert-ink:#A8431A;--warn-ink:#8A6200;--ok-ink:#00705F;--info-ink:#0076A8;
 }
 *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
 @keyframes pageFadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
@@ -49,14 +54,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .nav-subtitle{font-size:11px;color:var(--text-muted);display:block;margin-top:-1px;}
 .nav-links{display:flex;gap:2px;list-style:none;}
 .nav-links a{padding:7px 15px;border-radius:6px;text-decoration:none;font-size:13.5px;font-weight:500;color:var(--text-muted);transition:background 0.2s,color 0.2s;position:relative;}
-.nav-links a:hover{background:#EEF1F1;color:var(--text);}
+.nav-links a:hover{background:var(--dark-2);color:var(--text);}
 .nav-links a.active{background:transparent;color:var(--primary-ink);font-weight:600;}
 .nav-links a.active::after{content:'';position:absolute;bottom:3px;left:15px;right:15px;height:2px;background:var(--primary);border-radius:2px;}
 .nav-right{display:flex;gap:10px;}
 .btn{padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
   transition:all 0.25s;border:none;font-family:'Inter',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:7px;}
 .btn-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--text-muted);}
-.btn-ghost:hover{border-color:var(--glass-border-hover);color:var(--primary-light);}
+.btn-ghost:hover{border-color:var(--glass-border-hover);color:var(--primary-ink);}
 .btn-primary{background:var(--gradient);color:#fff;}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,93,99,0.4);}
 
@@ -67,8 +72,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .page-hero-overlay{position:absolute;inset:0;background:linear-gradient(105deg,rgba(0,19,20,0.93) 0%,rgba(0,19,20,0.76) 55%,rgba(0,93,99,0.25) 100%);}
 .page-hero-content{position:relative;z-index:2;max-width:1000px;margin:0 auto;}
 .page-hero-tag{display:inline-block;padding:4px 14px;margin-bottom:16px;
-  background:rgba(77,217,211,0.12);border:1px solid rgba(77,217,211,0.28);
-  border-radius:50px;font-size:11px;color:#4DD9D3;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;}
+  background:rgba(0,187,182,0.12);border:1px solid rgba(0,187,182,0.28);
+  border-radius:50px;font-size:11px;color:var(--primary-light);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;}
 .page-hero-content h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:clamp(26px,4vw,42px);font-weight:800;letter-spacing:-0.8px;color:#fff;margin-bottom:12px;}
 .page-hero-content p{font-size:15px;color:rgba(255,255,255,0.62);line-height:1.75;max-width:560px;}
 
@@ -76,9 +81,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .fl-wrap{position:relative;margin-bottom:0;}
 .fl-wrap .form-input{padding:20px 15px 8px;}
 .fl-label{position:absolute;top:14px;left:15px;font-size:13.5px;color:var(--text-muted);pointer-events:none;transition:top 0.2s,font-size 0.2s,color 0.2s;}
-.fl-label .req{color:var(--accent);margin-left:2px;}
+.fl-label .req{color:var(--alert-ink);margin-left:2px;}
 .fl-wrap .form-input:focus ~ .fl-label,
-.fl-wrap .form-input:not(:placeholder-shown) ~ .fl-label{top:6px;font-size:10.5px;color:var(--primary-light);font-weight:600;}
+.fl-wrap .form-input:not(:placeholder-shown) ~ .fl-label{top:6px;font-size:10.5px;color:var(--primary-ink);font-weight:600;}
 .fl-wrap .form-input::placeholder{color:transparent;}
 
 /* ── Layout ── */
@@ -102,7 +107,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .form-group:last-child{margin-bottom:0;}
 .form-label{display:block;font-family:'BwGradual','Urbanist',sans-serif;
   font-size:12.5px;font-weight:700;color:var(--text);letter-spacing:-0.05px;margin-bottom:5px;}
-.form-label span{color:var(--accent);font-weight:700;}
+/* The required star is orange as a signal, but orange at this size is too pale
+   to read on the card, so it takes the darkened ink like every other warm mark. */
+.form-label span{color:var(--alert-ink);font-weight:700;}
 .form-hint{display:block;font-size:11.5px;line-height:1.45;color:var(--text-light);
   margin:-1px 0 6px;max-width:62ch;}
 .form-input,.form-select,.form-textarea{
@@ -114,9 +121,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:rgba(0,187,182,0.4);box-shadow:0 0 0 3px rgba(0,93,99,0.08);}
 .form-input::placeholder,.form-textarea::placeholder{color:var(--text-light);font-size:13px;}
 .form-select{cursor:pointer;appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a8ba0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23756A61' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 14px center;}
-.form-select option{background:#fff;color:var(--text);}
+/* The option list is painted by the browser from these two values, so a fixed
+   white here left dark-theme text on a white drop-down. */
+.form-select option{background:var(--dark-3);color:var(--text);}
 .form-textarea{resize:vertical;min-height:84px;line-height:1.6;}
 
 /* Optional detail, folded away. Everything here helps the expert, and none of
@@ -155,30 +164,32 @@ html[data-taqa-theme="dark"] .whoami{background:rgba(0,187,182,0.07);border-colo
 .priority-pill{padding:14px 8px;border-radius:10px;text-align:center;cursor:pointer;
   border:1px solid var(--glass-border);background:var(--glass);transition:all 0.25s;user-select:none;}
 .priority-pill input{display:none;}
-.priority-dot{width:9px;height:9px;border-radius:50%;margin:0 auto 8px;background:#CBD3D3;transition:transform 0.2s,background 0.2s,box-shadow 0.2s;}
+.priority-dot{width:9px;height:9px;border-radius:50%;margin:0 auto 8px;background:#BEB8B2;transition:transform 0.2s,background 0.2s,box-shadow 0.2s;}
 .priority-pill strong{font-size:12px;font-weight:700;display:block;font-family:'BwGradual','Urbanist',sans-serif;margin-bottom:3px;color:var(--text);}
 .priority-pill small{font-size:10px;color:var(--text-muted);line-height:1.4;display:block;}
 .priority-pill:hover{border-color:var(--glass-border-hover);}
-.priority-pill.sel-critical{border-color:rgba(220,38,38,0.4);background:rgba(220,38,38,0.05);}
-.priority-pill.sel-critical .priority-dot{background:#C8102E;box-shadow:0 0 0 4px rgba(220,38,38,0.18);}
-.priority-pill.sel-critical strong{color:#C8102E;}
-.priority-pill.sel-high{border-color:rgba(249,115,22,0.4);background:rgba(249,115,22,0.05);}
-.priority-pill.sel-high .priority-dot{background:#FD691D;box-shadow:0 0 0 4px rgba(249,115,22,0.18);}
-.priority-pill.sel-high strong{color:#FD691D;}
-.priority-pill.sel-medium{border-color:rgba(234,179,8,0.4);background:rgba(234,179,8,0.05);}
-.priority-pill.sel-medium .priority-dot{background:#FFB81C;box-shadow:0 0 0 4px rgba(234,179,8,0.18);}
-.priority-pill.sel-medium strong{color:#B8860F;}
-.priority-pill.sel-low{border-color:rgba(34,197,94,0.35);background:rgba(34,197,94,0.05);}
-.priority-pill.sel-low .priority-dot{background:#008675;box-shadow:0 0 0 4px rgba(34,197,94,0.18);}
-.priority-pill.sel-low strong{color:#008675;}
+.priority-pill.sel-critical{border-color:rgba(200,16,46,0.4);background:rgba(200,16,46,0.05);}
+.priority-pill.sel-critical .priority-dot{background:#C8102E;box-shadow:0 0 0 4px rgba(200,16,46,0.18);}
+.priority-pill.sel-critical strong{color:var(--stop-ink);}
+.priority-pill.sel-high{border-color:rgba(253,105,29,0.4);background:rgba(253,105,29,0.05);}
+.priority-pill.sel-high .priority-dot{background:#FD691D;box-shadow:0 0 0 4px rgba(253,105,29,0.18);}
+.priority-pill.sel-high strong{color:var(--alert-ink);}
+.priority-pill.sel-medium{border-color:rgba(255,184,28,0.45);background:rgba(255,184,28,0.05);}
+.priority-pill.sel-medium .priority-dot{background:#FFB81C;box-shadow:0 0 0 4px rgba(255,184,28,0.22);}
+.priority-pill.sel-medium strong{color:var(--warn-ink);}
+.priority-pill.sel-low{border-color:rgba(0,134,117,0.35);background:rgba(0,134,117,0.05);}
+.priority-pill.sel-low .priority-dot{background:#008675;box-shadow:0 0 0 4px rgba(0,134,117,0.18);}
+.priority-pill.sel-low strong{color:var(--ok-ink);}
 
 /* ── Photo Evidence ── */
 .photo-drop{border:2px dashed var(--glass-border);border-radius:14px;padding:36px 24px;
   text-align:center;cursor:pointer;transition:all 0.3s;background:rgba(0,93,99,0.02);margin-bottom:16px;}
 .photo-drop:hover,.photo-drop.drag-over{border-color:rgba(0,187,182,0.4);background:rgba(0,187,182,0.04);}
+/* The camera outline used to be drawn in flat brand teal, which on the dark
+   card is teal on near-black and all but gone. It follows the ink instead. */
 .photo-drop-icon{width:44px;height:44px;border-radius:12px;background:rgba(0,93,99,0.1);
-  display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
-.photo-drop-icon svg{opacity:0.6;}
+  display:flex;align-items:center;justify-content:center;margin:0 auto 12px;color:var(--primary-ink);}
+.photo-drop-icon svg{opacity:0.75;}
 .photo-drop-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:14px;font-weight:600;margin-bottom:4px;}
 .photo-drop-sub{font-size:12px;color:var(--text-muted);}
 input.photo-input{display:none;}
@@ -198,7 +209,7 @@ input.photo-input{display:none;}
 .tool-btn{width:32px;height:32px;border-radius:7px;border:1px solid var(--glass-border);
   background:var(--glass);cursor:pointer;display:flex;align-items:center;justify-content:center;
   transition:all 0.2s;flex-shrink:0;}
-.tool-btn:hover{border-color:var(--glass-border-hover);background:#EEF1F1;}
+.tool-btn:hover{border-color:var(--glass-border-hover);background:var(--dark-2);}
 .tool-btn.active{background:rgba(0,93,99,0.12);border-color:rgba(0,187,182,0.35);}
 .tool-btn svg{pointer-events:none;}
 .color-btn{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
@@ -251,16 +262,19 @@ input.photo-input{display:none;}
 .sla-label{display:flex;align-items:center;gap:7px;color:var(--text-muted);}
 .sla-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 .sla-val{font-weight:600;font-family:'BwGradual','Urbanist',sans-serif;}
-.sla-critical{color:#C8102E;}.sla-high{color:#FD691D;}.sla-medium{color:#B8860F;}.sla-low{color:#008675;}
+.sla-critical{color:var(--stop-ink);}.sla-high{color:var(--alert-ink);}.sla-medium{color:var(--warn-ink);}.sla-low{color:var(--ok-ink);}
 .expert-item{display:flex;align-items:center;gap:12px;padding:9px 8px;border-bottom:1px solid var(--glass-border);border-radius:10px;margin:0 -8px;cursor:pointer;transition:background 0.2s;}
 .expert-item:last-child{border-bottom:none;}
 .expert-item:hover{background:rgba(0,93,99,0.05);}
 .expert-av-wrap{position:relative;flex-shrink:0;}
 .expert-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid transparent;}
-.ea-ct  {background:rgba(230,126,34,0.09);border-color:rgba(230,126,34,0.25);color:#c96e12;}
-.ea-drl {background:rgba(26,82,118,0.09); border-color:rgba(26,82,118,0.25); color:#1A5276;}
-.ea-ws  {background:rgba(192,57,43,0.09); border-color:rgba(192,57,43,0.25); color:#FD691D;}
-.ea-qhse{background:rgba(39,174,96,0.09); border-color:rgba(39,174,96,0.25); color:#219653;}
+/* One hue per expert group is worth keeping, but the four hues were picked off
+   a stock palette: the navy in particular vanished on the dark card. Each one
+   is now a TAQA accent, tinted for the ground and inked for the glyph. */
+.ea-ct  {background:rgba(253,105,29,0.10);border-color:rgba(253,105,29,0.25);color:var(--alert-ink);}
+.ea-drl {background:rgba(0,118,168,0.10); border-color:rgba(0,118,168,0.25); color:var(--info-ink);}
+.ea-ws  {background:rgba(200,16,46,0.09);  border-color:rgba(200,16,46,0.25);  color:var(--stop-ink);}
+.ea-qhse{background:rgba(0,134,117,0.10);  border-color:rgba(0,134,117,0.25);  color:var(--ok-ink);}
 .ea-all {background:rgba(0,93,99,0.08); border-color:rgba(0,187,182,0.25); color:var(--primary-ink);}
 .expert-dot{position:absolute;bottom:1px;right:1px;width:9px;height:9px;border-radius:50%;background:#008675;border:2px solid var(--glass);}
 .expert-dot.away{background:#FFB81C;}
@@ -275,7 +289,7 @@ html[data-taqa-theme="dark"] .expert-item:hover{background:rgba(0,187,182,0.06);
 .tip-item:last-child{margin-bottom:0;}
 .tip-num{width:20px;height:20px;border-radius:6px;background:rgba(0,93,99,0.1);
   display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;
-  color:var(--primary-light);flex-shrink:0;margin-top:1px;}
+  color:var(--primary-ink);flex-shrink:0;margin-top:1px;}
 .tip-text{font-size:12px;color:var(--text-muted);line-height:1.55;}
 
 /* ── Submit Toast ── */
@@ -311,18 +325,28 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;back
 .nav-links a.active::after{display:none!important;}
 .dark-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:border-color 0.2s,color 0.2s,background 0.2s;flex-shrink:0;padding:0;}
 .dark-toggle:hover{border-color:var(--primary);color:var(--primary-ink);background:rgba(0,93,99,0.06);}
-html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--dark:#001314;--glass:rgba(0,45,48,0.88);--glass-border:rgba(255,255,255,0.07);--text:#C7DBDD;--text-muted:#8CB6B9;--text-light:#619B9E;}
+/* The neutral tokens all have to be restated here, not just the text ones: the
+   toast reads --dark-3 and the annotation toolbar reads --glass-2, so leaving
+   either at its light value painted a white panel on the dark page. */
+html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--dark:#001314;--dark-2:#002D30;--dark-3:#002326;
+  --glass:rgba(0,45,48,0.88);--glass-2:rgba(0,19,20,0.98);--glass-border:rgba(255,255,255,0.07);
+  --text:#C7DBDD;--text-muted:#8CB6B9;--text-light:#619B9E;
+  --stop-ink:#FF8A94;--alert-ink:#FF9B5E;--warn-ink:#FFB81C;--ok-ink:#4FD1B5;--info-ink:#6BC5EE;}
 html[data-taqa-theme="dark"] body{background:#001314;}
 html[data-taqa-theme="dark"] nav{background:rgba(0,35,38,0.92);border-color:rgba(255,255,255,0.06);}
 html[data-taqa-theme="dark"] .nav-brand-name{color:#C7DBDD;}html[data-taqa-theme="dark"] .nav-brand-hub{color:#619B9E;}
 html[data-taqa-theme="dark"] .nav-pill{background:rgba(0,187,182,0.12);}
 html[data-taqa-theme="dark"] .dark-toggle{border-color:rgba(255,255,255,0.1);color:#619B9E;}
-html[data-taqa-theme="dark"] .form-card{background:#002326;border-color:#003A3D;}
-html[data-taqa-theme="dark"] .form-group input,html[data-taqa-theme="dark"] .form-group select,html[data-taqa-theme="dark"] .form-group textarea{background:#001314;border-color:#003A3D;color:#C7DBDD;}
+html[data-taqa-theme="dark"] .form-card{background:#002326;border-color:#00484B;}
+html[data-taqa-theme="dark"] .form-group input,html[data-taqa-theme="dark"] .form-group select,html[data-taqa-theme="dark"] .form-group textarea{background:#001314;border-color:#00484B;color:#C7DBDD;}
+/* The chevron is baked into a data URL, so it cannot follow a token. The rule
+   above sets the shorthand, which drops the image with it, so the dark copy
+   has to come after it and outrank it. */
+html[data-taqa-theme="dark"] .form-group select.form-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23619B9E' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;}
 html[data-taqa-theme="dark"] .form-group label{color:#619B9E;}
-html[data-taqa-theme="dark"] .sidebar-card{background:#002326;border-color:#003A3D;}
+html[data-taqa-theme="dark"] .sidebar-card{background:#002326;border-color:#00484B;}
 html[data-taqa-theme="dark"] .sidebar-section-title{color:#619B9E;}
-html[data-taqa-theme="dark"] footer{background:#002326;border-color:#003A3D;}
+html[data-taqa-theme="dark"] footer{background:#002326;border-color:#00484B;}
 html[data-taqa-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2);}
 html[data-taqa-theme="dark"] .bg-blob-1{background:radial-gradient(circle,rgba(0,187,182,0.05) 0%,transparent 65%);}
 html[data-taqa-theme="dark"] .bg-blob-2{background:radial-gradient(circle,rgba(0,93,99,0.04) 0%,transparent 65%);}
@@ -365,8 +389,11 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 
 /* Long option text ends in an ellipsis rather than being cut mid letter. */
 .form-select, select { text-overflow:ellipsis; padding-inline-end:30px; }
-.wip-note{color:#756A61;}
-html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
+.wip-note{color:var(--text-light);}
+/* shared.js paints the trail on var(--primary), which is a ground colour, so
+   on the dark canvas the current crumb was teal on near-black. The extra html
+   raises specificity over the sheet shared.js appends after ours. */
+html .auto-bc .bc-cur{color:var(--primary-ink);}
 </style>
 </head>
 <body>
@@ -400,7 +427,7 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
     <span class="page-hero-tag">Ask an Expert</span>
     <h1>Ask an Expert</h1>
     <p>Facing a technical challenge in the field? Submit your concern to a qualified TAQA segment expert. Describe the problem, upload photos, mark what you're seeing, get a direct response.</p>
-    <div style="margin-top:18px;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);">Part of <em style="color:#4DD9D3;font-style:italic;font-weight:700;text-transform:none;letter-spacing:0;">Tech Hub</em> <span style="opacity:0.7;font-style:normal;">(working name)</span></div>
+    <div style="margin-top:18px;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.78);">Part of <em style="color:var(--primary-light);font-style:italic;font-weight:700;text-transform:none;letter-spacing:0;">Tech Hub</em> <span style="opacity:0.8;font-style:normal;">(working name)</span></div>
   </div>
 </div>
 
@@ -488,7 +515,7 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
 
         <div class="photo-drop" id="photo-drop" onclick="document.getElementById('photo-input').click()">
           <div class="photo-drop-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#005D63" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/>
               <polyline points="21 15 16 10 5 21"/>
             </svg>
@@ -523,11 +550,11 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
 
             <div class="annot-group">
               <span class="annot-group-label">Color</span>
-              <button type="button" class="color-btn active" id="col-red"    style="background:#E74C3C;" onclick="setAnnotColor('#E74C3C','col-red')"    title="Red"></button>
-              <button type="button" class="color-btn"        id="col-yellow" style="background:#F1C40F;" onclick="setAnnotColor('#F1C40F','col-yellow')" title="Yellow"></button>
-              <button type="button" class="color-btn"        id="col-green"  style="background:#2ECC71;" onclick="setAnnotColor('#2ECC71','col-green')"  title="Green"></button>
-              <button type="button" class="color-btn"        id="col-blue"   style="background:#3498DB;" onclick="setAnnotColor('#3498DB','col-blue')"   title="Blue"></button>
-              <button type="button" class="color-btn"        id="col-white"  style="background:#FFFFFF;border:1px solid #ddd;" onclick="setAnnotColor('#FFFFFF','col-white')" title="White"></button>
+              <button type="button" class="color-btn active" id="col-red"    style="background:#C8102E;" onclick="setAnnotColor('#C8102E','col-red')"    title="Red"></button>
+              <button type="button" class="color-btn"        id="col-yellow" style="background:#FFB81C;" onclick="setAnnotColor('#FFB81C','col-yellow')" title="Yellow"></button>
+              <button type="button" class="color-btn"        id="col-green"  style="background:#008675;" onclick="setAnnotColor('#008675','col-green')"  title="Green"></button>
+              <button type="button" class="color-btn"        id="col-blue"   style="background:#0076A8;" onclick="setAnnotColor('#0076A8','col-blue')"   title="Blue"></button>
+              <button type="button" class="color-btn"        id="col-white"  style="background:#FFFFFF;border:1px solid #BEB8B2;" onclick="setAnnotColor('#FFFFFF','col-white')" title="White"></button>
             </div>
 
             <div class="annot-group">
@@ -542,7 +569,7 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
 
             <div class="annot-group" style="margin-left:auto;">
               <button type="button" class="annot-action" onclick="annotUndo()">Undo</button>
-              <button type="button" class="annot-action" onclick="annotClear()" style="color:#C8102E;">Clear</button>
+              <button type="button" class="annot-action" onclick="annotClear()" style="color:var(--stop-ink);">Clear</button>
             </div>
 
           </div>
@@ -572,7 +599,7 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
           </label>
           <label class="priority-pill sel-medium" id="pill-medium" onclick="selectPriority('medium')">
             <input type="radio" name="priority" value="medium" checked>
-            <div class="priority-dot" style="background:#FFB81C;box-shadow:0 0 0 4px rgba(234,179,8,0.18);"></div>
+            <div class="priority-dot" style="background:#FFB81C;box-shadow:0 0 0 4px rgba(255,184,28,0.22);"></div>
             <strong>Medium</strong>
             <small>Continuing with the issue</small>
           </label>
@@ -771,7 +798,10 @@ function selectPriority(level) {
   PRIORITY_LEVELS.forEach(l => {
     const el = document.getElementById('pill-' + l);
     el.className = 'priority-pill';
-    el.querySelector('.priority-dot').style.cssText = 'background:#E8E5E2;';
+    // Clearing the inline style hands the dot back to the stylesheet. Painting
+    // a grey here left that grey inline on the pill picked a moment later,
+    // where it outranked the selected colour and the ring never showed.
+    el.querySelector('.priority-dot').style.cssText = '';
   });
   document.getElementById('pill-' + level).className = 'priority-pill sel-' + level;
 }
@@ -801,7 +831,7 @@ const annotCanvas  = document.getElementById('annot-canvas');
 const actx = annotCanvas.getContext('2d');
 
 let annotTool  = 'rect';
-let annotColor = '#E74C3C';
+let annotColor = '#C8102E';
 let annotWidth = 2;
 let isAnnotDrawing = false;
 let annotStartX, annotStartY, lastSnapshot;
@@ -993,17 +1023,21 @@ function initPts() {
   for (let i = 0; i < n; i++) pts.push({ x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-.5)*.25, vy:(Math.random()-.5)*.25, s:Math.random()*1.5+.3 });
 }
 initPts();
+/* The canvas is painted over the whole viewport, so it has to carry the theme
+   itself: the body colour behind it never reaches the screen, and a fixed
+   light fill left the dark page sitting on a pale grey field. */
 function drawBg() {
-  ctx.fillStyle = '#F4F6F6'; ctx.fillRect(0, 0, W, H);
+  const dark = document.documentElement.getAttribute('data-taqa-theme') === 'dark';
+  ctx.fillStyle = dark ? '#001314' : '#F4F4F3'; ctx.fillRect(0, 0, W, H);
   const g = ctx.createRadialGradient(W*.8, H*.2, 0, W*.8, H*.2, 400);
-  g.addColorStop(0, 'rgba(0,93,99,0.04)'); g.addColorStop(1, 'transparent');
+  g.addColorStop(0, dark ? 'rgba(0,187,182,0.05)' : 'rgba(0,93,99,0.04)'); g.addColorStop(1, 'transparent');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   pts.forEach(p => {
     p.x += p.vx; p.y += p.vy;
     if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
     if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
     ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2);
-    ctx.fillStyle = 'rgba(0,93,99,0.08)'; ctx.fill();
+    ctx.fillStyle = dark ? 'rgba(0,187,182,0.10)' : 'rgba(0,93,99,0.08)'; ctx.fill();
   });
   requestAnimationFrame(drawBg);
 }
