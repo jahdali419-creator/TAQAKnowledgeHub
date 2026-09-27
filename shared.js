@@ -849,8 +849,8 @@ document.addEventListener('keydown',function(e){
       'font-family:inherit;font-size:12.5px;font-weight:600;color:var(--text,#1c2b3a);transition:all .2s;}' +
     '.door-btn:hover{border-color:var(--primary,#005D63);color:var(--primary,#005D63);}' +
     '.door-dot{width:7px;height:7px;border-radius:50%;background:var(--primary,#005D63);flex-shrink:0;}' +
-    '.door-dot.d-owner{background:#FD691D;}.door-dot.d-qms{background:#00BBB6;}' +
-    '.door-dot.d-auditor{background:#8E44AD;}' +
+    '.door-dot.d-employee{background:#6E9294;}.door-dot.d-owner{background:#00585A;}' +
+    '.door-dot.d-qms{background:#00BFB2;}.door-dot.d-auditor{background:#9AA7A7;}' +
     '.door-cap{white-space:nowrap;}' +
     '@media(max-width:760px){.door-cap{display:none;}.door-btn{padding:0 9px;}}' +
     '.door-menu{position:absolute;top:calc(100% + 8px);inset-inline-end:0;z-index:3000;width:236px;' +
