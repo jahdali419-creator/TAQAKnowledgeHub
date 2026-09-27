@@ -22,7 +22,7 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 <noscript></noscript>
 <style>
 :root {
-  --primary: #005D63;--primary-ink:#005D63;
+  --primary: #005D63;--primary-ink:#005D63;--primary-light:#00BBB6;
   --primary-hover: #00474C;
   --accent: #FD691D;
   --bg: #F4F6F6;
@@ -197,7 +197,7 @@ html[data-taqa-theme="dark"] .mob-seg-link { border-color:#003A3D; }
 }
 .hero-scroll-text {
   font-size:10px; font-weight:600; letter-spacing:2px; text-transform:uppercase;
-  color:rgba(255,255,255,0.45);
+  color:rgba(255,255,255,0.6);
 }
 .hero-scroll-chevron {
   width:14px; height:14px;
@@ -212,23 +212,27 @@ html[data-taqa-theme="dark"] .mob-seg-link { border-color:#003A3D; }
   50%      { transform:rotate(45deg) translate(2px,2px); }
 }
 
+/* The band under the hero photo is dark in both themes, so the legacy teal is
+   legal here as text. It used to be a lighter mix of its own, which is a shade
+   the palette does not have; the hover lifts to white, the way the other hero
+   links already do. */
 .hero-label {
   display:inline-block; font-size:14px; font-weight:700; letter-spacing:0.3px;
-  color:#4DD9D3; margin-bottom:16px;
+  color:var(--primary-light); margin-bottom:16px;
 }
 a.hero-label {
-  text-decoration:none; border-bottom:1px solid rgba(77,217,211,0.35);
+  text-decoration:none; border-bottom:1px solid rgba(0,187,182,0.35);
   padding-bottom:2px; transition:color 150ms cubic-bezier(0.23,1,0.32,1),
   border-color 150ms cubic-bezier(0.23,1,0.32,1);
 }
-a.hero-label:hover { color:#7FE8E3; border-bottom-color:#7FE8E3; }
-a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; border-radius:2px; }
+a.hero-label:hover { color:#fff; border-bottom-color:#fff; }
+a.hero-label:focus-visible { outline:2px solid var(--primary-light); outline-offset:3px; border-radius:2px; }
 .hero h1 {
   font-family:'BwGradual','Urbanist',sans-serif; font-size:clamp(28px,3.5vw,44px);
   font-weight:700; line-height:1.18; color:#ffffff;
   margin-bottom:18px; letter-spacing:-0.5px;
 }
-.hero h1 span { color:#4DD9D3; }
+.hero h1 span { color:var(--primary-light); }
 .hero-upper { text-transform:uppercase; letter-spacing:3px; color:#ffffff; }
 .hero h1 .hero-muted { color:rgba(255,255,255,0.45); font-size:0.88em; letter-spacing:0; }
 .hero-desc {
@@ -244,14 +248,14 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
   transition:border-color 0.2s, box-shadow 0.2s;
 }
 .hero-search-bar:focus-within {
-  border-color:rgba(77,217,211,0.6);
+  border-color:rgba(0,187,182,0.6);
   box-shadow:0 0 0 3px rgba(0,187,182,0.15);
 }
 .hero-search-bar input {
   flex:1; border:none; outline:none; background:transparent;
   font-size:14px; font-family:'Inter',sans-serif; color:#ffffff;
 }
-.hero-search-bar input::placeholder { color:rgba(255,255,255,0.45); }
+.hero-search-bar input::placeholder { color:rgba(255,255,255,0.6); }
 .hero-search-bar .btn { padding:8px 20px; border-radius:5px; }
 .hero-links { display:flex; gap:20px; }
 .hero-links a {
@@ -271,7 +275,7 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 .stats-panel-title {
   font-family:'BwGradual','Urbanist',sans-serif;
   font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px;
-  color:rgba(255,255,255,0.45); margin-bottom:20px;
+  color:rgba(255,255,255,0.72); margin-bottom:20px;
 }
 .stats-list { display:flex; flex-direction:column; gap:0; }
 .stat-row {
@@ -280,7 +284,7 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 }
 .stat-row:last-child { border-bottom:none; }
 .stat-row-label { font-family:'BwGradual','Urbanist',sans-serif; font-size:13.5px; font-weight:700; color:rgba(255,255,255,0.6); }
-.stat-row-value { font-family:'BwGradual','Urbanist',sans-serif; font-size:22px; font-weight:700; color:#4DD9D3; }
+.stat-row-value { font-family:'BwGradual','Urbanist',sans-serif; font-size:22px; font-weight:700; color:var(--primary-light); }
 
 /* ── Alert Banner ── */
 .alert-bar {
@@ -329,7 +333,7 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 /* ── Segment colour map ── */
 [data-id="coiled-tubing"]  { --seg-color:#E67E22; }
 [data-id="fracturing"]     { --seg-color:#E74C3C; }
-[data-id="wireline"]       { --seg-color:#3498DB; }
+[data-id="wireline"]       { --seg-color:#0076A8; }
 [data-id="drilling"]       { --seg-color:#1A5276; }
 [data-id="cementing"]      { --seg-color:#8E44AD; }
 [data-id="inspection"]     { --seg-color:#16A085; }
@@ -338,7 +342,7 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 [data-id="tws-maintenance"]{ --seg-color:#D35400; }
 [data-id="hr"]             { --seg-color:#2471A3; }
 [data-id="well-testing"]   { --seg-color:#1ABC9C; }
-[data-id="cybersecurity"]  { --seg-color:#0EA5E9; }
+[data-id="cybersecurity"]  { --seg-color:#968C83; }
 
 /* ── Segment Accordion ── */
 .seg-accordion {
@@ -980,7 +984,7 @@ body { animation:pageFadeIn 0.4s cubic-bezier(.4,0,.2,1); }
 .dark-toggle:hover { border-color:var(--primary); color:var(--primary-ink); background:rgba(0,93,99,0.06); }
 
 /* ── 6. Dark Mode Variables ── */
-html[data-taqa-theme="dark"] {--primary-ink:#00BBB6;
+html[data-taqa-theme="dark"] {--primary-ink:#00BBB6;--primary-light:#00BBB6;
   --bg:#001314; --bg-white:#002326; --border:#003A3D;
   --text:#C7DBDD; --text-muted:#8CB6B9; --text-light:#619B9E;
   --shadow-sm:0 1px 4px rgba(0,0,0,0.4); --shadow-md:0 4px 16px rgba(0,0,0,0.45);
@@ -1086,7 +1090,7 @@ html[data-taqa-theme="dark"] .stats-strip-divider { background:#003A3D; }
 .desk-who{font-size:10px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;
   color:#fff;background:var(--primary);border-radius:20px;padding:4px 11px;flex-shrink:0;}
 .desk-who,.desk-who.d-owner,.desk-who.d-qms,.desk-who.d-auditor{
-  background:rgba(0,93,99,0.10);color:#00474C;}
+  background:rgba(0,93,99,0.10);color:var(--primary-ink);}
 .desk-line{font-size:13.5px;color:var(--text);flex:1;min-width:0;line-height:1.5;}
 .desk-line b{font-weight:800;font-variant-numeric:tabular-nums;}
 .desk-go{flex-shrink:0;font-size:12.5px;font-weight:600;color:#fff;background:var(--primary);
