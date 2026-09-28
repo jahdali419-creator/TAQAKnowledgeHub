@@ -316,7 +316,7 @@ test.describe('The door (role / identity switcher)', () => {
     await clearAppState();
     await gotoApp('/index.html');
 
-    expect(await page.evaluate(() => window.TAQA_ROLE.current())).toBe('employee');
+    expect(await page.evaluate(() => TAQA_ROLE.current())).toBe('employee');
 
     await page.locator('#taqa-door .door-btn').click();
     await expect(page.locator('#taqa-door .door-menu')).toBeVisible();
@@ -329,10 +329,34 @@ test.describe('The door (role / identity switcher)', () => {
       /QMS \/ Document Controller/,
       { timeout: 10000 }
     );
-    await page.waitForTimeout(150);
 
-    expect(await page.evaluate(() => window.TAQA_ROLE.current())).toBe('qms');
-    expect(await page.evaluate(() => localStorage.getItem('taqa-demo-role'))).toBe('qms');
+    // This sandbox's page.goto() is documented (fixtures.js) to sometimes
+    // outrun its own navigation-lifecycle events even once the DOM is
+    // genuinely settled; the same applies to this in-page location.reload().
+    // A locator's own toHaveAttribute() above tolerates that by re-querying
+    // the live DOM, but a one-shot page.evaluate() right after can still
+    // land on a transitional document. expect.poll() re-runs the evaluate
+    // (tolerating a rejected call from a not-yet-settled context) instead of
+    // trusting a single call.
+    //
+    // TAQA_ROLE is a top-level `const` in roles.js, a real identifier but
+    // never a property of `window` (see tests/helpers/fixtures.js's setRole
+    // fixture for the same fact catching a real bug there), so the check
+    // reads it as a bare identifier, not window.TAQA_ROLE.
+    await expect
+      .poll(
+        () =>
+          page
+            .evaluate(() => (typeof TAQA_ROLE !== 'undefined' ? TAQA_ROLE.current() : undefined))
+            .catch(() => undefined),
+        { timeout: 10000 }
+      )
+      .toBe('qms');
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem('taqa-demo-role')).catch(() => undefined), {
+        timeout: 10000,
+      })
+      .toBe('qms');
   });
 
   test('area selection updates TAQA_ROLE.area() for a scoped role', async ({ page, gotoApp, setRole }) => {
@@ -348,10 +372,24 @@ test.describe('The door (role / identity switcher)', () => {
     await expect(page.locator('#taqa-door .door-btn')).toHaveAttribute('title', /Fracturing/, {
       timeout: 10000,
     });
-    await page.waitForTimeout(150);
 
-    expect(await page.evaluate(() => window.TAQA_ROLE.area())).toBe('fracturing');
-    expect(await page.evaluate(() => localStorage.getItem('taqa-demo-area'))).toBe('fracturing');
+    // See the comment in the previous test: poll instead of a one-shot
+    // evaluate (to tolerate this sandbox's page-settle race on a reload),
+    // and read TAQA_ROLE as a bare identifier, not window.TAQA_ROLE.
+    await expect
+      .poll(
+        () =>
+          page
+            .evaluate(() => (typeof TAQA_ROLE !== 'undefined' ? TAQA_ROLE.area() : undefined))
+            .catch(() => undefined),
+        { timeout: 10000 }
+      )
+      .toBe('fracturing');
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem('taqa-demo-area')).catch(() => undefined), {
+        timeout: 10000,
+      })
+      .toBe('fracturing');
   });
 
   test('opening the door toggles aria-expanded', async ({ page, gotoApp, clearAppState }) => {
