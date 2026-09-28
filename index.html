@@ -1136,342 +1136,360 @@ html[data-taqa-theme="dark"] .continue-icon.is-alert{background:rgba(253,105,29,
 }
 html[data-taqa-theme="dark"] .section-hl-title { color:var(--text); }
 
-/* ── Focus layout, preview ─────────────────────────────────────────────
-   One sheet of glass. Three cards sit on it in a row until you choose one,
-   and choosing rearranges them into a switcher on the left with the areas
-   opening beside it. The page's background blobs show through the sheet,
-   which is what makes the glass read as glass rather than as grey paint. */
-.focus {
-  position:relative; border-radius:22px; padding:16px;
-  background:rgba(255,255,255,0.52);
-  border:1px solid rgba(255,255,255,0.72);
-  box-shadow:0 1px 2px rgba(0,88,90,0.05), 0 20px 48px rgba(0,88,90,0.09);
-  -webkit-backdrop-filter:blur(24px) saturate(155%);
-  backdrop-filter:blur(24px) saturate(155%);
-}
-/* The light that catches the top edge of a real pane. */
-.focus::before {
-  content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
-  background:linear-gradient(158deg, rgba(255,255,255,0.6), rgba(255,255,255,0) 44%);
-}
-.fstage { display:grid; grid-template-columns:1fr; gap:14px; }
-.focus[data-state="focus"] .fstage { grid-template-columns:318px 1fr; align-items:start; }
+/* ── Explore by Discipline: the cross-section ──────────────────────────
+   One sheet, read like a well log. The company policies are the cap rock:
+   the only coloured ground in the section, spanning the full width, so
+   they read as the layer every area sits under. The three groups are the
+   beds beneath it. Choosing a group opens its bed and its areas appear
+   inside it, so a group and its members are visibly one body, and nothing
+   is ever shown as chosen by filling it with colour. That is what ends the
+   confusion between the policies and the group you picked.
 
-.fside { min-width:0; }
-/* The two halves are different jobs, so they are different materials. The
-   chosen side is tinted glass with the brand in it and its cards raised on
-   top; the list side stays clear, so the eye reads one as the place you are
-   and the other as the things in it. */
-.focus[data-state="focus"] .fside {
-  position:sticky; top:84px;
-  padding:13px; border-radius:19px;
-  background:linear-gradient(162deg, rgba(0,93,99,0.19), rgba(0,187,182,0.09) 72%);
-  border:1px solid rgba(0,93,99,0.2);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.5);
-  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+   Each bed has its own rock in a narrow track at the start edge, the way a
+   mud log draws lithology: sandstone dots for service lines, limestone
+   brick for functions, shale dashes for the centres. The text carries all
+   the meaning; the texture only tells the beds apart at a glance.       */
+#focus.strata {
+  --st-paper:#FFFFFF;
+  --st-shale:#1E1C1A;                 /* names            16.99:1 on paper */
+  --st-silt:#524D48;                  /* counts, meta      8.35:1          */
+  --st-clay:#756A61;                  /* lines of work     5.26:1          */
+  --st-bedding:rgba(117,106,97,0.30); /* between beds, crosses the track   */
+  --st-lamina:rgba(117,106,97,0.17);  /* between members, stops at track   */
+  --st-litho:#005D63;
+  --st-litho-a:0.5;
+  --st-rock:rgba(0,93,99,0.035);
+  --st-bore:#005D63;                  /* chevrons, ticks, open bed, focus  */
+  --st-scuff:rgba(0,93,99,0.045);
+  --st-press:rgba(0,93,99,0.085);
+  --st-caprock:#005D63;
+  --st-caprock-worn:#00565C;
+  --st-caprock-deep:#004A4F;
+  --st-cap-ink:#FFFFFF;               /* 7.65:1 on caprock                 */
+  --st-cap-ink-2:#CFE3E4;             /* 5.74:1 on caprock                 */
+  --st-cap-lamina:rgba(255,255,255,0.17);
+  --st-track:14px;
+  --st-gap:16px;
+  --st-numeral:44px;
+  --st-ease:cubic-bezier(0.23,1,0.32,1);
+  --st-top:64px;                      /* under the fixed nav               */
 }
-.fswitch { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
-.focus[data-state="focus"] .fswitch { grid-template-columns:1fr; gap:10px; align-content:start; }
+html[data-taqa-theme="dark"] #focus.strata {
+  --st-paper:#002326;
+  --st-shale:#C7DBDD;                 /* 11.51:1 on #002326 */
+  --st-silt:#8CB6B9;                  /*  7.50:1            */
+  --st-clay:#6FA7AA;                  /*  6.14:1            */
+  --st-bedding:rgba(0,187,182,0.24);
+  --st-lamina:rgba(0,187,182,0.12);
+  --st-litho:#00BBB6;
+  --st-litho-a:0.42;
+  --st-rock:rgba(0,187,182,0.05);
+  --st-bore:#00BBB6;                  /*  6.92:1            */
+  --st-scuff:rgba(0,187,182,0.06);
+  --st-press:rgba(0,187,182,0.11);
+  --st-caprock-worn:#006369;
+  --st-caprock-deep:#00535A;
+}
 
-.fcard {
-  position:relative; overflow:hidden; text-align:start; cursor:pointer;
-  font-family:inherit; padding:0; height:224px;
-  border-radius:16px;
-  background:rgba(255,255,255,0.86);
-  border:1px solid rgba(255,255,255,0.9);
-  box-shadow:0 2px 6px rgba(0,88,90,0.08);
-  transition:background 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+/* ── The sheet ── clip, not hidden, so an open bed's header can stick. */
+#focus.strata .st-col {
+  position:relative; overflow:clip; overflow-anchor:none;
+  background:var(--st-paper);
+  border:1px solid var(--st-bedding);
+  border-radius:12px;
 }
-.focus[data-state="focus"] .fcard { height:68px; }
-.focus[data-state="focus"] .fcard.on { height:224px; }
-.fcard:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
-.fcard.on {
-  background:rgba(255,255,255,0.97);
-  border-color:var(--primary);
-  box-shadow:0 0 0 1px var(--primary) inset, 0 14px 30px rgba(0,88,90,0.14);
+
+/* ── The cap rock: the company policies ── */
+#focus.strata .st-cap { background:var(--st-caprock); color:var(--st-cap-ink); }
+#focus.strata .st-capbtn {
+  display:grid; grid-template-columns:var(--st-numeral) minmax(0,1fr) auto;
+  column-gap:14px; align-items:start;
+  width:100%; margin:0; padding:18px var(--st-gap);
+  border:0; border-radius:0; background:var(--st-caprock); color:var(--st-cap-ink);
+  font:inherit; text-align:start; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color 160ms ease;
 }
+#focus.strata .cap-n {
+  font-family:'BwGradual','Urbanist',sans-serif; font-weight:800;
+  font-size:40px; line-height:0.84; letter-spacing:-1.6px;
+  font-variant-numeric:tabular-nums; color:var(--st-cap-ink); padding-top:3px;
+}
+#focus.strata .cap-main { display:flex; flex-direction:column; gap:5px; min-width:0; }
+#focus.strata .cap-t {
+  font-family:'BwGradual','Urbanist',sans-serif; font-weight:700;
+  font-size:18px; line-height:1.2; letter-spacing:-0.25px; color:var(--st-cap-ink);
+}
+#focus.strata .cap-d { font-size:13px; line-height:1.45; color:var(--st-cap-ink-2); }
+#focus.strata .cap-act {
+  display:inline-flex; align-items:center; gap:3px; min-height:22px;
+  font-size:12.5px; font-weight:600; color:var(--st-cap-ink); white-space:nowrap;
+}
+#focus.strata .cap-act svg { width:16px; height:16px; transition:transform 240ms var(--st-ease); }
+#focus.strata .cap-hide { display:none; }
+#focus.strata .st-capbtn[aria-expanded="true"] .cap-show { display:none; }
+#focus.strata .st-capbtn[aria-expanded="true"] .cap-hide { display:inline; }
+#focus.strata .st-capbtn[aria-expanded="true"] .cap-act svg { transform:rotate(180deg); }
+
+/* The twelve, inside the cap rock. */
+#focus.strata .charter-panel { height:0; overflow:hidden; transition:height 300ms var(--st-ease); }
+#focus.strata .ch-grid { display:grid; grid-template-columns:1fr; padding:0 var(--st-gap) 4px; }
+#focus.strata .charter-panel:not(.open) .ch-row,
+#focus.strata .charter-panel:not(.open) .st-fold { visibility:hidden; }
+#focus.strata .ch-row {
+  display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:10px; row-gap:2px;
+  align-items:baseline; align-content:start; min-height:52px; padding:10px 0;
+  border-top:1px solid var(--st-cap-lamina);
+  text-decoration:none; color:var(--st-cap-ink);
+  transition:background-color 140ms ease;
+}
+#focus.strata .ch-num {
+  grid-column:1; grid-row:1; min-width:0;
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:11px; font-weight:700;
+  letter-spacing:0.5px; line-height:1.3; font-variant-numeric:tabular-nums;
+  color:var(--st-cap-ink-2);
+}
+#focus.strata .ch-flag {
+  grid-column:2; grid-row:1; font-size:10.5px; font-weight:700;
+  letter-spacing:0.6px; text-transform:uppercase; color:var(--st-cap-ink-2);
+}
+#focus.strata .ch-name {
+  grid-column:1 / -1; grid-row:2;
+  font-size:14px; font-weight:600; line-height:1.35; color:var(--st-cap-ink);
+}
+
+/* The seal: the cap rock's hatch, across the whole sheet, because the
+   policies cover every area below. */
+#focus.strata .st-seal {
+  height:7px; background-color:var(--st-litho); opacity:var(--st-litho-a);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Cpath d='M-1 7L7 -1M-1 1L1 -1M5 7L7 5' stroke='%23000' stroke-width='1.1'/%3E%3C/svg%3E") repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Cpath d='M-1 7L7 -1M-1 1L1 -1M5 7L7 5' stroke='%23000' stroke-width='1.1'/%3E%3C/svg%3E") repeat;
+}
+
+/* ── The beds ── */
+#focus.strata .st-layer {
+  position:relative;
+  border-top:1px solid var(--st-bedding);
+  padding-inline-start:calc(var(--st-track) + 1px);
+}
+#focus.strata .st-seal + .st-layer { border-top:0; }
+#focus.strata .st-layer::before {
+  content:''; position:absolute; top:0; bottom:0; inset-inline-start:0;
+  width:var(--st-track); pointer-events:none; z-index:1;
+  background-color:var(--st-litho); opacity:var(--st-litho-a);
+  -webkit-mask-repeat:repeat; mask-repeat:repeat;
+}
+#focus.strata .st-layer::after {
+  content:''; position:absolute; top:0; bottom:0; inset-inline-start:0;
+  width:var(--st-track); pointer-events:none;
+  background:var(--st-rock);
+  border-inline-end:1px solid var(--st-bedding);
+}
+#focus.strata .st-layer[data-k="seg"]::before {
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='7'%3E%3Ccircle cx='1.75' cy='1.75' r='1'/%3E%3Ccircle cx='5.25' cy='5.25' r='1'/%3E%3C/svg%3E");
+          mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='7'%3E%3Ccircle cx='1.75' cy='1.75' r='1'/%3E%3Ccircle cx='5.25' cy='5.25' r='1'/%3E%3C/svg%3E");
+}
+#focus.strata .st-layer[data-k="fn"]::before {
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='12'%3E%3Cpath d='M0 .5h16M0 6.5h16M3.5 .5v6M11.5 .5v6M7.5 6.5v6' stroke='%23000' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+          mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='12'%3E%3Cpath d='M0 .5h16M0 6.5h16M3.5 .5v6M11.5 .5v6M7.5 6.5v6' stroke='%23000' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+}
+#focus.strata .st-layer[data-k="pt"]::before {
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8'%3E%3Cpath d='M1 2h5M8 2h5M0 6h2M4.5 6h5M12 6h2' stroke='%23000' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+          mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8'%3E%3Cpath d='M1 2h5M8 2h5M0 6h2M4.5 6h5M12 6h2' stroke='%23000' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+}
+
+#focus.strata .st-h { margin:0; font:inherit; }
+#focus.strata .st-head {
+  display:grid; grid-template-columns:minmax(0,1fr) 20px;
+  grid-template-areas:"name chev" "meta chev";
+  column-gap:12px; row-gap:3px; align-items:center;
+  width:100%; min-height:68px; margin:0; padding:14px var(--st-gap);
+  border:0; border-radius:0; background:transparent; color:var(--st-shale);
+  font:inherit; text-align:start; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color 160ms ease;
+}
+#focus.strata .st-name {
+  grid-area:name;
+  font-family:'BwGradual','Urbanist',sans-serif; font-weight:700;
+  font-size:18px; line-height:1.2; letter-spacing:-0.25px; color:var(--st-shale);
+  transition:color 160ms ease;
+}
+#focus.strata .st-meta {
+  grid-area:meta; display:flex; flex-wrap:wrap; align-items:baseline;
+  font-size:12.5px; line-height:1.4; color:var(--st-silt);
+}
+#focus.strata .st-stat b { font-weight:700; color:var(--st-shale); font-variant-numeric:tabular-nums; }
+#focus.strata .st-stat + .st-stat::before,
+#focus.strata .st-desc::before { content:'\00B7'; padding-inline:7px; color:var(--st-clay); }
+#focus.strata .st-desc { display:none; }
+#focus.strata .st-chev {
+  grid-area:chev; width:20px; height:20px; display:grid; place-items:center; color:var(--st-bore);
+}
+#focus.strata .st-chev svg { width:18px; height:18px; transition:transform 240ms var(--st-ease); }
+
+/* An open bed says so in more than the chevron: its name takes the teal
+   ink, a teal rule closes the header, and the header stays in view while
+   you scroll its areas, so halfway down eleven rows you still know which
+   group you are in. None of it is a fill. */
+#focus.strata .st-layer[data-open="true"] .st-chev svg { transform:rotate(180deg); }
+#focus.strata .st-layer[data-open="true"] .st-name { color:var(--st-bore); }
+#focus.strata .st-layer[data-open="true"] .st-h {
+  position:sticky; top:var(--st-top); z-index:2; background:var(--st-paper);
+  box-shadow:inset 0 -2px 0 var(--st-bore);
+}
+
+#focus.strata .st-body {
+  display:grid; grid-template-rows:0fr;
+  transition:grid-template-rows 200ms var(--st-ease);
+}
+#focus.strata .st-layer[data-open="true"] .st-body { grid-template-rows:1fr; transition-duration:300ms; }
+#focus.strata .st-body-in {
+  min-height:0; overflow:hidden; visibility:hidden;
+  transition:visibility 0s linear 200ms;
+}
+#focus.strata .st-layer[data-open="true"] .st-body-in { visibility:visible; transition-delay:0s; }
+
+#focus.strata .st-members { list-style:none; margin:0; padding:0; }
+#focus.strata .st-members li { position:relative; }
+/* Lamina lines between members stop at the track; where one meets it, a
+   short teal depth tick. Bedding lines between beds cross it. */
+#focus.strata .st-members li::before {
+  content:''; position:absolute; top:0; inset-inline:0 0;
+  height:1px; background:var(--st-lamina); pointer-events:none;
+}
+#focus.strata .st-members li:first-child::before { display:none; }
+#focus.strata .st-members li::after {
+  content:''; position:absolute; top:0; inset-inline-start:0;
+  width:7px; height:1px; background:var(--st-bore); pointer-events:none;
+  transition:width 180ms var(--st-ease);
+}
+#focus.strata .st-members li:first-child::after { display:none; }
+#focus.strata .st-layer[data-open="true"] .st-members li {
+  animation:st-emerge 280ms var(--st-ease) both;
+  animation-delay:calc(var(--i, 0) * 16ms + 60ms);
+}
+@keyframes st-emerge { from { opacity:0; transform:translateY(-6px); } }
+
+#focus.strata .st-row {
+  position:relative;
+  display:grid; grid-template-columns:minmax(0,1fr) auto 14px;
+  grid-template-areas:"name docs go" "tag docs go";
+  column-gap:12px; row-gap:2px; align-items:center;
+  min-height:56px; padding:10px var(--st-gap);
+  text-decoration:none; color:var(--st-shale);
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color 140ms ease;
+}
+/* The name leads and the line of work follows, quieter, so the name is
+   what survives sun on the screen. */
+#focus.strata .st-rname {
+  grid-area:name; min-width:0;
+  font-family:'BwGradual','Urbanist',sans-serif; font-weight:600;
+  font-size:15.5px; line-height:1.25; letter-spacing:-0.1px; color:var(--st-shale);
+}
+#focus.strata .st-rtag {
+  grid-area:tag; min-width:0;
+  font-size:12px; font-weight:500; line-height:1.3;
+  color:var(--st-clay);
+}
+#focus.strata .st-rtag:empty { display:none; }
+#focus.strata .st-rdocs {
+  grid-area:docs; justify-self:end; white-space:nowrap;
+  font-size:11.5px; color:var(--st-silt); font-variant-numeric:tabular-nums;
+}
+#focus.strata .st-rdocs b {
+  font-family:'BwGradual','Urbanist',sans-serif; font-weight:700;
+  font-size:16px; line-height:1; letter-spacing:-0.2px; color:var(--st-shale);
+  margin-inline-end:3px;
+}
+#focus.strata .st-rgo { grid-area:go; display:grid; place-items:center; color:var(--st-bore); }
+#focus.strata .st-rgo svg { width:14px; height:14px; transition:transform 180ms var(--st-ease); }
+[dir="rtl"] #focus.strata .st-rgo svg { transform:scaleX(-1); }
+
+/* The way out of a long bed, at its foot, so nobody is left below eleven
+   rows hunting for the header. Also closes the policies. */
+#focus.strata .st-fold {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  width:100%; min-height:48px; margin:0; padding:0 var(--st-gap);
+  border:0; border-top:1px solid var(--st-lamina); background:transparent;
+  font:inherit; font-size:13px; font-weight:600; color:var(--st-bore); cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+#focus.strata .st-fold svg { width:15px; height:15px; transform:rotate(180deg); }
+#focus.strata .st-cap .st-fold { color:var(--st-cap-ink); border-top-color:var(--st-cap-lamina); }
+
+/* ── States ── */
 @media (hover:hover) and (pointer:fine){
-  .fcard:not(.on):hover { background:rgba(255,255,255,0.88);
-    border-color:rgba(0,93,99,0.3); box-shadow:0 12px 26px rgba(0,88,90,0.12); }
-  .fcard:not(.on):hover .fc-go { background:var(--primary); border-color:var(--primary); color:#fff; }
+  #focus.strata .st-head:hover,
+  #focus.strata .st-row:hover,
+  #focus.strata .st-body .st-fold:hover { background:var(--st-scuff); }
+  #focus.strata .st-layer[data-open="true"] .st-head:hover { background:transparent; }
+  #focus.strata .st-members li:hover::after { width:16px; }
+  #focus.strata .st-row:hover .st-rgo svg { transform:translateX(2px); }
+  [dir="rtl"] #focus.strata .st-row:hover .st-rgo svg { transform:scaleX(-1) translateX(2px); }
+  #focus.strata .st-capbtn:hover { background:var(--st-caprock-worn); }
+  #focus.strata .ch-row:hover,
+  #focus.strata .st-cap .st-fold:hover { background:rgba(255,255,255,0.06); }
+}
+#focus.strata .st-head:active,
+#focus.strata .st-row:active { background:var(--st-press); }
+#focus.strata .st-capbtn:active { background:var(--st-caprock-deep); }
+
+/* The site's ring sits 3px outside, where this sheet clips it. Inside the
+   sheet the ring is drawn inset, whole, in the bed ink (white on the cap). */
+#focus.strata .st-head:focus-visible,
+#focus.strata .st-row:focus-visible,
+#focus.strata .st-body .st-fold:focus-visible {
+  outline:2px solid var(--st-bore) !important; outline-offset:-2px !important;
+}
+#focus.strata .st-capbtn:focus-visible,
+#focus.strata .ch-row:focus-visible,
+#focus.strata .st-cap .st-fold:focus-visible {
+  outline:2px solid #FFFFFF !important; outline-offset:-3px !important;
 }
 
-/* Two faces on one card, crossfaded. The box changes size around them while
-   they stay their own size, so nothing stretches on the way. */
-.fc-full, .fc-mini {
-  position:absolute; inset:0; transform-origin:top left;
-  transition:opacity 280ms ease;
+/* ── Wider: the same sheet. Areas sit in two columns that read down the
+   first column and then the second, so the ranking stays in order. ── */
+@media (min-width:700px){
+  #focus.strata { --st-gap:22px; --st-numeral:56px; }
+  #focus.strata .st-col { border-radius:14px; }
+  #focus.strata .st-capbtn { padding:22px var(--st-gap) 20px; }
+  #focus.strata .cap-n { font-size:50px; letter-spacing:-2px; }
+  #focus.strata .cap-t { font-size:20px; }
+  #focus.strata .cap-d { font-size:13.5px; }
+  #focus.strata .ch-grid {
+    grid-template-columns:1fr 1fr; column-gap:28px; padding-bottom:10px;
+    padding-inline-start:calc(var(--st-gap) + var(--st-numeral) + 14px);
+  }
+  #focus.strata .st-head { min-height:72px; padding:16px var(--st-gap); }
+  #focus.strata .st-name { font-size:20px; }
+  #focus.strata .st-meta { font-size:13px; }
+  #focus.strata .st-desc { display:inline; }
+
+  #focus.strata .st-members {
+    display:grid; grid-template-columns:1fr 1fr;
+    grid-template-rows:repeat(var(--rows, 6), auto); grid-auto-flow:column;
+  }
+  #focus.strata .st-members li:first-child::before,
+  #focus.strata .st-members li.st-top::before { display:none; }
+  /* Only the first column touches the track, so only it carries ticks. */
+  #focus.strata .st-members li.st-c2::after { display:none; }
+  #focus.strata .st-members li.st-c2 .st-row::before {
+    content:''; position:absolute; inset-inline-start:0; top:14px; bottom:14px;
+    width:1px; background:var(--st-lamina);
+  }
+  #focus.strata .st-row { min-height:62px; padding-block:11px; }
 }
-.fc-full { display:flex; flex-direction:column; padding:20px 20px 17px; }
-.fc-mini { display:flex; align-items:center; gap:13px; padding:0 17px; opacity:0; }
-.focus[data-state="focus"] .fcard:not(.on) .fc-full { opacity:0; }
-.focus[data-state="focus"] .fcard:not(.on) .fc-mini { opacity:1; }
 
-.fc-top { display:flex; align-items:baseline; gap:9px; }
-.fc-n { font-family:'BwGradual','Urbanist',sans-serif; font-size:46px; font-weight:800;
-  line-height:1; letter-spacing:-1.6px; color:var(--primary-ink); font-variant-numeric:tabular-nums; }
-.fc-k { font-size:10px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase;
-  color:var(--text-light); }
-.fc-t { font-family:'BwGradual','Urbanist',sans-serif; font-size:19px; font-weight:700;
-  color:var(--text); letter-spacing:-0.3px; margin-top:14px; }
-.fc-d { font-size:13px; line-height:1.55; color:var(--text-muted); margin-top:6px; }
-.fc-meter { margin-top:auto; height:5px; border-radius:999px; overflow:hidden;
-  background:rgba(0,88,90,0.14); }
-.fc-meter i { display:block; height:100%; width:0; min-width:4px; border-radius:999px;
-  background:linear-gradient(90deg, var(--primary), #00BBB6);
-  transition:width 820ms cubic-bezier(0.22,1,0.36,1) 180ms; }
-.fc-foot { margin-top:11px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.fc-stat { font-size:12.5px; color:var(--text-muted); font-variant-numeric:tabular-nums; }
-.fc-stat b { color:var(--text); font-weight:700; }
-.fc-share { font-size:11.5px; font-weight:700; color:var(--primary-ink); font-variant-numeric:tabular-nums; }
-
-.fc-mn { font-family:'BwGradual','Urbanist',sans-serif; font-size:26px; font-weight:800;
-  line-height:1; letter-spacing:-0.9px; color:var(--primary-ink); font-variant-numeric:tabular-nums;
-  min-width:34px; }
-.fc-mt { flex:1; font-family:'BwGradual','Urbanist',sans-serif; font-size:15px;
-  font-weight:700; color:var(--text); letter-spacing:-0.2px; }
-.fc-go, .fr-go {
-  width:28px; height:28px; flex-shrink:0;
-  display:inline-flex; align-items:center; justify-content:center;
-  border-radius:50%; border:1px solid rgba(0,88,90,0.18); color:var(--primary-ink);
-  transition:background 240ms cubic-bezier(0.22,1,0.36,1),
-             border-color 240ms cubic-bezier(0.22,1,0.36,1),
-             color 240ms cubic-bezier(0.22,1,0.36,1),
-             transform 240ms cubic-bezier(0.22,1,0.36,1);
-}
-.fc-go svg { width:13px; height:13px; }
-.fr-go { width:26px; height:26px; }
-.fr-go svg { width:11px; height:11px; }
-.fcard.on .fc-go svg { transform:rotate(180deg); }
-
-/* The areas, as a list. A master and detail layout wants rows, not a bento:
-   a row holds the full name of a Center of Excellence without squeezing it. */
-.flist { display:flex; flex-direction:column; gap:5px; height:0; overflow:hidden; opacity:0; }
-.focus[data-state="focus"] .flist { height:auto; overflow:visible; opacity:1; }
-.frow {
-  display:flex; align-items:center; gap:13px; text-decoration:none;
-  padding:10px 14px; border-radius:12px;
-  background:rgba(255,255,255,0.4);
-  border:1px solid rgba(255,255,255,0.5);
-  opacity:0; transform:translateX(16px);
-  animation:frowIn 460ms cubic-bezier(0.22,1,0.36,1) forwards;
-  animation-delay:calc(var(--i,0) * 26ms + 150ms);
-  transition:background 220ms ease, border-color 220ms ease,
-             box-shadow 220ms ease;
-}
-@keyframes frowIn { to { opacity:1; transform:none; } }
-@media (hover:hover) and (pointer:fine){
-  .frow:hover { background:rgba(255,255,255,0.95); border-color:rgba(0,93,99,0.24);
-    box-shadow:0 8px 20px rgba(0,88,90,0.10); }
-  .frow:hover .fr-go { background:var(--primary); border-color:var(--primary);
-    color:#fff; transform:translateX(2px); }
-}
-.frow:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
-.fr-n { font-family:'BwGradual','Urbanist',sans-serif; font-size:11px; font-weight:800;
-  color:var(--text-light); font-variant-numeric:tabular-nums; min-width:20px; }
-.fr-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
-.fr-name { font-family:'BwGradual','Urbanist',sans-serif; font-size:13.5px; font-weight:700;
-  color:var(--text); letter-spacing:-0.15px; }
-.fr-tag { font-size:9.5px; letter-spacing:0.7px; text-transform:uppercase; color:var(--text-light); }
-.fr-docs { font-family:'BwGradual','Urbanist',sans-serif; font-size:15.5px; font-weight:800;
-  color:var(--text); font-variant-numeric:tabular-nums; letter-spacing:-0.4px; flex-shrink:0; }
-.fr-docs span { font-size:10px; font-weight:500; color:var(--text-muted);
-  letter-spacing:0; margin-inline-start:4px; }
-
-.fhead { display:flex; align-items:baseline; justify-content:space-between; gap:16px;
-  flex-wrap:wrap; margin-bottom:10px; padding:0 3px; }
-.fhead h4 { font-family:'BwGradual','Urbanist',sans-serif; font-size:11px; font-weight:700;
-  letter-spacing:1.5px; text-transform:uppercase; color:var(--text); }
-.fhead span { font-size:11px; color:var(--text-muted); }
-.fhead span b { color:var(--text); font-weight:700; font-variant-numeric:tabular-nums; }
-
-
-html[data-taqa-theme="dark"] .focus {
-  background:rgba(0,45,48,0.55); border-color:rgba(255,255,255,0.08);
-  box-shadow:0 1px 2px rgba(0,0,0,0.3), 0 20px 48px rgba(0,0,0,0.34);
-}
-html[data-taqa-theme="dark"] .focus::before {
-  background:linear-gradient(158deg, rgba(255,255,255,0.08), rgba(255,255,255,0) 44%);
-}
-html[data-taqa-theme="dark"] .focus[data-state="focus"] .fside {
-  background:linear-gradient(162deg, rgba(0,187,182,0.16), rgba(0,93,99,0.09) 72%);
-  border-color:rgba(0,187,182,0.24);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.06);
-}
-html[data-taqa-theme="dark"] .fcard {
-  background:rgba(0,45,48,0.72); border-color:rgba(255,255,255,0.10);
-}
-html[data-taqa-theme="dark"] .fcard.on { background:rgba(0,45,48,0.9); border-color:var(--primary); }
-html[data-taqa-theme="dark"] .frow {
-  background:rgba(0,45,48,0.42); border-color:rgba(255,255,255,0.06);
-}
-html[data-taqa-theme="dark"] .fc-meter { background:rgba(255,255,255,0.12); }
-html[data-taqa-theme="dark"] .fc-go, html[data-taqa-theme="dark"] .fr-go { border-color:rgba(255,255,255,0.17); }
-
-@media(max-width:900px){
-  .focus[data-state="focus"] .fstage { grid-template-columns:1fr; }
-  .focus[data-state="focus"] .fside { position:static; }
-  .focus[data-state="focus"] .fswitch { grid-template-columns:1fr 1fr; }
-  .focus[data-state="focus"] .fcard.on { grid-column:1/-1; }
-  .fswitch { grid-template-columns:1fr; }
-}
-/* Two folded cards side by side leaves a mini about 176px wide, which wraps
-   the title and squeezes the ring against the edge. One per row below this. */
-@media(max-width:620px){
-  .focus[data-state="focus"] .fswitch { grid-template-columns:1fr; }
-}
-/* ── Phone and tablet: two levels that look like two levels ─────────────
-   Stacked, the desktop arrangement became a box inside a box inside a box:
-   the glass sheet, the tinted side panel, then a 224px card for the chosen
-   group that was mostly air, with two more cards under it and then eleven
-   rows each drawn as another box. The groups and their members wore the
-   same material, so nothing said which was the choice and which was the
-   result of choosing.
-
-   Below 900px the three groups are one row of equal tiles, the way a
-   segmented control reads: pick one of three. The chosen tile is filled
-   with the brand teal. Its members open in a single card directly under it,
-   with a notch pointing back at the tile that opened them, and the rows are
-   divided by hairlines instead of being boxes of their own. */
-@media(max-width:900px){
-  .focus { padding:0; background:none; border:0; box-shadow:none;
-    -webkit-backdrop-filter:none; backdrop-filter:none; }
-  .focus::before { display:none; }
-  .focus[data-state="focus"] .fstage,
-  .fstage { grid-template-columns:1fr; gap:14px; }
-  .focus[data-state="focus"] .fside { position:static; padding:0; background:none;
-    border:0; box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none; }
-
-  .fswitch,
-  .focus[data-state="focus"] .fswitch { grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
-  .fcard,
-  .focus[data-state="focus"] .fcard,
-  .focus[data-state="focus"] .fcard.on { height:auto; grid-column:auto; }
-  .fcard { border-radius:14px; background:var(--bg-white,#fff);
-    border:1px solid rgba(117,106,97,0.22); box-shadow:0 1px 2px rgba(0,88,90,0.06); }
-
-  /* One face on a phone: the count, then the name. */
-  .fc-full { display:none; }
-  .fc-mini,
-  .focus[data-state="focus"] .fcard:not(.on) .fc-mini {
-    position:static; opacity:1; display:flex; flex-direction:column;
-    align-items:flex-start; justify-content:flex-start; gap:6px;
-    padding:13px 12px 14px; min-height:92px; }
-  .fc-mn { font-size:26px; min-width:0; }
-  .fc-mt { flex:none; font-size:12.5px; line-height:1.25; letter-spacing:0; }
-  .fc-go { display:none; }
-
-  .fcard.on,
-  .focus[data-state="focus"] .fcard.on {
-    background:var(--primary); border-color:var(--primary);
-    box-shadow:0 6px 16px rgba(0,88,90,0.22); }
-  .fcard.on .fc-mn, .fcard.on .fc-mt { color:#fff; }
-
-  /* The members, as one card that belongs to the chosen tile. */
-  .focus[data-state="focus"] .flist {
-    position:relative; gap:0; margin-top:4px; padding:6px 4px 4px;
-    background:var(--bg-white,#fff); border-radius:16px;
-    border:1px solid rgba(117,106,97,0.22);
-    box-shadow:0 1px 2px rgba(0,88,90,0.06), 0 10px 26px rgba(0,88,90,0.07); }
-  .focus[data-state="focus"] .flist::before {
-    content:''; position:absolute; top:-7px; inset-inline-start:var(--caret,16.67%);
-    width:12px; height:12px; margin-inline-start:-6px; transform:rotate(45deg);
-    background:inherit; border-top:1px solid rgba(117,106,97,0.22);
-    border-left:1px solid rgba(117,106,97,0.22); }
-  .fhead { margin:8px 10px 4px; padding:0; flex-direction:column; align-items:flex-start; gap:2px; }
-  .fhead h4 { font-size:15px; letter-spacing:-0.2px; text-transform:none; }
-  .frow { padding:12px 10px; }
-
-  .frow { border:0; border-radius:0; background:none;
-    box-shadow:none; gap:12px; }
-  .frow + .frow { border-top:1px solid rgba(117,106,97,0.16); }
-  .fr-n { display:none; }
-  .fr-name { font-size:14.5px; }
-  .fr-tag { font-size:10px; }
-  .fr-go { width:18px; height:18px; border:0; }
-
-  html[data-taqa-theme="dark"] .fcard { background:#002326; border-color:rgba(0,187,182,0.18); }
-  html[data-taqa-theme="dark"] .fcard.on { background:var(--primary); border-color:#00BBB6; }
-  html[data-taqa-theme="dark"] .focus[data-state="focus"] .flist {
-    background:#002326; border-color:rgba(0,187,182,0.20); box-shadow:none; }
-  html[data-taqa-theme="dark"] .focus[data-state="focus"] .flist::before {
-    border-color:rgba(0,187,182,0.20); }
-  html[data-taqa-theme="dark"] .frow { background:none; }
-  html[data-taqa-theme="dark"] .frow + .frow { border-top-color:rgba(0,187,182,0.12); }
-}
 @media (prefers-reduced-motion: reduce){
-  .frow { animation:none; opacity:1; transform:none; }
-  .fc-meter i { transition:none; }
+  #focus.strata .st-body,
+  #focus.strata .st-body-in,
+  #focus.strata .charter-panel,
+  #focus.strata .st-chev svg,
+  #focus.strata .cap-act svg { transition:none; }
+  #focus.strata .st-layer[data-open="true"] .st-members li { animation:none; }
 }
-
-/* ── The company charter ───────────────────────────────────────────────
-   A policy is a different kind of thing from a segment's paperwork, so it
-   gets a different surface. Dark teal above the glass, because the eye
-   reads dark as the roof and everything under it as what it covers. */
-.charter {
-  width:100%; display:flex; align-items:center; gap:18px; text-align:start;
-  font-family:inherit; cursor:pointer; margin-bottom:13px;
-  padding:17px 20px; border-radius:18px; position:relative; overflow:hidden;
-  background:linear-gradient(135deg, #00474C 0%, #005D63 55%, #00767A 100%);
-  border:1px solid rgba(0,187,182,0.3); color:#fff;
-  box-shadow:0 10px 26px rgba(0,88,90,0.22);
-  transition:transform 300ms cubic-bezier(0.22,1,0.36,1),
-             box-shadow 300ms cubic-bezier(0.22,1,0.36,1);
-}
-.charter::after {
-  content:''; position:absolute; top:-58px; inset-inline-end:-30px;
-  width:190px; height:190px; border-radius:50%; pointer-events:none;
-  background:radial-gradient(circle, rgba(0,187,182,0.3), transparent 62%);
-}
-@media (hover:hover) and (pointer:fine){
-  .charter:hover { transform:translateY(-2px); box-shadow:0 16px 34px rgba(0,88,90,0.3); }
-  .charter:hover .ch-go { background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.5); }
-}
-.charter:focus-visible { outline:2px solid #00BBB6; outline-offset:3px; }
-.ch-main { flex:1; min-width:0; }
-.ch-tag { display:block; font-size:10px; font-weight:700; letter-spacing:1.6px;
-  text-transform:uppercase; color:rgba(255,255,255,0.78); margin-bottom:6px; }
-.ch-t { display:block; font-family:'BwGradual','Urbanist',sans-serif; font-size:16px;
-  font-weight:700; letter-spacing:-0.2px; color:#fff; }
-.ch-t b { font-size:20px; font-weight:800; color:#fff; font-variant-numeric:tabular-nums;
-  margin-inline-end:3px; }
-.ch-d { display:block; font-size:12px; line-height:1.55; color:rgba(255,255,255,0.72);
-  margin-top:5px; max-width:74ch; }
-.ch-go {
-  width:36px; height:36px; flex-shrink:0; display:inline-flex;
-  align-items:center; justify-content:center; border-radius:50%;
-  border:1px solid rgba(255,255,255,0.32); background:rgba(255,255,255,0.1); color:#fff;
-  transition:background 260ms ease, border-color 260ms ease;
-}
-.ch-go svg { width:15px; height:15px;
-  transition:transform 380ms cubic-bezier(0.22,1,0.36,1); }
-.charter[aria-expanded="true"] .ch-go svg { transform:rotate(90deg); }
-
-.charter-panel { height:0; overflow:hidden; margin-bottom:0;
-  transition:height 420ms cubic-bezier(0.22,1,0.36,1), margin-bottom 420ms cubic-bezier(0.22,1,0.36,1); }
-.charter-panel.open { margin-bottom:13px; }
-.ch-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
-@media(max-width:760px){ .ch-grid { grid-template-columns:1fr; } }
-.ch-row {
-  display:flex; align-items:center; gap:12px; text-decoration:none;
-  padding:11px 14px; border-radius:12px;
-  background:rgba(255,255,255,0.56); border:1px solid rgba(255,255,255,0.7);
-  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
-  transition:background 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
-}
-@media (hover:hover) and (pointer:fine){
-  .ch-row:hover { background:rgba(255,255,255,0.95); border-color:rgba(0,93,99,0.24);
-    box-shadow:0 8px 20px rgba(0,88,90,0.1); }
-}
-.ch-num { font-family:'BwGradual','Urbanist',sans-serif; font-size:10.5px; font-weight:800;
-  letter-spacing:0.2px; color:var(--primary-ink); font-variant-numeric:tabular-nums;
-  min-width:116px; flex-shrink:0; }
-.ch-name { flex:1; min-width:0; font-size:12.5px; font-weight:600; color:var(--text); }
-.ch-flag { font-size:9.5px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase;
-  color:var(--text-light); flex-shrink:0; }
-html[data-taqa-theme="dark"] .ch-row {
-  background:rgba(0,45,48,0.6); border-color:rgba(255,255,255,0.09); }
-@media (prefers-reduced-motion: reduce){ .charter-panel { transition:none; } }
 
 /* ── Footer Credit ── */
 .footer-credit {
@@ -1771,24 +1789,21 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
         <span class="section-hl-tag">Explore by Discipline</span>
         <h2 class="section-hl-title">One platform. Every discipline.</h2>
       </div>
-      <button type="button" class="charter reveal" id="charter" aria-expanded="false" aria-controls="charter-list">
-        <span class="ch-main">
-          <span class="ch-tag">Company wide</span>
-          <span class="ch-t"><b id="ch-n">0</b> policies every segment, function and center follows</span>
-          <span class="ch-d">Signed by the CEO. A policy is the top of the hierarchy in section 4, so it is never owned by one area.</span>
-        </span>
-        <span class="ch-go" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
-        </span>
-      </button>
-      <div class="charter-panel" id="charter-list"></div>
-
-      <div class="focus reveal" id="focus" data-state="focus">
-        <div class="fstage">
-          <div class="fside">
-            <div class="fswitch" id="fswitch"></div>
+      <div class="strata reveal" id="focus">
+        <div class="st-col">
+          <div class="st-cap">
+            <button type="button" class="st-capbtn" id="charter" aria-expanded="false" aria-controls="charter-list">
+              <span class="cap-n" id="ch-n">…</span>
+              <span class="cap-main">
+                <span class="cap-t">Company policies</span>
+                <span class="cap-d">Signed by the CEO. Every segment, function and center below follows them.</span>
+              </span>
+              <span class="cap-act" aria-hidden="true"><span class="cap-show">See all</span><span class="cap-hide">Hide</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9.5l6 6 6-6"/></svg></span>
+            </button>
+            <div class="charter-panel" id="charter-list"></div>
           </div>
-          <div class="flist" id="flist"></div>
+          <div class="st-seal" aria-hidden="true"></div>
+          <div id="st-beds"></div>
         </div>
       </div>
 
@@ -2057,7 +2072,9 @@ document.addEventListener('click',function(e){
 </script>
 <script>
 // ── Continue Reading ──
-(function(){
+// Runs once the page has parsed, because the register it reads the type
+// marks and area names from loads further down.
+document.addEventListener('DOMContentLoaded', function(){
   try {
     var events = JSON.parse(localStorage.getItem('taqa-analytics') || '[]');
     var lastOpen = null;
@@ -2082,7 +2099,7 @@ document.addEventListener('click',function(e){
     document.getElementById('continue-card').href = 'viewer.html?seg=' + (seg||'') + '&type=' + type + '&title=' + encodeURIComponent(lastOpen.k);
     document.getElementById('continue-strip').style.display = '';
   } catch(e) {}
-})();
+});
 </script>
 <!-- ── First-Time Tour ── -->
 <div id="tour-backdrop"></div>
@@ -2390,17 +2407,18 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
 })();
 </script>
 <script>
-/* ── Focus layout ──────────────────────────────────────────────────────
-   Every figure comes from the register, so this preview and the master list
-   can never quote different numbers.                                     */
+/* ── Explore by Discipline ─────────────────────────────────────────────
+   Every figure comes from the register, so this sheet and the master list
+   can never quote different numbers, and an upload moves both.         */
 (function(){
   if (typeof TAQA_MASTER_DOCS === 'undefined') return;
   var D = TAQA_MASTER_DOCS, L = TAQA_DOC_LOOKUPS, A = TAQA_DOC;
+  var focus = document.getElementById('focus'),
+      beds  = document.getElementById('st-beds');
+  if (!focus || !beds) return;
 
-  // The three families come from the register's own "group" field. They used to
-  // be three arrays typed here, which is how Well Safety and Cybersecurity and
-  // a Venture Management that no longer exists all outlived their removal.
-  // A tag is display copy, so it stays here, keyed by id.
+  // The three families come from the register's own "group" field. A tag is
+  // display copy, so it stays here, keyed by id.
   var TAGS = {
     drilling:'Well Operations', 'well-safety':'HSE Critical', fracturing:'Stimulation',
     inspection:'Compliance', 'coiled-tubing':'Operations', cementing:'Well Integrity',
@@ -2412,218 +2430,195 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
     'pt-drilling-coe':'Edmonton, Canada', 'pt-completions-coe':'Aberdeen, United Kingdom',
     'pt-intervention-coe':'Stavanger, Norway'
   };
-  function family(group){
-    return Object.keys(L.segments)
-      .filter(function(k){ return L.segments[k].group === group; })
-      .map(function(k){ return { name:L.segments[k].name, from:k, tag:TAGS[k] || '' }; });
-  }
-  var SEGMENTS = family('segment'),
-      FUNCTIONS = family('function'),
-      PRODUCTS  = family('product');
-
-  var ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" ' +
-    'stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/>' +
-    '<path d="M13 6.5L18.5 12 13 17.5"/></svg>';
-
-  // Counts come from the store, so this sheet and the headline strip above it
-  // are reading the same population and an upload moves both.
-  var ST         = (typeof TAQA_STORE !== 'undefined') ? TAQA_STORE : null,
-      controlled = ST ? ST.rows('live') : D.filter(A.controlled),
-      company    = controlled.filter(function(d){ return d.scope === 'company'; }),
-      library    = controlled.length;
-  function statsFor(id){
-    return { docs: ST ? ST.area(id).live
-                      : controlled.filter(function(d){ return d.segment === id; }).length };
-  }
-  function rowsOf(list){
-    return list.map(function(x){
-      return { id:x.from, name:x.name, tag:x.tag, docs:statsFor(x.from).docs };
-    }).sort(function(a,b){ return b.docs - a.docs; });
-  }
-
   var ORDER = ['seg','fn','pt'];
-  var GROUPS = {
-    seg: { rows:rowsOf(SEGMENTS), title:'Operational Segments', noun:'segments',
-           desc:'Service lines that deliver the work.' },
-    fn:  { rows:rowsOf(FUNCTIONS), title:'Corporate Functions', noun:'functions',
-           desc:'Functions that set the rules.' },
-    pt:  { rows:rowsOf(PRODUCTS), title:'Products &amp; Technology', noun:'centers',
-           desc:'Technical home of each discipline.' }
+  // What each bed is for, in one line. Functions used to be "Functions that
+  // set the rules", which is what the policies above them do, and was part
+  // of the confusion between the two.
+  var META = {
+    seg: { group:'segment',  title:'Operational Segments',  noun:'segments',  desc:'Service lines that deliver the work' },
+    fn:  { group:'function', title:'Corporate Functions',   noun:'functions', desc:'The functions that run the company' },
+    pt:  { group:'product',  title:'Products & Technology', noun:'centers',   desc:'Technical home of each discipline' }
   };
-  ORDER.forEach(function(k){
-    var g = GROUPS[k];
-    g.docs = g.rows.reduce(function(a,x){ return a + x.docs; }, 0);
-    g.pct  = library ? Math.round(g.docs / library * 100) : 0;
-  });
-
-  var focus  = document.getElementById('focus'),
-      switcher = document.getElementById('fswitch'),
-      list   = document.getElementById('flist'),
-      open   = 'seg';
-
-  // ── The three cards ─────────────────────────────────────────────────
-  switcher.innerHTML = ORDER.map(function(k){
-    var g = GROUPS[k];
-    return '<button type="button" class="fcard' + (k === open ? ' on' : '') + '" ' +
-           'data-group="' + k + '" aria-pressed="' + (k === open) + '">' +
-             '<span class="fc-full">' +
-               '<span class="fc-top"><span class="fc-n">' + g.rows.length + '</span>' +
-                 '<span class="fc-k">areas</span></span>' +
-               '<span class="fc-t">' + g.title + '</span>' +
-               '<span class="fc-d">' + g.desc + '</span>' +
-               '<span class="fc-meter"><i data-pct="' + g.pct + '"></i></span>' +
-               '<span class="fc-foot">' +
-                 '<span class="fc-stat"><b>' + g.docs + '</b> documents</span>' +
-                 '<span class="fc-share">' + g.pct + '%</span>' +
-               '</span>' +
-             '</span>' +
-             '<span class="fc-mini">' +
-               '<span class="fc-mn">' + g.rows.length + '</span>' +
-               '<span class="fc-mt">' + g.title + '</span>' +
-               '<span class="fc-go">' + ARROW + '</span>' +
-             '</span>' +
-           '</button>';
-  }).join('');
-
-  var cards = ORDER.map(function(k){
-    var el = switcher.querySelector('.fcard[data-group="' + k + '"]');
-    return { k:k, el:el, faces:[el.querySelector('.fc-full'), el.querySelector('.fc-mini')] };
-  });
-
-  function fillMeters(){
-    switcher.querySelectorAll('.fc-meter i').forEach(function(i){
-      i.style.width = i.dataset.pct + '%';
+  var CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" ' +
+             'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+             '<path d="M6 9.5l6 6 6-6"/></svg>';
+  var GO   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+             'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+             '<path d="M9.5 6l6 6-6 6"/></svg>';
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c];
     });
   }
 
-  // ── The list beside it ──────────────────────────────────────────────
-  function draw(k){
-    var g = GROUPS[k];
-    list.style.setProperty('--caret', (ORDER.indexOf(k) * 2 + 1) / 6 * 100 + '%');
-    list.innerHTML =
-      '<div class="fhead"><h4>' + g.title + '</h4><span><b>' + g.rows.length + '</b> ' +
-        g.noun + ' · <b>' + g.docs + '</b> controlled documents</span></div>' +
-      g.rows.map(function(x, i){
-        return '<a class="frow" style="--i:' + i + '" href="segment.html?id=' + x.id + '">' +
-                 '<span class="fr-n">' + (i < 9 ? '0' : '') + (i + 1) + '</span>' +
-                 '<span class="fr-main"><span class="fr-name">' + x.name + '</span>' +
-                   '<span class="fr-tag">' + (x.tag || '') + '</span></span>' +
-                 '<span class="fr-docs">' + x.docs + '<span>docs</span></span>' +
-                 '<span class="fr-go">' + ARROW + '</span>' +
-               '</a>';
-      }).join('');
+  // Read fresh each time, so a document filed in this browser moves the
+  // counts without a reload.
+  function groups(){
+    var ST = (typeof TAQA_STORE !== 'undefined') ? TAQA_STORE : null,
+        controlled = ST ? ST.rows('live') : D.filter(A.controlled);
+    var out = {};
+    ORDER.forEach(function(k){
+      var m = META[k];
+      var rows = Object.keys(L.segments)
+        .filter(function(id){ return L.segments[id].group === m.group; })
+        .map(function(id){
+          var nm = L.segments[id].name, tg = TAGS[id] || '';
+          // A tag that only repeats the name (Finance, Finance) says nothing.
+          if (tg && nm.toLowerCase().indexOf(tg.toLowerCase()) === 0) tg = '';
+          return { id:id, name:nm, tag:tg,
+                   docs: ST ? ST.area(id).live
+                            : controlled.filter(function(d){ return d.segment === id; }).length };
+        })
+        .sort(function(a,b){ return b.docs - a.docs || a.name.localeCompare(b.name); });
+      out[k] = { rows:rows, docs:rows.reduce(function(s,x){ return s + x.docs; }, 0) };
+    });
+    out.company = controlled.filter(function(d){ return d.scope === 'company'; });
+    return out;
   }
 
-  // ── Moving between the two states ───────────────────────────────────
-  // The cards are measured where they are, the layout is changed, then they
-  // are put back where they were and released. Their faces take the inverse
-  // scale for the ride, so the box resizes without the text stretching.
-  var MOVE = 'transform 560ms cubic-bezier(0.22,1,0.36,1)';
+  var open = null;
+  function paint(){
+    var G = groups();
+    beds.innerHTML = ORDER.map(function(k){
+      var m = META[k], g = G[k], half = Math.ceil(g.rows.length / 2);
+      return '<div class="st-layer" data-k="' + k + '" data-open="' + (open === k) + '">' +
+        '<h3 class="st-h">' +
+          '<button type="button" class="st-head" id="st-h-' + k + '" data-group="' + k + '" ' +
+            'aria-expanded="' + (open === k) + '" aria-controls="st-b-' + k + '">' +
+            '<span class="st-name">' + esc(m.title) + '</span>' +
+            '<span class="st-meta">' +
+              '<span class="st-stat"><b>' + g.rows.length + '</b> ' + m.noun + '</span>' +
+              '<span class="st-stat"><b>' + g.docs + '</b> documents</span>' +
+              '<span class="st-desc">' + esc(m.desc) + '</span>' +
+            '</span>' +
+            '<span class="st-chev">' + CHEV + '</span>' +
+          '</button>' +
+        '</h3>' +
+        '<div class="st-body" id="st-b-' + k + '" role="region" aria-labelledby="st-h-' + k + '">' +
+          '<div class="st-body-in">' +
+            '<ul class="st-members" style="--rows:' + half + '">' +
+            g.rows.map(function(x, i){
+              var cls = i >= half ? (i === half ? 'st-c2 st-top' : 'st-c2') : '';
+              return '<li' + (cls ? ' class="' + cls + '"' : '') + ' style="--i:' + i + '">' +
+                '<a class="st-row" href="segment.html?id=' + encodeURIComponent(x.id) + '">' +
+                  '<span class="st-rname">' + esc(x.name) + '</span>' +
+                  '<span class="st-rtag">' + esc(x.tag) + '</span>' +
+                  '<span class="st-rdocs"><b>' + x.docs + '</b>docs</span>' +
+                  '<span class="st-rgo">' + GO + '</span>' +
+                '</a></li>';
+            }).join('') +
+            '</ul>' +
+            '<button type="button" class="st-fold" data-fold="' + k + '">' + CHEV +
+              'Close ' + esc(m.title) + '</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return G;
+  }
 
-  function flip(mutate){
-    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      mutate(); return;
+  function setOpen(k){
+    open = k;
+    beds.querySelectorAll('.st-layer').forEach(function(el){
+      var on = el.dataset.k === k;
+      el.dataset.open = String(on);
+      el.querySelector('.st-head').setAttribute('aria-expanded', String(on));
+    });
+  }
+
+  // Which bed is open on arrival. On a phone the whole cross-section reads
+  // first, cap rock and three beds, so none is; on a wide screen the first
+  // is. After that, whatever this person last opened, because people come
+  // back for their own area. A convenience only: correct without storage.
+  var KEY = 'taqa-strata-bed', saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  var narrow = window.matchMedia && matchMedia('(max-width:699px)').matches;
+  open = saved === 'none' ? null : (META[saved] ? saved : (narrow ? null : 'seg'));
+  var G = paint();
+
+  // The header you touched stays under your finger while a bed above it
+  // closes. Scroll anchoring is off on the sheet so the two never fight.
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function pin(el, y0){
+    var t0 = performance.now();
+    (function step(){
+      var dy = el.getBoundingClientRect().top - y0;
+      if (Math.abs(dy) > 0.5) window.scrollBy(0, dy);
+      if (!reduce && performance.now() - t0 < 360) requestAnimationFrame(step);
+    })();
+  }
+  function remember(k){ try { localStorage.setItem(KEY, k || 'none'); } catch (e) {} }
+
+  beds.addEventListener('click', function(e){
+    var b = e.target.closest('.st-head');
+    if (b) {
+      // A sticky header may be the one tapped while pinned under the nav;
+      // pin to where the bed itself sits, not where the header floats.
+      var layer = b.closest('.st-layer'),
+          y0 = layer.getBoundingClientRect().top,
+          next = open === b.dataset.group ? null : b.dataset.group;
+      setOpen(next); remember(next);
+      if (y0 >= 0) pin(layer, y0);
+      else layer.scrollIntoView({ block:'start', behavior: reduce ? 'auto' : 'smooth' });
+      return;
     }
-    var first = cards.map(function(c){ return c.el.getBoundingClientRect(); });
-    mutate();
-    var last = cards.map(function(c){ return c.el.getBoundingClientRect(); });
-    cards.forEach(function(c, i){
-      var f = first[i], l = last[i];
-      if (!l.width || !l.height) return;
-      var dx = f.left - l.left, dy = f.top - l.top,
-          sx = f.width / l.width, sy = f.height / l.height;
-      if (Math.abs(dx) < 1 && Math.abs(dy) < 1 &&
-          Math.abs(sx - 1) < 0.005 && Math.abs(sy - 1) < 0.005) return;
-      c.el.style.transition = 'none';
-      c.el.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')';
-      c.faces.forEach(function(face){
-        face.style.transition = 'none';
-        face.style.transform = 'scale(' + (1 / sx) + ',' + (1 / sy) + ')';
-      });
-    });
-    requestAnimationFrame(function(){
-      cards.forEach(function(c){
-        c.el.style.transition = MOVE;
-        c.el.style.transform = '';
-        c.faces.forEach(function(face){
-          face.style.transition = MOVE + ', opacity 280ms ease';
-          face.style.transform = '';
-        });
-      });
-    });
-  }
-
-  function select(k){
-    flip(function(){
-      open = k;
-      focus.dataset.state = 'focus';
-      cards.forEach(function(c){
-        c.el.classList.toggle('on', c.k === k);
-        c.el.setAttribute('aria-pressed', String(c.k === k));
-      });
-      draw(k);
-    });
-  }
-
-  function browse(){
-    flip(function(){
-      open = null;
-      focus.dataset.state = 'browse';
-      cards.forEach(function(c){
-        c.el.classList.remove('on');
-        c.el.setAttribute('aria-pressed','false');
-      });
-    });
-  }
-
-  switcher.addEventListener('click', function(e){
-    var btn = e.target.closest('.fcard'); if (!btn) return;
-    var k = btn.dataset.group;
-    if (open === k) browse(); else select(k);
+    var f = e.target.closest('.st-fold');
+    if (f) {
+      var lay = f.closest('.st-layer');
+      setOpen(null); remember(null);
+      var top = lay.getBoundingClientRect().top;
+      if (top < 72) window.scrollBy({ top: top - 80, behavior: reduce ? 'auto' : 'smooth' });
+      var h = lay.querySelector('.st-head'); if (h) h.focus({ preventScroll:true });
+    }
   });
 
-  // ── The company charter ─────────────────────────────────────────────
-  // It opens and closes the same way a door does, so the page has one
-  // behaviour rather than two.
-  (function(){
-    var btn  = document.getElementById('charter'),
-        pane = document.getElementById('charter-list');
-    if (!btn || !pane) return;
+  // ── The cap rock: the company policies ──────────────────────────────
+  var btn  = document.getElementById('charter'),
+      pane = document.getElementById('charter-list');
+  function fillCharter(company){
     document.getElementById('ch-n').textContent = company.length;
     pane.innerHTML = '<div class="ch-grid">' + company.map(function(d){
       return '<a class="ch-row" href="viewer.html?seg=company&type=' +
                encodeURIComponent(d.docType || 'policy') +
                '&title=' + encodeURIComponent(d.title) +
                (d.numberStatus === 'provisional' ? '' : '&doc=' + encodeURIComponent(d.docNumber)) + '">' +
-               '<span class="ch-num">' + d.docNumber + '</span>' +
-               '<span class="ch-name">' + d.title + '</span>' +
-               (d.numberStatus === 'provisional'
-                 ? '<span class="ch-flag">Number pending</span>' : '') +
+               '<span class="ch-num">' + esc(d.docNumber) + '</span>' +
+               '<span class="ch-name">' + esc(d.title) + '</span>' +
+               (d.numberStatus === 'provisional' ? '<span class="ch-flag">Number pending</span>' : '') +
              '</a>';
-    }).join('') + '</div>';
-
-    var body = pane.firstElementChild, shown = false;
-    btn.addEventListener('click', function(){
-      shown = !shown;
-      pane.style.height = pane.offsetHeight + 'px';
-      void pane.offsetHeight;
-      pane.classList.toggle('open', shown);
-      pane.style.height = (shown ? body.offsetHeight : 0) + 'px';
-      btn.setAttribute('aria-expanded', String(shown));
-      clearTimeout(pane._settle);
-      pane._settle = setTimeout(function(){
-        if (shown) pane.style.height = 'auto';
-      }, 440);
+    }).join('') + '</div>' +
+    '<button type="button" class="st-fold" data-fold="charter">' + CHEV + 'Hide the policies</button>';
+  }
+  var shown = false;
+  function showCharter(on){
+    shown = on;
+    pane.style.height = pane.offsetHeight + 'px';
+    void pane.offsetHeight;
+    pane.classList.toggle('open', shown);
+    var inner = 0;
+    for (var c = pane.firstElementChild; c; c = c.nextElementSibling) inner += c.offsetHeight;
+    pane.style.height = (shown ? inner : 0) + 'px';
+    btn.setAttribute('aria-expanded', String(shown));
+    clearTimeout(pane._settle);
+    pane._settle = setTimeout(function(){ if (shown) pane.style.height = 'auto'; }, 320);
+  }
+  if (btn && pane) {
+    fillCharter(G.company);
+    btn.addEventListener('click', function(){ showCharter(!shown); });
+    pane.addEventListener('click', function(e){
+      if (!e.target.closest('.st-fold')) return;
+      showCharter(false);
+      var top = btn.getBoundingClientRect().top;
+      if (top < 72) window.scrollBy({ top: top - 80, behavior: reduce ? 'auto' : 'smooth' });
+      btn.focus({ preventScroll:true });
     });
-  })();
+  }
 
-  draw(open);
-  if ('IntersectionObserver' in window) {
-    var mo = new IntersectionObserver(function(es){
-      es.forEach(function(e){ if (e.isIntersecting) { fillMeters(); mo.disconnect(); } });
-    }, { threshold:0.2 });
-    mo.observe(focus);
-  } else { fillMeters(); }
+  // A document filed or released elsewhere moves these counts.
+  window.addEventListener('taqa:register-changed', function(){
+    var g = paint();
+    if (btn && pane) { fillCharter(g.company); if (shown) pane.style.height = 'auto'; }
+  });
 })();
 </script>
 <script>
