@@ -7,6 +7,13 @@ Prepared for the TAQA Learning Center, for hand-over to IT · 20 September 2026
 Assessed against the working tree at `claude/inspiring-mayer-pm1350`
 Classification: Internal Use
 
+**Status note:** this assessment was written the same day `documents-master.js` was first
+built, and Findings 1–6 below describe the working tree just *before* that rebuild. All six
+have since been substantially implemented (a single `documents-master.js` register, real
+metadata with no hash-derived fabrication, `docNumber` addressing in `viewer.html`, and
+`upload.html`'s `submitUpload()` now calling `TAQA_STORE.add()`). The findings are left as
+written below for the audit trail; read them as history, not as the current state of the code.
+
 ---
 
 ## The constraint that shapes everything
