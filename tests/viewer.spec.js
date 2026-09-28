@@ -1,4 +1,4 @@
-// viewer.html — a single document's viewer.
+// viewer.html, a single document's viewer.
 //
 // Every query param is sanitized before use (see the const declarations
 // right after `const params = new URLSearchParams(...)` in viewer.html):
@@ -6,9 +6,9 @@
 // [A-Za-z0-9-_&.] and capped at 120 chars, title has any HTML tag stripped
 // and is capped at 300 chars. None of that sanitizing depends on the
 // document actually existing in the register, so a bad/unknown combination
-// never throws: it falls through to one of three states this file tests —
+// never throws: it falls through to one of three states this file tests , 
 // a real record, a role-denied record, or "Not in the Master Document
-// List" — never a blank page or a thrown error.
+// List", never a blank page or a thrown error.
 const { test, expect, assertNoConsoleErrors } = require('./helpers/fixtures');
 const { computeBaseline } = require('./helpers/baseline');
 
@@ -173,7 +173,7 @@ test.describe('document statuses render distinctly, per the actual code paths', 
     assertNoConsoleErrors(consoleErrors);
   });
 
-  test('under-review: no distinct banner for employee either (the document stays in force) — status differs only in the Quick Reference chip', async ({
+  test('under-review: no distinct banner for employee either (the document stays in force), status differs only in the Quick Reference chip', async ({
     page,
     gotoApp,
     setRole,
@@ -239,7 +239,7 @@ test.describe('document statuses render distinctly, per the actual code paths', 
     await setRole('employee', DOC_DRAFT.seg);
     await gotoApp(urlFor(DOC_DRAFT));
     // roles.js: employee's `statuses` list has no 'draft', so TAQA_ROLE.canSee
-    // refuses it — the record is withheld, not merely marked.
+    // refuses it, the record is withheld, not merely marked.
     await expect(page.locator('#lifecycle-banner .lcb-obsolete')).toContainText('Access restricted');
     await expect(page.locator('#meta-grid')).toContainText('Not available to your role');
     await expect(page.locator('#dl-btn')).toHaveAttribute('aria-disabled', 'true');

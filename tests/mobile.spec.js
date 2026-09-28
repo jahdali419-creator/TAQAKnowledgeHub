@@ -172,22 +172,18 @@ test.describe('touch target sizes (~40-44px minimum)', () => {
     }
   });
 
-  test('KNOWN BUG: dashboard approve/reject buttons fall short of the minimum (dashboard.html ~L119-127)', async ({
+  test('dashboard approve/reject buttons meet the minimum', async ({
     page,
     gotoApp,
     setRole,
   }) => {
-    // .btn-approve / .btn-reject (dashboard.html:119-127) use
-    // `padding:7px 18px; font-size:13px` with no min-height and are not
-    // members of the generic `.btn` class that shared.js's mobile
-    // touch-target rule forces to 44px under 768px width, so unlike the
-    // rest of the app's chrome, these measure well under a reasonable
-    // minimum on a real phone. dashboard.html is not on this suite's
-    // do-not-edit list, but fixing app code is out of scope for a
-    // test-writing task; this pins today's real (too-small) measurement so
-    // it does not regress further, and flips to an "unexpected pass" the
-    // day someone gives these buttons a real touch-friendly size.
-    test.fail(true, 'KNOWN BUG: dashboard.html .btn-approve/.btn-reject measure well under 40px tall on mobile');
+    // .btn-approve / .btn-reject (dashboard.html:119-127) carry their own
+    // classes, not the generic `.btn` shared.js's mobile touch-target rule
+    // targets, so they used to measure well under a comfortable tap
+    // target on a real phone. Fixed in shared.js's touch-target block
+    // (`.btn-approve,.btn-reject{min-height:44px!important;...}` under
+    // `@media(max-width:768px)`) during this task, this now asserts the
+    // real, fixed behavior rather than the earlier gap.
     await page.setViewportSize(VIEWPORTS.standard);
     await visit(page, gotoApp, setRole, '/dashboard.html?id=coiled-tubing');
 

@@ -1,7 +1,7 @@
 // Permanent regression suite for upload.html: the simulated document
 // submission wizard. This is a purely client-side prototype (no backend), so
-// every assertion here is about local app state/UI — what buildRecord(),
-// TAQA_STORE.add() and paintRecord() actually do — never about a real
+// every assertion here is about local app state/UI, what buildRecord(),
+// TAQA_STORE.add() and paintRecord() actually do, never about a real
 // SharePoint upload or a real network call, neither of which this code makes.
 //
 // Read upload.html's own <script> in full before touching this file; the
@@ -41,7 +41,7 @@ async function fillToReview(page, { segment = 'coiled-tubing', docType = 'sop', 
   await expect(page.locator('#panel-4')).toBeVisible();
 }
 
-test.describe('upload.html — file intake security', () => {
+test.describe('upload.html, file intake security', () => {
   test('a malicious filename renders as literal text in the file queue, not markup', async ({
     page,
     gotoApp,
@@ -152,7 +152,7 @@ test.describe('upload.html — file intake security', () => {
   // gap that was fixed alongside this suite: addFiles() previously accepted
   // a file of any size at all). A ~500MB file is too expensive to allocate
   // for a test, so a stand-in object with just {name, size} is passed
-  // straight to the page's own addFiles() — legitimate here because the
+  // straight to the page's own addFiles(), legitimate here because the
   // size check runs, and rejects, before the file's bytes are ever read.
   test('the "Max file size: 500 MB" label matches what is actually enforced', async ({ page, gotoApp, setRole }) => {
     await openUpload(gotoApp, setRole);
@@ -179,7 +179,7 @@ test.describe('upload.html — file intake security', () => {
       const before = document.querySelectorAll('.file-item').length;
       // Exactly the limit; addFiles() only rejects when size EXCEEDS it.
       // Real bytes are needed here since an accepted file goes on to have
-      // its hash computed via file.arrayBuffer() — use a real (tiny) File
+      // its hash computed via file.arrayBuffer(), use a real (tiny) File
       // rather than a stand-in object so that call does not throw.
       const f = new File([new Uint8Array(4)], 'right-at-limit.pdf', { type: 'application/pdf' });
       Object.defineProperty(f, 'size', { value: 500 * 1024 * 1024 });
@@ -191,7 +191,7 @@ test.describe('upload.html — file intake security', () => {
   });
 });
 
-test.describe('upload.html — multi-step wizard', () => {
+test.describe('upload.html, multi-step wizard', () => {
   test('starts on step 1 with the other panels hidden and Continue disabled until a file is added', async ({
     page,
     gotoApp,
@@ -286,7 +286,7 @@ test.describe('upload.html — multi-step wizard', () => {
   });
 });
 
-test.describe('upload.html — record preview (paintRecord), cross-checked against TAQA_DOC_LOOKUPS', () => {
+test.describe('upload.html, record preview (paintRecord), cross-checked against TAQA_DOC_LOOKUPS', () => {
   test('shows "Not assigned" for the document number when it has been cleared', async ({ page, gotoApp, setRole }) => {
     await openUpload(gotoApp, setRole);
     await fillToReview(page);
@@ -378,7 +378,7 @@ test.describe('upload.html — record preview (paintRecord), cross-checked again
   });
 });
 
-test.describe('upload.html — approval workflow text', () => {
+test.describe('upload.html, approval workflow text', () => {
   test('the approval note describes the real two-step QMS-then-approver process', async ({ page, gotoApp, setRole }) => {
     await openUpload(gotoApp, setRole);
     await fillToReview(page);
@@ -404,7 +404,7 @@ test.describe('upload.html — approval workflow text', () => {
   });
 });
 
-test.describe('upload.html — submit commits to the real register (TAQA_STORE)', () => {
+test.describe('upload.html, submit commits to the real register (TAQA_STORE)', () => {
   test('submitting a valid document adds a real draft row via TAQA_STORE, awaiting QMS first', async ({
     page,
     gotoApp,
@@ -424,8 +424,12 @@ test.describe('upload.html — submit commits to the real register (TAQA_STORE)'
     await expect(page.locator('#toast-title')).toHaveText('Submitted for review');
     await expect(page.locator('#upload-ref')).toHaveText(docNumber);
 
+    // store.js's population name for a draft awaiting action is 'pending'
+    // (POP.pending = isPending, testing d.status === 'draft'), not 'draft'
+    // itself, 'draft' is not a registered population name at all, and
+    // TAQA_STORE.rows() silently falls back to 'live' for an unknown one.
     const draftRows = await page.evaluate(
-      (num) => TAQA_STORE.rows('draft', { segment: 'coiled-tubing' }).filter((d) => d.docNumber === num),
+      (num) => TAQA_STORE.rows('pending', { segment: 'coiled-tubing' }).filter((d) => d.docNumber === num),
       docNumber
     );
     expect(draftRows.length).toBe(1);

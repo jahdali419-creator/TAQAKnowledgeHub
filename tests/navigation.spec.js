@@ -290,19 +290,29 @@ test.describe('Dark mode toggle', () => {
     await clearAppState();
     await gotoApp('/index.html');
 
+    // page.evaluate() right after a navigation can, in this sandbox, land on
+    // a transitional document even once gotoApp()'s own readyState wait has
+    // resolved (see fixtures.js's header comment on the underlying
+    // navigation-lifecycle quirk). expect.poll() re-runs the read instead of
+    // trusting a single evaluate call, the same way the locator assertions
+    // around it already tolerate that by re-querying.
+    async function themeStorage() {
+      return page.evaluate(() => localStorage.getItem('taqa-theme-v3')).catch(() => undefined);
+    }
+
     await expect(page.locator('html')).toHaveAttribute('data-taqa-theme', 'light');
-    expect(await page.evaluate(() => localStorage.getItem('taqa-theme-v3'))).toBeNull();
+    await expect.poll(themeStorage).toBeNull();
 
     await page.locator('#dark-toggle').click();
     await expect(page.locator('html')).toHaveAttribute('data-taqa-theme', 'dark');
-    expect(await page.evaluate(() => localStorage.getItem('taqa-theme-v3'))).toBe('dark');
+    await expect.poll(themeStorage).toBe('dark');
 
     await gotoApp('/index.html');
     await expect(page.locator('html')).toHaveAttribute('data-taqa-theme', 'dark');
 
     await page.locator('#dark-toggle').click();
     await expect(page.locator('html')).toHaveAttribute('data-taqa-theme', 'light');
-    expect(await page.evaluate(() => localStorage.getItem('taqa-theme-v3'))).toBe('light');
+    await expect.poll(themeStorage).toBe('light');
   });
 });
 
@@ -316,7 +326,15 @@ test.describe('The door (role / identity switcher)', () => {
     await clearAppState();
     await gotoApp('/index.html');
 
-    expect(await page.evaluate(() => TAQA_ROLE.current())).toBe('employee');
+    // TAQA_ROLE is a top-level const in roles.js, a real identifier but
+    // never a property of window, so it is read here as a bare identifier.
+    await expect
+      .poll(() =>
+        page
+          .evaluate(() => (typeof TAQA_ROLE !== 'undefined' ? TAQA_ROLE.current() : undefined))
+          .catch(() => undefined)
+      )
+      .toBe('employee');
 
     await page.locator('#taqa-door .door-btn').click();
     await expect(page.locator('#taqa-door .door-menu')).toBeVisible();

@@ -1,10 +1,10 @@
-// segment.html — an area's document library.
+// segment.html, an area's document library.
 //
 // segment.html keeps its OWN copy of segment metadata (icon/tag/description)
 // as a literal `SEGMENTS` object in its inline script, but an IIFE right
 // after it (see "The register decides what this area holds") rebuilds every
 // entry's counts and document lists from TAQA_DOC_LOOKUPS.segments +
-// TAQA_STORE.all(), for every id the register knows about — 'company'
+// TAQA_STORE.all(), for every id the register knows about, 'company'
 // included. So the numbers this page shows are always the live register's,
 // never the literal object's stale copy, and every one of the register's 26
 // areas gets a working page even though only some of them have hand-written
@@ -415,7 +415,7 @@ test.describe('mobile responsiveness at 390px', () => {
 // document, and only claims the gesture once a drag reads as clearly
 // horizontal. Playwright's high-level touch API (`page.touchscreen`) only
 // offers a single-point `tap()`, with no way to drive a multi-step drag
-// sequence, so a real finger-drag cannot be simulated through it — this is
+// sequence, so a real finger-drag cannot be simulated through it, this is
 // a known Playwright limitation, not something this suite works around by
 // inventing gesture behaviour. What CAN be verified without faking hardware
 // is the handler's own logic: dispatching real TouchEvent/Touch objects

@@ -9,7 +9,7 @@
 //      segment name; segments-data.js now carries a 'company' entry whose
 //      name is "Company Wide". "Company Wide segment name" below is that
 //      regression test.
-//   3. (dashboard.html's duplicate-document detector — out of scope here,
+//   3. (dashboard.html's duplicate-document detector, out of scope here,
 //      covered in dashboard's own suite if one exists.)
 //
 // This page requires TAQA_ROLE.canManage(id) (the area's own holder, or
@@ -27,7 +27,7 @@ async function openArea(gotoApp, setRole, area) {
   await gotoApp('/documents.html?id=' + area);
 }
 
-test.describe('documents.html — counts and pills', () => {
+test.describe('documents.html, counts and pills', () => {
   test('document count and pill breakdown match TAQA_STORE.rows("live", {segment}), and computeBaseline() agrees', async ({
     page,
     gotoApp,
@@ -112,7 +112,7 @@ test.describe('documents.html — counts and pills', () => {
   });
 });
 
-test.describe('documents.html — sorting', () => {
+test.describe('documents.html, sorting', () => {
   test('sorting by Document reorders rows, both directions, by the app\'s own key (doc number + title text)', async ({
     page,
     gotoApp,
@@ -123,7 +123,7 @@ test.describe('documents.html — sorting', () => {
     // The "Document" cell renders the doc number (.pdt-num) directly before
     // the title (.pdt-t) with no separator, and applyPubSort() sorts on that
     // whole cell's lowercased textContent with plain `<`/`>` (not
-    // localeCompare) — so the visible order is "by doc number, then title",
+    // localeCompare), so the visible order is "by doc number, then title",
     // not a pure alphabetical title sort. Replicate that exact key/comparator
     // rather than assuming a title-only alphabetical sort.
     const key = async () =>
@@ -213,7 +213,7 @@ test.describe('documents.html — sorting', () => {
   });
 });
 
-test.describe('documents.html — review-overdue status', () => {
+test.describe('documents.html, review-overdue status', () => {
   test('a document past its review date shows "Review overdue"; one that is not shows "Current"', async ({
     page,
     gotoApp,
@@ -273,7 +273,7 @@ test.describe('documents.html — review-overdue status', () => {
   });
 });
 
-test.describe('documents.html — security regression (stored XSS)', () => {
+test.describe('documents.html, security regression (stored XSS)', () => {
   test('a title containing HTML/script markup renders as literal escaped text, never as live markup', async ({
     page,
     gotoApp,
@@ -323,8 +323,8 @@ test.describe('documents.html — security regression (stored XSS)', () => {
     expect(titleText.trim()).toBe(maliciousTitle);
 
     // And structurally: the cell's only content for that span is a single
-    // text node, never an element node (which is what a real regression —
-    // dropping esc() from renderPubTable — would produce).
+    // text node, never an element node (which is what a real regression,
+    // dropping esc() from renderPubTable, would produce).
     const childElementCount = await row.locator('.pdt-t').evaluate((el) => el.childElementCount);
     expect(childElementCount).toBe(0);
 
@@ -333,7 +333,7 @@ test.describe('documents.html — security regression (stored XSS)', () => {
   });
 });
 
-test.describe('documents.html — withdraw', () => {
+test.describe('documents.html, withdraw', () => {
   test('withdraw is gated behind confirm(): dismissing leaves the document untouched, accepting withdraws it', async ({
     page,
     gotoApp,

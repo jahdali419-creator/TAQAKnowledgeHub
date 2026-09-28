@@ -169,7 +169,7 @@ test.describe('"Not your area"', () => {
   });
 
   test('the "Not your area" empty-pending copy itself is correct, exercised directly since normal navigation cannot currently reach it', async ({ page, gotoApp, setRole, clearAppState }) => {
-    // FINDING (reported, not changed — see the final report): the gate at
+    // FINDING (reported, not changed, see the final report): the gate at
     // the top of dashboard.html (~717-720) refuses with TAQA_ROLE.refuse()
     // using the exact same predicate initDashboard()'s later `MINE` check
     // (~1038) uses (cap.scope==='all' || id===cap.ownSegment) against the
@@ -177,8 +177,8 @@ test.describe('"Not your area"', () => {
     // has already been replaced before initDashboard() can render the
     // "Not your area" empty-pending branch: through ordinary `?id=` link
     // navigation that branch appears to be unreachable dead code. This test
-    // forces the one condition the gate itself cannot produce — effective()
-    // resolving to a different segment than the id the page rendered with —
+    // forces the one condition the gate itself cannot produce, effective()
+    // resolving to a different segment than the id the page rendered with , 
     // to confirm the branch's own markup is correct on its own terms.
     await gotoApp('/index.html');
     await clearAppState();

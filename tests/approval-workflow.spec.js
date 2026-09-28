@@ -6,7 +6,7 @@
 // As coded, release is:
 //   1. COUNTERSIGN  QMS checks the record (numbering/revision/dates) first.
 //   2. APPROVE      the named approver (Director/QHSE Manager, informational
-//                    text only — see the dedicated test below) gives the
+//                    text only, see the dedicated test below) gives the
 //                    final sign-off. This step is what actually publishes it.
 // Neither step can be taken by the other, and neither can be skipped.
 //

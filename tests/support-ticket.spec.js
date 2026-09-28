@@ -2,7 +2,7 @@
 // "Ask an Expert" ticket form. This is a purely client-side prototype (no
 // backend): submitTicket() shows a toast and resets the form, but nothing is
 // transmitted anywhere and nothing is persisted (support-ticket.html itself
-// never touches localStorage/TAQA_STORE for the ticket data — confirmed by
+// never touches localStorage/TAQA_STORE for the ticket data, confirmed by
 // reading the file). Every assertion here is about that real, local
 // behavior, never about a real ticket having reached a real expert.
 const { test, expect, assertNoConsoleErrors } = require('./helpers/fixtures');
@@ -10,7 +10,7 @@ const { test, expect, assertNoConsoleErrors } = require('./helpers/fixtures');
 // A tiny (120x90) real PNG, embedded rather than shipped as a fixture file,
 // so the canvas annotation tests below load a genuine decodable image
 // (readAsDataURL + Image().onload both need real image bytes, not a stand-in
-// object — unlike upload.html's extension/size checks, which only look at
+// object, unlike upload.html's extension/size checks, which only look at
 // file metadata).
 const TINY_PNG_B64 =
   'iVBORw0KGgoAAAANSUhEUgAAAHgAAABaCAIAAAD8YgW4AAAA4ElEQVR4nO3QQRHAIADAMEAX/g9ZqFh5LFHQ6zx7D763Xgf8hdERoyNGR4yOGB0xOmJ0xOiI0RGjI0ZHjI4YHTE6YnTE6IjREaMjRkeMjhgdMTpidMToiNERoyNGR4yOGB0xOmJ0xOiI0RGjI0ZHjI4YHTE6YnTE6IjREaMjRkeMjhgdMTpidMToiNERoyNGR4yOGB0xOmJ0xOiI0RGjI0ZHjI4YHTE6YnTE6MgFy58B9AMwA/oAAAAASUVORK5CYII=';
@@ -34,7 +34,7 @@ async function fillRequired(page, overrides = {}) {
   await page.selectOption('#issue-cat', category);
 }
 
-test.describe('support-ticket.html — ticket reference number', () => {
+test.describe('support-ticket.html, ticket reference number', () => {
   test('submitting fills in a real, non-placeholder reference number', async ({
     page,
     gotoApp,
@@ -74,7 +74,7 @@ test.describe('support-ticket.html — ticket reference number', () => {
   });
 });
 
-test.describe('support-ticket.html — does not overclaim a real transmission', () => {
+test.describe('support-ticket.html, does not overclaim a real transmission', () => {
   test('the success toast does not claim the ticket was actually sent anywhere', async ({ page, gotoApp, setRole }) => {
     await openTicket(gotoApp, setRole);
     await fillRequired(page);
@@ -84,7 +84,7 @@ test.describe('support-ticket.html — does not overclaim a real transmission', 
     const detail = await page.locator('.ticket-toast small').textContent();
     // "sent"/"sent to" claims real delivery this prototype never performs
     // (there is no backend, and support-ticket.html writes nothing to
-    // localStorage or TAQA_STORE for the ticket — grep confirms it). This
+    // localStorage or TAQA_STORE for the ticket, grep confirms it). This
     // page's own copy was corrected accordingly; guard against it regressing.
     expect(heading.toLowerCase()).not.toContain('sent');
     expect(detail.toLowerCase()).not.toMatch(/\bsent\b/);
@@ -104,7 +104,7 @@ test.describe('support-ticket.html — does not overclaim a real transmission', 
   });
 });
 
-test.describe('support-ticket.html — form validation', () => {
+test.describe('support-ticket.html, form validation', () => {
   test('submitting with nothing filled in is blocked and shows a visible message', async ({ page, gotoApp, setRole }) => {
     await openTicket(gotoApp, setRole);
     await page.click('.btn-submit');
@@ -153,13 +153,13 @@ test.describe('support-ticket.html — form validation', () => {
   });
 });
 
-test.describe('support-ticket.html — photo annotation tools', () => {
+test.describe('support-ticket.html, photo annotation tools', () => {
   // Canvas-based, but it is a real 2D canvas (not WebGL), so Playwright's
   // mouse drag genuinely exercises onDown/onMove/onUp and can be verified
-  // meaningfully by comparing canvas pixel data before and after — this is
+  // meaningfully by comparing canvas pixel data before and after, this is
   // not a shallow "button exists" check. What is NOT verified here is that a
   // drawn shape is geometrically correct (e.g. that "rectangle" produces an
-  // actual rectangle) — that would need real image analysis. This confirms
+  // actual rectangle), that would need real image analysis. This confirms
   // the tool genuinely mutates the canvas, undoes, and clears, which is what
   // matters for a regression suite.
   async function addPhotoAndOpenAnnotator(page) {

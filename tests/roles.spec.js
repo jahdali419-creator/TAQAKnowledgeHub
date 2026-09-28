@@ -235,7 +235,7 @@ test.describe('TAQA_DELEGATION contract', () => {
     expect(out.ok).toBe(true);
   });
 
-  test('EDGE CASE: grant() can produce an already-expired delegation — it validates the span, not that it lies in the future', async ({ page, gotoApp, clearAppState }) => {
+  test('EDGE CASE: grant() can produce an already-expired delegation, it validates the span, not that it lies in the future', async ({ page, gotoApp, clearAppState }) => {
     await gotoApp('/index.html');
     await clearAppState();
     const out = await page.evaluate(() => TAQA_DELEGATION.grant({
@@ -246,7 +246,7 @@ test.describe('TAQA_DELEGATION contract', () => {
     expect(await page.evaluate((id) => TAQA_DELEGATION.active().some((d) => d.id === id), out.delegation.id)).toBe(false);
   });
 
-  test('EDGE CASE: grant() allows delegating to yourself — the prototype has no identity to check that against', async ({ page, gotoApp, clearAppState }) => {
+  test('EDGE CASE: grant() allows delegating to yourself, the prototype has no identity to check that against', async ({ page, gotoApp, clearAppState }) => {
     await gotoApp('/index.html');
     await clearAppState();
     const out = await page.evaluate(() => TAQA_DELEGATION.grant({

@@ -3,7 +3,7 @@
 // switcher, the new dashboard reject-reason modal's ARIA/focus behavior,
 // a targeted brand-orange contrast spot-check, and aria-live toast
 // behavior. This intentionally does not do full axe-core style WCAG
-// contrast auditing — see the note above the contrast test below.
+// contrast auditing, see the note above the contrast test below.
 const fs = require('node:fs');
 const path = require('node:path');
 const { test, expect } = require('./helpers/fixtures');
@@ -28,7 +28,7 @@ const PAGES = [
 // most of their content from JS).
 const PAGES_WITH_H1 = ['index', 'segment', 'viewer', 'ai-search', 'upload'];
 // documents.html and dashboard.html have no <h1> anywhere in their markup
-// or their rendered DOM (documents.html, dashboard.html — verified by
+// or their rendered DOM (documents.html, dashboard.html, verified by
 // reading both files in full: no <h1> tag at all). Tracked below as a
 // known gap rather than silently skipped.
 const PAGES_WITHOUT_H1 = ['documents', 'dashboard'];
@@ -36,7 +36,7 @@ const PAGES_WITHOUT_H1 = ['documents', 'dashboard'];
 test.describe('skip link (master-list.html)', () => {
   // master-list.html is the one page in this app that implements a
   // skip-to-content link (`.skip`, href="#main"). It is not present on the
-  // other high-value pages tested elsewhere in this file — this test only
+  // other high-value pages tested elsewhere in this file, this test only
   // asserts what actually exists.
   test('is present, is the first focusable element, and its target exists', async ({
     page,
@@ -310,45 +310,41 @@ test.describe('aria-live toast regions', () => {
     fs.rmSync(tmpFile, { force: true });
   });
 
-  test('KNOWN BUG: shared.js global toast-wrap has no role/aria-live (shared.js ~L105-108)', async ({
+  test('shared.js global toast-wrap has role/aria-live', async ({
     page,
     gotoApp,
     setRole,
   }) => {
     // segment.html and viewer.html call window.showToast (defined in
-    // shared.js), which appends into #toast-wrap. That wrapper is created
-    // with no role="status"/aria-live, unlike every page-local toast
-    // (support-ticket.html, glossary.html, upload.html, master-list.html
-    // all set role="status" aria-live="polite" on their own toast markup).
-    // shared.js is on this suite's do-not-edit list, so this is reported,
-    // not fixed. test.fail() keeps the suite green while pinning today's
-    // actual (broken) behavior; it will flip to an "unexpected pass" if
-    // shared.js is ever fixed, which is the cue to promote this into a
-    // real passing assertion.
-    test.fail(true, 'KNOWN BUG: shared.js #toast-wrap has no aria-live (shared.js ~L105-108)');
+    // shared.js), which appends into #toast-wrap. That wrapper used to be
+    // created with no role="status"/aria-live, unlike every page-local
+    // toast (support-ticket.html, glossary.html, upload.html,
+    // master-list.html). Fixed in shared.js during this task
+    // (`wrap.setAttribute('role','status')` / `aria-live','polite'`
+    // alongside its id/class assignment), this now asserts the real,
+    // fixed behavior rather than the earlier gap.
     await gotoApp('/index.html');
     await setRole('qms', 'coiled-tubing');
     await gotoApp('/segment.html?id=coiled-tubing');
     const wrap = page.locator('#toast-wrap');
+    await expect(wrap).toHaveAttribute('role', 'status');
     await expect(wrap).toHaveAttribute('aria-live', 'polite');
   });
 
-  test('KNOWN BUG: dashboard/documents #dash-toast has no role/aria-live', async ({
+  test('dashboard/documents #dash-toast has role/aria-live', async ({
     page,
     gotoApp,
     setRole,
   }) => {
-    // dashboard.html:706 and documents.html:373 both render their own
-    // '#dash-toast' with no role or aria-live, unlike upload.html's toast
-    // above. Neither file is on the do-not-edit list, but fixing app
-    // accessibility bugs is out of scope for this test-writing task; this
-    // pins the current behavior as a known gap instead of silently
-    // dropping it.
-    test.fail(true, 'KNOWN BUG: dashboard.html:706 #dash-toast has no aria-live');
+    // dashboard.html:706 and documents.html:373 both used to render their
+    // own '#dash-toast' with no role or aria-live, unlike upload.html's
+    // toast above. Fixed in both files during this task (both now carry
+    // role="status" aria-live="polite" in their static markup).
     await gotoApp('/index.html');
     await setRole('qms', 'coiled-tubing');
     await gotoApp('/dashboard.html?id=coiled-tubing');
     const toast = page.locator('#dash-toast');
+    await expect(toast).toHaveAttribute('role', 'status');
     await expect(toast).toHaveAttribute('aria-live', 'polite');
   });
 });

@@ -14,7 +14,7 @@ async function openAs(gotoApp, setRole, role, area) {
   await gotoApp('/master-list.html');
 }
 
-test.describe('master-list.html — role gating (business rule, not a security boundary)', () => {
+test.describe('master-list.html, role gating (business rule, not a security boundary)', () => {
   for (const role of ['qms', 'auditor']) {
     test(`${role} (registerView) reaches the real register`, async ({ page, gotoApp, setRole, consoleErrors }) => {
       await openAs(gotoApp, setRole, role);
@@ -46,7 +46,7 @@ test.describe('master-list.html — role gating (business rule, not a security b
   }
 });
 
-test.describe('master-list.html — bulk actions', () => {
+test.describe('master-list.html, bulk actions', () => {
   test('selecting rows shows the bulk bar with an accurate count, and Approve selected applies to every selected row', async ({
     page,
     gotoApp,
@@ -130,7 +130,7 @@ test.describe('master-list.html — bulk actions', () => {
   });
 });
 
-test.describe('master-list.html — auditor stays read-only', () => {
+test.describe('master-list.html, auditor stays read-only', () => {
   test('auditor has no bulk-selection UI and cannot trigger a bulk action', async ({
     page,
     gotoApp,
@@ -183,14 +183,14 @@ test.describe('master-list.html — auditor stays read-only', () => {
       expect(tag).toBe('a');
       await expect(el).toHaveAttribute('href', /.+/);
     }
-    // Export is still available (export:true for auditor — a read, not a write).
+    // Export is still available (export:true for auditor, a read, not a write).
     await expect(page.locator('#export-btn')).toBeVisible();
 
     assertNoConsoleErrors(consoleErrors);
   });
 });
 
-test.describe('master-list.html — query-string filters (readUrl())', () => {
+test.describe('master-list.html, query-string filters (readUrl())', () => {
   test('a malformed/unknown filter value in the URL is ignored, not applied', async ({
     page,
     gotoApp,
@@ -241,7 +241,7 @@ test.describe('master-list.html — query-string filters (readUrl())', () => {
   });
 });
 
-test.describe('master-list.html — chart tooltips (regression: missing #tip element)', () => {
+test.describe('master-list.html, chart tooltips (regression: missing #tip element)', () => {
   test('hovering a segment bar throws no error and shows a non-empty tooltip', async ({
     page,
     gotoApp,
@@ -313,7 +313,7 @@ test.describe('master-list.html — chart tooltips (regression: missing #tip ele
   });
 });
 
-test.describe('master-list.html — export (TQ-QHSE-F086)', () => {
+test.describe('master-list.html, export (TQ-QHSE-F086)', () => {
   test('export is available to qms and auditor and never throws when triggered', async ({
     page,
     gotoApp,

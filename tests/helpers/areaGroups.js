@@ -2,7 +2,7 @@
 // reads (documents-master.js), for facts computeBaseline() does not expose:
 //
 //   - which nav "group" each area belongs to (segment / function / product /
-//     company / pending) — shared.js's Areas dropdown and index.html's three
+//     company / pending), shared.js's Areas dropdown and index.html's three
 //     "Explore by Discipline" beds only ever render the segment/function/
 //     product groups; "company" (Company Wide) and "pending" (areas waiting
 //     on an org decision, e.g. TWS Maintenance) are deliberately handled

@@ -26,6 +26,50 @@ const CORE_PATHS = CORE_MATCH
   ? Array.from(CORE_MATCH[1].matchAll(/BASE(?:\s*\+\s*'([^']*)')?/g)).map((m) => m[1] || '')
   : [];
 
+// shared.js reloads the page the first time the service worker's
+// 'controllerchange' fires (the standard PWA "pick up the new build"
+// pattern, see playwright.config.js's comment on `use.serviceWorkers` for
+// why every other spec file blocks service workers entirely to avoid
+// racing it). That reload lands an unpredictable beat after
+// `navigator.serviceWorker.ready` resolves, so a plain
+// `await page.evaluate(() => navigator.serviceWorker.ready)` followed
+// immediately by more page.evaluate()/gotoApp() calls can have its
+// execution context torn out from under it, or race the reload's own
+// navigation ("interrupted by another navigation"). This polls for the
+// controller with short-lived evaluate() calls instead of one long-lived
+// await, so any number of reloads along the way are tolerated rather than
+// permanently orphaning the wait, then gives the dust a moment to settle.
+async function waitForServiceWorkerControl(page) {
+  const deadline = Date.now() + 20_000;
+  while (Date.now() < deadline) {
+    try {
+      if (await page.evaluate(() => !!navigator.serviceWorker.controller)) {
+        await page.waitForTimeout(400); // let an in-flight reload finish
+        return;
+      }
+    } catch (e) {
+      if (!/Execution context was destroyed/.test(String(e && e.message))) throw e;
+    }
+    await page.waitForTimeout(200);
+  }
+  throw new Error('service worker never took control of the page within 20s');
+}
+
+// Wraps a second/later gotoApp() call so it tolerates Chromium reporting
+// "interrupted by another navigation" when it races shared.js's own
+// reload-on-controllerchange, retrying rather than failing the test over a
+// timing accident.
+async function gotoResilient(gotoApp, path, retries = 3) {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await gotoApp(path);
+    } catch (e) {
+      if (i === retries || !/interrupted by another navigation/.test(String(e && e.message))) throw e;
+      await new Promise((r) => setTimeout(r, 300));
+    }
+  }
+}
+
 test.describe('manifest.json', () => {
   test('parses as valid JSON with the required PWA fields', () => {
     let manifest;
@@ -74,14 +118,22 @@ test.describe('service worker registration', () => {
 
     // index.html's own inline script registers on window 'load'; give it a
     // generous window rather than assuming it already ran by the time
-    // gotoApp resolves.
-    const state = await page.evaluate(async () => {
-      const reg = await navigator.serviceWorker.ready;
-      return {
-        active: !!reg.active,
-        scope: reg.scope,
-      };
-    });
+    // gotoApp resolves. A retry guards against shared.js's
+    // reload-on-controllerchange (see waitForServiceWorkerControl's comment
+    // above) landing mid-await and tearing out this evaluate's own context.
+    let state;
+    for (let i = 0; ; i++) {
+      try {
+        state = await page.evaluate(async () => {
+          const reg = await navigator.serviceWorker.ready;
+          return { active: !!reg.active, scope: reg.scope };
+        });
+        break;
+      } catch (e) {
+        if (i === 2 || !/Execution context was destroyed/.test(String(e && e.message))) throw e;
+        await page.waitForTimeout(300);
+      }
+    }
 
     expect(state.active).toBe(true);
     expect(state.scope).toContain('/');
@@ -91,32 +143,19 @@ test.describe('service worker registration', () => {
     page,
     gotoApp,
   }) => {
-    await gotoApp('/index.html');
-    await page.evaluate(() => navigator.serviceWorker.ready);
-
     // service-worker.js's activate handler calls self.clients.claim(), so
     // this very page becomes controlled without a reload, but that
     // transition itself fires 'controllerchange', and shared.js listens for
     // exactly that event to call location.reload() (the standard PWA
-    // "pick up the new build" pattern; see playwright.config.js's big
-    // comment on why every other spec in this suite blocks service workers
-    // entirely to avoid racing it). So rather than forcing a second
-    // navigation ourselves (which raced that same reload and made Chromium
-    // report "Navigation ... interrupted by another navigation"), poll for
-    // the controller and tolerate the page reloading out from under us.
-    await expect
-      .poll(
-        async () => {
-          try {
-            return await page.evaluate(() => !!navigator.serviceWorker.controller);
-          } catch (e) {
-            if (/Execution context was destroyed/.test(String(e && e.message))) return false;
-            throw e;
-          }
-        },
-        { timeout: 15_000 }
-      )
-      .toBe(true);
+    // "pick up the new build" pattern; see playwright.config.js's comment
+    // on why every other spec in this suite blocks service workers
+    // entirely to avoid racing it). waitForServiceWorkerControl polls
+    // rather than awaiting one long-lived promise, so it tolerates that
+    // reload landing mid-wait instead of racing it.
+    await gotoApp('/index.html');
+    await waitForServiceWorkerControl(page);
+    const hasController = await page.evaluate(() => !!navigator.serviceWorker.controller);
+    expect(hasController).toBe(true);
   });
 });
 
@@ -129,7 +168,7 @@ test.describe('CORE cache contents', () => {
     expect(CORE_PATHS.length).toBeGreaterThan(5);
 
     await gotoApp('/index.html');
-    await page.evaluate(() => navigator.serviceWorker.ready);
+    await waitForServiceWorkerControl(page);
     // Installation caching is async relative to 'ready'; poll briefly for it
     // to finish rather than assuming it has by the time ready resolves.
     await expect
@@ -173,7 +212,7 @@ test.describe('CORE cache contents', () => {
     gotoApp,
   }) => {
     await gotoApp('/index.html');
-    await page.evaluate(() => navigator.serviceWorker.ready);
+    await waitForServiceWorkerControl(page);
     await expect
       .poll(() => page.evaluate(() => caches.keys()), { timeout: 15_000 })
       .toEqual([CACHE_NAME]);
@@ -244,13 +283,13 @@ test.describe('offline navigation behavior (per the real fetch handler)', () => 
     // itself gets a network-fresh copy written into the cache by the fetch
     // handler's navigate branch.
     await gotoApp('/index.html');
-    await page.evaluate(() => navigator.serviceWorker.ready);
-    await gotoApp('/segment.html?id=coiled-tubing');
+    await waitForServiceWorkerControl(page);
+    await gotoResilient(gotoApp, '/segment.html?id=coiled-tubing');
     await expect(page.locator('#navbar')).toBeVisible();
 
     await context.setOffline(true);
     try {
-      await gotoApp('/segment.html?id=coiled-tubing');
+      await gotoResilient(gotoApp, '/segment.html?id=coiled-tubing');
       // Should be the real page (from cache), not the offline fallback.
       await expect(page.locator('#navbar')).toBeVisible();
       const title = await page.title();
@@ -268,13 +307,13 @@ test.describe('offline navigation behavior (per the real fetch handler)', () => 
   }) => {
     // Establish the SW first (online), but never touch this specific path.
     await gotoApp('/index.html');
-    await page.evaluate(() => navigator.serviceWorker.ready);
+    await waitForServiceWorkerControl(page);
 
     await context.setOffline(true);
     try {
       let navError = null;
       try {
-        await gotoApp('/this-page-was-never-cached.html');
+        await gotoResilient(gotoApp, '/this-page-was-never-cached.html');
       } catch (e) {
         navError = e;
       }

@@ -121,7 +121,15 @@ test.describe('Area cards ("Explore by Discipline")', () => {
     expect(id).toBeTruthy();
 
     await firstCard.click();
-    await expect(page).toHaveURL(new RegExp(`segment\\.html\\?id=${id}$`));
+    // segment.html defaults to the "sops" tab and records that in the URL
+    // via history.replaceState (its own startTab logic), so the query
+    // string can grow a &tab=... after landing. Only the id is this test's
+    // concern, so it is checked via URLSearchParams on page.url() (a plain
+    // Playwright-tracked value, no in-page evaluate needed) rather than an
+    // end-anchored regex.
+    await expect(page).toHaveURL(/segment\.html\?/);
+    const landedId = new URL(page.url()).searchParams.get('id');
+    expect(landedId).toBe(id);
   });
 
   test('each bed reports the same document count the register has for that group', async ({

@@ -1,7 +1,7 @@
 // Cross-cutting security regression sweep.
 //
 // PURPOSE: this file is the app-wide security checklist, not another XSS
-// spec — page-specific injection/XSS coverage lives in each page's own
+// spec, page-specific injection/XSS coverage lives in each page's own
 // spec file (see tests/upload.spec.js, tests/documents.spec.js, etc.).
 // What lives here instead: no leaked secrets in what actually gets served,
 // the CSP's current (known, accepted) policy is pinned so a future change
@@ -95,7 +95,7 @@ test.describe('Content-Security-Policy', () => {
   // Referrer-Policy / HSTS, but no Content-Security-Policy); the policy
   // instead lives as a <meta http-equiv="Content-Security-Policy"> tag,
   // identical on every page that has one. It already includes
-  // 'unsafe-inline' for both script-src and style-src — a known, already
+  // 'unsafe-inline' for both script-src and style-src, a known, already
   // flagged, ACCEPTED limitation for this prototype stage (the app relies
   // heavily on inline <script>/<style>, and locking that down is future
   // work). This test does not try to fix that; it pins the exact current
@@ -210,7 +210,7 @@ test.describe('upload.html file-extension allow-list', () => {
   // Minimal, source-level check: the allow-list array itself has not
   // quietly grown permissive. Behavioral coverage (drag/drop, double
   // extensions, actual rejection UI) already lives in tests/upload.spec.js
-  // — this only guards the list's contents.
+  //, this only guards the list's contents.
   const DANGEROUS_EXTENSIONS = ['exe', 'bat', 'sh', 'msi', 'cmd', 'com', 'scr', 'ps1', 'vbs', 'jar'];
 
   test('ALLOWED_EXT excludes every dangerous/executable extension', () => {

@@ -7,7 +7,7 @@
 //   around a single localStorage array at the key 'taqa-bookmarks'
 //   (shared.js:734). add()/remove()/toggle()/has()/getAll() are the whole
 //   API. There is no server, no sync endpoint, nothing but this one
-//   per-browser localStorage key — so bookmarks are per-browser/device by
+//   per-browser localStorage key, so bookmarks are per-browser/device by
 //   design, not by omission. This suite's last test turns that into an
 //   explicit regression guard (two independent contexts never share state)
 //   rather than leaving it as an assumption nobody checks.
@@ -27,7 +27,7 @@
 //   fixture would catch that) and, best-effort, that the browser actually
 //   started a download.
 //
-// KNOWN BUG (found while writing this suite, not fixed — shared.js is
+// KNOWN BUG (found while writing this suite, not fixed, shared.js is
 // listed as shared infrastructure this task must not edit, and the other
 // half of the mismatch is in viewer.html, which is also outside this task's
 // glossary.html/analytics.html edit scope):
@@ -41,7 +41,7 @@
 //   300)`, viewer.html:1357). Repro: open a document in viewer.html, bookmark
 //   it (button reads "Bookmarked", aria-pressed="true"), then remove that
 //   same bookmark from the bookmarks panel (or via "Clear") without
-//   reloading viewer.html — the panel and badge correctly drop it, but
+//   reloading viewer.html, the panel and badge correctly drop it, but
 //   viewer.html's own button stays stuck on "Bookmarked"/aria-pressed="true"
 //   until the page is reloaded. The dedicated test below documents this
 //   CURRENT (stale) behavior rather than asserting the ideal one, per this

@@ -10,7 +10,7 @@
 //   "Local usage data stored on this device, page views, document opens,
 //   and searches." (analytics.html:175). Page views/opens/searches come
 //   from shared.js's TAQA_Track, which reads/writes the 'taqa-analytics'
-//   localStorage key per browser (shared.js:709-730) — genuine, but
+//   localStorage key per browser (shared.js:709-730), genuine, but
 //   per-device, not company-wide.
 // - The two trend charts and the audit/activity log are NOT a real
 //   historical time series or a real event log: they are synthesized from a
@@ -78,7 +78,7 @@ test.describe('analytics.html', () => {
     }
 
     // The clarifying labels the code actually ships must be present, not
-    // just "absence of the bad phrase" — this is what makes the honest
+    // just "absence of the bad phrase", this is what makes the honest
     // framing a real, asserted feature rather than an accident.
     await expect(page.locator('.page-header p')).toContainText('this device');
     await expect(page.locator('#trend-section .trend-sub')).toContainText(/not a real historical log/i);
@@ -184,7 +184,7 @@ test.describe('analytics.html', () => {
     expect(listText).not.toMatch(/Invalid Date/);
 
     // Stats row: four non-negative integers, never NaN, even though these
-    // entries are synthesized — "synthesized" describes their PROVENANCE,
+    // entries are synthesized, "synthesized" describes their PROVENANCE,
     // not their arithmetic, so the counts must still be real, consistent
     // numbers.
     const statNums = await page.locator('#audit-stats .audit-stat-num').allTextContents();
@@ -288,7 +288,7 @@ test.describe('analytics.html', () => {
   });
 });
 
-// KNOWN ISSUE (needs owner judgment, not fixed here — see final report):
+// KNOWN ISSUE (needs owner judgment, not fixed here, see final report):
 // registerRows(pop) (analytics.html:410-413) wraps TAQA_STORE.rows(pop) in a
 // bare try/catch that swallows EVERY exception, not just "TAQA_STORE is
 // undefined". A real bug thrown from inside TAQA_STORE.rows() (a bad date, a
