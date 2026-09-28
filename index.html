@@ -1422,6 +1422,89 @@ html[data-taqa-theme="dark"] #focus.strata {
   #focus.strata .st-layer[data-open="true"] .st-members li { animation:none; }
 }
 
+/* ── Softer on the eye ──────────────────────────────────────────────────
+   The first cut read as hard: an ExtraBold numeral in white on a solid
+   slab that ran edge to edge, near-black bold headings, and rules strong
+   enough to be the first thing you saw. The structure stays; the contrast
+   comes down to what the eye needs and no more.
+   - The policies band floats inside the sheet with its own rounded corners
+     and a gentle two-tone teal, instead of being cut off square.
+   - The 12 is set Light, so it is a quiet figure rather than a shout.
+   - Lines between groups and areas are hairlines, headings a softer ink,
+     and the sheet sits on a diffuse shadow rather than a hard border.
+   - Chevrons sit in a faint teal disc so they read as a control, softly.
+   Every text pair still clears WCAG AA in both themes.                 */
+#focus.strata {
+  --st-shale:#2B2724;                 /* 14.6:1 on paper */
+  --st-bedding:rgba(117,106,97,0.13);
+  --st-lamina:rgba(117,106,97,0.09);
+}
+html[data-taqa-theme="dark"] #focus.strata {
+  --st-shale:#C7DBDD;
+  --st-bedding:rgba(0,187,182,0.13);
+  --st-lamina:rgba(0,187,182,0.08);
+}
+#focus.strata .st-col {
+  padding:6px; border-radius:20px;
+  border:1px solid rgba(117,106,97,0.12);
+  box-shadow:0 1px 2px rgba(0,88,90,0.04), 0 22px 44px -26px rgba(0,88,90,0.22);
+}
+html[data-taqa-theme="dark"] #focus.strata .st-col {
+  border-color:rgba(0,187,182,0.12);
+  box-shadow:0 22px 44px -26px rgba(0,0,0,0.5);
+}
+#focus.strata .st-cap {
+  border-radius:15px; overflow:hidden;
+  background:linear-gradient(135deg, #005D63 0%, #0A686D 100%);
+}
+#focus.strata .st-capbtn { background:transparent; }
+@media (hover:hover) and (pointer:fine){
+  #focus.strata .st-capbtn:hover { background:rgba(255,255,255,0.04); }
+}
+#focus.strata .st-capbtn:active { background:rgba(0,0,0,0.06); }
+#focus.strata .cap-n {
+  font-weight:300; font-size:46px; letter-spacing:-1.5px; line-height:0.82;
+  color:#E3F0F0;                      /* 6.6:1 on the band */
+}
+#focus.strata .cap-t { font-weight:600; letter-spacing:-0.15px; }
+#focus.strata .cap-act {
+  padding:6px 12px 6px 13px; border-radius:999px;
+  background:rgba(255,255,255,0.10); font-weight:500;
+  transition:background-color 160ms ease;
+}
+@media (hover:hover) and (pointer:fine){
+  #focus.strata .st-capbtn:hover .cap-act { background:rgba(255,255,255,0.16); }
+}
+#focus.strata .st-cap + .st-layer { margin-top:4px; }
+#focus.strata .st-layer:last-child { margin-bottom:0; }
+#focus.strata .st-head { border-radius:12px; }
+#focus.strata .st-name { font-size:17.5px; letter-spacing:-0.15px; }
+#focus.strata .st-stat b { font-weight:600; color:var(--st-silt); }
+#focus.strata .st-chev {
+  width:30px; height:30px; border-radius:50%;
+  background:rgba(0,93,99,0.06);
+  transition:background-color 160ms ease;
+}
+html[data-taqa-theme="dark"] #focus.strata .st-chev { background:rgba(0,187,182,0.08); }
+#focus.strata .st-chev svg { width:16px; height:16px; }
+#focus.strata .st-head { grid-template-columns:minmax(0,1fr) 30px; }
+@media (hover:hover) and (pointer:fine){
+  #focus.strata .st-head:hover .st-chev { background:rgba(0,93,99,0.11); }
+}
+#focus.strata .st-layer[data-open="true"] .st-h { box-shadow:inset 0 -1.5px 0 rgba(0,93,99,0.45); }
+html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { box-shadow:inset 0 -1.5px 0 rgba(0,187,182,0.5); }
+#focus.strata .st-rdocs b { font-weight:600; }
+
+#focus.strata .ch-name { font-family:'BwGradual','Urbanist',sans-serif; font-weight:300; font-size:15px; }
+#focus.strata .ch-row { border-top-color:rgba(255,255,255,0.12); }
+@media (max-width:699px){
+  /* On a phone the worded pill squeezed the title onto two lines; the
+     same round chevron as the groups below says the same thing. */
+  #focus.strata .cap-act { width:30px; height:30px; padding:0; justify-content:center; }
+  #focus.strata .cap-show, #focus.strata .st-capbtn[aria-expanded="true"] .cap-hide { display:none; }
+  #focus.strata .st-capbtn { grid-template-columns:auto minmax(0,1fr) 30px; }
+}
+
 /* ── Footer Credit ── */
 .footer-credit {
   font-size:11.5px; color:var(--text-muted); margin-top:4px;
