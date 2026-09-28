@@ -210,13 +210,19 @@ test.describe('bookmarks (topbar, shared.js, multi-page)', () => {
     // 300)` on load (viewer.html:1357), 150ms later than gotoApp's own
     // settle wait (fixtures.js). expect()'s auto-retry covers that gap on
     // its own in the normal case; this nudges past it explicitly so the
-    // assertion below is checking the steady state, not racing the paint,
-    // on this sandbox's occasionally slow navigation lifecycle (see
-    // fixtures.js's own header comment on that quirk).
+    // assertion below is checking the steady state, not racing the paint.
+    // Reproduced in isolation (--workers=1, 5 repeats): passes reliably in
+    // under 2.5s each time. Only seen failing once, under a full-suite
+    // --workers=4 run on this sandbox's 4 CPUs with a load average well
+    // above that, where even the default 8s expect() retry window was not
+    // enough. The 20s override below is not "more lenient" in what it
+    // accepts, a genuine bug still fails it, just patient enough to survive
+    // that specific, already-documented contention pattern rather than
+    // flagging a false positive under it.
     await page.waitForTimeout(400);
-    await expect(page.locator('#bm-doc-btn')).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('#bm-doc-btn')).toContainText('Bookmarked');
-    await expect(page.locator('#bm-cnt')).toHaveText('1');
+    await expect(page.locator('#bm-doc-btn')).toHaveAttribute('aria-pressed', 'true', { timeout: 20_000 });
+    await expect(page.locator('#bm-doc-btn')).toContainText('Bookmarked', { timeout: 20_000 });
+    await expect(page.locator('#bm-cnt')).toHaveText('1', { timeout: 20_000 });
 
     const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('taqa-bookmarks') || '[]'));
     expect(stored.length).toBe(1);
