@@ -991,9 +991,10 @@ function initDashboard() {
   // one uploaded a minute ago, so both queue here and both publish for real.
   // Which queue this is depends entirely on who is looking.
   //
-  //   Segment Director  documents in their own segment awaiting the technical
-  //                     sign-off the register names them approver for
-  //   QMS               documents already approved, awaiting the countersignature
+  //   QMS               documents in this segment awaiting the conformance
+  //                     check, before the Director's name goes on them
+  //   Segment Director  documents QMS has checked, awaiting their final
+  //                     approval, which is what releases them
   //   everyone else     no queue, because they hold neither step
   //
   // Each card asks the rules whether this person may act on that document now,
@@ -1001,7 +1002,7 @@ function initDashboard() {
   const MYROLE = TAQA_ROLE.current();
   const CAP    = TAQA_ROLE.effective();
   const STAGE  = CAP.countersign ? 'qms' : (CAP.approve ? 'director' : null);
-  const VERB   = STAGE === 'qms' ? 'Countersign' : 'Approve';
+  const VERB   = STAGE === 'qms' ? 'Confirm' : 'Approve';
 
   // This page is ONE area's desk, so the queue is that area's queue. It was
   // filtered by what the viewer could approve and not by the area on screen,
@@ -1020,11 +1021,11 @@ function initDashboard() {
     when: d.submittedAt ? 'Just now' : 'In the register',
     size: d.fileSize || '',
     preview: STAGE === 'qms'
-      ? 'Approved by ' + (d.approvedBy || 'the named approver') +
-        '. Check the number against 5.3, the revision and the dates, then release it.'
-      : 'Awaiting your technical sign-off as ' +
-        (TAQA_APPROVAL.approverFor(d) || 'the named approver') +
-        '. QMS countersigns the record afterwards.',
+      ? 'Check the number against 5.3, the revision and the dates. Confirming ' +
+        'sends it to ' + (TAQA_APPROVAL.approverFor(d) || 'the named approver') + ' for final approval.'
+      : 'Checked by QMS · ' + (d.countersignedBy || 'confirmed') +
+        '. Your approval as ' + (TAQA_APPROVAL.approverFor(d) || 'the named approver') +
+        ' is what publishes it.',
     fromStore: true,
     stage: STAGE
   }));
@@ -1049,12 +1050,12 @@ function initDashboard() {
   } else if (!queue.length) {
     pendingList.innerHTML = !STAGE
       ? '<div class="empty-pending"><div class="empty-pending-icon">●</div><h3>Nothing here is yours</h3>' +
-        '<p>Approving a document is the named approver\'s job, and releasing it is QMS. ' +
-        'As ' + TAQA_ROLES[MYROLE].label + ' you read the register, you do not sign it. ' +
+        '<p>Checking a document for QMS is QMS\'s job, and giving it final approval is the ' +
+        'named approver\'s. As ' + TAQA_ROLES[MYROLE].label + ' you read the register, you do not sign it. ' +
         'Switch the door in the top bar to see the other side.</p></div>'
       : '<div class="empty-pending"><div class="empty-pending-icon">✓</div><h3>All caught up!</h3>' +
         '<p>Nothing is waiting on your ' +
-        (STAGE === 'qms' ? 'countersignature' : 'sign-off') + '.</p></div>';
+        (STAGE === 'qms' ? 'conformance check' : 'final approval') + '.</p></div>';
   } else {
     pendingList.innerHTML = queue.map((p, i) => {
       const simDocs = buildSimilarDocs(p.title, dashSegId, 3);
@@ -1087,7 +1088,7 @@ function initDashboard() {
         ${exactBanner}${supersRow}${simPanel}
         <div class="pending-actions">
           <button class="btn-approve" data-store-doc="${p.fromStore ? p.docId : ''}" data-stage="${p.stage||''}" onclick="approveDoc(${i+1})">✓ ${VERB}</button>
-          <button class="btn-reject" onclick="rejectDoc(${i+1})">✕ Reject</button>
+          <button class="btn-reject" data-store-doc="${p.fromStore ? p.docId : ''}" data-stage="${p.stage||''}" data-doc-title="${esc(p.title||'')}" onclick="rejectDoc(${i+1})">✕ Reject</button>
           <button class="btn-preview-link">Preview Document</button>
           <span class="action-result" id="result-${i+1}"></span>
         </div>
@@ -1262,13 +1263,15 @@ function approveDoc(id) {
       return;
     }
     result.textContent = stage === 'qms'
-      ? '✓ Countersigned and released to the segment'
-      : '✓ Approved. Now with QMS for countersignature';
+      ? '✓ Checked. Now with the Director for final approval'
+      : '✓ Approved and published to the segment';
   }
   pendingCount = Math.max(0, pendingCount - 1);
   document.getElementById('stat-pending').textContent = pendingCount;
   document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
-  showToast('Document approved and published to segment', '#00BBB6');
+  showToast(stage === 'qms'
+    ? 'Checked, sent on for the Director\'s final approval'
+    : 'Document approved and published to segment', '#00BBB6');
   updateBellCount(-1);
 }
 

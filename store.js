@@ -111,12 +111,13 @@
     return isControlled(d) && (d.status === 'current' || d.status === 'under-review');
   }
   function isPending(d) { return d.status === 'draft'; }
-  /* A draft that shipped in the file carries no stage, so treat it as waiting
-     on its approver. Otherwise fifteen real drafts would sit in no queue at
-     all and look like nobody had to do anything about them. */
+  /* A draft that shipped in the file carries no stage, so treat it as
+     waiting on QMS: that is the first step now, before the Director's
+     approval releases it. Otherwise fifteen real drafts would sit in no
+     queue at all and look like nobody had to do anything about them. */
   function stageOf(d) {
-    if (d.status !== 'draft') return null;
-    return d.approvalStage || 'director';
+    if (d.status !== 'draft' || d.rejected) return null;
+    return d.approvalStage || 'qms';
   }
   function awaitingDirector(d) { return stageOf(d) === 'director'; }
   function awaitingQms(d)      { return stageOf(d) === 'qms'; }
@@ -194,9 +195,9 @@
     var row = {};
     for (var k in rec) if (Object.prototype.hasOwnProperty.call(rec, k)) row[k] = rec[k];
     row.status = row.status || 'draft';
-    // Enters the first of the two release steps: the named approver for its
-    // type has to sign before QMS ever sees it.
-    if (row.status === 'draft' && !row.approvalStage) row.approvalStage = 'director';
+    // Enters the first of the two release steps: QMS checks the record
+    // conforms before the named approver's name ever goes on it.
+    if (row.status === 'draft' && !row.approvalStage) row.approvalStage = 'qms';
     row.submittedAt = row.submittedAt || new Date().toISOString();
     row.locallyAdded = true;
     load().push(row);
@@ -242,17 +243,24 @@
     return hit;
   }
 
+  /* The Director's step now comes second and is what releases a document.
+     QMS goes first: it confirms the record is fit to carry the Director's
+     name before it goes live, not a co-signature after the Director has
+     already acted. See TAQA_APPROVAL's "Two-step release" comment in
+     roles.js for why the order is this way round. */
   function approve(docNumber, signer) {
     var d = findDoc(docNumber);
     if (!d) return { ok: false, error: 'No such document.' };
     if (typeof TAQA_APPROVAL === 'undefined') return { ok: false, error: 'Rules not loaded.' };
     if (!TAQA_APPROVAL.canApprove(d)) return { ok: false, error: 'You cannot approve this document.' };
+    var today = new Date().toISOString().slice(0, 10);
     patch(docNumber, {
-      approvalStage: 'qms',
+      approvalStage: null, status: 'current',
       approvedBy: signer || actingName(),
-      approvedDate: new Date().toISOString().slice(0, 10)
+      approvedDate: today,
+      issueDate: d.issueDate || today
     });
-    return { ok: true, next: 'QMS countersignature' };
+    return { ok: true, next: 'released' };
   }
 
   function countersign(docNumber, signer) {
@@ -261,11 +269,36 @@
     if (typeof TAQA_APPROVAL === 'undefined') return { ok: false, error: 'Rules not loaded.' };
     if (!TAQA_APPROVAL.canCountersign(d)) return { ok: false, error: 'You cannot countersign this document.' };
     patch(docNumber, {
-      approvalStage: null, status: 'current',
+      approvalStage: 'director',
       countersignedBy: signer || actingName(),
-      issueDate: d.issueDate || new Date().toISOString().slice(0, 10)
+      countersignedDate: new Date().toISOString().slice(0, 10)
     });
-    return { ok: true, next: 'released' };
+    return { ok: true, next: "the Director's final approval" };
+  }
+
+  /* Sends a draft back rather than releasing it, at whichever step refused
+     it. A reason is required: a submitter who only sees "Rejected" has
+     nothing to act on, and neither does anyone reading this later to see
+     why a document never made it into the register. */
+  function reject(docNumber, reason, signer) {
+    var d = findDoc(docNumber);
+    if (!d) return { ok: false, error: 'No such document.' };
+    if (typeof TAQA_APPROVAL === 'undefined') return { ok: false, error: 'Rules not loaded.' };
+    if (!reason || !reason.trim()) return { ok: false, error: 'A reason is required.' };
+    var stage = TAQA_APPROVAL.stageOf(d);
+    var may = stage === 'qms' ? TAQA_APPROVAL.canCountersign(d)
+            : stage === 'director' ? TAQA_APPROVAL.canApprove(d)
+            : false;
+    if (!may) return { ok: false, error: 'You cannot reject this document.' };
+    patch(docNumber, {
+      approvalStage: null,
+      rejected: true,
+      rejectedAtStage: stage,
+      rejectedBy: signer || actingName(),
+      rejectedReason: reason.trim(),
+      rejectedDate: new Date().toISOString().slice(0, 10)
+    });
+    return { ok: true, next: 'returned to submitter' };
   }
 
   /* The name that goes on the signature. A delegate signs in their own name,
@@ -326,7 +359,7 @@
   root.TAQA_STORE = {
     all: all, rows: rows, count: count, area: area, areasIn: areasIn,
     add: add, setStatus: setStatus, remove: remove, reset: reset,
-    approve: approve, countersign: countersign, patch: patch,
+    approve: approve, countersign: countersign, reject: reject, patch: patch,
     stageOf: stageOf, findDoc: findDoc, actingName: actingName,
     onChange: onChange, added: load,
     isControlled: isControlled, isLive: isLive,

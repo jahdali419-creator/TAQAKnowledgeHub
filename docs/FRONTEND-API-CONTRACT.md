@@ -91,7 +91,7 @@ reason the door pill carries that disclaimer.
 | `TAQA_ROLE.effective(roleKey)` → `{approve, countersign, delegate, editMetadata, controlPanel, export, scope, ownSegment}` | The capability set a real authorization layer derives from the token's role/group claims. **Every one of these flags is checked in front-end JS only today** — a determined user can flip them in devtools. Every corresponding backend write (`setStatus`, `approve`, `countersign`, `patch`) must re-check the equivalent server-side; the front-end check is UX only |
 | `TAQA_ROLE.canSee(doc, roleKey)` | Row-level read authorization — must be enforced server-side (an employee's `GET /documents` should never even return withdrawn/restricted rows they cannot see, not just hide them client-side) |
 | `TAQA_ROLE.canManage(areaId)` | Whether the signed-in user may act as an area's desk (its queue, contributors, published list) |
-| `TAQA_APPROVAL.canApprove(doc, roleKey)` / `canCountersign(doc, roleKey)` | The exact rule a `POST /documents/{docNumber}/approve` or `/countersign` endpoint must enforce: stage match (`director`/`qms`), capability, segment scope, and any delegation's document-type narrowing |
+| `TAQA_APPROVAL.canApprove(doc, roleKey)` / `canCountersign(doc, roleKey)` / `TAQA_STORE.reject(doc, reason)` | The exact rule a `POST /documents/{docNumber}/approve`, `/countersign` or `/reject` endpoint must enforce. **Order matters and was changed this round**: QMS checks conformance first (`countersign`, despite the name — it is a gate, not a co-signature after the fact), then the named approver (Segment Director for an SOP/Standard) gives final approval, and that is what releases the document. Either step can instead reject with a required reason, which sends the draft back to whoever submitted it |
 | `TAQA_DELEGATION.current()` / `.actAs()` | "Acting as" is fully client-side today (a note in the code says so explicitly: "the prototype has no signed-in identity, so acting as a delegate is a..."). A real delegation needs a real record of who granted it, to whom, until when, and with what scope — an audit trail, not a `localStorage` key |
 
 **The one rule that matters most for the handoff:** nothing in `roles.js`
@@ -105,16 +105,59 @@ from a value the browser handed itself.
 
 ## 4. Notifications (new this round, `shared.js`)
 
-The approvals bell (`#nav-bell` in every page's nav, synced by `shared.js`)
-shows the signed-in user's real pending-approval queue: documents where
+Two different notification needs live in the same bell (`#nav-bell`, synced
+by `shared.js`'s `sync()`), and Azure needs to replace both — they are not
+the same feed.
+
+### 4.1 The reviewer's queue
+
+Shows the signed-in user's real pending-approval queue: documents where
 `TAQA_APPROVAL.canApprove(d)` or `canCountersign(d)` is true for them. It is
 computed client-side from `TAQA_STORE.all()` on every load and on
 `taqa:register-changed`/`taqa:role-changed`/`storage` events.
 
 Azure equivalent: `GET /users/me/queue` returning the same shape (`docNumber`,
-`title`, `awaiting: 'approval'|'countersignature'`), ideally pushed rather
-than polled so the badge count updates when someone else clears an item from
-the queue.
+`title`, `awaiting: 'qms-conformance-check'|'final-approval'`), ideally
+pushed rather than polled so the badge count updates when someone else
+clears an item from the queue.
+
+### 4.2 Telling the submitter what happened to their document
+
+This is the part that genuinely cannot be built for real without a backend,
+and it matters for the handoff: **right now there is no real submitter
+identity to route a notification to.** There is no login, so "the
+submitter" is approximated as "whoever's browser has this document in its
+own local uploads" (`TAQA_STORE.added()`, the same set the register already
+calls `locallyAdded`). The bell shows that browser's own submissions once
+they are decided — `rejected: true` with `rejectedReason`, or `status:
+'current'` for a fresh approval — and lets that person dismiss each one
+(tracked in `localStorage` under `taqa-ack-outcomes-v1`, keyed by
+`docNumber:approved` / `docNumber:rejected`).
+
+**What IT must build for real, once Entra ID identity exists:**
+
+- `POST /documents/{docNumber}/approve` and `/reject` must record who
+  actually submitted the document (from their Entra ID token at upload
+  time, not a role or a browser), not just leave it to be inferred from
+  local storage.
+- An email (or Teams notification) to that real person on both outcomes:
+  - **Approved:** document title/number, that it is now published, a link
+    to it.
+  - **Rejected:** document title/number, the reason typed by whoever
+    rejected it (QMS or the Director — `reject()`'s `rejectedAtStage`
+    tells you which), and a way to resubmit. The in-app reason text is
+    already captured and stored (`rejectedReason` on the record) — the
+    only missing piece is delivering it somewhere the submitter will
+    actually see it, since they may not be back in the hub for days.
+  - This is exactly what `upload.html`'s own "Approval Workflow" note
+    already promises the submitter ("You'll see it in your notifications
+    bell here... email notifications arrive once this connects to
+    Azure") — so this is a promise already made in the UI, not a new
+    scope decision.
+- No resubmission flow exists yet either: a rejected draft stays rejected
+  with no way to edit and resend it through `upload.html`. Worth building
+  alongside the email step, since a rejection notice with nowhere to act
+  on it is only half the feature.
 
 ---
 
@@ -191,8 +234,9 @@ Finding 3 area, for the historical gap this closes).
 | `TAQA_APPROVAL`'s approve/countersign eligibility rules | Delegation ("acting as") records (§3) |
 | This device's own local analytics (page views, document opens) | Revision history (§5) |
 | The document number format and segment/type taxonomy | Approval / e-signature trail (§6) |
-| | Historical trend data and the audit event log (§7) |
+| The QMS-then-Director approval order and the reject-with-reason rule | Historical trend data and the audit event log (§7) |
 | | Cross-document full-text search at real register scale (§8) |
+| | Email/Teams notification of approval or rejection to the real submitter (§4.2) |
 
 This table is the honest version of "what's simulated vs. what Azure must
 supply" that every page's own disclaimers point back to individually.

@@ -278,28 +278,31 @@ if (typeof module !== 'undefined' && module.exports)
    ──────────────────────────────────────────────────────────────────────────
    A document is released by two different people, on purpose:
 
-     1. APPROVE      the named approver for that document type judges the
-                     content fit for use. For an SOP or a Standard that is the
+     1. COUNTERSIGN  QMS checks the record first: the number conforms to
+                     TQ-QHSE-S001 5.3, the revision and dates are right, and
+                     anything it supersedes is withdrawn with it. Not a
+                     co-signature after the fact, a gate before the Director's
+                     name goes on anything.
+     2. APPROVE      the named approver for that document type gives the
+                     final sign-off that content is fit for use, and that is
+                     what releases it. For an SOP or a Standard that is the
                      Operation Director for the segment. API Q2 4.4.3 a).
-     2. COUNTERSIGN  QMS confirms the record before it goes live: the number
-                     conforms to TQ-QHSE-S001 5.3, the revision and dates are
-                     right, and anything it supersedes is withdrawn with it.
 
    Neither step can be taken by one person alone, and neither can be skipped.
-   Splitting them is what lets 600 documents move without QMS judging the
-   technical content of every procedure in the company, while still leaving
-   one function accountable for the register.
+   QMS going first is what lets 600 documents move without a Director's name
+   ever going on a record with a bad number or a stale revision on it, while
+   the Director stays the one who actually releases their own segment's work.
 
    Tracked as approvalStage rather than as new status values, so that every
    page which already filters on status keeps working and a document in either
    queue is still, correctly, a draft with no authority.
 
-     approvalStage 'director'  waiting on the technical sign-off
-     approvalStage 'qms'       approved, waiting on the countersignature
-     approvalStage null        released, or never submitted
+     approvalStage 'qms'       waiting on QMS's conformance check
+     approvalStage 'director'  checked, waiting on the Director's approval
+     approvalStage null        released, rejected, or never submitted
    ────────────────────────────────────────────────────────────────────────── */
 const TAQA_APPROVAL = {
-  STAGES: ['director', 'qms'],
+  STAGES: ['qms', 'director'],
 
   // Who is named as approver for this document's type, verbatim from the
   // register. The back end resolves this to a person through Entra ID; here it
@@ -312,10 +315,12 @@ const TAQA_APPROVAL = {
 
   /* A draft that shipped in the register has no stage field, so read the
      stage rather than the field: otherwise every pre-existing draft sits in
-     the Director's queue on screen and refuses to be approved from it. */
+     QMS's queue on screen and refuses to be checked from it. A rejected
+     draft holds no stage either, so it drops out of both queues until it is
+     resubmitted rather than sitting there asking to be signed again. */
   stageOf(doc){
-    if (!doc || doc.status !== 'draft') return null;
-    return doc.approvalStage || 'director';
+    if (!doc || doc.status !== 'draft' || doc.rejected) return null;
+    return doc.approvalStage || 'qms';
   },
 
   // May this role take the technical sign-off on this document now?
@@ -339,9 +344,9 @@ const TAQA_APPROVAL = {
   // What is this document waiting for, in words, for whoever is looking at it.
   waitingOn(doc){
     const st = TAQA_APPROVAL.stageOf(doc);
+    if (st === 'qms') return 'QMS conformance check';
     if (st === 'director')
       return TAQA_APPROVAL.approverFor(doc) || 'the approver named for this type';
-    if (st === 'qms') return 'QMS countersignature';
     return null;
   }
 };

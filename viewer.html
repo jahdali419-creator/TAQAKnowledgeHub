@@ -1290,15 +1290,15 @@ function renderApprovalTrail() {
   var iconOk = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
   var iconPending = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>';
   var rows = [];
-  if (stage === 'director') {
-    rows.push({icon: iconPending, pending: true, name: 'Awaiting technical approval', role: approverRole, date: 'Not yet signed'});
-    rows.push({icon: iconPending, pending: true, name: 'Awaiting countersignature', role: 'QMS / Document Controller', date: 'Not yet signed'});
-  } else if (stage === 'qms') {
-    rows.push({icon: iconOk, pending: false, name: _rec.approvedBy || approverRole, role: 'Technical approval · ' + approverRole, date: _fmt(_rec.approvedDate) || 'Recorded'});
-    rows.push({icon: iconPending, pending: true, name: 'Awaiting countersignature', role: 'QMS / Document Controller', date: 'Not yet signed'});
+  if (stage === 'qms') {
+    rows.push({icon: iconPending, pending: true, name: 'Awaiting QMS conformance check', role: 'QMS / Document Controller', date: 'Not yet signed'});
+    rows.push({icon: iconPending, pending: true, name: 'Awaiting final approval', role: approverRole, date: 'Not yet signed'});
+  } else if (stage === 'director') {
+    rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy || 'QMS / Document Controller', role: 'QMS conformance check', date: _fmt(_rec.countersignedDate) || 'Recorded'});
+    rows.push({icon: iconPending, pending: true, name: 'Awaiting final approval', role: approverRole, date: 'Not yet signed'});
   } else {
-    rows.push({icon: iconOk, pending: false, name: _rec.approvedBy || approverRole, role: 'Technical approval · ' + approverRole, date: _fmt(_rec.approvedDate) || 'Not recorded'});
-    rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy || 'QMS / Document Controller', role: 'Countersignature · release', date: _fmt(_rec.issueDate) || 'Not recorded'});
+    rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy || 'QMS / Document Controller', role: 'QMS conformance check', date: _fmt(_rec.countersignedDate) || 'Not recorded'});
+    rows.push({icon: iconOk, pending: false, name: _rec.approvedBy || approverRole, role: 'Final approval · ' + approverRole, date: _fmt(_rec.approvedDate) || 'Not recorded'});
   }
   body.innerHTML = rows.map(function (r) {
     return '<div class="appr-row' + (r.pending ? ' pending' : '') + '">' +

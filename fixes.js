@@ -471,6 +471,19 @@
         if (!rejectTargetCard) return;
         const reason = rejectInput.value.trim();
 
+        // A card from the real register carries its own docNumber. Reject it
+        // through the store for real, so the reason survives a reload and the
+        // submitter's own bell can find it, same as approve() already does.
+        const storeDoc = rejectTargetBtn && rejectTargetBtn.dataset.storeDoc;
+        if (storeDoc && typeof TAQA_STORE !== 'undefined') {
+          const out = TAQA_STORE.reject(storeDoc, reason);
+          if (!out || !out.ok) {
+            rejectOverlay.classList.remove('open');
+            showToast('✕ ' + ((out && out.error) || 'Could not reject this document.'));
+            return;
+          }
+        }
+
         // Mark card as rejected
         rejectTargetCard.classList.add('rejected');
         const badge = rejectTargetCard.querySelector('.pending-status-badge');
@@ -512,9 +525,14 @@
         }, 400);
       });
 
-      // Intercept ALL existing reject buttons
+      // Intercept ALL existing reject buttons. Excludes the modal's own
+      // buttons by id: "Reject & Notify" and the confirm/cancel buttons all
+      // have "reject" in their class or text too, and without this the
+      // confirm button re-intercepted its own click and the modal could
+      // never actually submit.
       function interceptRejectButtons() {
         document.querySelectorAll('.btn-reject, [class*="reject"]:not(.reject-modal):not(.reject-reason):not([class*="modal"]):not([class*="overlay"])').forEach(btn => {
+          if (btn.id === 'reject-modal-confirm' || btn.id === 'reject-modal-cancel' || btn.closest('.reject-modal-overlay')) return;
           if (btn.dataset.fixedReject) return;
           btn.dataset.fixedReject = '1';
 
@@ -526,6 +544,7 @@
 
             const card = this.closest('.pending-card, [class*="pending"], [class*="approval-card"]');
             rejectTargetCard = card;
+            rejectTargetBtn = this;
 
             // Set doc name in modal
             const docName = card

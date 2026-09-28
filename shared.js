@@ -1464,6 +1464,9 @@ document.addEventListener('keydown',function(e){
    now opens a short preview first; "Open your queue" underneath is the old
    jump, kept for whoever wants it. */
 (function(){
+  var esc = function(t){ return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+  }); };
   var css = document.createElement('style');
   css.textContent =
     '.bell-wrap{position:relative;flex-shrink:0;display:inline-flex;}' +
@@ -1480,6 +1483,8 @@ document.addEventListener('keydown',function(e){
     '.bell-i:hover{background:rgba(0,93,99,.06);}' +
     '.bell-i .bt{display:block;font-size:12.5px;font-weight:700;color:var(--text,#1E1C1A);line-height:1.3;}' +
     '.bell-i .bd{display:block;font-size:11px;color:var(--text-muted,#524D48);line-height:1.35;margin-top:1px;}' +
+    '.bell-i.mine-rejected .bt{color:var(--stop-ink,#C8102E);}' +
+    '.bell-i.mine-approved .bt{color:var(--ok-ink,#0B7A3B);}' +
     '.bell-more{padding:6px 10px 2px;font-size:11px;color:var(--text-light,#756A61);}' +
     '.bell-foot{display:block;width:100%;text-align:center;margin-top:3px;padding:8px 10px;' +
       'border:none;border-top:1px solid var(--border,#C7DBDD);background:transparent;' +
@@ -1536,9 +1541,27 @@ document.addEventListener('keydown',function(e){
       if (menu.classList.contains('open') && e.relatedTarget && !wrap.contains(e.relatedTarget)) closeMenu();
     });
     menu.addEventListener('click', function(e){
-      if (e.target.closest('.bell-foot')) { e.preventDefault(); closeMenu(); openQueue(); }
+      if (e.target.closest('.bell-foot')) { e.preventDefault(); closeMenu(); openQueue(); return; }
+      var ackBtn = e.target.closest('[data-ack]');
+      if (ackBtn) { ack(ackBtn.dataset.ack); sync(); }
     });
     return wrap;
+  }
+
+  // A submitter has no account to sign into here, so "notify the uploader"
+  // can only mean this browser: the one TAQA_STORE.added() already calls
+  // "locallyAdded" everywhere else. Acknowledging an outcome is local too,
+  // by docNumber and which outcome, so an approval and a later rejection of
+  // a resubmission never hide each other.
+  var ACK_KEY = 'taqa-ack-outcomes-v1';
+  function acked(){
+    try { return JSON.parse(localStorage.getItem(ACK_KEY) || '[]'); } catch(e){ return []; }
+  }
+  function ack(key){
+    try {
+      var have = acked();
+      if (have.indexOf(key) === -1) { have.push(key); localStorage.setItem(ACK_KEY, JSON.stringify(have)); }
+    } catch(e){}
   }
 
   function sync(){
@@ -1549,8 +1572,6 @@ document.addEventListener('keydown',function(e){
     var A = (typeof TAQA_APPROVAL !== 'undefined') ? TAQA_APPROVAL : null;
     var cap = (R && R.effective) ? R.effective() : null;
     var signs = !!(cap && (cap.approve || cap.countersign));
-    btn.style.display = signs ? '' : 'none';
-    if (!signs || !badge) return;
     var pending = [];
     try {
       if (typeof TAQA_STORE !== 'undefined' && A) {
@@ -1559,28 +1580,60 @@ document.addEventListener('keydown',function(e){
         });
       }
     } catch(e){}
-    var n = pending.length;
+    // What this browser submitted, now decided one way or the other and not
+    // yet seen. A draft still moving through the two steps is not here: it
+    // has nothing to tell the submitter yet.
+    var have = acked();
+    var mine = [];
+    try {
+      if (typeof TAQA_STORE !== 'undefined') {
+        TAQA_STORE.added().forEach(function(d){
+          if (d.rejected && have.indexOf(d.docNumber + ':rejected') === -1) {
+            mine.push({doc: d, outcome: 'rejected'});
+          } else if (!d.rejected && d.status === 'current' && have.indexOf(d.docNumber + ':approved') === -1) {
+            mine.push({doc: d, outcome: 'approved'});
+          }
+        });
+      }
+    } catch(e){}
+    var show = signs || mine.length > 0;
+    btn.style.display = show ? '' : 'none';
+    if (!show || !badge) return;
+    var n = pending.length + mine.length;
     badge.textContent = n > 99 ? '99+' : String(n);
     badge.style.display = n > 0 ? 'flex' : 'none';
-    btn.setAttribute('aria-label', n ? n + ' document' + (n === 1 ? '' : 's') + ' waiting for your signature' : 'Approvals, nothing waiting');
+    btn.setAttribute('aria-label', n ? n + ' item' + (n === 1 ? '' : 's') + ' need your attention' : 'Approvals, nothing waiting');
     btn.title = btn.getAttribute('aria-label');
     btn.setAttribute('aria-haspopup', 'true');
     if (!btn.hasAttribute('aria-expanded')) btn.setAttribute('aria-expanded', 'false');
 
     ensureWrap(btn);
     var SHOWN = 6;
-    menu.innerHTML =
-      '<div class="bell-hd">Waiting for your signature</div>' +
-      (pending.length
-        ? pending.slice(0, SHOWN).map(function(d){
-            var verb = A.canCountersign(d) ? 'countersignature' : 'approval';
-            return '<a class="bell-i" href="viewer.html?doc=' + encodeURIComponent(d.docNumber) + '">' +
-              '<span class="bt">' + d.title + '</span>' +
-              '<span class="bd">' + d.docNumber + ' &middot; waiting for your ' + verb + '</span></a>';
-          }).join('')
-        : '<div class="bell-i" style="cursor:default;"><span class="bd">Nothing waiting right now.</span></div>') +
-      (pending.length > SHOWN ? '<div class="bell-more">+ ' + (pending.length - SHOWN) + ' more in your queue</div>' : '') +
-      '<button type="button" class="bell-foot">Open your queue</button>';
+    var pendingHtml = signs
+      ? '<div class="bell-hd">Waiting for your signature</div>' +
+        (pending.length
+          ? pending.slice(0, SHOWN).map(function(d){
+              var verb = A.canCountersign(d) ? 'conformance check' : 'final approval';
+              return '<a class="bell-i" href="viewer.html?doc=' + encodeURIComponent(d.docNumber) + '">' +
+                '<span class="bt">' + d.title + '</span>' +
+                '<span class="bd">' + d.docNumber + ' &middot; waiting for your ' + verb + '</span></a>';
+            }).join('')
+          : '<div class="bell-i" style="cursor:default;"><span class="bd">Nothing waiting right now.</span></div>') +
+        (pending.length > SHOWN ? '<div class="bell-more">+ ' + (pending.length - SHOWN) + ' more in your queue</div>' : '')
+      : '';
+    var mineHtml = mine.length
+      ? '<div class="bell-hd">Your submissions</div>' +
+        mine.map(function(m){
+          var d = m.doc;
+          return '<button type="button" class="bell-i mine-' + m.outcome + '" data-ack="' + esc(d.docNumber + ':' + m.outcome) + '">' +
+            '<span class="bt">' + esc(d.title) + '</span>' +
+            '<span class="bd">' + (m.outcome === 'rejected'
+              ? 'Rejected: ' + esc(d.rejectedReason || 'no reason recorded')
+              : 'Approved and published') + '</span></button>';
+        }).join('')
+      : '';
+    menu.innerHTML = pendingHtml + mineHtml +
+      (signs ? '<button type="button" class="bell-foot">Open your queue</button>' : '');
   }
   window.taqaSyncBell = sync;
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', sync); else sync();
