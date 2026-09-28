@@ -142,7 +142,7 @@ html[data-taqa-theme="dark"] .tabs-outer{border-color:rgba(255,255,255,0.06);}
 .alert-pulse-dot{display:none;}
 .manage-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:rgba(0,187,182,0.12);border:1px solid rgba(0,187,182,0.25);color:var(--primary-light);font-size:11.5px;font-weight:600;text-decoration:none;letter-spacing:0.3px;transition:background 0.2s,border-color 0.2s;}
 .manage-btn:hover{background:rgba(0,187,182,0.22);}
-.empty-state-upload{display:inline-block;margin-top:14px;padding:8px 20px;border-radius:9px;background:rgba(0,93,99,0.1);border:1px solid rgba(0,187,182,0.2);color:var(--primary-ink);font-size:13px;font-weight:500;text-decoration:none;transition:background 0.2s;}
+.empty-state-upload{display:inline-block;margin-top:14px;padding:8px 20px;border-radius:9px;background:rgba(0,93,99,0.1);border:1px solid rgba(0,187,182,0.2);color:var(--primary-ink);font-size:13px;font-weight:500;text-decoration:none;transition:background 0.2s;font-family:'Inter',sans-serif;cursor:pointer;}
 .empty-state-upload:hover{background:rgba(0,93,99,0.18);}
 
 /* ── Content Area ── */
@@ -319,6 +319,11 @@ html[data-taqa-theme="dark"] .docs-grid{
 /* An overdue review is a warning, the same yellow family as the viewer's
    review banner. The stop red is kept for withdrawn and obsolete. */
 .doc-review-late{color:var(--warn-ink,#8A6200);font-weight:600;}
+/* Review due soon: the same amber ink, at a lighter weight, so the eye can
+   tell "already late" from "coming up" without a second colour. Same role
+   gate as the overdue flag above: never shown to Employee, who still sees
+   the plain "Review due" line for anything further out. */
+.doc-review-soon{color:var(--warn-ink,#8A6200);font-weight:500;}
 
 /* New and Revised are a word in sentence case, not a pill, so they never
    read as part of the all-capitals reference beside them. New keeps the
@@ -347,6 +352,40 @@ html[data-taqa-theme="dark"] .docs-grid{
 .doc-more[aria-expanded="true"]{background:var(--row-disc);color:var(--primary-ink);}
 .doc-more:active{background:var(--row-press);}
 .doc-more:focus-visible{outline:2px solid var(--primary-ink)!important;outline-offset:-2px!important;}
+
+/* ── Swipe-to-reveal quick actions (touch only) ──
+   Bookmark and QR code, the two shortcuts worth a swipe from the row's own
+   overflow menu. The surface that carries the row's normal content sits on
+   top of the actions panel and only turns opaque, and only shows the panel
+   at all, on a touch/coarse pointer: a mouse row never changes. */
+.swipe-actions{
+  position:absolute;inset-block:0;inset-inline-end:0;
+  display:none;align-items:stretch;
+}
+.swipe-act{
+  width:64px;border:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  font-family:'Inter',sans-serif;font-size:10.5px;font-weight:600;color:#fff;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.swipe-act svg{width:18px;height:18px;}
+.swipe-act.act-bm{background:var(--primary,#005D63);}
+.swipe-act.act-qr{background:var(--primary-light,#00BBB6);}
+.swipe-act:active{filter:brightness(0.92);}
+.swipe-surface{display:flex;align-items:center;flex:1;min-width:0;position:relative;}
+@media (hover:none),(pointer:coarse){
+  .doc-card{overflow:hidden;}
+  .swipe-actions{display:flex;}
+  .swipe-surface{
+    background:var(--row-paper);
+    touch-action:pan-y;
+    transition:transform 220ms var(--row-ease,cubic-bezier(0.23,1,0.32,1));
+  }
+  .swipe-surface.is-dragging{transition:none;}
+  /* The surface's own opaque paper would otherwise sit in front of the
+     row's tap-press tint and hide it. */
+  .doc-card:not(.is-asset):active .swipe-surface{background:var(--row-press);}
+}
+@media (prefers-reduced-motion:reduce){.swipe-surface{transition:none;}}
 
 /* A software asset is listed, not controlled, and opens nothing. */
 .doc-card.is-asset .doc-row-link{cursor:default;padding-inline-end:16px;}
@@ -692,7 +731,7 @@ html body{overflow-x:clip;}
     <li><a href="support-ticket.html">Ask Expert</a></li>
   </ul>
   <div class="nav-right">
-    <button type="button" class="bell-btn" id="nav-bell" style="display:none" onclick="location.href='dashboard.html'" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
     <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
     <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
     <span class="nav-sep nav-up" aria-hidden="true"></span>
@@ -1497,7 +1536,6 @@ const seg = SEGMENTS[segId] || {
   docs:{ sops:[], manuals:[], policies:[], alerts:[], lessons:[], software:[] }
 };
 document.querySelector('.manage-btn').href = 'dashboard.html?id=' + segId;
-document.getElementById('nav-bell').onclick = function(){ location.href = 'dashboard.html?id=' + segId; };
 
 // ── Segment Hero Background ──
 const SEGMENT_IMAGES = {
@@ -1672,20 +1710,42 @@ function seesComplianceState(){
   var cap = TAQA_ROLE.effective();
   return !!(cap.editMetadata || TAQA_ROLE.canRegister());
 }
+// How many days past (positive) or before (negative) its review date a
+// record is, or null when the review clock does not apply to it: withdrawn,
+// obsolete or never given a date. Shared by the row's own meta line below
+// and by overdueDays() further down, which is the sort's version of the same
+// question, so the date math lives in exactly one place.
+function reviewDaysDelta(d){
+  if (!d || d.status === 'obsolete' || d.status === 'superseded' || !d.nextReviewDate) return null;
+  const due = new Date(d.nextReviewDate);
+  if (isNaN(due)) return null;
+  return Math.floor((Date.now() - due) / 86400000);
+}
+// The pre-warning window: a review due within this many days, but not yet
+// late, gets the amber "due soon" treatment instead of the plain date.
+const DUE_SOON_DAYS = 30;
 function rowMeta(d){
   if (!d) return '';
   const bits = [];
-  const due = d.nextReviewDate ? new Date(d.nextReviewDate) : null;
-  const closed = d.status === 'obsolete' || d.status === 'superseded';
-  if (due && !isNaN(due) && !closed) {
-    const late = Math.floor((Date.now() - due) / 86400000);
-    if (late > 0) {
+  const delta = reviewDaysDelta(d);
+  if (delta !== null) {
+    if (delta > 0) {
       if (seesComplianceState()) {
-        const how = late < 60 ? late + (late === 1 ? ' day' : ' days')
-                              : Math.floor(late / 30.44) + ' months';
+        const how = delta < 60 ? delta + (delta === 1 ? ' day' : ' days')
+                              : Math.floor(delta / 30.44) + ' months';
         bits.push('<span class="doc-review-late">Review overdue, ' + how + '</span>');
       }
-    } else if (late > -45) {
+    } else if (delta > -DUE_SOON_DAYS && seesComplianceState()) {
+      // Amber pre-warning: the review date is close but not yet overdue.
+      // A document stays fully in force either way (API Q2 4.4.3 c), so this
+      // is the same compliance flag as the overdue state above, gated the
+      // same way: never shown to Employee.
+      const soon = -delta;
+      const how = soon < 60 ? soon + (soon === 1 ? ' day' : ' days')
+                            : Math.floor(soon / 30.44) + ' months';
+      bits.push('<span class="doc-review-soon">Review due soon, ' + how + '</span>');
+    } else if (delta > -45) {
+      const due = new Date(d.nextReviewDate);
       bits.push('Review due ' + MON_SHORT[due.getMonth()] + ' ' + due.getFullYear());
     }
   }
@@ -1697,6 +1757,8 @@ function escHtml(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').rep
 
 const LIST_TYPE_MAP = {sops:'sop',manuals:'manual',policies:'standard',lessons:'lesson',alerts:'alert'};
 const MORE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>';
+// Same glass as the doc-search field itself, drawn larger for the empty state.
+const EMPTY_SEARCH_ICON = '<svg width="22" height="22" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
 
 function viewerHrefFor(entry, type){
   const p = splitEntry(entry);
@@ -1733,8 +1795,20 @@ function buildDocCard(title, type, idx) {
   const rev = rec && rec.revision ? '<span class="doc-rev">Rev ' + escHtml(rec.revision) + '</span>' : '';
   const read = isDocRead(title) ? '<span class="doc-read-badge">Read</span>' : '';
   const label = _p.title + (_p.num ? ', ' + _p.num : '');
+  // The two swipe shortcuts are the same Bookmark and QR actions the row's
+  // own overflow menu already offers, just reachable a swipe away on a
+  // phone. They carry tabindex="-1" and sit behind aria-hidden: a screen
+  // reader or keyboard user reaches the same two actions through .doc-more
+  // instead, so nothing here is a second, hidden route to the same control.
+  const swipeActions = `
+    <div class="swipe-actions" aria-hidden="true">
+      <button type="button" class="swipe-act act-bm" tabindex="-1" data-act="bm" data-title="${safeTitle}" data-type="${safeType}">${isBm ? ROW_MENU_ICONS.bmOn : ROW_MENU_ICONS.bm}${isBm ? 'Remove' : 'Bookmark'}</button>
+      <button type="button" class="swipe-act act-qr" tabindex="-1" data-act="qr">${ROW_MENU_ICONS.qr}QR code</button>
+    </div>`;
   return `
   <div class="doc-card${type==='alert'?' is-alert':''}${meta?' has-state':''}" data-title="${safeTitle}" data-type="${safeType}">
+    ${swipeActions}
+    <div class="swipe-surface">
     <a class="doc-row-link" href="${viewerHrefFor(title, safeType)}" onclick="var c=this.closest('.doc-card');saveRecent(c.dataset.title,c.dataset.type);markDocRead(c.dataset.title);if(window.TAQA_Track)window.TAQA_Track('open',c.dataset.title,{type:c.dataset.type,seg:'${segId}'})">
       <span class="doc-type-icon ${type}" aria-hidden="true">${_mark}</span>
       <span class="doc-body">
@@ -1744,6 +1818,7 @@ function buildDocCard(title, type, idx) {
       </span>
     </a>
     <button type="button" class="doc-more" aria-haspopup="menu" aria-expanded="false" aria-controls="row-menu" aria-label="More for ${escHtml(label)}">${MORE_ICON}</button>
+    </div>
   </div>`;
 }
 
@@ -1792,8 +1867,10 @@ function _renderPage(type){
     const lbl=btn?(btn.firstChild&&btn.firstChild.nodeType===3?btn.firstChild.textContent:btn.textContent).trim().replace(/\s*\d+$/,''):'documents';
     const noun=type==='all'?'documents':lbl.split(/\s+/).map(w=>/[A-Z].*[A-Z]/.test(w)?w:w.toLowerCase()).join(' ');
     const esc=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    el.innerHTML='<div class="empty-state"><h3>No '+esc(noun)+' match '+(q?'\u201c'+esc(q)+'\u201d':'this search')+'</h3>'+
-      '<p>Try fewer words, or search every area from Document Search.</p></div>';
+    el.innerHTML='<div class="empty-state"><div class="empty-icon empty-mark">'+EMPTY_SEARCH_ICON+'</div><h3>No '+esc(noun)+' match '+(q?'\u201c'+esc(q)+'\u201d':'this search')+'</h3>'+
+      '<p>Try fewer words, or search every area from Document Search.</p>'+
+      (q?'<button type="button" class="empty-state-upload" onclick="clearDocSearch(\''+type+'\')">Clear search</button>':'')+
+      '</div>';
     if(vis)vis.textContent='0';
     _renderPagination(type);
     return;
@@ -2064,11 +2141,8 @@ function setSort(btn, type, mode) {
 function overdueDays(entry) {
   const num = splitEntry(typeof entry === 'object' ? entry.title : entry).num;
   const d = num && typeof TAQA_STORE !== 'undefined' ? TAQA_STORE.findDoc(num) : null;
-  if (!d || d.status === 'obsolete' || d.status === 'superseded' || !d.nextReviewDate) return 0;
-  const due = new Date(d.nextReviewDate);
-  if (isNaN(due)) return 0;
-  const late = Math.floor((Date.now() - due) / 86400000);
-  return late > 0 ? late : 0;
+  const delta = reviewDaysDelta(d);
+  return (delta && delta > 0) ? delta : 0;
 }
 function applySortToState(type) {
   const mode = SORT_STATE[type] || 'default';
@@ -2131,6 +2205,16 @@ function filterDocs(input,type){
       }
     },150);
   },200);
+}
+
+// The empty state's own way to clear a search that matched nothing, so a
+// person is never left staring at a dead end with no way back to the list.
+function clearDocSearch(type){
+  const inp = document.querySelector('#panel-' + type + ' .doc-search input');
+  if (!inp) return;
+  inp.value = '';
+  filterDocs(inp, type);
+  inp.focus();
 }
 
 // ── Canvas ──
@@ -2402,6 +2486,90 @@ document.addEventListener('keydown', function(e){
   if (b && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) { e.preventDefault(); if (_rowMenuFrom !== b) { closeRowMenu(false); openRowMenu(b); } }
 });
 window.addEventListener('resize', function(){ closeRowMenu(false); });
+
+// ── Swipe-to-reveal quick actions (touch only) ──
+// Dragging a row left reveals Bookmark and QR code, the same two shortcuts
+// the row's own overflow menu already offers. A drag is only claimed once it
+// reads as clearly horizontal, so a vertical drag keeps scrolling the page
+// exactly as it always has; a mouse never sends the touch events this reads.
+(function(){
+  const REVEAL = 128;          // px: the two 64px actions
+  const OPEN_AT = REVEAL / 2;  // snap open once dragged past halfway
+  let dragCard = null, dragSurface = null, startX = 0, startY = 0, lastX = 0, axis = null, openCard = null;
+
+  function setOpen(card, open){
+    const s = card.querySelector('.swipe-surface');
+    if (!s) return;
+    s.style.transform = open ? 'translateX(-' + REVEAL + 'px)' : '';
+    card.classList.toggle('swipe-open', open);
+    if (open) openCard = card; else if (openCard === card) openCard = null;
+  }
+  function closeOpenCard(){ if (openCard) setOpen(openCard, false); }
+
+  document.addEventListener('touchstart', function(e){
+    const card = e.target.closest && e.target.closest('.doc-card');
+    if (!card || card.classList.contains('is-asset')) { closeOpenCard(); return; }
+    const surface = card.querySelector('.swipe-surface');
+    if (!surface) { closeOpenCard(); return; }
+    if (openCard && openCard !== card) closeOpenCard();
+    dragCard = card; dragSurface = surface;
+    startX = e.touches[0].clientX; startY = e.touches[0].clientY; lastX = 0; axis = null;
+    surface.classList.add('is-dragging');
+  }, {passive:true});
+
+  document.addEventListener('touchmove', function(e){
+    if (!dragCard) return;
+    const t = e.touches[0];
+    const mx = t.clientX - startX, my = t.clientY - startY;
+    if (axis === null && (Math.abs(mx) > 6 || Math.abs(my) > 6)) {
+      axis = Math.abs(mx) > Math.abs(my) ? 'x' : 'y';
+    }
+    if (axis !== 'x') return;                     // vertical drag: leave it to the page
+    e.preventDefault();                            // horizontal: this gesture is the row's
+    const base = dragCard.classList.contains('swipe-open') ? -REVEAL : 0;
+    lastX = Math.max(-REVEAL - 24, Math.min(24, base + mx));
+    dragSurface.style.transform = 'translateX(' + lastX + 'px)';
+  }, {passive:false});
+
+  function endDrag(){
+    if (!dragCard) return;
+    dragSurface.classList.remove('is-dragging');
+    if (axis === 'x') setOpen(dragCard, lastX <= -OPEN_AT);
+    dragCard = null; dragSurface = null; axis = null;
+  }
+  document.addEventListener('touchend', endDrag, {passive:true});
+  document.addEventListener('touchcancel', endDrag, {passive:true});
+
+  // A tap on the row link while it is swiped open closes the row instead of
+  // opening the document, the way a phone's own swipe rows behave. This has
+  // to run before the row-link's own onclick (which saves it to Recent and
+  // navigates), so it listens on the capture phase.
+  document.addEventListener('click', function(e){
+    const link = e.target.closest && e.target.closest('.doc-row-link');
+    if (!link) return;
+    const card = link.closest('.doc-card');
+    if (card && card.classList.contains('swipe-open')) {
+      e.preventDefault(); e.stopPropagation();
+      setOpen(card, false);
+    }
+  }, true);
+
+  document.addEventListener('click', function(e){
+    const act = e.target.closest && e.target.closest('.swipe-act');
+    if (act) {
+      const card = act.closest('.doc-card');
+      if (!card) return;
+      if (act.dataset.act === 'bm') toggleDocBm(act);
+      else if (act.dataset.act === 'qr') { _qrReturn = card.querySelector('.doc-more'); showDocQR(card.dataset.title, card.dataset.type); }
+      setOpen(card, false);
+      return;
+    }
+    const onCard = e.target.closest && e.target.closest('.doc-card');
+    if (openCard && onCard !== openCard) closeOpenCard();
+  });
+  window.addEventListener('resize', closeOpenCard);
+  document.addEventListener('scroll', closeOpenCard, {passive:true, capture:true});
+})();
 
 // The link a row opens, whole, so it can be pasted into a message.
 function copyRowLink(title, type){

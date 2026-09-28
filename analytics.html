@@ -77,6 +77,33 @@ body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min
 /* Empty */
 .an-empty{text-align:center;padding:32px;color:var(--text-muted);font-size:13px;}
 
+/* Trend charts, hand-rolled inline SVG (no chart library, same idea as the
+   inline-SVG icons above: plain shapes, colored via the state-ink tokens). */
+:root{--chart-grid:rgba(117,106,97,0.18);}
+.trend-sub{font-size:12px;color:var(--text-muted);margin-bottom:16px;line-height:1.5;}
+.trend-charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.trend-chart-card{min-width:0;}
+.trend-chart-label{font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px;}
+.tchart-svg{width:100%;height:auto;display:block;overflow:visible;}
+.tchart-svg text{font-family:'Inter',sans-serif;}
+
+/* Audit / activity log (qms and auditor only, see the role check below) */
+.audit-stats{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+.audit-stat{flex:1;min-width:110px;background:rgba(0,93,99,0.04);border:1px solid var(--glass-border);border-radius:10px;padding:10px 12px;}
+.audit-stat-num{font-family:'BwGradual','Urbanist',sans-serif;font-size:20px;font-weight:800;color:var(--text);line-height:1;}
+.audit-stat-label{font-size:11px;color:var(--text-muted);margin-top:3px;}
+.audit-list{display:flex;flex-direction:column;gap:8px;}
+.audit-item{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;background:rgba(0,93,99,0.03);border-radius:10px;border:1px solid rgba(0,0,0,0.05);}
+.audit-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.audit-dot-ok{background:var(--ok-ink,#00705F);}
+.audit-dot-info{background:var(--info-ink,#0076A8);}
+.audit-dot-stop{background:var(--stop-ink,#C8102E);}
+.audit-dot-view{background:var(--primary-ink);}
+.audit-text{flex:1;font-size:12.5px;color:var(--text);line-height:1.5;}
+.audit-actor{color:var(--text-muted);}
+.audit-time{font-size:11px;color:var(--text-muted);flex-shrink:0;white-space:nowrap;padding-top:1px;}
+.audit-note{font-size:11.5px;color:var(--text-muted);margin-top:12px;}
+
 /* Clear / export btns */
 .data-btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
 .clear-data-btn,.export-data-btn{display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;}
@@ -94,6 +121,8 @@ html[data-taqa-theme="dark"] body{background:#001314;}
 html[data-taqa-theme="dark"] .ov-card,html[data-taqa-theme="dark"] .an-section{background:#002326;border-color:#00484B;}
 html[data-taqa-theme="dark"] .activity-item{background:rgba(0,187,182,0.04);border-color:rgba(255,255,255,0.05);}
 html[data-taqa-theme="dark"] .bar-track{background:rgba(255,255,255,0.06);}
+html[data-taqa-theme="dark"] .audit-item,html[data-taqa-theme="dark"] .audit-stat{background:rgba(0,187,182,0.04);border-color:rgba(255,255,255,0.05);}
+html[data-taqa-theme="dark"]{--chart-grid:rgba(255,255,255,0.14);}
 
 @keyframes pageFadeOut{from{opacity:1;}to{opacity:0;transform:translateY(-5px);}}
 body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
@@ -102,6 +131,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .page-inner{padding:20px 20px 60px;}
   .overview-grid{grid-template-columns:1fr;}
   .bar-label{width:140px;}
+  .trend-charts-grid{grid-template-columns:1fr;gap:28px;}
 }
 @media(max-width:480px){
   .bar-label{width:100px;}
@@ -129,7 +159,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
     <li><a href="support-ticket.html">Ask Expert</a></li>
   </ul>
   <div class="nav-right">
-    <button type="button" class="bell-btn" id="nav-bell" style="display:none" onclick="location.href='dashboard.html'" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
     <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
     <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
     <span class="nav-sep nav-up" aria-hidden="true"></span>
@@ -162,6 +192,21 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
     </div>
   </div>
 
+  <div class="an-section" id="trend-section">
+    <div class="an-section-title"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Document Register Trends</div>
+    <p class="trend-sub">Built from the current register snapshot (issue dates and review dates), not a real historical log. Once Azure is the backend, this will read genuine time-series data from the audit service instead.</p>
+    <div class="trend-charts-grid">
+      <div class="trend-chart-card">
+        <div class="trend-chart-label">Overdue review backlog, trailing 12 months</div>
+        <div id="overdue-chart"></div>
+      </div>
+      <div class="trend-chart-card">
+        <div class="trend-chart-label">Publishing velocity by segment, trailing 12 months</div>
+        <div id="velocity-chart"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="an-section">
     <div class="an-section-title"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span> Top Pages Visited</div>
     <div id="pages-list"><div class="an-empty">No page view data yet.</div></div>
@@ -180,6 +225,14 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="an-section">
     <div class="an-section-title"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg></span> Recent Activity</div>
     <div id="activity-list"><div class="an-empty">No recent activity.</div></div>
+  </div>
+
+  <div class="an-section" id="audit-section" style="display:none">
+    <div class="an-section-title"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></span> Audit &amp; Activity Log</div>
+    <p class="trend-sub">Who approved, released, withdrew or viewed a document, and when. Approvals, releases and withdrawals are placeholder entries synthesized from the register's own dates (there is no real event log yet); the viewed entries are this device's own local usage history. A real Azure audit-log service will replace all of it with genuine per-user event records.</p>
+    <div class="audit-stats" id="audit-stats"></div>
+    <div id="audit-list"><div class="an-empty">No audit entries yet.</div></div>
+    <p class="audit-note" id="audit-note"></p>
   </div>
 
   <div class="data-btn-row">
@@ -322,6 +375,269 @@ document.addEventListener('click',function(e){const a=e.target.closest('a[href]'
 <script src="documents-master.js"></script>
 <script src="store.js"></script>
 <script src="shared.js"></script>
+<script>
+/* ──────────────────────────────────────────────────────────────────────────
+   Register trend charts and audit log.
+
+   There is no historical analytics backend yet, so both of these are built
+   from a single snapshot of the register (documents-master.js plus anything
+   held in TAQA_STORE) rather than from a real time series or a real event
+   log. Every number below is derived deterministically from that snapshot's
+   real dates, not randomised, so the same register always draws the same
+   charts and the same log. Once Azure is the backend this whole block is
+   replaced by reading genuine historical series and genuine audit events
+   from that service; the comments below mark exactly what is a stand-in.
+
+   This runs after documents-master.js, store.js and shared.js so
+   TAQA_STORE, TAQA_DOC_LOOKUPS and TAQA_Analytics all exist, and after the
+   page's own role gate above, which already stops a role other than QMS or
+   auditor from ever reaching this script (TAQA_ROLE.refuse calls
+   window.stop(), which halts these later script tags entirely). ──────── */
+(function(){
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return {'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[c];
+    });
+  }
+  function fmtDate(v){
+    if (!v) return '';
+    var d = new Date(v + 'T00:00:00');
+    if (isNaN(d)) return esc(v);
+    return d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+  }
+  function registerRows(pop){
+    try { if (typeof TAQA_STORE !== 'undefined') return TAQA_STORE.rows(pop); } catch(e){}
+    return [];
+  }
+  function segments(){
+    return (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments) || {};
+  }
+  // The last `n` calendar months, oldest first, ending with the current one.
+  function trailingMonths(n){
+    var out = [], now = new Date(); now.setHours(0,0,0,0);
+    for (var i = n - 1; i >= 0; i--) {
+      var start = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      var end   = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
+      out.push({ label: start.toLocaleDateString('en-US', {month:'short'}), start: start, end: end });
+    }
+    return out;
+  }
+
+  /* ── Chart 1 data: overdue review backlog ──────────────────────────────
+     No page load has ever recorded how many documents were overdue in a
+     past month, so this instead asks a single honest question of today's
+     register: "using each document's own nextReviewDate, how many in-force
+     documents would already have been due for review as of the end of each
+     of the last 12 months?" That is necessarily non-decreasing (nothing here
+     models a review actually happening), which is itself the point: it shows
+     the backlog SCORE would carry forward if nothing were reviewed, not a
+     record of reviews that did or did not happen. */
+  function overdueSeries(){
+    var live = registerRows('live'); // controlled, status current or under-review
+    return trailingMonths(12).map(function(m){
+      var n = live.filter(function(d){
+        if (!d.nextReviewDate) return false;
+        var due = new Date(d.nextReviewDate + 'T00:00:00');
+        return !isNaN(due) && due.getTime() <= m.end.getTime();
+      }).length;
+      return { label: m.label, value: n };
+    });
+  }
+
+  /* ── Chart 2 data: publishing velocity per segment ─────────────────────
+     Real issueDate values, bucketed by segment, counted over the trailing
+     12 months. This is a genuine count of what the register says shipped in
+     that window, just not broken out month by month within it, since a
+     single snapshot cannot show a monthly shape without inventing one. */
+  function velocityBySegment(){
+    var months = trailingMonths(12);
+    var cutoff = months[0].start.getTime();
+    var counts = {};
+    registerRows('controlled').forEach(function(d){
+      if (!d.issueDate) return;
+      var iss = new Date(d.issueDate + 'T00:00:00');
+      if (isNaN(iss) || iss.getTime() < cutoff) return;
+      counts[d.segment] = (counts[d.segment] || 0) + 1;
+    });
+    var S = segments();
+    return Object.keys(counts).map(function(k){
+      return { code: (S[k] && S[k].spl) || k, name: (S[k] && S[k].name) || k, value: counts[k] };
+    }).sort(function(a, b){ return b.value - a.value; }).slice(0, 8);
+  }
+
+  /* ── SVG builders, hand-rolled, same spirit as the inline-SVG icons above:
+     plain shapes, no library, colored with the state-ink tokens via inline
+     `style` so the CSS custom properties resolve reliably. ────────────── */
+  function lineChart(series, color, ariaLabel){
+    var w = 560, h = 170, padL = 26, padR = 10, padT = 12, padB = 24;
+    var innerW = w - padL - padR, innerH = h - padT - padB;
+    var maxV = Math.max(1, series.reduce(function(m, p){ return Math.max(m, p.value); }, 0));
+    var n = series.length, stepX = n > 1 ? innerW / (n - 1) : 0;
+    var pts = series.map(function(p, i){
+      var x = padL + stepX * i;
+      var y = padT + innerH - (p.value / maxV) * innerH;
+      return { x: x, y: y, v: p.value, label: p.label };
+    });
+    var path = pts.map(function(p, i){ return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
+    var svg = '<svg class="tchart-svg" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="' + esc(ariaLabel) + '">';
+    [0, 0.5, 1].forEach(function(f){
+      var y = (padT + innerH * f).toFixed(1);
+      svg += '<line x1="' + padL + '" x2="' + (w - padR) + '" y1="' + y + '" y2="' + y + '" style="stroke:var(--chart-grid)" stroke-width="1"/>';
+    });
+    svg += '<path d="' + path + '" style="stroke:' + color + ';fill:none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>';
+    pts.forEach(function(p, i){
+      svg += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="3" style="fill:' + color + '"><title>' + esc(p.label) + ': ' + p.v + ' due</title></circle>';
+      if (n <= 8 || i % 2 === 0 || i === n - 1) {
+        svg += '<text x="' + p.x.toFixed(1) + '" y="' + (h - 6) + '" font-size="9" text-anchor="middle" style="fill:var(--text-muted)">' + esc(p.label) + '</text>';
+      }
+    });
+    svg += '</svg>';
+    return svg;
+  }
+  function barChart(series, color, ariaLabel){
+    var w = 560, h = 190, padL = 8, padR = 8, padT = 10, padB = 34;
+    var innerW = w - padL - padR, innerH = h - padT - padB;
+    var n = series.length;
+    if (!n) return '';
+    var maxV = Math.max(1, series.reduce(function(m, p){ return Math.max(m, p.value); }, 0));
+    var gap = 10, barW = Math.max(8, (innerW - gap * (n - 1)) / n);
+    var svg = '<svg class="tchart-svg" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="' + esc(ariaLabel) + '">';
+    svg += '<line x1="' + padL + '" x2="' + (w - padR) + '" y1="' + (padT + innerH).toFixed(1) + '" y2="' + (padT + innerH).toFixed(1) + '" style="stroke:var(--chart-grid)" stroke-width="1"/>';
+    series.forEach(function(p, i){
+      var bh = Math.max(1, (p.value / maxV) * innerH);
+      var x = padL + i * (barW + gap);
+      var y = padT + innerH - bh;
+      svg += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barW.toFixed(1) + '" height="' + bh.toFixed(1) + '" rx="3" style="fill:' + color + '"><title>' + esc(p.name) + ': ' + p.value + ' published</title></rect>';
+      svg += '<text x="' + (x + barW / 2).toFixed(1) + '" y="' + (y - 4).toFixed(1) + '" font-size="9" text-anchor="middle" style="fill:var(--text)">' + p.value + '</text>';
+      svg += '<text x="' + (x + barW / 2).toFixed(1) + '" y="' + (h - 8) + '" font-size="9" text-anchor="middle" style="fill:var(--text-muted)">' + esc(p.code) + '</text>';
+    });
+    svg += '</svg>';
+    return svg;
+  }
+
+  function renderTrendCharts(){
+    var oc = document.getElementById('overdue-chart'), vc = document.getElementById('velocity-chart');
+    if (!oc || !vc) return;
+    var overdue = overdueSeries();
+    oc.innerHTML = overdue.some(function(p){ return p.value > 0; })
+      ? lineChart(overdue, 'var(--warn-ink,#8A6200)', 'Overdue review backlog over the trailing 12 months')
+      : '<div class="an-empty">No documents are due for review.</div>';
+    var velocity = velocityBySegment();
+    vc.innerHTML = velocity.length
+      ? barChart(velocity, 'var(--primary-ink)', 'Documents published per segment over the trailing 12 months')
+      : '<div class="an-empty">No documents were issued in the last 12 months.</div>';
+  }
+
+  /* ── Audit / activity log ───────────────────────────────────────────────
+     Synthesized from three real fields already on every controlled
+     document (approvedDate, issueDate, status), plus this device's own
+     genuine local view history from shared.js's TAQA_Track. Nothing here is
+     a real per-user event: there is no signed-in identity in the prototype,
+     so "who" is the role the register already names for that step (the
+     approver for the document's type, or QMS as document controller), not a
+     person. A real Azure audit-log service replaces this outright. */
+  function auditEntries(){
+    var docs = registerRows('controlled');
+    var entries = [];
+    docs.forEach(function(d){
+      var seg = segments()[d.segment] || {};
+      var segName = seg.name || d.segment || 'Company Wide';
+      var approver = (typeof TAQA_APPROVAL !== 'undefined' && TAQA_APPROVAL.approverFor(d)) ||
+        ((typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.types[d.docType] && TAQA_DOC_LOOKUPS.types[d.docType].owner)) || 'Approver';
+      if (d.approvedDate) {
+        entries.push({ date: d.approvedDate, action: 'approved', actor: approver + ' (' + segName + ')', doc: d });
+      }
+      var released = d.status === 'current' || d.status === 'under-review' || d.status === 'superseded' || d.status === 'obsolete';
+      if (d.issueDate && released) {
+        entries.push({ date: d.issueDate, action: 'released', actor: 'QMS Document Control', doc: d });
+      }
+      if (d.status === 'obsolete' || d.status === 'superseded') {
+        // No withdrawal date field exists yet. The review due date is the
+        // closest real date on the record to when a withdrawal would have
+        // been triggered, so it stands in, but only when that date has
+        // actually passed; otherwise the issue date is used instead so the
+        // log never claims a withdrawal that has not happened yet.
+        var due = d.nextReviewDate ? new Date(d.nextReviewDate + 'T00:00:00') : null;
+        var wd = (due && !isNaN(due) && due.getTime() <= Date.now()) ? d.nextReviewDate : d.issueDate;
+        if (wd) entries.push({ date: wd, action: 'withdrawn', actor: 'QMS Document Control', doc: d });
+      }
+    });
+    // Fold in this device's real, locally recorded document opens. Open
+    // events are keyed by document title (see segment.html), not docNumber.
+    try {
+      if (typeof TAQA_Analytics !== 'undefined') {
+        var byTitle = {};
+        docs.forEach(function(d){ byTitle[d.title] = d; });
+        TAQA_Analytics.get().forEach(function(ev){
+          if (ev.e !== 'open') return;
+          var d = byTitle[ev.k];
+          if (!d) return;
+          entries.push({ date: new Date(ev.t).toISOString().slice(0, 10), ts: ev.t, action: 'viewed', actor: 'This device', doc: d });
+        });
+      }
+    } catch(e){}
+    entries.sort(function(a, b){
+      var ta = a.ts || new Date(a.date + 'T00:00:00').getTime();
+      var tb = b.ts || new Date(b.date + 'T00:00:00').getTime();
+      return tb - ta;
+    });
+    return entries;
+  }
+
+  var AUDIT_LABEL = { approved: 'Approved', released: 'Countersigned and released', withdrawn: 'Withdrawn', viewed: 'Viewed' };
+  var AUDIT_DOT = { approved: 'ok', released: 'info', withdrawn: 'stop', viewed: 'view' };
+  var AUDIT_SHOWN = 40;
+
+  function renderAuditLog(){
+    var section = document.getElementById('audit-section');
+    if (!section) return;
+    // Stricter sub-gate on top of the page-level one above: this table names
+    // who approved, released, withdrew and viewed each document, so it stays
+    // limited to QMS and the auditor even if the page's own gate is ever
+    // widened to admit another role later.
+    var role = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE.current() : null;
+    if (role !== 'qms' && role !== 'auditor') { section.style.display = 'none'; return; }
+    section.style.display = '';
+
+    var entries = auditEntries();
+    var counts = { approved: 0, released: 0, withdrawn: 0, viewed: 0 };
+    entries.forEach(function(e){ counts[e.action] = (counts[e.action] || 0) + 1; });
+    document.getElementById('audit-stats').innerHTML = Object.keys(AUDIT_LABEL).map(function(k){
+      return '<div class="audit-stat"><div class="audit-stat-num">' + (counts[k] || 0) + '</div>' +
+        '<div class="audit-stat-label">' + AUDIT_LABEL[k] + '</div></div>';
+    }).join('');
+
+    var shown = entries.slice(0, AUDIT_SHOWN);
+    document.getElementById('audit-list').innerHTML = shown.length
+      ? '<div class="audit-list">' + shown.map(function(e){
+          return '<div class="audit-item">' +
+            '<div class="audit-dot audit-dot-' + AUDIT_DOT[e.action] + '"></div>' +
+            '<div class="audit-text"><strong>' + AUDIT_LABEL[e.action] + '</strong> ' +
+              esc(e.doc.docNumber) + ' ' + esc(e.doc.title) +
+              ' <span class="audit-actor">by ' + esc(e.actor) + '</span></div>' +
+            '<div class="audit-time">' + fmtDate(e.date) + '</div>' +
+          '</div>';
+        }).join('') + '</div>'
+      : '<div class="an-empty">No audit entries yet.</div>';
+
+    var note = document.getElementById('audit-note');
+    if (note) {
+      note.textContent = entries.length > AUDIT_SHOWN
+        ? 'Showing the ' + AUDIT_SHOWN + ' most recent of ' + entries.length + ' synthesized entries.'
+        : '';
+    }
+  }
+
+  renderTrendCharts();
+  renderAuditLog();
+  // A role switch from the refusal screen's own switcher reloads the page,
+  // but the register can also change in this tab (an upload, an approval)
+  // without a reload, so both stay live the same way the rest of the page
+  // already listens for taqa:register-changed.
+  try { if (typeof TAQA_STORE !== 'undefined') TAQA_STORE.onChange(function(){ renderTrendCharts(); renderAuditLog(); }); } catch(e){}
+})();
+</script>
 <script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
 </body>

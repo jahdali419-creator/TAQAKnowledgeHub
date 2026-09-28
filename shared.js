@@ -289,7 +289,7 @@ window.showToast=function(msg,type){
      one family: opening any of them closes the others, so two can never be
      drawn over each other. Each one publishes its own close function. */
   function closeOthers(keep){
-    var all={areas:'taqaCloseAreas',door:'taqaCloseDoor',bm:'taqaCloseBookmarks',menu:'taqaCloseMenu'};
+    var all={areas:'taqaCloseAreas',door:'taqaCloseDoor',bm:'taqaCloseBookmarks',menu:'taqaCloseMenu',bell:'taqaCloseBell'};
     Object.keys(all).forEach(function(k){ if(k!==keep && typeof window[all[k]]==='function') window[all[k]](); });
   }
   window.taqaCloseBarPopovers=closeOthers;
@@ -1284,6 +1284,53 @@ document.addEventListener('keydown',function(e){
 })();
 
 /* ──────────────────────────────────────────────────────────────────────────
+   Offline banner
+   ──────────────────────────────────────────────────────────────────────────
+   The service worker already caches the shell for offline reading. This is
+   the honest label for it: when the network drops, say so and say what the
+   reader is looking at, instead of letting a page go quietly stale.
+   ────────────────────────────────────────────────────────────────────────── */
+(function () {
+  if (document.getElementById('taqa-offline-bar')) return;
+
+  var css = document.createElement('style');
+  css.textContent =
+    '.offline-bar{position:sticky;top:0;z-index:2500;display:flex;align-items:center;gap:8px;' +
+      'justify-content:center;padding:7px 14px;background:#524D48;color:#fff;' +
+      'font-size:12px;font-weight:600;text-align:center;}' +
+    '.offline-bar svg{flex-shrink:0;}';
+  document.head.appendChild(css);
+
+  var ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>' +
+    '<path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/>' +
+    '<path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>' +
+    '<line x1="12" y1="20" x2="12.01" y2="20"/></svg>';
+
+  var bar = null;
+  function show() {
+    if (bar) return;
+    bar = document.createElement('div');
+    bar.id = 'taqa-offline-bar';
+    bar.className = 'offline-bar';
+    bar.innerHTML = ICON + '<span>You are offline. Showing the last cached copy of this page.</span>';
+    document.body.insertBefore(bar, document.body.firstChild);
+  }
+  function hide() {
+    if (!bar) return;
+    bar.remove(); bar = null;
+  }
+
+  window.addEventListener('online', hide);
+  window.addEventListener('offline', show);
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', show);
+    else show();
+  }
+})();
+
+/* ──────────────────────────────────────────────────────────────────────────
    The register is the controller's view
    ──────────────────────────────────────────────────────────────────────────
    The Master List carries the F086 export, the overdue queue, the provisional
@@ -1409,21 +1456,91 @@ document.addEventListener('keydown',function(e){
    The count is the real queue for the person signed in: drafts at the
    Director's stage in their own area, or at the QMS stage for QMS. It used
    to be a number seeded into localStorage, which is how an employee came to
-   see 24 approvals waiting. */
+   see 24 approvals waiting.
+
+   The bell used to jump straight to the queue (scrolling to it on the desk,
+   navigating there from anywhere else). It still can, but a reader should
+   not have to leave the page just to see what is in the queue, so a click
+   now opens a short preview first; "Open your queue" underneath is the old
+   jump, kept for whoever wants it. */
 (function(){
-  // On the desk itself the queue is on the page, so the bell goes to it.
-  (function(){
-    var b = document.getElementById('nav-bell');
-    if (b && /dashboard\.html/.test(location.pathname)) b.onclick = function(){
-      var q = document.getElementById('pending-list');
-      if (!q) { location.href = 'dashboard.html'; return; }
-      // Land the queue's heading below the fixed bar, not under it.
+  var css = document.createElement('style');
+  css.textContent =
+    '.bell-wrap{position:relative;flex-shrink:0;display:inline-flex;}' +
+    '.bell-menu{position:absolute;top:calc(100% + 8px);inset-inline-end:0;z-index:3000;width:300px;' +
+      'max-height:min(380px,70vh);overflow-y:auto;background:var(--bg-white,#fff);' +
+      'border:1px solid var(--border,#C7DBDD);border-radius:13px;box-shadow:0 14px 40px rgba(0,88,90,.15);' +
+      'padding:6px;display:none;}' +
+    '.bell-menu.open{display:block;}' +
+    '.bell-hd{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;' +
+      'color:var(--text-light,#756A61);padding:7px 10px 6px;}' +
+    '.bell-i{display:block;width:100%;text-align:start;padding:8px 10px;border:none;' +
+      'background:transparent;border-radius:9px;cursor:pointer;font-family:inherit;' +
+      'transition:background .15s;text-decoration:none;}' +
+    '.bell-i:hover{background:rgba(0,93,99,.06);}' +
+    '.bell-i .bt{display:block;font-size:12.5px;font-weight:700;color:var(--text,#1E1C1A);line-height:1.3;}' +
+    '.bell-i .bd{display:block;font-size:11px;color:var(--text-muted,#524D48);line-height:1.35;margin-top:1px;}' +
+    '.bell-more{padding:6px 10px 2px;font-size:11px;color:var(--text-light,#756A61);}' +
+    '.bell-foot{display:block;width:100%;text-align:center;margin-top:3px;padding:8px 10px;' +
+      'border:none;border-top:1px solid var(--border,#C7DBDD);background:transparent;' +
+      'font-family:inherit;font-size:12px;font-weight:700;color:var(--primary,#005D63);cursor:pointer;' +
+      'text-decoration:none;}' +
+    '.bell-foot:hover{background:rgba(0,93,99,.06);}' +
+    'html[data-taqa-theme="dark"] .bell-menu{background:#002326;border-color:#003A3D;}' +
+    'html[data-taqa-theme="dark"] .bell-i:hover,html[data-taqa-theme="dark"] .bell-foot:hover{background:rgba(0,187,182,.08);}';
+  document.head.appendChild(css);
+
+  // The desk (dashboard.html) already shows the queue on the page; jumping
+  // there from anywhere else is what "Open your queue" falls back to.
+  function openQueue(){
+    var q = document.getElementById('pending-list');
+    if (q && /dashboard\.html/.test(location.pathname)) {
       var nav = document.getElementById('navbar');
       var off = (nav ? nav.getBoundingClientRect().bottom : 64) + 16;
       var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       window.scrollTo({top: Math.max(0, q.getBoundingClientRect().top + window.pageYOffset - off), behavior: still ? 'auto' : 'smooth'});
-    };
-  })();
+      return;
+    }
+    // Leaving from a segment page keeps that segment's desk, not the
+    // reader's own default one.
+    var id = /segment\.html/.test(location.pathname) ? new URLSearchParams(location.search).get('id') : null;
+    location.href = 'dashboard.html' + (id ? '?id=' + encodeURIComponent(id) : '');
+  }
+
+  var wrap = null, menu = null;
+  // The button ships in every page's static markup with no positioned
+  // ancestor of its own; give it one at runtime rather than edit every page.
+  function ensureWrap(btn){
+    if (wrap) return wrap;
+    wrap = document.createElement('div');
+    wrap.className = 'bell-wrap';
+    btn.parentNode.insertBefore(wrap, btn);
+    wrap.appendChild(btn);
+    menu = document.createElement('div');
+    menu.className = 'bell-menu';
+    wrap.appendChild(menu);
+    function closeMenu(){ menu.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+    window.taqaCloseBell = closeMenu;
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var open = !menu.classList.contains('open');
+      if (open && window.taqaCloseBarPopovers) window.taqaCloseBarPopovers('bell');
+      menu.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', String(open));
+    });
+    document.addEventListener('click', closeMenu);
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && menu.classList.contains('open')) { closeMenu(); btn.focus(); }
+    });
+    wrap.addEventListener('focusout', function(e){
+      if (menu.classList.contains('open') && e.relatedTarget && !wrap.contains(e.relatedTarget)) closeMenu();
+    });
+    menu.addEventListener('click', function(e){
+      if (e.target.closest('.bell-foot')) { e.preventDefault(); closeMenu(); openQueue(); }
+    });
+    return wrap;
+  }
+
   function sync(){
     var btn = document.getElementById('nav-bell');
     if (!btn) return;
@@ -1434,18 +1551,36 @@ document.addEventListener('keydown',function(e){
     var signs = !!(cap && (cap.approve || cap.countersign));
     btn.style.display = signs ? '' : 'none';
     if (!signs || !badge) return;
-    var n = 0;
+    var pending = [];
     try {
       if (typeof TAQA_STORE !== 'undefined' && A) {
-        n = TAQA_STORE.all().filter(function(d){
+        pending = TAQA_STORE.all().filter(function(d){
           return A.canApprove(d) || A.canCountersign(d);
-        }).length;
+        });
       }
     } catch(e){}
+    var n = pending.length;
     badge.textContent = n > 99 ? '99+' : String(n);
     badge.style.display = n > 0 ? 'flex' : 'none';
     btn.setAttribute('aria-label', n ? n + ' document' + (n === 1 ? '' : 's') + ' waiting for your signature' : 'Approvals, nothing waiting');
     btn.title = btn.getAttribute('aria-label');
+    btn.setAttribute('aria-haspopup', 'true');
+    if (!btn.hasAttribute('aria-expanded')) btn.setAttribute('aria-expanded', 'false');
+
+    ensureWrap(btn);
+    var SHOWN = 6;
+    menu.innerHTML =
+      '<div class="bell-hd">Waiting for your signature</div>' +
+      (pending.length
+        ? pending.slice(0, SHOWN).map(function(d){
+            var verb = A.canCountersign(d) ? 'countersignature' : 'approval';
+            return '<a class="bell-i" href="viewer.html?doc=' + encodeURIComponent(d.docNumber) + '">' +
+              '<span class="bt">' + d.title + '</span>' +
+              '<span class="bd">' + d.docNumber + ' &middot; waiting for your ' + verb + '</span></a>';
+          }).join('')
+        : '<div class="bell-i" style="cursor:default;"><span class="bd">Nothing waiting right now.</span></div>') +
+      (pending.length > SHOWN ? '<div class="bell-more">+ ' + (pending.length - SHOWN) + ' more in your queue</div>' : '') +
+      '<button type="button" class="bell-foot">Open your queue</button>';
   }
   window.taqaSyncBell = sync;
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', sync); else sync();

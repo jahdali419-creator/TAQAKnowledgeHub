@@ -293,12 +293,18 @@ html[data-taqa-theme="dark"] .pp-meta,html[data-taqa-theme="dark"] .pp-seg{color
 /* Print view */
 @media print{
   nav,.bc,.doc-actions,.act-note,.pop,.pdf-toolbar,.pdf-preview,#read-progress-bar,
-  footer,.bm-fab,.bm-panel,.toast-wrap,#back-to-top{display:none!important;}
+  footer,.bm-fab,.bm-panel,.toast-wrap,#back-to-top,
+  .rev-toggle-btn,.cmp-toggle-btn,#cmp-panel{display:none!important;}
   body{background:#fff!important;animation:none!important;}
   .page-wrapper{padding-top:0!important;padding-bottom:0!important;}
   .doc-foot{border-top:0!important;margin-top:8px!important;padding-top:0!important;}
   .related-section{box-shadow:none!important;border:1px solid #ddd!important;background:#fff!important;}
   .related-chev{display:none!important;}
+  /* The timeline and the approval trail are the record a binder needs, so
+     they print open even if a reader had the timeline collapsed on screen. */
+  .rev-timeline{display:block!important;}
+  .rev-hist-hd{cursor:default!important;}
+  .appr-row{background:#F9F8F7!important;border:1px solid #ddd!important;}
   /* The quick reference card prints on its own when it is open, and not at
      all when it is closed, rather than as an empty card under the page. */
   #qref-overlay:not(.open){display:none!important;}
@@ -519,6 +525,55 @@ html[data-taqa-theme="dark"] .rev-dot{background:#002326;}
   .rev-row{grid-template-columns:26px 1fr;gap:10px;}
   .rev-note{font-size:12px;}
 }
+
+/* Employee: one line, no history list, no compare. Matches the brief/full
+   split the meta grid already uses above (ISO 9001 7.5.3.1 a)). */
+.rev-brief{font-size:13.5px;color:var(--text-muted);line-height:1.65;margin-top:2px;}
+.rev-brief b{color:var(--text);font-weight:700;}
+
+/* ── Compare revisions ── */
+.cmp-toggle-btn{margin-inline-start:auto;min-height:30px;padding:0 12px;border-radius:50px;
+  font:600 11.5px/1 'Inter',sans-serif;background:transparent;color:var(--primary-ink);
+  border:1px solid rgba(0,93,99,0.24);cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+  transition:background-color .18s ease,border-color .18s ease;}
+.cmp-toggle-btn svg{width:13px;height:13px;flex:none;}
+@media (hover:hover){ .cmp-toggle-btn:hover{background:var(--disc);border-color:rgba(0,93,99,0.34);} }
+.cmp-toggle-btn[aria-expanded="true"]{background:var(--disc-2);border-color:rgba(0,93,99,0.34);color:var(--primary-ink);}
+.cmp-panel{display:none;margin-top:18px;padding-top:16px;border-top:1px dashed var(--hair-2);}
+.cmp-panel.open{display:block;}
+.cmp-pickers{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.cmp-lbl{font-size:12px;color:var(--text-muted);display:inline-flex;align-items:center;gap:8px;}
+.cmp-select{font:600 12.5px/1 'Inter',sans-serif;color:var(--text);background:var(--sheet);
+  border:1px solid var(--hair-2);border-radius:9px;padding:7px 10px;cursor:pointer;min-height:36px;}
+.cmp-vs{font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;}
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.cmp-col{background:var(--inset);border-radius:12px;padding:14px 16px;}
+.cmp-col-current{background:rgba(0,187,182,0.09);}
+html[data-taqa-theme="dark"] .cmp-col-current{background:rgba(0,187,182,0.13);}
+.cmp-col-hd{font-family:'BwGradual','Urbanist',sans-serif;font-size:13.5px;font-weight:700;color:var(--text);
+  margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+.cmp-field{display:flex;flex-direction:column;gap:2px;padding:7px 0;border-top:1px solid var(--hair);}
+.cmp-field:first-of-type{border-top:0;padding-top:0;}
+.cmp-k{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);}
+.cmp-v{font-size:12.5px;color:var(--text);line-height:1.55;}
+@media(max-width:600px){
+  .cmp-grid{grid-template-columns:1fr;}
+  .cmp-toggle-btn{font-size:11px;}
+}
+
+/* ── Approval / e-signature trail ── */
+.appr-trail{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
+.appr-row{display:flex;align-items:flex-start;gap:12px;padding:13px 15px;background:var(--inset);border-radius:12px;}
+.appr-icon{width:30px;height:30px;border-radius:50%;background:rgba(0,93,99,0.12);color:var(--primary-ink);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.appr-icon svg{width:15px;height:15px;}
+.appr-row.pending{opacity:0.82;}
+.appr-row.pending .appr-icon{background:rgba(255,184,28,0.16);color:var(--warn-ink);}
+.appr-body{flex:1;min-width:0;}
+.appr-name{font-family:'BwGradual','Urbanist',sans-serif;font-size:14px;font-weight:700;color:var(--text);line-height:1.3;}
+.appr-role{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.appr-date{font-size:11.5px;color:var(--text-dim);margin-top:3px;}
+.appr-caveat{font-size:11.5px;line-height:1.65;color:var(--text-dim);margin-top:14px;padding-top:13px;border-top:1px dashed var(--hair-2);}
 </style>
 <link rel="stylesheet" href="topbar.css">
 </head>
@@ -543,7 +598,7 @@ html[data-taqa-theme="dark"] .rev-dot{background:#002326;}
     <li><a href="support-ticket.html">Ask Expert</a></li>
   </ul>
   <div class="nav-right">
-    <button type="button" class="bell-btn" id="nav-bell" style="display:none" onclick="location.href='dashboard.html'" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
     <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
     <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
     <span class="nav-sep nav-up" aria-hidden="true"></span>
@@ -622,14 +677,42 @@ html[data-taqa-theme="dark"] .rev-dot{background:#002326;}
   </section>
 
   <div class="content-card" id="rev-history-section" style="display:none">
-    <div class="rev-hist-hd" onclick="toggleRevHistory()">
+    <!-- Employee brief: current revision only, no history list. TAQA_ROLE gates
+         which of these two views renders; see renderRevHistory() below. -->
+    <div id="rev-brief-view" style="display:none">
       <div class="sec-h" style="margin:0">Version History</div>
-      <span class="rev-count-badge" id="rev-count-badge"></span>
-      <button class="rev-toggle-btn open" id="rev-toggle-btn" aria-label="Toggle version history">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
+      <p class="rev-brief" id="rev-brief-text"></p>
     </div>
-    <div class="rev-timeline" id="rev-timeline"></div>
+    <!-- Owner / QMS / auditor: the full revision timeline plus a compare tool.
+         Placeholder data; see the comment above renderRevHistory() in the script. -->
+    <div id="rev-full-view" style="display:none">
+      <div class="rev-hist-hd" onclick="toggleRevHistory()">
+        <div class="sec-h" style="margin:0">Version History</div>
+        <span class="rev-count-badge" id="rev-count-badge"></span>
+        <button type="button" class="cmp-toggle-btn" id="cmp-toggle-btn" aria-expanded="false" aria-controls="cmp-panel" onclick="toggleCompare(event)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v14"/><path d="M4 13l4 4 4-4"/><path d="M16 21V7"/><path d="M20 11l-4-4-4 4"/></svg>
+          Compare revisions
+        </button>
+        <button class="rev-toggle-btn open" id="rev-toggle-btn" aria-label="Toggle version history">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+      </div>
+      <div class="rev-timeline" id="rev-timeline"></div>
+      <div class="cmp-panel" id="cmp-panel">
+        <div class="cmp-pickers">
+          <label class="cmp-lbl">Compare <select class="cmp-select" id="cmp-select-a" onchange="renderCompareGrid()" aria-label="First revision to compare"></select></label>
+          <span class="cmp-vs">vs</span>
+          <select class="cmp-select" id="cmp-select-b" onchange="renderCompareGrid()" aria-label="Second revision to compare"></select>
+        </div>
+        <div class="cmp-grid" id="cmp-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-card" id="approval-section" style="display:none">
+    <div class="sec-h">Approval &amp; e-signature trail</div>
+    <div class="appr-trail" id="appr-trail"></div>
+    <p class="appr-caveat" id="appr-caveat"></p>
   </div>
 
   <section class="related-section" id="related-section" style="display:none" aria-labelledby="rel-h">
@@ -1036,27 +1119,103 @@ if (_denied) {
 if (!_denied) document.getElementById('doc-summary').innerHTML = docControlLine(_rec, {noRev:true}) ||
   'The register holds no control record for this document.';
 
-// Version History
+// ── Version history & approval trail ───────────────────────────────────────
+// PLACEHOLDER DATA. TQ-QHSE-S001 5.4 and API Q2 4.4.3 d) expect a controlled
+// document to carry its revision history, and 4.4.3 a) b) expect the
+// approver and countersigner's identity and date. Neither is a field the
+// register carries yet, and the Hub has no back end to ask for one. Rather
+// than invent a network call the prototype cannot make, this derives a
+// plausible, deterministic set of rows from the one real number already on
+// screen (the current revision) plus the document's own type metadata
+// (owner/approver role, review cycle, issue date), seeded on the document
+// number so the same document produces the same rows on every load and
+// every viewer. Once Azure/Entra ID identity and a real revision log are
+// wired in, this block is replaced by rows the back end returns.
+function _seedFromString(s) {
+  var h = 5381; s = String(s || '');
+  for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+  return Math.abs(h) || 1;
+}
+function _seededSeq(seed) {
+  var s = seed % 2147483647; if (s <= 0) s += 2147483646;
+  return function () { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+}
+function _monYear(d) {
+  var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return MON[d.getMonth()] + ' ' + d.getFullYear();
+}
+var REV_NOTES = [
+  'Periodic review: clarified steps and updated cross-references.',
+  'Updated to reflect current equipment and field practice.',
+  'Editorial and formatting corrections, no change of intent.',
+  'Incorporated feedback raised at internal audit.',
+  'Aligned wording with the current edition of the referenced standard.',
+  'Minor scope clarification following a related lesson learned.'
+];
+function synthRevisionHistory(rec) {
+  if (!rec || (MA && !MA.controlled(rec))) return null;
+  var cur = parseInt(rec.revision, 10);
+  if (!cur || cur < 1) cur = 1;
+  var seed = _seedFromString(rec.docNumber || rec.title || docTitle);
+  var rnd = _seededSeq(seed);
+  var t = MA ? MA.type(rec) : {};
+  var ownerLbl = (t.owner || 'Document owner').replace(/,\s*$/, '') || 'Document owner';
+  var cycle = t.reviewCycleMonths || 24;
+  var cursor = rec.issueDate ? new Date(rec.issueDate) : new Date();
+  var rows = [];
+  for (var k = cur; k >= 1; k--) {
+    var d;
+    if (k === cur) {
+      d = cursor;
+    } else {
+      var stepDays = Math.round(cycle * 30.4);
+      var jitter = Math.round((rnd() - 0.5) * 20);
+      d = new Date(cursor);
+      d.setDate(d.getDate() - stepDays + jitter);
+      cursor = d;
+    }
+    rows.push({
+      rev: k,
+      date: d,
+      author: ownerLbl,
+      note: k === 1 ? 'Initial release, baseline revision.' : REV_NOTES[Math.floor(rnd() * REV_NOTES.length)]
+    });
+  }
+  return { current: cur, rows: rows }; // rows ordered current -> 1, matching the timeline
+}
+var _histCache = null;
 function renderRevHistory() {
-  if (typeof TAQA_SEGMENTS === 'undefined') return;
-  const seg = TAQA_SEGMENTS[segId];
-  if (!seg || !seg.docRevisions) return;
-  const revData = seg.docRevisions[docTitle];
-  if (!revData || !revData.history || !revData.history.length) return;
-  document.getElementById('rev-count-badge').textContent = revData.history.length + ' revision' + (revData.history.length > 1 ? 's' : '');
-  document.getElementById('rev-timeline').innerHTML = revData.history.map(r => `
-    <div class="rev-row ${r.rev === revData.current ? 'rev-current' : ''}">
-      <div><div class="rev-dot"></div></div>
-      <div>
-        <div class="rev-chip-row">
-          <span class="rev-chip">Rev ${r.rev}</span>
-          ${r.rev === revData.current ? '<span class="rev-current-tag">Current</span>' : ''}
-          <span class="rev-meta">${r.date} &nbsp;·&nbsp; ${r.author}</span>
-        </div>
-        <div class="rev-note">${r.note}</div>
-      </div>
-    </div>`).join('');
-  document.getElementById('rev-history-section').style.display = '';
+  var sec = document.getElementById('rev-history-section');
+  if (!sec || !_rec || _denied) return;
+  var hist = synthRevisionHistory(_rec);
+  if (!hist) return;
+  sec.style.display = '';
+  var isController = !_roleKey || _roleKey !== 'employee';
+  if (!isController) {
+    document.getElementById('rev-brief-view').style.display = '';
+    document.getElementById('rev-full-view').style.display = 'none';
+    document.getElementById('rev-brief-text').innerHTML =
+      'Current revision: <b>Rev ' + hist.current + '</b>. The full revision history is available to the document owner, QMS and an auditor.';
+    return;
+  }
+  document.getElementById('rev-brief-view').style.display = 'none';
+  document.getElementById('rev-full-view').style.display = '';
+  document.getElementById('rev-count-badge').textContent = hist.rows.length + ' revision' + (hist.rows.length > 1 ? 's' : '');
+  document.getElementById('rev-timeline').innerHTML = hist.rows.map(function (r) {
+    return '<div class="rev-row' + (r.rev === hist.current ? ' rev-current' : '') + '">' +
+      '<div><div class="rev-dot"></div></div>' +
+      '<div>' +
+        '<div class="rev-chip-row">' +
+          '<span class="rev-chip">Rev ' + r.rev + '</span>' +
+          (r.rev === hist.current ? '<span class="rev-current-tag">Current</span>' : '') +
+          '<span class="rev-meta">' + _monYear(r.date) + ' · ' + esc(r.author) + '</span>' +
+        '</div>' +
+        '<div class="rev-note">' + esc(r.note) + '</div>' +
+      '</div></div>';
+  }).join('');
+  var cmpBtn = document.getElementById('cmp-toggle-btn');
+  if (cmpBtn) cmpBtn.style.display = hist.rows.length > 1 ? '' : 'none';
+  renderCompareOptions(hist);
 }
 function toggleRevHistory() {
   const tl = document.getElementById('rev-timeline');
@@ -1065,7 +1224,96 @@ function toggleRevHistory() {
   tl.style.display = hidden ? '' : 'none';
   btn.classList.toggle('open', hidden);
 }
+
+// ── Compare revisions ── a simple side-by-side read of two rows from the
+// same synthesized history above, not a text-diff tool: this is a controlled
+// document register, not source control.
+function renderCompareOptions(hist) {
+  _histCache = hist;
+  var a = document.getElementById('cmp-select-a'), b = document.getElementById('cmp-select-b');
+  if (!a || !b) return;
+  var opts = hist.rows.map(function (r) {
+    return '<option value="' + r.rev + '">Rev ' + r.rev + ' (' + _monYear(r.date) + ')</option>';
+  }).join('');
+  a.innerHTML = opts; b.innerHTML = opts;
+  a.value = hist.rows[Math.min(1, hist.rows.length - 1)].rev;
+  b.value = hist.current;
+}
+function renderCompareGrid() {
+  if (!_histCache) return;
+  var a = document.getElementById('cmp-select-a'), b = document.getElementById('cmp-select-b');
+  var grid = document.getElementById('cmp-grid');
+  if (!a || !b || !grid) return;
+  var ra = _histCache.rows.find(function (r) { return String(r.rev) === a.value; });
+  var rb = _histCache.rows.find(function (r) { return String(r.rev) === b.value; });
+  if (!ra || !rb) return;
+  var col = function (r) {
+    return '<div class="cmp-col' + (r.rev === _histCache.current ? ' cmp-col-current' : '') + '">' +
+      '<div class="cmp-col-hd">Rev ' + r.rev + (r.rev === _histCache.current ? ' <span class="rev-current-tag">Current</span>' : '') + '</div>' +
+      '<div class="cmp-field"><span class="cmp-k">Date</span><span class="cmp-v">' + _monYear(r.date) + '</span></div>' +
+      '<div class="cmp-field"><span class="cmp-k">Author</span><span class="cmp-v">' + esc(r.author) + '</span></div>' +
+      '<div class="cmp-field"><span class="cmp-k">Change</span><span class="cmp-v">' + esc(r.note) + '</span></div>' +
+    '</div>';
+  };
+  grid.innerHTML = col(ra) + col(rb);
+}
+function toggleCompare(ev) {
+  if (ev) ev.stopPropagation();
+  var panel = document.getElementById('cmp-panel');
+  var btn = document.getElementById('cmp-toggle-btn');
+  if (!panel) return;
+  var open = panel.classList.toggle('open');
+  if (btn) btn.setAttribute('aria-expanded', String(open));
+  if (open) {
+    var tl = document.getElementById('rev-timeline');
+    if (tl && tl.style.display === 'none') { tl.style.display = ''; document.getElementById('rev-toggle-btn').classList.add('open'); }
+    renderCompareGrid();
+  }
+}
+
+// ── Approval / e-signature trail ── PLACEHOLDER DATA, same caveat as above.
+// TAQA_APPROVAL (roles.js) already knows what stage an in-progress draft is
+// waiting on, so a document mid-release shows that honestly rather than a
+// fabricated completed signature. A released document shows the role the
+// register names for that step (API Q2 4.4.3 a) b)) and the date already on
+// the record; the signer's own name/identity is what Entra ID adds later.
+function renderApprovalTrail() {
+  var sec = document.getElementById('approval-section');
+  if (!sec || !_rec || _denied) return;
+  if (MA && !MA.controlled(_rec)) return;
+  var isController = !_roleKey || _roleKey !== 'employee';
+  if (!isController) return; // stays hidden for an employee
+  sec.style.display = '';
+  var body = document.getElementById('appr-trail');
+  var approverRole = (MA && MA.approver(_rec)) || 'Named approver';
+  var stage = (typeof TAQA_APPROVAL !== 'undefined') ? TAQA_APPROVAL.stageOf(_rec) : null;
+  var iconOk = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
+  var iconPending = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>';
+  var rows = [];
+  if (stage === 'director') {
+    rows.push({icon: iconPending, pending: true, name: 'Awaiting technical approval', role: approverRole, date: 'Not yet signed'});
+    rows.push({icon: iconPending, pending: true, name: 'Awaiting countersignature', role: 'QMS / Document Controller', date: 'Not yet signed'});
+  } else if (stage === 'qms') {
+    rows.push({icon: iconOk, pending: false, name: _rec.approvedBy || approverRole, role: 'Technical approval · ' + approverRole, date: _fmt(_rec.approvedDate) || 'Recorded'});
+    rows.push({icon: iconPending, pending: true, name: 'Awaiting countersignature', role: 'QMS / Document Controller', date: 'Not yet signed'});
+  } else {
+    rows.push({icon: iconOk, pending: false, name: _rec.approvedBy || approverRole, role: 'Technical approval · ' + approverRole, date: _fmt(_rec.approvedDate) || 'Not recorded'});
+    rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy || 'QMS / Document Controller', role: 'Countersignature · release', date: _fmt(_rec.issueDate) || 'Not recorded'});
+  }
+  body.innerHTML = rows.map(function (r) {
+    return '<div class="appr-row' + (r.pending ? ' pending' : '') + '">' +
+      '<span class="appr-icon">' + r.icon + '</span>' +
+      '<div class="appr-body">' +
+        '<div class="appr-name">' + esc(r.name) + '</div>' +
+        '<div class="appr-role">' + esc(r.role) + '</div>' +
+        '<div class="appr-date">' + esc(r.date) + '</div>' +
+      '</div></div>';
+  }).join('');
+  document.getElementById('appr-caveat').textContent =
+    'Signer identity shown here is placeholder data. Once Azure/Entra ID identity is connected, this trail carries the actual approver and countersigner rather than the role the register names for the step.';
+}
 renderRevHistory();
+renderApprovalTrail();
 
 // The document sheet. The cover carries only what the register holds.
 document.getElementById('pdf-doc-name').textContent = docTitle;

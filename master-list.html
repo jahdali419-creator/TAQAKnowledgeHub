@@ -37,6 +37,12 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
   --primary:#005D63; --primary-ink:#005D63; --primary-light:#00BBB6;
   --brand-soft:rgba(0,93,99,.07);
   --due:#C8102E; --out:var(--ink-3); --prov:var(--primary-ink);
+  /* The same state-ink pair every other hub page carries in its own :root
+     (viewer.html, dashboard.html, segment.html, whats-new.html). Reused
+     verbatim rather than invented here, so the amber "review due soon" mark
+     added below reads as the one warning colour the rest of the site already
+     uses, not a new one this page introduces on its own. */
+  --warn-ink:#8A6200;
   --r1:4px; --r2:7px; --r3:10px;
   --mono:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
   --read:'Inter',system-ui,sans-serif;   /* the minority face, for long small copy */
@@ -51,6 +57,7 @@ html[data-taqa-theme="dark"]{
   --primary:#005D63; --primary-ink:#00BBB6; --primary-light:#00BBB6;
   --brand-soft:rgba(0,187,182,.13);
   --due:#FD691D;
+  --warn-ink:#FFB81C;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 /* A class that sets display beats the browser rule for [hidden], so the
@@ -296,6 +303,14 @@ tbody tr[aria-selected="true"]{background:var(--brand-soft);}
 .org{font-size:11px;color:var(--ink-3);margin-top:2px;}
 .dat{font:500 11.5px/1.5 var(--mono);color:var(--ink-2);white-space:nowrap;}
 .dat.late{color:var(--due);font-weight:600;}
+/* Amber pre-warning: the review date is inside the 30-day window (see
+   DUE_SOON_DAYS in the script below) but the document is not overdue yet.
+   Sits right next to .dat.late, which due() below already used for the red
+   overdue state, and the two can never both apply to one row since due()
+   branches on the same number either side of zero. --warn-ink is the site's
+   existing warning colour (viewer.html, dashboard.html, whats-new.html), so
+   this never risks being mistaken for --due, the red "already late" ink. */
+.dat.soon{color:var(--warn-ink);font-weight:600;}
 .dat.nil{color:var(--ink-3);}
 .mark{display:inline-flex;align-items:center;gap:6px;padding:3px 9px 3px 7px;
   border:1px solid var(--rule-firm);border-radius:var(--r1);background:var(--paper);
@@ -327,9 +342,40 @@ tbody tr[aria-selected="true"] .cls.hi{color:var(--ink);}
   font:600 12px 'BwGradual',sans-serif;color:var(--primary-ink);cursor:pointer;
   transition:background 140ms var(--out-ease);}
 .more:hover{background:var(--brand-soft);}
-.none{padding:56px 20px;text-align:center;color:var(--ink-3);}
+.none{padding:56px 20px;text-align:center;color:var(--ink-3);
+  display:flex;flex-direction:column;align-items:center;gap:9px;}
+.none svg{width:34px;height:34px;color:var(--ink-4);}
+.none .empty-t{font:700 13px/1.4 'BwGradual',sans-serif;color:var(--ink-2);}
+.none .empty-s{font-family:var(--read);font-size:12px;line-height:1.6;color:var(--ink-3);max-width:36ch;}
+.none .btn{margin-top:5px;}
 .note{font-family:var(--read);padding:11px 14px;border-top:1px solid var(--rule);background:var(--inset);
   border-radius:0 0 var(--r3) var(--r3);font-size:11.5px;color:var(--ink-3);}
+
+/* ── Bulk selection ───────────────────────────────────────────────────────
+   The checkbox column exists in every row's markup regardless of role (see
+   render() below); .no-bulk, set once in renderRole() from the same
+   countersign flag that gates bulkAction(), just hides it. That keeps the
+   row template from branching on role and matches how #export-btn is
+   hidden elsewhere on this page rather than left out of the DOM. */
+th.bulk-col,td.bulk-col{width:34px;padding-inline-end:2px;}
+.reg.no-bulk .bulk-col{display:none;}
+.chk{text-align:center;}
+.chk input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--primary-ink);
+  vertical-align:middle;}
+.chk input[type=checkbox]:disabled{cursor:default;opacity:.4;}
+
+#bulk-bar{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:70;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;
+  background:var(--paper);border:1px solid var(--rule-firm);border-radius:var(--r3);
+  padding:10px 12px 10px 16px;box-shadow:0 10px 30px rgba(0,0,0,.20),0 2px 6px rgba(0,93,99,.1);
+  max-width:min(560px,92vw);}
+#bulk-bar[hidden]{display:none;}
+#bulk-count{font:700 12px/1.3 'BwGradual',sans-serif;color:var(--ink);white-space:nowrap;}
+.bulk-actions{display:flex;gap:7px;flex-wrap:wrap;}
+@media(max-width:560px){
+  #bulk-bar{left:16px;right:16px;bottom:14px;transform:none;max-width:none;
+    justify-content:space-between;}
+}
 
 /* ── Register surface: the same glass as the summary above it ── */
 .reg{backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);}
@@ -479,7 +525,7 @@ thead th{top:var(--nav-h,64px);}
     <li><a href="support-ticket.html">Ask Expert</a></li>
   </ul>
   <div class="nav-right">
-    <button type="button" class="bell-btn" id="nav-bell" style="display:none" onclick="location.href='dashboard.html'" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
     <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
     <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
     <span class="nav-sep nav-up" aria-hidden="true"></span>
@@ -616,13 +662,19 @@ thead th{top:var(--nav-h,64px);}
     <div class="scroll">
       <table>
         <thead><tr>
+          <th scope="col" class="bulk-col chk"><input type="checkbox" id="sel-all" onchange="toggleSelectAll(this)" aria-label="Select all rows on this page"></th>
           <th scope="col">Number</th><th scope="col">Title</th><th scope="col">Rev</th>
           <th scope="col">Issued</th><th scope="col">Review due</th>
           <th scope="col">Status</th><th scope="col">Class</th>
         </tr></thead>
         <tbody id="rows"></tbody>
       </table>
-      <p class="none" id="empty" hidden>Nothing matches these filters.</p>
+      <div class="none" id="empty" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8.5 11h5"/></svg>
+        <span class="empty-t">Nothing matches these filters.</span>
+        <span class="empty-s">Try a different segment, status or search text, or clear everything and start again.</span>
+        <button type="button" class="btn" onclick="clearFilters()">Clear filters</button>
+      </div>
     </div>
     <div class="pager" id="pager">
       <span class="pager-info" id="pager-info"></span>
@@ -635,6 +687,15 @@ thead th{top:var(--nav-h,64px);}
 </div>
 
 <div id="toast" role="status" aria-live="polite"></div>
+
+<div id="bulk-bar" hidden role="region" aria-label="Bulk actions">
+  <span id="bulk-count">0 documents selected</span>
+  <div class="bulk-actions">
+    <button type="button" class="btn btn-quiet" onclick="clearSelection()">Clear</button>
+    <button type="button" class="btn" id="bulk-approve" onclick="bulkAction('approve')">Approve selected</button>
+    <button type="button" class="btn" id="bulk-withdraw" onclick="bulkAction('withdraw')">Withdraw selected</button>
+  </div>
+</div>
 
 <div class="scrim" id="scrim" onclick="closeDetail()"></div>
 <aside class="dw" id="dw" role="dialog" aria-modal="true" aria-labelledby="dw-title" aria-hidden="true">
@@ -706,6 +767,18 @@ Object.keys(L.types).forEach(k=>ft.insertAdjacentHTML('beforeend',`<option value
 
 let quick='controlled', page=1, selected=null;
 const PER_PAGE=20;
+// Review date, not stored status: how many days out the amber pre-warning
+// starts, one field on from the red "late" state due() already draws.
+const DUE_SOON_DAYS=30;
+// Bulk selection. docNumbers, not row indexes, so a selection survives a
+// re-render (the register redraws on every keystroke and on every external
+// store change). lastSlice is the page of records render() most recently
+// drew, which is what the header checkbox and toggleRowSelect() need to know
+// "select all" and "am I now fully selected" against; lastFilterKey is the
+// filter/search/quick signature at that same render, so changing any of
+// them clears a selection that no longer means what it did, while simply
+// turning the page, or a store update repainting the same view, does not.
+let selectedRows=new Set(), lastSlice=[], lastFilterKey=null;
 const CT=[
   {k:'controlled', l:'All controlled',f:d=>A.controlled(d),               strip:true},
   {k:'current',    l:'Current',       f:d=>d.status==='current'},
@@ -767,6 +840,30 @@ function renderRole(){
   document.getElementById('export-btn').hidden=!TAQA_ROLE.can('export',k);
   const dr=document.querySelector('#f-status option[value="draft"]');
   if(dr)dr.hidden=!R.statuses.includes('draft');
+  // Set once here, from the role, rather than on every render(): a role
+  // switch reloads the page (see the comment above), so nothing after the
+  // first paint can change what canBulk() answers.
+  document.getElementById('reg').classList.toggle('no-bulk', !canBulk());
+  if(!canBulk()){selectedRows.clear();}
+}
+// The Master List is already refused at the door to everyone but qms and
+// auditor (TAQA_ROLE.canRegister(), checked before this script even loads).
+// Of those two, auditor is deliberately read-only end to end: approve,
+// countersign and editMetadata are all false on that role in roles.js. qms
+// is the one that holds countersign, the register-release step whose own
+// comment in store.js says setStatus() "is what QMS approval and withdrawal
+// call" - the exact call bulkAction() below makes. So countersign is reused
+// here rather than a new flag, and it is the same test that keeps bulk
+// approve/withdraw out of reach for auditor while leaving every single-row
+// read (the detail drawer, export) exactly as open as it always was.
+function canBulk(){
+  return !!TAQA_ROLES[role()].countersign;
+}
+function clearFilters(){
+  document.getElementById('q').value='';
+  ['f-seg','f-type','f-status','f-cls','f-lang'].forEach(id=>{document.getElementById(id).value='';});
+  quick='controlled'; page=1;
+  chartSeg(); renderCuts(); syncDonut(); render();
 }
 function quickFilter(k){quick=(quick===k&&k!=='controlled')?'controlled':k;
   page=1;renderCuts();syncDonut();render();}
@@ -795,8 +892,12 @@ function due(d){
   if(d.status==='obsolete'||d.status==='superseded')return '<span class="dat nil">Withdrawn</span>';
   if(!d.nextReviewDate)return '<span class="dat nil">Not set</span>';
   const n=A.reviewDays(d);
-  return n<0?`<span class="dat late">${fmt(d.nextReviewDate)}<br>${Math.abs(n)} days late</span>`
-            :`<span class="dat">${fmt(d.nextReviewDate)}</span>`;
+  if(n<0)return `<span class="dat late">${fmt(d.nextReviewDate)}<br>${Math.abs(n)} days late</span>`;
+  // Amber pre-warning: not overdue yet, but inside DUE_SOON_DAYS. Reads the
+  // same reviewDays() the line above already reads for the red state, so the
+  // two never disagree about the same document.
+  if(n<=DUE_SOON_DAYS)return `<span class="dat soon">${fmt(d.nextReviewDate)}<br>due in ${n} day${n===1?'':'s'}</span>`;
+  return `<span class="dat">${fmt(d.nextReviewDate)}</span>`;
 }
 // Twenty rows a page. A register is read a screen at a time, and an endless
 // list makes "where was that one" impossible to answer.
@@ -824,6 +925,14 @@ function goPage(n){
 
 function render(){
   writeUrl();
+  // A changed filter, search term or quick cut means the rows a prior
+  // selection pointed at are not the set the person is looking at any more,
+  // so drop it. Paging within the same view, or a store change repainting
+  // it, leaves the key untouched and the selection stands.
+  const fKey=[document.getElementById('q').value,document.getElementById('f-seg').value,
+    document.getElementById('f-type').value,document.getElementById('f-status').value,
+    document.getElementById('f-cls').value,document.getElementById('f-lang').value,quick].join('|');
+  if(fKey!==lastFilterKey){selectedRows.clear();lastFilterKey=fKey;}
   const rows=current();
   const totalPages=Math.max(Math.ceil(rows.length/PER_PAGE),1);
   if(page>totalPages)page=totalPages;
@@ -843,6 +952,9 @@ function render(){
     const s=A.seg(d), pv=d.numberStatus==='provisional';
     return `<tr tabindex="0" aria-selected="${!!selected&&selected===d.docNumber}"
         onclick="openDetail(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetail(${i});}">
+      <td class="bulk-col chk" onclick="event.stopPropagation()" onkeydown="event.stopPropagation()"><input type="checkbox" class="row-chk" data-doc="${esc(d.docNumber||'')}"
+        ${d.docNumber?'':'disabled'} ${d.docNumber&&selectedRows.has(d.docNumber)?'checked':''}
+        onchange="toggleRowSelect(this)" aria-label="Select ${esc(d.title)}"></td>
       <td><div class="num${pv?' prov':''}">${esc(d.docNumber||'Not numbered')}</div>${d.legacyId?`<div class="was">was ${esc(d.legacyId)}</div>`:''}</td>
       <td><div class="ttl">${esc(d.title)}${d.language==='ar'?'<span class="ar">AR</span>':''}</div><div class="org">${esc(s.name)}</div></td>
       <td><span class="dat">${esc(d.revision||'n/a')}</span></td>
@@ -851,6 +963,88 @@ function render(){
       <td><span class="mark m-${d.status.replace('under-review','review')}">${LABEL[d.status]||d.status}</span></td>
       <td><span class="cls${d.classification==='restricted'?' hi':''}">${esc(d.classification||'')}</span></td>
     </tr>`}).join('');
+  lastSlice=slice;
+  const chkAll=document.getElementById('sel-all');
+  if(chkAll){
+    const pageDocs=slice.filter(d=>d.docNumber).map(d=>d.docNumber);
+    const selOnPage=pageDocs.filter(n=>selectedRows.has(n));
+    chkAll.checked=pageDocs.length>0&&selOnPage.length===pageDocs.length;
+    chkAll.indeterminate=selOnPage.length>0&&selOnPage.length<pageDocs.length;
+    chkAll.disabled=pageDocs.length===0;
+  }
+  updateBulkBar();
+}
+
+// ── Bulk selection and action ───────────────────────────────────────────
+function toggleSelectAll(el){
+  const docs=lastSlice.filter(d=>d.docNumber).map(d=>d.docNumber);
+  if(el.checked)docs.forEach(n=>selectedRows.add(n));
+  else docs.forEach(n=>selectedRows.delete(n));
+  document.querySelectorAll('#rows .row-chk').forEach(cb=>{cb.checked=el.checked&&!cb.disabled;});
+  updateBulkBar();
+}
+function toggleRowSelect(el){
+  const num=el.dataset.doc; if(!num)return;
+  if(el.checked)selectedRows.add(num); else selectedRows.delete(num);
+  const chkAll=document.getElementById('sel-all');
+  if(chkAll){
+    const pageDocs=lastSlice.filter(d=>d.docNumber).map(d=>d.docNumber);
+    const selOnPage=pageDocs.filter(n=>selectedRows.has(n));
+    chkAll.checked=pageDocs.length>0&&selOnPage.length===pageDocs.length;
+    chkAll.indeterminate=selOnPage.length>0&&selOnPage.length<pageDocs.length;
+  }
+  updateBulkBar();
+}
+function clearSelection(){selectedRows.clear();render();}
+function updateBulkBar(){
+  const bar=document.getElementById('bulk-bar');
+  const n=selectedRows.size;
+  if(!canBulk()||n===0){bar.hidden=true;return;}
+  bar.hidden=false;
+  document.getElementById('bulk-count').textContent=n+' document'+(n===1?'':'s')+' selected';
+}
+
+// Both actions call TAQA_STORE.setStatus(), the same call documents.html's
+// single Withdraw button makes (store.js: "what QMS approval and withdrawal
+// call"), so the register updates for every reader everywhere else in the
+// hub, not just in this table. A selected row that is not eligible, such as
+// a document already current or already withdrawn, is left untouched rather
+// than acted on or silently dropped, and the confirm dialog says so by name
+// before anything happens, the same honesty documents.html's own withdraw
+// confirm uses.
+function bulkAction(kind){
+  if(!canBulk()||typeof TAQA_STORE==='undefined')return;
+  const chosen=Array.from(selectedRows).map(n=>TAQA_STORE.findDoc(n)).filter(Boolean);
+  const eligible=chosen.filter(kind==='approve'
+    ? d=>d.status==='draft'||d.status==='under-review'
+    : d=>d.status!=='obsolete'&&d.status!=='superseded');
+  const skipped=chosen.length-eligible.length;
+  if(!eligible.length){
+    toast(kind==='approve'
+      ? 'Nothing selected is waiting on approval. Already-current and withdrawn documents are left as they are.'
+      : 'Nothing selected can be withdrawn. It is already marked obsolete or superseded.');
+    return;
+  }
+  const n=eligible.length, s=n===1?'':'s';
+  // skipped is only ever >0 here alongside at least one eligible document, so
+  // the pool being referred to ("the selected documents") always has two or
+  // more in it; only is/are and it/they, tied to skipped itself, need to
+  // agree with how many of those are being left alone.
+  const skipNote=skipped
+    ? ' '+skipped+' of the selected documents '+(skipped===1?'is':'are')+
+      ' already '+(kind==='approve'?'current or withdrawn':'withdrawn')+
+      ' and will be left as '+(skipped===1?'it is':'they are')+'.'
+    : '';
+  const msg=kind==='approve'
+    ? n+' document'+s+' will be approved and marked Current.'+skipNote+
+      ' This updates the register everywhere it is read. This cannot be undone from here.'
+    : n+' document'+s+' will be marked obsolete. Every reader will see "Withdrawn, do not use." '+
+      (n===1?'It stays':'They stay')+' in the register, but '+(n===1?'leaves':'leave')+' the live list.'+skipNote;
+  if(!confirm(msg))return;
+  eligible.forEach(d=>TAQA_STORE.setStatus(d.docNumber, kind==='approve'?'current':'obsolete'));
+  selectedRows.clear();
+  renderCuts(); render(); drawSummary();
+  toast((kind==='approve'?'Approved ':'Withdrew ')+n+' document'+s+'.');
 }
 
 let lastFocus=null;
