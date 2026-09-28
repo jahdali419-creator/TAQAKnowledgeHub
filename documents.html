@@ -71,10 +71,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .docs-hero-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:28px;font-weight:800;color:#fff;
   margin-bottom:6px;letter-spacing:-0.3px;}
 .docs-hero-sub{font-size:13.5px;color:rgba(255,255,255,0.5);}
-.docs-hero-stats{display:flex;gap:28px;flex-wrap:wrap;}
-.docs-stat{text-align:center;}
-.docs-stat-num{font-family:'BwGradual','Urbanist',sans-serif;font-size:26px;font-weight:800;color:#fff;display:block;line-height:1;}
-.docs-stat-label{font-size:10px;color:rgba(255,255,255,0.6);margin-top:5px;text-transform:uppercase;letter-spacing:1px;}
+/* The type breakdown belongs on the pills below, where a reader can also
+   filter by it; here it would only be the same six counts a second time. */
+.docs-hero-total{font-size:13.5px;color:rgba(255,255,255,0.7);white-space:nowrap;}
+.docs-hero-total b{font-family:'BwGradual','Urbanist',sans-serif;font-size:26px;font-weight:800;color:#fff;margin-inline-end:7px;}
 
 /* ── Main ── */
 .docs-outer{max-width:1200px;margin:0 auto;padding:32px 48px 80px;}
@@ -160,12 +160,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
   background:rgba(0,93,99,0.07);color:var(--primary-ink);}
 .pub-type-alert{background:rgba(253,105,29,0.12);color:var(--alert-ink);}
 .pub-table-date{color:var(--text-muted);font-size:12px;white-space:nowrap;}
-/* "Relevant SPL / Function" is a real owner value and does not fit on one line
-   in a 16% column, so let it use two rather than cutting it. */
-/* A table row can grow; a clamped cell cannot. Let the owner wrap to whatever
-   it needs rather than losing the last few pixels of a real value. */
-.pub-table-by{color:var(--text);font-size:12px;font-weight:500;max-width:0;
-  line-height:1.4;overflow-wrap:break-word;}
+/* Status. Everything in this table is already status:current, so the one
+   thing left to flag is a review running late, in the same warning ink the
+   rest of the hub uses for it. */
+.pub-table-status{font-size:12px;white-space:nowrap;}
+.pub-status{display:inline-flex;align-items:center;gap:5px;font-weight:600;}
+.pub-status::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.pub-status-ok{color:var(--ok-ink,#00705F);}
+.pub-status-warn{color:var(--warn-ink,#8A6200);white-space:normal;}
 .pub-remove-btn{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-dim);
   background:transparent;border:1px solid transparent;cursor:pointer;
   padding:4px 10px;border-radius:6px;font-family:'Inter',sans-serif;font-weight:500;
@@ -176,6 +178,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
    button's own state now outranks it by being written against the row. */
 .pub-table tbody tr .pub-remove-btn:hover,.pub-table tbody tr .pub-remove-btn:focus-visible{
   color:var(--stop-ink,#C8102E);background:rgba(200,16,46,0.07);border-color:rgba(200,16,46,0.22);}
+.pub-remove-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.pub-table tbody tr .pub-remove-btn:disabled:hover{color:var(--text-dim);background:transparent;border-color:transparent;}
 .pub-table th.sortable{cursor:pointer;user-select:none;}
 .pub-table th.sortable:hover{color:var(--text);}
 /* The arrows are the only sign a column sorts. At opacity 0.25 they measured
@@ -230,22 +234,32 @@ html[data-taqa-theme="dark"] .pub-table-footer{border-color:#003A3D;background:r
 @media(max-width:900px){
   .docs-outer{padding:24px 20px 60px;}
   .docs-hero{padding:32px 20px;}
-  .docs-hero-stats{gap:18px;}
-  .docs-stat-num{font-size:20px;}
+  .docs-hero-total b{font-size:20px;}
 }
 @media(max-width:640px){
   .docs-hero-inner{flex-direction:column;align-items:flex-start;gap:16px;}
   .docs-hero-title{font-size:20px;}
-  .docs-hero-stats{gap:14px;}
-  .pub-table th:nth-child(3),.pub-table td:nth-child(3),
-  .pub-table th:nth-child(4),.pub-table td:nth-child(4){display:none;}
-  .pub-table colgroup col:nth-child(1){width:55%;}
-  .pub-table colgroup col:nth-child(2){width:26%;}
-  .pub-table colgroup col:nth-child(3),
-  .pub-table colgroup col:nth-child(4){width:0;}
-  .pub-table colgroup col:nth-child(5){width:19%;}
+  /* The published date gives way; status is the column worth the space on a
+     phone, the same call segment.html's rows make. */
+  .pub-table th:nth-child(3),.pub-table td:nth-child(3){display:none;}
+  .pub-table colgroup col:nth-child(1){width:42%;}
+  .pub-table colgroup col:nth-child(2){width:17%;}
+  /* A fixed-layout table that hides a <td> but not its <col> misassigns the
+     columns after it (the column after the hidden one renders at 0 and the
+     one after that inherits its width). Hiding the <col> too keeps the grid
+     in step with what is actually visible. */
+  .pub-table colgroup col:nth-child(3){width:0;display:none;}
+  .pub-table colgroup col:nth-child(4){width:23%;}
+  .pub-table colgroup col:nth-child(5){width:18%;}
   .pub-table th,.pub-table td{padding-inline:10px;}
   .pub-doc-type-badge{padding:3px 8px;letter-spacing:0.2px;}
+  .pub-status-warn{white-space:normal;line-height:1.3;}
+  /* The withdraw button drops its label to an icon on a phone (the column
+     already says Withdraw next to nothing else it could mean), and claims
+     the full 44px touch target the icon alone would fall short of. */
+  .pub-table td:last-child{padding-inline:4px;}
+  .pub-remove-btn{min-width:44px;min-height:44px;justify-content:center;padding:0;margin-inline:auto;}
+  .pub-remove-btn span{display:none;}
 }
 @media(max-width:480px){
   .docs-outer{padding:16px 16px 60px;}
@@ -301,14 +315,9 @@ html[data-taqa-theme="dark"] .pub-table-footer{border-color:#003A3D;background:r
       <div class="docs-hero-title" id="docs-seg-name">Published Documents</div>
       <div class="docs-hero-sub" id="docs-seg-sub">Loading…</div>
     </div>
-    <div class="docs-hero-stats">
-      <div class="docs-stat"><span class="docs-stat-num" id="stat-total">,</span><div class="docs-stat-label">Total</div></div>
-      <div class="docs-stat"><span class="docs-stat-num" id="stat-sops">,</span><div class="docs-stat-label" id="stat-label-sops">SOPs</div></div>
-      <div class="docs-stat"><span class="docs-stat-num" id="stat-manuals">,</span><div class="docs-stat-label" id="stat-label-manuals">Manuals</div></div>
-      <div class="docs-stat"><span class="docs-stat-num" id="stat-policies">,</span><div class="docs-stat-label" id="stat-label-policies">Standards</div></div>
-      <div class="docs-stat"><span class="docs-stat-num" id="stat-alerts">,</span><div class="docs-stat-label" id="stat-label-alerts">Alerts</div></div>
-      <div class="docs-stat"><span class="docs-stat-num" id="stat-lessons">,</span><div class="docs-stat-label" id="stat-label-lessons">Lessons</div></div>
-    </div>
+    <!-- The type breakdown lives once, on the pills below the search box:
+         these six tiles repeated the same six counts a second time. -->
+    <div class="docs-hero-total"><b id="docs-total-count">0</b> documents published in this segment</div>
   </div>
 </div>
 
@@ -338,7 +347,7 @@ html[data-taqa-theme="dark"] .pub-table-footer{border-color:#003A3D;background:r
           <th class="sortable" data-col="doc" onclick="sortPubTable('doc',this)">Document</th>
           <th class="sortable" data-col="type" onclick="sortPubTable('type',this)">Type</th>
           <th class="sortable" data-col="date" onclick="sortPubTable('date',this)">Published</th>
-          <th class="sortable" data-col="by" onclick="sortPubTable('by',this)">By</th>
+          <th class="sortable" data-col="status" onclick="sortPubTable('status',this)">Status</th>
           <th></th>
         </tr>
       </thead>
@@ -379,22 +388,6 @@ html[data-taqa-theme="dark"] .pub-table-footer{border-color:#003A3D;background:r
 <script src="store.js"></script>
 <script src="segments-data.js"></script>
 <script>
-// Abbreviated owner/contributor names per segment for "By" column
-const OWNERS_DATA = {
-  'coiled-tubing':  ['M. Jahdali','K. Al-Otaibi','F. Al-Ghamdi','O. Al-Harbi'],
-  'fracturing':     ['S. Al-Qahtani','A. Al-Mutairi','W. Al-Harbi','T. Al-Asmari'],
-  'wireline':       ['N. Al-Dosari','S. Al-Zahrani','M. Al-Otaibi'],
-  'drilling':       ['I. Al-Shehri','S. Al-Qahtani','N. Al-Ghamdi','B. Al-Harbi'],
-  'cementing':      ['T. Al-Malki','H. Al-Shimmari','R. Al-Turki'],
-  'inspection':     ['W. Al-Zahrani','F. Al-Bishi','M. Al-Otaibi','S. Al-Dossary'],
-  'well-safety':    ['S. Al-Harbi','Y. Al-Anzi','G. Al-Malki','A. Al-Qahtani'],
-  'cybersecurity':  ['M. Al Obaid','A. Al Khabty'],
-  'qhse':           ['A. Al-Ghamdi','H. Al-Rashidi','L. Al-Otaibi','K. Al-Binsaif'],
-  'hr':             ['R. Al-Otaibi','A. Al-Zahrani','S. Al-Shehri'],
-  'tws-maintenance':['F. Al-Amri','K. Al-Otaibi','R. Al-Ghamdi','H. Al-Shamrani'],
-  'well-testing':   ['T. Al-Rashidi','Y. Al-Subaie','B. Al-Shammari']
-};
-
 const PREVIEW_COUNT = 25;
 let pubActiveFilter = 'all';
 let pubSortCol = null;
@@ -424,15 +417,23 @@ function buildAllDocs(segId) {
   const TYPE_KEY = { sop:'sop', manual:'manual', standard:'policy',
                      policy:'policy', alert:'alert', lesson:'lesson' };
   const ORDER = { sop:0, manual:1, policy:2, alert:3, lesson:4 };
+  // Everything in 'live' is status current, so the one thing left to tell
+  // rows apart by is whether the review behind them is still on time. That
+  // is what a controller scanning this list is actually looking for, more
+  // than who the owner role is (API Q2 4.4.3 c)).
   return TAQA_STORE.rows('live', { segment: segId })
-    .map(d => ({
-      num: d.docNumber || '',
-      title: d.title,
-      type: TYPE_KEY[d.docType] || 'sop',
-      kind: d.docType,   // what the register says it is; the column key above is shared
-      date: fmt(d.issueDate),
-      by: (typeof TAQA_DOC !== 'undefined' && TAQA_DOC.owner(d)) || 'Not recorded'
-    }))
+    .map(d => {
+      const due = d.nextReviewDate ? new Date(d.nextReviewDate) : null;
+      const late = due && !isNaN(due) ? Math.floor((Date.now() - due) / 86400000) : null;
+      return {
+        num: d.docNumber || '',
+        title: d.title,
+        type: TYPE_KEY[d.docType] || 'sop',
+        kind: d.docType,   // what the register says it is; the column key above is shared
+        date: fmt(d.issueDate),
+        late: late != null && late > 0 ? late : 0
+      };
+    })
     .sort((a, b) => (ORDER[a.type] - ORDER[b.type]) || a.title.localeCompare(b.title));
 }
 
@@ -460,8 +461,10 @@ function renderPubTable(docs, tl) {
       </td>
       <td><span class="pub-doc-type-badge ${tc[d.type]||'pub-type-sop'}">${d.kind==='policy'?'Policy':(tl[d.type]||d.type)}</span></td>
       <td class="pub-table-date">${d.date}</td>
-      <td class="pub-table-by">${d.by}</td>
-      <td><button class="pub-remove-btn" onclick="removeDoc(this)">${ri}Remove</button></td>
+      <td class="pub-table-status" data-late="${d.late}">${d.late > 0
+        ? `<span class="pub-status pub-status-warn">Review overdue, ${d.late < 60 ? d.late + (d.late === 1 ? ' day' : ' days') : Math.floor(d.late / 30.44) + ' months'}</span>`
+        : `<span class="pub-status pub-status-ok">Current</span>`}</td>
+      <td><button class="pub-remove-btn" data-num="${d.num}" aria-label="Withdraw ${d.title}" ${d.num ? '' : 'disabled title="No document number assigned yet"'} onclick="removeDoc(this)">${ri}<span>Withdraw</span></button></td>
     </tr>`
   ).join('');
   const tot = document.getElementById('pub-total');
@@ -488,19 +491,9 @@ function updatePillCounts(docs) {
   });
 }
 
-function updateHeroStats(docs, tl) {
-  const counts = { sop: 0, manual: 0, policy: 0, alert: 0, lesson: 0 };
-  docs.forEach(d => { if (counts[d.type] !== undefined) counts[d.type]++; });
-  document.getElementById('stat-total').textContent    = docs.length;
-  document.getElementById('stat-sops').textContent     = counts.sop;
-  document.getElementById('stat-manuals').textContent  = counts.manual;
-  document.getElementById('stat-policies').textContent = counts.policy;
-  document.getElementById('stat-alerts').textContent   = counts.alert;
-  document.getElementById('stat-lessons').textContent  = counts.lesson;
-  document.getElementById('stat-label-sops').textContent    = tl.sop;
-  document.getElementById('stat-label-manuals').textContent = tl.manual;
-  document.getElementById('stat-label-alerts').textContent  = tl.alert;
-  document.getElementById('stat-label-lessons').textContent = tl.lesson;
+function updateHeroStats(docs) {
+  const el = document.getElementById('docs-total-count');
+  if (el) el.textContent = docs.length;
 }
 
 function applyPubFilters() {
@@ -554,41 +547,57 @@ function setPubFilter(type, pill) {
 }
 
 function sortPubTable(col, th) {
-  const tbody = document.getElementById('pub-docs-body');
-  if (!tbody) return;
   if (pubSortCol === col) { pubSortDir = pubSortDir === 'asc' ? 'desc' : 'asc'; }
   else { pubSortCol = col; pubSortDir = 'asc'; }
   document.querySelectorAll('.pub-table th.sortable').forEach(h => h.classList.remove('sort-asc','sort-desc'));
   th.classList.add(pubSortDir === 'asc' ? 'sort-asc' : 'sort-desc');
-  const ci = { doc:0, type:1, date:2, by:3 }[col];
+  applyPubSort();
+  applyPubFilters();
+}
+// Reapplies whichever sort is current. Split out from sortPubTable (which
+// also toggles the direction) so a table rebuild, such as after a
+// withdrawal, can restore the order the user chose instead of resetting it.
+function applyPubSort() {
+  if (!pubSortCol) return;
+  const tbody = document.getElementById('pub-docs-body');
+  if (!tbody) return;
+  const ci = { doc:0, type:1, date:2, status:3 }[pubSortCol];
   const M = {Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
   const pd = s => { const [m,y] = s.split(' '); return (parseInt(y)||0)*12+(M[m]||0); };
   Array.from(tbody.querySelectorAll('tr'))
     .sort((a,b) => {
+      // Status sorts on the days late behind it, not the words in the cell,
+      // so "Review overdue, 2 months" lands correctly against "13 months".
+      if (pubSortCol === 'status') {
+        const la = parseInt(a.cells[ci]?.dataset.late || '0', 10), lb = parseInt(b.cells[ci]?.dataset.late || '0', 10);
+        return (la - lb) * (pubSortDir === 'asc' ? 1 : -1);
+      }
       let av = a.cells[ci]?.textContent.trim()||'', bv = b.cells[ci]?.textContent.trim()||'';
-      const va = col==='date'?pd(av):av.toLowerCase(), vb = col==='date'?pd(bv):bv.toLowerCase();
+      const va = pubSortCol==='date'?pd(av):av.toLowerCase(), vb = pubSortCol==='date'?pd(bv):bv.toLowerCase();
       return (va<vb?-1:va>vb?1:0)*(pubSortDir==='asc'?1:-1);
     })
     .forEach(r => tbody.appendChild(r));
-  applyPubFilters();
 }
 
+// Withdrawal is real: it calls the same TAQA_STORE.setStatus() the approval
+// flow uses, so the document reads "Withdrawn, do not use." everywhere else
+// in the hub from this point on, not just faded out of this one table.
 function removeDoc(btn) {
+  const num = btn.dataset.num;
+  if (!num || typeof TAQA_STORE === 'undefined') return;
   const row = btn.closest('tr');
-  const title = row.querySelector('.pub-doc-title').textContent;
-  if (confirm('Remove "' + title + '" from the segment?')) {
-    row.style.opacity = '0.3';
-    row.style.transition = 'opacity 0.3s';
-    setTimeout(() => {
-      row.remove();
-      applyPubFilters();
-      const t = document.getElementById('pub-total');
-      if (t) t.textContent = parseInt(t.textContent||0) - 1;
-      const st = document.getElementById('stat-total');
-      if (st) st.textContent = parseInt(st.textContent||0) - 1;
-      showToast('Document removed from segment');
-    }, 300);
-  }
+  const title = row.querySelector('.pub-doc-title').textContent.trim();
+  if (!confirm('Withdraw "' + title + '"? It will be marked obsolete and ' +
+      'every reader will see "Withdrawn, do not use." It stays in the ' +
+      'register, but leaves this list.')) return;
+  const updated = TAQA_STORE.setStatus(num, 'obsolete');
+  if (!updated) { showToast('Could not withdraw this document', '#C8102E'); return; }
+  row.style.opacity = '0.3';
+  row.style.transition = 'opacity 0.3s';
+  setTimeout(() => {
+    initDocPage();
+    showToast('Withdrawn. Marked obsolete in the register.');
+  }, 300);
 }
 
 function showToast(msg, color) {
@@ -619,12 +628,11 @@ function initDocPage() {
   const inCol = docs.filter(d => d.type === 'policy');
   const polOnly = inCol.length > 0 && inCol.every(d => d.kind === 'policy');
   if (polOnly) tl.policy = 'Policy';
-  const spl = document.getElementById('stat-label-policies');
-  if (spl) spl.textContent = polOnly ? 'Policies' : 'Standards';
   renderPubTable(docs, tl);
   initPubPills(tl);
   updatePillCounts(docs);
-  updateHeroStats(docs, tl);
+  updateHeroStats(docs);
+  applyPubSort();
   applyPubFilters();
 }
 

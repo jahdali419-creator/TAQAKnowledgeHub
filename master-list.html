@@ -143,10 +143,6 @@ h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:20px;font-weight:800;
 .kicker{font:700 9.5px/1 'BwGradual',sans-serif;letter-spacing:.17em;text-transform:uppercase;
   color:var(--ink-3);margin-bottom:6px;}
 .top-r{display:flex;align-items:center;gap:8px;}
-.role-field{display:flex;align-items:center;gap:6px;height:32px;padding-inline-start:11px;
-  border:1px solid var(--rule-firm);border-radius:var(--r2);background:var(--paper);}
-.role-field span{font:700 9px/1 'BwGradual',sans-serif;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);}
-.role-field select{border:none;background:transparent;height:30px;font-weight:600;color:var(--ink);padding-inline-start:0;}
 
 /* ── Banner ── */
 .hero{position:relative;overflow:hidden;border-radius:var(--r3);background:var(--primary);
@@ -267,9 +263,6 @@ html[data-taqa-theme="dark"] .att .due svg{color:#FD691D;}
 }
 @media(max-width:560px){
   .top{align-items:flex-start;}
-  .top-r{width:100%;}
-  .role-field{flex:1;min-width:0;}
-  .role-field select{min-width:0;}
 }
 
 /* ── Toolbar ── */
@@ -450,7 +443,7 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
 /* Six filters share this row, so a long area name cannot be given more room.
    It ends in an ellipsis instead of mid letter, and the full name is on the
    title attribute for a hover or a screen reader. */
-.filter-bar select, #f-seg, #f-type, #f-status, #f-cls, #f-lang, #role-select {
+.filter-bar select, #f-seg, #f-type, #f-status, #f-cls, #f-lang {
   text-overflow:ellipsis; padding-inline-end:30px;
 }
 
@@ -532,10 +525,6 @@ thead th{top:var(--nav-h,64px);}
       </div>
     </div>
     <div class="top-r">
-      <div class="role-field">
-        <span>As</span>
-        <select id="role-select" onchange="setRole(this.value)" aria-label="Viewing role"></select>
-      </div>
       <button class="btn" id="export-btn" onclick="exportCsv()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export
@@ -766,10 +755,12 @@ document.addEventListener('click',e=>{
   if(popOpen&&!e.target.closest('.pop-wrap'))togglePop();
 });
 
+// The role itself is switched from the bar's door pill, the same control
+// every other page uses; it reloads on a change, which is what lets a
+// switch to a role that cannot open this register hand off to the refusal
+// screen. This just reflects whichever role the page loaded as.
 function renderRole(){
-  const k=role(), R=TAQA_ROLES[k], sel=document.getElementById('role-select');
-  if(!sel.options.length)TAQA_ROLE_ORDER.forEach(r=>sel.insertAdjacentHTML('beforeend',`<option value="${r}">${esc(TAQA_ROLES[r].label)}</option>`));
-  sel.value=k;
+  const k=role(), R=TAQA_ROLES[k];
   const hidden=D.length-visible().length;
   document.getElementById('pop-role').innerHTML='<b>'+esc(R.label)+'.</b> '+esc(R.blurb)+
     (hidden>0?' '+hidden+(hidden===1?' document is':' documents are')+' outside this role.':'');
@@ -781,11 +772,6 @@ function quickFilter(k){quick=(quick===k&&k!=='controlled')?'controlled':k;
   page=1;renderCuts();syncDonut();render();}
 function segFilter(id){const el=document.getElementById('f-seg');
   el.value=el.value===id?'':id; page=1; chartSeg(); render();}
-function setRole(r){
-  TAQA_ROLE.set(r);
-  if(quick){const c=CT.find(x=>x.k===quick); if(c&&c.control&&!TAQA_ROLES[r].controlPanel)quick='controlled';}
-  page=1;closeDetail();renderRole();renderCuts();render();drawSummary();
-}
 
 function current(){
   const q=document.getElementById('q').value.trim().toLowerCase();
