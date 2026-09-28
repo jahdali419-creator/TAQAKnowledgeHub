@@ -493,7 +493,8 @@
         const pendingStat = document.getElementById('stat-pending');
         if (pendingStat) pendingStat.textContent = Math.max(0, parseInt(pendingStat.textContent) - 1);
         const bellBadge = document.getElementById('bell-badge');
-        if (bellBadge) bellBadge.textContent = Math.max(0, parseInt(bellBadge.textContent) - 1);
+        if (window.taqaSyncBell) window.taqaSyncBell();
+        else if (bellBadge) bellBadge.textContent = Math.max(0, parseInt(bellBadge.textContent) - 1);
 
         rejectOverlay.classList.remove('open');
         rejectInput.value = '';

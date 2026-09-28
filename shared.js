@@ -269,6 +269,30 @@ window.showToast=function(msg,type){
     '.nav-mobile-menu a.active,.nav-mobile-menu a:hover{color:var(--primary-ink,#005D63);}'+
     'html[data-taqa-theme="dark"] .nav-mobile-menu{background:rgba(0,35,38,0.97);border-color:#003A3D;}'+
     'html[data-taqa-theme="dark"] .nav-mobile-menu a{color:#C7DBDD;border-color:#003A3D;}'+
+    '.nav-mobile-menu{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}'+
+    'html.taqa-menu-open .bm-fab,html.taqa-menu-open .scroll-top-btn,html.taqa-menu-open #back-to-top,html.taqa-menu-open .bm-panel{display:none!important;}'+
+    '.nav-mobile-menu .mm-main a:last-child{border-bottom:none;}'+
+    '.nav-mobile-menu .mm-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--primary-ink,#005D63);padding:20px 0 8px;border-top:1px solid var(--border,rgba(0,0,0,.08));margin-top:4px;}'+
+    '.nav-mobile-menu a.mm-company,.nav-mobile-menu .mm-grp>summary{display:flex!important;align-items:center;gap:10px;min-height:52px;padding:0;font-size:15px;font-weight:600;color:var(--text,#1E1C1A);text-decoration:none;border-bottom:1px solid var(--border,rgba(0,0,0,.07));cursor:pointer;}'+
+    '.nav-mobile-menu .mm-grp>summary{list-style:none;}'+
+    '.nav-mobile-menu .mm-grp>summary::-webkit-details-marker{display:none;}'+
+    '.nav-mobile-menu .mm-n{margin-inline-start:auto;font-size:12.5px;font-weight:600;color:var(--text-light,#756A61);font-variant-numeric:tabular-nums;}'+
+    '.nav-mobile-menu .mm-chev{flex:none;color:var(--primary-ink,#005D63);transition:transform .2s cubic-bezier(.23,1,.32,1);}'+
+    '.nav-mobile-menu .mm-grp[open]>summary .mm-chev{transform:rotate(180deg);}'+
+    '.nav-mobile-menu .mm-grp[open]>summary{color:var(--primary-ink,#005D63);border-bottom-color:transparent;}'+
+    '.nav-mobile-menu .mm-list{margin:0 0 12px;padding:2px 0;border-inline-start:2px solid var(--border,rgba(0,0,0,.1));border-bottom:1px solid var(--border,rgba(0,0,0,.07));padding-bottom:10px;}'+
+    '.nav-mobile-menu .mm-list a{display:flex!important;align-items:center;gap:10px;min-height:44px;padding:0 0 0 14px;margin-inline-start:-2px;border:0;border-inline-start:2px solid transparent;font-size:14.5px;font-weight:500;color:var(--text-muted,#524D48);}'+
+    '.nav-mobile-menu .mm-dc{margin-inline-start:auto;font-size:12.5px;color:var(--text-light,#756A61);font-variant-numeric:tabular-nums;}'+
+    '.nav-mobile-menu .mm-list a.mm-here{color:var(--primary-ink,#005D63);font-weight:600;border-inline-start-color:var(--primary-ink,#005D63);}'+
+    '.nav-mobile-menu a.mm-company.mm-here{color:var(--primary-ink,#005D63);}'+
+    '.nav-mobile-menu .mm-list a:hover,.nav-mobile-menu a.mm-company:hover{color:var(--primary-ink,#005D63);}'+
+    'html[data-taqa-theme="dark"] .nav-mobile-menu .mm-label{border-color:#003A3D;}'+
+    'html[data-taqa-theme="dark"] .nav-mobile-menu a.mm-company,html[data-taqa-theme="dark"] .nav-mobile-menu .mm-grp>summary{color:#C7DBDD;border-color:#003A3D;}'+
+    'html[data-taqa-theme="dark"] .nav-mobile-menu .mm-grp[open]>summary{color:#00BBB6;border-bottom-color:transparent;}'+
+    'html[data-taqa-theme="dark"] .nav-mobile-menu .mm-list{border-color:#003A3D;}'+
+    'html[data-taqa-theme="dark"] .nav-mobile-menu .mm-list a{color:#8CB6B9;}'+
+    'html[data-taqa-theme="dark"] .nav-mobile-menu .mm-list a.mm-here{color:#00BBB6;border-inline-start-color:#00BBB6;}'+
+    'html[data-taqa-theme="dark"] .nav-mobile-menu .mm-n,html[data-taqa-theme="dark"] .nav-mobile-menu .mm-dc{color:#8CB6B9;}'+
     '@media(max-width:640px){'+
       '.nav-hamburger{display:flex!important;}'+
       '.nav-links{display:none!important;}'+
@@ -287,36 +311,72 @@ window.showToast=function(msg,type){
     }
   }
 
-  // Inject mobile dropdown menu (index.html already has one, skip)
-  if(!document.getElementById('nav-mobile-menu')){
-    var nav=document.querySelector('nav');
-    if(nav){
-      var p=location.pathname;
-      // The register entry is built only for a role that may open it, rather
-      // than built and then removed, which would depend on which of these two
-      // blocks happened to run first.
-      var items=[
-        {href:'index.html',label:'Home'},
-        {href:'ai-search.html',label:'Document Search'}
+  /* The phone menu. Built here, once, for every page, so the menu is the
+     same wherever you open it. It used to be two menus: a short one on most
+     pages that could not reach any area at all, and a long one on the home
+     page whose twenty-four area names ran together on a line, because the
+     touch-target rule above set them inline. The areas now sit in their
+     three families, each one a fold that shows its count, with the area you
+     are in marked and its family already open. */
+  var menu=document.getElementById('nav-mobile-menu');
+  var nav=document.querySelector('nav');
+  if(!menu && nav){
+    menu=document.createElement('div');
+    menu.id='nav-mobile-menu';menu.className='nav-mobile-menu';
+    nav.parentNode.insertBefore(menu,nav.nextSibling);
+  }
+  if(menu){
+    var p=location.pathname;
+    var esc=function(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+    // The register entry is built only for a role that may open it.
+    var items=[
+      {href:'index.html',label:'Home'},
+      {href:'ai-search.html',label:'Document Search'}
+    ];
+    if (typeof TAQA_ROLE === 'undefined' || TAQA_ROLE.canRegister())
+      items.push({href:'master-list.html',label:'Master List'});
+    items.push({href:'glossary.html',label:'Field Glossary'},
+               {href:'support-ticket.html',label:'Ask Expert'});
+    var html='<div class="mm-main">'+items.map(function(l){
+      var key=l.href.replace('.html','');
+      var active=(l.href==='index.html')
+        ?(p.endsWith('/')||p.endsWith('/index.html'))
+        :(p.indexOf('/'+key+'.html')>-1);
+      return '<a href="'+l.href+'"'+(active?' class="active" aria-current="page"':'')+'>'+l.label+'</a>';
+    }).join('')+'</div>';
+
+    var L=(typeof TAQA_DOC_LOOKUPS!=='undefined')?TAQA_DOC_LOOKUPS.segments:null;
+    if(L){
+      var here=(p.indexOf('segment.html')>-1)?new URLSearchParams(location.search).get('id'):null;
+      var live=function(id){
+        try{ return (typeof TAQA_STORE!=='undefined')?TAQA_STORE.area(id).live:null; }catch(e){ return null; }
+      };
+      var FAM=[
+        {group:'segment', title:'Operational Segments'},
+        {group:'function',title:'Corporate Functions'},
+        {group:'product', title:'Products & Technology'}
       ];
-      if (typeof TAQA_ROLE === 'undefined' || TAQA_ROLE.canRegister())
-        items.push({href:'master-list.html',label:'Master List'});
-      items.push({href:'glossary.html',label:'Field Glossary'},
-                 {href:'support-ticket.html',label:'Ask Expert'});
-      var menu=document.createElement('div');
-      menu.id='nav-mobile-menu';menu.className='nav-mobile-menu';
-      items.forEach(function(l){
-        var a=document.createElement('a');
-        a.href=l.href;a.textContent=l.label;
-        var key=l.href.replace('.html','');
-        var active=(l.href==='index.html')
-          ?(p.endsWith('/')||p.endsWith('/index.html'))
-          :(p.indexOf('/'+key+'.html')>-1);
-        if(active)a.className='active';
-        menu.appendChild(a);
+      var chev='<svg class="mm-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
+      html+='<div class="mm-label">Areas</div>';
+      if(L.company){
+        var cn=live('company');
+        html+='<a class="mm-company'+(here==='company'?' mm-here':'')+'" href="segment.html?id=company"'+(here==='company'?' aria-current="page"':'')+'>'+
+              '<span>Company policies</span>'+(cn!=null?'<span class="mm-n">'+cn+'</span>':'')+'</a>';
+      }
+      FAM.forEach(function(f){
+        var ids=Object.keys(L).filter(function(k){return L[k].group===f.group;})
+          .sort(function(a,b){return L[a].name.localeCompare(L[b].name);});
+        if(!ids.length)return;
+        var open=here&&ids.indexOf(here)>-1;
+        html+='<details class="mm-grp"'+(open?' open':'')+'><summary><span>'+esc(f.title)+'</span><span class="mm-n">'+ids.length+'</span>'+chev+'</summary><div class="mm-list">'+
+          ids.map(function(k){
+            var n=live(k), me=(k===here);
+            return '<a href="segment.html?id='+encodeURIComponent(k)+'"'+(me?' class="mm-here" aria-current="page"':'')+'><span>'+esc(L[k].name)+'</span>'+
+                   (n!=null?'<span class="mm-dc">'+n+'</span>':'')+'</a>';
+          }).join('')+'</div></details>';
       });
-      nav.parentNode.insertBefore(menu,nav.nextSibling);
     }
+    menu.innerHTML=html;
   }
 
   // Toggle (overrides index.html's identical version safely)
@@ -324,8 +384,15 @@ window.showToast=function(msg,type){
     var menu=document.getElementById('nav-mobile-menu');
     var nav=document.querySelector('nav');
     if(menu){
-      if(nav&&!menu.style.top)menu.style.top=nav.offsetHeight+'px';
+      if(nav){
+        var t=Math.round(nav.getBoundingClientRect().bottom);
+        menu.style.top=t+'px';
+        menu.style.maxHeight='calc(100dvh - '+t+'px)';
+      }
       menu.classList.toggle('open');
+      document.documentElement.classList.toggle('taqa-menu-open',menu.classList.contains('open'));
+      var hb=document.getElementById('nav-hamburger');
+      if(hb)hb.setAttribute('aria-expanded',menu.classList.contains('open')?'true':'false');
     }
   };
 
@@ -340,7 +407,7 @@ window.showToast=function(msg,type){
     var menu=document.getElementById('nav-mobile-menu');
     var hb=document.getElementById('nav-hamburger');
     if(menu&&menu.classList.contains('open')&&!menu.contains(e.target)&&hb&&!hb.contains(e.target))
-      menu.classList.remove('open');
+      { menu.classList.remove('open'); document.documentElement.classList.remove('taqa-menu-open'); }
   });
 })();
 
@@ -1123,4 +1190,45 @@ document.addEventListener('keydown',function(e){
       ticking = false;
     });
   }, {passive:true});
+})();
+
+/* ── The approvals bell ─────────────────────────────────────────────────
+   The bell is a queue, not a notice board: it says "something is waiting on
+   your signature". Only a role that can sign carries it, which is a Segment
+   Director (or whoever holds their delegation) and QMS. An employee or an
+   auditor has nothing to approve, so the bell is not drawn for them at all.
+
+   The count is the real queue for the person signed in: drafts at the
+   Director's stage in their own area, or at the QMS stage for QMS. It used
+   to be a number seeded into localStorage, which is how an employee came to
+   see 24 approvals waiting. */
+(function(){
+  function sync(){
+    var btn = document.getElementById('nav-bell');
+    if (!btn) return;
+    var badge = document.getElementById('bell-badge');
+    var R = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE : null;
+    var A = (typeof TAQA_APPROVAL !== 'undefined') ? TAQA_APPROVAL : null;
+    var cap = (R && R.effective) ? R.effective() : null;
+    var signs = !!(cap && (cap.approve || cap.countersign));
+    btn.style.display = signs ? '' : 'none';
+    if (!signs || !badge) return;
+    var n = 0;
+    try {
+      if (typeof TAQA_STORE !== 'undefined' && A) {
+        n = TAQA_STORE.all().filter(function(d){
+          return A.canApprove(d) || A.canCountersign(d);
+        }).length;
+      }
+    } catch(e){}
+    badge.textContent = n > 99 ? '99+' : String(n);
+    badge.style.display = n > 0 ? 'flex' : 'none';
+    btn.setAttribute('aria-label', n ? n + ' document' + (n === 1 ? '' : 's') + ' waiting for your signature' : 'Approvals, nothing waiting');
+    btn.title = btn.getAttribute('aria-label');
+  }
+  window.taqaSyncBell = sync;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', sync); else sync();
+  window.addEventListener('taqa:role-changed', sync);
+  window.addEventListener('taqa:register-changed', sync);
+  window.addEventListener('storage', sync);
 })();
