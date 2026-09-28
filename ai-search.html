@@ -428,6 +428,91 @@ html[data-taqa-theme="dark"] .ir-footer{background:rgba(255,255,255,0.02);border
 /* Long option text ends in an ellipsis rather than being cut mid letter. */
 select { text-overflow:ellipsis; padding-inline-end:30px; }
 
+/* ── Filters Drawer / Panel ── */
+button.filter-chip{font-family:inherit;display:inline-flex;align-items:center;gap:6px;}
+.filters-badge{
+  background:var(--gradient);color:#fff;font-size:10px;font-weight:700;border-radius:50px;
+  padding:1px 6px;min-width:16px;line-height:1.5;text-align:center;display:inline-block;
+}
+.filters-scrim{
+  position:fixed;inset:0;background:rgba(0,0,0,0.38);z-index:650;
+  opacity:0;pointer-events:none;transition:opacity 0.25s;
+}
+.filters-scrim.open{opacity:1;pointer-events:auto;}
+.filters-drawer{
+  position:fixed;top:var(--nav-h,64px);left:0;height:calc(100dvh - var(--nav-h,64px));width:284px;max-width:86vw;
+  background:var(--glass-2);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  border-inline-end:1px solid var(--glass-border);
+  box-shadow:0 10px 40px rgba(0,0,0,0.18);
+  z-index:700;transform:translateX(-100%);
+  transition:transform 0.3s cubic-bezier(.4,0,.2,1);
+  overflow-y:auto;padding:20px 18px 24px;text-align:left;
+}
+.filters-drawer.open{transform:translateX(0);}
+.filters-drawer-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--glass-border);
+}
+.filters-drawer-title{
+  font-family:'BwGradual','Urbanist',sans-serif;font-weight:700;font-size:15px;
+  color:var(--text);display:flex;align-items:center;gap:8px;
+}
+.filters-close-btn{
+  width:28px;height:28px;border-radius:8px;border:1px solid var(--glass-border);
+  background:transparent;color:var(--text-muted);cursor:pointer;font-size:13px;
+  display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;
+}
+.filters-close-btn:hover{border-color:var(--glass-border-hover);color:var(--text);}
+.filters-group{margin-bottom:18px;}
+.filters-group label{
+  display:block;font-size:10.5px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:7px;
+}
+.filters-group select,.filters-group input[type="date"]{
+  width:100%;padding:9px 10px;border-radius:9px;border:1px solid var(--glass-border);
+  background:rgba(255,255,255,0.75);color:var(--text);font-size:13px;font-family:'Inter',sans-serif;
+  outline:none;transition:border-color 0.2s,box-shadow 0.2s;color-scheme:light;
+}
+.filters-group select:focus,.filters-group input[type="date"]:focus{
+  border-color:rgba(0,187,182,0.45);box-shadow:0 0 0 3px rgba(0,187,182,0.1);
+}
+.filters-date-row{display:flex;align-items:center;gap:7px;}
+.filters-date-row input{flex:1;min-width:0;}
+.filters-date-sep{font-size:11px;color:var(--text-muted);flex-shrink:0;}
+.filters-clear-btn{
+  width:100%;margin-top:2px;padding:9px;border-radius:9px;border:1px solid var(--glass-border);
+  background:transparent;color:var(--text-muted);font-size:12.5px;font-weight:600;cursor:pointer;
+  transition:all 0.2s;font-family:'Inter',sans-serif;
+}
+.filters-clear-btn:hover{border-color:rgba(0,187,182,0.35);color:var(--primary-ink);background:rgba(0,187,182,0.05);}
+@media(min-width:1300px){
+  .filters-drawer{
+    top:110px;left:24px;height:auto;max-height:calc(100vh - 140px);
+    border-radius:18px;border:1px solid var(--glass-border);border-inline-end:1px solid var(--glass-border);
+    transform:translateX(0);box-shadow:0 4px 28px rgba(0,0,0,0.08);
+  }
+  .filters-scrim{display:none;}
+  .filters-close-btn{display:none;}
+  #filters-trigger-btn{display:none;}
+}
+html[data-taqa-theme="dark"] .filters-drawer{background:rgba(0,35,38,0.98);border-color:rgba(255,255,255,0.08);}
+html[data-taqa-theme="dark"] .filters-drawer-head{border-color:rgba(255,255,255,0.07);}
+html[data-taqa-theme="dark"] .filters-close-btn{border-color:rgba(255,255,255,0.1);color:#619B9E;}
+html[data-taqa-theme="dark"] .filters-group select,html[data-taqa-theme="dark"] .filters-group input[type="date"]{
+  background:rgba(0,45,48,0.6);border-color:rgba(255,255,255,0.1);color:#C7DBDD;color-scheme:dark;
+}
+html[data-taqa-theme="dark"] .filters-clear-btn{border-color:rgba(255,255,255,0.1);color:#619B9E;}
+html[data-taqa-theme="dark"] .filters-clear-btn:hover{border-color:rgba(0,187,182,0.3);color:#00BBB6;background:rgba(0,93,99,0.15);}
+
+/* ── Real result / source cards (search results, honest empty state) ── */
+.source-card{cursor:pointer;}
+.result-note{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.empty-state-suggest{margin-top:2px;}
+.empty-state-suggest button{
+  background:none;border:none;padding:0;color:var(--primary-ink);font-weight:600;
+  font-size:inherit;font-family:inherit;cursor:pointer;text-decoration:underline;
+}
+
 /* shared.js paints the breadcrumb on var(--primary), which is a ground colour,
    so on the dark canvas the current crumb sat at about 2.5 to 1. The leading
    html raises specificity over the sheet shared.js appends after ours. */
@@ -461,7 +546,7 @@ html[data-taqa-theme] body .ai-safety-banner{color:var(--alert-ink);background:v
     <li><a href="support-ticket.html">Ask Expert</a></li>
   </ul>
   <div class="nav-right">
-    <button type="button" class="bell-btn" id="nav-bell" style="display:none" onclick="location.href='dashboard.html'" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
     <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
     <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
     <span class="nav-sep nav-up" aria-hidden="true"></span>
@@ -502,6 +587,10 @@ html[data-taqa-theme] body .ai-safety-banner{color:var(--alert-ink);background:v
         <span class="filter-chip" data-seg="fracturing">Fracturing</span>
         <span class="filter-chip" data-seg="qhse">QHSE</span>
         <span class="filter-chip" data-seg="hr">HR</span>
+        <button type="button" class="filter-chip" id="filters-trigger-btn" onclick="toggleFilters()"
+          aria-haspopup="dialog" aria-expanded="false" aria-controls="filters-drawer">
+          Filters<span class="filters-badge" id="filters-badge-mini" style="display:none">0</span>
+        </button>
       </div>
       <span class="char-count" id="char-count">0 / 500</span>
     </div>
@@ -509,6 +598,42 @@ html[data-taqa-theme] body .ai-safety-banner{color:var(--alert-ink);background:v
   <!-- ── Instant Results (injected below search card) ── -->
   <div id="ir-panel" class="ir-panel" role="listbox" aria-label="Document matches"></div>
 </div>
+
+<!-- ── Filters Panel / Drawer ── -->
+<div class="filters-scrim" id="filters-scrim" onclick="closeFilters()"></div>
+<aside class="filters-drawer" id="filters-drawer" aria-label="Search filters" role="dialog" aria-modal="false">
+  <div class="filters-drawer-head">
+    <span class="filters-drawer-title">Filters<span class="filters-badge" id="filters-badge" style="display:none">0</span></span>
+    <button type="button" class="filters-close-btn" onclick="closeFilters()" aria-label="Close filters">✕</button>
+  </div>
+  <div class="filters-group">
+    <label for="f-segment">Area / Segment</label>
+    <select id="f-segment"></select>
+  </div>
+  <div class="filters-group">
+    <label for="f-status">Status</label>
+    <select id="f-status">
+      <option value="all">All Statuses</option>
+      <option value="current">Published</option>
+      <option value="under-review">Under Review</option>
+      <option value="draft">Draft</option>
+      <option value="overdue">Review Overdue</option>
+    </select>
+  </div>
+  <div class="filters-group">
+    <label for="f-type">Document Type</label>
+    <select id="f-type"></select>
+  </div>
+  <div class="filters-group">
+    <label id="f-date-label">Issued Date Range</label>
+    <div class="filters-date-row">
+      <input type="date" id="f-date-from" aria-label="Issued from">
+      <span class="filters-date-sep">to</span>
+      <input type="date" id="f-date-to" aria-label="Issued to">
+    </div>
+  </div>
+  <button type="button" class="filters-clear-btn" id="filters-clear-btn" onclick="clearAllFilters()">Clear all filters</button>
+</aside>
 
 <!-- ── Suggested Prompts ── -->
 <div class="prompts-section">
@@ -591,184 +716,10 @@ function setPrompt(el) {
   input.focus();
 }
 
-// ── Segment Filters ──
-document.querySelectorAll('.filter-chip').forEach(chip => {
-  chip.addEventListener('click', () => {
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-  });
-});
-
-// ── Demo AI Responses ──
-const RESPONSES = {
-  'well shut-in': {
-    answer: `<h4>Well Shut-In Procedure</h4>
-    <p>According to <strong>WS-003 Well Shut-In Procedure</strong> and the <strong>Well Control Manual v6.0</strong>, the immediate shut-in sequence is:</p>
-    <p><strong>1. Detect the kick:</strong> Monitor for pit gain, flow while pumps are off, increased pump pressure, or increased rate of penetration.</p>
-    <p><strong>2. Pick up off bottom:</strong> Stop drilling, pick up to a safe position above the formation.</p>
-    <p><strong>3. Shut down pumps:</strong> Stop all circulation pumps immediately.</p>
-    <p><strong>4. Close the BOP:</strong> Per WS-004, a Hard Shut-In (direct BOP closure) is the preferred TAQA method.</p>
-    <p><strong>5. Record SICP and SIDPP:</strong> Wait for pressures to stabilize, record all readings on the kill sheet.</p>
-    <p><strong>6. Notify:</strong> Alert the Company Man, Well Site Leader, and QHSE immediately.</p>`,
-    sources: [
-      {title:'WS-003 Well Shut-In Procedure',seg:'Safety Services',type:'SOP'},
-      {title:'WS-004 Hard vs Soft Shut-In',seg:'Safety Services',type:'SOP'},
-      {title:'Well Control Manual v6.0',seg:'Drilling Services',type:'Manual'},
-      {title:'TQ-QHSE-SOP-016 Document Control',seg:'QHSE',type:'SOP'}
-    ]
-  },
-  'bop test': {
-    answer: `<h4>BOP Testing Requirements</h4>
-    <p>Per <strong>WS-001 Daily BOP Test SOP</strong> and <strong>ALERT-DRL-002</strong> (effective June 2026), BOP testing intervals at TAQA are:</p>
-    <p><strong>Pressure Tests:</strong> Every 14 days, or after each connection/nipple-up, or after any BOP repair.</p>
-    <p><strong>Function Tests:</strong> Every 7 days for all BOP functions including annulars, pipe rams, and blind rams.</p>
-    <p><strong>H2S Zones (updated):</strong> Inspection intervals reduced to 14 days per ALERT-INS-002.</p>
-    <p><strong>Test Pressure:</strong> Low pressure (200, 300 psi), followed by high pressure (as per casing design, typically MAASP or 70% of burst).</p>
-    <p><strong>Documentation:</strong> All tests must be recorded in the BOP test log and reviewed by the Company Man.</p>`,
-    sources: [
-      {title:'WS-001 Daily BOP Test SOP',seg:'Safety Services',type:'SOP'},
-      {title:'DRL-022 End of Well Report SOP',seg:'Drilling Services',type:'SOP'},
-      {title:'ALERT-DRL-002',seg:'Drilling Services',type:'Alert'},
-      {title:'Well Control Manual v6.0',seg:'Drilling Services',type:'Manual'}
-    ]
-  },
-  'h2s': {
-    answer: `<h4>H2S Safety &amp; PPE Requirements</h4>
-    <p>Per <strong>WS-008 H2S Alarm Response SOP</strong> and the <strong>H2S Safety Manual</strong>, TAQA H2S requirements include:</p>
-    <p><strong>Detection Levels:</strong></p>
-    <p>• <strong>1 ppm:</strong> Warning alarm, monitor closely<br>• <strong>5 ppm:</strong> Personnel upwind, emergency response standby<br>• <strong>10 ppm:</strong> SCBA mandatory for all personnel near source<br>• <strong>20 ppm:</strong> Full evacuation of work area</p>
-    <p><strong>PPE Requirements:</strong> SCBA units must be worn when entering any area with confirmed H2S ≥10 ppm. All personnel must pass annual H2S Awareness Training.</p>
-    <p><strong>ALERT-DRL-004:</strong> H2S concentrations elevated in Shedgum area, updated PPE requirements are in effect immediately.</p>`,
-    sources: [
-      {title:'WS-008 H2S Alarm Response SOP',seg:'Safety Services',type:'SOP'},
-      {title:'H2S Safety Manual',seg:'QHSE',type:'Manual'},
-      {title:'ALERT-DRL-004',seg:'Drilling Services',type:'Alert'},
-      {title:'WS-011 H2S Safety SOP',seg:'Safety Services',type:'SOP'}
-    ]
-  },
-  'default': {
-    answer: `<h4>Search Results</h4>
-    <p>I found relevant information across multiple TAQA segments. Based on the documents in the Knowledge Hub, here is a summary of the most relevant procedures and standards:</p>
-    <p>For operational procedures, refer to the relevant segment's <strong>Standard Operating Procedures (SOPs)</strong>. For equipment specifications, consult the <strong>Technical Manuals</strong>. For compliance requirements, review the area's <strong>Standards</strong>; the company-wide Policies signed by the CEO sit above them.</p>
-    <p>To get more specific results, try narrowing your question or selecting a segment filter above. You can also browse documents directly by navigating to a segment page.</p>
-    <p><strong>Note:</strong> This is a demo interface. Full AI-powered search will be connected to the Claude API in the next phase, enabling real document Q&amp;A with citations.</p>`,
-    sources: [
-      {title:'Knowledge Hub Documentation',seg:'All Segments',type:'Manual'},
-      {title:'TQ-QHSE-SOP-016 Document Control',seg:'QHSE',type:'SOP'}
-    ]
-  }
-};
-
-function getResponse(q) {
-  q = q.toLowerCase();
-  if (q.includes('shut') || q.includes('kick') || q.includes('well control')) return RESPONSES['well shut-in'];
-  if (q.includes('bop') || q.includes('blowout') || q.includes('preventer')) return RESPONSES['bop test'];
-  if (q.includes('h2s') || q.includes('hydrogen') || q.includes('sulfide') || q.includes('toxic')) return RESPONSES['h2s'];
-  return RESPONSES['default'];
-}
-
-// ── Typewriter for AI responses ──
-function typewriteHTML(el, html, speed, onDone) {
-  el.innerHTML = '';
-  let i = 0;
-  const cursor = document.createElement('span');
-  cursor.className = 'tw-cursor';
-  el.appendChild(cursor);
-  function step() {
-    if (i >= html.length) {
-      el.innerHTML = html;
-      if (onDone) onDone();
-      return;
-    }
-    if (html[i] === '<') {
-      const end = html.indexOf('>', i);
-      i = end !== -1 ? end + 1 : html.length;
-    } else {
-      i++;
-    }
-    el.innerHTML = html.substring(0, i) + '<span class="tw-cursor"></span>';
-    setTimeout(step, speed);
-  }
-  step();
-}
-
-function addMessage(type, content, sources) {
-  const log = document.getElementById('chat-log');
-  const welcome = log.querySelector('.welcome-state');
-  if (welcome) welcome.remove();
-
-  const div = document.createElement('div');
-  if (type === 'user') {
-    div.className = 'msg-user';
-    div.innerHTML = `<div class="bubble">${content}</div>`;
-    log.appendChild(div);
-    div.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  } else {
-    // Search results marked the type in four unrelated hues, none of them
-    // TAQA's. A result list is scanned fast; colour should mean one thing.
-    // Tokens rather than hexes here: the teal it carried is a light-ground
-    // ink and the answer bubble is dark in dark mode, where it measured
-    // about 2 to 1.
-    const typeInk = {Alert:'var(--alert-ink)',default:'var(--primary-ink)'};
-    const typeTint = {Alert:'var(--alert-soft)',default:'var(--brand-soft)'};
-    const srcsHTML = sources && sources.length ? `<div class="sources-block">
-      <div class="sources-label">${sources.length} Source${sources.length>1?'s':''}</div>
-      <div class="sources-list">${sources.map(s=>`
-        <div class="source-card">
-          <div class="source-card-bar" style="background:${typeInk[s.type]||typeInk.default}"></div>
-          <div class="source-card-body">
-            <div class="source-card-title">${s.title}</div>
-            <div class="source-card-meta">
-              <span class="source-card-seg">${s.seg}</span>
-              <span class="source-card-type" style="background:${typeTint[s.type]||typeTint.default};border-color:${typeTint[s.type]||typeTint.default};color:${typeInk[s.type]||typeInk.default}">${s.type}</span>
-            </div>
-          </div>
-          <span class="source-card-arrow">›</span>
-        </div>`).join('')}
-      </div></div>` : '';
-    div.className = 'msg-ai';
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    div.innerHTML = '<div class="msg-ai-avatar">✦</div>';
-    div.appendChild(bubble);
-    log.appendChild(div);
-    div.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    typewriteHTML(bubble, content, 9, () => {
-      if (srcsHTML) {
-        const srcDiv = document.createElement('div');
-        srcDiv.innerHTML = srcsHTML;
-        srcDiv.style.cssText = 'opacity:0;transform:translateY(8px);transition:opacity 0.4s,transform 0.4s;';
-        bubble.appendChild(srcDiv);
-        setTimeout(() => { srcDiv.style.opacity='1'; srcDiv.style.transform='none'; }, 80);
-      }
-      div.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    });
-  }
-}
-
-function submitQuery() {
-  const q = input.value.trim();
-  if (!q) return;
-
-  addMessage('user', q);
-  input.value = '';
-  input.style.height = 'auto';
-  document.getElementById('char-count').textContent = '0 / 500';
-
-  const thinking = document.getElementById('thinking-block');
-  thinking.classList.add('active');
-  const btn = document.getElementById('send-btn');
-  btn.classList.add('loading');
-  btn.disabled = true;
-
-  setTimeout(() => {
-    thinking.classList.remove('active');
-    btn.classList.remove('loading');
-    btn.disabled = false;
-    const resp = getResponse(q);
-    addMessage('ai', resp.answer, resp.sources);
-  }, 1800 + Math.random() * 800);
-}
+// Segment quick-chips, the filters drawer and submitQuery() itself all need
+// the real register (TAQA_SEARCH_INDEX), which loads later in the page, so
+// that wiring lives in the "Real Document Search" script near the bottom of
+// the page rather than here.
 
 // ── Canvas ──
 const canvas = document.getElementById('bg-canvas');
@@ -791,7 +742,8 @@ function draw(){ctx.fillStyle=document.documentElement.getAttribute('data-taqa-t
   requestAnimationFrame(draw);}
 draw();
 
-if (urlQ) setTimeout(submitQuery, 600);
+// A prefilled query needs submitQuery(), which is defined once the register
+// has loaded further down the page, so the actual search runs from there.
 
 // ── Scroll Progress Ring ──
 (function(){
@@ -843,12 +795,15 @@ document.addEventListener('click',function(e){
 <script src="fixes.js"></script>
 <script src="search-index.js"></script>
 <script>
-// ── Instant Document Search ──
+// ── Real Document Search ──
+// Wires the free-text query, the type-ahead preview and the filters panel to
+// the actual register: TAQA_SEARCH_INDEX, built in search-index.js from
+// TAQA_STORE. Every result here is a row from the register and every link
+// opens that row's real viewer.html; nothing is invented.
 (function(){
-  // Six types in six borrowed hues made the match list read as a code nobody
-  // has learnt, and none of the six were TAQA's. The label already names the
-  // type, so every badge takes the one teal wash; Alert stays orange because
-  // it is an operational warning.
+  // The label already names the type on a result card, so every badge takes
+  // the one teal wash; Alert stays orange because it is an operational
+  // warning, the colour the rest of the Hub gives an alert.
   var TYPE_CFG={
     sop:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
     manual:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
@@ -858,45 +813,133 @@ document.addEventListener('click',function(e){
     lesson:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
     software:{bg:'var(--brand-soft)',color:'var(--primary-ink)'}
   };
-  // The badge text is the register's mark, so a result reads the same as its
-  // card: WI, ST, POL, LL, where this map used to spell out Manual and Lesson
-  // and had no Standard at all, 134 of them fell through to the raw type.
+  var TYPE_ORDER=['sop','manual','standard','policy','alert','lesson','software'];
+  // The badge text is the register's mark (WI, ST, POL, LL); the filter's
+  // Document Type list instead spells the type out, since a dropdown is read
+  // slower than a badge and "WI" alone means nothing there.
   (function(){ var T=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.types)||{};
     var fb={sop:'SOP',manual:'WI',standard:'ST',policy:'POL',alert:'ALT',lesson:'LL',software:'ZIP'};
-    Object.keys(TYPE_CFG).forEach(function(k){ TYPE_CFG[k].label=(T[k]&&T[k].mark)||fb[k]; }); })();
-  // A Standard lives in the same tab as a Policy; without this every Standard
-  // result opened a tab that does not exist, so the library came up empty.
-  var TAB_MAP={sop:'sops',manual:'manuals',standard:'policies',policy:'policies',alert:'alerts',lesson:'lessons',software:'software'};
+    TYPE_ORDER.forEach(function(k){
+      TYPE_CFG[k].label=(T[k]&&T[k].mark)||fb[k];
+      TYPE_CFG[k].fullLabel=(T[k]&&T[k].label)||k;
+    });
+  })();
 
-  function esc(s){return s.replace(/[&<>"']/g,function(c){{return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}})}
-
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function highlight(str,q){
     if(!q)return esc(str);
     var re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
     return esc(str).replace(re,'<mark>$1</mark>');
   }
+  // The one place a match becomes a link. Every card, in the type-ahead
+  // preview and in the full results below, opens the same real record.
+  function docHref(d){
+    return 'viewer.html?doc='+encodeURIComponent(d.n||'')+'&seg='+encodeURIComponent(d.s)+
+      '&type='+encodeURIComponent(d.tp)+'&title='+encodeURIComponent(d.t);
+  }
+  function statusNote(d){
+    if(!d.st||d.st==='current'||d.st==='asset')return '';
+    var label=d.st==='under-review'?'under review':d.st;
+    return ' <span class="ir-state ir-state-'+esc(d.st)+'">'+esc(label)+'</span>';
+  }
 
+  var FILTERS={segment:'all',status:'all',type:'all',dateFrom:'',dateTo:''};
+
+  var segSelect=document.getElementById('f-segment');
+  var typeSelect=document.getElementById('f-type');
+  var statusSelect=document.getElementById('f-status');
+  var dateFromInput=document.getElementById('f-date-from');
+  var dateToInput=document.getElementById('f-date-to');
+  var drawer=document.getElementById('filters-drawer');
+  var scrim=document.getElementById('filters-scrim');
+  var badgeMain=document.getElementById('filters-badge');
+  var badgeMini=document.getElementById('filters-badge-mini');
+  var triggerBtn=document.getElementById('filters-trigger-btn');
+
+  // Areas and types come from the register's own lookups, never a list typed
+  // by hand, so a new area or a renamed type appears here on its own.
+  (function populateSelects(){
+    var S=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.segments)||{};
+    var names=Object.keys(S).map(function(k){return{id:k,name:S[k].name||k};})
+      .sort(function(a,b){return a.name.localeCompare(b.name);});
+    if(segSelect){
+      var opts='<option value="all">All Areas</option>';
+      names.forEach(function(s){opts+='<option value="'+esc(s.id)+'">'+esc(s.name)+'</option>';});
+      segSelect.innerHTML=opts;
+    }
+    if(typeSelect){
+      var topts='<option value="all">All Types</option>';
+      TYPE_ORDER.forEach(function(t){topts+='<option value="'+t+'">'+esc(TYPE_CFG[t].fullLabel)+'</option>';});
+      typeSelect.innerHTML=topts;
+    }
+  })();
+
+  function activeFilterCount(){
+    var n=0;
+    if(FILTERS.segment!=='all')n++;
+    if(FILTERS.status!=='all')n++;
+    if(FILTERS.type!=='all')n++;
+    if(FILTERS.dateFrom)n++;
+    if(FILTERS.dateTo)n++;
+    return n;
+  }
+  function updateFilterBadge(){
+    var n=activeFilterCount();
+    [badgeMain,badgeMini].forEach(function(b){
+      if(!b)return;
+      b.textContent=n;
+      b.style.display=n?'inline-block':'none';
+    });
+  }
+
+  // Withdrawn documents (obsolete, superseded) never reach this array at all:
+  // search-index.js leaves them out, per TQ-QHSE-S001 4.6, so there is no
+  // "withdrawn" option here to filter by; a query never turns one up either.
+  function matchesFilters(d){
+    if(FILTERS.segment!=='all'&&d.s!==FILTERS.segment)return false;
+    if(FILTERS.type!=='all'&&d.tp!==FILTERS.type)return false;
+    if(FILTERS.status==='overdue'){ if(!d.ov)return false; }
+    else if(FILTERS.status!=='all'&&d.st!==FILTERS.status)return false;
+    if(FILTERS.dateFrom){ if(!d.iss||d.iss<FILTERS.dateFrom)return false; }
+    if(FILTERS.dateTo){ if(!d.iss||d.iss>FILTERS.dateTo)return false; }
+    return true;
+  }
+
+  // The one search. Filters narrow the register first (AND); free text then
+  // scores what is left: an exact title or document number outranks a
+  // start-of-title match, which outranks a substring, which outranks a hit
+  // that only lands in the segment name or the type.
+  function searchDocs(q){
+    if(!window.TAQA_SEARCH_INDEX)return [];
+    var ql=(q||'').trim().toLowerCase();
+    var pool=TAQA_SEARCH_INDEX.filter(matchesFilters);
+    if(!ql)return pool;
+    return pool.map(function(d){
+      var sc=0,tl=d.t.toLowerCase(),sl=d.sn.toLowerCase(),tp=d.tp.toLowerCase(),nl=(d.n||'').toLowerCase();
+      if(tl===ql)sc+=10;
+      else if(tl.indexOf(ql)===0)sc+=6;
+      else if(tl.indexOf(ql)>-1)sc+=4;
+      if(nl){
+        if(nl===ql)sc+=9;
+        else if(nl.indexOf(ql)===0)sc+=5;
+        else if(nl.indexOf(ql)>-1)sc+=3;
+      }
+      if(sl.indexOf(ql)>-1)sc+=2;
+      if(tp.indexOf(ql)>-1)sc+=1;
+      return{d:d,sc:sc};
+    }).filter(function(x){return x.sc>0;}).sort(function(a,b){return b.sc-a.sc;}).map(function(x){return x.d;});
+  }
+
+  // ── Type-ahead preview under the search box ──
   var panel=document.getElementById('ir-panel');
   var inp=document.getElementById('query-input');
   var timer=null;
 
-  function renderResults(q){
+  function renderPreview(q){
     if(!panel||!window.TAQA_SEARCH_INDEX)return;
     if(!q||q.length<2){panel.classList.remove('open');return;}
-    var ql=q.toLowerCase();
-    // Track search
     if(window.TAQA_Track)window.TAQA_Track('search',q);
-    // Scored: title exact(10) > title-start(6) > title-contains(4) > segment(2) > type(1)
-    var scored=TAQA_SEARCH_INDEX.map(function(d){
-      var sc=0,tl=d.t.toLowerCase(),sl=d.sn.toLowerCase(),tp=d.tp.toLowerCase();
-      if(tl===ql)sc+=10;
-      else if(tl.indexOf(ql)===0)sc+=6;
-      else if(tl.indexOf(ql)>-1)sc+=4;
-      if(sl.indexOf(ql)>-1)sc+=2;
-      if(tp.indexOf(ql)>-1)sc+=1;
-      return{d:d,sc:sc};
-    }).filter(function(x){return x.sc>0;}).sort(function(a,b){return b.sc-a.sc;});
-    var all=scored.map(function(x){return x.d;});
+    var all=searchDocs(q);
     var shown=all.slice(0,8);
     if(!shown.length){panel.classList.remove('open');return;}
     var html=
@@ -904,17 +947,16 @@ document.addEventListener('click',function(e){
       (all.length>8?'Top 8 of '+all.length:all.length+' found')+'</span></div>'+
       shown.map(function(d){
         var c=TYPE_CFG[d.tp]||{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:d.tp};
-        var href='segment.html?id='+d.s+'&tab='+(TAB_MAP[d.tp]||d.tp);
-        return '<a class="ir-item" href="'+href+'" role="option">'+
+        return '<a class="ir-item" href="'+docHref(d)+'" role="option">'+
           '<span class="ir-badge" style="background:'+c.bg+';color:'+c.color+'">'+c.label+'</span>'+
           '<div class="ir-body">'+
             '<div class="ir-title">'+highlight(d.t,q)+'</div>'+
-            '<div class="ir-seg">'+esc(d.sn)+(d.st&&d.st!=='current'&&d.st!=='asset'?' <span class="ir-state ir-state-'+esc(d.st)+'">'+esc(d.st==='under-review'?'under review':d.st)+'</span>':'')+'</div>'+
+            '<div class="ir-seg">'+esc(d.sn)+statusNote(d)+'</div>'+
           '</div>'+
           '<span class="ir-arrow">›</span>'+
         '</a>';
       }).join('')+
-      '<div class="ir-footer">Press <strong>Enter</strong> to ask AI about this</div>';
+      '<div class="ir-footer">Press <strong>Enter</strong> to see all matching documents</div>';
     panel.innerHTML=html;
     panel.classList.add('open');
   }
@@ -923,7 +965,7 @@ document.addEventListener('click',function(e){
     inp.addEventListener('input',function(){
       clearTimeout(timer);
       var q=inp.value.trim();
-      timer=setTimeout(function(){renderResults(q);},150);
+      timer=setTimeout(function(){renderPreview(q);},150);
     });
     inp.addEventListener('keydown',function(e){
       if(e.key==='Escape'&&panel){panel.classList.remove('open');}
@@ -938,12 +980,173 @@ document.addEventListener('click',function(e){
     panel.classList.remove('open');
   });
 
-  // Hide panel when query is submitted
-  var origSubmit=window.submitQuery;
-  window.submitQuery=function(){
+  // ── Full results, shown below the search card once a search runs ──
+  var chatLog=document.getElementById('chat-log');
+  var welcomeHTML=chatLog?chatLog.innerHTML:'';
+  var RESULT_CAP=40;
+
+  function filterSummary(){
+    var bits=[];
+    if(FILTERS.segment!=='all'){
+      var S=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.segments)||{};
+      bits.push((S[FILTERS.segment]&&S[FILTERS.segment].name)||FILTERS.segment);
+    }
+    if(FILTERS.type!=='all')bits.push(TYPE_CFG[FILTERS.type]?TYPE_CFG[FILTERS.type].fullLabel:FILTERS.type);
+    if(FILTERS.status!=='all'){
+      var labels={current:'Published','under-review':'Under Review',draft:'Draft',overdue:'Review Overdue'};
+      bits.push(labels[FILTERS.status]||FILTERS.status);
+    }
+    if(FILTERS.dateFrom||FILTERS.dateTo)bits.push('issued '+(FILTERS.dateFrom||'any date')+' to '+(FILTERS.dateTo||'any date'));
+    return bits;
+  }
+
+  function resultCardHTML(d){
+    var c=TYPE_CFG[d.tp]||{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:d.tp};
+    var note='';
+    if(d.st&&d.st!=='current'&&d.st!=='asset'){
+      note=d.st==='under-review'?'Under review':d.st==='draft'?'Draft, not yet in force':esc(d.st);
+      if(d.ov)note+=' · review overdue';
+    } else if(d.ov){ note='Review overdue'; }
+    return '<a class="source-card" href="'+docHref(d)+'">'+
+      '<div class="source-card-bar" style="background:'+c.color+'"></div>'+
+      '<div class="source-card-body">'+
+        '<div class="source-card-title">'+esc(d.t)+'</div>'+
+        '<div class="source-card-meta">'+
+          '<span class="source-card-seg">'+esc(d.sn)+(d.n?' · '+esc(d.n):'')+'</span>'+
+          '<span class="source-card-type" style="background:'+c.bg+';border-color:'+c.bg+';color:'+c.color+'">'+c.label+'</span>'+
+        '</div>'+
+        (note?'<div class="result-note">'+note+'</div>':'')+
+      '</div>'+
+      '<span class="source-card-arrow">›</span>'+
+    '</a>';
+  }
+
+  function renderEmptyState(q){
+    var qText=q?' match "<strong>'+esc(q)+'</strong>"':' match the selected filters';
+    return '<div class="welcome-state">'+
+      '<div class="welcome-icon">⌕</div>'+
+      '<h3>No Documents Found</h3>'+
+      '<p>No documents in the register'+qText+'. Try a shorter search term, check the document number, or '+
+      '<span class="empty-state-suggest"><button type="button" onclick="clearAllFilters()">clear all filters</button></span>.</p>'+
+    '</div>';
+  }
+
+  function renderFullResults(q){
+    if(!chatLog)return;
+    if(!window.TAQA_SEARCH_INDEX){chatLog.innerHTML=welcomeHTML;return;}
+    var results=searchDocs(q);
+    if(!results.length){ chatLog.innerHTML=renderEmptyState(q); return; }
+    var shown=results.slice(0,RESULT_CAP);
+    var bits=filterSummary();
+    var qLine=q?'"'+esc(q)+'"':'the selected filters';
+    var filterLine=bits.length?' ('+bits.map(esc).join(', ')+')':'';
+    var userBubble=q?'<div class="msg-user"><div class="bubble">'+esc(q)+'</div></div>':'';
+    chatLog.innerHTML=userBubble+
+      '<div class="msg-ai"><div class="msg-ai-avatar">✦</div><div class="bubble">'+
+      '<h4>Search Results</h4>'+
+      '<p>'+results.length+' document'+(results.length===1?'':'s')+' in the register match '+qLine+filterLine+'.'+
+      (results.length>RESULT_CAP?' Showing the first '+RESULT_CAP+'; narrow the search or add a filter for fewer, more exact matches.':'')+'</p>'+
+      '<div class="sources-block">'+
+        '<div class="sources-label">'+results.length+' Document'+(results.length===1?'':'s')+'</div>'+
+        '<div class="sources-list">'+shown.map(resultCardHTML).join('')+'</div>'+
+      '</div>'+
+      '</div></div>';
+  }
+
+  window.submitQuery=function submitQuery(){
+    var q=inp?inp.value.trim():'';
+    if(!q&&activeFilterCount()===0)return;
     if(panel)panel.classList.remove('open');
-    if(origSubmit)origSubmit();
+    if(inp){ inp.value=''; inp.style.height='auto'; }
+    var cc=document.getElementById('char-count');
+    if(cc)cc.textContent='0 / 500';
+
+    var thinking=document.getElementById('thinking-block');
+    var btn=document.getElementById('send-btn');
+    if(thinking)thinking.classList.add('active');
+    if(btn){btn.classList.add('loading');btn.disabled=true;}
+
+    // A brief, real pause: this is a register lookup, not a generated answer,
+    // so it stays short rather than pretending to think something over.
+    setTimeout(function(){
+      if(thinking)thinking.classList.remove('active');
+      if(btn){btn.classList.remove('loading');btn.disabled=false;}
+      renderFullResults(q);
+      if(chatLog)chatLog.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }, 220);
   };
+
+  // ── Filters: quick segment chips, the panel's own controls, and the drawer ──
+  function syncSegmentChips(){
+    document.querySelectorAll('.seg-filters .filter-chip[data-seg]').forEach(function(c){
+      c.classList.toggle('active', c.getAttribute('data-seg')===FILTERS.segment);
+    });
+  }
+  window.setSegmentFilter=function(segId){
+    FILTERS.segment=segId;
+    if(segSelect)segSelect.value=segId;
+    syncSegmentChips();
+    handleFilterChange();
+  };
+  document.querySelectorAll('.seg-filters .filter-chip[data-seg]').forEach(function(chip){
+    chip.addEventListener('click',function(){ window.setSegmentFilter(chip.getAttribute('data-seg')); });
+  });
+
+  function handleFilterChange(){
+    updateFilterBadge();
+    var q=inp?inp.value.trim():'';
+    renderPreview(q);
+    if(q||activeFilterCount()>0){ renderFullResults(q); }
+    else if(chatLog){ chatLog.innerHTML=welcomeHTML; }
+  }
+
+  if(segSelect)segSelect.addEventListener('change',function(){FILTERS.segment=segSelect.value;syncSegmentChips();handleFilterChange();});
+  if(typeSelect)typeSelect.addEventListener('change',function(){FILTERS.type=typeSelect.value;handleFilterChange();});
+  if(statusSelect)statusSelect.addEventListener('change',function(){FILTERS.status=statusSelect.value;handleFilterChange();});
+  if(dateFromInput)dateFromInput.addEventListener('change',function(){FILTERS.dateFrom=dateFromInput.value;handleFilterChange();});
+  if(dateToInput)dateToInput.addEventListener('change',function(){FILTERS.dateTo=dateToInput.value;handleFilterChange();});
+
+  window.clearAllFilters=function(){
+    FILTERS={segment:'all',status:'all',type:'all',dateFrom:'',dateTo:''};
+    if(segSelect)segSelect.value='all';
+    if(typeSelect)typeSelect.value='all';
+    if(statusSelect)statusSelect.value='all';
+    if(dateFromInput)dateFromInput.value='';
+    if(dateToInput)dateToInput.value='';
+    syncSegmentChips();
+    updateFilterBadge();
+    var q=inp?inp.value.trim():'';
+    renderPreview(q);
+    if(q){ renderFullResults(q); }
+    else if(chatLog){ chatLog.innerHTML=welcomeHTML; }
+  };
+
+  window.openFilters=function(){
+    if(drawer)drawer.classList.add('open');
+    if(scrim)scrim.classList.add('open');
+    if(triggerBtn)triggerBtn.setAttribute('aria-expanded','true');
+  };
+  window.closeFilters=function(){
+    if(drawer)drawer.classList.remove('open');
+    if(scrim)scrim.classList.remove('open');
+    if(triggerBtn)triggerBtn.setAttribute('aria-expanded','false');
+  };
+  window.toggleFilters=function(){
+    if(drawer&&drawer.classList.contains('open'))window.closeFilters();
+    else window.openFilters();
+  };
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape')window.closeFilters();
+  });
+
+  syncSegmentChips();
+  updateFilterBadge();
+
+  // A prefilled query (?q=) can only run now that submitQuery is real.
+  if(typeof urlQ!=='undefined'&&urlQ){
+    if(inp)inp.value=urlQ;
+    setTimeout(window.submitQuery,300);
+  }
 })();
 </script>
 <script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary-ink);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#C8102E;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-taqa-theme="dark"] .bell-badge{border-color:#002326;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>

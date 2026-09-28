@@ -56,7 +56,9 @@ var TAQA_SEARCH_INDEX = [];
         sn: segName(d.segment),
         n:  d.docNumber || null,   // so a result can be traced to one record
         st: d.status,              // so a draft never reads as a live document
-        rev: d.revision || null
+        rev: d.revision || null,
+        iss: d.issueDate || null,  // so search can filter by an issued date range
+        ov: !!d.reviewOverdue      // so search can filter to reviews overdue now
       });
     }
     /* Replace in place. ai-search.html and viewer.html captured this array
