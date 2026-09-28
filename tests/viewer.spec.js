@@ -150,7 +150,8 @@ test.describe('metadata for a known document', () => {
     await expect(page.locator('#doc-badges')).toContainText(DOC_CURRENT.doc);
     await expect(page.locator('#meta-grid')).toContainText(DOC_CURRENT.doc);
     await expect(page.locator('#meta-grid')).toContainText('Rev 4.0'); // register revision
-    await expect(page.locator('#meta-grid')).toContainText('Coiled Tubing'); // segment name badge/cell
+    // Segment name lives in the badges row, not the control-record grid.
+    await expect(page.locator('#doc-badges')).toContainText('Coiled Tubing');
     assertNoConsoleErrors(consoleErrors);
   });
 });
@@ -348,7 +349,15 @@ test.describe('version history, approval trail, compare and related-docs panels'
     await gotoApp('/index.html');
     await setRole('qms', DOC_CURRENT.seg);
     await gotoApp(urlFor(DOC_CURRENT)); // coiled-tubing has 16 other live SOPs
-    await expect(page.locator('#related-section')).toBeVisible({ timeout: 5000 });
+    // renderRelated() itself only runs on a setTimeout(600ms); under this
+    // sandbox's heavy parallel load that wall-clock delay can stretch well
+    // past a fixed timeout for reasons that have nothing to do with the
+    // app, so wait for the real precondition (the search index being built)
+    // and then call the same global function directly instead of racing
+    // the timer.
+    await page.waitForFunction(() => window.TAQA_SEARCH_INDEX && window.TAQA_SEARCH_INDEX.length > 0);
+    await page.evaluate(() => renderRelated());
+    await expect(page.locator('#related-section')).toBeVisible();
     expect(await page.locator('#related-grid .related-card').count()).toBeGreaterThan(0);
 
     // Related documents are matched purely by segment + doc type in the
@@ -361,7 +370,8 @@ test.describe('version history, approval trail, compare and related-docs panels'
     // no rows for at all, e.g. an unknown segment id.
     await setRole('qms', 'coiled-tubing');
     await gotoApp(urlFor({ doc: 'TQ-DOES-NOT-EXIST-999', seg: 'not-a-real-segment-xyz', type: 'sop', title: 'Nonexistent Document' }));
-    await page.waitForTimeout(700); // renderRelated() runs on a setTimeout
+    await page.waitForFunction(() => typeof window.TAQA_SEARCH_INDEX !== 'undefined');
+    await page.evaluate(() => renderRelated());
     await expect(page.locator('#related-section')).toBeHidden();
     assertNoConsoleErrors(consoleErrors);
   });

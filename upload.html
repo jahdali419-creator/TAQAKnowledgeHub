@@ -991,14 +991,23 @@ function submitUpload(e) {
 
   setUploadStep(3);
   const ref = rec.docNumber;
-  // showUploadToast() sets toast-sub's textContent, which wipes the #upload-ref
-  // span inside it. After any earlier toast, "File Added" for instance, this
-  // line threw and the submit died halfway. Write the sub line directly.
-  var refEl = document.getElementById('upload-ref');
-  if (refEl) refEl.textContent = ref;
+  // showUploadToast() sets toast-sub's textContent wholesale, which wipes out
+  // the #upload-ref span nested inside it. Writing the sub line directly here
+  // used to have the exact same problem: setting toast-sub.textContent to a
+  // whole new string destroyed the #upload-ref span the line right above it
+  // had just filled in, leaving the toast readable but #upload-ref gone from
+  // the DOM. Composed from text nodes instead, so the span (and its id)
+  // survives every submission, not just the first line that touches it.
   document.getElementById('toast-title').textContent = 'Submitted for review';
-  document.getElementById('toast-sub').textContent =
-    'Queued as ' + ref + '. In the register now, in force once QMS approves.';
+  var toastSub = document.getElementById('toast-sub');
+  if (toastSub) {
+    toastSub.textContent = 'Queued as ';
+    var refEl = document.createElement('span');
+    refEl.id = 'upload-ref';
+    refEl.textContent = ref;
+    toastSub.appendChild(refEl);
+    toastSub.appendChild(document.createTextNode('. In the register now, in force once QMS approves.'));
+  }
   document.getElementById('toast-icon').innerHTML = ICON_OK;
   const toast = document.getElementById('toast');
   toast.classList.add('show');
