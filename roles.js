@@ -221,6 +221,43 @@ const TAQA_ROLE = {
   }
 };
 
+/* A page that belongs to a role nobody else holds refuses at the door, the
+   same way the Master List does. Hiding the link is not enough: the address
+   can be typed. In Azure it is the API that declines; this states the same
+   rule where it can be seen. Replaces the page and stops it, so nothing
+   below runs against a document that has just been emptied. */
+TAQA_ROLE.refuse = function(title, why){
+  var who = (TAQA_ROLES[TAQA_ROLE.current()] || {}).label || 'your role';
+  var dark = false;
+  try { dark = localStorage.getItem('taqa-theme-v3') === 'dark'; } catch(e){}
+  var ink = dark ? '#C7DBDD' : '#1E1C1A', mute = dark ? '#8CB6B9' : '#524D48',
+      bg = dark ? '#001314' : '#F4F4F3', line = dark ? '#00484B' : '#BEB8B2',
+      teal = dark ? '#00BBB6' : '#005D63';
+  var e = function(t){ return String(t).replace(/[&<>"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  document.documentElement.setAttribute('data-taqa-theme', dark ? 'dark' : 'light');
+  document.body.innerHTML =
+    '<main style="max-width:620px;margin:16vh auto;padding:0 24px;text-align:center;font-family:Inter,system-ui,sans-serif">' +
+      '<h1 style="font-family:BwGradual,Urbanist,sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.3px;margin:0 0 12px;color:' + ink + '">' + e(title) + '</h1>' +
+      '<p style="font-size:14px;line-height:1.7;color:' + mute + ';margin:0 0 10px">' + e(why) +
+        ' You are signed in as <b style="color:' + ink + '">' + e(who) + '</b>.</p>' +
+      '<p style="font-size:14px;line-height:1.7;color:' + mute + ';margin:0 0 24px">Every document you need is still open to you, and each one tells you whether it is current before you use it.</p>' +
+      '<a href="ai-search.html" style="display:inline-block;font-size:13.5px;font-weight:600;color:#fff;background:#005D63;border-radius:9px;padding:11px 22px;text-decoration:none;margin:0 4px 8px">Search the documents</a>' +
+      '<a href="index.html" style="display:inline-block;font-size:13.5px;font-weight:600;color:' + teal + ';border:1px solid ' + line + ';border-radius:9px;padding:11px 22px;text-decoration:none;margin:0 4px 8px">Home</a>' +
+    '</main>';
+  document.body.style.background = bg;
+  if (window.stop) window.stop();
+};
+
+/* May this person manage an area's desk: its queue, contributors and
+   published list? The holder of that area, or QMS for every area. An
+   auditor reads the register instead; an employee has no desk. */
+TAQA_ROLE.canManage = function(areaId){
+  var cap = TAQA_ROLE.effective();
+  if (!cap.editMetadata) return false;
+  return cap.scope === 'all' || !areaId || areaId === cap.ownSegment;
+};
+
 if (typeof module !== 'undefined' && module.exports)
   module.exports = { TAQA_ROLES, TAQA_ROLE, TAQA_ROLE_ORDER, TAQA_DEFAULT_ROLE };
 

@@ -314,6 +314,21 @@ function toggleDark(){const isDark=document.documentElement.getAttribute('data-t
 document.addEventListener('click',function(e){const a=e.target.closest('a[href]');if(!a)return;const h=a.getAttribute('href');if(!h||h.startsWith('#')||h.startsWith('http')||h.startsWith('mailto'))return;if(a.target==='_blank')return;e.preventDefault();document.body.classList.add('page-exit');setTimeout(()=>window.location.href=h,270);});
 </script>
 <script src="roles.js"></script>
+<script>
+/* Usage analytics are for the people who run the register. QMS may clear
+   them; an auditor reads them. */
+(function(){
+  if (typeof TAQA_ROLE === 'undefined') return;
+  if (!TAQA_ROLE.canRegister()) {
+    TAQA_ROLE.refuse('Usage analytics are for the register’s owners',
+      'This page shows how the Hub is used across the company and is open to QMS and to auditors.');
+    return;
+  }
+  if (!TAQA_ROLE.effective().editMetadata) {
+    var b = document.querySelector('.clear-data-btn'); if (b) b.remove();
+  }
+})();
+</script>
 <script src="documents-master.js"></script>
 <script src="store.js"></script>
 <script src="shared.js"></script>

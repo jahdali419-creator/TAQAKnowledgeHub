@@ -238,15 +238,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   background:rgba(0,93,99,0.1);border:1px solid rgba(0,93,99,0.18);color:var(--primary-ink);}
 
 /* ── Toast ── */
-.toast{position:fixed;bottom:32px;right:32px;z-index:9999;
+/* Its own class: the site-wide .toast in shared.js animates itself in on
+   load, which put "Upload Submitted! Ref: --" on screen before anything
+   had been uploaded. */
+.up-toast{position:fixed;bottom:32px;right:32px;z-index:9999;
   background:var(--dark-3);border:1px solid rgba(0,187,182,0.3);border-radius:14px;
   padding:18px 24px;display:flex;align-items:center;gap:14px;
   box-shadow:0 12px 40px rgba(0,0,0,0.5);min-width:320px;
   transform:translateY(100px);opacity:0;transition:all 0.4s cubic-bezier(.4,0,.2,1);}
-.toast.show{transform:translateY(0);opacity:1;}
-.toast-icon{display:flex;align-items:center;flex-shrink:0;}
-.toast strong{font-family:'BwGradual','Urbanist',sans-serif;font-size:14px;display:block;margin-bottom:3px;}
-.toast small{font-size:12px;color:var(--text-muted);}
+.up-toast.show{transform:translateY(0);opacity:1;}
+.up-toast .toast-icon{display:flex;align-items:center;flex-shrink:0;}
+.up-toast strong{font-family:'BwGradual','Urbanist',sans-serif;font-size:14px;display:block;margin-bottom:3px;}
+.up-toast small{font-size:12px;color:var(--text-muted);}
 
 footer{border-top:none;padding:0;background:transparent;position:relative;margin-top:auto;height:4px;}
 footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#005D63;}
@@ -792,7 +795,7 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
 </div>
 
 <!-- ── Toast ── -->
-<div class="toast" id="toast">
+<div class="up-toast" id="toast" role="status" aria-live="polite">
   <span class="toast-icon" id="toast-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="rgba(0,187,182,0.15)" stroke="#00BBB6" stroke-width="1.5"/><path d="M7 11l3 3 5-5" stroke="#00BBB6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
   <div>
     <strong id="toast-title">Upload Submitted!</strong>

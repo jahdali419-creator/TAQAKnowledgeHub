@@ -714,6 +714,15 @@ html[data-taqa-theme="dark"] .dash-unknown{background:#002326;border-color:#0048
 
 <script src="documents-master.js"></script>
 <script src="roles.js"></script>
+<script>
+/* This desk belongs to the holder of the area, or QMS. See TAQA_ROLE.refuse. */
+(function(){
+  if (typeof TAQA_ROLE === 'undefined') return;
+  var id = new URLSearchParams(location.search).get('id') || TAQA_ROLE.area();
+  if (TAQA_ROLE.canManage(id)) return;
+  TAQA_ROLE.refuse("Managing an area is its director\u2019s desk", "The control panel approves, delegates and names contributors for one area. It is open to the holder of that area and to QMS.");
+})();
+</script>
 <script src="store.js"></script>
 <script src="segments-data.js"></script>
 <script>

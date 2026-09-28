@@ -402,6 +402,15 @@ html[data-taqa-theme="dark"] .pub-table-footer{border-color:#003A3D;background:r
 
 <script src="documents-master.js"></script>
 <script src="roles.js"></script>
+<script>
+/* This desk belongs to the holder of the area, or QMS. See TAQA_ROLE.refuse. */
+(function(){
+  if (typeof TAQA_ROLE === 'undefined') return;
+  var id = new URLSearchParams(location.search).get('id') || TAQA_ROLE.area();
+  if (TAQA_ROLE.canManage(id)) return;
+  TAQA_ROLE.refuse("This list is the area manager\u2019s view", "Published documents can be withdrawn from here, so it is open to the holder of the area and to QMS.");
+})();
+</script>
 <script src="store.js"></script>
 <script src="segments-data.js"></script>
 <script>
