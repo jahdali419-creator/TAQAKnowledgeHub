@@ -133,6 +133,31 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .action-result.approved-txt{color:var(--primary-ink);}
 .action-result.rejected-txt{color:var(--stop-ink);}
 
+/* ── Reject reason modal ── */
+.reject-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:3000;
+  display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.reject-modal-overlay.open{display:flex;}
+.reject-modal{background:var(--bg-white);border-radius:16px;padding:28px;width:100%;max-width:440px;
+  box-shadow:0 24px 64px rgba(0,0,0,0.2);}
+.reject-modal h3{font-family:'BwGradual','Urbanist',sans-serif;font-size:17px;font-weight:800;
+  color:var(--text);margin-bottom:4px;}
+.reject-modal-doc-name{font-size:12.5px;color:var(--text-muted);margin-bottom:14px;font-style:italic;}
+.reject-modal p{font-size:13px;color:var(--text-muted);margin-bottom:18px;}
+.reject-reason-input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;
+  font-size:13.5px;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg-white);
+  outline:none;resize:vertical;min-height:90px;transition:border-color 0.2s;}
+.reject-reason-input:focus{border-color:var(--stop-ink,#C8102E);box-shadow:0 0 0 3px rgba(200,16,46,0.1);}
+.reject-reason-input.error{border-color:var(--stop-ink,#C8102E) !important;}
+.reject-char-hint{font-size:11px;color:var(--text-muted);margin-top:4px;}
+.reject-modal-actions{display:flex;gap:10px;margin-top:20px;}
+.btn-reject-confirm{flex:1;padding:11px;border-radius:10px;background:var(--stop-ink,#C8102E);
+  color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:'Inter',sans-serif;
+  transition:opacity 0.2s;}
+.btn-reject-confirm:hover{opacity:0.88;}
+.btn-reject-confirm:disabled{opacity:0.45;cursor:not-allowed;}
+.btn-reject-cancel{padding:11px 20px;border-radius:10px;background:transparent;border:1px solid var(--border);
+  color:var(--text-muted);font-size:14px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;}
+
 /* ── Published Docs Link Card ── */
 .pub-docs-link-card{background:var(--bg-white);border:1px solid var(--border);border-radius:var(--radius);
   padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
@@ -1064,25 +1089,25 @@ function initDashboard() {
       const simPanel = simDocs.length ? `
         <div class="dup-sim-panel">
           <div class="dup-sim-hd"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Similar documents already in this segment</div>
-          ${simDocs.map(d=>`<div class="dup-sim-item"><div class="dup-sim-bar-wrap"><div class="dup-sim-bar" style="width:${Math.round(d.score*100)}%"></div></div><div class="dup-sim-title" title="${d.title}">${d.title}</div><span class="dup-sim-pct">${Math.round(d.score*100)}% match</span></div>`).join('')}
+          ${simDocs.map(d=>`<div class="dup-sim-item"><div class="dup-sim-bar-wrap"><div class="dup-sim-bar" style="width:${Math.round(d.score*100)}%"></div></div><div class="dup-sim-title" title="${esc(d.title)}">${esc(d.title)}</div><span class="dup-sim-pct">${Math.round(d.score*100)}% match</span></div>`).join('')}
         </div>` : '';
       const exactBanner = p.isExactDup ? `
         <div class="dup-exact-banner"><span class="dup-exact-badge">EXACT DUPLICATE</span><span class="dup-exact-txt">File fingerprint matches a document already published in this segment. Verify before approving.</span></div>` : '';
       const supersRow = p.supersedes ? `
-        <div class="supersedes-row"><span class="supersedes-label">Replaces →</span><span class="supersedes-doc-title" title="${p.supersedes}">${p.supersedes}</span></div>` : '';
+        <div class="supersedes-row"><span class="supersedes-label">Replaces →</span><span class="supersedes-doc-title" title="${esc(p.supersedes)}">${esc(p.supersedes)}</span></div>` : '';
       // Every type reads the same calm way except an alert, which is an
       // operational warning and keeps the warm ink.
       const typeCls = 'pending-doc-type' + (/alert/i.test(p.type || '') ? ' type-alert' : '');
       const docTypeLabel = p.docId
-        ? `<div class="${typeCls}">${p.type} &nbsp;<span style="font-family:monospace;font-size:9.5px;font-weight:600;">${p.docId}</span></div>`
-        : `<div class="${typeCls}">${p.type}</div>`;
+        ? `<div class="${typeCls}">${esc(p.type)} &nbsp;<span style="font-family:monospace;font-size:9.5px;font-weight:600;">${esc(p.docId)}</span></div>`
+        : `<div class="${typeCls}">${esc(p.type)}</div>`;
       return `
       <div class="pending-card${p.isExactDup?' dup-flagged':''}" id="pcard-${i+1}">
         <div class="pending-card-top">
           <div class="pending-doc-info">
             ${docTypeLabel}
-            <div class="pending-doc-title">${p.title}</div>
-            <div class="pending-doc-meta">Submitted by <strong>${p.submitter}</strong> · ${p.when} · PDF · ${p.size}</div>
+            <div class="pending-doc-title">${esc(p.title)}</div>
+            <div class="pending-doc-meta">Submitted by <strong>${esc(p.submitter)}</strong> · ${esc(p.when)} · PDF · ${esc(p.size)}</div>
           </div>
           <span class="pending-status-badge badge-pending">Awaiting Review</span>
         </div>
@@ -1174,7 +1199,7 @@ function initDashboard() {
       document.getElementById('dg-until').value = d14;
       document.getElementById('dg-approval').checked = true;
       paintList();
-      showToast('Delegated to ' + out.delegation.to + ' until ' + out.delegation.until, '#00BBB6');
+      showDashToast('Delegated to ' + out.delegation.to + ' until ' + out.delegation.until, '#00BBB6');
     });
 
     paintList();
@@ -1226,7 +1251,12 @@ function initDashboard() {
 
 initDashboard();
 
-function showToast(msg, color) {
+// Named distinctly: shared.js defines its own window.showToast(msg, type),
+// which loads after this script and would otherwise silently overwrite this
+// page's colored-dot version, so every call here ended up hitting the
+// generic toast with a hex color string passed as its class-keyword
+// argument, and the colored dot never rendered.
+function showDashToast(msg, color) {
   const t = document.getElementById('dash-toast');
   const dot = t.querySelector('.dash-toast-dot');
   document.getElementById('dash-toast-msg').textContent = msg;
@@ -1271,10 +1301,116 @@ function approveDoc(id) {
   pendingCount = Math.max(0, pendingCount - 1);
   document.getElementById('stat-pending').textContent = pendingCount;
   document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
-  showToast(stage === 'qms'
+  showDashToast(stage === 'qms'
     ? 'Checked, sent on for the Director\'s final approval'
     : 'Document approved and published to segment', '#00BBB6');
   updateBellCount(-1);
+}
+
+// A reason is mandatory: the submitter has to know exactly what to fix
+// before resubmitting, and QMS needs a record of why a document was turned
+// back. Rejection only actually happens from the modal's confirm handler,
+// never here, so there is exactly one place that touches the store and the
+// counters, and cancelling the modal truly cancels the reject.
+let rejectTarget = null;
+let rejectOverlay = null, rejectInput = null, rejectConfirm = null, rejectCount = null, rejectDocName = null;
+
+function ensureRejectModal() {
+  if (rejectOverlay) return;
+  rejectOverlay = document.createElement('div');
+  rejectOverlay.className = 'reject-modal-overlay';
+  rejectOverlay.setAttribute('role', 'dialog');
+  rejectOverlay.setAttribute('aria-modal', 'true');
+  rejectOverlay.setAttribute('aria-labelledby', 'reject-modal-title');
+  rejectOverlay.innerHTML =
+    '<div class="reject-modal">' +
+      '<h3 id="reject-modal-title">Reject Document</h3>' +
+      '<p class="reject-modal-doc-name" id="reject-modal-doc-name"></p>' +
+      '<p>Provide a clear reason so the submitter knows exactly what to fix before resubmitting.</p>' +
+      '<textarea class="reject-reason-input" id="reject-reason-input" aria-label="Reason for rejection" ' +
+        'placeholder="e.g. Section 4.2 is incomplete, scope of application missing. Please revise and resubmit." ' +
+        'maxlength="500"></textarea>' +
+      '<div class="reject-char-hint"><span id="reject-char-count">0</span> / 500 characters (minimum 20 required)</div>' +
+      '<div class="reject-modal-actions">' +
+        '<button type="button" class="btn-reject-cancel" id="reject-modal-cancel">Cancel</button>' +
+        '<button type="button" class="btn-reject-confirm" id="reject-modal-confirm" disabled>Reject &amp; Notify</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(rejectOverlay);
+
+  rejectInput = document.getElementById('reject-reason-input');
+  rejectConfirm = document.getElementById('reject-modal-confirm');
+  rejectCount = document.getElementById('reject-char-count');
+  rejectDocName = document.getElementById('reject-modal-doc-name');
+
+  rejectInput.addEventListener('input', function () {
+    const len = this.value.trim().length;
+    rejectCount.textContent = this.value.length;
+    rejectConfirm.disabled = len < 20;
+    this.classList.toggle('error', len > 0 && len < 20);
+  });
+
+  function closeRejectModal() {
+    rejectOverlay.classList.remove('open');
+    rejectInput.value = '';
+    rejectCount.textContent = '0';
+    rejectConfirm.disabled = true;
+    rejectInput.classList.remove('error');
+    const openedBy = rejectTarget && rejectTarget.openedBy;
+    rejectTarget = null;
+    if (openedBy) openedBy.focus();
+  }
+
+  document.getElementById('reject-modal-cancel').addEventListener('click', closeRejectModal);
+  rejectOverlay.addEventListener('click', function (e) {
+    if (e.target === rejectOverlay) closeRejectModal();
+  });
+  rejectOverlay.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeRejectModal();
+  });
+
+  rejectConfirm.addEventListener('click', function () {
+    if (!rejectTarget) return;
+    const { id, card, badge, result, actions, storeDoc } = rejectTarget;
+    const reason = rejectInput.value.trim();
+    if (reason.length < 20) return;
+
+    if (storeDoc && typeof TAQA_STORE !== 'undefined') {
+      const out = TAQA_STORE.reject(storeDoc, reason);
+      if (!out || !out.ok) {
+        showDashToast('✕ ' + ((out && out.error) || 'Could not reject this document.'), '#FF8A94');
+        closeRejectModal();
+        return;
+      }
+    }
+
+    badge.className = 'pending-status-badge badge-rejected';
+    badge.textContent = 'Rejected';
+    card.classList.add('rejected');
+    actions.querySelector('.btn-approve').disabled = true;
+    actions.querySelector('.btn-reject').disabled = true;
+    actions.querySelector('.btn-approve').style.opacity = '0.4';
+    actions.querySelector('.btn-reject').style.opacity = '0.4';
+    result.textContent = '✕ Rejected, reason sent to submitter';
+    result.className = 'action-result show rejected-txt';
+
+    const reasonEl = document.createElement('div');
+    reasonEl.style.cssText = 'font-size:12px;color:var(--stop-ink,#C8102E);background:rgba(200,16,46,0.05);' +
+      'border:1px solid rgba(200,16,46,0.15);border-radius:8px;padding:8px 12px;margin-top:10px;line-height:1.5;';
+    const strongEl = document.createElement('strong');
+    strongEl.textContent = 'Rejection reason: ';
+    reasonEl.appendChild(strongEl);
+    reasonEl.appendChild(document.createTextNode(reason));
+    card.appendChild(reasonEl);
+
+    pendingCount = Math.max(0, pendingCount - 1);
+    document.getElementById('stat-pending').textContent = pendingCount;
+    document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
+    showDashToast('Document rejected, submitter will be notified', '#FF8A94');
+    updateBellCount(-1);
+
+    closeRejectModal();
+  });
 }
 
 function rejectDoc(id) {
@@ -1282,20 +1418,17 @@ function rejectDoc(id) {
   const badge = card.querySelector('.pending-status-badge');
   const result = document.getElementById('result-' + id);
   const actions = card.querySelector('.pending-actions');
-  badge.className = 'pending-status-badge badge-rejected';
-  badge.textContent = 'Rejected';
-  card.classList.add('rejected');
-  actions.querySelector('.btn-approve').disabled = true;
-  actions.querySelector('.btn-reject').disabled = true;
-  actions.querySelector('.btn-approve').style.opacity = '0.4';
-  actions.querySelector('.btn-reject').style.opacity = '0.4';
-  result.textContent = '✕ Returned to submitter';
-  result.className = 'action-result show rejected-txt';
-  pendingCount = Math.max(0, pendingCount - 1);
-  document.getElementById('stat-pending').textContent = pendingCount;
-  document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
-  showToast('Document rejected, submitter will be notified', '#FF8A94');
-  updateBellCount(-1);
+  const btn = actions.querySelector('.btn-reject');
+  const title = btn.dataset.docTitle || card.querySelector('.pending-doc-title')?.textContent || 'this document';
+
+  ensureRejectModal();
+  rejectTarget = { id, card, badge, result, actions, storeDoc: btn.dataset.storeDoc, openedBy: btn };
+  rejectDocName.textContent = '"' + title + '"';
+  rejectInput.value = '';
+  rejectCount.textContent = '0';
+  rejectConfirm.disabled = true;
+  rejectOverlay.classList.add('open');
+  rejectInput.focus();
 }
 
 const ROLE_HINTS = {
@@ -1350,7 +1483,7 @@ function addContributor() {
   list.insertBefore(newRow, list.lastElementChild);
   setTimeout(() => newRow.style.opacity = '1', 30);
   closeAddContributor();
-  showToast(name + ' added as ' + role, '#00BBB6');
+  showDashToast(name + ' added as ' + role, '#00BBB6');
 }
 
 // The bell counts the real queue (shared.js), so a decision just re-reads it.
@@ -1359,7 +1492,6 @@ function updateBellCount() {
 }
 </script>
 <script src="shared.js"></script>
-<script src="fixes.js"></script>
 <script>
 (function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--border,rgba(0,0,0,0.08));background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:rgba(0,93,99,0.06);border-color:rgba(0,93,99,0.3);color:var(--primary-ink);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#C8102E;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-taqa-theme="dark"] .bell-badge{border-color:#002326;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();
 </script>

@@ -389,6 +389,12 @@ html[data-taqa-theme="dark"] .pub-table-footer{border-color:#003A3D;background:r
 <script src="store.js"></script>
 <script src="segments-data.js"></script>
 <script>
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
 const PREVIEW_COUNT = 25;
 let pubActiveFilter = 'all';
 let pubSortCol = null;
@@ -455,17 +461,17 @@ function renderPubTable(docs, tl) {
   const tc = { sop:'pub-type-sop', manual:'pub-type-manual', policy:'pub-type-policy', alert:'pub-type-alert', lesson:'pub-type-lesson' };
   const ri = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>`;
   document.getElementById('pub-docs-body').innerHTML = docs.map(d =>
-    `<tr data-type="${d.type}">
-      <td class="pub-doc-title" title="${d.num ? d.num + '  ' : ''}${d.title}">
-        ${d.num ? `<span class="pdt-num">${d.num}</span>` : ''}
-        <span class="pdt-t">${d.title}</span>
+    `<tr data-type="${esc(d.type)}">
+      <td class="pub-doc-title" title="${d.num ? esc(d.num) + '  ' : ''}${esc(d.title)}">
+        ${d.num ? `<span class="pdt-num">${esc(d.num)}</span>` : ''}
+        <span class="pdt-t">${esc(d.title)}</span>
       </td>
-      <td><span class="pub-doc-type-badge ${tc[d.type]||'pub-type-sop'}">${d.kind==='policy'?'Policy':(tl[d.type]||d.type)}</span></td>
-      <td class="pub-table-date">${d.date}</td>
+      <td><span class="pub-doc-type-badge ${tc[d.type]||'pub-type-sop'}">${d.kind==='policy'?'Policy':esc(tl[d.type]||d.type)}</span></td>
+      <td class="pub-table-date">${esc(d.date)}</td>
       <td class="pub-table-status" data-late="${d.late}">${d.late > 0
         ? `<span class="pub-status pub-status-warn">Review overdue, ${d.late < 60 ? d.late + (d.late === 1 ? ' day' : ' days') : Math.floor(d.late / 30.44) + ' months'}</span>`
         : `<span class="pub-status pub-status-ok">Current</span>`}</td>
-      <td><button class="pub-remove-btn" data-num="${d.num}" aria-label="Withdraw ${d.title}" ${d.num ? '' : 'disabled title="No document number assigned yet"'} onclick="removeDoc(this)">${ri}<span>Withdraw</span></button></td>
+      <td><button class="pub-remove-btn" data-num="${esc(d.num)}" aria-label="Withdraw ${esc(d.title)}" ${d.num ? '' : 'disabled title="No document number assigned yet"'} onclick="removeDoc(this)">${ri}<span>Withdraw</span></button></td>
     </tr>`
   ).join('');
   const tot = document.getElementById('pub-total');
@@ -592,16 +598,21 @@ function removeDoc(btn) {
       'every reader will see "Withdrawn, do not use." It stays in the ' +
       'register, but leaves this list.')) return;
   const updated = TAQA_STORE.setStatus(num, 'obsolete');
-  if (!updated) { showToast('Could not withdraw this document', '#C8102E'); return; }
+  if (!updated) { showDocsToast('Could not withdraw this document', '#C8102E'); return; }
   row.style.opacity = '0.3';
   row.style.transition = 'opacity 0.3s';
   setTimeout(() => {
     initDocPage();
-    showToast('Withdrawn. Marked obsolete in the register.');
+    showDocsToast('Withdrawn. Marked obsolete in the register.');
   }, 300);
 }
 
-function showToast(msg, color) {
+// Named distinctly: shared.js defines its own window.showToast(msg, type),
+// which loads after this script and would otherwise silently overwrite this
+// page's colored-dot version, so every call here ended up hitting the
+// generic toast with a hex color string passed as its class-keyword
+// argument, and the colored dot never rendered.
+function showDocsToast(msg, color) {
   const t = document.getElementById('dash-toast');
   const dot = t.querySelector('.dash-toast-dot');
   document.getElementById('dash-toast-msg').textContent = msg;
@@ -641,7 +652,6 @@ initDocPage();
 
 </script>
 <script src="shared.js"></script>
-<script src="fixes.js"></script>
 <script>
 (function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();
 </script>
