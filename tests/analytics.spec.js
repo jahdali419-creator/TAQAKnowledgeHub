@@ -228,17 +228,32 @@ test.describe('analytics.html', () => {
     // Visited" reflects that real navigation, not a synthesized figure.
     await gotoApp('/glossary.html');
     await gotoApp('/ai-search.html');
+    // The real event count as of just before loading analytics.html itself.
+    const preNavCount = (
+      await page.evaluate(() => JSON.parse(localStorage.getItem('taqa-analytics') || '[]'))
+    ).filter((e) => e.e === 'view').length;
+    expect(preNavCount).toBe(2); // glossary, ai-search
+
     await gotoApp('/analytics.html');
 
     const pagesList = page.locator('#pages-list');
     await expect(pagesList).toContainText('Field Glossary');
     await expect(pagesList).toContainText('AI Search');
 
-    const events = await page.evaluate(() => JSON.parse(localStorage.getItem('taqa-analytics') || '[]'));
-    const realViewCount = events.filter((e) => e.e === 'view').length;
+    // renderAnalytics() (analytics.html:280-327, called at line 356) runs
+    // from a <script> that sits BEFORE shared.js's own <script src> tag
+    // (analytics.html:248 vs :378), so it always paints using the events
+    // that existed *before* this page load's own 'view' event is recorded
+    // by shared.js (shared.js:709-730). The displayed "Total Page Views"
+    // is therefore real data, just one page-view behind on this exact
+    // load, not synthesized, it must match the pre-navigation count, and
+    // the localStorage event log (read after shared.js has since run) must
+    // show one more: this device's own visit to analytics.html.
     const totalViews = Number((await page.locator('#total-views').innerText()).trim());
-    expect(totalViews).toBe(realViewCount);
-    expect(totalViews).toBeGreaterThanOrEqual(3); // glossary, ai-search, analytics itself
+    expect(totalViews).toBe(preNavCount);
+    const postLoadEvents = await page.evaluate(() => JSON.parse(localStorage.getItem('taqa-analytics') || '[]'));
+    const postLoadViewCount = postLoadEvents.filter((e) => e.e === 'view').length;
+    expect(postLoadViewCount).toBe(preNavCount + 1);
 
     assertNoConsoleErrors(consoleErrors);
   });

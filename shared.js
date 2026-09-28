@@ -72,6 +72,10 @@
     '@media(max-width:768px){'+
       '.btn{min-height:44px!important;display:inline-flex!important;align-items:center!important;}'+
       '.annot-tool-btn{min-width:44px!important;min-height:44px!important;}'+
+      // Dashboard's approve/reject buttons carry their own classes, not
+      // .btn, so the rule above never reached them: on a phone they measured
+      // well under a comfortable tap target.
+      '.btn-approve,.btn-reject{min-height:44px!important;display:inline-flex!important;align-items:center!important;}'+
     '}';
   document.head.appendChild(s);
 })();
@@ -105,6 +109,8 @@
   var wrap=document.createElement('div');
   wrap.className='toast-wrap';
   wrap.id='toast-wrap';
+  wrap.setAttribute('role','status');
+  wrap.setAttribute('aria-live','polite');
   document.body.appendChild(wrap);
 })();
 window.showToast=function(msg,type){

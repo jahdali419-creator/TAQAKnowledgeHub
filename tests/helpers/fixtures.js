@@ -67,7 +67,18 @@ exports.test = base.test.extend({
         ({ role, area }) => {
           try {
             localStorage.setItem('taqa-demo-role', role);
-            if (window.TAQA_ROLE) {
+            // roles.js declares TAQA_ROLE as a top-level `const` in a classic
+            // <script>, which makes it an ordinary global identifier but NOT
+            // a property of `window` (unlike TAQA_STORE, which roles.js's
+            // sibling files assign explicitly via `root.TAQA_STORE = ...`).
+            // `if (window.TAQA_ROLE)` is therefore always false here, which
+            // silently skipped TAQA_ROLE.set()/setArea() below on every call:
+            // the role still appeared to switch (TAQA_ROLE.current() falls
+            // back to reading the 'taqa-demo-role' key this function also
+            // sets directly, above), but the area never did, and every
+            // segment-scoped test kept running against the default area
+            // ('coiled-tubing') no matter what `area` was passed in.
+            if (typeof TAQA_ROLE !== 'undefined') {
               TAQA_ROLE.set(role);
               if (area && TAQA_ROLE.setArea) TAQA_ROLE.setArea(area);
             }

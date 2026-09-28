@@ -15,6 +15,21 @@ const { test, expect, assertNoConsoleErrors } = require('./helpers/fixtures');
 const { computeBaseline } = require('./helpers/baseline');
 const { loadRegisterDetail } = require('./helpers/areaGroups');
 
+// index.html ships a first-visit onboarding tour (#tour-backdrop, gated on
+// localStorage['taqa-tour-done']) whose backdrop covers the whole viewport
+// and intercepts clicks until dismissed. A fresh Playwright context (and
+// clearAppState()) has no storage, so it would otherwise pop up and block
+// every click in this file. addInitScript reapplies the "done" flag on
+// every navigation this test makes, including the reload after
+// clearAppState(), so these tests exercise the real page, not the tour.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('taqa-tour-done', '1');
+    } catch (e) {}
+  });
+});
+
 test.describe('Hero', () => {
   test('renders the headline and a working search box', async ({ page, gotoApp, clearAppState }) => {
     await gotoApp('/index.html');

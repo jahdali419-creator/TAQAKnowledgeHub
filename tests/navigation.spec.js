@@ -20,8 +20,25 @@
 //    also controlPanel, but auditor holds controlPanel with neither
 //    approve nor countersign, and the code (shared.js's bell `sync()`)
 //    hides the bell for auditor. Verified by reading the code, not assumed.
+//  - index.html ships a first-visit onboarding tour (#tour-backdrop, gated
+//    on localStorage['taqa-tour-done']) whose backdrop covers the whole
+//    viewport and intercepts clicks until it is dismissed. A fresh
+//    Playwright context (and clearAppState()) has no storage, so it would
+//    otherwise pop up and block every click-based test below. Every test
+//    marks it done up front via addInitScript, which reapplies on each
+//    navigation this test makes (including the reload after
+//    clearAppState()/setRole()), so it is never testing around a popup
+//    it wasn't asked to test.
 const { test, expect, assertNoConsoleErrors } = require('./helpers/fixtures');
 const { loadRegisterDetail } = require('./helpers/areaGroups');
+
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('taqa-tour-done', '1');
+    } catch (e) {}
+  });
+});
 
 test.describe('Logo / brand link', () => {
   test('navigates to index.html from another page', async ({ page, gotoApp, clearAppState }) => {
