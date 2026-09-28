@@ -57,7 +57,13 @@ test.describe('unknown or malformed area id degrades gracefully', () => {
     // (the bug this fix replaced: an unknown id used to render as Drilling).
     await expect(page.locator('#seg-name')).toHaveText('Area not found');
     await expect(page.locator('#seg-desc')).toContainText('totally-bogus-area-xyz');
-    await expect(page.locator('title')).toHaveText(/Area not found/);
+    // page.title() rather than the <title> element locator: this sandbox's
+    // gotoApp occasionally races a phantom extra navigation (see the header
+    // comment in tests/helpers/fixtures.js), which can leave the <title>
+    // locator observing a transient empty value mid-poll even though the
+    // document's real title is already correct; page.title() reads the
+    // current title directly instead of polling the DOM node.
+    await expect.poll(() => page.title()).toMatch(/Area not found/);
 
     // The controls that only make sense for a real area (manage button, tab
     // bar, copy-link, pagination) are hidden via the seg-unknown state, not
