@@ -246,7 +246,7 @@ TAQA_ROLE.refuse = function(title, why){
       '<a href="index.html" style="display:inline-block;font-size:13.5px;font-weight:600;color:' + teal + ';border:1px solid ' + line + ';border-radius:9px;padding:11px 22px;text-decoration:none;margin:0 4px 8px">Home</a>' +
       // A preview has no sign-in, so whoever is previewing needs a way to try
       // another role from here instead of going home to find the switcher.
-      '<p style="font-size:12.5px;color:' + mute + ';margin:22px 0 8px">Previewing the prototype? View this page as</p>' +
+      '<p style="font-size:12.5px;color:' + mute + ';margin:22px 0 8px">Trying a different role? View this page as</p>' +
       TAQA_ROLE_ORDER.filter(function(k){ return k !== TAQA_ROLE.current(); }).map(function(k){
         return '<button type="button" data-role="' + k + '" style="font:inherit;font-size:12.5px;font-weight:600;color:' + teal + ';background:none;border:1px solid ' + line + ';border-radius:999px;padding:8px 14px;min-height:44px;margin:0 3px 6px;cursor:pointer">' + e(TAQA_ROLES[k].label) + '</button>';
       }).join('') +

@@ -464,7 +464,7 @@ window.showToast=function(msg,type){
       });
     }
     if(canRegister && R){
-      html+='<div class="mm-label">More</div><div class="mm-main"><a href="whats-new.html"'+(onPage('whats-new.html')?' class="active" aria-current="page"':'')+'>About this prototype</a></div>';
+      html+='<div class="mm-label">More</div><div class="mm-main"><a href="whats-new.html"'+(onPage('whats-new.html')?' class="active" aria-current="page"':'')+'>About this platform</a></div>';
     }
     menu.innerHTML=html;
   }
