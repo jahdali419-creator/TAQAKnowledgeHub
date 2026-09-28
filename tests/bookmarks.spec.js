@@ -206,6 +206,14 @@ test.describe('bookmarks (topbar, shared.js, multi-page)', () => {
     await expect(page.locator('#bm-doc-btn')).toHaveAttribute('aria-pressed', 'true');
 
     await gotoApp(VIEWER_URL);
+    // updateBmBtn() only repaints this button from a `setTimeout(updateBmBtn,
+    // 300)` on load (viewer.html:1357), 150ms later than gotoApp's own
+    // settle wait (fixtures.js). expect()'s auto-retry covers that gap on
+    // its own in the normal case; this nudges past it explicitly so the
+    // assertion below is checking the steady state, not racing the paint,
+    // on this sandbox's occasionally slow navigation lifecycle (see
+    // fixtures.js's own header comment on that quirk).
+    await page.waitForTimeout(400);
     await expect(page.locator('#bm-doc-btn')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('#bm-doc-btn')).toContainText('Bookmarked');
     await expect(page.locator('#bm-cnt')).toHaveText('1');
