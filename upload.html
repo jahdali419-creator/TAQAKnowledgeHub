@@ -867,6 +867,12 @@ function showUploadToast(title, sub, iconHTML) {
 // the file picker's "All files" option both bypass.
 const ALLOWED_EXT = ['pdf','doc','docx','xls','xlsx','ppt','pptx','zip'];
 
+// The "Max file size: 500 MB per file" copy above and in the sidebar used to
+// promise a limit nothing here actually checked, so a file of any size was
+// silently accepted. Enforced here for the same reason as the extension
+// allow-list: the label is not the control.
+const MAX_FILE_SIZE_BYTES = 500 * 1024 * 1024;
+
 function extOf(name) {
   const i = String(name).lastIndexOf('.');
   return i === -1 ? '' : String(name).slice(i + 1).toLowerCase();
@@ -879,8 +885,10 @@ function unlockStep1(){
 function addFiles(files) {
   let added = 0;
   const rejected = [];
+  const oversized = [];
   files.forEach(f => {
     if (!ALLOWED_EXT.includes(extOf(f.name))) { rejected.push(f.name); return; }
+    if (f.size > MAX_FILE_SIZE_BYTES) { oversized.push(f.name); return; }
     if (selectedFiles.find(x => x.name === f.name)) return;
     selectedFiles.push(f);
     added++;
@@ -913,6 +921,11 @@ function addFiles(files) {
     showUploadToast('File type not permitted',
       rejected.length + ' file' + (rejected.length > 1 ? 's were' : ' was') +
       ' refused. Allowed: ' + ALLOWED_EXT.join(', ') + '.', ICON_WARN);
+  }
+  if (oversized.length) {
+    showUploadToast('File too large',
+      oversized.length + ' file' + (oversized.length > 1 ? 's exceed' : ' exceeds') +
+      ' the 500 MB limit and ' + (oversized.length > 1 ? 'were' : 'was') + ' not added.', ICON_WARN);
   }
 
 }
