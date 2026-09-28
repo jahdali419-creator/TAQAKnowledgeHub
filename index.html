@@ -1161,7 +1161,6 @@ html[data-taqa-theme="dark"] .section-hl-title { color:var(--text); }
   --st-cap-ink-2:#CFE3E4;             /* 5.74:1 on caprock                 */
   --st-cap-lamina:rgba(255,255,255,0.17);
   --st-gap:16px;
-  --st-numeral:44px;
   --st-ease:cubic-bezier(0.23,1,0.32,1);
   --st-top:64px;                      /* under the fixed nav               */
 }
@@ -1190,18 +1189,13 @@ html[data-taqa-theme="dark"] #focus.strata {
 /* ── The cap rock: the company policies ── */
 #focus.strata .st-cap { background:var(--st-caprock); color:var(--st-cap-ink); }
 #focus.strata .st-capbtn {
-  display:grid; grid-template-columns:var(--st-numeral) minmax(0,1fr) auto;
+  display:grid; grid-template-columns:minmax(0,1fr) auto;
   column-gap:14px; align-items:start;
   width:100%; margin:0; padding:18px var(--st-gap);
   border:0; border-radius:0; background:var(--st-caprock); color:var(--st-cap-ink);
   font:inherit; text-align:start; cursor:pointer;
   -webkit-tap-highlight-color:transparent;
   transition:background-color 160ms ease;
-}
-#focus.strata .cap-n {
-  font-family:'BwGradual','Urbanist',sans-serif; font-weight:800;
-  font-size:40px; line-height:0.84; letter-spacing:-1.6px;
-  font-variant-numeric:tabular-nums; color:var(--st-cap-ink); padding-top:3px;
 }
 #focus.strata .cap-main { display:flex; flex-direction:column; gap:5px; min-width:0; }
 #focus.strata .cap-t {
@@ -1385,15 +1379,13 @@ html[data-taqa-theme="dark"] #focus.strata {
 /* ── Wider: the same sheet. Areas sit in two columns that read down the
    first column and then the second, so the ranking stays in order. ── */
 @media (min-width:700px){
-  #focus.strata { --st-gap:22px; --st-numeral:56px; }
+  #focus.strata { --st-gap:22px; }
   #focus.strata .st-col { border-radius:14px; }
   #focus.strata .st-capbtn { padding:22px var(--st-gap) 20px; }
-  #focus.strata .cap-n { font-size:50px; letter-spacing:-2px; }
-  #focus.strata .cap-t { font-size:20px; }
+    #focus.strata .cap-t { font-size:20px; }
   #focus.strata .cap-d { font-size:13.5px; }
   #focus.strata .ch-grid {
     grid-template-columns:1fr 1fr; column-gap:28px; padding-bottom:10px;
-    padding-inline-start:calc(var(--st-gap) + var(--st-numeral) + 14px);
   }
   #focus.strata .st-head { min-height:72px; padding:16px var(--st-gap); }
   #focus.strata .st-name { font-size:20px; }
@@ -1429,7 +1421,6 @@ html[data-taqa-theme="dark"] #focus.strata {
    comes down to what the eye needs and no more.
    - The policies band floats inside the sheet with its own rounded corners
      and a gentle two-tone teal, instead of being cut off square.
-   - The 12 is set Light, so it is a quiet figure rather than a shout.
    - Lines between groups and areas are hairlines, headings a softer ink,
      and the sheet sits on a diffuse shadow rather than a hard border.
    - Chevrons sit in a faint teal disc so they read as a control, softly.
@@ -1462,10 +1453,6 @@ html[data-taqa-theme="dark"] #focus.strata .st-col {
   #focus.strata .st-capbtn:hover { background:rgba(255,255,255,0.04); }
 }
 #focus.strata .st-capbtn:active { background:rgba(0,0,0,0.06); }
-#focus.strata .cap-n {
-  font-weight:300; font-size:46px; letter-spacing:-1.5px; line-height:0.82;
-  color:#E3F0F0;                      /* 6.6:1 on the band */
-}
 #focus.strata .cap-t { font-weight:600; letter-spacing:-0.15px; }
 #focus.strata .cap-act {
   padding:6px 12px 6px 13px; border-radius:999px;
@@ -1502,7 +1489,7 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
      same round chevron as the groups below says the same thing. */
   #focus.strata .cap-act { width:30px; height:30px; padding:0; justify-content:center; }
   #focus.strata .cap-show, #focus.strata .st-capbtn[aria-expanded="true"] .cap-hide { display:none; }
-  #focus.strata .st-capbtn { grid-template-columns:auto minmax(0,1fr) 30px; }
+  #focus.strata .st-capbtn { grid-template-columns:minmax(0,1fr) 30px; }
 }
 
 /* ── Footer Credit ── */
@@ -1807,7 +1794,6 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
         <div class="st-col">
           <div class="st-cap">
             <button type="button" class="st-capbtn" id="charter" aria-expanded="false" aria-controls="charter-list">
-              <span class="cap-n" id="ch-n">…</span>
               <span class="cap-main">
                 <span class="cap-t">Company policies</span>
                 <span class="cap-d">Signed by the CEO. Every segment, function and center below follows them.</span>
@@ -2589,7 +2575,6 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
   var btn  = document.getElementById('charter'),
       pane = document.getElementById('charter-list');
   function fillCharter(company){
-    document.getElementById('ch-n').textContent = company.length;
     pane.innerHTML = '<div class="ch-grid">' + company.map(function(d){
       return '<a class="ch-row" href="viewer.html?seg=company&type=' +
                encodeURIComponent(d.docType || 'policy') +
