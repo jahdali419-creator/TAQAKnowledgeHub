@@ -1143,23 +1143,15 @@ html[data-taqa-theme="dark"] .section-hl-title { color:var(--text); }
    beds beneath it. Choosing a group opens its bed and its areas appear
    inside it, so a group and its members are visibly one body, and nothing
    is ever shown as chosen by filling it with colour. That is what ends the
-   confusion between the policies and the group you picked.
-
-   Each bed has its own rock in a narrow track at the start edge, the way a
-   mud log draws lithology: sandstone dots for service lines, limestone
-   brick for functions, shale dashes for the centres. The text carries all
-   the meaning; the texture only tells the beds apart at a glance.       */
+   confusion between the policies and the group you picked.            */
 #focus.strata {
   --st-paper:#FFFFFF;
   --st-shale:#1E1C1A;                 /* names            16.99:1 on paper */
   --st-silt:#524D48;                  /* counts, meta      8.35:1          */
   --st-clay:#756A61;                  /* lines of work     5.26:1          */
-  --st-bedding:rgba(117,106,97,0.30); /* between beds, crosses the track   */
-  --st-lamina:rgba(117,106,97,0.17);  /* between members, stops at track   */
-  --st-litho:#005D63;
-  --st-litho-a:0.5;
-  --st-rock:rgba(0,93,99,0.035);
-  --st-bore:#005D63;                  /* chevrons, ticks, open bed, focus  */
+  --st-bedding:rgba(117,106,97,0.30); /* between groups                    */
+  --st-lamina:rgba(117,106,97,0.17);  /* between areas                     */
+  --st-bore:#005D63;                  /* chevrons, open group, focus ring  */
   --st-scuff:rgba(0,93,99,0.045);
   --st-press:rgba(0,93,99,0.085);
   --st-caprock:#005D63;
@@ -1168,7 +1160,6 @@ html[data-taqa-theme="dark"] .section-hl-title { color:var(--text); }
   --st-cap-ink:#FFFFFF;               /* 7.65:1 on caprock                 */
   --st-cap-ink-2:#CFE3E4;             /* 5.74:1 on caprock                 */
   --st-cap-lamina:rgba(255,255,255,0.17);
-  --st-track:14px;
   --st-gap:16px;
   --st-numeral:44px;
   --st-ease:cubic-bezier(0.23,1,0.32,1);
@@ -1181,9 +1172,6 @@ html[data-taqa-theme="dark"] #focus.strata {
   --st-clay:#6FA7AA;                  /*  6.14:1            */
   --st-bedding:rgba(0,187,182,0.24);
   --st-lamina:rgba(0,187,182,0.12);
-  --st-litho:#00BBB6;
-  --st-litho-a:0.42;
-  --st-rock:rgba(0,187,182,0.05);
   --st-bore:#00BBB6;                  /*  6.92:1            */
   --st-scuff:rgba(0,187,182,0.06);
   --st-press:rgba(0,187,182,0.11);
@@ -1243,61 +1231,14 @@ html[data-taqa-theme="dark"] #focus.strata {
   text-decoration:none; color:var(--st-cap-ink);
   transition:background-color 140ms ease;
 }
-#focus.strata .ch-num {
-  grid-column:1; grid-row:1; min-width:0;
-  font-family:'BwGradual','Urbanist',sans-serif; font-size:11px; font-weight:700;
-  letter-spacing:0.5px; line-height:1.3; font-variant-numeric:tabular-nums;
-  color:var(--st-cap-ink-2);
-}
-#focus.strata .ch-flag {
-  grid-column:2; grid-row:1; font-size:10.5px; font-weight:700;
-  letter-spacing:0.6px; text-transform:uppercase; color:var(--st-cap-ink-2);
-}
 #focus.strata .ch-name {
-  grid-column:1 / -1; grid-row:2;
+  grid-column:1 / -1; grid-row:1; align-self:center;
   font-size:14px; font-weight:600; line-height:1.35; color:var(--st-cap-ink);
 }
 
-/* The seal: the cap rock's hatch, across the whole sheet, because the
-   policies cover every area below. */
-#focus.strata .st-seal {
-  height:7px; background-color:var(--st-litho); opacity:var(--st-litho-a);
-  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Cpath d='M-1 7L7 -1M-1 1L1 -1M5 7L7 5' stroke='%23000' stroke-width='1.1'/%3E%3C/svg%3E") repeat;
-          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Cpath d='M-1 7L7 -1M-1 1L1 -1M5 7L7 5' stroke='%23000' stroke-width='1.1'/%3E%3C/svg%3E") repeat;
-}
-
 /* ── The beds ── */
-#focus.strata .st-layer {
-  position:relative;
-  border-top:1px solid var(--st-bedding);
-  padding-inline-start:calc(var(--st-track) + 1px);
-}
-#focus.strata .st-seal + .st-layer { border-top:0; }
-#focus.strata .st-layer::before {
-  content:''; position:absolute; top:0; bottom:0; inset-inline-start:0;
-  width:var(--st-track); pointer-events:none; z-index:1;
-  background-color:var(--st-litho); opacity:var(--st-litho-a);
-  -webkit-mask-repeat:repeat; mask-repeat:repeat;
-}
-#focus.strata .st-layer::after {
-  content:''; position:absolute; top:0; bottom:0; inset-inline-start:0;
-  width:var(--st-track); pointer-events:none;
-  background:var(--st-rock);
-  border-inline-end:1px solid var(--st-bedding);
-}
-#focus.strata .st-layer[data-k="seg"]::before {
-  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='7'%3E%3Ccircle cx='1.75' cy='1.75' r='1'/%3E%3Ccircle cx='5.25' cy='5.25' r='1'/%3E%3C/svg%3E");
-          mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='7'%3E%3Ccircle cx='1.75' cy='1.75' r='1'/%3E%3Ccircle cx='5.25' cy='5.25' r='1'/%3E%3C/svg%3E");
-}
-#focus.strata .st-layer[data-k="fn"]::before {
-  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='12'%3E%3Cpath d='M0 .5h16M0 6.5h16M3.5 .5v6M11.5 .5v6M7.5 6.5v6' stroke='%23000' stroke-width='1' fill='none'/%3E%3C/svg%3E");
-          mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='12'%3E%3Cpath d='M0 .5h16M0 6.5h16M3.5 .5v6M11.5 .5v6M7.5 6.5v6' stroke='%23000' stroke-width='1' fill='none'/%3E%3C/svg%3E");
-}
-#focus.strata .st-layer[data-k="pt"]::before {
-  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8'%3E%3Cpath d='M1 2h5M8 2h5M0 6h2M4.5 6h5M12 6h2' stroke='%23000' stroke-width='1' fill='none'/%3E%3C/svg%3E");
-          mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8'%3E%3Cpath d='M1 2h5M8 2h5M0 6h2M4.5 6h5M12 6h2' stroke='%23000' stroke-width='1' fill='none'/%3E%3C/svg%3E");
-}
-
+#focus.strata .st-layer { position:relative; border-top:1px solid var(--st-bedding); }
+#focus.strata .st-cap + .st-layer { border-top:0; }
 #focus.strata .st-h { margin:0; font:inherit; }
 #focus.strata .st-head {
   display:grid; grid-template-columns:minmax(0,1fr) 20px;
@@ -1352,19 +1293,12 @@ html[data-taqa-theme="dark"] #focus.strata {
 
 #focus.strata .st-members { list-style:none; margin:0; padding:0; }
 #focus.strata .st-members li { position:relative; }
-/* Lamina lines between members stop at the track; where one meets it, a
-   short teal depth tick. Bedding lines between beds cross it. */
+/* Hairlines between areas; a firmer line between groups. */
 #focus.strata .st-members li::before {
   content:''; position:absolute; top:0; inset-inline:0 0;
   height:1px; background:var(--st-lamina); pointer-events:none;
 }
 #focus.strata .st-members li:first-child::before { display:none; }
-#focus.strata .st-members li::after {
-  content:''; position:absolute; top:0; inset-inline-start:0;
-  width:7px; height:1px; background:var(--st-bore); pointer-events:none;
-  transition:width 180ms var(--st-ease);
-}
-#focus.strata .st-members li:first-child::after { display:none; }
 #focus.strata .st-layer[data-open="true"] .st-members li {
   animation:st-emerge 280ms var(--st-ease) both;
   animation-delay:calc(var(--i, 0) * 16ms + 60ms);
@@ -1425,7 +1359,6 @@ html[data-taqa-theme="dark"] #focus.strata {
   #focus.strata .st-row:hover,
   #focus.strata .st-body .st-fold:hover { background:var(--st-scuff); }
   #focus.strata .st-layer[data-open="true"] .st-head:hover { background:transparent; }
-  #focus.strata .st-members li:hover::after { width:16px; }
   #focus.strata .st-row:hover .st-rgo svg { transform:translateX(2px); }
   [dir="rtl"] #focus.strata .st-row:hover .st-rgo svg { transform:scaleX(-1) translateX(2px); }
   #focus.strata .st-capbtn:hover { background:var(--st-caprock-worn); }
@@ -1473,8 +1406,6 @@ html[data-taqa-theme="dark"] #focus.strata {
   }
   #focus.strata .st-members li:first-child::before,
   #focus.strata .st-members li.st-top::before { display:none; }
-  /* Only the first column touches the track, so only it carries ticks. */
-  #focus.strata .st-members li.st-c2::after { display:none; }
   #focus.strata .st-members li.st-c2 .st-row::before {
     content:''; position:absolute; inset-inline-start:0; top:14px; bottom:14px;
     width:1px; background:var(--st-lamina);
@@ -1802,7 +1733,6 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
             </button>
             <div class="charter-panel" id="charter-list"></div>
           </div>
-          <div class="st-seal" aria-hidden="true"></div>
           <div id="st-beds"></div>
         </div>
       </div>
@@ -2582,9 +2512,7 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
                encodeURIComponent(d.docType || 'policy') +
                '&title=' + encodeURIComponent(d.title) +
                (d.numberStatus === 'provisional' ? '' : '&doc=' + encodeURIComponent(d.docNumber)) + '">' +
-               '<span class="ch-num">' + esc(d.docNumber) + '</span>' +
                '<span class="ch-name">' + esc(d.title) + '</span>' +
-               (d.numberStatus === 'provisional' ? '<span class="ch-flag">Number pending</span>' : '') +
              '</a>';
     }).join('') + '</div>' +
     '<button type="button" class="st-fold" data-fold="charter">' + CHEV + 'Hide the policies</button>';
