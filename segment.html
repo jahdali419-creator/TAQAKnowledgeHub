@@ -1653,6 +1653,15 @@ function docControlLine(num){
    matters, and the classification when it is anything but Internal. A row
    with neither has no meta line at all. */
 const MON_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+// An overdue review is a compliance flag, not an operating instruction: the
+// document stays in force and an employee still uses the current revision
+// exactly as before (API Q2 4.4.3 c)). Only the people who act on the flag,
+// the area's Director, QMS and an auditor, are shown it here.
+function seesComplianceState(){
+  if (typeof TAQA_ROLE === 'undefined') return true;
+  var cap = TAQA_ROLE.effective();
+  return !!(cap.editMetadata || TAQA_ROLE.canRegister());
+}
 function rowMeta(d){
   if (!d) return '';
   const bits = [];
@@ -1661,9 +1670,11 @@ function rowMeta(d){
   if (due && !isNaN(due) && !closed) {
     const late = Math.floor((Date.now() - due) / 86400000);
     if (late > 0) {
-      const how = late < 60 ? late + (late === 1 ? ' day' : ' days')
-                            : Math.floor(late / 30.44) + ' months';
-      bits.push('<span class="doc-review-late">Review overdue, ' + how + '</span>');
+      if (seesComplianceState()) {
+        const how = late < 60 ? late + (late === 1 ? ' day' : ' days')
+                              : Math.floor(late / 30.44) + ' months';
+        bits.push('<span class="doc-review-late">Review overdue, ' + how + '</span>');
+      }
     } else if (late > -45) {
       bits.push('Review due ' + MON_SHORT[due.getMonth()] + ' ' + due.getFullYear());
     }

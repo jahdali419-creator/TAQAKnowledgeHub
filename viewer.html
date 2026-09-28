@@ -952,10 +952,13 @@ if (_denied) {
     drawRecord();
     if (_narrow.addEventListener) _narrow.addEventListener('change', drawRecord);
   } else {
+    // A review running late is a flag for whoever must act on it, not an
+    // instruction to the reader: the document is still the one to use
+    // (API Q2 4.4.3 c)). An employee sees the same "Current" status a
+    // controller sees on the same document the day before it fell due.
     const st = _rec.status === 'obsolete'   ? ['stop','Withdrawn, do not use']
              : _rec.status === 'superseded' ? ['warn','Superseded']
              : _rec.status === 'draft'      ? ['info','Draft, not approved']
-             : MA.overdue(_rec)             ? ['warn','In use, review overdue']
              :                                ['ok','Current, OK to use'];
     const item = (l, v) => '<div class="mb-item"><div class="mb-label">' + l + '</div><div class="mb-val">' + (v || 'Not recorded') + '</div></div>';
     _mg.className = 'meta-grid brief';
@@ -980,7 +983,11 @@ if (_denied) {
   else if (_rec.status === 'draft')
     B.push(['draft','Draft. Not approved for use.',
       'This document has not completed approval and carries no authority. It is shown for review only.']);
-  else if (MA.overdue(_rec))
+  else if (MA.overdue(_rec) && _roleKey !== 'employee')
+    // Shown to the Director, QMS and an auditor, who can act on it. An
+    // employee still gets the obsolete, superseded, draft and provisional
+    // banners above: those change what to do with the document. This one
+    // does not; the content stays in force either way (API Q2 4.4.3 c)).
     B.push(['review','Periodic review overdue',
       'The review due on ' + _fmt(_rec.nextReviewDate) + ' has not been recorded. The content stays in force until it is withdrawn, but nobody has confirmed it is still suitable. API Q2 4.4.3 c).']);
   if (_rec.numberStatus === 'provisional')
