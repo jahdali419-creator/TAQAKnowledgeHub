@@ -59,8 +59,20 @@ const SEGMENT_URL = '/segment.html?id=coiled-tubing';
 test.describe('bookmarks (topbar, shared.js, multi-page)', () => {
   test.beforeEach(async ({ page, gotoApp, setRole, clearAppState }) => {
     await gotoApp('/index.html');
-    await setRole('qms', 'coiled-tubing');
     await clearAppState();
+    await setRole('qms', 'coiled-tubing');
+    // Unrelated to bookmarks: index.html's own first-visit product tour
+    // (index.html:1894-2080) shows a full-page backdrop until
+    // 'taqa-tour-done' is set, and clearAppState() just wiped that flag.
+    // Several tests below navigate back to index.html mid-test to check the
+    // shared bookmarks panel there, and the tour backdrop would otherwise
+    // intercept those clicks. Pre-seeding the flag is the same thing a
+    // returning visitor's browser would already have.
+    await page.evaluate(() => {
+      try {
+        localStorage.setItem('taqa-tour-done', '1');
+      } catch (e) {}
+    });
   });
 
   test('adding a bookmark from viewer.html appears in the shared panel, including when the panel is opened from a different page', async ({
@@ -228,6 +240,10 @@ test.describe('bookmarks (topbar, shared.js, multi-page)', () => {
   test('two independent browser contexts (two devices) never share bookmark state, by design', async ({
     browser,
   }, testInfo) => {
+    // Two full browser contexts and four navigations is inherently heavier
+    // than this suite's other tests; give it more room than the project's
+    // default 30s, especially under parallel workers.
+    test.setTimeout(60_000);
     const baseURL = testInfo.project.use.baseURL;
 
     const ctxA = await browser.newContext();

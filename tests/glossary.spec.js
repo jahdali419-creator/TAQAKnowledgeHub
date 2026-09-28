@@ -61,8 +61,8 @@ async function fillAddForm(page, { abbr, full, def }) {
 test.describe('glossary.html', () => {
   test.beforeEach(async ({ page, gotoApp, setRole, clearAppState }) => {
     await gotoApp('/index.html');
-    await setRole('qms', 'coiled-tubing');
     await clearAppState();
+    await setRole('qms', 'coiled-tubing');
   });
 
   test('a submitted term persists to localStorage and survives a reload', async ({

@@ -44,8 +44,8 @@ const OVERCLAIM_PATTERNS = [
 test.describe('analytics.html', () => {
   test.beforeEach(async ({ page, gotoApp, setRole, clearAppState }) => {
     await gotoApp('/index.html');
-    await setRole('qms', 'coiled-tubing');
     await clearAppState();
+    await setRole('qms', 'coiled-tubing');
   });
 
   test('role gate: a role without register access is refused with accurate, non-overclaiming copy', async ({
