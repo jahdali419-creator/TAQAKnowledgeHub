@@ -124,6 +124,37 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
    one the same green as anything else that is in order. */
 .mv-over{color:var(--warn-ink);}
 .mv-ok{color:var(--ok-ink);}
+/* The reader's view. An employee opening a procedure needs to know four
+   things: may I use it, which revision, when it was issued, and who owns
+   it. The twelve-box control record is the controller's instrument, so for
+   an employee it folds away under one line, still one tap away (ISO 9001
+   7.5.3.1 a) wants it available, not in the way). */
+.meta-grid.brief{display:block;}
+.meta-brief{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  border-top:1px solid var(--glass-border);border-bottom:1px solid var(--glass-border);}
+.mb-item{padding:14px 16px;min-width:0;}
+.mb-item:first-child{padding-inline-start:0;}
+.mb-item + .mb-item{border-inline-start:1px solid var(--glass-border);}
+.mb-label{font-size:11px;color:var(--text-muted);margin-bottom:4px;}
+.mb-val{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;font-weight:400;color:var(--text);
+  line-height:1.3;overflow-wrap:anywhere;}
+.mb-state{display:inline-flex;align-items:center;gap:7px;}
+.mb-state i{width:8px;height:8px;border-radius:50%;background:currentColor;flex:none;}
+.mb-state.ok{color:var(--ok-ink);} .mb-state.warn{color:var(--warn-ink);} .mb-state.stop{color:var(--stop-ink);} .mb-state.info{color:var(--info-ink);}
+.meta-more{margin-top:10px;}
+.meta-more>summary{list-style:none;display:inline-flex;align-items:center;gap:6px;min-height:44px;
+  font-size:13px;font-weight:600;color:var(--primary-ink);cursor:pointer;}
+.meta-more>summary::-webkit-details-marker{display:none;}
+.meta-more>summary svg{width:15px;height:15px;transition:transform .2s cubic-bezier(.23,1,.32,1);}
+.meta-more[open]>summary svg{transform:rotate(180deg);}
+.meta-more .meta-grid-in{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:6px;}
+.meta-more .meta-clause{display:none;}
+@media(max-width:768px){
+  .meta-brief{grid-template-columns:1fr 1fr;}
+  .mb-item:nth-child(3){padding-inline-start:0;border-inline-start:0;}
+  .mb-item:nth-child(n+3){border-top:1px solid var(--glass-border);}
+  .meta-more .meta-grid-in{grid-template-columns:1fr 1fr;}
+}
 .meta-cell{background:rgba(0,93,99,0.04);border:1px solid var(--glass-border);border-radius:10px;padding:12px 14px;}
 .meta-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;font-weight:600;}
 .meta-val{font-size:13px;font-weight:600;color:var(--text);}
@@ -664,7 +695,7 @@ document.getElementById('doc-title').textContent = docTitle;
 function esc(v){ return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 document.getElementById('doc-badges').innerHTML =
   '<span class="badge seg">' + segInfo.name + '</span>' +
-  '<span class="badge seg">' + segInfo.tag + '</span>' +
+  (segInfo.tag && segInfo.tag !== segInfo.name ? '<span class="badge seg">' + segInfo.tag + '</span>' : '') +
   (docId ? '<span class="badge docid">Document ID: ' + esc(docId) + '</span>' : '');
 
 // Document control block.
@@ -724,7 +755,7 @@ if (_denied) {
                     : '<span class="mv-ok">' + _fmt(_rec.nextReviewDate) + '</span>')
         : null);
   const score = MA.scoreUrl(_rec);
-  document.getElementById('meta-grid').innerHTML =
+  const fullRecord =
     cell('Document number', _rec.docNumber, 'TQ-QHSE-S001 5.3') +
     cell('Revision',        _rec.revision ? 'Rev ' + _rec.revision : null, 'API Q2 4.4.3 d)') +
     cell('Issued',          _fmt(_rec.issueDate), 'API Q2 4.4.3 d)') +
@@ -737,6 +768,31 @@ if (_denied) {
     cell('Retention',       MA.retention(_rec) ? MA.retention(_rec) + ' years' : null, 'API Q2 4.5') +
     cell('Language',        _rec.language === 'ar' ? 'العربية' : 'English', 'API Q2 4.4.3') +
     cell('Master copy',     score ? '<a href="' + score + '" rel="noopener">Open in SCORE</a>' : null, 'System of record');
+
+  // Controllers (QMS, a Director, an auditor) work from the full record.
+  // An employee gets the four answers they came for, and the rest folded.
+  const _mg = document.getElementById('meta-grid');
+  if (!_roleKey || _roleKey !== 'employee') {
+    _mg.innerHTML = fullRecord;
+  } else {
+    const st = _rec.status === 'obsolete'   ? ['stop','Withdrawn, do not use']
+             : _rec.status === 'superseded' ? ['warn','Superseded']
+             : _rec.status === 'draft'      ? ['info','Draft, not approved']
+             : MA.overdue(_rec)             ? ['warn','In use, review overdue']
+             :                                ['ok','Current, OK to use'];
+    const item = (l, v) => '<div class="mb-item"><div class="mb-label">' + l + '</div><div class="mb-val">' + (v || 'Not recorded') + '</div></div>';
+    _mg.className = 'meta-grid brief';
+    _mg.innerHTML =
+      '<div class="meta-brief">' +
+        item('Status', '<span class="mb-state ' + st[0] + '"><i aria-hidden="true"></i>' + st[1] + '</span>') +
+        item('Revision', _rec.revision ? 'Rev ' + esc(_rec.revision) : null) +
+        item('Issued', _fmt(_rec.issueDate)) +
+        item('Owner', t.owner ? esc(t.owner) : null) +
+      '</div>' +
+      '<details class="meta-more"><summary>Full control record' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg>' +
+      '</summary><div class="meta-grid-in">' + fullRecord + '</div></details>';
+  }
 
   // Lifecycle banner. Obsolete documents must not be used at the point of use.
   const B = [];
