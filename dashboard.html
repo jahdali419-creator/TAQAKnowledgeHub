@@ -17,6 +17,7 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TechHub Platform">
 <link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <title>Segment Control Panel, TAQA Knowledge Hub</title>
 <link rel="stylesheet" href="fonts/fonts.css">
 <noscript></noscript>
@@ -905,12 +906,13 @@ function animateCount(el, target, duration) {
 }
 
 function buildSimilarDocs(title, segId, limit) {
-  if (typeof TAQA_SEGMENTS === 'undefined' || !TAQA_SEGMENTS[segId]) return [];
-  const seg = TAQA_SEGMENTS[segId];
-  const allTitles = [
-    ...(seg.docs.sops||[]),...(seg.docs.manuals||[]),...(seg.docs.policies||[]),
-    ...(seg.docs.alerts||[]),...(seg.docs.lessons||[])
-  ].map(t => String(t).replace(/^⚠️\s*/,''));
+  // Was matching against TAQA_SEGMENTS[segId].docs, a hand-written list of
+  // fabricated titles left over from before the real register existed. A
+  // duplicate check run against fiction can miss a real duplicate and flag
+  // one that was never real, so this reads the actual live documents in
+  // the segment instead, the same source every other count on the page uses.
+  if (typeof TAQA_STORE === 'undefined') return [];
+  const allTitles = TAQA_STORE.rows('live', {segment: segId}).map(d => d.title);
   const stopW = new Set(['the','a','an','of','in','for','and','or','to','with','at','by','from','on','is','are','its','this','that','was','been']);
   function kw(s){return s.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(w=>w.length>2&&!stopW.has(w));}
   const wa = new Set(kw(title));

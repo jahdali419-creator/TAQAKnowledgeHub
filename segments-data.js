@@ -557,5 +557,21 @@ const TAQA_SEGMENTS = {
       policies:[],
       alerts:[], lessons:[], software:[]
     }
+  },
+  // 'company' was missing here even though TAQA_DOC_LOOKUPS.segments (the
+  // register's own lookup table, documents-master.js) has always carried
+  // it. Every page that reads this table's .name for company-wide policies
+  // (dashboard.html, documents.html) fell back to a title-cased id and
+  // showed "Company" instead of the real name below; segment.html was
+  // already reading the register's own lookup table directly and never had
+  // the bug. No fabricated document list is added: the schema, not invented
+  // titles, is the deliverable.
+  'company': {
+    name:"Company Wide", icon:'\u25A0', tag:"Policy",
+    desc:"Company wide policies, signed by the CEO. Apply to every segment, function and center.",
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    sops:0, manuals:0, policies:0, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{ sops:[], manuals:[], policies:[], alerts:[], lessons:[], software:[] }
   }
 };

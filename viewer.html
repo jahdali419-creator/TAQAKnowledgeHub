@@ -20,6 +20,7 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TechHub Platform">
 <link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="fonts/fonts.css">
 <noscript></noscript>
 <style>
@@ -898,13 +899,11 @@ document.title = docTitle + ', TAQA Knowledge Hub';
 
 // Breadcrumb
 document.getElementById('bc-seg').textContent = segInfo.name;
-// A company policy belongs to no area, so its breadcrumb goes to the register
-// rather than to segment.html?id=company, which is a page that cannot exist.
-if (segId === 'company') {
-  document.getElementById('bc-seg').href = 'master-list.html?q=' + encodeURIComponent(docId || docTitle);
-} else {
-  document.getElementById('bc-seg').href = 'segment.html?id=' + segId;
-}
+// segment.html reads every area, company policies included, from the
+// register's own lookup table (TAQA_DOC_LOOKUPS.segments), so this used to
+// route a company policy's breadcrumb to master-list.html instead, which
+// is QMS/auditor only, refusing an employee who just wanted to go back.
+document.getElementById('bc-seg').href = 'segment.html?id=' + segId;
 document.getElementById('bc-title').textContent = docTitle.length > 50 ? docTitle.slice(0,50)+'…' : docTitle;
 
 // The breadcrumb's area link is the way back, so it returns to the tab
