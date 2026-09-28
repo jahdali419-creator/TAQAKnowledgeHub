@@ -10,7 +10,7 @@
    nothing in our storage saying so. */
 try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Document Viewer, TAQA Knowledge Hub</title>
 <script src="qrcode.js"></script>
 <script src="qr.js"></script>
@@ -24,6 +24,7 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 <noscript></noscript>
 <style>
 :root{
+  --side-safe:max(env(safe-area-inset-left), env(safe-area-inset-right));
   --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
   --dark:#F4F4F3;--glass:rgba(255,255,255,0.88);--glass-2:rgba(255,255,255,0.98);
   --glass-border:rgba(0,0,0,0.08);--text:#1E1C1A;--text-muted:#524D48;
@@ -36,24 +37,18 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
      accent stays on the fill and the border beside it. */
   --stop-ink:#C8102E;--warn-ink:#8A6200;--alert-ink:#A8431A;--ok-ink:#00705F;--info-ink:#0076A8;
   --gradient:#005D63; /* flat brand teal - no gradient */
+  /* The calm sheet the home page's Explore by Discipline set: white paper,
+     hairline rules, one soft shadow, teal as the only accent. */
+  --sheet:#FFFFFF;--inset:#EDEBE8;
+  --hair:rgba(117,106,97,0.13);--hair-2:rgba(117,106,97,0.24);
+  --sheet-shadow:0 22px 44px -26px rgba(0,88,90,0.22);
+  --disc:rgba(0,93,99,0.06);--disc-2:rgba(0,93,99,0.11);
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+  --bar-h:64px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
 @keyframes pageFadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;animation:pageFadeIn 0.4s cubic-bezier(.4,0,.2,1);}
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
-  display:flex;align-items:center;justify-content:space-between;
-  background:rgba(255,255,255,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  border-bottom:1px solid var(--glass-border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
-.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
-.nav-brand-icon{width:40px;height:40px;border-radius:11px;background:var(--gradient);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  position:relative;overflow:hidden;box-shadow:0 4px 18px rgba(0,93,99,0.38);}
-.nav-brand-icon::before{content:'';position:absolute;top:-10px;left:-6px;width:32px;height:32px;background:rgba(255,255,255,0.13);border-radius:50%;}
-.nav-brand-text{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;}
-.nav-brand-name{font-weight:800;color:var(--primary-ink);}
-.nav-brand-hub{font-weight:500;color:#756A61;}
-.nav-subtitle{font-size:11px;color:var(--text-muted);display:block;margin-top:-1px;}
-.nav-right{display:flex;gap:10px;align-items:center;}
 .btn{padding:8px 18px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
   transition:all 0.25s;border:none;font-family:'Inter',sans-serif;text-decoration:none;
   display:inline-flex;align-items:center;gap:7px;}
@@ -61,10 +56,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .btn-ghost:hover{border-color:rgba(0,93,99,0.3);color:var(--primary-ink);}
 .btn-primary{background:var(--gradient);color:#fff;}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,93,99,0.4);}
-.dark-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:all 0.2s;padding:0;flex-shrink:0;}
-.dark-toggle:hover{border-color:var(--primary);color:var(--primary-ink);background:rgba(0,93,99,0.06);}
 
-.page-wrapper{padding-top:68px;min-height:100vh;display:flex;flex-direction:column;}
+.page-wrapper{padding-top:var(--nav-h,64px);min-height:100vh;display:flex;flex-direction:column;}
 
 /* Breadcrumb */
 .bc{padding:16px 48px 0;max-width:900px;margin:0 auto;width:100%;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-muted);}
@@ -77,14 +70,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .doc-view{max-width:900px;margin:0 auto;width:100%;padding:20px 48px 80px;}
 
 /* Header card */
-.doc-header{background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:20px;padding:28px 32px;margin-bottom:24px;
-  box-shadow:0 4px 24px rgba(0,0,0,0.07);}
-.doc-header-top{display:flex;align-items:flex-start;gap:18px;margin-bottom:20px;}
-.doc-type-icon-lg{width:56px;height:56px;border-radius:14px;flex-shrink:0;
+.doc-header{background:var(--sheet);border:1px solid var(--hair);border-radius:20px;padding:28px 32px 22px;margin-bottom:20px;
+  box-shadow:var(--sheet-shadow);}
+.doc-header-top{display:flex;align-items:flex-start;gap:18px;margin-bottom:22px;}
+.doc-type-icon-lg{width:52px;height:52px;border-radius:14px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-family:'BwGradual','Urbanist',sans-serif;font-size:11px;font-weight:800;letter-spacing:0.6px;text-transform:uppercase;}
+  font-family:'BwGradual','Urbanist',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;}
 .doc-header-info{flex:1;min-width:0;}
-.doc-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:22px;font-weight:800;line-height:1.25;color:var(--text);margin-bottom:10px;}
+.doc-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:24px;font-weight:700;line-height:1.25;color:var(--text);margin-bottom:10px;letter-spacing:-0.01em;}
 .doc-badges{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;}
 .badge{padding:3px 11px;border-radius:50px;font-size:11px;font-weight:600;}
 /* The word in the chip already says which type it is, so the type no longer
@@ -159,154 +152,287 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .meta-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;font-weight:600;}
 .meta-val{font-size:13px;font-weight:600;color:var(--text);}
 
-/* Action row */
-.doc-actions-row{display:flex;gap:10px;flex-wrap:wrap;}
-.doc-act-btn{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;
-  font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:7px;transition:all 0.22s;text-decoration:none;}
-.doc-act-primary{background:var(--gradient);color:#fff;border:none;box-shadow:0 4px 16px rgba(0,93,99,0.3);}
-.doc-act-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,93,99,0.4);}
-.doc-act-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--text-muted);}
-.doc-act-ghost:hover{border-color:rgba(0,93,99,0.3);color:var(--primary-ink);}
-.doc-act-bm{background:transparent;border:1px solid var(--glass-border);color:var(--text-muted);font-size:15px;}
-.doc-act-bm.on{border-color:rgba(0,93,99,0.5);color:var(--primary-ink);background:rgba(0,93,99,0.08);}
-.doc-act-bm:hover{border-color:rgba(0,93,99,0.3);color:var(--primary-ink);}
+/* Actions. One quiet row closing the header sheet on a desktop; on a phone
+   the same four controls become a bar under the thumb (see the 768px block),
+   so every id the disabling logic reaches exists exactly once. */
+.doc-foot{display:flex;align-items:center;gap:16px;margin-top:18px;padding-top:18px;border-top:1px solid var(--hair);}
+.meta-more + .doc-foot,.meta-grid.brief + .doc-foot{margin-top:6px;}
+.badge.docid{padding-inline:2px;color:var(--text-muted);font-weight:500;}
+.doc-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.act{min-height:44px;padding:0 16px;border-radius:12px;font:600 13.5px/1 'Inter',sans-serif;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;
+  background:transparent;color:var(--text);border:1px solid var(--hair-2);
+  transition:background-color .18s ease,border-color .18s ease,color .18s ease,transform .16s var(--ease-out);}
+.act svg{width:17px;height:17px;flex:none;}
+.act .act-s{display:none;}
+.act:active{transform:scale(.97);}
+@media (hover:hover){ .act:hover{background:var(--disc);border-color:rgba(0,93,99,0.28);color:var(--primary-ink);} }
+.act[aria-pressed="true"]{color:var(--primary-ink);background:var(--disc);border-color:rgba(0,93,99,0.28);}
+.act[aria-expanded="true"]{background:var(--disc-2);border-color:rgba(0,93,99,0.34);color:var(--primary-ink);}
+.act-primary{background:var(--primary);color:#fff;border-color:var(--primary);padding:0 20px;}
+@media (hover:hover){ .act-primary:hover{background:#004A4F;border-color:#004A4F;color:#fff;} }
+.act:focus-visible,.mi:focus-visible,.pop-btn:focus-visible,.related-card:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;}
+.act[disabled],.mi[disabled],.pdf-req-btn[disabled]{cursor:not-allowed;}
+.act-note{font-size:12.5px;line-height:1.5;color:var(--text-muted);margin-top:12px;}
+
+/* Share popover and More menu. Anchored under their trigger on a desktop,
+   a sheet above the action bar on a phone. */
+.pop{position:absolute;top:var(--pop-y,0);left:var(--pop-x,0);z-index:950;background:var(--sheet);border:1px solid var(--hair);border-radius:16px;
+  box-shadow:0 24px 48px -18px rgba(0,40,42,0.30),0 2px 6px rgba(0,40,42,0.06);
+  visibility:hidden;opacity:0;transform:translateY(-4px) scale(.98);transform-origin:top left;
+  transition:opacity .16s var(--ease-out),transform .16s var(--ease-out),visibility 0s linear .16s;}
+[dir="rtl"] .pop{transform-origin:top right;}
+/* Visibility switches at once on the way in (no transition on it), so focus
+   can land inside even when reduced motion shortens every transition. */
+.pop.open{visibility:visible;opacity:1;transform:none;transition:opacity .16s var(--ease-out),transform .16s var(--ease-out);}
+.share-pop{width:330px;padding:18px;}
+.pop-hd{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;}
+.share-row{display:flex;gap:14px;align-items:center;}
+/* A QR code has to be dark on light to scan, so its tile stays white in both themes. */
+.share-qr{width:112px;height:112px;flex:none;border-radius:12px;background:#fff;border:1px solid var(--hair);padding:6px;
+  display:flex;align-items:center;justify-content:center;}
+.share-qr img{width:100%;height:100%;display:block;image-rendering:pixelated;}
+.qr-error{font-size:11px;color:#524D48;text-align:center;}
+.share-cap{font-size:12.5px;line-height:1.5;color:var(--text-muted);}
+.share-link{margin-top:14px;padding:10px 12px;border-radius:10px;background:var(--inset);font-size:11.5px;line-height:1.5;color:var(--text-muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;user-select:all;-webkit-user-select:all;}
+.pop-btn{margin-top:12px;width:100%;min-height:44px;border-radius:12px;border:1px solid var(--primary);background:var(--primary);color:#fff;
+  font:600 13.5px/1 'Inter',sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;
+  transition:background-color .18s ease,transform .16s var(--ease-out);}
+.pop-btn svg{width:16px;height:16px;}
+.pop-btn:active{transform:scale(.98);}
+@media (hover:hover){ .pop-btn:hover{background:#004A4F;} }
+.menu-pop{width:248px;padding:6px;}
+.mi{width:100%;min-height:44px;display:flex;align-items:center;gap:12px;padding:0 12px;border:0;border-radius:10px;background:transparent;
+  font:500 14px/1.2 'Inter',sans-serif;color:var(--text);cursor:pointer;text-align:start;transition:background-color .15s ease;}
+.mi svg{width:17px;height:17px;flex:none;color:var(--primary-ink);}
+@media (hover:hover){ .mi:hover{background:var(--disc);} }
+.mi:focus-visible{outline-offset:-2px;}
+.mi.pinned{color:var(--primary-ink);}
+.mi + .mi{margin-top:2px;}
+.mi-sep{height:1px;background:var(--hair);margin:6px 8px;}
+/* When nothing in the menu may be used, it says why before the greyed items. */
+.mi-note{font-size:12.5px;line-height:1.5;color:var(--text-muted);padding:8px 12px 10px;margin-bottom:4px;border-bottom:1px solid var(--hair);}
+.menu-pop:focus{outline:none;}
+.menu-pop:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;}
 
 /* Content card */
-.content-card{background:var(--glass-2);border:1px solid var(--glass-border);border-radius:18px;
-  padding:28px 32px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
-.section-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;
-  color:var(--primary-ink);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
-.section-label::after{content:'';flex:1;height:1px;background:rgba(0,187,182,0.15);}
+.content-card{background:var(--sheet);border:1px solid var(--hair);border-radius:18px;
+  padding:24px 32px;margin-bottom:20px;box-shadow:var(--sheet-shadow);}
+.sec-h{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;font-weight:700;color:var(--text);
+  margin-bottom:10px;display:flex;align-items:center;gap:8px;}
 .doc-review-late{color:var(--warn-ink,#8A6200);font-weight:600;}
-.section-text{font-size:14px;color:var(--text-muted);line-height:1.78;}
+/* The summary is the document's caption, not a sheet of its own: one ruled
+   line at the foot of the document it describes. */
+.doc-sum{display:flex;align-items:baseline;gap:14px;padding:14px 24px 16px;border-top:1px solid var(--hair);}
+.doc-sum-l{font-family:'BwGradual','Urbanist',sans-serif;font-size:14px;font-weight:700;color:var(--text);flex:none;}
+.doc-sum-t{font-size:13.5px;line-height:1.6;color:var(--text-muted);min-width:0;}
+.section-text{font-size:14px;color:var(--text-muted);line-height:1.7;}
 
-/* PDF placeholder */
-.pdf-wrap{background:var(--glass-2);border:1px solid var(--glass-border);border-radius:18px;
-  padding:0;margin-bottom:20px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
-.pdf-toolbar{display:flex;align-items:center;gap:10px;padding:12px 20px;
-  border-bottom:1px solid var(--glass-border);background:rgba(0,93,99,0.03);}
-.pdf-tb-label{font-size:11.5px;font-weight:600;color:var(--text-muted);flex:1;}
-.pdf-tb-badge{padding:2px 10px;border-radius:50px;background:rgba(255,184,28,0.14);border:1px solid rgba(255,184,28,0.30);color:var(--warn-ink);font-size:10.5px;font-weight:600;}
-.pdf-preview{background:linear-gradient(160deg,#F4F4F3 0%,#FFFFFF 100%);min-height:320px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px 24px;text-align:center;}
-.pdf-icon{width:64px;height:80px;background:rgba(255,255,255,0.9);border-radius:6px;
-  border:1px solid rgba(0,93,99,0.15);display:flex;flex-direction:column;align-items:center;
-  justify-content:flex-end;padding-bottom:10px;box-shadow:0 4px 20px rgba(0,0,0,0.08);
-  position:relative;overflow:hidden;}
-.pdf-icon::before{content:'';position:absolute;top:0;right:0;width:18px;height:18px;
-  background:linear-gradient(225deg,rgba(0,93,99,0.15) 0%,rgba(0,93,99,0.15) 50%,transparent 50%);}
-.pdf-icon-label{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--primary-ink);}
-.pdf-placeholder-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;font-weight:700;color:var(--text);}
-.pdf-placeholder-sub{font-size:13px;color:var(--text-muted);max-width:320px;line-height:1.6;}
-.pdf-req-btn{padding:10px 22px;border-radius:10px;background:var(--gradient);color:#fff;border:none;
-  font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;
-  display:inline-flex;align-items:center;gap:7px;margin-top:4px;
-  box-shadow:0 4px 16px rgba(0,93,99,0.3);}
-.pdf-req-btn:hover{transform:translateY(-1px);}
-
-/* QR inline */
-.qr-inline-box{background:var(--glass-2);border:1px solid var(--glass-border);border-radius:18px;
-  padding:24px;margin-bottom:20px;display:flex;align-items:center;gap:24px;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
-.qr-inline-img{width:100px;height:100px;border-radius:8px;border:2px solid #EDEBE8;flex-shrink:0;}
-.qr-inline-info h4{font-family:'BwGradual','Urbanist',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;}
-.qr-inline-info p{font-size:12.5px;color:var(--text-muted);line-height:1.5;margin-bottom:10px;}
-.qr-inline-url{font-size:10.5px;color:var(--text-muted);word-break:break-all;background:rgba(0,0,0,0.03);
-  border-radius:6px;padding:6px 10px;font-family:'Inter',sans-serif;}
+/* The document itself. Until document storage is connected there is no page
+   to render, so the sheet sets out the cover a reader will get, built only
+   from the register: type, number, title and revision. */
+.doc-sheet{background:var(--sheet);border:1px solid var(--hair);border-radius:20px;margin-bottom:20px;overflow:hidden;box-shadow:var(--sheet-shadow);}
+.pdf-toolbar{display:flex;align-items:center;gap:10px;padding:14px 24px;border-bottom:1px solid var(--hair);}
+.pdf-toolbar svg{width:16px;height:16px;flex:none;color:var(--primary-ink);}
+.pdf-tb-label{font-size:13px;font-weight:600;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pdf-tb-badge{padding:3px 10px;border-radius:50px;background:var(--inset);color:var(--text-muted);font-size:11px;font-weight:600;white-space:nowrap;}
+.pdf-preview{background:var(--dark);min-height:440px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:40px 24px 36px;text-align:center;}
+.pdf-page{width:232px;aspect-ratio:1/1.414;background:#fff;border-radius:4px;border:1px solid var(--hair);
+  box-shadow:0 18px 36px -20px rgba(0,40,42,0.35),0 1px 3px rgba(0,40,42,0.06);
+  display:flex;flex-direction:column;align-items:flex-start;text-align:start;padding:22px 20px 18px;gap:8px;}
+.pp-mark{font-family:'BwGradual','Urbanist',sans-serif;font-size:11px;font-weight:700;letter-spacing:.6px;color:#005D63;
+  padding:3px 7px;border-radius:5px;background:rgba(0,93,99,0.08);}
+.pp-mark.alert{color:#A8431A;background:rgba(253,105,29,0.10);}
+.pp-top{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;}
+.pp-flag{font-size:11px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;}
+.pp-flag.stop{color:#C8102E;} .pp-flag.warn{color:#8A6200;} .pp-flag.info{color:#0076A8;}
+.pp-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:14px;font-weight:700;line-height:1.3;color:#1E1C1A;margin-top:6px;
+  display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;}
+.pp-rule{width:32px;height:2px;background:#005D63;border-radius:2px;margin-top:2px;}
+.pp-seg{font-size:11.5px;line-height:1.4;color:#524D48;}
+.pp-meta{margin-top:auto;font-size:11px;line-height:1.5;color:#524D48;overflow-wrap:anywhere;}
+.pdf-placeholder-sub{font-size:13px;color:var(--text-muted);max-width:340px;line-height:1.6;}
+.pdf-req-btn{min-height:44px;padding:0 18px;border-radius:12px;background:transparent;color:var(--primary-ink);border:1px solid rgba(0,93,99,0.30);
+  font:600 13.5px/1 'Inter',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+  transition:background-color .18s ease,transform .16s var(--ease-out);}
+.pdf-req-btn svg{width:16px;height:16px;}
+.pdf-req-btn:active{transform:scale(.97);}
+@media (hover:hover){ .pdf-req-btn:hover{background:var(--disc);} }
 
 /* Dark mode */
 html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--dark:#001314;--glass:rgba(0,45,48,0.88);--glass-border:rgba(255,255,255,0.07);--text:#C7DBDD;--text-muted:#8CB6B9;--text-dim:#619B9E;
   --stop-ink:#FF8A94;--warn-ink:#FFB81C;--alert-ink:#FF9B5E;--ok-ink:#4FD1B5;--info-ink:#6BC5EE;}
 html[data-taqa-theme="dark"] body{background:#001314;}
-html[data-taqa-theme="dark"] nav{background:rgba(0,35,38,0.92);border-color:rgba(255,255,255,0.06);}
-html[data-taqa-theme="dark"] .nav-brand-name{color:#C7DBDD;}
-html[data-taqa-theme="dark"] .nav-brand-hub{color:#619B9E;}
-html[data-taqa-theme="dark"] .dark-toggle{border-color:rgba(255,255,255,0.1);color:#619B9E;}
 /* The theme prefix only binds to the first selector in a list, so the three
    that followed it were painting the dark panel in light theme too, and every
    label inside them was reading light ink on a dark ground. */
-html[data-taqa-theme="dark"] .doc-header,
-html[data-taqa-theme="dark"] .doc-view .content-card,
-html[data-taqa-theme="dark"] .doc-view .pdf-wrap,
-html[data-taqa-theme="dark"] .doc-view .qr-inline-box{background:#002326;border-color:#003A3D;}
+html[data-taqa-theme="dark"]{--sheet:#002326;--inset:#002D30;--hair:rgba(0,187,182,0.12);--hair-2:rgba(0,187,182,0.24);
+  --sheet-shadow:0 22px 44px -26px rgba(0,0,0,0.55);--disc:rgba(0,187,182,0.08);--disc-2:rgba(0,187,182,0.14);}
 html[data-taqa-theme="dark"] .meta-cell{background:rgba(0,187,182,0.04);border-color:#003A3D;}
-html[data-taqa-theme="dark"] .pdf-preview{background:linear-gradient(160deg,#001314 0%,#002D30 100%);}
-html[data-taqa-theme="dark"] .pdf-icon{background:rgba(0,45,48,0.9);border-color:rgba(0,187,182,0.15);}
-html[data-taqa-theme="dark"] .qr-inline-url{background:rgba(255,255,255,0.04);}
+html[data-taqa-theme="dark"] .act-primary{border-color:rgba(0,187,182,0.35);}
+@media (hover:hover){ html[data-taqa-theme="dark"] .act-primary:hover{background:#00696F;border-color:rgba(0,187,182,0.45);} }
+html[data-taqa-theme="dark"] .pop{box-shadow:0 24px 48px -18px rgba(0,0,0,0.7),0 0 0 1px rgba(0,187,182,0.06);}
+html[data-taqa-theme="dark"] .pop-btn{border-color:rgba(0,187,182,0.35);}
+html[data-taqa-theme="dark"] .pdf-req-btn{border-color:rgba(0,187,182,0.30);}
+/* A white page on the night canvas would glare, so the cover turns to the
+   raised dark ground and takes the dark inks. */
+html[data-taqa-theme="dark"] .pdf-page{background:#002D30;border-color:rgba(0,187,182,0.16);box-shadow:0 18px 36px -20px rgba(0,0,0,0.7);}
+html[data-taqa-theme="dark"] .pp-mark{color:#00BBB6;background:rgba(0,187,182,0.10);}
+html[data-taqa-theme="dark"] .pp-mark.alert{color:#FF9B5E;background:rgba(253,105,29,0.12);}
+html[data-taqa-theme="dark"] .pp-title{color:#C7DBDD;}
+html[data-taqa-theme="dark"] .pp-flag.stop{color:#FF8A94;} html[data-taqa-theme="dark"] .pp-flag.warn{color:#FFB81C;} html[data-taqa-theme="dark"] .pp-flag.info{color:#6BC5EE;}
+html[data-taqa-theme="dark"] .pp-rule{background:#00BBB6;}
+html[data-taqa-theme="dark"] .pp-meta,html[data-taqa-theme="dark"] .pp-seg{color:#8CB6B9;}
 
 /* Read progress bar */
-#read-progress-bar{position:fixed;top:68px;left:0;height:3px;z-index:999;
+#read-progress-bar{position:fixed;top:var(--nav-h,64px);inset-inline-start:0;height:3px;z-index:999;
   background:var(--gradient);width:0;transition:width 0.1s linear;pointer-events:none;}
 
 /* Print view */
 @media print{
-  nav,.bc,.doc-actions-row,.qr-inline-box,.pdf-wrap,#read-progress-bar,
-  footer,.bm-fab,.bm-panel,.toast-wrap{display:none!important;}
+  nav,.bc,.doc-actions,.act-note,.pop,.pdf-toolbar,.pdf-preview,#read-progress-bar,
+  footer,.bm-fab,.bm-panel,.toast-wrap,#back-to-top{display:none!important;}
   body{background:#fff!important;animation:none!important;}
-  .page-wrapper{padding-top:0!important;}
+  .page-wrapper{padding-top:0!important;padding-bottom:0!important;}
+  .doc-foot{border-top:0!important;margin-top:8px!important;padding-top:0!important;}
+  .related-section{box-shadow:none!important;border:1px solid #ddd!important;background:#fff!important;}
+  .related-chev{display:none!important;}
+  /* The quick reference card prints on its own when it is open, and not at
+     all when it is closed, rather than as an empty card under the page. */
+  #qref-overlay:not(.open){display:none!important;}
+  .page-wrapper:has(#qref-overlay.open) > :not(#qref-overlay){display:none!important;}
   .doc-view{padding:16px!important;max-width:100%!important;}
-  .doc-header,.content-card{background:#fff!important;border:1px solid #ddd!important;box-shadow:none!important;}
+  .doc-header,.content-card,.doc-sheet{background:#fff!important;border:1px solid #ddd!important;box-shadow:none!important;}
+  .doc-sum{border-top:0!important;}
   .meta-cell{background:#F9F8F7!important;border:1px solid #ddd!important;}
-  .section-label{color:var(--primary-ink)!important;}
-  .section-label::after{background:#ddd!important;}
+  .sec-h{color:#1E1C1A!important;}
   /* Paper is white whichever theme was on screen, so print takes the light inks. */
   html[data-taqa-theme="dark"]{--primary-ink:#005D63;--text:#1E1C1A;--text-muted:#524D48;--text-dim:#756A61;
     --stop-ink:#C8102E;--warn-ink:#8A6200;--alert-ink:#A8431A;--ok-ink:#00705F;--info-ink:#0076A8;}
 }
 
 /* Related documents */
-.related-section{background:var(--glass-2);border:1px solid var(--glass-border);border-radius:18px;
-  padding:22px 28px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
-.related-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px;}
-.related-card{background:rgba(0,93,99,0.03);border:1px solid var(--glass-border);border-radius:12px;
-  padding:12px 14px;text-decoration:none;display:flex;align-items:center;gap:12px;
-  transition:border-color 0.2s,background 0.2s;}
-.related-card:hover{border-color:rgba(0,93,99,0.3);background:rgba(0,93,99,0.06);}
-.related-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;
-  font-size:9px;font-weight:700;font-family:'BwGradual','Urbanist',sans-serif;flex-shrink:0;}
-.related-title{font-size:12px;font-weight:600;color:var(--text);line-height:1.4;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-html[data-taqa-theme="dark"] .related-section{background:#002326;border-color:#003A3D;}
-html[data-taqa-theme="dark"] .related-card{background:rgba(0,187,182,0.03);border-color:#003A3D;}
-html[data-taqa-theme="dark"] .related-card:hover{background:rgba(0,187,182,0.06);border-color:rgba(0,187,182,0.2);}
+.related-section{background:var(--sheet);border:1px solid var(--hair);border-radius:18px;
+  padding:22px 32px 10px;margin-bottom:20px;box-shadow:var(--sheet-shadow);}
+.related-section .sec-h{margin-bottom:4px;}
+.related-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:32px;}
+.related-card{min-height:60px;padding:10px 0;text-decoration:none;display:flex;align-items:center;gap:14px;
+  border-top:1px solid var(--hair);border-radius:0;}
+.related-card:nth-child(-n+2){border-top:0;}
+.related-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-size:9.5px;font-weight:700;font-family:'BwGradual','Urbanist',sans-serif;flex-shrink:0;letter-spacing:.3px;}
+.related-title{flex:1;min-width:0;font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;font-weight:300;color:var(--text);line-height:1.35;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:color .15s ease;}
+.related-chev{width:30px;height:30px;border-radius:50%;background:var(--disc);color:var(--primary-ink);flex:none;
+  display:flex;align-items:center;justify-content:center;transition:background-color .15s ease;}
+.related-chev svg{width:14px;height:14px;}
+[dir="rtl"] .related-chev svg{transform:scaleX(-1);}
+@media (hover:hover){
+  .related-card:hover .related-title{color:var(--primary-ink);}
+  .related-card:hover .related-chev{background:var(--disc-2);}
+}
 
 /* Page exit */
 @keyframes pageFadeOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-5px);}}
 body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 
-@media(max-width:768px){
-  nav{padding:0 20px;}
-  .bc{padding:12px 20px 0;}
-  .doc-view{padding:16px 20px 60px;}
-  .doc-header{padding:20px;}
-  .meta-grid{grid-template-columns:1fr 1fr;}
-  .content-card{padding:20px;}
-  .qr-inline-box{flex-direction:column;align-items:center;text-align:center;}
-  .doc-title{font-size:18px;}
-  .doc-actions-row{gap:8px;flex-wrap:wrap;}
-  .doc-act-btn{padding:9px 14px;font-size:12.5px;}
-  .related-section{padding:16px 18px;}
-  .related-grid{grid-template-columns:1fr 1fr;}
-}
-@media(max-width:480px){
-  .nav-right .btn{display:none!important;}
-  .meta-grid{grid-template-columns:1fr 1fr;}
-  .pdf-preview{min-height:240px;}
-  .related-grid{grid-template-columns:1fr;}
-  .doc-act-btn{flex:1;justify-content:center;min-width:calc(50% - 4px);}
-}
-
-/* Pin button */
-.doc-act-pin{background:transparent;border:1px solid var(--glass-border);color:var(--text-muted);}
-.doc-act-pin:hover{border-color:rgba(0,93,99,0.3);color:var(--primary-ink);}
-.doc-act-pin.pinned{border-color:rgba(0,93,99,0.5);color:var(--primary-ink);background:rgba(0,93,99,0.08);}
-
 /* Last synced note */
-.sync-note{font-size:11px;color:var(--text-muted);margin-top:12px;text-align:right;}
+.sync-note{font-size:11.5px;color:var(--text-muted);margin-inline-start:auto;text-align:end;}
+
+@media(max-width:768px){
+  .bc{padding-block:12px 0;padding-inline:max(16px, var(--side-safe));}
+  .doc-view{padding-block:14px 32px;padding-inline:max(16px, var(--side-safe));}
+  /* Room under everything for the action bar, safe area included. */
+  .page-wrapper{padding-bottom:calc(var(--bar-h) + env(safe-area-inset-bottom));}
+  .doc-header{padding:20px 20px 16px;border-radius:18px;}
+  .doc-header-top{gap:14px;margin-bottom:18px;}
+  .doc-type-icon-lg{width:44px;height:44px;border-radius:12px;font-size:10px;}
+  .meta-grid{grid-template-columns:1fr 1fr;}
+  /* On a phone the record reads as hairline-ruled rows, not tiles in a sheet. */
+  .meta-grid,.meta-more .meta-grid-in,.meta-key{column-gap:16px;row-gap:0;}
+  .meta-cell,html[data-taqa-theme="dark"] .meta-cell{background:none;border:0;border-top:1px solid var(--hair);border-radius:0;padding:10px 0 11px;}
+  .meta-label{font-size:11px;}
+  .meta-grid.ctl-narrow{display:block;}
+  .meta-key{display:grid;grid-template-columns:1fr 1fr;}
+  /* The document number is the longest value and the first thing checked. */
+  .meta-key .meta-cell:first-child,.meta-grid > .meta-cell:first-child,.meta-grid-in > .meta-cell:first-child{grid-column:1 / -1;}
+  .meta-cell .meta-clause{display:none;}
+  .content-card{padding:20px;}
+  .doc-title{font-size:20px;}
+  /* The actions leave for the bar, so the foot keeps only the sync note:
+     no rule, no padding, just a quiet line. */
+  .doc-foot{margin-top:4px;padding-top:0;border-top:0;}
+  .meta-more + .doc-foot,.meta-grid.brief + .doc-foot{margin-top:0;}
+  .sync-note{margin-inline-start:0;text-align:start;}
+  .related-section{padding:18px 20px 6px;}
+  .related-grid{grid-template-columns:1fr;}
+  .related-card:nth-child(2){border-top:1px solid var(--hair);}
+  .pdf-toolbar{padding:12px 18px;}
+  .doc-sum{flex-direction:column;gap:2px;padding:12px 18px 14px;}
+  .pdf-preview{min-height:0;padding:28px 20px 26px;}
+  .pdf-page{width:190px;padding:18px 16px 14px;}
+  .pp-title{font-size:12.5px;}
+
+  /* The action bar, under the thumb. The same four controls as the desktop row. */
+  .doc-actions{position:fixed;inset-inline:0;bottom:0;z-index:900;flex-wrap:nowrap;gap:6px;
+    display:grid;grid-template-columns:minmax(0,1.45fr) repeat(3,minmax(0,1fr));
+    padding-block:8px calc(8px + env(safe-area-inset-bottom));padding-inline:max(12px, var(--side-safe));
+    background:var(--sheet);border-top:1px solid var(--hair);box-shadow:0 -10px 28px -18px rgba(0,40,42,0.35);}
+  .act{min-height:48px;padding:0 6px;border-color:transparent;font-size:11.5px;flex-direction:column;gap:4px;border-radius:12px;}
+  .act svg{width:20px;height:20px;}
+  .act .act-l{display:none;}
+  .act .act-s{display:inline;}
+  .act-primary{flex-direction:row;gap:8px;font-size:14px;border-color:var(--primary);}
+  .act-primary svg{width:18px;height:18px;}
+  .act[aria-pressed="true"],.act[aria-expanded="true"]{border-color:transparent;}
+  /* The ring stays inside each cell rather than running off the bar's edge. */
+  .act:focus-visible{outline-offset:-3px;}
+
+  /* Popovers become sheets resting on the bar. */
+  .pop{position:fixed;top:auto;left:auto;inset-inline:max(12px, var(--side-safe));bottom:calc(var(--bar-h) + env(safe-area-inset-bottom) + 8px);
+    width:auto;max-height:calc(100dvh - var(--bar-h) - 96px);overflow:auto;
+    transform:translateY(8px);transform-origin:bottom center;border-radius:18px;}
+  [dir="rtl"] .pop{transform-origin:bottom center;}
+  .menu-pop{padding:8px;}
+  /* A light scrim sets the sheet apart from the page; a tap on it closes. */
+  /* It covers the topbar too (1000), so the whole screen dims evenly; the bar
+     and the open sheet step above it while it shows. */
+  .page-wrapper::after{content:'';position:fixed;inset:0;z-index:1002;background:rgba(0,19,20,0.32);
+    opacity:0;visibility:hidden;transition:opacity .16s ease,visibility 0s linear .16s;}
+  body.act-pop-open .page-wrapper::after{opacity:1;visibility:visible;transition-delay:0s;}
+  body.act-pop-open .doc-actions{z-index:1003;}
+  body.act-pop-open .pop.open{z-index:1004;}
+  .mi{min-height:50px;font-size:15px;}
+  .share-qr{width:120px;height:120px;}
+
+  /* shared.js pins the toast and the back-to-top button to the bottom edge,
+     which the bar now occupies, so both step up above it. */
+  .toast-wrap{bottom:calc(var(--bar-h) + env(safe-area-inset-bottom) + 14px)!important;}
+  #back-to-top{bottom:calc(var(--bar-h) + env(safe-area-inset-bottom) + 14px)!important;}
+  /* The same for the offline banner and the update bar shared.js pins to the
+     bottom edge: they rest on the action bar instead of covering it. */
+  #offline-banner,#sw-update-bar{bottom:calc(var(--bar-h) + env(safe-area-inset-bottom))!important;}
+  /* A transform on body would make it the bar's containing block while the
+     page fades in, so on a phone the entrance is opacity only. */
+  body{animation-name:pageFadeInFlat;}
+}
+@keyframes pageFadeInFlat{from{opacity:0;}to{opacity:1;}}
+@media(max-width:480px){
+  .meta-grid{grid-template-columns:1fr 1fr;}
+}
+@media (prefers-reduced-motion:reduce){
+  .pop,.act,.pdf-req-btn,.pop-btn{transition:none;}
+  .pop{transform:none;}
+}
 
 /* Quick Reference Card modal */
 #qref-overlay{position:fixed;inset:0;z-index:99980;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);
   display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;
   opacity:0;pointer-events:none;transition:opacity 0.3s;}
+/* While closed the overlay is also inert (set in the markup and by the
+   script), so Tab cannot land on a control nobody can see. */
 #qref-overlay.open{opacity:1;pointer-events:auto;}
 /* This card is meant to be printed, so it stays on white paper whatever the
    theme is. Pinning the inks here keeps the light-ground values on it while the
@@ -320,7 +446,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   border-bottom:1px solid #EDEBE8;gap:10px;flex-wrap:wrap;}
 .qref-tbtn{padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;
   font-family:'Inter',sans-serif;border:1px solid rgba(0,0,0,0.12);background:transparent;color:#524D48;
-  display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;}
+  display:inline-flex;align-items:center;gap:6px;transition:border-color .2s,color .2s,background-color .2s;}
 .qref-tbtn:hover{border-color:rgba(0,93,99,0.3);color:var(--primary-ink);}
 .qref-tbtn.sun-on{background:rgba(255,184,28,0.18);border-color:#FFB81C;color:var(--warn-ink,#8A6200);}
 .qref-tbtn.close-btn{background:#EDEBE8;border-color:transparent;}
@@ -338,10 +464,6 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 .qref-bullets li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #EDEBE8;font-size:14px;color:#1E1C1A;line-height:1.6;}
 .qref-bullets li:last-child{border-bottom:none;}
 .qref-bullet-dot{width:7px;height:7px;border-radius:50%;background:#00BBB6;flex-shrink:0;margin-top:7px;}
-/* The card always prints on white, so the scope callout takes TAQA green
-   rather than the Tailwind green it arrived with. */
-.qref-scope-box{background:rgba(0,134,117,0.06);border:1px solid rgba(0,134,117,0.28);border-radius:10px;padding:12px 16px;
-  font-size:13px;color:var(--ok-ink,#00705F);line-height:1.6;}
 
 /* Sunlight mode overrides */
 #qref-overlay.sunlight #qref-card{background:#ffffff;border:3px solid #000;}
@@ -356,7 +478,6 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 #qref-overlay.sunlight .qref-bullets li{color:#000;font-size:16px;font-weight:500;border-color:#ccc;}
 #qref-overlay.sunlight .qref-meta-chip{background:#f0f0f0;border-color:#999;color:#000;}
 #qref-overlay.sunlight .qref-meta-chip strong{color:#000;}
-#qref-overlay.sunlight .qref-scope-box{background:#FFF9E6;border-color:#FFB81C;color:#000;font-weight:500;}
 #qref-overlay.sunlight .qref-section-label{color:#333;}
 #qref-overlay.sunlight .qref-bullet-dot{background:#000;}
 #qref-overlay.sunlight .qref-type-pill{filter:saturate(2) contrast(1.3);}
@@ -399,24 +520,35 @@ html[data-taqa-theme="dark"] .rev-dot{background:#002326;}
   .rev-note{font-size:12px;}
 }
 </style>
+<link rel="stylesheet" href="topbar.css">
 </head>
 <body>
 <div id="read-progress-bar" aria-hidden="true"></div>
 <div class="page-wrapper">
 
-<nav>
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
   <a href="index.html" class="nav-brand">
-    <div class="nav-brand-icon">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-    </div>
-    <span class="nav-brand-text"><span class="nav-brand-name">TAQA</span> <span class="nav-brand-hub">Knowledge Hub</span><span class="nav-subtitle"><em style="color:var(--primary-ink);font-style:italic;">Tech Hub</em> <span style="font-style:normal;">(working name)</span></span></span>
+    <span class="nav-title"><span class="nav-title-brand">TAQA</span> <span class="nav-title-hub">Knowledge Hub</span></span>
+    <span class="nav-subtitle"><em>Tech Hub</em> <span class="wip-note">(working name)</span></span>
   </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn active" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
+    <li><a href="ai-search.html">Document Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
   <div class="nav-right">
-    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode">
-      <svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>
-    </button>
-    <a href="ai-search.html" class="btn btn-ghost">AI Search</a>
-    <a href="upload.html" class="btn btn-primary">+ Upload</a>
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" onclick="location.href='dashboard.html'" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
@@ -428,83 +560,70 @@ html[data-taqa-theme="dark"] .rev-dot{background:#002326;}
   <span class="bc-cur" id="bc-title">Document</span>
 </div>
 
-<div class="doc-view">
+<main class="doc-view" id="main-content">
   <div id="lifecycle-banner"></div>
   <div class="doc-header">
     <div class="doc-header-top">
       <div class="doc-type-icon-lg" id="doc-icon"></div>
       <div class="doc-header-info">
-        <div class="doc-title" id="doc-title">Loading…</div>
+        <h1 class="doc-title" id="doc-title">Loading…</h1>
         <div class="doc-badges" id="doc-badges"></div>
       </div>
     </div>
     <div class="meta-grid" id="meta-grid"></div>
-    <div class="sync-note" id="sync-note"></div>
+    <div class="doc-foot">
+      <div class="doc-actions" id="doc-actions-row" role="toolbar" aria-label="Document actions">
+        <button type="button" class="act act-primary" id="dl-btn" onclick="requestAccess()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10.5l5 5 5-5"/><path d="M5 20h14"/></svg>
+          <span class="act-l">Download PDF</span><span class="act-s">Download</span>
+        </button>
+        <button type="button" class="act" id="bm-doc-btn" aria-pressed="false" onclick="toggleViewerBm()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg>
+          <span class="act-l">Bookmark</span><span class="act-s">Bookmark</span>
+        </button>
+        <button type="button" class="act" id="share-btn" aria-haspopup="dialog" aria-expanded="false" aria-controls="share-pop">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3.5"/><path d="M7.5 8 12 3.5 16.5 8"/><path d="M5 12v7a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19v-7"/></svg>
+          <span class="act-l">Share</span><span class="act-s">Share</span>
+        </button>
+        <button type="button" class="act" id="more-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="more-menu">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5.5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18.5" cy="12" r="1.7"/></svg>
+          <span class="act-l">More</span><span class="act-s">More</span>
+        </button>
+      </div>
+      <div class="sync-note" id="sync-note"></div>
+    </div>
+    <p class="act-note" id="act-note" hidden></p>
   </div>
 
-  <div class="doc-actions-row" style="margin-bottom:24px;" id="doc-actions-row">
-    <button class="doc-act-btn doc-act-primary" id="dl-btn" onclick="requestAccess()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Download PDF
-    </button>
-    <button class="doc-act-btn doc-act-bm" id="bm-doc-btn" onclick="toggleViewerBm()">☆ Bookmark</button>
-    <button class="doc-act-btn doc-act-pin" id="pin-btn" onclick="togglePin()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6h6l-5 3.5 2 6L12 14l-5 3.5 2-6L4 8h6z"/></svg>
-      Pin Offline
-    </button>
-    <button class="doc-act-btn doc-act-ghost" id="qref-open-btn" onclick="showQuickRef()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      Quick Ref
-    </button>
-    <button class="doc-act-btn doc-act-ghost" id="print-btn" onclick="window.print()" title="Print this document" aria-label="Print">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-      Print
-    </button>
-    <a class="doc-act-btn doc-act-ghost" id="back-btn" href="#">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      Back
-    </a>
-  </div>
-
-  <div class="content-card">
-    <div class="section-label">Document Summary</div>
-    <div class="section-text" id="doc-summary"></div>
-  </div>
-
-  <div class="content-card">
-    <div class="section-label">Scope &amp; Application</div>
-    <div class="section-text" id="doc-scope"></div>
-  </div>
-
-  <div class="pdf-wrap">
+  <section class="doc-sheet" aria-label="Document">
     <div class="pdf-toolbar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
       <span class="pdf-tb-label" id="pdf-toolbar-label">PDF Document</span>
-      <span class="pdf-tb-badge">Backend Required</span>
+      <span class="pdf-tb-badge">Preview not connected</span>
     </div>
     <div class="pdf-preview">
-      <div class="pdf-icon"><span class="pdf-icon-label">PDF</span></div>
-      <div class="pdf-placeholder-title" id="pdf-doc-name">Document</div>
-      <div class="pdf-placeholder-sub">Full PDF preview will be available once connected to document storage. Download the file to view offline.</div>
-      <button class="pdf-req-btn" onclick="requestAccess()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <div class="pdf-page" aria-hidden="true">
+        <span class="pp-top"><span class="pp-mark" id="pp-mark"></span></span>
+        <span class="pp-title" id="pdf-doc-name">Document</span>
+        <span class="pp-rule"></span>
+        <span class="pp-seg" id="pp-seg"></span>
+        <span class="pp-meta" id="pp-meta"></span>
+      </div>
+      <p class="pdf-placeholder-sub">The full preview appears here once document storage is connected. Download the file to read it offline.</p>
+      <button type="button" class="pdf-req-btn" id="pdf-dl-btn" onclick="requestAccess()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10.5l5 5 5-5"/><path d="M5 20h14"/></svg>
         Download PDF
       </button>
     </div>
-  </div>
-
-  <div class="qr-inline-box" id="qr-section">
-    <img class="qr-inline-img" id="qr-inline-img" alt="QR" onerror="this.style.display='none';document.getElementById('qr-error').style.display='flex';" />
-    <div id="qr-error" style="display:none;width:100px;height:100px;border-radius:8px;border:2px solid #EDEBE8;flex-shrink:0;align-items:center;justify-content:center;background:#F4F4F3;font-size:11px;color:#756A61;text-align:center;padding:8px;">QR unavailable</div>
-    <div class="qr-inline-info">
-      <h4>Document QR Code</h4>
-      <p>Scan to open this document on any device, or copy the link below.</p>
-      <div class="qr-inline-url" id="qr-inline-url"></div>
+    <div class="doc-sum">
+      <h2 class="doc-sum-l" id="sum-h">Summary</h2>
+      <p class="doc-sum-t" id="doc-summary"></p>
     </div>
-  </div>
+  </section>
 
   <div class="content-card" id="rev-history-section" style="display:none">
     <div class="rev-hist-hd" onclick="toggleRevHistory()">
-      <div class="section-label" style="margin:0">Version History</div>
+      <div class="sec-h" style="margin:0">Version History</div>
       <span class="rev-count-badge" id="rev-count-badge"></span>
       <button class="rev-toggle-btn open" id="rev-toggle-btn" aria-label="Toggle version history">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
@@ -513,14 +632,49 @@ html[data-taqa-theme="dark"] .rev-dot{background:#002326;}
     <div class="rev-timeline" id="rev-timeline"></div>
   </div>
 
-  <div class="related-section" id="related-section" style="display:none">
-    <div class="section-label">Related Documents</div>
+  <section class="related-section" id="related-section" style="display:none" aria-labelledby="rel-h">
+    <h2 class="sec-h" id="rel-h">Related documents</h2>
     <div class="related-grid" id="related-grid"></div>
-  </div>
+  </section>
 
+</main>
+
+<!-- Share popover: the link, its QR code and a copy button. -->
+<div class="pop share-pop" id="share-pop" role="dialog" aria-label="Share this document">
+  <div class="pop-hd">Share this document</div>
+  <div class="share-row">
+    <div class="share-qr">
+      <img id="qr-img" alt="QR code linking to this document" width="100" height="100" onerror="this.style.display='none';document.getElementById('qr-error').style.display='block';">
+      <div class="qr-error" id="qr-error" style="display:none">QR unavailable</div>
+    </div>
+    <p class="share-cap">Scan with a phone or tablet to open this document there, or copy the link.</p>
+  </div>
+  <div class="share-link" id="share-url"></div>
+  <button type="button" class="pop-btn" id="copy-link-btn" onclick="shareDoc()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>
+    <span>Copy link</span>
+  </button>
+</div>
+
+<!-- More menu -->
+<div class="pop menu-pop" id="more-menu" role="menu" aria-label="More actions" tabindex="-1">
+  <p class="mi-note" id="mi-note" role="none" hidden></p>
+  <button type="button" role="menuitem" class="mi" id="qref-open-btn" onclick="showQuickRef();closeActPop()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+    <span>Quick reference card</span>
+  </button>
+  <button type="button" role="menuitemcheckbox" aria-checked="false" class="mi" id="pin-btn" onclick="togglePin()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v4"/><path d="M8 3h8l-1 6 3 4H6l3-4z"/></svg>
+    <span>Pin offline</span>
+  </button>
+  <div class="mi-sep" role="separator"></div>
+  <button type="button" role="menuitem" class="mi" id="print-btn" onclick="closeActPop();window.print()" title="Print this document">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7"/></svg>
+    <span>Print</span>
+  </button>
 </div>
 <!-- Quick Reference Card Modal -->
-<div id="qref-overlay" role="dialog" aria-modal="true" aria-label="Quick Reference Card" onclick="if(event.target===this)closeQuickRef()">
+<div id="qref-overlay" role="dialog" aria-modal="true" aria-label="Quick Reference Card" inert onclick="if(event.target===this)closeQuickRef()">
   <div id="qref-card">
     <div id="qref-toolbar">
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -544,8 +698,6 @@ html[data-taqa-theme="dark"] .rev-dot{background:#002326;}
       <div class="qref-meta-row" id="qref-meta-row"></div>
       <div class="qref-section-label">Key Points</div>
       <ul class="qref-bullets" id="qref-bullets"></ul>
-      <div class="qref-section-label">Applicability</div>
-      <div class="qref-scope-box" id="qref-scope"></div>
       <div class="qref-ctrl-note" id="qref-ctrl-note"></div>
     </div>
   </div>
@@ -600,32 +752,24 @@ const TYPE_SHORT = (function(){
     });
   return out;
 })();
-const SCOPES={
-  sop:'Applies to all field personnel, supervisors, and engineers involved in the specified operation. Must be reviewed before commencing any related activity.',
-  manual:'For use by qualified equipment operators, engineers, and maintenance personnel. Serves as the primary technical reference for this system.',
-  standard:'Applies to everyone working within this area. Issued by the area and approved by its Operation Director.',
-  policy:'A company commitment signed by the CEO. Applies to every TAQA employee, contractor and third party, in every segment, function and center.',
-  lesson:'Shared across relevant segments for awareness and preventive action. All supervisors must review and brief their teams.',
-  alert:'Requires immediate acknowledgment from all segment supervisors. Applicable to ongoing and planned operations until further notice.',
-  software:'For authorised users with a valid TAQA software licence. Contact IT for installation support and licence queries.'
-};
-const SIZES=['1.2 MB','845 KB','2.1 MB','3.4 MB','560 KB','1.8 MB','920 KB'];
-function rnd(a){return a[Math.abs(hashStr(docTitle||'x'))%a.length];}
-function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=((h<<5)-h)+s.charCodeAt(i);return h;}
 
 /* The register holds no abstract, so a card states what it does hold: the
    revision in force, who may read it, and when it is next due for review.
    A document past its review date says so, because that is the one thing a
    reader needs to know before acting on it. A title the register does not
-   carry gets no line at all rather than an invented one. */
-function docControlLine(ref){
+   carry gets no line at all rather than an invented one.
+   Lateness follows the register's reviewOverdue flag (TAQA_DOC.overdue), the
+   same rule the status, the banner and every count use. A date that has
+   passed without the flag set is shown as a date, with no claim either way,
+   so the page never says both "current" and "late" about one document. */
+function docControlLine(ref, opts){
   var d = (ref && typeof ref === 'object') ? ref
         : (ref && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(ref)
         : (ref && typeof TAQA_DOC !== 'undefined') ? (TAQA_DOC.byNumber(ref) || TAQA_DOC.byLegacy(ref))
         : null;
   if (!d) return '';
   var bits = [];
-  if (d.revision) bits.push('Rev ' + d.revision);
+  if (d.revision && !(opts && opts.noRev)) bits.push('Rev ' + d.revision);
   if (d.classification) bits.push(d.classification.charAt(0).toUpperCase() + d.classification.slice(1));
   var withdrawn = d.status === 'obsolete' || d.status === 'superseded';
   var due = (!withdrawn && d.nextReviewDate) ? new Date(d.nextReviewDate) : null;
@@ -634,11 +778,20 @@ function docControlLine(ref){
     var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     var when = MON[due.getMonth()] + ' ' + due.getFullYear();
     var late = Math.floor((Date.now() - due) / 86400000);
-    bits.push(late > 0
-      ? '<span class="doc-review-late">Review was due ' + when + ', ' + late + ' days late</span>'
-      : 'Review due ' + when);
+    var flagged = (typeof TAQA_DOC !== 'undefined') ? TAQA_DOC.overdue(d) : !!d.reviewOverdue;
+    bits.push(flagged
+      ? '<span class="doc-review-late">Review was due ' + when + (late > 0 ? ', ' + late + ' days late' : '') + '</span>'
+      : (late > 0 ? 'Next review ' : 'Review due ') + when);
   }
   return bits.join(' \u00b7 ');
+}
+
+// The More menu explains itself when nothing in it may be used.
+function setMenuNote(text){
+  var n = document.getElementById('mi-note'), m = document.getElementById('more-menu');
+  if (!n || !m) return;
+  n.textContent = text; n.hidden = false;
+  m.setAttribute('aria-describedby', 'mi-note');
 }
 
 const params = new URLSearchParams(location.search);
@@ -671,13 +824,13 @@ if (segId === 'company') {
 }
 document.getElementById('bc-title').textContent = docTitle.length > 50 ? docTitle.slice(0,50)+'…' : docTitle;
 
-// Back button
-document.getElementById('back-btn').href = (segId === 'company')
-  ? 'master-list.html'
-  : 'segment.html?id=' + segId + '&tab=' +
-    // Pluralising the type sent a Standard to tab=standards and software to
-    // tab=softwares, neither of which exists, so Back opened an empty page.
+// The breadcrumb's area link is the way back, so it returns to the tab
+// this type is listed under. Pluralising the type once sent a Standard to
+// tab=standards and software to tab=softwares, neither of which exists.
+if (segId !== 'company') {
+  document.getElementById('bc-seg').href = 'segment.html?id=' + segId + '&tab=' +
     (({sop:'sops',manual:'manuals',standard:'policies',policy:'policies',alert:'alerts',lesson:'lessons',software:'software'})[docType] || 'all');
+}
 
 // Type icon
 const iconEl = document.getElementById('doc-icon');
@@ -710,6 +863,7 @@ const _rec = MA ? (MA.byNumber(docId) || MA.byLegacy(docId) ||
               MD.find(d => d.title === _bare && d.segment === segId) ||
               MD.find(d => d.title === _bare) || null) : null;
 
+const _narrow = window.matchMedia('(max-width:768px)');
 const _fmt = v => v ? new Date(v).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : null;
 function cell(label, value, clause, extraCls){
   const has = value !== null && value !== undefined && value !== '';
@@ -737,12 +891,13 @@ if (_denied) {
     '<div class="lcb lcb-obsolete"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
     '<div><b>Access restricted</b><span class="n">' + reason +
     ' If you need it, request access through the QMS function. <a href="master-list.html">Back to the register</a>.</span></div></div>';
-  ['dl-btn','pin-btn','qref-open-btn','print-btn','bm-doc-btn'].forEach(function(id){
+  ['dl-btn','pdf-dl-btn','pin-btn','qref-open-btn','print-btn','bm-doc-btn'].forEach(function(id){
     var el=document.getElementById(id); if(!el) return;
     el.style.opacity='0.45'; el.style.pointerEvents='none'; el.setAttribute('aria-disabled','true');
+    el.disabled = true;
   });
+  setMenuNote('Not available to your role, so these actions are disabled.');
   var _sm=document.getElementById('doc-summary'); if(_sm) _sm.textContent='Not available to your role.';
-  var _sc=document.getElementById('doc-scope');   if(_sc) _sc.textContent='Not available to your role.';
 } else if (_rec) {
   const t = MA.type(_rec), days = MA.reviewDays(_rec);
   const withdrawn = _rec.status === 'obsolete' || _rec.status === 'superseded';
@@ -751,29 +906,51 @@ if (_denied) {
   const due = withdrawn
     ? '<span style="color:var(--text-dim);">Not applicable, withdrawn</span>'
     : (_rec.nextReviewDate
-        ? (days < 0 ? '<span class="mv-over">' + _fmt(_rec.nextReviewDate) + ' · ' + Math.abs(days) + 'd overdue</span>'
-                    : '<span class="mv-ok">' + _fmt(_rec.nextReviewDate) + '</span>')
+        ? (MA.overdue(_rec) ? '<span class="mv-over">' + _fmt(_rec.nextReviewDate) + (days < 0 ? ' · ' + Math.abs(days) + 'd overdue' : ' · overdue') + '</span>'
+          : days < 0 ? _fmt(_rec.nextReviewDate)
+                     : '<span class="mv-ok">' + _fmt(_rec.nextReviewDate) + '</span>')
         : null);
   const score = MA.scoreUrl(_rec);
-  const fullRecord =
-    cell('Document number', _rec.docNumber, 'TQ-QHSE-S001 5.3') +
-    cell('Revision',        _rec.revision ? 'Rev ' + _rec.revision : null, 'API Q2 4.4.3 d)') +
-    cell('Issued',          _fmt(_rec.issueDate), 'API Q2 4.4.3 d)') +
-    cell('Approved',        _fmt(_rec.approvedDate), 'API Q2 4.4.3 b)') +
-    cell('Document owner',  t.owner, 'API Q2 4.4.3 a) · role') +
-    cell('Approval authority', MA.approver(_rec), 'API Q2 4.4.3 a) · role') +
-    cell('Next review',     due, 'API Q2 4.4.3 c)') +
-    cell('Review cycle',    MA.cycle(_rec) ? MA.cycle(_rec) + ' months' : null, 'API Q2 4.4.3 c)') +
-    cell('Classification',  _rec.classification ? _rec.classification.toUpperCase() : null, 'ISO 9001 7.5.3.1 b)') +
-    cell('Retention',       MA.retention(_rec) ? MA.retention(_rec) + ' years' : null, 'API Q2 4.5') +
-    cell('Language',        _rec.language === 'ar' ? 'العربية' : 'English', 'API Q2 4.4.3') +
-    cell('Master copy',     score ? '<a href="' + score + '" rel="noopener">Open in SCORE</a>' : null, 'System of record');
+  const C = {
+    num:   cell('Document number', _rec.docNumber, 'TQ-QHSE-S001 5.3'),
+    rev:   cell('Revision',        _rec.revision ? 'Rev ' + _rec.revision : null, 'API Q2 4.4.3 d)'),
+    iss:   cell('Issued',          _fmt(_rec.issueDate), 'API Q2 4.4.3 d)'),
+    appd:  cell('Approved',        _fmt(_rec.approvedDate), 'API Q2 4.4.3 b)'),
+    own:   cell('Document owner',  t.owner, 'API Q2 4.4.3 a) · role'),
+    appr:  cell('Approval authority', MA.approver(_rec), 'API Q2 4.4.3 a) · role'),
+    next:  cell('Next review',     due, 'API Q2 4.4.3 c)'),
+    cyc:   cell('Review cycle',    MA.cycle(_rec) ? MA.cycle(_rec) + ' months' : null, 'API Q2 4.4.3 c)'),
+    cls:   cell('Classification',  _rec.classification ? _rec.classification.toUpperCase() : null, 'ISO 9001 7.5.3.1 b)'),
+    ret:   cell('Retention',       MA.retention(_rec) ? MA.retention(_rec) + ' years' : null, 'API Q2 4.5'),
+    lang:  cell('Language',        _rec.language === 'ar' ? 'العربية' : 'English', 'API Q2 4.4.3'),
+    score: cell('Master copy',     score ? '<a href="' + score + '" rel="noopener">Open in SCORE</a>' : null, 'System of record')
+  };
+  const pick = keys => keys.map(k => C[k]).join('');
+  const fullRecord = pick(['num','rev','iss','appd','own','appr','next','cyc','cls','ret','lang','score']);
+  const FOLD_SUM = '<summary>Full control record' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg></summary>';
 
   // Controllers (QMS, a Director, an auditor) work from the full record.
   // An employee gets the four answers they came for, and the rest folded.
   const _mg = document.getElementById('meta-grid');
   if (!_roleKey || _roleKey !== 'employee') {
-    _mg.innerHTML = fullRecord;
+    // On a desktop the twelve cells side by side. On a phone the four a
+    // controller checks first, with the rest under the same fold an employee
+    // gets, so the document is not a screen and a half further down.
+    const drawRecord = function(){
+      if (_narrow.matches) {
+        const was = _mg.querySelector('details.meta-more');
+        _mg.className = 'meta-grid ctl-narrow';
+        _mg.innerHTML = '<div class="meta-key">' + pick(['num','rev','next','own']) + '</div>' +
+          '<details class="meta-more"' + (was && was.open ? ' open' : '') + '>' + FOLD_SUM +
+          '<div class="meta-grid-in">' + pick(['iss','appd','appr','cyc','cls','ret','lang','score']) + '</div></details>';
+      } else {
+        _mg.className = 'meta-grid';
+        _mg.innerHTML = fullRecord;
+      }
+    };
+    drawRecord();
+    if (_narrow.addEventListener) _narrow.addEventListener('change', drawRecord);
   } else {
     const st = _rec.status === 'obsolete'   ? ['stop','Withdrawn, do not use']
              : _rec.status === 'superseded' ? ['warn','Superseded']
@@ -789,9 +966,7 @@ if (_denied) {
         item('Issued', _fmt(_rec.issueDate)) +
         item('Owner', t.owner ? esc(t.owner) : null) +
       '</div>' +
-      '<details class="meta-more"><summary>Full control record' +
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg>' +
-      '</summary><div class="meta-grid-in">' + fullRecord + '</div></details>';
+      '<details class="meta-more">' + FOLD_SUM + '<div class="meta-grid-in">' + fullRecord + '</div></details>';
   }
 
   // Lifecycle banner. Obsolete documents must not be used at the point of use.
@@ -822,7 +997,7 @@ if (_denied) {
     var why = _rec.status === 'draft'
       ? 'Not approved for use, so download is disabled'
       : 'Withdrawn document. Download is disabled to prevent an uncontrolled copy.';
-    ['dl-btn','pin-btn','qref-open-btn','print-btn'].forEach(function(id){
+    ['dl-btn','pdf-dl-btn','pin-btn','qref-open-btn','print-btn'].forEach(function(id){
       var el = document.getElementById(id);
       if (!el) return;
       el.setAttribute('aria-disabled','true');
@@ -830,10 +1005,11 @@ if (_denied) {
       el.style.opacity = '0.45';
       el.style.pointerEvents = 'none';
       el.style.cursor = 'not-allowed';
+      el.disabled = true;
     });
-    var row = document.getElementById('doc-actions-row');
-    if (row) row.insertAdjacentHTML('beforeend',
-      '<span style="font-size:11.5px;color:var(--text-dim);align-self:center;padding-left:4px;">' + why + '</span>');
+    var note = document.getElementById('act-note');
+    if (note) { note.textContent = why; note.hidden = false; }
+    setMenuNote(why);
   }
 } else {
   // Not in the register. Say so plainly rather than inventing control metadata.
@@ -848,10 +1024,10 @@ if (_denied) {
     'Check <a href="master-list.html">the register</a> or SCORE before using it.</span></div></div>';
 }
 
-// Summary & Scope
+// Summary
 // A reader the role check turned away keeps the refusal, not the record.
-if (!_denied) document.getElementById('doc-summary').innerHTML = docControlLine(_rec);
-document.getElementById('doc-scope').textContent = SCOPES[docType] || SCOPES.sop;
+if (!_denied) document.getElementById('doc-summary').innerHTML = docControlLine(_rec, {noRev:true}) ||
+  'The register holds no control record for this document.';
 
 // Version History
 function renderRevHistory() {
@@ -884,22 +1060,38 @@ function toggleRevHistory() {
 }
 renderRevHistory();
 
-// PDF section
+// The document sheet. The cover carries only what the register holds.
 document.getElementById('pdf-doc-name').textContent = docTitle;
 document.getElementById('pdf-toolbar-label').textContent = docTitle + '.pdf';
+(function(){
+  var mk = document.getElementById('pp-mark');
+  mk.textContent = typeShort;
+  if (docType === 'alert') mk.classList.add('alert');
+  document.getElementById('pp-seg').textContent = segInfo.name;
+  // The cover says plainly when this is not a document in force.
+  var st = (_rec && !_denied) ? _rec.status : null;
+  var flag = st === 'obsolete' ? ['stop','Withdrawn'] : st === 'superseded' ? ['warn','Superseded'] : st === 'draft' ? ['info','Draft'] : null;
+  if (flag) mk.insertAdjacentHTML('afterend', '<span class="pp-flag ' + flag[0] + '">' + flag[1] + '</span>');
+  var num = (_rec && _rec.docNumber) || docId || '';
+  var rev = (_rec && !_denied && _rec.revision) ? 'Rev ' + _rec.revision : '';
+  document.getElementById('pp-meta').textContent = [num, rev].filter(Boolean).join(' \u00b7 ');
+})();
 
-// QR section
+// Share: the link and its QR code live in the Share popover.
 let docUrl = location.origin + location.pathname.replace(/viewer\.html.*/,'') + 'viewer.html?seg=' + segId + '&type=' + docType + '&title=' + encodeURIComponent(docTitle);
 if (docId) docUrl += '&doc=' + encodeURIComponent(docId);
-document.getElementById('qr-inline-img').src = window.TAQA_QR ? window.TAQA_QR(docUrl, 4) : '';
-document.getElementById('qr-inline-url').textContent = docUrl;
+document.getElementById('qr-img').src = window.TAQA_QR ? window.TAQA_QR(docUrl, 4) : '';
+document.getElementById('share-url').textContent = docUrl;
+document.getElementById('share-url').title = docUrl;
 
 // Bookmark state
 function updateBmBtn() {
   const btn = document.getElementById('bm-doc-btn');
-  const isBm = window.TAQA_Bookmarks && window.TAQA_Bookmarks.has(docTitle, segId);
-  btn.textContent = (isBm ? '★' : '☆') + ' Bookmark';
-  btn.classList.toggle('on', !!isBm);
+  const isBm = !!(window.TAQA_Bookmarks && window.TAQA_Bookmarks.has(docTitle, segId));
+  btn.setAttribute('aria-pressed', String(isBm));
+  btn.querySelector('svg').setAttribute('fill', isBm ? 'currentColor' : 'none');
+  btn.querySelector('.act-l').textContent = isBm ? 'Bookmarked' : 'Bookmark';
+  btn.querySelector('.act-s').textContent = isBm ? 'Saved' : 'Bookmark';
 }
 function toggleViewerBm() {
   if (!window.TAQA_Bookmarks) return;
@@ -911,17 +1103,29 @@ function toggleViewerBm() {
 setTimeout(updateBmBtn, 300);
 
 function shareDoc() {
-  navigator.clipboard.writeText(docUrl).then(() => { if(window.showToast) window.showToast('Link copied!'); });
+  const lbl = document.querySelector('#copy-link-btn span');
+  const done = function(){
+    lbl.textContent = 'Link copied';
+    setTimeout(function(){ lbl.textContent = 'Copy link'; }, 1800);
+    if (window.showToast) window.showToast('Link copied');
+  };
+  // The clipboard API needs a secure context. Where it is missing, select
+  // the link text so the reader can copy it by hand.
+  const fallback = function(){
+    const el = document.getElementById('share-url');
+    try {
+      const r = document.createRange(); r.selectNodeContents(el);
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      if (document.execCommand && document.execCommand('copy')) { done(); return; }
+    } catch(e) {}
+    if (window.showToast) window.showToast('Link selected, copy it from the box', 'info');
+  };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(docUrl).then(done, fallback);
+  else fallback();
 }
 function requestAccess() {
   if(window.showToast) window.showToast('Download request sent to document administrator.', 'info');
 }
-
-// Dark mode
-const MOON='M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
-const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
-function toggleDark(){const isDark=document.documentElement.getAttribute('data-taqa-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-taqa-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme-v3',next);}
-(function(){const s=localStorage.getItem('taqa-theme-v3');if(s==='dark'){document.documentElement.setAttribute('data-taqa-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
 
 // Read progress bar
 (function(){
@@ -963,7 +1167,8 @@ function renderRelated(){
       (d.n?'&doc='+encodeURIComponent(d.n):'');
     return '<a class="related-card" href="'+href+'">'+
       '<div class="related-icon" style="background:'+(TC[d.tp]||TC.sop)+';color:'+(TT[d.tp]||TT.sop)+'">'+(TS[d.tp]||'DOC')+'</div>'+
-      '<div class="related-title">'+d.t+'</div></a>';
+      '<div class="related-title">'+esc(d.t)+'</div>'+
+      '<span class="related-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></a>';
   }).join('');
   section.style.display = '';
 }
@@ -990,9 +1195,9 @@ function updatePinBtn() {
   if (!btn || !window.TAQA_Pins) return;
   var pinned = window.TAQA_Pins.isPinned(docUrl);
   btn.classList.toggle('pinned', pinned);
-  btn.innerHTML = pinned
-    ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l2 6h6l-5 3.5 2 6L12 14l-5 3.5 2-6L4 8h6z"/></svg> Pinned'
-    : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6h6l-5 3.5 2 6L12 14l-5 3.5 2-6L4 8h6z"/></svg> Pin Offline';
+  btn.setAttribute('aria-checked', String(pinned));
+  btn.querySelector('svg').setAttribute('fill', pinned ? 'currentColor' : 'none');
+  btn.querySelector('span').textContent = pinned ? 'Pinned offline' : 'Pin offline';
 }
 function togglePin() {
   if (!window.TAQA_Pins) return;
@@ -1055,9 +1260,6 @@ function showQuickRef() {
     'Verify the current revision in SCORE before use.' +
     (_rec && MA.scoreUrl(_rec) ? ' \u00b7 ' + _rec.docNumber : '');
 
-  // Scope
-  document.getElementById('qref-scope').textContent = SCOPES[docType] || SCOPES.sop;
-
   // Last synced in toolbar
   var syncTs = null;
   try { syncTs = localStorage.getItem('taqa-last-sync'); } catch(e) {}
@@ -1067,14 +1269,33 @@ function showQuickRef() {
     syncEl.textContent = m < 2 ? 'Synced just now' : m < 60 ? 'Synced ' + m + 'm ago' : 'Synced ' + Math.round(m/60) + 'h ago';
   }
 
+  // Focus moves into the dialog and comes back to whoever opened it. The menu
+  // item that did is hidden once the menu closes, so the way back is More.
+  var a = document.activeElement;
+  _qrefReturn = (a && document.getElementById('more-menu').contains(a)) ? document.getElementById('more-btn')
+              : (a && a !== document.body ? a : null);
+  overlay.inert = false;
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+  var cb = overlay.querySelector('.close-btn');
+  if (cb) cb.focus({ preventScroll: true });
 }
+var _qrefReturn = null;
 function closeQuickRef() {
   var overlay = document.getElementById('qref-overlay');
-  if (overlay) overlay.classList.remove('open');
+  if (overlay) { overlay.classList.remove('open'); overlay.inert = true; }
   document.body.style.overflow = '';
+  if (_qrefReturn) { _qrefReturn.focus({ preventScroll: true }); _qrefReturn = null; }
 }
+// Tab stays inside the open card, as a modal dialog is expected to keep it.
+document.getElementById('qref-overlay').addEventListener('keydown', function(e){
+  if (e.key !== 'Tab' || !this.classList.contains('open')) return;
+  var f = Array.prototype.slice.call(this.querySelectorAll('button:not([disabled]),a[href]'));
+  if (!f.length) return;
+  var i = f.indexOf(document.activeElement);
+  if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+  else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+});
 function toggleSunlight() {
   var overlay = document.getElementById('qref-overlay');
   var btn = document.getElementById('qref-sun-btn');
@@ -1086,7 +1307,68 @@ function toggleSunlight() {
     : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> Sunlight Mode';
 }
 document.addEventListener('keydown', function(e){
-  if (e.key === 'Escape') closeQuickRef();
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('qref-overlay').classList.contains('open')) closeQuickRef();
+  else closeActPop(true);
+});
+
+// ── Share popover and More menu ──
+// One open at a time. Under its trigger on a desktop (placed here, since the
+// row wraps); on a phone the stylesheet rests it on the action bar instead.
+var _actPop = null;
+var _phone = window.matchMedia('(max-width:768px)');
+function placeActPop() {
+  if (!_actPop) return;
+  var pop = _actPop.pop, r = _actPop.trig.getBoundingClientRect();
+  if (_phone.matches) return;
+  var vw = document.documentElement.clientWidth, w = pop.offsetWidth;
+  var rtl = getComputedStyle(document.documentElement).direction === 'rtl';
+  var x = rtl ? r.right - w : r.left;
+  x = Math.max(16, Math.min(x, vw - w - 16));
+  pop.style.setProperty('--pop-x', Math.round(x + window.scrollX) + 'px');
+  pop.style.setProperty('--pop-y', Math.round(r.bottom + window.scrollY + 8) + 'px');
+}
+function closeActPop(returnFocus) {
+  if (!_actPop) return;
+  var o = _actPop; _actPop = null;
+  o.pop.classList.remove('open');
+  o.trig.setAttribute('aria-expanded', 'false');
+  document.body.classList.remove('act-pop-open');
+  if (returnFocus) o.trig.focus();
+}
+function openActPop(trig, pop) {
+  var same = _actPop && _actPop.pop === pop;
+  closeActPop(false);
+  if (same) return;
+  _actPop = { trig: trig, pop: pop };
+  placeActPop();
+  pop.classList.add('open');
+  trig.setAttribute('aria-expanded', 'true');
+  document.body.classList.add('act-pop-open');
+  var first = pop.querySelector('[role^="menuitem"]:not([disabled]), .pop-btn');
+  (first || pop).focus({ preventScroll: true });
+}
+document.getElementById('share-btn').addEventListener('click', function(){ openActPop(this, document.getElementById('share-pop')); });
+document.getElementById('more-btn').addEventListener('click', function(){ openActPop(this, document.getElementById('more-menu')); });
+document.addEventListener('click', function(e){
+  if (_actPop && !_actPop.pop.contains(e.target) && !_actPop.trig.contains(e.target)) closeActPop(false);
+});
+window.addEventListener('resize', placeActPop);
+// Arrow keys walk the menu, as a menu is expected to.
+document.getElementById('more-menu').addEventListener('keydown', function(e){
+  if (e.key === 'Tab') { closeActPop(false); return; }
+  var items = Array.prototype.slice.call(this.querySelectorAll('[role^="menuitem"]:not([disabled])'));
+  if (!items.length) return;
+  var i = items.indexOf(document.activeElement);
+  if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+  else if (e.key === 'Home') { e.preventDefault(); items[0].focus(); }
+  else if (e.key === 'End') { e.preventDefault(); items[items.length - 1].focus(); }
+});
+// The share popover closes once focus leaves it, so Tab never leaves it
+// hanging open over the page.
+document.getElementById('share-pop').addEventListener('focusout', function(e){
+  if (_actPop && _actPop.pop === this && e.relatedTarget && !this.contains(e.relatedTarget) && e.relatedTarget !== _actPop.trig) closeActPop(false);
 });
 
 // ── Page exit transition

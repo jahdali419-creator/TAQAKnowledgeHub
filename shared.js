@@ -23,8 +23,12 @@
 (function(){
   var s=document.createElement('style');
   s.textContent=
-    'html{overflow-x:hidden;max-width:100vw;}'+
-    'body{overflow-x:hidden;width:100%;max-width:100%;}'+
+    /* clip, not hidden: hidden makes html and body scroll containers, which
+       quietly broke every position:sticky on the site (tab bars, the glossary
+       rail). Browsers without clip fall back to hidden. */
+    'html{overflow-x:clip;max-width:100vw;}'+
+    'body{overflow-x:clip;width:100%;max-width:100%;}'+
+    '@supports not (overflow:clip){html,body{overflow-x:hidden;}}'+
     '*{box-sizing:border-box;}'+
     /* clamp decorative wide elements that bleed past viewport */
     '.hub-glow,.bg-blob,.bg-blob-1,.bg-blob-2,.bg-blob-3{max-width:100vw!important;overflow:hidden;}'+
@@ -33,7 +37,7 @@
       /* prevent any child from being wider than screen */
       '.page-wrapper>*,.main-wrapper,.main-inner,.search-hub,'+
       '.results-section,.prompts-section,.chat-log,'+
-      '.seg-panel,.doc-list,.doc-toolbar{max-width:100vw!important;overflow-x:hidden!important;}'+
+      '.seg-panel,.doc-list,.doc-toolbar{max-width:100vw!important;overflow-x:clip!important;}'+
       /* stats strips that use flex but don't wrap */
       '.stats-strip-inner,.stat-pill-row{flex-wrap:wrap!important;}'+
       /* hero sections: contain text */
@@ -66,7 +70,7 @@
     '.bell-btn{min-width:44px!important;min-height:44px!important;}'+
     '.file-remove,.photo-thumb-del,.annot-del,.bm-x,.qr-close{min-width:44px!important;min-height:44px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;}'+
     '@media(max-width:768px){'+
-      '.btn,.nav-links a,.mob-seg-link{min-height:44px!important;display:inline-flex!important;align-items:center!important;}'+
+      '.btn{min-height:44px!important;display:inline-flex!important;align-items:center!important;}'+
       '.annot-tool-btn{min-width:44px!important;min-height:44px!important;}'+
     '}';
   document.head.appendChild(s);
@@ -255,120 +259,203 @@ window.showToast=function(msg,type){
   });
 })();
 
-// ── Mobile nav hamburger (injected on all pages that have a nav) ──
+// ── The top bar ──
+/* One bar for the whole site. Every page carries the same <nav id="navbar">
+   markup and links topbar.css, so it is drawn in its final form before this
+   runs. What is added here depends on who is looking: Master List for the
+   roles that may open the register, Upload for the roles that may file, the
+   Areas sheet (built from the register, so a renamed area cannot survive as
+   stale markup) and the phone menu. */
 (function(){
+  var navEl=document.getElementById('navbar')||document.querySelector('nav');
+  var R=(typeof TAQA_ROLE!=='undefined')?TAQA_ROLE:null;
+  var cap=null; try{ cap=R&&R.effective?R.effective():null; }catch(e){}
+  var canRegister=false; try{ canRegister=!R||R.canRegister(); }catch(e){}
+  var canUpload=!!(cap&&cap.editMetadata);
+  var p=location.pathname;
+  var onPage=function(f){ return f==='index.html' ? (/\/$/.test(p)||/\/index\.html$/.test(p)) : p.indexOf('/'+f)>-1; };
+  var esc=function(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var L=(typeof TAQA_DOC_LOOKUPS!=='undefined')?TAQA_DOC_LOOKUPS.segments:null;
+  var here=(p.indexOf('segment.html')>-1)?new URLSearchParams(location.search).get('id'):null;
+  var live=function(id){ try{ return (typeof TAQA_STORE!=='undefined')?TAQA_STORE.area(id).live:null; }catch(e){ return null; } };
+  var FAM=[
+    {group:'segment', title:'Operational Segments'},
+    {group:'function',title:'Corporate Functions'},
+    {group:'product', title:'Products & Technology'}
+  ];
+  var famIds=function(g){ return Object.keys(L).filter(function(k){return L[k].group===g;})
+    .sort(function(a,b){return L[a].name.localeCompare(L[b].name);}); };
+  /* The bar's four popovers (Areas, the door, Bookmarks, the phone menu) are
+     one family: opening any of them closes the others, so two can never be
+     drawn over each other. Each one publishes its own close function. */
+  function closeOthers(keep){
+    var all={areas:'taqaCloseAreas',door:'taqaCloseDoor',bm:'taqaCloseBookmarks',menu:'taqaCloseMenu'};
+    Object.keys(all).forEach(function(k){ if(k!==keep && typeof window[all[k]]==='function') window[all[k]](); });
+  }
+  window.taqaCloseBarPopovers=closeOthers;
+  var ICON={
+    bm:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg>',
+    up:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg>',
+    chev:'<svg class="mm-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>'
+  };
+
+  /* ---- Role pieces on the desktop bar ----
+     Master List and Upload are in the static markup, and a one-line hint in
+     the <nav> shows them from the first paint for the roles that usually hold
+     them, so the links do not jump sideways once this runs. Here the real
+     answer from TAQA_ROLE (delegation included) replaces the hint, and a
+     piece the reader may not use is taken out of the page altogether. */
+  var docEl=document.documentElement;
+  if(canRegister) docEl.setAttribute('data-tb-reg',''); else docEl.removeAttribute('data-tb-reg');
+  if(canUpload) docEl.setAttribute('data-tb-up',''); else docEl.removeAttribute('data-tb-up');
+  if(navEl && navEl.id==='navbar'){
+    if(!canRegister) navEl.querySelectorAll('.nav-reg').forEach(function(e){ e.remove(); });
+    if(!canUpload) navEl.querySelectorAll('.nav-up').forEach(function(e){ e.remove(); });
+    navEl.querySelectorAll('.nav-links a.active').forEach(function(a){ a.setAttribute('aria-current','page'); });
+  }
+
+  /* ---- Areas sheet ---- */
+  var ddLi=document.getElementById('seg-dropdown-li'), ddBtn=document.getElementById('seg-dropdown-btn');
+  var ddPanel=ddLi?ddLi.querySelector('.nav-dropdown-panel'):null;
+  if(ddPanel && L){
+    var h='';
+    if(L.company){
+      var cn=live('company');
+      h+='<a class="ad-company'+(here==='company'?' here':'')+'" href="segment.html?id=company"'+(here==='company'?' aria-current="page"':'')+'>'+
+         '<span>Company policies</span><span class="ad-sub">Apply to everyone</span>'+(cn!=null?'<span class="ad-n">'+cn+'</span>':'')+'</a>';
+    }
+    h+='<div class="ad-cols">'+FAM.map(function(f){
+      var ids=famIds(f.group); if(!ids.length) return '';
+      return '<div class="ad-col"><div class="ad-head"><span>'+esc(f.title)+'</span><span class="ad-n">'+ids.length+'</span></div>'+
+        ids.map(function(k){
+          var n=live(k), me=(k===here);
+          return '<a href="segment.html?id='+encodeURIComponent(k)+'"'+(me?' class="here" aria-current="page"':'')+'><span>'+esc(L[k].name)+'</span>'+
+                 (n!=null?'<span class="ad-n">'+n+'</span>':'')+'</a>';
+        }).join('')+'</div>';
+    }).join('')+'</div>';
+    ddPanel.innerHTML=h;
+  }
+  function closeAreas(){ if(ddLi){ ddLi.classList.remove('open'); if(ddBtn) ddBtn.setAttribute('aria-expanded','false'); } }
+  if(ddLi && ddBtn){
+    ddBtn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var open=ddLi.classList.toggle('open');
+      ddBtn.setAttribute('aria-expanded',open?'true':'false');
+      if(open) closeOthers('areas');
+    });
+    ddLi.addEventListener('click',function(e){ e.stopPropagation(); });
+    document.addEventListener('click',closeAreas);
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape' && ddLi.classList.contains('open')){ closeAreas(); ddBtn.focus(); }
+    });
+    // Tabbing out of the sheet closes it, so it never stays open behind focus.
+    ddLi.addEventListener('focusout',function(e){
+      if(ddLi.classList.contains('open') && e.relatedTarget && !ddLi.contains(e.relatedTarget)) closeAreas();
+    });
+  }
+  window.taqaCloseAreas=closeAreas;
+
+  /* ---- Phone menu styles ---- */
   var s=document.createElement('style');
   s.textContent=
-    '.nav-hamburger{display:none;background:none;border:1px solid rgba(0,0,0,0.1);border-radius:7px;padding:7px 9px;cursor:pointer;flex-direction:column;gap:4px;align-items:center;justify-content:center;flex-shrink:0;}'+
-    'html[data-taqa-theme="dark"] .nav-hamburger{border-color:rgba(255,255,255,0.15);}'+
-    '.nav-hamburger span{display:block;width:17px;height:2px;background:#756A61;border-radius:2px;transition:all 0.25s;}'+
-    '.nav-mobile-menu{display:none;position:fixed;left:0;right:0;z-index:998;background:rgba(255,255,255,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,0.08);padding:8px 20px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.1);}'+
+    '.nav-hamburger{display:none;}'+
+    '.nav-mobile-menu{display:none;position:fixed;inset-inline:0;top:var(--nav-h,64px);z-index:998;'+
+      'background:var(--tb-solid,#fff);border-bottom:1px solid var(--tb-rule,rgba(117,106,97,.13));'+
+      'padding:6px 16px 28px;box-shadow:0 22px 44px -26px rgba(0,88,90,.28);'+
+      'overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;font-family:"Inter",system-ui,sans-serif;}'+
     '.nav-mobile-menu.open{display:block;}'+
-    '.nav-mobile-menu a{display:block;padding:13px 0;font-size:15px;font-weight:500;color:#1E1C1A;text-decoration:none;border-bottom:1px solid rgba(0,0,0,0.07);transition:color 0.2s;}'+
-    '.nav-mobile-menu a:last-child{border-bottom:none;}'+
-    '.nav-mobile-menu a.active,.nav-mobile-menu a:hover{color:var(--primary-ink,#005D63);}'+
-    'html[data-taqa-theme="dark"] .nav-mobile-menu{background:rgba(0,35,38,0.97);border-color:#003A3D;}'+
-    'html[data-taqa-theme="dark"] .nav-mobile-menu a{color:#C7DBDD;border-color:#003A3D;}'+
-    '.nav-mobile-menu{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}'+
-    'html.taqa-menu-open .bm-fab,html.taqa-menu-open .scroll-top-btn,html.taqa-menu-open #back-to-top,html.taqa-menu-open .bm-panel{display:none!important;}'+
-    '.nav-mobile-menu .mm-main a:last-child{border-bottom:none;}'+
-    '.nav-mobile-menu .mm-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--primary-ink,#005D63);padding:20px 0 8px;border-top:1px solid var(--border,rgba(0,0,0,.08));margin-top:4px;}'+
-    '.nav-mobile-menu a.mm-company,.nav-mobile-menu .mm-grp>summary{display:flex!important;align-items:center;gap:10px;min-height:52px;padding:0;font-size:15px;font-weight:600;color:var(--text,#1E1C1A);text-decoration:none;border-bottom:1px solid var(--border,rgba(0,0,0,.07));cursor:pointer;}'+
+    /* On a tablet the menu drops as a sheet from the end of the bar rather
+       than stretching a phone list across a 1000px screen. */
+    '@media (min-width:641px){.nav-mobile-menu{inset-inline-start:auto;inset-inline-end:12px;inline-size:min(420px,calc(100vw - 24px));'+
+      'border:1px solid var(--tb-rule,rgba(117,106,97,.13));border-radius:16px;padding:6px 18px 18px;'+
+      'box-shadow:var(--tb-shadow,0 22px 44px -26px rgba(0,88,90,.28));}}'+
+    'html.taqa-menu-open .scroll-top-btn,html.taqa-menu-open #back-to-top,html.taqa-menu-open .bm-panel{display:none!important;}'+
+    '.nav-mobile-menu a,.nav-mobile-menu .mm-row{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:0 4px;margin:0;'+
+      'font:500 15.5px/1.2 "Inter",system-ui,sans-serif;color:var(--tb-text,#1E1C1A);text-decoration:none;text-align:start;'+
+      'background:none;border:0;border-bottom:1px solid var(--tb-rule,rgba(117,106,97,.13));cursor:pointer;}'+
+    '.nav-mobile-menu .mm-main a:last-child{border-bottom:0;}'+
+    '.nav-mobile-menu .mm-main a.active{color:var(--tb-ink,#005D63);font-weight:600;}'+
+    '.nav-mobile-menu .mm-main a.active::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;margin-inline-start:-2px;}'+
+    '.nav-mobile-menu .mm-tools{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 4px;}'+
+    '.nav-mobile-menu .mm-tools .mm-row,.nav-mobile-menu .mm-tools a{min-height:48px;justify-content:center;border:1px solid var(--tb-rule,rgba(117,106,97,.13));border-radius:12px;padding:0 12px;font-weight:600;font-size:14.5px;}'+
+    '.nav-mobile-menu .mm-tools .mm-row:only-child{grid-column:1/-1;}'+
+    '.nav-mobile-menu .mm-tools a.mm-up{background:var(--tb-primary,#005D63);border-color:transparent;color:#FFFFFF;}'+
+    '.nav-mobile-menu .mm-tools svg{flex:none;}'+
+    '.nav-mobile-menu .mm-bmn{font-variant-numeric:tabular-nums;color:var(--tb-light,#756A61);font-weight:500;}'+
+    '.nav-mobile-menu .mm-label{font:700 13px/1.2 "BwGradual","Urbanist",sans-serif;letter-spacing:0;text-transform:none;'+
+      'color:var(--tb-light,#756A61);padding:22px 4px 6px;margin:0;border:0;}'+
+    '.nav-mobile-menu a.mm-company,.nav-mobile-menu .mm-grp>summary{display:flex!important;align-items:center;gap:10px;min-height:52px;padding:0 4px;'+
+      'font:700 15.5px/1.25 "BwGradual","Urbanist",sans-serif;color:var(--tb-text,#1E1C1A);text-decoration:none;'+
+      'border-bottom:1px solid var(--tb-rule,rgba(117,106,97,.13));cursor:pointer;}'+
     '.nav-mobile-menu .mm-grp>summary{list-style:none;}'+
     '.nav-mobile-menu .mm-grp>summary::-webkit-details-marker{display:none;}'+
-    '.nav-mobile-menu .mm-n{margin-inline-start:auto;font-size:12.5px;font-weight:600;color:var(--text-light,#756A61);font-variant-numeric:tabular-nums;}'+
-    '.nav-mobile-menu .mm-chev{flex:none;color:var(--primary-ink,#005D63);transition:transform .2s cubic-bezier(.23,1,.32,1);}'+
+    '.nav-mobile-menu .mm-n{margin-inline-start:auto;font:500 12.5px/1 "Inter",system-ui,sans-serif;color:var(--tb-light,#756A61);font-variant-numeric:tabular-nums;}'+
+    '.nav-mobile-menu .mm-chev{flex:none;color:var(--tb-ink,#005D63);transition:transform .2s cubic-bezier(.23,1,.32,1);}'+
     '.nav-mobile-menu .mm-grp[open]>summary .mm-chev{transform:rotate(180deg);}'+
-    '.nav-mobile-menu .mm-grp[open]>summary{color:var(--primary-ink,#005D63);border-bottom-color:transparent;}'+
-    '.nav-mobile-menu .mm-list{margin:0 0 12px;padding:2px 0;border-inline-start:2px solid var(--border,rgba(0,0,0,.1));border-bottom:1px solid var(--border,rgba(0,0,0,.07));padding-bottom:10px;}'+
-    '.nav-mobile-menu .mm-list a{display:flex!important;align-items:center;gap:10px;min-height:44px;padding:0 0 0 14px;margin-inline-start:-2px;border:0;border-inline-start:2px solid transparent;font-family:\'BwGradual\',\'Urbanist\',sans-serif;font-size:15px;font-weight:300;color:var(--text,#1E1C1A);}'+
-    '.nav-mobile-menu .mm-dc{margin-inline-start:auto;font-size:12.5px;color:var(--text-light,#756A61);font-variant-numeric:tabular-nums;}'+
-    '.nav-mobile-menu .mm-list a.mm-here{color:var(--primary-ink,#005D63);font-weight:500;border-inline-start-color:var(--primary-ink,#005D63);}'+
-    '.nav-mobile-menu a.mm-company.mm-here{color:var(--primary-ink,#005D63);}'+
-    '.nav-mobile-menu .mm-list a:hover,.nav-mobile-menu a.mm-company:hover{color:var(--primary-ink,#005D63);}'+
-    'html[data-taqa-theme="dark"] .nav-mobile-menu .mm-label{border-color:#003A3D;}'+
-    'html[data-taqa-theme="dark"] .nav-mobile-menu a.mm-company,html[data-taqa-theme="dark"] .nav-mobile-menu .mm-grp>summary{color:#C7DBDD;border-color:#003A3D;}'+
-    'html[data-taqa-theme="dark"] .nav-mobile-menu .mm-grp[open]>summary{color:#00BBB6;border-bottom-color:transparent;}'+
-    'html[data-taqa-theme="dark"] .nav-mobile-menu .mm-list{border-color:#003A3D;}'+
-    'html[data-taqa-theme="dark"] .nav-mobile-menu .mm-list a{color:#C7DBDD;}'+
-    'html[data-taqa-theme="dark"] .nav-mobile-menu .mm-list a.mm-here{color:#00BBB6;border-inline-start-color:#00BBB6;}'+
-    'html[data-taqa-theme="dark"] .nav-mobile-menu .mm-n,html[data-taqa-theme="dark"] .nav-mobile-menu .mm-dc{color:#8CB6B9;}'+
-    '@media(max-width:640px){'+
-      '.nav-hamburger{display:flex!important;}'+
-      '.nav-links{display:none!important;}'+
-      '.nav-right a.btn,.nav-right .btn-primary,.nav-right .btn-outline,.nav-right .btn-ghost{display:none!important;}'+
-    '}';
+    '.nav-mobile-menu .mm-grp[open]>summary{color:var(--tb-ink,#005D63);border-bottom-color:transparent;}'+
+    '.nav-mobile-menu .mm-list{margin:0 0 10px;padding:2px 0 10px;border-inline-start:2px solid var(--tb-rule,rgba(117,106,97,.13));border-bottom:1px solid var(--tb-rule,rgba(117,106,97,.13));}'+
+    '.nav-mobile-menu .mm-list a{min-height:44px;padding:0 4px;padding-inline-start:14px;margin-inline-start:-2px;border:0;border-inline-start:2px solid transparent;'+
+      'font:300 15.5px/1.3 "BwGradual","Urbanist",sans-serif;color:var(--tb-text,#1E1C1A);}'+
+    '.nav-mobile-menu .mm-dc{margin-inline-start:auto;font:500 12.5px/1 "Inter",system-ui,sans-serif;color:var(--tb-light,#756A61);font-variant-numeric:tabular-nums;}'+
+    '.nav-mobile-menu .mm-list a.mm-here{color:var(--tb-ink,#005D63);font-weight:400;border-inline-start-color:var(--tb-ink,#005D63);}'+
+    '.nav-mobile-menu a.mm-company.mm-here{color:var(--tb-ink,#005D63);}'+
+    '.nav-mobile-menu .mm-door{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:2px 0 0;}'+
+    '.nav-mobile-menu .mm-door button{display:flex;align-items:center;gap:9px;min-height:48px;padding:0 12px;border-radius:12px;'+
+      'border:1px solid var(--tb-rule,rgba(117,106,97,.13));background:transparent;color:var(--tb-text,#1E1C1A);'+
+      'font:500 14px/1.2 "Inter",system-ui,sans-serif;cursor:pointer;text-align:start;}'+
+    '.nav-mobile-menu .mm-door button[aria-pressed="true"]{border-color:var(--tb-ink,#005D63);color:var(--tb-ink,#005D63);font-weight:600;background:var(--tb-active,rgba(0,93,99,.07));}'+
+    '.nav-mobile-menu .mm-door-area{margin-top:10px;}'+
+    '.nav-mobile-menu .mm-door-area label{display:block;font:500 12.5px/1.3 "Inter",system-ui,sans-serif;color:var(--tb-light,#756A61);margin:0 4px 6px;}'+
+    '.nav-mobile-menu .mm-door-area select{width:100%;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--tb-rule,rgba(117,106,97,.13));'+
+      'background:var(--tb-solid,#fff);color:var(--tb-text,#1E1C1A);font:500 15px "Inter",system-ui,sans-serif;}'+
+    '.nav-mobile-menu .mm-note{font-size:12.5px;line-height:1.45;color:var(--tb-light,#756A61);padding:10px 4px 0;}'+
+    '@media (hover:hover){.nav-mobile-menu a:hover,.nav-mobile-menu .mm-row:hover{color:var(--tb-ink,#005D63);}'+
+      '.nav-mobile-menu .mm-tools a.mm-up:hover{color:#FFFFFF;background:#004A4F;}}';
   document.head.appendChild(s);
 
-  // Inject hamburger into .nav-right (index.html already has one, skip)
+  // Fallback for any page still without the canonical bar.
   if(!document.getElementById('nav-hamburger')){
     var nr=document.querySelector('.nav-right');
     if(nr){
-      var hb=document.createElement('button');
-      hb.id='nav-hamburger';hb.className='nav-hamburger';hb.setAttribute('aria-label','Menu');
-      hb.innerHTML='<span></span><span></span><span></span>';
-      nr.insertBefore(hb,nr.firstChild);
+      var hb0=document.createElement('button');
+      hb0.id='nav-hamburger';hb0.className='nav-hamburger';hb0.type='button';hb0.setAttribute('aria-label','Menu');
+      hb0.innerHTML='<span></span><span></span><span></span>';
+      nr.appendChild(hb0);
     }
   }
 
-  /* The phone menu. Built here, once, for every page, so the menu is the
-     same wherever you open it. It used to be two menus: a short one on most
-     pages that could not reach any area at all, and a long one on the home
-     page whose twenty-four area names ran together on a line, because the
-     touch-target rule above set them inline. The areas now sit in their
-     three families, each one a fold that shows its count, with the area you
-     are in marked and its family already open. */
+  /* ---- Phone menu ---- */
   var menu=document.getElementById('nav-mobile-menu');
-  var nav=document.querySelector('nav');
-  if(!menu && nav){
+  if(!menu && navEl){
     menu=document.createElement('div');
     menu.id='nav-mobile-menu';menu.className='nav-mobile-menu';
-    nav.parentNode.insertBefore(menu,nav.nextSibling);
+    navEl.parentNode.insertBefore(menu,navEl.nextSibling);
   }
   if(menu){
-    var p=location.pathname;
-    var esc=function(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
-    // The register entry is built only for a role that may open it.
-    var items=[
-      {href:'index.html',label:'Home'},
-      {href:'ai-search.html',label:'Document Search'}
-    ];
-    if (typeof TAQA_ROLE === 'undefined' || TAQA_ROLE.canRegister())
-      items.push({href:'master-list.html',label:'Master List'});
-    items.push({href:'glossary.html',label:'Field Glossary'},
-               {href:'support-ticket.html',label:'Ask Expert'});
+    menu.setAttribute('aria-label','Menu');
+    var items=[{href:'index.html',label:'Home'},{href:'ai-search.html',label:'Document Search'}];
+    if(canRegister) items.push({href:'master-list.html',label:'Master List'});
+    items.push({href:'glossary.html',label:'Field Glossary'},{href:'support-ticket.html',label:'Ask Expert'});
     var html='<div class="mm-main">'+items.map(function(l){
-      var key=l.href.replace('.html','');
-      var active=(l.href==='index.html')
-        ?(p.endsWith('/')||p.endsWith('/index.html'))
-        :(p.indexOf('/'+key+'.html')>-1);
-      return '<a href="'+l.href+'"'+(active?' class="active" aria-current="page"':'')+'>'+l.label+'</a>';
+      var a=onPage(l.href);
+      return '<a href="'+l.href+'"'+(a?' class="active" aria-current="page"':'')+'>'+l.label+'</a>';
     }).join('')+'</div>';
 
-    var L=(typeof TAQA_DOC_LOOKUPS!=='undefined')?TAQA_DOC_LOOKUPS.segments:null;
+    html+='<div class="mm-tools"><button type="button" class="mm-row" id="mm-bm">'+ICON.bm+'<span>Bookmarks</span><span class="mm-bmn" id="mm-bmn"></span></button>'+
+          (canUpload?'<a class="mm-up" href="upload.html"'+(onPage('upload.html')?' aria-current="page"':'')+'>'+ICON.up+'<span>Upload</span></a>':'')+'</div>';
+
     if(L){
-      var here=(p.indexOf('segment.html')>-1)?new URLSearchParams(location.search).get('id'):null;
-      var live=function(id){
-        try{ return (typeof TAQA_STORE!=='undefined')?TAQA_STORE.area(id).live:null; }catch(e){ return null; }
-      };
-      var FAM=[
-        {group:'segment', title:'Operational Segments'},
-        {group:'function',title:'Corporate Functions'},
-        {group:'product', title:'Products & Technology'}
-      ];
-      var chev='<svg class="mm-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
       html+='<div class="mm-label">Areas</div>';
       if(L.company){
-        var cn=live('company');
+        var cn2=live('company');
         html+='<a class="mm-company'+(here==='company'?' mm-here':'')+'" href="segment.html?id=company"'+(here==='company'?' aria-current="page"':'')+'>'+
-              '<span>Company policies</span>'+(cn!=null?'<span class="mm-n">'+cn+'</span>':'')+'</a>';
+              '<span>Company policies</span>'+(cn2!=null?'<span class="mm-n">'+cn2+'</span>':'')+'</a>';
       }
       FAM.forEach(function(f){
-        var ids=Object.keys(L).filter(function(k){return L[k].group===f.group;})
-          .sort(function(a,b){return L[a].name.localeCompare(L[b].name);});
+        var ids=famIds(f.group);
         if(!ids.length)return;
         var open=here&&ids.indexOf(here)>-1;
-        html+='<details class="mm-grp"'+(open?' open':'')+'><summary><span>'+esc(f.title)+'</span><span class="mm-n">'+ids.length+'</span>'+chev+'</summary><div class="mm-list">'+
+        html+='<details class="mm-grp"'+(open?' open':'')+'><summary><span>'+esc(f.title)+'</span><span class="mm-n">'+ids.length+'</span>'+ICON.chev+'</summary><div class="mm-list">'+
           ids.map(function(k){
             var n=live(k), me=(k===here);
             return '<a href="segment.html?id='+encodeURIComponent(k)+'"'+(me?' class="mm-here" aria-current="page"':'')+'><span>'+esc(L[k].name)+'</span>'+
@@ -376,39 +463,80 @@ window.showToast=function(msg,type){
           }).join('')+'</div></details>';
       });
     }
+    if(canRegister && R){
+      html+='<div class="mm-label">More</div><div class="mm-main"><a href="whats-new.html"'+(onPage('whats-new.html')?' class="active" aria-current="page"':'')+'>About this prototype</a></div>';
+    }
     menu.innerHTML=html;
   }
 
-  // Toggle (overrides index.html's identical version safely)
-  window.toggleMobileNav=function(){
-    var menu=document.getElementById('nav-mobile-menu');
-    var nav=document.querySelector('nav');
-    if(menu){
-      if(nav){
-        var t=Math.round(nav.getBoundingClientRect().bottom);
-        menu.style.top=t+'px';
-        menu.style.maxHeight='calc(100dvh - '+t+'px)';
-      }
-      menu.classList.toggle('open');
-      document.documentElement.classList.toggle('taqa-menu-open',menu.classList.contains('open'));
-      var hb=document.getElementById('nav-hamburger');
-      if(hb)hb.setAttribute('aria-expanded',menu.classList.contains('open')?'true':'false');
+  function setMenu(open){
+    var m=document.getElementById('nav-mobile-menu'); if(!m) return;
+    if(open){
+      var t=navEl?Math.round(navEl.getBoundingClientRect().bottom):64;
+      var sheet=window.matchMedia&&window.matchMedia('(min-width:641px)').matches;
+      if(sheet) t+=8;
+      m.style.top=t+'px';
+      m.style.maxHeight='calc(100dvh - '+(t+(sheet?12:0))+'px)';
+      closeOthers('menu');
     }
+    m.classList.toggle('open',!!open);
+    document.documentElement.classList.toggle('taqa-menu-open',!!open);
+    var hb=document.getElementById('nav-hamburger');
+    if(hb){ hb.setAttribute('aria-expanded',open?'true':'false'); hb.setAttribute('aria-label',open?'Close menu':'Menu'); }
+  }
+  window.toggleMobileNav=function(){
+    var m=document.getElementById('nav-mobile-menu');
+    setMenu(!(m&&m.classList.contains('open')));
   };
+  window.taqaCloseMenu=function(){ setMenu(false); };
 
-  // Wire hamburger click
   document.addEventListener('click',function(e){
     var hb=document.getElementById('nav-hamburger');
-    if(hb&&(hb===e.target||hb.contains(e.target)))window.toggleMobileNav();
+    var m=document.getElementById('nav-mobile-menu');
+    if(hb&&(hb===e.target||hb.contains(e.target))){ window.toggleMobileNav(); return; }
+    if(m&&m.classList.contains('open')&&!m.contains(e.target)) setMenu(false);
   });
-
-  // Close when clicking outside
-  document.addEventListener('click',function(e){
-    var menu=document.getElementById('nav-mobile-menu');
+  document.addEventListener('keydown',function(e){
+    var m=document.getElementById('nav-mobile-menu');
+    if(e.key==='Escape'&&m&&m.classList.contains('open')){
+      setMenu(false); var hb=document.getElementById('nav-hamburger'); if(hb) hb.focus();
+    }
+  });
+  // A menu left open across a rotate to a wide screen would sit under the desktop bar.
+  window.addEventListener('resize',function(){
     var hb=document.getElementById('nav-hamburger');
-    if(menu&&menu.classList.contains('open')&&!menu.contains(e.target)&&hb&&!hb.contains(e.target))
-      { menu.classList.remove('open'); document.documentElement.classList.remove('taqa-menu-open'); }
-  });
+    if(hb && getComputedStyle(hb).display==='none') setMenu(false);
+  },{passive:true});
+})();
+
+// ── Theme: one switch for every page ──
+/* Every page used to carry its own copy, with two different icon ids. This
+   one updates whichever icon the page has and keeps the same storage key. */
+(function(){
+  var SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
+  var MOON='M6.2 2.3a.55.55 0 0 1 .2.62 5.2 5.2 0 0 0 6.7 6.7.55.55 0 0 1 .68.75A6.3 6.3 0 1 1 5.6 2.1a.55.55 0 0 1 .6.2Z';
+  function isDark(){ return document.documentElement.getAttribute('data-taqa-theme')==='dark'; }
+  function paint(){
+    var d=isDark();
+    document.querySelectorAll('#dark-icon,#theme-icon').forEach(function(svg){
+      var path=svg.querySelector('path');
+      if(!path){ path=document.createElementNS('http://www.w3.org/2000/svg','path'); svg.appendChild(path); }
+      path.setAttribute('d',d?MOON:SUN);
+      path.removeAttribute('fill');
+    });
+    var lbl=document.getElementById('theme-label'); if(lbl) lbl.textContent=d?'Light':'Dark';
+    var b=document.getElementById('dark-toggle');
+    if(b){ var t=d?'Switch to light':'Switch to dark'; b.setAttribute('aria-label',t); b.title=t; }
+  }
+  window.toggleDark=function(){
+    var n=isDark()?'light':'dark';
+    document.documentElement.setAttribute('data-taqa-theme',n);
+    try{ localStorage.setItem('taqa-theme-v3',n); }catch(e){}
+    paint();
+    try{ window.dispatchEvent(new CustomEvent('taqa:theme-changed',{detail:{theme:n}})); }catch(e){}
+  };
+  window.taqaPaintTheme=paint;
+  paint();
 })();
 
 // ── PWA Install Prompt (mobile only) ──
@@ -629,50 +757,42 @@ window.showToast=function(msg,type){
     },
     getAll:function(){return load();}
   };
+  /* The list opens from the Bookmarks button in the top bar and hangs under
+     it. It used to open from a round button floating over every page, which
+     on a phone sat on top of each card's own controls. */
   var s=document.createElement('style');
   s.textContent=
-    '.bm-fab{position:fixed;bottom:88px;right:28px;z-index:499;width:44px;height:44px;border-radius:50%;'+
-    'background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);'+
-    'border:1px solid rgba(0,0,0,0.09);box-shadow:0 4px 20px rgba(0,0,0,0.1);'+
-    'cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;line-height:1;transition:transform 0.2s,box-shadow 0.2s;padding:0;}'+
-    '.bm-fab:hover{transform:scale(1.1);box-shadow:0 8px 28px rgba(0,93,99,0.28);}'+
-    '.bm-cnt{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 3px;'+
-    'border-radius:50px;background:#005D63;color:#fff;font-size:9px;font-weight:700;'+
-    'display:none;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;}'+
-    '.bm-panel{position:fixed;bottom:144px;right:28px;z-index:498;width:min(320px,calc(100vw - 40px));max-height:420px;'+
-    'background:rgba(255,255,255,0.99);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);'+
-    'border:1px solid rgba(0,0,0,0.08);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,0.16);'+
+    '.bm-panel{position:fixed;top:calc(var(--nav-h,64px) + 8px);inset-inline-end:12px;z-index:1002;width:min(360px,calc(100vw - 24px));max-height:min(460px,calc(100dvh - var(--nav-h,64px) - 24px));'+
+    'background:var(--tb-solid,#fff);border:1px solid var(--tb-rule,rgba(117,106,97,.13));border-radius:16px;'+
+    'box-shadow:0 22px 44px -26px rgba(0,88,90,.32),0 2px 6px -2px rgba(0,88,90,.08);'+
     'display:none;flex-direction:column;overflow:hidden;'+
-    'animation:bmIn 0.22s cubic-bezier(.34,1.56,.64,1);}'+
-    '@keyframes bmIn{from{opacity:0;transform:scale(0.9) translateY(10px);}to{opacity:1;transform:none;}}'+
+    'animation:bmIn .16s cubic-bezier(.23,1,.32,1);font-family:"Inter",system-ui,sans-serif;}'+
+    '@keyframes bmIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}'+
     '.bm-panel.open{display:flex;}'+
-    '.bm-ph{padding:12px 14px 10px;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}'+
-    '.bm-pt{font-family:"BwGradual","Urbanist",sans-serif;font-size:13px;font-weight:700;color:#1E1C1A;}'+
-    '.bm-clr{font-size:11px;color:#756A61;cursor:pointer;background:none;border:none;padding:0;font-family:"Inter",sans-serif;}'+
-    '.bm-clr:hover{color:var(--stop-ink,#C8102E);}'+
-    '.bm-list{flex:1;overflow-y:auto;padding:4px 0;}'+
-    '.bm-item{display:flex;align-items:center;gap:10px;padding:9px 14px;text-decoration:none;transition:background 0.15s;}'+
-    '.bm-item:hover{background:rgba(0,93,99,0.04);}'+
-    '.bm-ico{width:30px;height:30px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-family:"BwGradual","Urbanist",sans-serif;}'+
+    '.bm-ph{padding-block:14px 12px;padding-inline:16px 12px;border-bottom:1px solid var(--tb-rule,rgba(117,106,97,.13));display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;}'+
+    '.bm-pt{font-family:"BwGradual","Urbanist",sans-serif;font-size:15px;font-weight:700;color:var(--tb-text,#1E1C1A);}'+
+    '.bm-pt .bm-pn{font-family:"Inter",sans-serif;font-weight:500;font-size:12.5px;color:var(--tb-light,#756A61);margin-inline-start:6px;font-variant-numeric:tabular-nums;}'+
+    '.bm-acts{display:flex;gap:2px;}'+
+    '.bm-clr{font-size:12.5px;font-weight:500;color:var(--tb-muted,#524D48);cursor:pointer;background:none;border:0;padding:0 10px;min-height:36px;border-radius:8px;font-family:"Inter",sans-serif;}'+
+    '.bm-clr:hover{background:var(--tb-hover,rgba(117,106,97,.08));color:var(--tb-text,#1E1C1A);}'+
+    '#bm-clr:hover{color:var(--stop-ink,#C8102E);}'+
+    '.bm-list{flex:1;overflow-y:auto;padding:6px;overscroll-behavior:contain;}'+
+    '.bm-item{display:flex;align-items:center;gap:12px;padding-block:8px;padding-inline:10px 6px;border-radius:10px;text-decoration:none;transition:background-color .15s;}'+
+    '.bm-item:hover{background:var(--tb-hover,rgba(117,106,97,.08));}'+
+    '.bm-ico{width:32px;height:32px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;font-family:"BwGradual","Urbanist",sans-serif;}'+
     '.bm-inf{flex:1;min-width:0;}'+
-    '.bm-t{font-size:12px;font-weight:600;color:#1E1C1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'+
-    '.bm-m{font-size:10.5px;color:#756A61;margin-top:1px;}'+
-    '.bm-x{background:none;border:none;color:#D3D8D4;cursor:pointer;font-size:16px;padding:2px;flex-shrink:0;line-height:1;}'+
-    '.bm-x:hover{color:var(--stop-ink,#C8102E);}'+
-    '.bm-empty{text-align:center;padding:28px 16px;color:#756A61;font-size:12.5px;line-height:1.6;}'+
-    'html[data-taqa-theme="dark"] .bm-fab{background:rgba(0,35,38,0.92);border-color:rgba(255,255,255,0.08);}'+
-    'html[data-taqa-theme="dark"] .bm-panel{background:rgba(0,45,48,0.99);border-color:rgba(255,255,255,0.07);}'+
-    'html[data-taqa-theme="dark"] .bm-pt{color:#C7DBDD;}'+
-    'html[data-taqa-theme="dark"] .bm-ph{border-color:rgba(255,255,255,0.06);}'+
-    'html[data-taqa-theme="dark"] .bm-t{color:#C7DBDD;}'+
-    'html[data-taqa-theme="dark"] .bm-m,html[data-taqa-theme="dark"] .bm-empty,html[data-taqa-theme="dark"] .bm-clr{color:#8CB6B9;}'+
-    'html[data-taqa-theme="dark"] .bm-item:hover{background:rgba(0,187,182,0.06);}';
+    '.bm-t{font-family:"BwGradual","Urbanist",sans-serif;font-size:14.5px;font-weight:300;line-height:1.3;color:var(--tb-text,#1E1C1A);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'+
+    '.bm-m{font-size:12px;color:var(--tb-light,#756A61);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'+
+    '.bm-x{background:none;border:none;color:var(--tb-light,#756A61);cursor:pointer;font-size:18px;padding:0;flex-shrink:0;line-height:1;border-radius:8px;}'+
+    '.bm-x:hover{color:var(--stop-ink,#C8102E);background:var(--tb-hover,rgba(117,106,97,.08));}'+
+    '.bm-empty{text-align:center;padding:30px 20px 34px;color:var(--tb-light,#756A61);font-size:13.5px;line-height:1.6;}'+
+    '.bm-empty b{display:block;font-family:"BwGradual","Urbanist",sans-serif;font-size:15px;font-weight:700;color:var(--tb-text,#1E1C1A);margin-bottom:4px;}'+
+    '@media (max-width:1180px){.bm-clr{min-height:44px;padding:0 12px;}}'+
+    '@media (max-width:640px){.bm-panel{inset-inline:12px;width:auto;}}'+
+    '@media (prefers-reduced-motion:reduce){.bm-panel{animation:none;}}';
   document.head.appendChild(s);
-  var fab=document.createElement('button');
-  fab.className='bm-fab';fab.title='Bookmarks';fab.setAttribute('aria-label','Bookmarks');
-  fab.innerHTML='🔖<span class="bm-cnt" id="bm-cnt"></span>';
-  document.body.appendChild(fab);
   var panel=document.createElement('div');panel.className='bm-panel';panel.id='bm-panel';
+  panel.setAttribute('role','dialog');panel.setAttribute('aria-label','Bookmarks');
   document.body.appendChild(panel);
   var TC={sop:'rgba(0,93,99,0.10)',manual:'rgba(0,93,99,0.10)',standard:'rgba(0,93,99,0.10)',policy:'rgba(0,93,99,0.10)',lesson:'rgba(0,93,99,0.10)',alert:'rgba(253,105,29,0.12)',software:'rgba(0,93,99,0.10)'};
   var TT={sop:'var(--primary-ink,#005D63)',manual:'var(--primary-ink,#005D63)',standard:'var(--primary-ink,#005D63)',policy:'var(--primary-ink,#005D63)',lesson:'var(--primary-ink,#005D63)',alert:'var(--alert-ink,#A8431A)',software:'var(--primary-ink,#005D63)'};
@@ -684,19 +804,22 @@ window.showToast=function(msg,type){
   function updateBmBadge(){
     var n=window.TAQA_Bookmarks.getAll().length;
     var b=document.getElementById('bm-cnt');
-    if(b){b.textContent=n;b.style.display=n>0?'flex':'none';}
+    if(b){b.textContent=n>99?'99+':n;b.style.display=n>0?'flex':'none';}
+    var m=document.getElementById('mm-bmn'); if(m) m.textContent=n>0?n:'';
+    var btn=document.getElementById('nav-bm');
+    if(btn){var t=n?'Bookmarks, '+n+' saved':'Bookmarks';btn.setAttribute('aria-label',t);btn.title=t;}
   }
   function renderBmPanel(){
     var items=window.TAQA_Bookmarks.getAll();
     updateBmBadge();
     if(!items.length){
-      panel.innerHTML='<div class="bm-ph"><span class="bm-pt">🔖 Bookmarks</span></div>'+
-        '<div class="bm-empty">No bookmarks yet.<br>Tap ★ on any document to save it.</div>';
+      panel.innerHTML='<div class="bm-ph"><span class="bm-pt">Bookmarks</span></div>'+
+        '<div class="bm-empty"><b>Nothing saved yet</b>Tap ☆ on any document to keep it here.</div>';
       return;
     }
     panel.innerHTML='<div class="bm-ph">'+
-      '<span class="bm-pt">🔖 Bookmarks ('+items.length+')</span>'+
-      '<div style="display:flex;gap:6px;">'+
+      '<span class="bm-pt">Bookmarks<span class="bm-pn">'+items.length+'</span></span>'+
+      '<div class="bm-acts">'+
       '<button class="bm-clr" id="bm-exp" title="Export list as text">Export</button>'+
       '<button class="bm-clr" id="bm-clr">Clear</button>'+
       '</div></div>'+
@@ -740,10 +863,43 @@ window.showToast=function(msg,type){
         if(window.showToast)window.showToast('Bookmarks exported','success');
       }
     });
-  fab.addEventListener('click',function(e){e.stopPropagation();renderBmPanel();panel.classList.toggle('open');});
+  function trigger(){ return document.getElementById('nav-bm'); }
+  function place(from){
+    // Hang the list under whatever opened it. On a phone it spans the width.
+    var wide=window.matchMedia&&window.matchMedia('(min-width:1181px)').matches;
+    var nav=document.getElementById('navbar')||document.querySelector('nav');
+    var top=nav?Math.round(nav.getBoundingClientRect().bottom)+8:72;
+    panel.style.top=top+'px';
+    if(wide&&from&&from.getBoundingClientRect&&from.offsetParent){
+      // Line the sheet's end edge up with the button, in either direction.
+      var r=from.getBoundingClientRect(), rtl=getComputedStyle(document.documentElement).direction==='rtl';
+      panel.style.insetInlineEnd=Math.max(12,Math.round(rtl?r.left-8:window.innerWidth-r.right-8))+'px';
+    } else { panel.style.insetInlineEnd=''; }
+  }
+  function setOpen(open,from){
+    var t=trigger();
+    if(open){ renderBmPanel(); place(from||t); if(window.taqaCloseBarPopovers) window.taqaCloseBarPopovers('bm'); }
+    panel.classList.toggle('open',!!open);
+    if(t) t.setAttribute('aria-expanded',open?'true':'false');
+  }
+  window.taqaOpenBookmarks=function(from){ setOpen(true,from); };
+  window.taqaCloseBookmarks=function(){ setOpen(false); };
   document.addEventListener('click',function(e){
-    if(!panel.contains(e.target)&&!fab.contains(e.target))panel.classList.remove('open');
+    var t=trigger(), mm=document.getElementById('mm-bm');
+    if(t&&t.contains(e.target)){ e.stopPropagation(); setOpen(!panel.classList.contains('open'),t); return; }
+    if(mm&&mm.contains(e.target)){
+      e.stopPropagation();
+      if(window.taqaCloseMenu) window.taqaCloseMenu();
+      setOpen(true,null);
+      var f=panel.querySelector('a,button'); if(f) try{f.focus({preventScroll:true});}catch(err){}
+      return;
+    }
+    if(panel.classList.contains('open')&&!panel.contains(e.target)) setOpen(false);
   });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&panel.classList.contains('open')){ setOpen(false); var t=trigger(); if(t&&t.offsetParent) t.focus(); }
+  });
+  window.addEventListener('resize',function(){ if(panel.classList.contains('open')) place(trigger()); },{passive:true});
   setTimeout(updateBmBadge,200);
 })();
 
@@ -797,7 +953,7 @@ document.addEventListener('keydown',function(e){
 (function(){
   var s=document.createElement('style');
   s.textContent=
-    '#offline-bar{position:fixed;top:68px;left:0;right:0;z-index:999;background:rgba(61,84,84,0.93);'+
+    '#offline-bar{position:fixed;top:var(--nav-h,64px);left:0;right:0;z-index:999;background:rgba(61,84,84,0.93);'+
     'color:#fff;font-size:12.5px;font-weight:500;text-align:center;font-family:"Inter",sans-serif;'+
     'max-height:0;overflow:hidden;padding:0 36px;transition:max-height 0.3s ease,padding 0.3s ease;}'+
     '#offline-bar.show{max-height:40px;padding:7px 36px;}'+
@@ -920,7 +1076,7 @@ document.addEventListener('keydown',function(e){
     '.door-dot{width:7px;height:7px;border-radius:50%;background:var(--primary,#005D63);flex-shrink:0;}' +
     '.door-dot.d-employee{background:#6E9294;}.door-dot.d-owner{background:#00585A;}' +
     '.door-dot.d-qms{background:#00BFB2;}.door-dot.d-auditor{background:#9AA7A7;}' +
-    '.door-cap{white-space:nowrap;}' +
+    '.door-cap,.door-cap-s{white-space:nowrap;}.door-cap-s{display:none;}' +
     '@media(max-width:760px){.door-cap{display:none;}.door-btn{padding:0 9px;}}' +
     '.door-menu{position:absolute;top:calc(100% + 8px);inset-inline-end:0;z-index:3000;width:236px;' +
       'background:var(--bg-white,#fff);border:1px solid var(--border,#C7DBDD);border-radius:13px;' +
@@ -967,8 +1123,11 @@ document.addEventListener('keydown',function(e){
   function cur(){ return TAQA_ROLE.current(); }
 
   function build() {
-    var anchor = document.querySelector('.dark-toggle, #theme-btn, [onclick="toggleDark()"]');
-    if (!anchor || !anchor.parentNode) return;
+    // On the shared bar the door opens the right-hand cluster. A page without
+    // the bar keeps it beside its theme switch.
+    var bar = document.querySelector('#navbar .nav-right');
+    var anchor = bar ? bar.firstChild : document.querySelector('.dark-toggle, #theme-btn, [onclick="toggleDark()"]');
+    if (!bar && (!anchor || !anchor.parentNode)) return;
 
     var wrap = document.createElement('div');
     wrap.className = 'door-wrap';
@@ -985,7 +1144,11 @@ document.addEventListener('keydown',function(e){
     btn.title = scoped
       ? TAQA_ROLE.areaTitle() + ', ' + TAQA_ROLE.areaName()
       : 'You are viewing as: ' + TAQA_ROLES[k].label;
+    btn.setAttribute('aria-label', btn.title + '. Change view');
+    // Two captions: the area name where the bar has room, and the short role
+    // name where it does not, so the door always says who you are.
     btn.innerHTML = '<span class="door-dot d-' + k + '"></span>' +
+                    (scoped ? '<span class="door-cap-s">' + d.short + '</span>' : '') +
                     '<span class="door-cap">' +
                       (scoped ? TAQA_ROLE.areaName() : d.short) + '</span>';
 
@@ -1002,19 +1165,32 @@ document.addEventListener('keydown',function(e){
                  '<span class="dd">' + x.line + '</span>' +
                  '<span class="dk">\u2713</span></button>';
       }).join('') +
-      (scoped ? areaPicker(k) : '') +
+      (scoped && areaPicker(k) ? '<div class="door-area">' + areaField(k, 'door-area-sel') + '</div>' : '') +
       '<div class="door-note">Preview only. Azure uses Entra ID.</div>';
 
     wrap.appendChild(btn); wrap.appendChild(menu);
-    anchor.parentNode.insertBefore(wrap, anchor);
+    if (bar) bar.insertBefore(wrap, anchor); else anchor.parentNode.insertBefore(wrap, anchor);
+    phoneDoor(k, scoped);
 
+    function closeDoor() {
+      menu.classList.remove('open'); btn.setAttribute('aria-expanded', 'false');
+    }
+    // One of the bar's popovers: opening it closes Areas, Bookmarks and the
+    // phone menu, and opening any of those closes it.
+    window.taqaCloseDoor = closeDoor;
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
-      var open = menu.classList.toggle('open');
+      var open = !menu.classList.contains('open');
+      if (open && window.taqaCloseBarPopovers) window.taqaCloseBarPopovers('door');
+      menu.classList.toggle('open', open);
       btn.setAttribute('aria-expanded', String(open));
     });
-    document.addEventListener('click', function () {
-      menu.classList.remove('open'); btn.setAttribute('aria-expanded', 'false');
+    document.addEventListener('click', closeDoor);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && menu.classList.contains('open')) { closeDoor(); btn.focus(); }
+    });
+    wrap.addEventListener('focusout', function (e) {
+      if (menu.classList.contains('open') && e.relatedTarget && !wrap.contains(e.relatedTarget)) closeDoor();
     });
     menu.addEventListener('click', function (e) {
       e.stopPropagation();
@@ -1027,6 +1203,34 @@ document.addEventListener('keydown',function(e){
       e.stopPropagation();
       TAQA_ROLE.setArea(e.target.value);
       // Land on the desk for the area just taken, not the one just left.
+      if (/dashboard\.html/.test(location.pathname))
+        location.href = 'dashboard.html?id=' + encodeURIComponent(e.target.value);
+      else location.reload();
+    });
+  }
+
+  /* On a phone the bar has no room for the door, so the menu carries it,
+     at the bottom where it is out of a reader's way. */
+  function phoneDoor(k, scoped) {
+    var mm = document.getElementById('nav-mobile-menu');
+    if (!mm || mm.querySelector('.mm-door')) return;
+    var box = document.createElement('div');
+    box.innerHTML = '<div class="mm-label">Viewing as</div>' +
+      '<div class="mm-door">' + TAQA_ROLE_ORDER.map(function (r) {
+        var x = DESK[r] || { short: TAQA_ROLES[r].label };
+        return '<button type="button" data-role="' + r + '" aria-pressed="' + (r === k) + '">' +
+               '<span class="door-dot d-' + r + '"></span>' + x.short + '</button>';
+      }).join('') + '</div>' +
+      (scoped ? '<div class="mm-door-area">' + areaField(k, 'mm-area-sel') + '</div>' : '') +
+      '<div class="mm-note">Preview only. Azure uses Entra ID.</div>';
+    while (box.firstChild) mm.appendChild(box.firstChild);
+    mm.addEventListener('click', function (e) {
+      var b = e.target.closest('.mm-door button'); if (!b) return;
+      TAQA_ROLE.set(b.dataset.role); location.reload();
+    });
+    mm.addEventListener('change', function (e) {
+      if (e.target.id !== 'mm-area-sel') return;
+      TAQA_ROLE.setArea(e.target.value);
       if (/dashboard\.html/.test(location.pathname))
         location.href = 'dashboard.html?id=' + encodeURIComponent(e.target.value);
       else location.reload();
@@ -1050,9 +1254,13 @@ document.addEventListener('keydown',function(e){
         return '<option value="' + x + '"' + (x === here ? ' selected' : '') + '>' +
                S[x].name + '</option>'; }).join('') + '</optgroup>';
     }).join('');
-    return '<div class="door-area"><label for="door-area-sel">' +
-             TAQA_ROLE.areaTitle() + ' of</label>' +
-           '<select id="door-area-sel">' + opts + '</select></div>';
+    return opts;
+  }
+  function areaField(k, id) {
+    var opts = areaPicker(k);
+    if (!opts) return '';
+    return '<label for="' + id + '">' + TAQA_ROLE.areaTitle() + ' of</label>' +
+           '<select id="' + id + '">' + opts + '</select>';
   }
 
   function banner() {
@@ -1144,13 +1352,13 @@ document.addEventListener('keydown',function(e){
   s.textContent =
     ':root{--alert-ink:#A8431A;--warn-ink:#8A6200;--ok-ink:#00705F;--stop-ink:#C8102E;--info-ink:#0076A8;}' +
     'html[data-taqa-theme="dark"]{--alert-ink:#FF9B5E;--warn-ink:#FFB81C;--ok-ink:#4FD1B5;--stop-ink:#FF8A94;--info-ink:#6BC5EE;}' +
-    /* On a phone the floating buttons sit over the right-hand side of every
-       card, which is exactly where a card keeps View, bookmark and QR. */
+    /* On a phone the scroll-to-top button sits over the right-hand side of
+       every card, which is exactly where a card keeps View, bookmark and QR. */
     '@media (max-width:640px){' +
-      '.bm-fab,.scroll-top-btn,#back-to-top{transition:opacity .2s ease,transform .2s ease!important;}' +
-      'html.taqa-fab-away .bm-fab,html.taqa-fab-away .scroll-top-btn,html.taqa-fab-away #back-to-top{' +
+      '.scroll-top-btn,#back-to-top{transition:opacity .2s ease,transform .2s ease!important;}' +
+      'html.taqa-fab-away .scroll-top-btn,html.taqa-fab-away #back-to-top{' +
         'opacity:0!important;transform:translateY(28px)!important;pointer-events:none!important;}' +
-      'html.taqa-fab-away .bm-fab:focus-visible,html.taqa-fab-away .scroll-top-btn:focus-visible,html.taqa-fab-away #back-to-top:focus-visible{' +
+      'html.taqa-fab-away .scroll-top-btn:focus-visible,html.taqa-fab-away #back-to-top:focus-visible{' +
         'opacity:1!important;transform:none!important;pointer-events:auto!important;}' +
     '}' +
     /* The scroll-to-top button fades to opacity 0 until the page has scrolled
@@ -1203,6 +1411,19 @@ document.addEventListener('keydown',function(e){
    to be a number seeded into localStorage, which is how an employee came to
    see 24 approvals waiting. */
 (function(){
+  // On the desk itself the queue is on the page, so the bell goes to it.
+  (function(){
+    var b = document.getElementById('nav-bell');
+    if (b && /dashboard\.html/.test(location.pathname)) b.onclick = function(){
+      var q = document.getElementById('pending-list');
+      if (!q) { location.href = 'dashboard.html'; return; }
+      // Land the queue's heading below the fixed bar, not under it.
+      var nav = document.getElementById('navbar');
+      var off = (nav ? nav.getBoundingClientRect().bottom : 64) + 16;
+      var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({top: Math.max(0, q.getBoundingClientRect().top + window.pageYOffset - off), behavior: still ? 'auto' : 'smooth'});
+    };
+  })();
   function sync(){
     var btn = document.getElementById('nav-bell');
     if (!btn) return;

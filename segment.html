@@ -41,44 +41,6 @@ body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);ove
 #bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
 .page-wrapper{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
 
-/* ── Nav ── */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
-  display:flex;align-items:center;justify-content:space-between;
-  background:rgba(255,255,255,0.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--glass-border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
-.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
-.nav-brand-icon{width:40px;height:40px;border-radius:11px;background:var(--gradient);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  position:relative;overflow:hidden;box-shadow:0 4px 18px rgba(0,93,99,0.38);}
-.nav-brand-icon::before{content:'';position:absolute;top:-10px;left:-6px;width:32px;height:32px;
-  background:rgba(255,255,255,0.13);border-radius:50%;pointer-events:none;}
-.nav-brand-text{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;}
-.nav-brand-name{font-weight:800;color:var(--primary-ink);}
-.nav-brand-hub{font-weight:500;color:#756A61;}
-.nav-subtitle{font-size:11px;color:var(--text-muted);display:block;margin-top:-1px;}
-.nav-links{display:flex;gap:2px;list-style:none;}
-.nav-links a{padding:7px 15px;border-radius:6px;text-decoration:none;font-size:13.5px;font-weight:500;color:var(--text-muted);transition:background 0.2s,color 0.2s;position:relative;}
-.nav-links a:hover{background:#EDEBE8;color:var(--text);}
-.nav-links a.active{background:transparent;color:var(--primary-ink);font-weight:600;}
-.nav-links a.active::after{content:'';position:absolute;bottom:3px;left:15px;right:15px;height:2px;background:var(--primary);border-radius:2px;}
-.nav-dropdown{position:relative;list-style:none;}
-.nav-dropdown-btn{display:flex;align-items:center;gap:5px;padding:7px 15px;border-radius:6px;border:none;background:transparent;cursor:pointer;font-size:13.5px;font-weight:500;color:var(--text-muted);font-family:'Inter',sans-serif;transition:background 0.2s,color 0.2s;}
-.nav-dropdown-btn:hover,.nav-dropdown-li.open .nav-dropdown-btn{background:#EDEBE8;color:var(--text);}
-.nav-dropdown-arrow{transition:transform 0.22s;flex-shrink:0;}
-.nav-dropdown-li.open .nav-dropdown-arrow{transform:rotate(180deg);}
-.nav-dropdown-panel{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(-6px);width:420px;background:#fff;border:1px solid rgba(0,0,0,0.09);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.13);padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:3px;opacity:0;pointer-events:none;transition:opacity 0.18s,transform 0.18s;z-index:2000;}
-.nav-dropdown-li:hover .nav-dropdown-panel,.nav-dropdown-li.open .nav-dropdown-panel{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0);}
-.seg-dd-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;text-decoration:none;transition:background 0.15s;}
-.seg-dd-item:hover{background:#F4F4F3;}
-.seg-dd-name{font-size:13px;font-weight:600;color:#1E1C1A;flex:1;}
-.seg-dd-tag{font-size:10px;font-weight:600;color:var(--primary-ink);background:rgba(0,93,99,0.08);padding:2px 7px;border-radius:20px;white-space:nowrap;}
-/* The home page's dropdown turns dark with the theme; this one stayed white
-   while its inks followed the theme, so its group headings went legacy teal
-   on white at 2.4:1. Same ground as the home page now. */
-html[data-taqa-theme="dark"] .nav-dropdown-panel{background:#002D30;border-color:rgba(255,255,255,0.1);}
-html[data-taqa-theme="dark"] .seg-dd-item:hover{background:rgba(255,255,255,0.06);}
-html[data-taqa-theme="dark"] .seg-dd-name{color:#C7DBDD;}
-html[data-taqa-theme="dark"] .seg-dd-tag{background:rgba(0,187,182,0.12);}
-.nav-right{display:flex;gap:10px;align-items:center;}
 .btn{padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
   transition:all 0.25s;border:none;font-family:'Inter',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:7px;}
 .btn-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--text-muted);}
@@ -132,11 +94,12 @@ html[data-taqa-theme="dark"] .seg-dd-tag{background:rgba(0,187,182,0.12);}
 .seg-hero-inner{
   background:none; border:none; backdrop-filter:none;
   padding:0;
-  display:grid;grid-template-columns:1fr auto;align-items:center;gap:48px;
+  display:block;
 }
 .seg-hero-icon{font-size:48px;width:80px;height:80px;border-radius:18px;
   background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);backdrop-filter:blur(12px);
   display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+.seg-hero-tag[hidden]{display:none;}
 .seg-hero-tag{display:inline-block;padding:4px 14px;margin-bottom:14px;
   background:rgba(0,187,182,0.15);border:1px solid rgba(0,187,182,0.3);
   border-radius:50px;font-size:11px;color:var(--primary-light);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;}
@@ -146,17 +109,14 @@ html[data-taqa-theme="dark"] .seg-dd-tag{background:rgba(0,187,182,0.12);}
 .seg-hero-meta{display:flex;gap:24px;flex-wrap:wrap;}
 .seg-meta-item{display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(255,255,255,0.58);}
 .seg-meta-item strong{color:#fff;font-weight:600;}
-.seg-hero-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:12px;min-width:200px;}
-.mini-stat{
-  background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.16);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  border-radius:12px;padding:16px 20px;text-align:center;
-}
-.mini-stat-num{font-family:'BwGradual','Urbanist',sans-serif;font-size:26px;font-weight:700;color:var(--primary-light);-webkit-text-fill-color:var(--primary-light);}
-.mini-stat-label{font-size:11px;color:rgba(255,255,255,0.78);margin-top:2px;}
+
+html.seg-unknown .seg-hero-meta,html.seg-unknown #manage-btn,html.seg-unknown .copy-link-btn,html.seg-unknown .tabs-outer,
+html.seg-unknown .doc-toolbar,html.seg-unknown .pg-wrap,html.seg-unknown #recent-strip,
+html.seg-unknown #breadcrumb-tab,html.seg-unknown .bc-sep:has(+ #breadcrumb-tab){display:none!important;}
+html.seg-unknown .content-outer{padding-top:32px;}
 
 /* ── Tab Navigation ── */
-.tabs-outer{padding:10px 48px;max-width:none;margin:0;position:sticky;top:68px;z-index:500;background:var(--dark);border-bottom:1px solid var(--glass-border);box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+.tabs-outer{padding:10px 48px;max-width:none;margin:0;position:sticky;top:var(--nav-h,64px);z-index:500;background:var(--dark);border-bottom:1px solid var(--glass-border);box-shadow:0 2px 8px rgba(0,0,0,0.04);}
 .tabs-outer .tabs{max-width:1104px;margin:0 auto;}
 html[data-taqa-theme="dark"] .tabs-outer{background:#001314;}
 html[data-taqa-theme="dark"] .tabs-outer{border-color:rgba(255,255,255,0.06);}
@@ -182,9 +142,6 @@ html[data-taqa-theme="dark"] .tabs-outer{border-color:rgba(255,255,255,0.06);}
 .alert-pulse-dot{display:none;}
 .manage-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:rgba(0,187,182,0.12);border:1px solid rgba(0,187,182,0.25);color:var(--primary-light);font-size:11.5px;font-weight:600;text-decoration:none;letter-spacing:0.3px;transition:background 0.2s,border-color 0.2s;}
 .manage-btn:hover{background:rgba(0,187,182,0.22);}
-.doc-new-badge{display:inline-block;padding:1px 7px;border-radius:50px;font-size:9.5px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;background:rgba(0,134,117,0.10);color:var(--ok-ink,#00705F);border:1px solid rgba(0,134,117,0.22);margin-left:6px;vertical-align:middle;}
-.doc-new-badge.updated{background:rgba(0,187,182,0.1);color:var(--primary-ink);border-color:rgba(0,187,182,0.22);}
-.doc-rev-badge{display:inline-block;padding:1px 7px;border-radius:50px;font-size:9.5px;font-weight:700;letter-spacing:0.3px;background:rgba(0,93,99,0.06);color:var(--text-light);border:1px solid rgba(0,93,99,0.12);margin-left:6px;vertical-align:middle;}
 .empty-state-upload{display:inline-block;margin-top:14px;padding:8px 20px;border-radius:9px;background:rgba(0,93,99,0.1);border:1px solid rgba(0,187,182,0.2);color:var(--primary-ink);font-size:13px;font-weight:500;text-decoration:none;transition:background 0.2s;}
 .empty-state-upload:hover{background:rgba(0,93,99,0.18);}
 
@@ -245,78 +202,243 @@ html[data-taqa-theme="dark"] .pg-btn:hover:not(:disabled):not(.pg-dots){border-c
 .sort-btn{padding:5px 11px;border-radius:6px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;font-size:11px;font-weight:500;color:var(--text-muted);font-family:'Inter',sans-serif;transition:all 0.2s;white-space:nowrap;}
 .sort-btn.sort-on{background:rgba(0,93,99,0.08);border-color:rgba(0,93,99,0.25);color:var(--primary-ink);font-weight:600;}
 .sort-btn:hover{border-color:rgba(0,93,99,0.25);color:var(--primary-ink);}
-/* Mark as Read badge */
-.doc-read-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--text-light);background:transparent;border:1px solid rgba(0,93,99,0.14);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:middle;}
 
-/* ── Document Cards ── */
-.docs-grid{display:flex;flex-direction:column;gap:10px;}
+/* ── The library sheet ──
+   One quiet sheet of rows, in the same language as the home page's
+   disciplines: white paper, hairlines, one soft shadow, teal as the only
+   accent. A document used to be a 95px card with a View button, a star and
+   a QR square, so 21 SOPs ran to two pages. Each is now one row: the whole
+   row opens it, and the rarer actions wait behind a menu at its end. */
+.docs-grid{
+  --row-paper:#FFFFFF;
+  --row-ink:#1E1C1A;          /* titles        16.9:1 on paper */
+  --row-meta:#524D48;         /* meta line      8.3:1          */
+  --row-light:#756A61;        /* separators     5.3:1          */
+  --row-hair:rgba(117,106,97,0.12);
+  --row-scuff:rgba(0,93,99,0.04);
+  --row-press:rgba(0,93,99,0.08);
+  --row-disc:rgba(0,93,99,0.06);
+  --row-mark-bg:rgba(0,93,99,0.065);
+  --row-alert-bg:rgba(253,105,29,0.11);
+  --row-alert-rule:#FD691D;
+  --row-ease:cubic-bezier(0.23,1,0.32,1);
+  position:relative;overflow:clip;
+  background:var(--row-paper);
+  border-radius:18px;
+  box-shadow:0 0 0 1px rgba(117,106,97,0.08),0 22px 44px -26px rgba(0,88,90,0.22);
+}
+html[data-taqa-theme="dark"] .docs-grid{
+  --row-paper:#002326;
+  --row-ink:#C7DBDD;          /* 11.5:1 */
+  --row-meta:#8CB6B9;         /*  7.5:1 */
+  --row-light:#6FA7AA;        /*  6.1:1 */
+  --row-hair:rgba(0,187,182,0.11);
+  --row-scuff:rgba(0,187,182,0.05);
+  --row-press:rgba(0,187,182,0.10);
+  --row-disc:rgba(0,187,182,0.08);
+  --row-mark-bg:rgba(0,187,182,0.09);
+  --row-alert-bg:rgba(255,155,94,0.11);
+  --row-alert-rule:#FF9B5E;
+  box-shadow:0 0 0 1px rgba(0,187,182,0.08),0 22px 44px -26px rgba(0,0,0,0.55);
+}
 .doc-card{
-  background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;
-  padding:20px 24px;backdrop-filter:blur(8px);
-  display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:start;gap:20px;
-  transition:border-color 0.25s,box-shadow 0.25s;cursor:pointer;
+  position:relative;display:flex;align-items:center;
+  min-height:68px;color:var(--row-ink);
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color 140ms ease;
 }
-.doc-card:hover{background:var(--glass-2);border-color:var(--glass-border-hover);box-shadow:0 4px 16px rgba(0,0,0,0.08);}
+/* Hairlines start where the text starts, so the marks read as one column. */
+.doc-card + .doc-card::before,
+.doc-group + .doc-card::before{
+  content:'';position:absolute;top:0;inset-inline:68px 16px;height:1px;
+  background:var(--row-hair);pointer-events:none;
+}
+.doc-group + .doc-card::before{display:none;}
+.doc-row-link{
+  flex:1;min-width:0;align-self:stretch;
+  display:grid;grid-template-columns:36px minmax(0,1fr);column-gap:16px;align-items:center;
+  padding-block:10px;padding-inline:16px 4px;
+  color:inherit;text-decoration:none;border-radius:inherit;
+}
+.doc-row-link:focus-visible{outline:2px solid var(--primary-ink)!important;outline-offset:-2px!important;border-radius:12px;}
+@media (hover:hover) and (pointer:fine){
+  .doc-card:not(.is-asset):hover{background:var(--row-scuff);}
+}
+.doc-card:not(.is-asset):active{background:var(--row-press);}
+
 .doc-type-icon{
-  width:44px;height:44px;border-radius:10px;flex-shrink:0;
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-family:'BwGradual','Urbanist',sans-serif;font-size:9.5px;font-weight:700;
-  letter-spacing:0.6px;text-transform:uppercase;
-  background:rgba(0,93,99,0.07);color:var(--primary-ink);border:1px solid rgba(0,93,99,0.14);
+  font-family:'BwGradual','Urbanist',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:0.5px;text-transform:uppercase;
+  background:var(--row-mark-bg);color:var(--primary-ink);
 }
-/* Every type gets the square from the base class. It used to be granted
-   type by type from a list, the list left out "standard", and every
-   Standard on every segment page drew a bare letter with no square behind
-   it. Only Alert overrides, because it is the one operational warning. */
-/* Orange as text needs the darkened ink on paper and a lifted one on the dark
-   ground. The mid tone it used to carry cleared neither. */
-.doc-type-icon.alert{background:rgba(253,105,29,0.10);color:#A8431A;border:1px solid rgba(253,105,29,0.22);}
-.doc-type-badge.software{background:rgba(0,93,99,0.07);color:var(--primary-ink);border:1px solid rgba(0,93,99,0.12);}
-.sw-version{display:inline-block;padding:1px 7px;border-radius:50px;font-size:9.5px;font-weight:700;letter-spacing:0.4px;background:rgba(0,93,99,0.07);color:var(--primary-ink);border:1px solid rgba(0,93,99,0.12);margin-left:6px;vertical-align:middle;}
-/* The card reads top to bottom: reference, then name, then what it is for,
-   then the record. The number used to sit inline at the front of the title,
-   so the title wrapped around a bold chip and a badge and the whole block
-   looked crowded at any width below a laptop. */
-.doc-body{min-width:0;}
-.doc-eyebrow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px;min-width:0;}
-.doc-info-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:14.5px;font-weight:700;
-  margin-bottom:5px;line-height:1.32;letter-spacing:-0.1px;
+/* Every type gets the square from the base class; only Alert overrides,
+   because it is the one operational warning among the types. */
+.doc-type-icon.alert{background:var(--row-alert-bg);color:var(--alert-ink,#A8431A);}
+/* An alert keeps a thin orange rule on its leading edge and its square in
+   the orange family. That is enough to find one in the All tab. */
+.doc-card.is-alert::after{
+  content:'';position:absolute;inset-inline-start:0;top:16px;bottom:16px;width:2px;
+  border-start-end-radius:3px;border-end-end-radius:3px;
+  background:var(--row-alert-rule);pointer-events:none;
+}
+
+.doc-body{min-width:0;display:flex;flex-direction:column;gap:2px;}
+/* The eyebrow carries the reference: number, revision, then the quiet
+   words. It is one line tall and wraps into a hidden second line, so on a
+   narrow screen a word that does not fit drops out whole instead of being
+   cut in half. The number always comes first and always fits. */
+.doc-eyebrow{
+  display:flex;flex-wrap:wrap;align-items:center;column-gap:6px;min-width:0;
+  height:15px;line-height:15px;overflow:hidden;
+  font-family:'Inter',sans-serif;font-size:11.5px;
+}
+.doc-eyebrow > *{flex-shrink:0;white-space:nowrap;}
+.doc-num{
+  font-weight:600;letter-spacing:0;
+  color:var(--primary-ink);font-variant-numeric:tabular-nums;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;
+}
+.doc-rev{font-weight:500;color:var(--row-meta);font-variant-numeric:tabular-nums;}
+.doc-rev::before,.doc-new-badge::before,.doc-read-badge::before{
+  content:'\00B7';color:var(--row-light);margin-inline-end:6px;font-weight:400;
+}
+.doc-info-title{
+  font-family:'BwGradual','Urbanist',sans-serif;font-weight:300;
+  font-size:16px;line-height:1.3;letter-spacing:0;color:var(--row-ink);
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-  overflow-wrap:anywhere;}
+  overflow-wrap:anywhere;
+}
+.doc-info-title .search-hl{font-weight:400;}
+.doc-meta{
+  font-size:12.5px;line-height:1.4;color:var(--row-meta);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.doc-meta .sep{color:var(--row-light);padding-inline:6px;}
 /* An overdue review is a warning, the same yellow family as the viewer's
    review banner. The stop red is kept for withdrawn and obsolete. */
 .doc-review-late{color:var(--warn-ink,#8A6200);font-weight:600;}
-.doc-summary{font-size:12.5px;color:var(--text-muted);line-height:1.55;margin-bottom:9px;max-width:620px;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.doc-info-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.doc-meta-item{font-size:11.5px;color:var(--text-muted);display:flex;align-items:center;gap:4px;min-width:0;}
+
+/* New and Revised are a word in sentence case, not a pill, so they never
+   read as part of the all-capitals reference beside them. New keeps the
+   current-document green; Revised is only a note, in the meta grey. */
+.doc-new-badge{font-size:11px;font-weight:600;color:var(--ok-ink,#00705F);}
+.doc-new-badge.updated{font-weight:500;color:var(--row-meta);}
+.doc-read-badge{font-size:11px;font-weight:500;color:var(--row-light);}
+/* The bookmark flag shows only while the document is saved. It carries the
+   bm-btn class so the bookmarks panel clears it when a bookmark is removed. */
+.bm-flag{display:none;font-size:11px;line-height:1;color:var(--primary-ink);flex-shrink:0;}
+.bm-flag.bm-on{display:inline;}
+
+/* The overflow: one 44px target at the row's end. */
+.doc-more{
+  flex-shrink:0;align-self:center;margin-inline-end:8px;
+  width:44px;height:44px;border-radius:50%;border:0;padding:0;
+  display:grid;place-items:center;cursor:pointer;
+  background:transparent;color:var(--row-light);
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color 140ms ease,color 140ms ease;
+}
+.doc-more svg{width:18px;height:18px;}
+@media (hover:hover) and (pointer:fine){
+  .doc-more:hover{background:var(--row-disc);color:var(--primary-ink);}
+}
+.doc-more[aria-expanded="true"]{background:var(--row-disc);color:var(--primary-ink);}
+.doc-more:active{background:var(--row-press);}
+.doc-more:focus-visible{outline:2px solid var(--primary-ink)!important;outline-offset:-2px!important;}
+
+/* A software asset is listed, not controlled, and opens nothing. */
+.doc-card.is-asset .doc-row-link{cursor:default;padding-inline-end:16px;}
+.doc-card.is-asset .doc-meta{white-space:normal;}
+.doc-meta .nw{white-space:nowrap;}
+
+/* The All tab's shelves, inside the sheet. */
+.doc-group{
+  display:flex;align-items:baseline;gap:8px;
+  padding-block:18px 8px;padding-inline:16px;
+  border-top:1px solid var(--row-hair);
+}
+.doc-group:first-child{border-top:0;padding-top:16px;}
+.doc-group-t{font-family:'BwGradual','Urbanist',sans-serif;font-size:13.5px;font-weight:700;color:var(--row-ink);letter-spacing:0.01em;}
+.doc-group-n{font-size:12px;color:var(--row-meta);font-variant-numeric:tabular-nums;}
+
+/* ── The row menu ── one element, placed beside whichever row opened it. */
+.row-menu{
+  position:absolute;z-index:950;min-width:212px;padding:6px;
+  background:#FFFFFF;border-radius:14px;
+  box-shadow:0 0 0 1px rgba(117,106,97,0.12),0 22px 44px -18px rgba(0,88,90,0.34),0 2px 6px -2px rgba(0,88,90,0.10);
+  font-family:'Inter',sans-serif;
+  transform-origin:top right;
+  animation:rowMenuIn 150ms cubic-bezier(0.23,1,0.32,1);
+}
+.row-menu[data-up]{transform-origin:bottom right;}
+[dir="rtl"] .row-menu{transform-origin:top left;}
+.row-menu[hidden]{display:none;}
+@keyframes rowMenuIn{from{opacity:0;transform:scale(0.97) translateY(-2px);}}
+.row-menu-item{
+  display:flex;align-items:center;gap:12px;width:100%;min-height:44px;
+  padding-inline:12px 16px;border:0;border-radius:9px;background:transparent;
+  font:inherit;font-size:14px;font-weight:500;color:#1E1C1A;text-align:start;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.row-menu-item svg{width:17px;height:17px;flex-shrink:0;color:#005D63;}
+.row-menu-item:hover,.row-menu-item:focus-visible{background:rgba(0,93,99,0.06);outline:none;}
+.row-menu-item:focus-visible{box-shadow:inset 0 0 0 2px #005D63;outline:none!important;}
+.row-menu-item:active{background:rgba(0,93,99,0.10);}
+/* On the dark canvas a shadow does not show, so the menu is lifted by its
+   surface and ring instead, with a faint light edge along the top. */
+html[data-taqa-theme="dark"] .row-menu{background:#00363A;box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1px rgba(0,187,182,0.26),0 22px 44px -18px rgba(0,0,0,0.7);}
+html[data-taqa-theme="dark"] .row-menu-item{color:#C7DBDD;}
+html[data-taqa-theme="dark"] .row-menu-item svg{color:#00BBB6;}
+html[data-taqa-theme="dark"] .row-menu-item:hover,html[data-taqa-theme="dark"] .row-menu-item:focus-visible{background:rgba(0,187,182,0.08);}
+html[data-taqa-theme="dark"] .row-menu-item:focus-visible{box-shadow:inset 0 0 0 2px #00BBB6;}
+@media (prefers-reduced-motion:reduce){.row-menu{animation:none;}.doc-card,.doc-more{transition:none;}}
+
+/* Wide screens: the review state and classification move to a column of
+   their own before the menu, so the row is two lines, not three, and the
+   eye does not cross an empty sheet to find them. */
+@media(min-width:900px){
+  .doc-card.has-state .doc-body{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:24px;row-gap:2px;
+    grid-template-areas:"eyebrow meta" "title meta";align-items:center;
+  }
+  .doc-card.has-state .doc-eyebrow{grid-area:eyebrow;}
+  .doc-card.has-state .doc-info-title{grid-area:title;}
+  .doc-card.has-state .doc-meta{grid-area:meta;text-align:end;max-width:320px;}
+}
+/* Phone: a row is never more than three lines of text: the reference, then
+   two for the title, or one for the title and one for its state. A title
+   cut short is read in full by a screen reader and in the viewer, and a
+   search shows it whole again so the match is never hidden. */
+@media(max-width:640px){
+  .doc-card{min-height:64px;}
+  .doc-row-link{grid-template-columns:32px minmax(0,1fr);column-gap:12px;padding-block:9px;padding-inline:14px 0;}
+  .doc-type-icon{width:32px;height:32px;border-radius:9px;font-size:9.5px;}
+  .doc-card + .doc-card::before{inset-inline:58px 14px;}
+  .doc-eyebrow{font-size:11px;height:14px;line-height:14px;}
+  .doc-info-title{font-size:15.5px;line-height:1.22;}
+  .doc-card.has-state .doc-info-title{-webkit-line-clamp:1;}
+  .docs-grid.is-searching .doc-card.has-state .doc-info-title{-webkit-line-clamp:2;}
+  .doc-meta{font-size:12px;line-height:1.3;}
+  .doc-more{margin-inline-end:2px;}
+  .docs-grid{border-radius:16px;}
+  .doc-group{padding-inline:14px;}
+}
 .doc-type-badge{padding:2px 9px;border-radius:50px;font-size:10.5px;font-weight:600;
   background:rgba(0,93,99,0.07);color:var(--primary-ink);border:1px solid rgba(0,93,99,0.12);}
 .doc-type-badge.alert{background:rgba(253,105,29,0.1);color:#A8431A;border:1px solid rgba(253,105,29,0.2);}
-html[data-taqa-theme="dark"] .doc-type-icon.alert,html[data-taqa-theme="dark"] .doc-type-badge.alert,
+.doc-type-badge.software{background:rgba(0,93,99,0.07);color:var(--primary-ink);border:1px solid rgba(0,93,99,0.12);}
+html[data-taqa-theme="dark"] .doc-type-badge.alert,
 html[data-taqa-theme="dark"] .sh-pill.alert{color:#FF9B5E;}
-.doc-actions{
-  display:flex;flex-direction:column;gap:6px;align-items:stretch;
-  min-width:92px;
-}
-.doc-action-btn{
-  width:100%;padding:8px 12px;border-radius:8px;
-  border:1px solid var(--glass-border);background:transparent;
-  cursor:pointer;color:var(--text-muted);font-size:12px;font-weight:500;
-  font-family:'Inter',sans-serif;
-  display:flex;align-items:center;justify-content:center;gap:5px;
-  transition:all 0.22s;white-space:nowrap;
-}
-.doc-action-btn:hover{background:var(--glass-2);border-color:var(--glass-border-hover);color:var(--primary-ink);}
-.doc-action-btn.primary-action{background:rgba(0,93,99,0.08);border-color:rgba(0,93,99,0.2);color:var(--primary-ink);font-weight:600;}
-.doc-action-btn.primary-action:hover{background:rgba(0,93,99,0.16);}
-.doc-act-pair{display:flex;gap:6px;}
-.doc-act-pair .doc-action-btn{flex:1;padding:7px 6px;}
-.bm-btn{font-size:14px;}
-.bm-btn.bm-on{color:var(--primary-ink)!important;border-color:rgba(0,93,99,0.3)!important;background:rgba(0,93,99,0.08)!important;}
 /* ── QR Modal ── */
 .qr-overlay{position:fixed;inset:0;z-index:900;background:rgba(0,28,30,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity 0.25s;display:flex;align-items:center;justify-content:center;}
-.qr-overlay.open{opacity:1;pointer-events:auto;}
+.qr-overlay:not(.open){visibility:hidden;transition:opacity 0.25s,visibility 0s linear 0.25s;}
+.qr-overlay.open{opacity:1;pointer-events:auto;visibility:visible;}
+/* With reduced motion the fade is dropped, and with it the delayed
+   visibility, so the dialog can take focus the moment it opens. */
+@media (prefers-reduced-motion:reduce){.qr-overlay,.qr-overlay:not(.open),.qr-box{transition:none!important;}}
+@media(max-width:640px){.qr-copy,.qr-url-in,.qr-close{min-height:44px;}}
 .qr-box{width:min(300px,88vw);background:rgba(255,255,255,0.98);border-radius:20px;padding:24px 20px 20px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.22);transform:scale(0.9);transition:transform 0.28s cubic-bezier(.32,1.12,.64,1);}
 .qr-overlay.open .qr-box{transform:scale(1);}
 .qr-doc-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:13px;font-weight:700;color:#1E1C1A;margin-bottom:14px;line-height:1.4;max-height:3.2em;overflow:hidden;}
@@ -329,26 +451,17 @@ html[data-taqa-theme="dark"] .qr-url-in{background:#001314;border-color:rgba(0,1
 html[data-taqa-theme="dark"] .qr-box{background:rgba(0,45,48,0.99);}
 html[data-taqa-theme="dark"] .qr-doc-title{color:#C7DBDD;}
 
-/* ── Alerts ── */
-/* An alert is the one operational warning among the types, so it keeps a
-   thin Brave Orange rule on its leading edge and its square in the orange
-   family. That is enough to find one in the All tab. The whole card used to
-   be tinted peach, and a list of seven of them turned the screen orange. */
-.doc-card.is-alert,.doc-card.is-alert:hover,
-html[data-taqa-theme="dark"] .doc-card.is-alert,
-html[data-taqa-theme="dark"] .doc-card.is-alert:hover{
-  border-inline-start:3px solid #FD691D;padding-inline-start:22px;}
-
 /* ── Empty State ── */
-.empty-state{text-align:center;padding:80px 40px;}
+.empty-state{text-align:center;padding:56px 24px;}
 .empty-icon{font-size:48px;margin-bottom:16px;opacity:0.4;}
 
 /* ── Skeleton Loading ── */
 @keyframes skeletonPulse{0%,100%{opacity:0.4;}50%{opacity:0.9;}}
-.skeleton-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:20px 24px;display:flex;gap:16px;align-items:flex-start;}
-.skel-icon{width:44px;height:44px;border-radius:10px;background:rgba(150,140,131,0.15);flex-shrink:0;animation:skeletonPulse 1.4s ease-in-out infinite;}
-.skel-lines{flex:1;display:flex;flex-direction:column;gap:10px;padding-top:4px;}
-.skel-line{height:11px;border-radius:6px;background:rgba(150,140,131,0.12);animation:skeletonPulse 1.4s ease-in-out infinite;}
+.skeleton-card{display:flex;gap:16px;align-items:center;min-height:72px;padding:13px 16px;position:relative;}
+.skeleton-card + .skeleton-card{border-top:1px solid var(--row-hair,rgba(117,106,97,0.12));}
+.skel-icon{width:36px;height:36px;border-radius:10px;background:rgba(150,140,131,0.15);flex-shrink:0;animation:skeletonPulse 1.4s ease-in-out infinite;}
+.skel-lines{flex:1;display:flex;flex-direction:column;gap:8px;}
+.skel-line{height:10px;border-radius:6px;background:rgba(150,140,131,0.12);animation:skeletonPulse 1.4s ease-in-out infinite;}
 .skel-line.w80{width:80%;}.skel-line.w60{width:60%;}.skel-line.w40{width:40%;}
 
 /* ── Recently Viewed ── */
@@ -372,12 +485,13 @@ html[data-taqa-theme="dark"] .doc-card.is-alert:hover{
      light inks; the dark-theme teal measured 2.4:1 on paper. */
   .doc-type-icon,.doc-type-badge,.doc-num{color:#005D63!important;}
   .doc-type-icon.alert,.doc-type-badge.alert{color:#A8431A!important;}
-  .doc-meta-item,.doc-summary{color:#524D48!important;}
-  nav,.seg-hero-banner,footer,.doc-toolbar,.tabs-outer,.scroll-top-btn,.doc-actions,.alert-pulse-dot,.doc-new-badge{display:none!important;}
+  .doc-meta{color:#524D48!important;}
+  nav,.seg-hero-banner,footer,.doc-toolbar,.tabs-outer,.scroll-top-btn,.doc-more,.row-menu,.alert-pulse-dot,.doc-new-badge{display:none!important;}
   body{background:#fff!important;color:#111!important;}
   .page-wrapper{background:#fff!important;}
-  .doc-card{border:1px solid #ddd!important;background:#fff!important;box-shadow:none!important;page-break-inside:avoid;margin-bottom:8px;}
-  .doc-summary{color:#444!important;}
+  .docs-grid{box-shadow:none!important;background:#fff!important;}
+  .doc-card{page-break-inside:avoid;}
+  .doc-info-title{color:#1E1C1A!important;}
   .tab-panel{display:block!important;}
   .content-outer{padding:0!important;}
 }
@@ -405,23 +519,13 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;back
 @keyframes blob2{0%,100%{transform:translate(0,0) scale(1);}40%{transform:translate(-60px,50px) scale(1.06);}80%{transform:translate(30px,-30px) scale(0.95);}}
 @keyframes blob3{0%,100%{transform:translate(0,0) scale(1);}60%{transform:translate(-40px,60px) scale(1.1);}}
 ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(0,93,99,0.28);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:rgba(0,93,99,0.5);}
-.nav-links{position:relative;}.nav-pill{position:absolute;top:50%;transform:translateY(-50%);height:34px;background:rgba(0,93,99,0.1);border-radius:8px;transition:left 0.28s cubic-bezier(.4,0,.2,1),width 0.28s cubic-bezier(.4,0,.2,1),opacity 0.2s;pointer-events:none;z-index:0;opacity:0;}
-.nav-links a.active::after{display:none!important;}
-.dark-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:border-color 0.2s,color 0.2s,background 0.2s;flex-shrink:0;padding:0;}
-.dark-toggle:hover{border-color:var(--primary);color:var(--primary-ink);background:rgba(0,93,99,0.06);}
 /* Tier 3 existed only as a fallback baked into two rules, so the light ramp's
    grey walked into dark mode with them. Named here, it lifts with the theme. */
 html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--alert-ink:#FF9B5E;--warn-ink:#FFB81C;--ok-ink:#4FD1B5;--stop-ink:#FF8A94;--info-ink:#6BC5EE;--dark:#001314;--dark-2:#002D30;--dark-3:#002326;--dark-4:#002326;--glass:rgba(0,45,48,0.88);--glass-border:rgba(255,255,255,0.07);--text:#C7DBDD;--text-muted:#8CB6B9;--text-light:#619B9E;}
 html[data-taqa-theme="dark"] body{background:#001314;}
-html[data-taqa-theme="dark"] nav{background:rgba(0,35,38,0.92);border-color:rgba(255,255,255,0.06);}
-html[data-taqa-theme="dark"] .nav-brand-name{color:#C7DBDD;}html[data-taqa-theme="dark"] .nav-brand-hub{color:#619B9E;}
-html[data-taqa-theme="dark"] .nav-pill{background:rgba(0,187,182,0.12);}
-html[data-taqa-theme="dark"] .dark-toggle{border-color:rgba(255,255,255,0.1);color:#619B9E;}
 html[data-taqa-theme="dark"] .btn-ghost{border-color:rgba(255,255,255,0.1);color:#619B9E;}
 html[data-taqa-theme="dark"] .tabs{background:rgba(0,45,48,0.9);border-color:rgba(255,255,255,0.07);}
 html[data-taqa-theme="dark"] .tab-btn{color:#00BBB6;}html[data-taqa-theme="dark"] .tab-btn.active{background:#002326;color:#00BBB6;}
-html[data-taqa-theme="dark"] .doc-card{background:#002326;border-color:#003A3D;}
-html[data-taqa-theme="dark"] .doc-card:hover{border-color:rgba(0,187,182,0.3);}
 html[data-taqa-theme="dark"] .sidebar-card{background:#002326;border-color:#003A3D;}
 html[data-taqa-theme="dark"] footer{background:#002326;border-color:#003A3D;}
 html[data-taqa-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2);}
@@ -505,20 +609,14 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 .stp-arrow{font-size:13px;color:var(--primary-ink);position:relative;z-index:1;font-weight:800;}
 
 @media(max-width:768px){
-  .seg-hero-inner{grid-template-columns:1fr;}
-  .seg-hero-stats{display:none;}
   .seg-hero-banner::before{background:rgba(0,19,20,0.88);}
-  nav{padding:0 20px;}.breadcrumb,.seg-hero,.content-outer{padding-left:20px;padding-right:20px;}
-  .tabs-outer{padding:8px 12px;top:64px;}
-  .doc-card{grid-template-columns:auto 1fr;}
-  .doc-actions{grid-column:1/-1;flex-direction:row;min-width:unset;gap:8px;}
-  .doc-action-btn{width:auto;padding:7px 14px;font-size:12px;}
+  .breadcrumb,.seg-hero,.content-outer{padding-left:20px;padding-right:20px;}
+  .tabs-outer{padding:8px 12px;top:var(--nav-h,64px);}
   footer{padding:12px 20px;}
   .footer-links{display:none;}
   .footer-copy{display:none;}
 }
 @media(max-width:640px){
-  .nav-right .btn,.nav-right a.btn{display:none!important;}
   /* Breadcrumb: 72px clears the 64px mobile nav with 8px margin (not 88px) */
   .breadcrumb{padding-top:72px;font-size:11px;}
   /* Icon: hide on mobile, it stacks and eats ~80px of vertical space */
@@ -538,85 +636,67 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .doc-toolbar{flex-direction:column;align-items:stretch;gap:10px;}
   .doc-search{max-width:100%;}
   .doc-count-label{font-size:12px;}
-  .doc-card-title{font-size:13.5px;}
-  .doc-summary{-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;}
-  .mini-stats{gap:12px;}
-  .mini-stat{padding:12px 16px;}
   .manage-btn{font-size:10.5px;padding:5px 10px;}
+  /* Touch: every control in the library answers a 44px finger. The tab bar
+     and the small buttons keep their drawn size and grow an invisible hit
+     area; pagination is simply drawn at 44px. */
+  .tab-btn,.sort-btn,.manage-btn,.copy-link-btn,.breadcrumb a{position:relative;}
+  .tab-btn::after{content:'';position:absolute;inset:-5px 0;}
+  .sort-btn::after{content:'';position:absolute;inset:-10px -2px;}
+  .manage-btn::after,.copy-link-btn::after{content:'';position:absolute;inset:-11px -4px;}
+  .manage-btn,.copy-link-btn,.sort-btn{z-index:1;}
+  /* The crumbs sit 16px under the top bar, room for a full finger-sized
+     hit area that does not reach under the bar. */
+  .breadcrumb{position:relative;z-index:2;padding-top:80px;padding-bottom:16px;}
+  .seg-hero{padding-top:0;}
+  .breadcrumb a::after{content:'';position:absolute;inset:-15px -8px;}
+  .pg-btn,.pg-btn.pg-nav{height:44px;min-width:44px;}
 }
+/* shared.js sets overflow-x:hidden on both html and body. That makes the
+   body a scroll box of its own, which never scrolls, so the tab bar had
+   nothing to stick to on a phone and slid away under the top bar. Clip
+   hides the same sideways overflow without making a scroll box. */
+html:root{overflow-x:clip;}
+html body{overflow-x:clip;}
 @media(max-width:480px){
-  .breadcrumb{padding-top:68px;}
-  .seg-hero{padding-top:10px;padding-bottom:20px;}
+  .seg-hero{padding-top:2px;padding-bottom:20px;}
   .seg-hero h1{font-size:22px;}
   .seg-hero-desc{font-size:13px;}
-  .doc-actions{flex-wrap:wrap;}
-  .doc-action-btn.primary-action{flex:1;}
 }
 
 
-/* Three families, three columns, so the menu reads like the home page. */
-.nav-dropdown-panel.seg-cols { width:min(640px, calc(100vw - 24px));
-  grid-template-columns:repeat(3,1fr); gap:6px; padding:12px; align-items:start; }
-.seg-dd-col { min-width:0; }
-.seg-dd-head {
-  font-size:9.5px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase;
-  color:var(--primary-ink); padding:2px 8px 7px; white-space:nowrap;
-}
-.seg-dd-col .seg-dd-item { padding:6px 8px; }
-.seg-dd-col .seg-dd-name { font-size:11.5px; line-height:1.35; white-space:normal; }
-@media(max-width:900px){
-  .nav-dropdown-panel.seg-cols { grid-template-columns:1fr 1fr; }
-}
 
-/* The controlled number belongs on the card, but as a reference beside the
-   title rather than glued to the front of it. */
-.doc-num {
-  display:inline-block; padding:0; border:none; background:none; border-radius:0;
-  font-family:'BwGradual','Urbanist',sans-serif; font-size:10px; font-weight:800;
-  letter-spacing:0.9px; color:var(--primary-ink); text-transform:uppercase;
-  font-variant-numeric:tabular-nums; white-space:nowrap; opacity:0.85;
-}
-/* The dark rule still painted the chip fill the base rule takes away, and teal
-   ink on that tile lands under 4.5 once the 0.85 fade is applied. */
-html[data-taqa-theme="dark"] .doc-num {
-  color:var(--primary-ink);
-}
-.wip-note{color:#756A61;}
-html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
 </style>
+<link rel="stylesheet" href="topbar.css">
 </head>
 <body>
 <div class="bg-blobs" aria-hidden="true"><div class="bg-blob bg-blob-1"></div><div class="bg-blob bg-blob-2"></div><div class="bg-blob bg-blob-3"></div></div>
 <canvas id="bg-canvas"></canvas>
 <div class="page-wrapper">
 
-<nav>
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
   <a href="index.html" class="nav-brand">
-    <span class="nav-brand-text"><span class="nav-brand-name">TAQA</span> <span class="nav-brand-hub">Knowledge Hub</span><span class="nav-subtitle" style="white-space:nowrap"><em style="color:var(--primary-ink); font-style:italic;">Tech Hub</em> <span class="wip-note">(working name)</span></span></span>
+    <span class="nav-title"><span class="nav-title-brand">TAQA</span> <span class="nav-title-hub">Knowledge Hub</span></span>
+    <span class="nav-subtitle"><em>Tech Hub</em> <span class="wip-note">(working name)</span></span>
   </a>
   <ul class="nav-links">
-    <div class="nav-pill" id="nav-pill"></div>
     <li><a href="index.html">Home</a></li>
-    <li class="nav-dropdown nav-dropdown-li" id="seg-dropdown-li">
-      <button class="nav-dropdown-btn" id="seg-dropdown-btn" aria-haspopup="true" aria-expanded="false">
-        Segments
-        <svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <div class="nav-dropdown-panel seg-cols" role="menu">
-        <!-- Built from the register at runtime. Nothing is listed here, so a
-             renamed area cannot survive as stale markup. -->
-      </div>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn active" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
     </li>
     <li><a href="ai-search.html">Document Search</a></li>
-    <li><a href="master-list.html">Master List</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
     <li><a href="glossary.html">Field Glossary</a></li>
     <li><a href="support-ticket.html">Ask Expert</a></li>
   </ul>
   <div class="nav-right">
-    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode"><svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
-    <button class="bell-btn" id="nav-bell" style="display:none" onclick="location.href='dashboard.html'" title="Pending approvals" aria-label="Pending approvals"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
-    <a href="ai-search.html" class="btn btn-ghost">AI Search</a>
-    <a href="upload.html" class="btn btn-primary">+ Upload</a>
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" onclick="location.href='dashboard.html'" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
@@ -656,13 +736,6 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
             Copy link
           </button>
         </div>
-      </div>
-      <div class="seg-hero-stats">
-        <div class="mini-stat"><div class="mini-stat-num" id="ms-policies">,</div><div class="mini-stat-label" id="ms-label-policies">Standards</div></div>
-        <div class="mini-stat"><div class="mini-stat-num" id="ms-sops">,</div><div class="mini-stat-label" id="ms-label-sops">SOPs</div></div>
-        <div class="mini-stat"><div class="mini-stat-num" id="ms-manuals">,</div><div class="mini-stat-label" id="ms-label-manuals">Manuals</div></div>
-        <div class="mini-stat"><div class="mini-stat-num" id="ms-lessons">,</div><div class="mini-stat-label" id="ms-label-lessons">Lessons</div></div>
-        <div class="mini-stat"><div class="mini-stat-num" id="ms-software" style="color:var(--primary-light);">,</div><div class="mini-stat-label">Software</div></div>
       </div>
     </div>
   </div>
@@ -1414,9 +1487,10 @@ const startTab = params.get('tab') || 'sops';
 // An unknown id used to fall through to Drilling, so a bad link showed one
 // segment's documents under another segment's name. Fail visibly instead,
 // in the shape the rest of this page expects.
+const SEG_KNOWN = !!SEGMENTS[segId];
 const seg = SEGMENTS[segId] || {
-  name:'Segment not found', icon:'\u25CB', tag:'',
-  desc:'No area with this identifier exists. Check the link, or open the Master List.',
+  name:'Area not found', icon:'\u25CB', tag:'',
+  desc:'No area is called \u201c' + segId + '\u201d. The link may be mistyped or out of date.',
   sops:0, manuals:0, policies:0, alerts:0, lessons:0, software:0,
   contributors:[],
   docs:{ sops:[], manuals:[], policies:[], alerts:[], lessons:[], software:[] }
@@ -1445,8 +1519,9 @@ document.getElementById('hero-bg-img').style.backgroundImage =
 // ── Populate Header ──
 document.title = seg.name + ', TAQA Knowledge Hub';
 document.getElementById('breadcrumb-name').textContent = seg.name;
-(function(){try{var r=JSON.parse(localStorage.getItem('taqa-recent')||'[]');r=r.filter(function(x){return x.id!==segId;});r.unshift({id:segId,name:seg.name,tag:seg.tag});localStorage.setItem('taqa-recent',JSON.stringify(r.slice(0,4)));}catch(e){}})();
+if (SEG_KNOWN) (function(){try{var r=JSON.parse(localStorage.getItem('taqa-recent')||'[]');r=r.filter(function(x){return x.id!==segId;});r.unshift({id:segId,name:seg.name,tag:seg.tag});localStorage.setItem('taqa-recent',JSON.stringify(r.slice(0,4)));}catch(e){}})();
 document.getElementById('seg-tag').textContent = seg.tag;
+document.getElementById('seg-tag').hidden = !seg.tag;
 document.getElementById('seg-name').textContent = seg.name;
 document.getElementById('seg-desc').textContent = seg.desc;
 // Software is an asset, not a controlled document (TQ-QHSE-S001 4.4), so it is
@@ -1454,6 +1529,9 @@ document.getElementById('seg-desc').textContent = seg.desc;
 // header read 39 while the register and documents.html both said 36.
 document.getElementById('seg-total').textContent = seg.sops + seg.manuals + seg.policies + seg.alerts + seg.lessons;
 document.getElementById('seg-alerts').textContent = seg.alerts || 'None';
+// An area that does not exist has no counts, no update date, nothing to
+// manage and no shelves to search, so none of that is drawn for it.
+if (!SEG_KNOWN) document.documentElement.classList.add('seg-unknown');
 /* Managing a segment is a Director's or QMS's job. An Employee and an Auditor
    read this library; offering them a control they cannot use is noise, and in
    the Auditor's case it misstates what their access is. Shown only to someone
@@ -1464,7 +1542,7 @@ document.getElementById('seg-alerts').textContent = seg.alerts || 'None';
   var cap = TAQA_ROLE.effective();
   var mayManage = !!cap.editMetadata &&
                   (cap.scope === 'all' || cap.ownSegment === segId);
-  btn.hidden = !mayManage;
+  btn.hidden = !mayManage || !SEG_KNOWN;
   if (mayManage) btn.href = 'dashboard.html?id=' + encodeURIComponent(segId);
 })();
 
@@ -1483,11 +1561,8 @@ document.getElementById('seg-alerts').textContent = seg.alerts || 'None';
   }
   TAQA_STORE.onChange(paintPending);
 })();
-document.getElementById('ms-sops').textContent = seg.sops;
-document.getElementById('ms-manuals').textContent = seg.manuals;
-document.getElementById('ms-policies').textContent = seg.policies;
-document.getElementById('ms-lessons').textContent = seg.lessons;
-document.getElementById('ms-software').textContent = seg.software||0;
+// The hero used to repeat these counts as tiles; the tab bar already carries
+// them, once, beside the shelf they count.
 document.getElementById('tc-sops').textContent = seg.sops;
 document.getElementById('tc-manuals').textContent = seg.manuals;
 document.getElementById('tc-policies').textContent = seg.policies;
@@ -1495,21 +1570,14 @@ document.getElementById('tc-alerts').textContent = seg.alerts;
 document.getElementById('tc-lessons').textContent = seg.lessons;
 document.getElementById('tc-software').textContent = seg.software||0;
 
-// ── Tab label & mini-stat overrides ──
+// ── Tab label overrides ──
 if(seg.tabLabels){
-  const labelMap = {sops:'ms-label-sops', manuals:'ms-label-manuals', policies:'ms-label-policies', lessons:'ms-label-lessons'};
   document.querySelectorAll('#tab-bar .tab-btn').forEach(btn=>{
     const t = btn.dataset.tab;
     if(seg.tabLabels[t]){
       const span = btn.querySelector('span');
       btn.textContent = seg.tabLabels[t] + ' ';
       if(span) btn.appendChild(span);
-    }
-  });
-  Object.keys(labelMap).forEach(k=>{
-    if(seg.tabLabels[k]){
-      const el = document.getElementById(labelMap[k]);
-      if(el) el.textContent = seg.tabLabels[k];
     }
   });
 }
@@ -1555,38 +1623,13 @@ if(seg.contributors && seg.contributors.length){
 }
 
 // ── Build Document Lists ──
-/* A list of nine invented staff names, a list of invented file sizes and a
-   random-month picker used to live here as fallbacks. They were dormant, but
-   a fallback that invents a person or a date is still a way to show something
-   the register does not hold. What the register does not know now says so. */
+/* What the register does not know is never made up here. The card used to
+   carry an owner line ("Relevant SPL / Function" on every document, which
+   told nobody anything) and a second date line; both are gone from the row.
+   The viewer still shows the full record. */
 
-/* The register knows who owns a document and when it was issued, so neither
-   needs to be made up. It printed "undefined" because seg.contributors is an
-   empty array now and [] is truthy, so the guard never fired. */
-function ownerOf(num){
-  var d = (num && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(num) : null;
-  if (d && typeof TAQA_DOC !== 'undefined') {
-    var o = TAQA_DOC.owner(d);
-    if (o && o !== ',') return o;
-  }
-  return 'Owner not recorded';
-}
-function issuedOf(num, idx){
-  var d = (num && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(num) : null;
-  if (d && d.issueDate) {
-    var dt = new Date(d.issueDate);
-    if (!isNaN(dt)) return MONTHS_FULL[dt.getMonth()] + ' ' + dt.getFullYear();
-  }
-  return fmtDate(idx);
-}
-const MONTHS_FULL = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-function fmtDate(i){ return 'Date not recorded'; }
-
-/* The register holds no abstract, so a card states what it does hold: the
-   revision in force, who may read it, and when it is next due for review.
-   A document past its review date says so, because that is the one thing a
-   reader needs to know before acting on it. A title the register does not
-   carry gets no line at all rather than an invented one. */
+/* The modal states the record in full: revision, classification and when the
+   document is next due for review. */
 function docControlLine(num){
   var d = (num && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(num) : null;
   if (!d) return '';
@@ -1602,70 +1645,84 @@ function docControlLine(num){
       ? '<span class="doc-review-late">Review was due ' + when + ', ' + late + ' days late</span>'
       : 'Review due ' + when);
   }
-  return bits.join(' \u00b7 ');
+  return bits.join(' · ');
 }
 
+/* The revision in force sits on the reference line. The row's meta line
+   says only what changes what a reader does: the review state when it
+   matters, and the classification when it is anything but Internal. A row
+   with neither has no meta line at all. */
+const MON_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function rowMeta(d){
+  if (!d) return '';
+  const bits = [];
+  const due = d.nextReviewDate ? new Date(d.nextReviewDate) : null;
+  const closed = d.status === 'obsolete' || d.status === 'superseded';
+  if (due && !isNaN(due) && !closed) {
+    const late = Math.floor((Date.now() - due) / 86400000);
+    if (late > 0) {
+      const how = late < 60 ? late + (late === 1 ? ' day' : ' days')
+                            : Math.floor(late / 30.44) + ' months';
+      bits.push('<span class="doc-review-late">Review overdue, ' + how + '</span>');
+    } else if (late > -45) {
+      bits.push('Review due ' + MON_SHORT[due.getMonth()] + ' ' + due.getFullYear());
+    }
+  }
+  if (d.classification && String(d.classification).toLowerCase() !== 'internal')
+    bits.push(escHtml(d.classification.charAt(0).toUpperCase() + d.classification.slice(1)));
+  return bits.join('<span class="sep" aria-hidden="true">·</span>');
+}
+function escHtml(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
 const LIST_TYPE_MAP = {sops:'sop',manuals:'manual',policies:'standard',lessons:'lesson',alerts:'alert'};
+const MORE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>';
+
+function viewerHrefFor(entry, type){
+  const p = splitEntry(entry);
+  return `viewer.html?seg=${segId}&type=${type}` +
+    `&title=${encodeURIComponent(p.title)}` +
+    (p.num ? `&doc=${encodeURIComponent(p.num)}` : '');
+}
 
 function buildDocCard(title, type, idx) {
-  // The list a card sits in is not its type. Standards and the company's
+  // The list a row sits in is not its type. Standards and the company's
   // policies share one tab, so a CEO-signed Policy was drawn as a Standard.
   // The register record says what the document is.
-  const _rec0 = (typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(splitEntry(title).num) : null;
-  if (_rec0 && _rec0.docType) type = _rec0.docType;
-  const labels = {sop:'SOP',manual:'Manual',standard:'Standard',policy:'Policy',alert:'Alert',lesson:'Lesson Learned'};
-  const typeClass = type;
-  const summary = docControlLine(splitEntry(title).num);
+  const _p = splitEntry(title);
+  const rec = (_p.num && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(_p.num) : null;
+  if (rec && rec.docType) type = rec.docType;
   // Titles go into data attributes, never into JavaScript source. The parser
   // decodes &#39; back to an apostrophe before the handler compiles, so
   // "Manager's Guide to HR Processes" used to break its own View and QR.
   const safeTitle = title.replace(/&/g,'&amp;').replace(/'/g,"&#39;").replace(/"/g,"&quot;").replace(/</g,'&lt;');
-  const safeType = typeClass;
-  const _p = splitEntry(title);
+  const safeType = type;
   const newBadge = (function(){
-    var d = (_p.num && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(_p.num) : null;
-    if (!d || !d.issueDate) return '';
-    var days = (Date.now() - new Date(d.issueDate)) / 86400000;
+    if (!rec || !rec.issueDate) return '';
+    var days = (Date.now() - new Date(rec.issueDate)) / 86400000;
     if (isNaN(days) || days > 120 || days < 0) return '';
-    var rev = parseFloat(d.revision || '1');
+    var rev = parseFloat(rec.revision || '1');
     return rev > 1
       ? '<span class="doc-new-badge updated">Revised</span>'
       : '<span class="doc-new-badge">New</span>';
   })();
-  const segRevs = (typeof TAQA_SEGMENTS !== 'undefined' && TAQA_SEGMENTS[segId]) ? (TAQA_SEGMENTS[segId].docRevisions || {}) : {};
-  const revInfo = segRevs[title];
-  const revBadge = revInfo ? `<span class="doc-rev-badge">Rev ${revInfo.current}</span>` : '';
-  const _T=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.types[type])||{};
-  const _mark=_T.mark||({sop:'SOP',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT'})[type]||type.slice(0,3).toUpperCase();
-  const icon=`<div class="doc-type-icon ${type}">${_mark}</div>`;
+  const _T = (typeof TAQA_DOC_LOOKUPS!=='undefined' && TAQA_DOC_LOOKUPS.types[type]) || {};
+  const _mark = _T.mark || ({sop:'SOP',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT'})[type] || type.slice(0,3).toUpperCase();
   const isBm = window.TAQA_Bookmarks ? window.TAQA_Bookmarks.has(title, segId) : false;
-  const viewerHref = `viewer.html?seg=${segId}&type=${safeType}` +
-    `&title=${encodeURIComponent(_p.title)}` +
-    (_p.num ? `&doc=${encodeURIComponent(_p.num)}` : '');
+  const meta = rowMeta(rec);
+  const rev = rec && rec.revision ? '<span class="doc-rev">Rev ' + escHtml(rec.revision) + '</span>' : '';
+  const read = isDocRead(title) ? '<span class="doc-read-badge">Read</span>' : '';
+  const label = _p.title + (_p.num ? ', ' + _p.num : '');
   return `
-  <div class="doc-card${type==='alert'?' is-alert':''}" data-title="${safeTitle}" data-type="${safeType}">
-    ${icon}
-    <div class="doc-body">
-      <div class="doc-eyebrow">${_p.num?`<span class="doc-num">${_p.num}</span>`:''}${revBadge}${newBadge}${isDocRead(title)?'<span class="doc-read-badge">✓ Read</span>':''}</div>
-      <div class="doc-info-title">${_p.title}</div>
-      ${summary?`<div class="doc-summary">${summary}</div>`:''}
-      <div class="doc-info-meta">
-        <span class="doc-meta-item">${ownerOf(_p.num)}</span>
-        <span class="doc-meta-item">${issuedOf(_p.num, idx)}</span>
-      </div>
-    </div>
-    <div class="doc-actions">
-      <a class="doc-action-btn primary-action" href="${viewerHref}" onclick="var c=this.closest('.doc-card');saveRecent(c.dataset.title,c.dataset.type);markDocRead(c.dataset.title);if(window.TAQA_Track)window.TAQA_Track('open',c.dataset.title,{type:c.dataset.type,seg:'${segId}'})">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        View
-      </a>
-      <div class="doc-act-pair">
-        <button class="doc-action-btn bm-btn${isBm?' bm-on':''}" data-title="${safeTitle}" data-type="${safeType}" onclick="toggleDocBm(this)" title="${isBm?'Remove bookmark':'Bookmark'}">${isBm?'★':'☆'}</button>
-        <button class="doc-action-btn" onclick="var c=this.closest('.doc-card');showDocQR(c.dataset.title,c.dataset.type)" title="QR Code">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="5" y="5" width="3" height="3"/><rect x="16" y="5" width="3" height="3"/><rect x="16" y="16" width="3" height="3"/><rect x="5" y="16" width="3" height="3"/></svg>
-        </button>
-      </div>
-    </div>
+  <div class="doc-card${type==='alert'?' is-alert':''}${meta?' has-state':''}" data-title="${safeTitle}" data-type="${safeType}">
+    <a class="doc-row-link" href="${viewerHrefFor(title, safeType)}" onclick="var c=this.closest('.doc-card');saveRecent(c.dataset.title,c.dataset.type);markDocRead(c.dataset.title);if(window.TAQA_Track)window.TAQA_Track('open',c.dataset.title,{type:c.dataset.type,seg:'${segId}'})">
+      <span class="doc-type-icon ${type}" aria-hidden="true">${_mark}</span>
+      <span class="doc-body">
+        <span class="doc-eyebrow">${_p.num?`<span class="doc-num">${escHtml(_p.num)}</span>`:''}${rev}${newBadge}<span class="bm-btn bm-flag${isBm?' bm-on':''}" data-title="${safeTitle}" data-type="${safeType}" role="img" aria-label="Bookmarked" title="Bookmarked">★</span>${read}</span>
+        <span class="doc-info-title">${escHtml(_p.title)}</span>
+        ${meta?`<span class="doc-meta">${meta}</span>`:''}
+      </span>
+    </a>
+    <button type="button" class="doc-more" aria-haspopup="menu" aria-expanded="false" aria-controls="row-menu" aria-label="More for ${escHtml(label)}">${MORE_ICON}</button>
   </div>`;
 }
 
@@ -1678,10 +1735,11 @@ function buildAlertCard(text, idx) {
   return buildDocCard(String(text).replace(/^\u26a0\ufe0f?\s*/, ''), 'alert', idx);
 }
 
-const SKEL = `<div class="skeleton-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>`;
+const SKEL = `<div class="skeleton-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line w40"></div><div class="skel-line w80"></div><div class="skel-line w60"></div></div></div>`;
 
 // ── Paginated rendering, 100K-ready ──
-const PAGE_SIZE = 12;
+// Rows are compact, so a page holds a whole shelf in most areas.
+const PAGE_SIZE = 25;
 const DOCS_STATE = {};
 function _st(type){
   if(!DOCS_STATE[type])DOCS_STATE[type]={all:[],filtered:[],page:0,observer:null,isAlert:false,isSoftware:false};
@@ -1698,6 +1756,7 @@ function _renderPage(type){
   const searching=st.filtered.length<st.all.length&&st.all.length>0;
   const start=searching?0:st.page*PAGE_SIZE;
   const slice=searching?items:items.slice(start,start+PAGE_SIZE);
+  el.classList.toggle('is-searching',searching);
   const build=(t,i)=>{
     if(typeof t==='object'){return t.isSoftware?buildSoftwareCard(t.title,i):t.isAlert?buildAlertCard(t.title,i):buildDocCard(t.title,t.type,i);}
     return st.isSoftware?buildSoftwareCard(t,i):st.isAlert?buildAlertCard(t,i):buildDocCard(t,LIST_TYPE_MAP[type]||type,i);
@@ -1729,7 +1788,9 @@ function _renderPage(type){
     const e2=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     // Only someone who can submit to the register is offered the button.
     const mayUpload=typeof TAQA_ROLE!=='undefined'&&TAQA_ROLE.can('editMetadata');
-    el.innerHTML=st.isAlert
+    el.innerHTML=!SEG_KNOWN
+      ?`<div class="empty-state"><h3>Choose an area</h3><p>Every area is listed under Areas, in the menu at the top of this page.</p></div>`
+      :st.isAlert
       ?`<div class="empty-state"><div class="empty-icon empty-mark">${e2(mark||'ALT')}</div><h3>No active alerts</h3><p>${e2(seg.name)} has no outstanding technical alerts.</p></div>`
       :`<div class="empty-state">${mark?`<div class="empty-icon empty-mark">${e2(mark)}</div>`:''}<h3>No ${e2(noun)} issued for ${e2(seg.name)} yet</h3><p>When one is approved and released it will appear on this tab.</p>${mayUpload?'<a href="upload.html?seg='+encodeURIComponent(segId)+'" class="empty-state-upload">+ Submit a document</a>':''}</div>`;
     if(vis)vis.textContent='0';
@@ -1737,7 +1798,19 @@ function _renderPage(type){
     return;
   }
 
-  el.innerHTML=slice.map((t,i)=>build(t,start+i)).join('');
+  // The All tab keeps its shelves: a quiet heading inside the sheet each
+  // time the list moves from one kind of document to the next.
+  let lastBucket=null;
+  el.innerHTML=slice.map((t,i)=>{
+    let head='';
+    if(type==='all'&&SORT_STATE.all!=='az'&&typeof t==='object'&&t.bucket&&t.bucket!==lastBucket){
+      lastBucket=t.bucket;
+      const n=items.filter(x=>x.bucket===t.bucket).length;
+      head=`<div class="doc-group" role="heading" aria-level="3"><span class="doc-group-t">${escHtml(tabLabelOf(t.bucket))}</span><span class="doc-group-n">${n}</span></div>`;
+    }
+    return head+build(t,start+i);
+  }).join('');
+  closeRowMenu();
   if(vis)vis.textContent=items.length;
   if(st.isAlert&&items.length>0){const dot=document.getElementById('alert-pulse-dot');if(dot)dot.style.display='inline-block';}
   _renderPagination(type);
@@ -1761,6 +1834,9 @@ renderList('policies', seg.docs.policies, false);
 renderList('alerts', seg.docs.alerts, true);
 renderList('lessons', seg.docs.lessons, false);
 renderSoftware(seg.docs.software || []);
+// The row menu exists, hidden, from the start, so every row button's
+// aria-controls names a real element.
+rowMenuEl();
 
 /* A software asset is listed, not controlled: TQ-QHSE-S001 does not place
    tools under document control. This card used to invent a version (v1.0), a
@@ -1771,17 +1847,15 @@ function buildSoftwareCard(raw, idx) {
   const name = String(raw).split(' | ')[0] || raw;
   const T = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.types.software) || {};
   const owner = T.owner || 'Digital Transformation';
-  const esc = v => String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const mark = T.mark || 'ZIP';
   return `
-  <div class="doc-card is-asset">
-    <div class="doc-type-icon software">${mark}</div>
-    <div class="doc-body">
-      <div class="doc-info-title">${esc(name)}</div>
-      <div class="doc-summary">Software asset, listed here but not under document control</div>
-      <div class="doc-info-meta">
-        <span class="doc-meta-item">Distributed by ${esc(owner)}</span>
-      </div>
+  <div class="doc-card is-asset" data-title="${escHtml(name)}" data-type="software">
+    <div class="doc-row-link">
+      <span class="doc-type-icon software" aria-hidden="true">${escHtml(mark)}</span>
+      <span class="doc-body">
+        <span class="doc-info-title">${escHtml(name)}</span>
+        <span class="doc-meta"><span class="nw">Software asset, not under document control</span><span class="sep" aria-hidden="true">\u00b7</span><span class="nw">Distributed by ${escHtml(owner)}</span></span>
+      </span>
     </div>
   </div>`;
 }
@@ -1874,12 +1948,12 @@ function openTab(name) {
     const allPanel = document.getElementById('panel-all');
     if (allPanel) allPanel.classList.add('active');
     const combined = [
-      ..._st('sops').all.map(t=>({title:t,type:'sop'})),
-      ..._st('manuals').all.map(t=>({title:t,type:'manual'})),
-      ..._st('policies').all.map(t=>({title:t,type:'policy'})),
-      ..._st('alerts').all.map(t=>({title:t,type:'alert',isAlert:true})),
-      ..._st('lessons').all.map(t=>({title:t,type:'lesson'})),
-      ..._st('software').all.map(t=>({title:t,type:'software',isSoftware:true})),
+      ..._st('policies').all.map(t=>({title:t,type:'policy',bucket:'policies'})),
+      ..._st('sops').all.map(t=>({title:t,type:'sop',bucket:'sops'})),
+      ..._st('manuals').all.map(t=>({title:t,type:'manual',bucket:'manuals'})),
+      ..._st('alerts').all.map(t=>({title:t,type:'alert',isAlert:true,bucket:'alerts'})),
+      ..._st('lessons').all.map(t=>({title:t,type:'lesson',bucket:'lessons'})),
+      ..._st('software').all.map(t=>({title:t,type:'software',isSoftware:true,bucket:'software'})),
     ];
     const stA=_st('all');
     stA.all=combined;stA.filtered=[...combined];stA.page=0;stA.isAlert=false;stA.isSoftware=false;
@@ -2042,24 +2116,6 @@ function draw(){ ctx.fillStyle=document.documentElement.getAttribute('data-taqa-
     ctx.fillStyle='rgba(0,93,99,0.12)';ctx.fill(); });
   requestAnimationFrame(draw); }
 draw();
-// ── Segments Dropdown ──
-(function(){
-  const li=document.getElementById('seg-dropdown-li'),btn=document.getElementById('seg-dropdown-btn');
-  if(!li||!btn)return;
-  btn.addEventListener('click',function(e){e.stopPropagation();const o=li.classList.toggle('open');btn.setAttribute('aria-expanded',o);});
-  document.addEventListener('click',function(){li.classList.remove('open');btn.setAttribute('aria-expanded','false');});
-  li.addEventListener('click',function(e){e.stopPropagation();});
-})();
-// ── Sliding Pill Nav ──
-const pill=document.getElementById('nav-pill'),navList=document.querySelector('.nav-links');
-function pillTo(el){const lr=navList.getBoundingClientRect(),ar=el.getBoundingClientRect();pill.style.left=(ar.left-lr.left)+'px';pill.style.width=ar.width+'px';pill.style.opacity='1';}
-function pillToActive(){const a=navList.querySelector('a.active');if(a)pillTo(a);else pill.style.opacity='0';}
-pillToActive();navList.querySelectorAll('a').forEach(a=>a.addEventListener('mouseenter',()=>pillTo(a)));navList.addEventListener('mouseleave',pillToActive);
-// ── Dark Mode ──
-const MOON='M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
-const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
-function toggleDark(){const isDark=document.documentElement.getAttribute('data-taqa-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-taqa-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme-v3',next);}
-(function(){const s=localStorage.getItem('taqa-theme-v3');if(s==='dark'){document.documentElement.setAttribute('data-taqa-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
 
 // ── Document Detail Modal ──
 const TYPE_LABELS = {sop:'SOP',manual:'Manual',policy:'Policy',lesson:'Lesson Learned',alert:'Alert'};
@@ -2173,17 +2229,6 @@ function loadRecent() {
 }
 loadRecent();
 
-// ── Copy Link ──
-function copyDocLink(btn, title) {
-  const url = location.href.split('#')[0] + '#doc-' + encodeURIComponent(title);
-  navigator.clipboard.writeText(url).then(() => {
-    const orig = btn.textContent;
-    btn.textContent = 'Copied!';
-    btn.classList.add('copy-ok');
-    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copy-ok'); }, 1800);
-  });
-}
-
 // ── / Keyboard Shortcut ──
 document.addEventListener('keydown', e => {
   if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
@@ -2203,12 +2248,137 @@ function toggleDocBm(btn) {
   // tabs render once, so update every star for it, not only the one tapped.
   document.querySelectorAll('.bm-btn').forEach(function(x){
     if (x.dataset.title !== title) return;
-    x.textContent = added ? '★' : '☆';
     x.classList.toggle('bm-on', added);
+    // A row's star is a mark, not a control: it says Bookmarked and stays
+    // a filled star, and is simply hidden when the bookmark goes.
+    if (x.classList.contains('bm-flag')) { x.textContent = '★'; return; }
+    x.textContent = added ? '★' : '☆';
     x.title = added ? 'Remove bookmark' : 'Bookmark';
   });
   if (window.updateBmBadge) window.updateBmBadge();
   if (window.showToast) window.showToast(added ? 'Bookmarked!' : 'Bookmark removed', added ? 'success' : 'info');
+}
+
+// A tab's own words, without its count, so the All tab's shelf headings say
+// what the tabs say (Policies for Company Wide, Notices for a function).
+function tabLabelOf(bucket){
+  const b = document.querySelector('#tab-bar .tab-btn[data-tab="' + bucket + '"]');
+  const raw = b ? (b.firstChild && b.firstChild.nodeType === 3 ? b.firstChild.textContent : b.textContent) : '';
+  return raw.trim().replace(/\s*\d+$/, '') || TAB_LABELS[bucket] || bucket;
+}
+
+// ── Row menu ──
+// One menu serves every row. It is built when opened, so its bookmark label
+// always reads the bookmark store as it is now, whatever the panel did since.
+const ROW_MENU_ICONS = {
+  bm:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg>',
+  bmOn:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg>',
+  qr:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.2"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1.2"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1.2"/><path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18zM14 18.5v2M18.5 14h2"/></svg>',
+  link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>'
+};
+let _rowMenuFrom = null;
+function rowMenuEl(){
+  let m = document.getElementById('row-menu');
+  if (m) return m;
+  m = document.createElement('div');
+  m.id = 'row-menu'; m.className = 'row-menu'; m.setAttribute('role', 'menu'); m.hidden = true;
+  document.body.appendChild(m);
+  m.addEventListener('click', function(e){
+    const it = e.target.closest('.row-menu-item');
+    if (!it || !_rowMenuFrom) return;
+    const from = _rowMenuFrom, row = from.closest('.doc-card');
+    const act = it.dataset.act;
+    closeRowMenu(act !== 'qr');
+    if (!row) return;
+    if (act === 'bm') toggleDocBm(it);
+    else if (act === 'qr') { _qrReturn = from; showDocQR(row.dataset.title, row.dataset.type); }
+    else if (act === 'link') copyRowLink(row.dataset.title, row.dataset.type);
+  });
+  m.addEventListener('keydown', function(e){
+    const items = [...m.querySelectorAll('.row-menu-item')];
+    const i = items.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+    else if (e.key === 'Home') { e.preventDefault(); items[0].focus(); }
+    else if (e.key === 'End') { e.preventDefault(); items[items.length - 1].focus(); }
+    else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeRowMenu(true); }
+    else if (e.key === 'Tab') { closeRowMenu(true); }
+  });
+  return m;
+}
+function openRowMenu(btn){
+  const row = btn.closest('.doc-card');
+  if (!row) return;
+  const m = rowMenuEl();
+  const on = window.TAQA_Bookmarks ? window.TAQA_Bookmarks.has(row.dataset.title, segId) : false;
+  const t = escHtml(row.dataset.title), ty = escHtml(row.dataset.type);
+  m.innerHTML =
+    `<button type="button" class="row-menu-item" role="menuitem" data-act="bm" data-title="${t}" data-type="${ty}">${on ? ROW_MENU_ICONS.bmOn : ROW_MENU_ICONS.bm}${on ? 'Remove bookmark' : 'Bookmark'}</button>` +
+    `<button type="button" class="row-menu-item" role="menuitem" data-act="qr">${ROW_MENU_ICONS.qr}Show QR code</button>` +
+    `<button type="button" class="row-menu-item" role="menuitem" data-act="link">${ROW_MENU_ICONS.link}Copy link</button>`;
+  m.setAttribute('aria-label', 'Actions for ' + (splitEntry(row.dataset.title).title));
+  m.hidden = false;
+  _rowMenuFrom = btn;
+  btn.setAttribute('aria-expanded', 'true');
+  // Hang it under the button, its end edge on the button's end edge; open
+  // upward when the row sits near the bottom of the screen.
+  const r = btn.getBoundingClientRect(), mw = m.offsetWidth, mh = m.offsetHeight;
+  const rtl = getComputedStyle(btn).direction === 'rtl';
+  let x = rtl ? r.left : r.right - mw;
+  x = Math.max(8, Math.min(x, document.documentElement.clientWidth - mw - 8));
+  const up = r.bottom + 6 + mh > window.innerHeight - 8 && r.top - 6 - mh > 72;
+  m.toggleAttribute('data-up', up);
+  m.style.left = (x + window.scrollX) + 'px';
+  m.style.top = ((up ? r.top - 6 - mh : r.bottom + 6) + window.scrollY) + 'px';
+  const first = m.querySelector('.row-menu-item');
+  if (first) first.focus({preventScroll:true});
+}
+function closeRowMenu(refocus){
+  const m = document.getElementById('row-menu');
+  if (!m || m.hidden) return;
+  m.hidden = true;
+  const from = _rowMenuFrom; _rowMenuFrom = null;
+  if (from) {
+    from.setAttribute('aria-expanded', 'false');
+    if (refocus && from.isConnected) from.focus({preventScroll:true});
+  }
+}
+document.addEventListener('click', function(e){
+  const b = e.target.closest('.doc-more');
+  if (b) {
+    e.preventDefault();
+    const again = _rowMenuFrom === b;
+    closeRowMenu(false);
+    if (!again) openRowMenu(b);
+    return;
+  }
+});
+document.addEventListener('pointerdown', function(e){
+  if (!_rowMenuFrom) return;
+  if (e.target.closest('#row-menu') || e.target.closest('.doc-more') === _rowMenuFrom) return;
+  closeRowMenu(false);
+});
+document.addEventListener('keydown', function(e){
+  const b = e.target.closest && e.target.closest('.doc-more');
+  if (b && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) { e.preventDefault(); if (_rowMenuFrom !== b) { closeRowMenu(false); openRowMenu(b); } }
+});
+window.addEventListener('resize', function(){ closeRowMenu(false); });
+
+// The link a row opens, whole, so it can be pasted into a message.
+function copyRowLink(title, type){
+  const base = location.origin + location.pathname.replace(/[^/]*$/, '');
+  const url = base + viewerHrefFor(title, type);
+  const done = ok => { if (window.showToast) window.showToast(ok ? 'Link copied' : 'Could not copy link', ok ? 'success' : 'error'); };
+  const fallback = () => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = url; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      const ok = document.execCommand('copy'); ta.remove(); done(ok);
+    } catch (err) { done(false); }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(() => done(true), fallback);
+  else fallback();
 }
 
 // A list entry is "NUMBER  Title". Split it so a link can carry the controlled
@@ -2231,54 +2401,53 @@ function showDocQR(title, type) {
   if (inp) inp.value = url;
   const img = document.getElementById('qr-img');
   if (img) img.src = window.TAQA_QR ? window.TAQA_QR(url, 5) : '';
-  document.getElementById('qr-overlay').classList.add('open');
+  const ov = document.getElementById('qr-overlay');
+  ov.classList.add('open');
+  // Focus waits a frame, so the dialog is visible before it is asked to
+  // take focus, and tries once more if the first attempt did not land.
+  const cl = ov.querySelector('.qr-close');
+  if (cl) requestAnimationFrame(function(){
+    cl.focus({preventScroll:true});
+    if (document.activeElement !== cl) setTimeout(function(){ if (ov.classList.contains('open')) cl.focus({preventScroll:true}); }, 60);
+  });
 }
-function closeQR() { document.getElementById('qr-overlay').classList.remove('open'); }
+// Tab stays inside the open dialog. The dialog's markup comes after this
+// script, so the listener sits on the document and looks it up each time.
+document.addEventListener('keydown', function(e){
+  if (e.key !== 'Tab') return;
+  const ov = document.getElementById('qr-overlay');
+  if (!ov || !ov.classList.contains('open')) return;
+  const f = [...ov.querySelectorAll('input,button')].filter(x => !x.disabled);
+  if (!f.length) return;
+  const first = f[0], last = f[f.length - 1], a = document.activeElement;
+  if (!ov.contains(a)) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+  else if (e.shiftKey && a === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+});
+// Focus goes back to the row's menu button the dialog was opened from.
+let _qrReturn = null;
+function closeQR() {
+  const ov = document.getElementById('qr-overlay');
+  if (!ov.classList.contains('open')) return;
+  ov.classList.remove('open');
+  const r = _qrReturn; _qrReturn = null;
+  if (r && r.isConnected) r.focus({preventScroll:true});
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeQR(); });
 // Swipe-down to close QR
-(function(){
+// Deferred to DOMContentLoaded: the dialog is written after this script.
+document.addEventListener('DOMContentLoaded', function(){
   var ov=document.getElementById('qr-overlay'),sy=0;
   if(!ov)return;
   ov.addEventListener('touchstart',function(e){sy=e.touches[0].clientY;},{passive:true});
   ov.addEventListener('touchend',function(e){if(e.changedTouches[0].clientY-sy>60)closeQR();},{passive:true});
-})();
+});
 function copyQRUrl() {
   const v = document.getElementById('qr-url-in').value;
   navigator.clipboard.writeText(v).then(() => { if(window.showToast) window.showToast('Link copied!'); });
 }
 </script>
 <script>
-/* ── The Segments menu ─────────────────────────────────────────────────
-   Built from the register, in the three families the business settled on,
-   so a renamed or retired area cannot survive here the way Well Safety,
-   Inspection Services and Cybersecurity did. TWS Maintenance is left out:
-   its documents reassign to the segments that own the equipment, so it is
-   not somewhere to send anyone. */
-(function(){
-  var panel = document.querySelector('#seg-dropdown-li .nav-dropdown-panel');
-  if (!panel || typeof TAQA_DOC_LOOKUPS === 'undefined') return;
-  var S = TAQA_DOC_LOOKUPS.segments;
-
-  var FAMILIES = [
-    { group:'segment',  title:'Operational Segments' },
-    { group:'function', title:'Corporate Functions' },
-    { group:'product',  title:'Products & Technology' }
-  ];
-
-  panel.innerHTML = FAMILIES.map(function(f){
-    var ids = Object.keys(S)
-      .filter(function(k){ return S[k].group === f.group; })
-      .sort(function(a,b){ return S[a].name.localeCompare(S[b].name); });
-    if (!ids.length) return '';
-    return '<div class="seg-dd-col">' +
-             '<div class="seg-dd-head">' + f.title + '</div>' +
-             ids.map(function(k){
-               return '<a href="segment.html?id=' + k + '" class="seg-dd-item">' +
-                        '<span class="seg-dd-name">' + S[k].name + '</span>' +
-                      '</a>';
-             }).join('') +
-           '</div>';
-  }).join('');
-})();
 </script>
 <script src="shared.js"></script>
 <script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary-ink);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#C8102E;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-taqa-theme="dark"] .bell-badge{border-color:#002326;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
@@ -2286,7 +2455,7 @@ function copyQRUrl() {
 
 <!-- ── QR Modal ── -->
 <div class="qr-overlay" id="qr-overlay" onclick="if(event.target===this)closeQR()">
-  <div class="qr-box">
+  <div class="qr-box" role="dialog" aria-modal="true" aria-labelledby="qr-doc-title">
     <div class="qr-doc-title" id="qr-doc-title"></div>
     <img class="qr-img" id="qr-img" alt="QR Code" />
     <div class="qr-url-row">

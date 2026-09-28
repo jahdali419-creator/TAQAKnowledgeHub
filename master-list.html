@@ -18,6 +18,7 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 <link rel="apple-touch-icon" href="icons/icon.svg">
 <title>Master Document List, TAQA Knowledge Hub</title>
 <link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="topbar.css">
 <style>
 /* TAQA identity. Brand hues exactly as specified; the neutral ramp is built
    from Monument Gray so the greys run warm rather than blue. */
@@ -91,12 +92,6 @@ input[type=search]::placeholder{color:var(--ink-3);}
 input[type=search]::-webkit-search-cancel-button{cursor:pointer;}
 
 /* ── Brand lockup and the About popover ── */
-.side-brand img{display:block;width:150px;height:auto;}
-.side-brand .logo-dk{display:none;}
-html[data-taqa-theme="dark"] .side-brand .logo-lt{display:none;}
-html[data-taqa-theme="dark"] .side-brand .logo-dk{display:block;}
-.side-sub{display:block;font:500 11.5px/1 'BwGradual',sans-serif;color:var(--ink-3);
-  letter-spacing:.02em;margin-top:7px;}
 .pop-wrap{position:relative;}
 .pop{position:absolute;top:calc(100% + 8px);inset-inline-start:0;width:min(420px,88vw);z-index:50;
   background:var(--paper);border:1px solid var(--rule-firm);border-radius:var(--r3);padding:15px 17px;
@@ -118,7 +113,6 @@ html[dir="rtl"] .pop{transform-origin:top right;}
 .side{background:var(--paper);border-inline-end:1px solid var(--rule);
   position:sticky;top:0;height:100dvh;overflow-y:auto;overscroll-behavior:contain;
   display:flex;flex-direction:column;padding:18px 14px 20px;}
-.side-brand{display:block;padding:4px 8px 20px;text-decoration:none;}
 .side-sec{font:700 9.5px/1 'BwGradual',sans-serif;letter-spacing:.15em;text-transform:uppercase;
   color:var(--ink-3);padding:16px 10px 8px;}
 .side-rule{height:1px;background:var(--rule);margin:14px 6px;}
@@ -261,9 +255,6 @@ html[data-taqa-theme="dark"] .att .due svg{color:#FD691D;}
   .side{position:static;height:auto;flex-direction:row;align-items:center;gap:3px;
     overflow-x:auto;overflow-y:hidden;padding:9px 12px;
     border-inline-end:0;border-bottom:1px solid var(--rule);}
-  .side-brand{padding:0 14px 0 2px;flex-shrink:0;}
-  .side-brand img{width:96px;}
-  .side-sub{display:none;}
   .side-sec,.side-rule{display:none;}
   /* the cuts are a block list in the rail, so let their buttons become
      direct children of the row instead of stacking inside a wrapper */
@@ -443,7 +434,7 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
 .dw-f .btn{flex:1;}
 
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
-@media(max-width:1180px){.nav-links{display:none;}.frame{padding:16px 13px 54px;}}
+@media(max-width:1180px){.frame{padding:16px 13px 54px;}}
 @media(max-width:1100px){.scroll{overflow-x:auto;}}
 @media(max-width:760px){
   /* The popover is anchored to a trigger that sits mid-page, so on a narrow
@@ -462,33 +453,51 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
 .filter-bar select, #f-seg, #f-type, #f-status, #f-cls, #f-lang, #role-select {
   text-overflow:ellipsis; padding-inline-end:30px;
 }
+
+/* ── The site's top bar ──
+   This page carries the same bar as every other page (topbar.css, shared.js).
+   The bar is fixed, so the shell starts below it, the rail and the table
+   header stick below it, and the detail drawer, being modal, covers it. */
+.shell{padding-top:var(--nav-h,64px);}
+.side{top:var(--nav-h,64px);height:calc(100dvh - var(--nav-h,64px));}
+thead th{top:var(--nav-h,64px);}
+.scrim{z-index:1005;}
+.dw{z-index:1006;}
+@media(max-width:980px){.side{height:auto;}}
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to the register</a>
 
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+  <a href="index.html" class="nav-brand">
+    <span class="nav-title"><span class="nav-title-brand">TAQA</span> <span class="nav-title-hub">Knowledge Hub</span></span>
+    <span class="nav-subtitle"><em>Tech Hub</em> <span class="wip-note">(working name)</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
+    <li><a href="ai-search.html">Document Search</a></li>
+    <li class="nav-reg"><a href="master-list.html" class="active" aria-current="page">Master List</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
+  <div class="nav-right">
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" onclick="location.href='dashboard.html'" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
 <div class="shell">
 
-<aside class="side" aria-label="Main navigation">
-  <a href="index.html" class="side-brand" aria-label="TAQA Knowledge Hub home">
-    <img class="logo-lt" src="icons/taqa-logo.png" alt="TAQA" width="340" height="145">
-    <img class="logo-dk" src="icons/taqa-logo-reverse.png" alt="TAQA" width="340" height="145">
-    <span class="side-sub">Knowledge Hub</span>
-  </a>
-
-  <a class="nav-i" href="index.html">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/></svg>
-    <span>Home</span></a>
-  <a class="nav-i" href="ai-search.html">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-    <span>Search</span></a>
-  <a class="nav-i" href="master-list.html" aria-current="page">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M3.5 9h17M9 9v11"/></svg>
-    <span>Master List</span></a>
-  <a class="nav-i" href="glossary.html">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2 2 0 016 4h13v16H6a2 2 0 01-2-2z"/><path d="M8 8h7M8 12h7"/></svg>
-    <span>Glossary</span></a>
-
+<aside class="side" aria-label="In this register">
   <div class="side-sec">In this register</div>
   <div id="cuts"></div>
 
@@ -527,10 +536,6 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
         <span>As</span>
         <select id="role-select" onchange="setRole(this.value)" aria-label="Viewing role"></select>
       </div>
-      <button class="btn" id="theme-btn" onclick="toggleDark()" aria-label="Switch between light and dark">
-        <svg id="theme-icon" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>
-        <span id="theme-label">Dark</span>
-      </button>
       <button class="btn" id="export-btn" onclick="exportCsv()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export
@@ -699,21 +704,6 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
 <script src="documents-master.js"></script>
 <script src="store.js"></script>
 <script>
-const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
-const MOON='M6.2 2.3a.55.55 0 0 1 .2.62 5.2 5.2 0 0 0 6.7 6.7.55.55 0 0 1 .68.75A6.3 6.3 0 1 1 5.6 2.1a.55.55 0 0 1 .6.2Z';
-function paintTheme(n){
-  document.documentElement.setAttribute('data-taqa-theme',n);
-  var p=document.querySelector('#theme-icon path');
-  if(p)p.setAttribute('d',n==='dark'?MOON:SUN);
-  var l=document.getElementById('theme-label');
-  if(l)l.textContent=n==='dark'?'Light':'Dark';
-}
-(function(){var t;try{t=localStorage.getItem('taqa-theme-v3');}catch(e){}
-  paintTheme(t==='dark'?'dark':'light');})();
-function toggleDark(){
-  var n=document.documentElement.getAttribute('data-taqa-theme')==='dark'?'light':'dark';
-  paintTheme(n);
-  try{localStorage.setItem('taqa-theme-v3',n);}catch(e){}}
 
 const D=TAQA_MASTER_DOCS, L=TAQA_DOC_LOOKUPS, A=TAQA_DOC;
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1210,5 +1200,6 @@ if (typeof TAQA_STORE !== 'undefined') window.addEventListener(TAQA_STORE.EVENT,
   });
 })();
 </script>
+<script src="shared.js"></script>
 </body>
 </html>

@@ -42,99 +42,8 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 html { scroll-behavior:smooth; }
 body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); line-height:1.5; }
 
-/* ── Navigation ── */
-nav {
-  position:fixed; top:0; left:0; right:0; z-index:1000;
-  height:64px; padding:0 48px;
-  display:flex; align-items:center; justify-content:space-between;
-  background:rgba(255,255,255,0.92); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
-  border-bottom:1px solid rgba(0,0,0,0.08); box-shadow:0 1px 12px rgba(0,0,0,0.06);
-}
-.nav-brand { display:flex; align-items:center; gap:12px; text-decoration:none; }
-.nav-logo {
-  width:40px; height:40px; border-radius:11px;
-  background:var(--gradient);
-  display:flex; align-items:center; justify-content:center;
-  flex-shrink:0; position:relative; overflow:hidden;
-  box-shadow:0 4px 18px rgba(0,93,99,0.38);
-}
-.nav-logo::before {
-  content:''; position:absolute; top:-10px; left:-6px;
-  width:32px; height:32px;
-  background:rgba(255,255,255,0.13);
-  border-radius:50%; pointer-events:none;
-}
-.nav-title { font-family:'BwGradual','Urbanist',sans-serif; font-size:15px; }
-.nav-title-brand { font-weight:800; color:var(--primary-ink); }
-.nav-title-hub { font-weight:500; color:#756A61; }
-.nav-subtitle { font-size:11px; color:var(--text-muted); display:block; margin-top:-2px; }
-.nav-links { display:flex; gap:2px; list-style:none; }
-.nav-links a {
-  padding:7px 15px; border-radius:6px; text-decoration:none;
-  font-size:13.5px; font-weight:500; color:var(--text-muted);
-  transition:background 0.2s, color 0.2s;
-}
-.nav-links a:hover { background:#EEF1F1; color:var(--text); }
-.nav-links a.active {
-  background:transparent; color:var(--primary-ink); font-weight:600;
-  position:relative;
-}
-.nav-links a.active::after {
-  content:''; position:absolute; bottom:3px; left:15px; right:15px;
-  height:2px; background:var(--primary); border-radius:2px;
-}
-/* ── Segments Dropdown ── */
-.nav-dropdown { position:relative; list-style:none; }
-.nav-dropdown-btn {
-  display:flex; align-items:center; gap:5px;
-  padding:7px 15px; border-radius:6px; border:none; background:transparent; cursor:pointer;
-  font-size:13.5px; font-weight:500; color:var(--text-muted); font-family:'Inter',sans-serif;
-  transition:background 0.2s, color 0.2s;
-}
-.nav-dropdown-btn:hover, .nav-dropdown-li.open .nav-dropdown-btn { background:#EEF1F1; color:var(--text); }
-.nav-dropdown-arrow { transition:transform 0.22s; flex-shrink:0; }
-.nav-dropdown-li.open .nav-dropdown-arrow { transform:rotate(180deg); }
-.nav-dropdown-panel {
-  position:absolute; top:calc(100% + 8px); left:50%; transform:translateX(-50%) translateY(-6px);
-  width:min(420px, calc(100vw - 24px)); background:#fff; border:1px solid var(--border);
-  border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,0.13);
-  padding:8px; display:grid; grid-template-columns:1fr 1fr; gap:3px;
-  overflow:hidden;
-  opacity:0; pointer-events:none; transition:opacity 0.18s, transform 0.18s;
-  z-index:2000;
-}
-.nav-dropdown-li:hover .nav-dropdown-panel,
-.nav-dropdown-li.open .nav-dropdown-panel {
-  opacity:1; pointer-events:all; transform:translateX(-50%) translateY(0);
-}
-.seg-dd-item {
-  display:flex; align-items:center; gap:6px;
-  padding:7px 8px; border-radius:8px; text-decoration:none;
-  transition:background 0.15s; min-width:0;
-}
-.seg-dd-item:hover { background:#F4F6F6; }
-.seg-dd-name { font-size:11px; font-weight:600; color:var(--text); flex:1; min-width:0; }
-.seg-dd-tag { font-size:9px; font-weight:600; color:var(--primary-ink); background:rgba(0,93,99,0.08); padding:1px 5px; border-radius:20px; white-space:nowrap; flex-shrink:0; }
-html[data-taqa-theme="dark"] .nav-dropdown-panel { background:#002D30; border-color:rgba(255,255,255,0.1); }
-html[data-taqa-theme="dark"] .seg-dd-item:hover { background:rgba(255,255,255,0.06); }
-html[data-taqa-theme="dark"] .seg-dd-name { color:#C7DBDD; }
 
-/* Mobile segments section */
-.mob-seg-label {
-  font-size:10.5px; font-weight:700; color:var(--primary-ink); letter-spacing:0.9px;
-  text-transform:uppercase; padding:14px 0 6px; border-bottom:1px solid var(--border);
-}
-.mob-seg-link {
-  display:block; padding:11px 0 11px 14px; font-size:14px; font-weight:500;
-  color:var(--text-muted); text-decoration:none;
-  border-bottom:1px solid var(--border); transition:color 0.2s;
-}
-.mob-seg-link:last-of-type { border-bottom:none; }
-.mob-seg-link:hover, .mob-seg-link:active { color:var(--primary-ink); }
-html[data-taqa-theme="dark"] .mob-seg-label { color:var(--primary-light); }
-html[data-taqa-theme="dark"] .mob-seg-link { border-color:#003A3D; }
 
-.nav-actions { display:flex; gap:8px; align-items:center; }
 .btn {
   padding:8px 18px; border-radius:7px; font-size:13.5px; font-weight:500;
   cursor:pointer; border:none; font-family:'Inter',sans-serif;
@@ -146,7 +55,12 @@ html[data-taqa-theme="dark"] .mob-seg-link { border-color:#003A3D; }
 .btn-primary { background:var(--primary); color:#fff; }
 .btn-primary:hover { background:var(--primary-hover); }
 
-/* ── Hero ── */
+/* ── Hero ──
+   A band, not a page. It used to fill the whole first screen with one
+   search box and pushed Explore by Discipline below the fold, so the
+   reader scrolled past a photo before reaching anything they could open.
+   Now it takes about half a desktop screen and about 380px on a phone,
+   and the search field is the one thing in it to act on. */
 .hero-wrap {
   /* The photo and the overlay that darken this band are siblings of the
      text, not ancestors of it, and the overlay's far stop is only 22%
@@ -156,7 +70,7 @@ html[data-taqa-theme="dark"] .mob-seg-link { border-color:#003A3D; }
      photo never arrives. */
   background:#001314;
   position:relative; overflow:hidden;
-  min-height:100vh; display:flex; flex-direction:column;
+  min-height:clamp(400px, 48vh, 520px); display:flex; flex-direction:column;
 }
 .hero-bg-layer {
   position:absolute; inset:-4%;
@@ -175,57 +89,28 @@ html[data-taqa-theme="dark"] .mob-seg-link { border-color:#003A3D; }
   position:absolute; inset:0; z-index:2;
   background:linear-gradient(105deg, rgba(0,19,20,0.93) 0%, rgba(0,19,20,0.78) 45%, rgba(0,19,20,0.22) 100%);
 }
+/* In RTL the text column sits on the right, so the dark end of the
+   gradient follows it there. */
+[dir="rtl"] .hero-overlay {
+  background:linear-gradient(255deg, rgba(0,19,20,0.93) 0%, rgba(0,19,20,0.78) 45%, rgba(0,19,20,0.22) 100%);
+}
 .hero {
   position:relative; z-index:3; flex:1;
-  padding:80px 48px 60px;
+  /* The top bar is fixed over this band, so the text starts below it. */
+  padding-block:calc(var(--nav-h, 64px) + 28px) 40px;
+  padding-inline:48px;
   max-width:1200px; margin:0 auto; width:100%;
-  display:grid; grid-template-columns:1fr 360px; gap:64px;
+  display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:64px;
   align-items:center; align-content:center;
 }
-
-/* ── Hero Watermark ── */
-.hero-watermark {
-  position:absolute; z-index:2;
-  font-family:'BwGradual','Urbanist',sans-serif; font-weight:800; font-style:italic;
-  font-size:clamp(100px,18vw,260px);
-  color:rgba(255,255,255,0.04);
-  letter-spacing:12px; text-transform:uppercase;
-  bottom:-10px; right:-10px;
-  pointer-events:none; user-select:none; white-space:nowrap;
-  line-height:1;
-}
-
-/* ── Hero Scroll Hint ── */
-.hero-scroll-hint {
-  position:absolute; bottom:36px; left:50%; transform:translateX(-50%);
-  z-index:4; display:flex; flex-direction:column; align-items:center; gap:7px;
-  opacity:0; animation:hintFadeIn 0.7s ease 2.5s forwards;
-  transition:opacity 0.4s; pointer-events:none;
-}
-.hero-scroll-text {
-  font-size:10px; font-weight:600; letter-spacing:2px; text-transform:uppercase;
-  color:rgba(255,255,255,0.6);
-}
-.hero-scroll-chevron {
-  width:14px; height:14px;
-  border-right:2px solid rgba(255,255,255,0.4);
-  border-bottom:2px solid rgba(255,255,255,0.4);
-  transform:rotate(45deg);
-  animation:scrollBounce 1.6s ease-in-out infinite;
-}
-@keyframes hintFadeIn { to { opacity:1; } }
-@keyframes scrollBounce {
-  0%,100% { transform:rotate(45deg) translate(0,0); }
-  50%      { transform:rotate(45deg) translate(2px,2px); }
-}
+.hero-left { max-width:640px; }
 
 /* The band under the hero photo is dark in both themes, so the legacy teal is
    legal here as text. It used to be a lighter mix of its own, which is a shade
-   the palette does not have; the hover lifts to white, the way the other hero
-   links already do. */
+   the palette does not have; the hover lifts to white. */
 .hero-label {
-  display:inline-block; font-size:14px; font-weight:700; letter-spacing:0.3px;
-  color:var(--primary-light); margin-bottom:16px;
+  display:inline-block; font-size:13.5px; font-weight:700; letter-spacing:0.3px;
+  color:var(--primary-light); margin-bottom:14px;
 }
 a.hero-label {
   text-decoration:none; border-bottom:1px solid rgba(0,187,182,0.35);
@@ -233,65 +118,90 @@ a.hero-label {
   border-color 150ms cubic-bezier(0.23,1,0.32,1);
 }
 a.hero-label:hover { color:#fff; border-bottom-color:#fff; }
-a.hero-label:focus-visible { outline:2px solid var(--primary-light); outline-offset:3px; border-radius:2px; }
+/* shared.js sets a site-wide #005D63 focus ring with !important, which is
+   about 2:1 on this dark band, so the band's own ring has to win. */
+.hero a.hero-label:focus-visible { outline:2px solid #00BBB6 !important; outline-offset:3px; border-radius:2px; }
 .hero h1 {
-  font-family:'BwGradual','Urbanist',sans-serif; font-size:clamp(28px,3.5vw,44px);
-  font-weight:700; line-height:1.18; color:#ffffff;
-  margin-bottom:18px; letter-spacing:-0.5px;
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:clamp(28px,2.9vw,40px);
+  font-weight:700; line-height:1.16; color:#ffffff;
+  margin-bottom:26px; letter-spacing:-0.5px;
 }
 .hero h1 span { color:var(--primary-light); }
-.hero-upper { text-transform:uppercase; letter-spacing:3px; color:#ffffff; }
-.hero h1 .hero-muted { color:rgba(255,255,255,0.45); font-size:0.88em; letter-spacing:0; }
-.hero-desc {
-  font-size:15px; color:rgba(255,255,255,0.72); line-height:1.78;
-  max-width:440px; margin-bottom:32px;
+.hero h1 .hero-h1-lead { color:#ffffff; }
+.hero h1 .hero-h1-sub {
+  display:inline-block; margin-top:6px;
+  font-style:italic; font-weight:400; font-size:0.62em; letter-spacing:0;
+  color:rgba(255,255,255,0.84);
 }
-.hero-search-bar {
-  display:flex; gap:8px;
-  background:rgba(255,255,255,0.1);
-  backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
-  border:1px solid rgba(255,255,255,0.22); border-radius:8px;
-  padding:6px 6px 6px 16px; margin-bottom:24px;
-  transition:border-color 0.2s, box-shadow 0.2s;
+
+/* The search field is the primary element of the band: a solid sheet, not
+   glass, so it reads in sun glare and does not borrow the photo behind it. */
+.hero-search {
+  --hs-ground:#FFFFFF; --hs-text:#1E1C1A; --hs-hint:#756A61; --hs-icon:#756A61;
+  --hs-edge:rgba(255,255,255,0.0);
+  display:flex; align-items:center; gap:8px;
+  min-height:58px; padding-block:6px; padding-inline:18px 6px;
+  background:var(--hs-ground); border:1px solid var(--hs-edge); border-radius:14px;
+  box-shadow:0 22px 44px -22px rgba(0,0,0,0.55);
+  transition:box-shadow 180ms cubic-bezier(0.23,1,0.32,1), border-color 180ms cubic-bezier(0.23,1,0.32,1);
 }
-.hero-search-bar:focus-within {
-  border-color:rgba(0,187,182,0.6);
-  box-shadow:0 0 0 3px rgba(0,187,182,0.15);
+html[data-taqa-theme="dark"] .hero-search {
+  --hs-ground:#002D30; --hs-text:#C7DBDD; --hs-hint:#8CB6B9; --hs-icon:#8CB6B9;
+  --hs-edge:rgba(0,187,182,0.36);
 }
-.hero-search-bar input {
-  flex:1; border:none; outline:none; background:transparent;
-  font-size:14px; font-family:'Inter',sans-serif; color:#ffffff;
+/* The field carries the input's focus ring, so the input drops the
+   site-wide outline instead of drawing a second box within the first.
+   It keys on the input, not :focus-within, so a focused button shows
+   only its own ring and not two concentric ones. */
+.hero-search:has(input:focus) {
+  border-color:#00BBB6;
+  box-shadow:0 22px 44px -22px rgba(0,0,0,0.55), 0 0 0 4px rgba(0,187,182,0.34);
 }
-.hero-search-bar input::placeholder { color:rgba(255,255,255,0.6); }
-.hero-search-bar .btn { padding:8px 20px; border-radius:5px; }
-.hero-links { display:flex; gap:20px; }
-.hero-links a {
-  font-size:13.5px; color:rgba(255,255,255,0.6); text-decoration:none;
-  font-weight:500; transition:color 0.2s;
+.hero-search input:focus-visible { outline:none !important; }
+.hero-search-icon { width:19px; height:19px; flex-shrink:0; color:var(--hs-icon); }
+.hero-search input {
+  flex:1; min-width:0; height:44px; border:none; outline:none; background:transparent;
+  font-size:16px; font-family:'Inter',sans-serif; color:var(--hs-text);
+  text-overflow:ellipsis;
 }
-.hero-links a:hover { color:#fff; }
+.hero-search input::placeholder { color:var(--hs-hint); opacity:1; }
+.hero-search input::-webkit-search-cancel-button { display:none; }
+.hero-search-btn {
+  flex-shrink:0; height:46px; padding-inline:22px; border-radius:10px;
+  font-size:14.5px; font-weight:600; justify-content:center;
+  transition:background 150ms cubic-bezier(0.23,1,0.32,1), transform 100ms cubic-bezier(0.23,1,0.32,1);
+}
+.hero-search-btn:active { transform:scale(0.97); }
+.hero .hero-search-btn:focus-visible { outline:2px solid #00BBB6 !important; outline-offset:2px; }
+/* On the dark field the #005D63 fill is about 1.9:1, so the button gets a
+   teal edge that reads at about 3.7:1 against the field. */
+html[data-taqa-theme="dark"] .hero-search-btn { box-shadow:inset 0 0 0 1px rgba(0,187,182,0.5); }
+.hero-search-btn svg { display:none; width:18px; height:18px; }
+[dir="rtl"] .hero-search-btn svg { transform:scaleX(-1); }
 
 .hero-stats-panel {
-  background:rgba(255,255,255,0.06);
+  /* A dark glass, not a white one: the overlay is only 22% at this end of
+     the band, so the panel brings its own ground for the white labels. */
+  background:rgba(0,19,20,0.55);
   backdrop-filter:blur(32px); -webkit-backdrop-filter:blur(32px);
-  border:1px solid rgba(255,255,255,0.14);
-  border-radius:var(--radius);
-  padding:28px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:16px;
+  padding:20px 24px 12px;
+  box-shadow:0 22px 44px -26px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
 }
 .stats-panel-title {
   font-family:'BwGradual','Urbanist',sans-serif;
   font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px;
-  color:rgba(255,255,255,0.72); margin-bottom:20px;
+  color:rgba(255,255,255,0.82); margin-bottom:6px;
 }
 .stats-list { display:flex; flex-direction:column; gap:0; }
 .stat-row {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.1);
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:11px 0; border-bottom:1px solid rgba(255,255,255,0.09);
 }
 .stat-row:last-child { border-bottom:none; }
-.stat-row-label { font-family:'BwGradual','Urbanist',sans-serif; font-size:13.5px; font-weight:700; color:rgba(255,255,255,0.6); }
-.stat-row-value { font-family:'BwGradual','Urbanist',sans-serif; font-size:22px; font-weight:700; color:var(--primary-light); }
+.stat-row-label { font-family:'BwGradual','Urbanist',sans-serif; font-size:14px; font-weight:400; color:rgba(255,255,255,0.82); }
+.stat-row-value { font-family:'BwGradual','Urbanist',sans-serif; font-size:20px; font-weight:700; color:var(--primary-light); font-variant-numeric:tabular-nums; }
 
 /* ── Alert Banner ── */
 .alert-bar {
@@ -954,16 +864,6 @@ body { animation:pageFadeIn 0.4s cubic-bezier(.4,0,.2,1); }
 @keyframes blob2 { 0%,100%{transform:translate(0,0) scale(1);} 40%{transform:translate(-60px,50px) scale(1.06);} 80%{transform:translate(30px,-30px) scale(0.95);} }
 @keyframes blob3 { 0%,100%{transform:translate(0,0) scale(1);} 60%{transform:translate(-40px,60px) scale(1.1);} }
 
-/* ── 2. Sliding Pill Nav ── */
-.nav-links { position:relative; }
-.nav-pill {
-  position:absolute; top:50%; transform:translateY(-50%);
-  height:34px; background:rgba(0,93,99,0.1); border-radius:8px;
-  transition:left 0.28s cubic-bezier(.4,0,.2,1), width 0.28s cubic-bezier(.4,0,.2,1), opacity 0.2s;
-  pointer-events:none; z-index:0; opacity:0;
-}
-.nav-links a { position:relative; z-index:1; }
-.nav-links a.active::after { display:none; }
 
 
 /* ── 4. Custom Scrollbar ── */
@@ -972,14 +872,6 @@ body { animation:pageFadeIn 0.4s cubic-bezier(.4,0,.2,1); }
 ::-webkit-scrollbar-thumb { background:rgba(0,93,99,0.28); border-radius:3px; }
 ::-webkit-scrollbar-thumb:hover { background:rgba(0,93,99,0.5); }
 
-/* ── 5. Dark Mode Toggle Button ── */
-.dark-toggle {
-  width:36px; height:36px; border-radius:8px; border:1px solid var(--border);
-  background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center;
-  color:var(--text-muted); transition:border-color 0.2s, color 0.2s, background 0.2s;
-  flex-shrink:0; padding:0;
-}
-.dark-toggle:hover { border-color:var(--primary); color:var(--primary-ink); background:rgba(0,93,99,0.06); }
 
 /* ── 6. Dark Mode Variables ── */
 html[data-taqa-theme="dark"] {--primary-ink:#00BBB6;--primary-light:#00BBB6;
@@ -988,12 +880,7 @@ html[data-taqa-theme="dark"] {--primary-ink:#00BBB6;--primary-light:#00BBB6;
   --shadow-sm:0 1px 4px rgba(0,0,0,0.4); --shadow-md:0 4px 16px rgba(0,0,0,0.45);
 }
 html[data-taqa-theme="dark"] body { background:var(--bg); }
-html[data-taqa-theme="dark"] nav { background:rgba(0,35,38,0.92); border-color:rgba(255,255,255,0.06); }
-html[data-taqa-theme="dark"] .nav-title-brand { color:#00BBB6; }
-html[data-taqa-theme="dark"] .nav-title-hub { color:#619B9E; }
-html[data-taqa-theme="dark"] .nav-pill { background:rgba(0,187,182,0.12); }
 html[data-taqa-theme="dark"] .btn-outline { background:rgba(255,255,255,0.03); border-color:#003A3D; color:#619B9E; }
-html[data-taqa-theme="dark"] .dark-toggle { border-color:#003A3D; color:#619B9E; }
 html[data-taqa-theme="dark"] footer { background:#002326; border-color:#003A3D; }
 html[data-taqa-theme="dark"] .seg-accordion { background:#002326; border-color:#003A3D; }
 html[data-taqa-theme="dark"] .seg-acc-item { border-color:#003A3D; }
@@ -1043,19 +930,18 @@ html[data-taqa-theme="dark"] .scroll-top-btn { background:rgba(0,35,38,0.92); bo
 }
 
 @keyframes heroWordIn {
-  from { opacity:0; transform:translateY(28px); }
+  from { opacity:0; transform:translateY(12px); }
   to   { opacity:1; transform:translateY(0); }
 }
-.hw { opacity:0; animation:heroWordIn 0.75s cubic-bezier(0.16,1,0.3,1) forwards; }
+.hw { opacity:0; animation:heroWordIn 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
 .hw-i { display:inline-block; }
-.hw-1 { animation-delay:0.08s; }
-.hw-2 { animation-delay:0.30s; }
-.hw-3 { animation-delay:0.55s; }
-.hw-4 { animation-delay:0.78s; }
-.hw-5 { animation-delay:1.04s; }
-.hw-6 { animation-delay:1.20s; }
-.hw-7 { animation-delay:1.34s; }
-.hw-8 { animation-delay:0.90s; }
+/* The search field is what the band is for, so it arrives early. */
+.hw-1 { animation-delay:0.05s; }
+.hw-2 { animation-delay:0.14s; }
+.hw-3 { animation-delay:0.24s; }
+.hw-4 { animation-delay:0.34s; }
+.hw-5 { animation-delay:0.40s; }
+.hw-8 { animation-delay:0.48s; }
 
 /* ── Stats Bridge Strip ── */
 .stats-strip {
@@ -1530,37 +1416,15 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
 }
 .sidebar-brand-card-credit span { color:var(--primary-light); }
 
-/* ── Mobile Nav ── */
-.nav-hamburger {
-  display:none; background:none; border:1px solid var(--border);
-  border-radius:7px; padding:7px 9px; cursor:pointer;
-  flex-direction:column; gap:4px; align-items:center; justify-content:center;
-}
-.nav-hamburger span { display:block; width:17px; height:2px; background:var(--text-muted); border-radius:2px; transition:all 0.25s; }
-.nav-mobile-menu {
-  display:none; position:fixed; top:64px; left:0; right:0; z-index:998;
-  background:rgba(255,255,255,0.97); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border); padding:8px 20px 20px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.1);
-}
-.nav-mobile-menu.open { display:block; }
-.nav-mobile-menu a {
-  display:block; padding:13px 0; font-size:15px; font-weight:500;
-  color:var(--text); text-decoration:none; border-bottom:1px solid var(--border); transition:color 0.2s;
-}
-.nav-mobile-menu a:last-child { border-bottom:none; }
-.nav-mobile-menu a.active, .nav-mobile-menu a:hover { color:var(--primary-ink); }
-html[data-taqa-theme="dark"] .nav-mobile-menu { background:rgba(0,35,38,0.97); border-color:#003A3D; }
-html[data-taqa-theme="dark"] .nav-mobile-menu a { border-color:#003A3D; }
 
 /* ── Responsive ── */
 @media(max-width:1100px) {
   .main-inner { grid-template-columns:1fr 280px; gap:32px; }
 }
 @media(max-width:1024px) {
-  .hero { grid-template-columns:1fr; gap:40px; padding:80px 48px 60px; }
+  .hero { grid-template-columns:minmax(0,1fr); gap:40px; }
   .hero-right { display:none; }
-  .hero-overlay { background:linear-gradient(105deg, rgba(0,19,20,0.92) 0%, rgba(0,19,20,0.85) 100%); }
+  .hero-overlay, [dir="rtl"] .hero-overlay { background:linear-gradient(105deg, rgba(0,19,20,0.92) 0%, rgba(0,19,20,0.85) 100%); }
   .main-inner { grid-template-columns:1fr; align-items:start; }
   .panel-sidebar { display:block; }
   .sidebar-inner { position:static; flex:none; display:block; }
@@ -1574,17 +1438,13 @@ html[data-taqa-theme="dark"] .nav-mobile-menu a { border-color:#003A3D; }
   .alert-bar { padding:0 24px 24px; }
   .sidebar-tools { grid-template-columns:1fr; }
   .stats-strip-inner { padding:0 24px; }
-  .nav-actions .btn { display:none !important; }
 }
 @media(max-width:640px) {
-  nav { padding:0 20px; }
-  .nav-links { display:none; }
-  .nav-hamburger { display:flex; }
-  .nav-actions .btn { display:none; }
-  .hero { padding:80px 20px 56px; }
-  .hero h1 { font-size:clamp(24px,7.5vw,36px); }
-  .hero-search-bar { flex-wrap:wrap; }
-  .hero-search-bar .btn { width:100%; justify-content:center; }
+  .hero-wrap { min-height:380px; }
+  .hero { padding-block:calc(var(--nav-h, 64px) + 22px) 30px; padding-inline:20px; }
+  .hero-label { margin-bottom:12px; }
+  .hero h1 { font-size:clamp(25px,7vw,30px); margin-bottom:22px; }
+  .hero-search { min-height:56px; padding-inline:16px 5px; border-radius:13px; }
   .main-wrapper { padding:28px 20px; }
   .alert-bar { padding:0 20px 24px; }
   .stats-strip-inner { padding:0 16px; flex-wrap:wrap; }
@@ -1599,29 +1459,31 @@ html[data-taqa-theme="dark"] .nav-mobile-menu a { border-color:#003A3D; }
   .cmd-header { flex-wrap:wrap; gap:8px; }
   .segments-grid { grid-template-columns:repeat(2,1fr); }
 }
+/* A phone held sideways is wide but short: the band shrinks to its
+   content so the strip below still shows on the first screen. */
+@media (max-height:520px) {
+  .hero-wrap { min-height:0; }
+  .hero { padding-block:calc(var(--nav-h, 64px) + 16px) 24px; }
+}
+/* The label is a 23px line of text; on touch it gets a 44px hit area
+   without moving anything around it. */
+@media (max-width:640px), (pointer:coarse) {
+  a.hero-label { position:relative; }
+  a.hero-label::after { content:''; position:absolute; inset-inline:-8px; inset-block:-11px; }
+}
 @media(max-width:480px) {
   .segments-grid { grid-template-columns:1fr; }
   .cmd-header-count { width:100%; }
   .sidebar-tools { grid-template-columns:1fr; }
-  .hero-search-bar input { font-size:14px; }
+  /* The button keeps its name for assistive tech and shows the arrow, so
+     the field keeps room for the placeholder on a narrow phone. */
+  .hero-search-btn { width:46px; padding:0; }
+  .hero-search-btn span { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+  .hero-search-btn svg { display:block; }
 }
 
-/* Three families, three columns, so the menu reads like the home page. */
-.nav-dropdown-panel.seg-cols { width:min(640px, calc(100vw - 24px));
-  grid-template-columns:repeat(3,1fr); gap:6px; padding:12px; align-items:start; }
-.seg-dd-col { min-width:0; }
-.seg-dd-head {
-  font-size:9.5px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase;
-  color:var(--primary-ink); padding:2px 8px 7px; white-space:nowrap;
-}
-.seg-dd-col .seg-dd-item { padding:6px 8px; }
-.seg-dd-col .seg-dd-name { font-size:11.5px; line-height:1.35; white-space:normal; }
-@media(max-width:900px){
-  .nav-dropdown-panel.seg-cols { grid-template-columns:1fr 1fr; }
-}
-.wip-note{color:#756A61;}
-html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
 </style>
+<link rel="stylesheet" href="topbar.css">
 </head>
 <body>
 
@@ -1634,49 +1496,33 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
 </div>
 
 <!-- ── Navigation ── -->
-<nav id="navbar">
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
   <a href="index.html" class="nav-brand">
-    <div>
-      <span class="nav-title"><span class="nav-title-brand">TAQA</span> <span class="nav-title-hub">Knowledge Hub</span></span>
-      <span class="nav-subtitle" style="white-space:nowrap"><em style="color:var(--primary-ink); font-style:italic;">Tech Hub</em> <span class="wip-note">(working name)</span></span>
-    </div>
+    <span class="nav-title"><span class="nav-title-brand">TAQA</span> <span class="nav-title-hub">Knowledge Hub</span></span>
+    <span class="nav-subtitle"><em>Tech Hub</em> <span class="wip-note">(working name)</span></span>
   </a>
   <ul class="nav-links">
-    <div class="nav-pill" id="nav-pill"></div>
-    <li><a href="index.html" class="active">Home</a></li>
-    <li class="nav-dropdown nav-dropdown-li" id="seg-dropdown-li">
-      <button class="nav-dropdown-btn" id="seg-dropdown-btn" aria-haspopup="true" aria-expanded="false">
-        Segments
-        <svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <div class="nav-dropdown-panel seg-cols" role="menu">
-        <!-- Built from the register at runtime. Nothing is listed here, so a
-             renamed area cannot survive as stale markup. -->
-      </div>
+    <li><a href="index.html" class="active" aria-current="page">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
     </li>
     <li><a href="ai-search.html">Document Search</a></li>
-    <li><a href="master-list.html">Master List</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
     <li><a href="glossary.html">Field Glossary</a></li>
     <li><a href="support-ticket.html">Ask Expert</a></li>
   </ul>
-  <div class="nav-actions">
-    <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
-    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode">
-      <svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor">
-        <path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/>
-      </svg>
-    </button>
-    <button class="bell-btn" id="nav-bell" style="display:none" onclick="location.href='dashboard.html'" title="Pending approvals" aria-label="Pending approvals"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
-    <a href="ai-search.html" class="btn btn-outline">Search Documents</a>
-    <a href="upload.html" class="btn btn-primary">Upload Document</a>
+  <div class="nav-right">
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" onclick="location.href='dashboard.html'" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
 <!-- ── Mobile Nav Menu ── -->
-<!-- filled by shared.js, the same menu on every page -->
-<div class="nav-mobile-menu" id="nav-mobile-menu"></div>
 
 <!-- ── Hero ── -->
 <div class="hero-wrap">
@@ -1686,15 +1532,12 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
 <div class="hero">
   <div class="hero-left">
 <a class="hero-label hw hw-1" href="https://engage.cloud.microsoft/main/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyMTA0NzY4NjgyOTQyNDY0In0/all" target="_blank" rel="noopener noreferrer" aria-label="#BetterTogether@TAQA, opens the initiative community in Viva Engage">#BetterTogether@TAQA</a>
-<h1><span class="hw hw-2 hw-i" style="color:#ffffff;">Knowledge Is&nbsp;</span><span class="hw hw-3 hw-i">Better Together.</span><br><span class="hw hw-4 hw-i" style="font-style:italic;font-size:0.74em;color:rgba(255,255,255,0.82);">Every Answer, Within Reach.</span></h1>
-    <div class="hero-search-bar hw hw-5">
-      <input type="text" id="hero-search-input" placeholder="Search documents, procedures, manuals..." autocomplete="off">
-      <a href="ai-search.html" class="btn btn-primary" id="hero-search-btn">Search</a>
-    </div>
-    <div class="hero-links hw hw-6">
-      <a href="#segments">Browse Segments</a>
-      <a href="ai-search.html">AI Document Search</a>
-    </div>
+<h1><span class="hw hw-2 hw-i hero-h1-lead">Knowledge Is&nbsp;</span><span class="hw hw-3 hw-i">Better Together.</span><br><span class="hw hw-4 hw-i hero-h1-sub">Every Answer, Within Reach.</span></h1>
+    <form class="hero-search hw hw-5" id="hero-search" action="ai-search.html" method="get" role="search" aria-label="Search the register">
+      <svg class="hero-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+      <input type="search" id="hero-search-input" name="q" placeholder="Search documents, procedures, manuals" autocomplete="off" enterkeyhint="search" aria-label="Search documents, procedures and manuals">
+      <button type="submit" class="btn btn-primary hero-search-btn" id="hero-search-btn"><span>Search</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
+    </form>
   </div>
   <div class="hero-right">
     <div class="hero-stats-panel hw hw-8">
@@ -1721,11 +1564,6 @@ html[data-taqa-theme="dark"] .wip-note{color:#8CB6B9;}
   </div>
 </div>
 
-<div class="hero-scroll-hint" id="scroll-hint">
-    <span style="font-size:10px; color:rgba(255,255,255,0.6); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:8px; display:block;">Built by <span style="color:var(--primary-light);">TAQA LEARNING CENTER</span></span>
-    <span class="hero-scroll-text">Scroll</span>
-    <div class="hero-scroll-chevron"></div>
-  </div>
 </div><!-- /hero-wrap -->
 
 <!-- ── Stats Bridge Strip ── -->
@@ -1945,77 +1783,29 @@ function toggleAcc(row) {
 }
 
 // ── Hero Search ──
-document.getElementById('hero-search-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    const q = e.target.value.trim();
-    if (q) window.location.href = 'ai-search.html?q=' + encodeURIComponent(q);
-  }
+// A real form, so Enter and the button both submit. An empty query opens
+// Document Search as it is, with no ?q= on the address.
+// The long placeholder is cut off on a phone, so narrow screens get a
+// short one; the aria-label names the whole scope either way.
+(function(){
+  var inp = document.getElementById('hero-search-input');
+  if (!inp || !window.matchMedia) return;
+  var mq = window.matchMedia('(max-width:520px)');
+  function fit(){ inp.placeholder = mq.matches ? 'Search documents' : 'Search documents, procedures, manuals'; }
+  fit();
+  if (mq.addEventListener) mq.addEventListener('change', fit); else if (mq.addListener) mq.addListener(fit);
+})();
+document.getElementById('hero-search').addEventListener('submit', e => {
+  e.preventDefault();
+  const q = document.getElementById('hero-search-input').value.trim();
+  window.location.href = 'ai-search.html' + (q ? '?q=' + encodeURIComponent(q) : '');
 });
 
-// ── Sliding Pill Nav ──
-const pill = document.getElementById('nav-pill');
-const navList = document.querySelector('.nav-links');
-function pillTo(el) {
-  const lr = navList.getBoundingClientRect(), ar = el.getBoundingClientRect();
-  pill.style.left = (ar.left - lr.left) + 'px';
-  pill.style.width = ar.width + 'px';
-  pill.style.opacity = '1';
-}
-function pillToActive() {
-  const active = navList.querySelector('a.active');
-  if (active) pillTo(active); else pill.style.opacity = '0';
-}
-pillToActive();
-navList.querySelectorAll('a').forEach(a => a.addEventListener('mouseenter', () => pillTo(a)));
-navList.addEventListener('mouseleave', pillToActive);
-
-// ── Segments Dropdown ──
-(function(){
-  const li = document.getElementById('seg-dropdown-li');
-  const btn = document.getElementById('seg-dropdown-btn');
-  if (!li || !btn) return;
-  btn.addEventListener('click', function(e){
-    e.stopPropagation();
-    const open = li.classList.toggle('open');
-    btn.setAttribute('aria-expanded', open);
-  });
-  document.addEventListener('click', function(){ li.classList.remove('open'); btn.setAttribute('aria-expanded','false'); });
-  li.addEventListener('click', function(e){ e.stopPropagation(); });
-})();
-
-// ── Dark Mode ──
-const MOON_PATH = 'M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
-const SUN_PATH  = 'M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
-function toggleDark() {
-  const isDark = document.documentElement.getAttribute('data-taqa-theme') === 'dark';
-  const next = isDark ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-taqa-theme', next);
-  const p = document.querySelector('#dark-icon path');
-  if (p) p.setAttribute('d', next === 'dark' ? MOON_PATH : SUN_PATH);
-  localStorage.setItem('taqa-theme-v3', next);
-}
-(function() {
-  const saved = localStorage.getItem('taqa-theme-v3');
-  if (saved === 'dark') {
-    document.documentElement.setAttribute('data-taqa-theme', 'dark');
-    const p = document.querySelector('#dark-icon path');
-    if (p) p.setAttribute('d', MOON_PATH);
-  }
-})();
 
 
 // ── Mobile Nav, handled entirely by shared.js ──
 // shared.js wires the hamburger click and close-on-outside-click via document listeners.
 // Do not add a second handler here, it causes double-toggle on some iOS browsers.
-
-// ── Scroll Hint Hide ──
-(function(){
-  const hint = document.getElementById('scroll-hint');
-  if (!hint) return;
-  window.addEventListener('scroll', function(){
-    hint.style.opacity = window.scrollY > 60 ? '0' : '';
-  }, { passive:true });
-})();
 
 // ── Scroll Progress Ring ──
 (function(){
@@ -2173,8 +1963,8 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
     },
     {
       title:'Browse Your Segment',
-      desc:'Every area is here: 11 operational segments, 10 corporate functions and 3 Centers of Excellence. Tap any card to access its latest policies, standards, procedures, awareness content, and compliance resources.',
-      target:'.segments-grid'
+      desc:'Every area is here: 11 operational segments, 10 corporate functions and 3 Centers of Excellence. Open a group to see its areas, then tap one for its policies, standards, procedures and lessons.',
+      target:'#focus'
     },
     {
       title:'Search Any Document',
@@ -2201,7 +1991,8 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
   var card=document.getElementById('tour-card');
   var backdrop=document.getElementById('tour-backdrop');
 
-  function isMob(){return window.innerWidth<=640;}
+  // The bar folds its links into the menu at 1180px (topbar.css), not 640px.
+  function isMob(){return window.matchMedia?window.matchMedia('(max-width:1180px)').matches:window.innerWidth<=1180;}
 
   function dots(){
     var d=document.getElementById('tc-dots');
@@ -2219,7 +2010,7 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
     var vw=window.innerWidth;
     var vh=window.innerHeight;
     var P=16;
-    if(isMob()||!rect){
+    if(window.innerWidth<=640||!rect){
       card.style.left='50%';
       card.style.transform='translateX(-50%)';
       card.style.bottom=(P+16)+'px';
@@ -2255,8 +2046,9 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
     document.getElementById('tc-desc').textContent=desc;
 
     var el=step.target?document.querySelector(step.target):null;
-    var hidden=el&&(getComputedStyle(el).display==='none'||getComputedStyle(el).visibility==='hidden');
-    if(hidden) el=null;
+    var hidden=el&&(!el.getClientRects().length||getComputedStyle(el).visibility==='hidden');
+    // A link folded into the menu: point at the menu button instead.
+    if(hidden){ el=(mob&&step.mobileLabel)?document.getElementById('nav-hamburger'):null; if(el&&!el.getClientRects().length) el=null; }
 
     card.style.display='block';
 
@@ -2303,40 +2095,6 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
 <script src="roles.js"></script>
 <script src="store.js"></script>
 <script src="segments-data.js"></script>
-<script>
-/* ── The Segments menu ─────────────────────────────────────────────────
-   Built from the register, in the three families the business settled on,
-   so a renamed or retired area cannot survive here the way Well Safety,
-   Inspection Services and Cybersecurity did. TWS Maintenance is left out:
-   its documents reassign to the segments that own the equipment, so it is
-   not somewhere to send anyone. */
-(function(){
-  var panel = document.querySelector('#seg-dropdown-li .nav-dropdown-panel');
-  if (!panel || typeof TAQA_DOC_LOOKUPS === 'undefined') return;
-  var S = TAQA_DOC_LOOKUPS.segments;
-
-  var FAMILIES = [
-    { group:'segment',  title:'Operational Segments' },
-    { group:'function', title:'Corporate Functions' },
-    { group:'product',  title:'Products & Technology' }
-  ];
-
-  panel.innerHTML = FAMILIES.map(function(f){
-    var ids = Object.keys(S)
-      .filter(function(k){ return S[k].group === f.group; })
-      .sort(function(a,b){ return S[a].name.localeCompare(S[b].name); });
-    if (!ids.length) return '';
-    return '<div class="seg-dd-col">' +
-             '<div class="seg-dd-head">' + f.title + '</div>' +
-             ids.map(function(k){
-               return '<a href="segment.html?id=' + k + '" class="seg-dd-item">' +
-                        '<span class="seg-dd-name">' + S[k].name + '</span>' +
-                      '</a>';
-             }).join('') +
-           '</div>';
-  }).join('');
-})();
-</script>
 <script>
 /* ── Headline figures ──────────────────────────────────────────────────────
    The hero panel, the strip and the two doors all read the same register,
