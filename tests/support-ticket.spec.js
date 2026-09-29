@@ -104,6 +104,58 @@ test.describe('support-ticket.html, does not overclaim a real transmission', () 
   });
 });
 
+test.describe('support-ticket.html, urgency selector', () => {
+  // Regression for a real user report: clicking a pill visibly focused it
+  // (the :focus-visible outline) but never actually selected it, so the
+  // hint text and SLA time stayed on whatever was selected before. The
+  // radio input is an invisible, absolutely-positioned overlay on its own
+  // <label> (see .urg-opt input's CSS), relying on the browser's native
+  // label-activates-its-control behavior; that's not reliable in every
+  // real browser/device, so a direct click listener on each pill now
+  // drives selectPriority() explicitly too. Covers every pill, not just
+  // one, since the report was specifically about Critical/High not
+  // responding while a lower option stayed selected.
+  test('clicking each urgency pill selects it and updates the hint text and reply time', async ({
+    page,
+    gotoApp,
+    setRole,
+  }) => {
+    await openTicket(gotoApp, setRole);
+
+    // Medium is the documented default.
+    await expect(page.locator('input[name="priority"]:checked')).toHaveValue('medium');
+    await expect(page.locator('#pill-medium')).toHaveClass(/\bsel\b/);
+
+    const cases = [
+      { id: 'critical', name: 'Critical', hint: 'Stopped, or a safety risk.', time: '2 hours' },
+      { id: 'high', name: 'High', hint: 'Impacted, needs a workaround.', time: '4 hours' },
+      { id: 'low', name: 'Low', hint: 'No impact on operations.', time: '3 business days' },
+      { id: 'medium', name: 'Medium', hint: 'Continuing with the issue.', time: '1 business day' },
+    ];
+
+    for (const c of cases) {
+      await page.locator('#pill-' + c.id).click();
+      await expect(page.locator('input[name="priority"]:checked')).toHaveValue(c.id);
+      await expect(page.locator('#pill-' + c.id)).toHaveClass(/\bsel\b/);
+      // Every other pill loses the selected class, not just the previous one.
+      for (const other of cases) {
+        if (other.id !== c.id) await expect(page.locator('#pill-' + other.id)).not.toHaveClass(/\bsel\b/);
+      }
+      await expect(page.locator('#urg-hint')).toContainText(c.name);
+      await expect(page.locator('#urg-hint')).toContainText(c.hint);
+      await expect(page.locator('#urg-time')).toHaveText(c.time);
+    }
+  });
+
+  test('the selected urgency is what the ticket actually submits with', async ({ page, gotoApp, setRole }) => {
+    await openTicket(gotoApp, setRole);
+    await page.locator('#pill-critical').click();
+    await fillRequired(page);
+    await page.click('.btn-submit');
+    await expect(page.locator('#toast-time')).toHaveText('2 hours');
+  });
+});
+
 test.describe('support-ticket.html, form validation', () => {
   test('submitting with nothing filled in is blocked and shows a visible message', async ({ page, gotoApp, setRole }) => {
     await openTicket(gotoApp, setRole);

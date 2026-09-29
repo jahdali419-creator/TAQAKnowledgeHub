@@ -721,6 +721,15 @@ function selectPriority(level) {
 }
 document.querySelectorAll('input[name="priority"]').forEach(r =>
   r.addEventListener('change', () => { if (r.checked) selectPriority(r.value); }));
+// The radio itself is an invisible, full-size overlay on its <label> (see
+// .urg-opt input's CSS) so a click can rely on the browser's native
+// label-activates-its-control behavior. That's reported not to fire
+// reliably in every real browser/device, so this listens on each pill
+// directly too and drives the same selectPriority() path explicitly,
+// rather than depending on that native delegation alone.
+PRIORITY_LEVELS.forEach(l => {
+  document.getElementById('pill-' + l).addEventListener('click', () => selectPriority(l));
+});
 
 // ── Submit ──
 function submitTicket(e) {
