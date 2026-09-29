@@ -1,0 +1,49 @@
+# Runs the Playwright suite on every push and pull request. This does not
+# yet gate the two deploy workflows (pages.yml, the Azure Static Web Apps
+# workflow) on a green run here: turning that into an enforced requirement
+# needs a branch-protection rule on the repository's default branch (Settings
+# -> Branches -> add rule -> "Require status checks to pass" -> select this
+# workflow's job), which only a repository admin can set from GitHub's own
+# UI or API, not from a workflow file. Until that rule exists, this workflow
+# reports a status check on every push/PR, but does not block a deploy by
+# itself.
+name: Frontend regression tests
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install test dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run the Playwright suite (Chromium)
+        run: npx playwright test --project=chromium
+
+      - name: Upload HTML report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14

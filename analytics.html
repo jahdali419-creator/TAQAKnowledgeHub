@@ -1,65 +1,61 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-taqa-theme="light">
 <head>
 <meta charset="UTF-8">
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Analytics — TAQA Knowledge Hub</title>
+<title>Analytics, TAQA Knowledge Hub</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#005D63">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Tech Hub">
+<meta name="apple-mobile-web-app-title" content="TechHub Platform">
 <link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="fonts/fonts.css">
 <noscript></noscript>
 <style>
 :root{
-  --primary:#005D63;--primary-light:#00BBB6;
-  --dark:#f4f5f7;--glass:rgba(255,255,255,0.88);--glass-2:rgba(255,255,255,0.98);
-  --glass-border:rgba(0,0,0,0.08);--text:#1a2235;--text-muted:#64748b;
+  --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;
+  --dark:#F4F4F3;--glass:rgba(255,255,255,0.88);--glass-2:rgba(255,255,255,0.98);
+  --glass-border:rgba(117,106,97,0.26);--text:#1E1C1A;--text-muted:#756A61;
+  --text-light:#756A61;
   --gradient:#005D63; /* flat brand teal - no gradient */
 }
 *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
 @keyframes pageFadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;animation:pageFadeIn 0.4s cubic-bezier(.4,0,.2,1);}
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
-  display:flex;align-items:center;justify-content:space-between;
-  background:rgba(255,255,255,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  border-bottom:1px solid var(--glass-border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
-.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
-.nav-brand-icon{width:40px;height:40px;border-radius:11px;background:var(--gradient);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;overflow:hidden;box-shadow:0 4px 18px rgba(0,93,99,0.38);}
-.nav-brand-icon::before{content:'';position:absolute;top:-10px;left:-6px;width:32px;height:32px;background:rgba(255,255,255,0.13);border-radius:50%;}
-.nav-brand-text{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;}
-.nav-brand-name{font-weight:800;color:var(--primary);}
-.nav-brand-hub{font-weight:500;color:#64748b;}
-.nav-subtitle{font-size:11px;color:var(--text-muted);display:block;margin-top:-1px;}
-.nav-right{display:flex;gap:10px;align-items:center;}
 .btn{padding:8px 18px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;transition:all 0.25s;border:none;font-family:'Inter',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:7px;}
 .btn-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--text-muted);}
-.btn-ghost:hover{border-color:rgba(0,93,99,0.3);color:var(--primary);}
+.btn-ghost:hover{border-color:rgba(0,93,99,0.3);color:var(--primary-ink);}
 .btn-primary{background:var(--gradient);color:#fff;}
-.dark-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:all 0.2s;padding:0;flex-shrink:0;}
-.dark-toggle:hover{border-color:var(--primary);color:var(--primary);background:rgba(0,93,99,0.06);}
 
-.page-wrapper{padding-top:68px;min-height:100vh;display:flex;flex-direction:column;}
+.page-wrapper{padding-top:var(--nav-h,64px);min-height:100vh;display:flex;flex-direction:column;}
 .page-inner{max-width:1100px;margin:0 auto;width:100%;padding:32px 48px 80px;}
 
 .page-header{margin-bottom:32px;}
-.page-header h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:28px;font-weight:800;color:var(--text);margin-bottom:6px;}
+.page-header h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:28px;font-weight:800;color:var(--text);margin-bottom:6px;display:flex;align-items:center;gap:10px;}
+.page-header h1 svg{color:var(--primary-ink);flex-shrink:0;}
 .page-header p{font-size:14px;color:var(--text-muted);}
 
 /* Overview cards */
 .overview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px;}
 .ov-card{background:var(--glass-2);border:1px solid var(--glass-border);border-radius:16px;padding:22px 24px;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
-.ov-card-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px;}
+.ov-card-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
 .ov-card-num{font-family:'BwGradual','Urbanist',sans-serif;font-size:32px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px;}
 .ov-card-label{font-size:12.5px;color:var(--text-muted);font-weight:500;}
 
 /* Sections */
 .an-section{background:var(--glass-2);border:1px solid var(--glass-border);border-radius:16px;padding:22px 24px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
 .an-section-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:10px;}
-.an-section-title span{font-size:16px;}
+.an-section-title span{display:flex;color:var(--primary-ink);}
 
 /* Bar chart rows */
 .bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
@@ -74,112 +70,175 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .activity-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(0,93,99,0.03);border-radius:10px;border:1px solid rgba(0,0,0,0.05);}
 .activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .activity-dot.view{background:#00BBB6;}
-.activity-dot.open{background:#60a5fa;}
-.activity-dot.search{background:#f59e0b;}
+.activity-dot.open{background:#0076A8;}
+.activity-dot.search{background:#FFB81C;}
 .activity-text{flex:1;font-size:12.5px;color:var(--text);}
 .activity-time{font-size:11px;color:var(--text-muted);flex-shrink:0;}
 
 /* Empty */
 .an-empty{text-align:center;padding:32px;color:var(--text-muted);font-size:13px;}
 
+/* Trend charts, hand-rolled inline SVG (no chart library, same idea as the
+   inline-SVG icons above: plain shapes, colored via the state-ink tokens). */
+:root{--chart-grid:rgba(117,106,97,0.18);}
+.trend-sub{font-size:12px;color:var(--text-muted);margin-bottom:16px;line-height:1.5;}
+.trend-charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.trend-chart-card{min-width:0;}
+.trend-chart-label{font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px;}
+.tchart-svg{width:100%;height:auto;display:block;overflow:visible;}
+.tchart-svg text{font-family:'Inter',sans-serif;}
+
+/* Audit / activity log (qms and auditor only, see the role check below) */
+.audit-stats{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+.audit-stat{flex:1;min-width:110px;background:rgba(0,93,99,0.04);border:1px solid var(--glass-border);border-radius:10px;padding:10px 12px;}
+.audit-stat-num{font-family:'BwGradual','Urbanist',sans-serif;font-size:20px;font-weight:800;color:var(--text);line-height:1;}
+.audit-stat-label{font-size:11px;color:var(--text-muted);margin-top:3px;}
+.audit-list{display:flex;flex-direction:column;gap:8px;}
+.audit-item{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;background:rgba(0,93,99,0.03);border-radius:10px;border:1px solid rgba(0,0,0,0.05);}
+.audit-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.audit-dot-ok{background:var(--ok-ink,#00705F);}
+.audit-dot-info{background:var(--info-ink,#0076A8);}
+.audit-dot-stop{background:var(--stop-ink,#C8102E);}
+.audit-dot-view{background:var(--primary-ink);}
+.audit-text{flex:1;font-size:12.5px;color:var(--text);line-height:1.5;}
+.audit-actor{color:var(--text-muted);}
+.audit-time{font-size:11px;color:var(--text-muted);flex-shrink:0;white-space:nowrap;padding-top:1px;}
+.audit-note{font-size:11.5px;color:var(--text-muted);margin-top:12px;}
+
 /* Clear / export btns */
 .data-btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
-.clear-data-btn{padding:7px 16px;border-radius:8px;border:1px solid rgba(239,68,68,0.2);background:rgba(239,68,68,0.05);color:#ef4444;font-size:12px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;}
-.clear-data-btn:hover{background:rgba(239,68,68,0.1);}
-.export-data-btn{padding:7px 16px;border-radius:8px;border:1px solid rgba(0,93,99,0.2);background:rgba(0,93,99,0.05);color:var(--primary);font-size:12px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;}
+.clear-data-btn,.export-data-btn{display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;}
+.clear-data-btn{border:1px solid rgba(200,16,46,0.2);background:rgba(200,16,46,0.05);color:var(--stop-ink,#C8102E);}
+.clear-data-btn:hover{background:rgba(200,16,46,0.1);}
+.export-data-btn{border:1px solid rgba(0,93,99,0.2);background:rgba(0,93,99,0.05);color:var(--primary-ink);}
 .export-data-btn:hover{background:rgba(0,93,99,0.1);}
 
 /* Dark mode */
-html[data-theme="dark"]{--dark:#0e1824;--glass:rgba(25,38,58,0.88);--glass-border:rgba(255,255,255,0.07);--text:#dde4ef;--text-muted:#7e94ab;}
-html[data-theme="dark"] body{background:#0e1824;}
-html[data-theme="dark"] nav{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.06);}
-html[data-theme="dark"] .nav-brand-name{color:#dde4ef;}html[data-theme="dark"] .nav-brand-hub{color:#7e94ab;}
-html[data-theme="dark"] .dark-toggle{border-color:rgba(255,255,255,0.1);color:#7e94ab;}
-html[data-theme="dark"] .ov-card,.an-section{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] .activity-item{background:rgba(0,187,182,0.04);border-color:rgba(255,255,255,0.05);}
-html[data-theme="dark"] .bar-track{background:rgba(255,255,255,0.06);}
+html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--dark:#001314;--glass:rgba(0,45,48,0.88);--glass-border:rgba(0,187,182,0.20);--text:#C7DBDD;--text-muted:#8CB6B9;--text-light:#619B9E;}
+html[data-taqa-theme="dark"] body{background:#001314;}
+/* Both halves of this list need the theme prefix. Written as
+   ".ov-card,.an-section" the second selector is unscoped, so the section
+   panels stayed near-black in the light theme under light-theme text. */
+html[data-taqa-theme="dark"] .ov-card,html[data-taqa-theme="dark"] .an-section{background:#002326;border-color:#00484B;}
+html[data-taqa-theme="dark"] .activity-item{background:rgba(0,187,182,0.04);border-color:rgba(255,255,255,0.05);}
+html[data-taqa-theme="dark"] .bar-track{background:rgba(255,255,255,0.06);}
+html[data-taqa-theme="dark"] .audit-item,html[data-taqa-theme="dark"] .audit-stat{background:rgba(0,187,182,0.04);border-color:rgba(255,255,255,0.05);}
+html[data-taqa-theme="dark"]{--chart-grid:rgba(255,255,255,0.14);}
 
 @keyframes pageFadeOut{from{opacity:1;}to{opacity:0;transform:translateY(-5px);}}
 body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 
 @media(max-width:768px){
-  nav{padding:0 20px;}
   .page-inner{padding:20px 20px 60px;}
   .overview-grid{grid-template-columns:1fr;}
   .bar-label{width:140px;}
+  .trend-charts-grid{grid-template-columns:1fr;gap:28px;}
 }
 @media(max-width:480px){
-  .nav-right .btn{display:none!important;}
   .bar-label{width:100px;}
 }
 </style>
+<link rel="stylesheet" href="topbar.css">
 </head>
 <body>
 <div class="page-wrapper">
 
-<nav>
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
   <a href="index.html" class="nav-brand">
-    <div class="nav-brand-icon">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-    </div>
-    <span class="nav-brand-text"><span class="nav-brand-name">TAQA</span> <span class="nav-brand-hub">Knowledge Hub</span><span class="nav-subtitle"><em style="color:#005D63;font-style:italic;">Tech Hub</em> <span style="opacity:0.7;font-style:normal;">(working name)</span></span></span>
+    <span class="nav-title"><span class="nav-title-brand">TAQA</span> <span class="nav-title-hub">Knowledge Hub</span></span>
+    <span class="nav-subtitle"><em>TechHub Platform</em></span>
   </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
+    <li><a href="ai-search.html">Document Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
   <div class="nav-right">
-    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode">
-      <svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>
-    </button>
-    <a href="ai-search.html" class="btn btn-ghost">AI Search</a>
-    <a href="upload.html" class="btn btn-primary">+ Upload</a>
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
 <div class="page-inner">
   <div class="page-header">
-    <h1>📊 Usage Analytics</h1>
-    <p>Local usage data stored on this device — page views, document opens, and searches.</p>
+    <h1><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Usage Analytics</h1>
+    <p>Local usage data stored on this device, page views, document opens, and searches.</p>
   </div>
 
   <div class="overview-grid">
     <div class="ov-card">
-      <div class="ov-card-icon" style="background:rgba(0,93,99,0.1);">📄</div>
+      <div class="ov-card-icon" style="background:rgba(0,93,99,0.1);color:var(--primary-ink);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
       <div class="ov-card-num" id="total-views">0</div>
       <div class="ov-card-label">Total Page Views</div>
     </div>
     <div class="ov-card">
-      <div class="ov-card-icon" style="background:rgba(59,130,246,0.1);">📂</div>
+      <div class="ov-card-icon" style="background:rgba(0,118,168,0.1);color:var(--info-ink,#0076A8);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg></div>
       <div class="ov-card-num" id="total-opens">0</div>
       <div class="ov-card-label">Documents Opened</div>
     </div>
     <div class="ov-card">
-      <div class="ov-card-icon" style="background:rgba(245,158,11,0.1);">🔍</div>
+      <div class="ov-card-icon" style="background:rgba(255,184,28,0.1);color:var(--warn-ink,#8A6200);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
       <div class="ov-card-num" id="total-searches">0</div>
       <div class="ov-card-label">Searches Made</div>
     </div>
   </div>
 
+  <div class="an-section" id="trend-section">
+    <div class="an-section-title"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Document Register Trends</div>
+    <p class="trend-sub">Built from the current register snapshot (issue dates and review dates), not a real historical log. Once Azure is the backend, this will read genuine time-series data from the audit service instead.</p>
+    <div class="trend-charts-grid">
+      <div class="trend-chart-card">
+        <div class="trend-chart-label">Overdue review backlog, trailing 12 months</div>
+        <div id="overdue-chart"></div>
+      </div>
+      <div class="trend-chart-card">
+        <div class="trend-chart-label">Publishing velocity by segment, trailing 12 months</div>
+        <div id="velocity-chart"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="an-section">
-    <div class="an-section-title"><span>📄</span> Top Pages Visited</div>
+    <div class="an-section-title"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span> Top Pages Visited</div>
     <div id="pages-list"><div class="an-empty">No page view data yet.</div></div>
   </div>
 
   <div class="an-section">
-    <div class="an-section-title"><span>📂</span> Most Opened Documents</div>
+    <div class="an-section-title"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg></span> Most Opened Documents</div>
     <div id="docs-list"><div class="an-empty">No document opens recorded yet.</div></div>
   </div>
 
   <div class="an-section">
-    <div class="an-section-title"><span>🔍</span> Top Search Queries</div>
+    <div class="an-section-title"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span> Top Search Queries</div>
     <div id="search-list"><div class="an-empty">No searches recorded yet.</div></div>
   </div>
 
   <div class="an-section">
-    <div class="an-section-title"><span>🕐</span> Recent Activity</div>
+    <div class="an-section-title"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg></span> Recent Activity</div>
     <div id="activity-list"><div class="an-empty">No recent activity.</div></div>
   </div>
 
+  <div class="an-section" id="audit-section" style="display:none">
+    <div class="an-section-title"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></span> Audit &amp; Activity Log</div>
+    <p class="trend-sub">Who approved, released, withdrew or viewed a document, and when. Approvals, releases and withdrawals are placeholder entries synthesized from the register's own dates (there is no real event log yet); the viewed entries are this device's own local usage history. A real Azure audit-log service will replace all of it with genuine per-user event records.</p>
+    <div class="audit-stats" id="audit-stats"></div>
+    <div id="audit-list"><div class="an-empty">No audit entries yet.</div></div>
+    <p class="audit-note" id="audit-note"></p>
+  </div>
+
   <div class="data-btn-row">
-    <button class="export-data-btn" onclick="exportCSV()">⬇ Export as CSV</button>
-    <button class="clear-data-btn" onclick="clearAnalytics()">🗑 Clear all data</button>
+    <button class="export-data-btn" onclick="exportCSV()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export as CSV</button>
+    <button class="clear-data-btn" onclick="clearAnalytics()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Clear all data</button>
   </div>
 </div>
 
@@ -296,13 +355,290 @@ function clearAnalytics() {
 
 renderAnalytics();
 
-const MOON='M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
-const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
-function toggleDark(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme',next);}
-(function(){const s=localStorage.getItem('taqa-theme');if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
 document.addEventListener('click',function(e){const a=e.target.closest('a[href]');if(!a)return;const h=a.getAttribute('href');if(!h||h.startsWith('#')||h.startsWith('http')||h.startsWith('mailto'))return;if(a.target==='_blank')return;e.preventDefault();document.body.classList.add('page-exit');setTimeout(()=>window.location.href=h,270);});
 </script>
+<script src="roles.js"></script>
+<script>
+/* Usage analytics are for the people who run the register. QMS may clear
+   them; an auditor reads them. */
+(function(){
+  if (typeof TAQA_ROLE === 'undefined') return;
+  if (!TAQA_ROLE.canRegister()) {
+    TAQA_ROLE.refuse('Usage analytics are for the register’s owners',
+      'This page shows local usage data stored on this device, plus a register-derived audit log, and is open to QMS and to auditors.');
+    return;
+  }
+  if (!TAQA_ROLE.effective().editMetadata) {
+    var b = document.querySelector('.clear-data-btn'); if (b) b.remove();
+  }
+})();
+</script>
+<script src="documents-master.js"></script>
+<script src="store.js"></script>
 <script src="shared.js"></script>
+<script>
+/* ──────────────────────────────────────────────────────────────────────────
+   Register trend charts and audit log.
+
+   There is no historical analytics backend yet, so both of these are built
+   from a single snapshot of the register (documents-master.js plus anything
+   held in TAQA_STORE) rather than from a real time series or a real event
+   log. Every number below is derived deterministically from that snapshot's
+   real dates, not randomised, so the same register always draws the same
+   charts and the same log. Once Azure is the backend this whole block is
+   replaced by reading genuine historical series and genuine audit events
+   from that service; the comments below mark exactly what is a stand-in.
+
+   This runs after documents-master.js, store.js and shared.js so
+   TAQA_STORE, TAQA_DOC_LOOKUPS and TAQA_Analytics all exist, and after the
+   page's own role gate above, which already stops a role other than QMS or
+   auditor from ever reaching this script (TAQA_ROLE.refuse calls
+   window.stop(), which halts these later script tags entirely). ──────── */
+(function(){
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return {'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[c];
+    });
+  }
+  function fmtDate(v){
+    if (!v) return '';
+    var d = new Date(v + 'T00:00:00');
+    if (isNaN(d)) return esc(v);
+    return d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+  }
+  function registerRows(pop){
+    try { if (typeof TAQA_STORE !== 'undefined') return TAQA_STORE.rows(pop); } catch(e){}
+    return [];
+  }
+  function segments(){
+    return (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments) || {};
+  }
+  // The last `n` calendar months, oldest first, ending with the current one.
+  function trailingMonths(n){
+    var out = [], now = new Date(); now.setHours(0,0,0,0);
+    for (var i = n - 1; i >= 0; i--) {
+      var start = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      var end   = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
+      out.push({ label: start.toLocaleDateString('en-US', {month:'short'}), start: start, end: end });
+    }
+    return out;
+  }
+
+  /* ── Chart 1 data: overdue review backlog ──────────────────────────────
+     No page load has ever recorded how many documents were overdue in a
+     past month, so this instead asks a single honest question of today's
+     register: "using each document's own nextReviewDate, how many in-force
+     documents would already have been due for review as of the end of each
+     of the last 12 months?" That is necessarily non-decreasing (nothing here
+     models a review actually happening), which is itself the point: it shows
+     the backlog SCORE would carry forward if nothing were reviewed, not a
+     record of reviews that did or did not happen. */
+  function overdueSeries(){
+    var live = registerRows('live'); // controlled, status current or under-review
+    return trailingMonths(12).map(function(m){
+      var n = live.filter(function(d){
+        if (!d.nextReviewDate) return false;
+        var due = new Date(d.nextReviewDate + 'T00:00:00');
+        return !isNaN(due) && due.getTime() <= m.end.getTime();
+      }).length;
+      return { label: m.label, value: n };
+    });
+  }
+
+  /* ── Chart 2 data: publishing velocity per segment ─────────────────────
+     Real issueDate values, bucketed by segment, counted over the trailing
+     12 months. This is a genuine count of what the register says shipped in
+     that window, just not broken out month by month within it, since a
+     single snapshot cannot show a monthly shape without inventing one. */
+  function velocityBySegment(){
+    var months = trailingMonths(12);
+    var cutoff = months[0].start.getTime();
+    var counts = {};
+    registerRows('controlled').forEach(function(d){
+      if (!d.issueDate) return;
+      var iss = new Date(d.issueDate + 'T00:00:00');
+      if (isNaN(iss) || iss.getTime() < cutoff) return;
+      counts[d.segment] = (counts[d.segment] || 0) + 1;
+    });
+    var S = segments();
+    return Object.keys(counts).map(function(k){
+      return { code: (S[k] && S[k].spl) || k, name: (S[k] && S[k].name) || k, value: counts[k] };
+    }).sort(function(a, b){ return b.value - a.value; }).slice(0, 8);
+  }
+
+  /* ── SVG builders, hand-rolled, same spirit as the inline-SVG icons above:
+     plain shapes, no library, colored with the state-ink tokens via inline
+     `style` so the CSS custom properties resolve reliably. ────────────── */
+  function lineChart(series, color, ariaLabel){
+    var w = 560, h = 170, padL = 26, padR = 10, padT = 12, padB = 24;
+    var innerW = w - padL - padR, innerH = h - padT - padB;
+    var maxV = Math.max(1, series.reduce(function(m, p){ return Math.max(m, p.value); }, 0));
+    var n = series.length, stepX = n > 1 ? innerW / (n - 1) : 0;
+    var pts = series.map(function(p, i){
+      var x = padL + stepX * i;
+      var y = padT + innerH - (p.value / maxV) * innerH;
+      return { x: x, y: y, v: p.value, label: p.label };
+    });
+    var path = pts.map(function(p, i){ return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
+    var svg = '<svg class="tchart-svg" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="' + esc(ariaLabel) + '">';
+    [0, 0.5, 1].forEach(function(f){
+      var y = (padT + innerH * f).toFixed(1);
+      svg += '<line x1="' + padL + '" x2="' + (w - padR) + '" y1="' + y + '" y2="' + y + '" style="stroke:var(--chart-grid)" stroke-width="1"/>';
+    });
+    svg += '<path d="' + path + '" style="stroke:' + color + ';fill:none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>';
+    pts.forEach(function(p, i){
+      svg += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="3" style="fill:' + color + '"><title>' + esc(p.label) + ': ' + p.v + ' due</title></circle>';
+      if (n <= 8 || i % 2 === 0 || i === n - 1) {
+        svg += '<text x="' + p.x.toFixed(1) + '" y="' + (h - 6) + '" font-size="9" text-anchor="middle" style="fill:var(--text-muted)">' + esc(p.label) + '</text>';
+      }
+    });
+    svg += '</svg>';
+    return svg;
+  }
+  function barChart(series, color, ariaLabel){
+    var w = 560, h = 190, padL = 8, padR = 8, padT = 10, padB = 34;
+    var innerW = w - padL - padR, innerH = h - padT - padB;
+    var n = series.length;
+    if (!n) return '';
+    var maxV = Math.max(1, series.reduce(function(m, p){ return Math.max(m, p.value); }, 0));
+    var gap = 10, barW = Math.max(8, (innerW - gap * (n - 1)) / n);
+    var svg = '<svg class="tchart-svg" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="' + esc(ariaLabel) + '">';
+    svg += '<line x1="' + padL + '" x2="' + (w - padR) + '" y1="' + (padT + innerH).toFixed(1) + '" y2="' + (padT + innerH).toFixed(1) + '" style="stroke:var(--chart-grid)" stroke-width="1"/>';
+    series.forEach(function(p, i){
+      var bh = Math.max(1, (p.value / maxV) * innerH);
+      var x = padL + i * (barW + gap);
+      var y = padT + innerH - bh;
+      svg += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barW.toFixed(1) + '" height="' + bh.toFixed(1) + '" rx="3" style="fill:' + color + '"><title>' + esc(p.name) + ': ' + p.value + ' published</title></rect>';
+      svg += '<text x="' + (x + barW / 2).toFixed(1) + '" y="' + (y - 4).toFixed(1) + '" font-size="9" text-anchor="middle" style="fill:var(--text)">' + p.value + '</text>';
+      svg += '<text x="' + (x + barW / 2).toFixed(1) + '" y="' + (h - 8) + '" font-size="9" text-anchor="middle" style="fill:var(--text-muted)">' + esc(p.code) + '</text>';
+    });
+    svg += '</svg>';
+    return svg;
+  }
+
+  function renderTrendCharts(){
+    var oc = document.getElementById('overdue-chart'), vc = document.getElementById('velocity-chart');
+    if (!oc || !vc) return;
+    var overdue = overdueSeries();
+    oc.innerHTML = overdue.some(function(p){ return p.value > 0; })
+      ? lineChart(overdue, 'var(--warn-ink,#8A6200)', 'Overdue review backlog over the trailing 12 months')
+      : '<div class="an-empty">No documents are due for review.</div>';
+    var velocity = velocityBySegment();
+    vc.innerHTML = velocity.length
+      ? barChart(velocity, 'var(--primary-ink)', 'Documents published per segment over the trailing 12 months')
+      : '<div class="an-empty">No documents were issued in the last 12 months.</div>';
+  }
+
+  /* ── Audit / activity log ───────────────────────────────────────────────
+     Synthesized from three real fields already on every controlled
+     document (approvedDate, issueDate, status), plus this device's own
+     genuine local view history from shared.js's TAQA_Track. Nothing here is
+     a real per-user event: there is no signed-in identity in the prototype,
+     so "who" is the role the register already names for that step (the
+     approver for the document's type, or QMS as document controller), not a
+     person. A real Azure audit-log service replaces this outright. */
+  function auditEntries(){
+    var docs = registerRows('controlled');
+    var entries = [];
+    docs.forEach(function(d){
+      var seg = segments()[d.segment] || {};
+      var segName = seg.name || d.segment || 'Company Wide';
+      var approver = (typeof TAQA_APPROVAL !== 'undefined' && TAQA_APPROVAL.approverFor(d)) ||
+        ((typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.types[d.docType] && TAQA_DOC_LOOKUPS.types[d.docType].owner)) || 'Approver';
+      if (d.approvedDate) {
+        entries.push({ date: d.approvedDate, action: 'approved', actor: approver + ' (' + segName + ')', doc: d });
+      }
+      var released = d.status === 'current' || d.status === 'under-review' || d.status === 'superseded' || d.status === 'obsolete';
+      if (d.issueDate && released) {
+        entries.push({ date: d.issueDate, action: 'released', actor: 'QMS Document Control', doc: d });
+      }
+      if (d.status === 'obsolete' || d.status === 'superseded') {
+        // No withdrawal date field exists yet. The review due date is the
+        // closest real date on the record to when a withdrawal would have
+        // been triggered, so it stands in, but only when that date has
+        // actually passed; otherwise the issue date is used instead so the
+        // log never claims a withdrawal that has not happened yet.
+        var due = d.nextReviewDate ? new Date(d.nextReviewDate + 'T00:00:00') : null;
+        var wd = (due && !isNaN(due) && due.getTime() <= Date.now()) ? d.nextReviewDate : d.issueDate;
+        if (wd) entries.push({ date: wd, action: 'withdrawn', actor: 'QMS Document Control', doc: d });
+      }
+    });
+    // Fold in this device's real, locally recorded document opens. Open
+    // events are keyed by document title (see segment.html), not docNumber.
+    try {
+      if (typeof TAQA_Analytics !== 'undefined') {
+        var byTitle = {};
+        docs.forEach(function(d){ byTitle[d.title] = d; });
+        TAQA_Analytics.get().forEach(function(ev){
+          if (ev.e !== 'open') return;
+          var d = byTitle[ev.k];
+          if (!d) return;
+          entries.push({ date: new Date(ev.t).toISOString().slice(0, 10), ts: ev.t, action: 'viewed', actor: 'This device', doc: d });
+        });
+      }
+    } catch(e){}
+    entries.sort(function(a, b){
+      var ta = a.ts || new Date(a.date + 'T00:00:00').getTime();
+      var tb = b.ts || new Date(b.date + 'T00:00:00').getTime();
+      return tb - ta;
+    });
+    return entries;
+  }
+
+  var AUDIT_LABEL = { approved: 'Approved', released: 'Countersigned and released', withdrawn: 'Withdrawn', viewed: 'Viewed' };
+  var AUDIT_DOT = { approved: 'ok', released: 'info', withdrawn: 'stop', viewed: 'view' };
+  var AUDIT_SHOWN = 40;
+
+  function renderAuditLog(){
+    var section = document.getElementById('audit-section');
+    if (!section) return;
+    // Stricter sub-gate on top of the page-level one above: this table names
+    // who approved, released, withdrew and viewed each document, so it stays
+    // limited to QMS and the auditor even if the page's own gate is ever
+    // widened to admit another role later.
+    var role = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE.current() : null;
+    if (role !== 'qms' && role !== 'auditor') { section.style.display = 'none'; return; }
+    section.style.display = '';
+
+    var entries = auditEntries();
+    var counts = { approved: 0, released: 0, withdrawn: 0, viewed: 0 };
+    entries.forEach(function(e){ counts[e.action] = (counts[e.action] || 0) + 1; });
+    document.getElementById('audit-stats').innerHTML = Object.keys(AUDIT_LABEL).map(function(k){
+      return '<div class="audit-stat"><div class="audit-stat-num">' + (counts[k] || 0) + '</div>' +
+        '<div class="audit-stat-label">' + AUDIT_LABEL[k] + '</div></div>';
+    }).join('');
+
+    var shown = entries.slice(0, AUDIT_SHOWN);
+    document.getElementById('audit-list').innerHTML = shown.length
+      ? '<div class="audit-list">' + shown.map(function(e){
+          return '<div class="audit-item">' +
+            '<div class="audit-dot audit-dot-' + AUDIT_DOT[e.action] + '"></div>' +
+            '<div class="audit-text"><strong>' + AUDIT_LABEL[e.action] + '</strong> ' +
+              esc(e.doc.docNumber) + ' ' + esc(e.doc.title) +
+              ' <span class="audit-actor">by ' + esc(e.actor) + '</span></div>' +
+            '<div class="audit-time">' + fmtDate(e.date) + '</div>' +
+          '</div>';
+        }).join('') + '</div>'
+      : '<div class="an-empty">No audit entries yet.</div>';
+
+    var note = document.getElementById('audit-note');
+    if (note) {
+      note.textContent = entries.length > AUDIT_SHOWN
+        ? 'Showing the ' + AUDIT_SHOWN + ' most recent of ' + entries.length + ' synthesized entries.'
+        : '';
+    }
+  }
+
+  renderTrendCharts();
+  renderAuditLog();
+  // A role switch from the refusal screen's own switcher reloads the page,
+  // but the register can also change in this tab (an upload, an approval)
+  // without a reload, so both stay live the same way the rest of the page
+  // already listens for taqa:register-changed.
+  try { if (typeof TAQA_STORE !== 'undefined') TAQA_STORE.onChange(function(){ renderTrendCharts(); renderAuditLog(); }); } catch(e){}
+})();
+</script>
 <script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
 </body>

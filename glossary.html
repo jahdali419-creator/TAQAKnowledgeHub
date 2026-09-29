@@ -1,412 +1,479 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-taqa-theme="light">
 <head>
 <meta charset="UTF-8">
-<script>try{var _t=localStorage.getItem('taqa-theme');if(_t)document.documentElement.setAttribute('data-theme',_t);}catch(e){}</script>
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Field Glossary — TAQA Knowledge Hub</title>
+<title>Field Glossary, TAQA Knowledge Hub</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#005D63">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Tech Hub">
+<meta name="apple-mobile-web-app-title" content="TechHub Platform">
 <link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="fonts/fonts.css">
 <noscript></noscript>
 <style>
 :root{
-  --primary:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
-  --dark:#f4f5f7;--dark-2:#eaecf0;--dark-3:#ffffff;
+  --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
+  /* Names the shared chrome reads as well, so its panels theme with the page. */
+  --alert-ink:#A8431A;--text-light:#756A61;--stop-ink:#C8102E;
+  --dark:#F4F4F3;--dark-2:#EDEBE8;--dark-3:#ffffff;
   --glass:rgba(255,255,255,0.85);--glass-2:rgba(255,255,255,0.98);
   --glass-border:rgba(0,0,0,0.09);--glass-border-hover:rgba(0,93,99,0.35);
-  --text:#1a2235;--text-muted:#64748b;--gradient:#005D63; /* flat brand teal - no gradient */
+  --text:#1E1C1A;--text-muted:#524D48;--gradient:#005D63;
+
+  /* The glossary's own grounds and lines, after the home page's
+     Explore by Discipline sheet: one white sheet, hairlines, one teal. */
+  --gl-paper:#FFFFFF;
+  --gl-canvas:#F4F4F3;
+  --gl-inset:#F4F4F3;
+  --gl-rule:rgba(117,106,97,0.11);
+  --gl-rule-firm:rgba(117,106,97,0.22);
+  --gl-disc:rgba(0,93,99,0.06);
+  --gl-scuff:rgba(0,93,99,0.04);
+  --gl-press:rgba(0,93,99,0.08);
+  --gl-shadow:0 22px 44px -26px rgba(0,88,90,0.22),0 1px 2px rgba(0,88,90,0.04);
+  --gl-ease:cubic-bezier(0.23,1,0.32,1);
+  --gl-top:var(--nav-h,64px);
+  --gl-abbr-w:92px;
 }
-*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+html[data-taqa-theme="dark"]{
+  --primary-ink:#00BBB6;--alert-ink:#FF9B5E;--text-light:#619B9E;--stop-ink:#FF8A94;
+  --dark:#001314;--dark-2:#002326;--dark-3:#1E1C1A;
+  --glass:rgba(0,45,48,0.90);--glass-2:rgba(0,45,48,0.98);
+  --glass-border:rgba(255,255,255,0.08);--glass-border-hover:rgba(0,187,182,0.35);
+  --text:#C7DBDD;--text-muted:#8CB6B9;
+  --gl-paper:#002326;
+  --gl-canvas:#001314;
+  --gl-inset:#002D30;
+  --gl-rule:rgba(0,187,182,0.11);
+  --gl-rule-firm:rgba(0,187,182,0.22);
+  --gl-disc:rgba(0,187,182,0.09);
+  --gl-scuff:rgba(0,187,182,0.05);
+  --gl-press:rgba(0,187,182,0.10);
+  --gl-shadow:0 22px 44px -22px rgba(0,0,0,0.6),0 0 0 1px rgba(0,187,182,0.07);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+/* shared.js sets overflow-x:hidden on html, body and every page-wrapper
+   child. hidden makes each of them a scroll container, and a sticky
+   element then sticks to a box that never scrolls. clip trims the same
+   overflow without that side effect, so the A to Z rail can stick. */
+html{overflow-x:clip!important;scroll-behavior:smooth;}
+body{overflow-x:clip!important;}
+.page-wrapper>.glossary-layout{overflow-x:clip!important;overflow-y:visible!important;}
+/* Where clip is not understood (iOS Safari before 16) the declarations
+   above are dropped and shared.js's hidden returns. Leave html visible so
+   body's hidden passes to the viewport instead: the viewport still trims
+   sideways overflow, and nothing between the rail and it scrolls. */
+@supports not (overflow:clip){
+  html{overflow-x:visible!important;}
+  body{overflow-x:hidden!important;}
+  .page-wrapper>.glossary-layout{overflow:visible!important;}
+}
 @keyframes pageFadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
 @keyframes pageFadeOut{from{opacity:1;transform:none;}to{opacity:0;transform:translateY(-8px);}}
-body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;animation:pageFadeIn 0.4s cubic-bezier(.4,0,.2,1);}
+body{font-family:'Inter',sans-serif;background:var(--gl-canvas);color:var(--text);min-height:100vh;animation:pageFadeIn 0.4s cubic-bezier(.4,0,.2,1);}
 body.page-exit{animation:pageFadeOut 0.27s ease forwards;}
-.bg-blobs{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
-.bg-blob{position:absolute;border-radius:50%;filter:blur(100px);}
-.bg-blob-1{width:720px;height:720px;top:-220px;left:-200px;background:radial-gradient(circle,rgba(0,187,182,0.12) 0%,transparent 65%);animation:blob1 26s ease-in-out infinite;}
-.bg-blob-2{width:580px;height:580px;bottom:-160px;right:-120px;background:radial-gradient(circle,rgba(0,93,99,0.09) 0%,transparent 65%);animation:blob2 32s ease-in-out infinite;}
-@keyframes blob1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(60px,40px) scale(1.08);}}
-@keyframes blob2{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-50px,-30px) scale(1.06);}}
 .page-wrapper{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+button{font:inherit;color:inherit;}
 
-/* ── Nav ── */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
-  display:flex;align-items:center;justify-content:space-between;
-  background:rgba(255,255,255,0.92);backdrop-filter:blur(24px);
-  border-bottom:1px solid var(--glass-border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
-.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
-.nav-brand-text{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;}
-.nav-brand-name{font-weight:800;color:var(--primary);}
-.nav-brand-hub{font-weight:500;color:#64748b;}
-.nav-subtitle{font-size:11px;color:var(--text-muted);display:block;margin-top:-1px;}
-.nav-links{display:flex;gap:2px;list-style:none;position:relative;}
-.nav-pill{position:absolute;background:rgba(0,93,99,0.08);border-radius:6px;
-  transition:all 0.32s cubic-bezier(.4,0,.2,1);z-index:-1;pointer-events:none;}
-.nav-links a{padding:7px 15px;border-radius:6px;text-decoration:none;font-size:13.5px;
-  font-weight:500;color:var(--text-muted);transition:color 0.2s;position:relative;}
-.nav-links a:hover{color:var(--text);}
-.nav-links a.active{color:var(--primary);font-weight:600;}
-.nav-links a.active::after{content:'';position:absolute;bottom:3px;left:15px;right:15px;
-  height:2px;background:var(--primary);border-radius:2px;}
-.nav-right{display:flex;gap:10px;align-items:center;}
-.dark-toggle{background:none;border:1px solid var(--glass-border);border-radius:8px;
-  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:var(--text-muted);transition:all 0.2s;}
-.dark-toggle:hover{border-color:var(--glass-border-hover);color:var(--primary);}
-.btn{padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
-  transition:all 0.25s;border:none;font-family:'Inter',sans-serif;
-  text-decoration:none;display:inline-flex;align-items:center;gap:7px;}
-.btn-primary{background:var(--gradient);color:#fff;}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,93,99,0.4);}
-
-/* ── Hero ── */
-.page-hero{position:relative;overflow:hidden;padding:110px 48px 72px;}
+/* ── Hero ── dark in both themes, so its inks are fixed. */
+.page-hero{position:relative;overflow:hidden;background:#001314;padding:112px 40px 56px;}
 .page-hero::before{content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(4,14,22,0.97) 0%,rgba(6,20,30,0.92) 45%,rgba(0,60,65,0.80) 100%);}
+  background:linear-gradient(135deg,rgba(0,16,17,0.97) 0%,rgba(0,19,20,0.92) 45%,rgba(0,60,65,0.80) 100%);}
 @keyframes heroKenBurns{0%{transform:scale(1) translate(0%,0%);}30%{transform:scale(1.06) translate(-1.2%,0.4%);}65%{transform:scale(1.09) translate(0.8%,-0.6%);}100%{transform:scale(1.04) translate(-0.4%,0.8%);}}
 .page-hero-bg{position:absolute;inset:0;background:url('taqa-hero.webp') center 40%/cover no-repeat;opacity:0.14;animation:heroKenBurns 18s ease-in-out infinite;}
-.page-hero-glow{position:absolute;bottom:-100px;left:50%;transform:translateX(-50%);
-  width:700px;height:280px;pointer-events:none;
-  background:radial-gradient(ellipse,rgba(0,187,182,0.20) 0%,transparent 70%);}
-.page-hero-content{position:relative;z-index:2;max-width:700px;margin:0 auto;text-align:center;}
-.page-hero-tag{display:inline-flex;align-items:center;gap:8px;padding:5px 16px;margin-bottom:20px;
-  background:rgba(77,217,211,0.10);border:1px solid rgba(77,217,211,0.26);
-  border-radius:50px;font-size:11px;color:#4DD9D3;text-transform:uppercase;
-  letter-spacing:1.5px;font-weight:600;}
-.page-hero-content h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:clamp(32px,5vw,54px);
-  font-weight:800;letter-spacing:-1px;color:#fff;margin-bottom:14px;line-height:1.1;}
-.grad{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.page-hero-content p{font-size:15px;color:rgba(255,255,255,0.55);line-height:1.75;margin-bottom:34px;max-width:560px;margin-left:auto;margin-right:auto;}
+.page-hero-content{position:relative;z-index:2;max-width:680px;margin:0 auto;text-align:center;}
+.page-hero-tag{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;margin-bottom:18px;
+  background:rgba(0,187,182,0.10);border:1px solid rgba(0,187,182,0.24);
+  border-radius:50px;font-size:11px;color:var(--primary-light);text-transform:uppercase;
+  letter-spacing:1.4px;font-weight:600;}
+.page-hero-content h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:clamp(34px,5vw,52px);
+  font-weight:700;letter-spacing:-1px;color:#fff;margin-bottom:12px;line-height:1.08;}
+.grad{color:var(--primary-light);}
+.page-hero-content p{font-size:15px;color:rgba(255,255,255,0.74);line-height:1.7;max-width:540px;margin:0 auto;}
+.hero-part{margin-top:14px;font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:rgba(255,255,255,0.72);}
+.hero-part em{font-style:italic;font-weight:700;text-transform:none;letter-spacing:0;
+  background:linear-gradient(120deg, #00BBB6 15%, #EAFFFD 85%);-webkit-background-clip:text;background-clip:text;color:transparent;}
+@media (prefers-contrast:more){.hero-part em{background:none;-webkit-text-fill-color:unset;color:var(--primary-light);}}
+.hero-part span{font-style:normal;}
 
-/* ── Search Bar ── */
-.glossary-search-wrap{position:relative;max-width:640px;margin:0 auto 22px;}
-.glossary-search-bar{display:flex;align-items:center;gap:0;
-  background:rgba(255,255,255,0.97);border:2px solid rgba(255,255,255,0.12);
-  border-radius:16px;padding:6px 6px 6px 18px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.32),0 0 0 1px rgba(255,255,255,0.06);
-  transition:border-color 0.3s,box-shadow 0.3s,transform 0.3s;}
-.glossary-search-bar:focus-within{border-color:rgba(0,187,182,0.5);
-  box-shadow:0 0 0 4px rgba(0,187,182,0.09),0 20px 60px rgba(0,0,0,0.28);
-  transform:translateY(-2px);}
-.glossary-search-bar svg{flex-shrink:0;color:#94a3b8;margin-right:4px;}
-#glossary-input{flex:1;border:none;outline:none;font-size:15.5px;font-family:'Inter',sans-serif;
-  background:transparent;color:var(--text);padding:10px 4px;}
-#glossary-input::placeholder{color:#94a3b8;}
-.glossary-clear{background:rgba(100,116,139,0.1);border:none;border-radius:8px;
-  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:#64748b;font-size:15px;transition:all 0.2s;flex-shrink:0;margin-right:6px;}
-.glossary-clear:hover{background:rgba(253,105,29,0.1);color:var(--accent);}
+/* ── Search ── */
+.glossary-search-wrap{max-width:620px;margin:26px auto 18px;}
+.glossary-search-bar{display:flex;align-items:center;gap:6px;
+  background:#FFFFFF;border-radius:16px;padding:6px 6px;padding-inline-start:18px;min-height:58px;
+  box-shadow:0 20px 50px -18px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.06);
+  transition:box-shadow 0.25s;}
+.glossary-search-bar:focus-within{box-shadow:0 0 0 3px rgba(0,187,182,0.55),0 20px 50px -18px rgba(0,0,0,0.5);}
+.glossary-search-bar>svg{flex-shrink:0;color:#756A61;}
+#glossary-input{flex:1 1 0;min-width:0;border:none;outline:none;font-size:16px;font-family:'Inter',sans-serif;
+  background:transparent;color:#1E1C1A;padding:10px 6px;min-height:44px;-webkit-appearance:none;appearance:none;}
+#glossary-input::placeholder{color:#756A61;}
+/* The bar's own ring shows focus; the site-wide square outline would draw
+   a second one inside it. */
+#glossary-input:focus-visible{outline:none!important;}
+#glossary-input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;}
+.glossary-clear{flex-shrink:0;width:44px;height:44px;border:0;border-radius:12px;background:transparent;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:#524D48;
+  transition:background-color 0.2s,color 0.2s;}
+.glossary-clear svg{width:16px;height:16px;}
+@media (hover:hover){.glossary-clear:hover{background:rgba(117,106,97,0.10);color:#1E1C1A;}}
+.glossary-clear:focus-visible{outline:2px solid #005D63;outline-offset:-2px;}
 .glossary-clear.hidden{display:none;}
-.btn-go{background:var(--gradient);color:#fff;border:none;border-radius:11px;
-  padding:10px 22px;font-size:14px;font-weight:600;cursor:pointer;
-  font-family:'Inter',sans-serif;transition:all 0.25s;white-space:nowrap;flex-shrink:0;}
-.btn-go:hover{box-shadow:0 6px 20px rgba(0,93,99,0.45);transform:translateY(-1px);}
+html[data-taqa-theme="dark"] .glossary-search-bar{background:#002D30;}
+html[data-taqa-theme="dark"] #glossary-input{color:#C7DBDD;}
+html[data-taqa-theme="dark"] #glossary-input::placeholder{color:#8CB6B9;}
+html[data-taqa-theme="dark"] .glossary-search-bar>svg{color:#8CB6B9;}
+html[data-taqa-theme="dark"] .glossary-clear{color:#8CB6B9;}
+html[data-taqa-theme="dark"] .glossary-clear:focus-visible{outline-color:#00BBB6;}
 
-.hero-stats{display:flex;gap:30px;justify-content:center;}
-.hstat{font-size:12.5px;color:rgba(255,255,255,0.42);}
-.hstat strong{color:rgba(255,255,255,0.82);font-weight:700;}
+.hero-stats{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;}
+.hstat{font-size:12.5px;color:rgba(255,255,255,0.72);}
+.hstat strong{color:#fff;font-weight:700;font-variant-numeric:tabular-nums;}
 
-/* ── Layout ── */
-.glossary-layout{max-width:1240px;margin:0 auto;padding:36px 48px 80px;
-  display:grid;grid-template-columns:1fr 296px;gap:26px;align-items:start;}
+/* ── Layout ── one measured reading column and a quiet side column.
+   A dictionary is read down, letter by letter; two columns of rows would
+   break that order and shift sideways whenever a row opens. */
+.glossary-layout{width:100%;max-width:1140px;margin:0 auto;padding:30px 40px 96px;
+  display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:44px;align-items:start;}
+.glossary-main{min-width:0;max-width:740px;}
 
-/* ── Category filter pills ── */
-.cat-filter{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:22px;}
-.cat-pill{padding:5px 14px;border-radius:50px;font-size:12.5px;font-weight:500;
-  cursor:pointer;border:1px solid var(--glass-border);background:var(--glass);
-  color:var(--text-muted);transition:all 0.2s;user-select:none;}
-.cat-pill:hover{border-color:var(--glass-border-hover);color:var(--primary);}
-.cat-pill.active{background:var(--gradient);color:#fff;border-color:transparent;
-  box-shadow:0 4px 14px rgba(0,93,99,0.28);}
+/* ── Category pills ── 44px tall targets, 32px visible pill: the
+   transparent border is the extra hit area and the gap between pills. */
+.gl-cats{display:flex;flex-wrap:wrap;margin-inline:-3px;margin-block:-6px 4px;}
+.gl-pill{height:44px;border:6px solid transparent;border-inline-width:3px;background-clip:padding-box;
+  display:inline-flex;align-items:center;gap:6px;padding:0 13px;border-radius:999px;
+  background-color:var(--gl-paper);box-shadow:inset 0 0 0 1px var(--gl-rule-firm);
+  font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;white-space:nowrap;
+  -webkit-tap-highlight-color:transparent;transition:background-color 160ms ease,color 160ms ease,box-shadow 160ms ease;}
+.gl-pill-n{font-size:11.5px;font-weight:600;color:var(--text-light);font-variant-numeric:tabular-nums;}
+@media (hover:hover){.gl-pill:hover{color:var(--primary-ink);box-shadow:inset 0 0 0 1px var(--primary-ink);}}
+.gl-pill[aria-pressed="true"]{background-color:#005D63;color:#FFFFFF;box-shadow:none;}
+.gl-pill[aria-pressed="true"] .gl-pill-n{color:#CFE3E4;}
+.gl-pill:focus-visible{outline:2px solid var(--primary-ink)!important;outline-offset:-4px!important;}
 
-/* ── Alphabet nav ── */
-.alpha-nav{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:24px;}
-.alpha-btn{width:30px;height:30px;border-radius:7px;border:1px solid var(--glass-border);
-  background:var(--glass);font-size:12px;font-weight:600;cursor:pointer;
-  color:var(--text-muted);transition:all 0.18s;display:flex;align-items:center;justify-content:center;}
-.alpha-btn:hover:not(.disabled){border-color:var(--glass-border-hover);color:var(--primary);}
-.alpha-btn.active{background:var(--gradient);color:#fff;border-color:transparent;}
-.alpha-btn.disabled{opacity:0.28;cursor:default;pointer-events:none;}
+/* Keyboard only: past the pills and the rail, straight to the terms. */
+.gl-skip{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+.gl-skip:focus,.gl-skip:focus-visible{position:static;width:auto;height:44px;margin:4px 0 0;clip:auto;overflow:visible;
+  display:inline-flex;align-items:center;padding:0 16px;border-radius:12px;background:var(--gl-paper);
+  box-shadow:inset 0 0 0 2px var(--primary-ink);outline:none!important;
+  font-size:13px;font-weight:600;color:var(--primary-ink);cursor:pointer;}
 
-/* ── Results header ── */
-.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
-.results-count{font-size:13px;color:var(--text-muted);}
-.results-count strong{color:var(--text);}
+/* ── A to Z rail ── sticks under the top bar. */
+.gl-az[hidden]{display:none;}
+.gl-az{position:sticky;top:var(--gl-top);z-index:30;margin-top:10px;
+  margin-inline:-10px;padding:4px 10px;background:var(--gl-canvas);
+  display:flex;justify-content:space-between;
+  transition:box-shadow 200ms ease;}
+.gl-az.is-stuck{box-shadow:0 1px 0 var(--gl-rule-firm),0 14px 20px -18px rgba(0,40,42,0.35);}
+.gl-az-btn{flex:0 0 auto;width:28px;height:36px;border:0;border-radius:9px;background:transparent;
+  display:grid;place-items:center;cursor:pointer;
+  font-family:'BwGradual','Urbanist',sans-serif;font-weight:700;font-size:14px;color:var(--primary-ink);
+  -webkit-tap-highlight-color:transparent;transition:background-color 140ms ease,color 140ms ease;}
+@media (hover:hover){.gl-az-btn:not(:disabled):hover{background-color:var(--gl-press);}}
+.gl-az-btn:disabled{color:var(--gl-rule-firm);cursor:default;}
+html[data-taqa-theme="dark"] .gl-az-btn:disabled{color:rgba(0,187,182,0.28);}
+.gl-az-btn[aria-current="true"]{background-color:#005D63;color:#FFFFFF;}
+.gl-az-btn:focus-visible{outline:2px solid var(--primary-ink)!important;outline-offset:-2px!important;}
 
-/* ── Term cards grid ── */
-.terms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:13px;}
-.term-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;
-  padding:20px 22px;transition:border-color 0.25s,box-shadow 0.25s,transform 0.25s;
-  position:relative;overflow:hidden;}
-.term-card:hover{border-color:var(--glass-border-hover);
-  box-shadow:0 8px 32px rgba(0,0,0,0.08);transform:translateY(-2px);}
-.term-card::after{content:'';position:absolute;top:0;left:-130%;width:52%;height:100%;
-  background:linear-gradient(105deg,transparent 0%,rgba(255,255,255,0.44) 50%,transparent 100%);
-  transform:skewX(-16deg);pointer-events:none;}
-.term-card:hover::after{animation:shineSwipe 0.55s ease forwards;}
-@keyframes shineSwipe{from{left:-130%;opacity:1;}to{left:165%;opacity:1;}}
-.tc-abbr{font-family:'BwGradual','Urbanist',sans-serif;font-size:26px;font-weight:800;
-  letter-spacing:-0.5px;line-height:1;margin-bottom:5px;
-  background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.tc-full{font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:7px;line-height:1.35;}
-.tc-def{font-size:12.5px;color:#475569;line-height:1.65;margin-bottom:12px;}
-/* ── Card expand / collapse ── */
-.tc-def-wrap{overflow:hidden;max-height:76px;transition:max-height 0.42s cubic-bezier(.4,0,.2,1);}
-.term-card.expandable .tc-def-wrap{position:relative;}
-.term-card.expandable .tc-def-wrap::after{content:'';position:absolute;bottom:0;left:0;right:0;height:28px;
-  background:linear-gradient(transparent,rgba(255,255,255,0.92));pointer-events:none;transition:opacity 0.28s;}
-html[data-theme="dark"] .term-card.expandable .tc-def-wrap::after{background:linear-gradient(transparent,rgba(22,32,51,0.94));}
-.term-card.tc-open .tc-def-wrap{max-height:800px;}
-.term-card.tc-open .tc-def-wrap::after{opacity:0;}
-.term-card.expandable{cursor:pointer;user-select:none;}
-.term-card.tc-open{border-color:rgba(0,93,99,0.42)!important;
-  box-shadow:0 16px 48px rgba(0,93,99,0.14)!important;transform:translateY(-4px)!important;}
-html[data-theme="dark"] .term-card.tc-open{border-color:rgba(0,187,182,0.3)!important;
-  box-shadow:0 16px 48px rgba(0,187,182,0.10)!important;}
-.tc-expand{display:none;align-items:center;gap:5px;padding:8px 0 2px;
-  font-size:11px;font-weight:700;color:var(--primary);letter-spacing:0.3px;opacity:0.85;transition:opacity 0.2s;}
-.term-card.expandable .tc-expand{display:flex;}
-.term-card.expandable:hover .tc-expand{opacity:1;}
-.tc-chevron{flex-shrink:0;transition:transform 0.38s cubic-bezier(.34,1.56,.64,1);}
-.term-card.tc-open .tc-chevron{transform:rotate(180deg);}
-.tc-footer{display:flex;align-items:center;justify-content:space-between;}
-.tc-cat{padding:3px 10px;border-radius:50px;font-size:11px;font-weight:600;letter-spacing:0.3px;}
-.tc-community{font-size:11px;color:var(--accent);font-style:italic;}
-.cat-drilling{background:rgba(59,130,246,0.1);color:#2563eb;}
-.cat-wellcontrol{background:rgba(239,68,68,0.1);color:#dc2626;}
-.cat-production{background:rgba(16,185,129,0.1);color:#059669;}
-.cat-safety{background:rgba(245,158,11,0.1);color:#d97706;}
-.cat-engineering{background:rgba(139,92,246,0.1);color:#7c3aed;}
-.cat-logging{background:rgba(236,72,153,0.1);color:#db2777;}
-.cat-commercial{background:rgba(20,184,166,0.1);color:#0d9488;}
-.cat-maintenance{background:rgba(107,114,128,0.1);color:#4b5563;}
-.cat-general{background:rgba(0,93,99,0.1);color:var(--primary);}
-.cat-custom{background:rgba(253,105,29,0.1);color:var(--accent);}
-.cat-hr{background:rgba(244,63,94,0.10);color:#e11d48;}
-.cat-cybersecurity{background:rgba(99,102,241,0.10);color:#4338ca;}
-.hl{background:rgba(0,187,182,0.18);color:var(--primary);border-radius:3px;padding:0 2px;font-weight:600;}
+/* ── Results line ── */
+.gl-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;margin-top:8px;}
+.gl-count{font-size:13px;color:var(--text-muted);}
+.gl-count:focus{outline:none;}
+.gl-count:focus-visible{outline:2px solid var(--primary-ink)!important;outline-offset:4px!important;border-radius:6px;}
+.gl-count strong{color:var(--text);font-weight:700;font-variant-numeric:tabular-nums;}
+.gl-collapse{height:44px;padding:0 4px;border:0;background:transparent;cursor:pointer;
+  font-size:13px;font-weight:600;color:var(--primary-ink);}
+.gl-collapse[hidden]{display:none;}
+@media (hover:hover){.gl-collapse:hover{text-decoration:underline;text-underline-offset:3px;}}
+.gl-collapse:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;border-radius:6px;}
 
-/* ── No results ── */
-.no-results{grid-column:1/-1;text-align:center;padding:64px 20px;color:var(--text-muted);}
-.no-results-icon{font-size:48px;margin-bottom:14px;display:block;}
-.no-results h3{font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px;}
-.no-results p{font-size:13.5px;}
+/* ── Letter groups ── */
+.gl-group{margin-top:22px;}
+.gl-group:first-child{margin-top:4px;}
+.gl-letter{display:flex;align-items:baseline;gap:10px;margin:0 0 8px;padding-inline:4px;outline:none;
+  font-family:'BwGradual','Urbanist',sans-serif;font-weight:700;font-size:20px;line-height:1.2;color:var(--primary-ink);}
+/* A letter jump focuses its header so the next Tab starts there. It is
+   not a control, so it takes no ring; the rail shows where you landed. */
+.gl-letter:focus-visible{outline:none!important;}
+.gl-letter-n{font-family:'Inter',sans-serif;font-weight:500;font-size:12px;color:var(--text-light);font-variant-numeric:tabular-nums;}
+.gl-group-flat{margin-top:4px;}
+.gl-sheet{list-style:none;background:var(--gl-paper);border-radius:18px;box-shadow:var(--gl-shadow);overflow:clip;}
+.gl-item+.gl-item{border-top:1px solid var(--gl-rule);}
 
-/* ── Sidebar ── */
-.glossary-sidebar{display:flex;flex-direction:column;gap:20px;}
-.sidebar-card{background:var(--glass);border:1px solid var(--glass-border);
-  border-radius:16px;padding:22px;backdrop-filter:blur(8px);}
-.scard-title{font-size:12px;font-weight:700;color:var(--text-muted);
-  text-transform:uppercase;letter-spacing:0.9px;margin-bottom:16px;
-  display:flex;align-items:center;gap:7px;}
-.scard-title svg{color:var(--primary-light);}
+/* ── A row ── abbreviation, meaning, chevron. */
+.gl-h{margin:0;font:inherit;}
+.gl-line{display:contents;}
+.gl-row{display:grid;grid-template-columns:var(--gl-abbr-w) minmax(0,1fr) 28px;
+  grid-template-areas:"abbr full chev" ". snip .";
+  column-gap:14px;align-items:start;width:100%;min-height:52px;padding:14px 18px;
+  border:0;background:transparent;text-align:start;cursor:pointer;color:var(--text);
+  -webkit-tap-highlight-color:transparent;transition:background-color 150ms ease;}
+@media (hover:hover){.gl-row:hover{background:var(--gl-scuff);}}
+.gl-row:active{background:var(--gl-press);}
+.gl-row:focus-visible{outline:2px solid var(--primary-ink)!important;outline-offset:-3px!important;}
+.gl-abbr{grid-area:abbr;font-family:'BwGradual','Urbanist',sans-serif;font-weight:700;font-size:16px;line-height:24px;
+  letter-spacing:0.1px;color:var(--primary-ink);overflow-wrap:anywhere;}
+.gl-full{grid-area:full;font-family:'BwGradual','Urbanist',sans-serif;font-weight:300;font-size:16px;line-height:24px;color:var(--text);}
+.gl-snip{grid-area:snip;margin-top:2px;font-size:12.5px;line-height:1.45;color:var(--text-muted);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.gl-chev{grid-area:chev;width:28px;height:28px;margin-top:-2px;border-radius:50%;background:var(--gl-disc);
+  display:grid;place-items:center;color:var(--primary-ink);}
+.gl-chev svg{width:14px;height:14px;transition:transform 240ms var(--gl-ease);}
+.gl-item.is-open .gl-chev svg{transform:rotate(180deg);}
+.gl-item.is-open .gl-row{background:var(--gl-scuff);}
 
-/* ── Submit form ── */
-.submit-form{display:flex;flex-direction:column;gap:11px;}
-.sf-row{display:flex;flex-direction:column;gap:4px;}
-.sf-label{font-size:11.5px;font-weight:600;color:var(--text-muted);
-  text-transform:uppercase;letter-spacing:0.5px;}
-.sf-input,.sf-select,.sf-textarea{width:100%;padding:9px 12px;
-  border:1px solid var(--glass-border);border-radius:10px;
-  font-size:13.5px;font-family:'Inter',sans-serif;
-  background:rgba(255,255,255,0.7);color:var(--text);outline:none;
-  transition:border-color 0.2s,box-shadow 0.2s;}
-.sf-input:focus,.sf-select:focus,.sf-textarea:focus{
-  border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(0,187,182,0.09);}
-.sf-textarea{resize:vertical;min-height:68px;line-height:1.5;}
+/* ── The panel ── grid rows animate from 0fr, so no height is measured. */
+.gl-panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows 220ms var(--gl-ease);}
+.gl-item.is-open .gl-panel{grid-template-rows:1fr;transition-duration:300ms;}
+.gl-panel-in{min-height:0;overflow:hidden;visibility:hidden;transition:visibility 0s linear 220ms;}
+.gl-item.is-open .gl-panel-in{visibility:visible;transition-delay:0s;}
+.gl-body{padding:2px 18px 18px;padding-inline-start:calc(18px + var(--gl-abbr-w) + 14px);padding-inline-end:60px;background:var(--gl-scuff);}
+.gl-def{font-size:14.5px;line-height:1.65;color:var(--text-muted);max-width:62ch;}
+.gl-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:12px;}
+.gl-chip{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;
+  font-size:11.5px;font-weight:600;letter-spacing:0.2px;background:var(--gl-disc);color:var(--primary-ink);}
+.gl-chip.cat-wellcontrol{background:rgba(200,16,46,0.08);color:var(--stop-ink);}
+html[data-taqa-theme="dark"] .gl-chip.cat-wellcontrol{background:rgba(255,138,148,0.12);}
+.gl-note{font-size:12.5px;line-height:1.5;color:var(--text-muted);}
+.gl-note b{font-weight:600;color:var(--text);}
+.hl{background:rgba(0,187,182,0.20);color:inherit;border-radius:3px;padding:0 1px;font-weight:inherit;box-shadow:inset 0 -1.5px 0 rgba(0,93,99,0.55);}
+html[data-taqa-theme="dark"] .hl{background:rgba(0,187,182,0.22);box-shadow:inset 0 -1.5px 0 rgba(0,187,182,0.7);}
+
+/* ── Nothing found ── */
+.gl-empty{background:var(--gl-paper);border-radius:18px;box-shadow:var(--gl-shadow);padding:36px 24px;text-align:center;margin-top:4px;}
+.gl-empty h2{font-family:'BwGradual','Urbanist',sans-serif;font-weight:700;font-size:18px;color:var(--text);margin-bottom:6px;overflow-wrap:anywhere;}
+.gl-empty p{font-size:14px;line-height:1.6;color:var(--text-muted);max-width:40ch;margin:0 auto 18px;}
+.gl-empty-acts{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;}
+
+/* ── Buttons ── */
+.gl-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;
+  border-radius:12px;border:0;cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;
+  transition:background-color 160ms ease,box-shadow 160ms ease,transform 100ms ease;}
+.gl-btn:active{transform:scale(0.98);}
+.gl-btn-primary{background:#005D63;color:#FFFFFF;}
+@media (hover:hover){.gl-btn-primary:hover{background:#004A4F;}}
+html[data-taqa-theme="dark"] .gl-btn-primary{background:#006369;}
+@media (hover:hover){html[data-taqa-theme="dark"] .gl-btn-primary:hover{background:#00737A;}}
+.gl-btn-quiet{background:transparent;color:var(--primary-ink);box-shadow:inset 0 0 0 1px var(--gl-rule-firm);}
+@media (hover:hover){.gl-btn-quiet:hover{box-shadow:inset 0 0 0 1px var(--primary-ink);}}
+.gl-btn:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;}
+
+/* ── Side column ── */
+.glossary-sidebar{display:flex;flex-direction:column;gap:20px;min-width:0;}
+.sidebar-card{background:var(--gl-paper);border-radius:18px;box-shadow:var(--gl-shadow);padding:22px;}
+.scard-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:16px;font-weight:700;color:var(--text);
+  margin-bottom:4px;display:flex;align-items:center;gap:10px;}
+.scard-disc{width:28px;height:28px;border-radius:50%;background:var(--gl-disc);color:var(--primary-ink);
+  display:grid;place-items:center;flex-shrink:0;}
+.scard-disc svg{width:14px;height:14px;}
+.scard-sub{font-size:13px;line-height:1.55;color:var(--text-muted);margin-bottom:16px;}
+.sb-toggle{display:none;}
+
+.submit-form{display:flex;flex-direction:column;gap:12px;}
+.sf-row{display:flex;flex-direction:column;gap:5px;}
+.sf-label{font-size:12px;font-weight:600;color:var(--text-muted);}
+.sf-label i{font-style:normal;color:var(--text-light);font-weight:500;}
+.sf-input,.sf-select,.sf-textarea{width:100%;min-height:44px;padding:10px 12px;
+  border:0;border-radius:11px;box-shadow:inset 0 0 0 1px var(--gl-rule-firm);
+  font-size:14px;font-family:'Inter',sans-serif;
+  background:var(--gl-inset);color:var(--text);outline:none;
+  transition:box-shadow 0.2s,background-color 0.2s;}
+.sf-input:focus,.sf-select:focus,.sf-textarea:focus{background:var(--gl-paper);box-shadow:inset 0 0 0 2px var(--primary-ink);outline:none!important;}
+.sf-input::placeholder,.sf-textarea::placeholder{color:var(--text-light);}
+.sf-textarea{resize:vertical;min-height:84px;line-height:1.5;}
 .sf-select{cursor:pointer;}
-.btn-submit{width:100%;padding:11px;background:var(--gradient);color:#fff;
-  border:none;border-radius:10px;font-size:14px;font-weight:600;
-  cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.25s;margin-top:2px;}
-.btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,93,99,0.4);}
+.btn-submit{width:100%;margin-top:4px;}
 
-/* ── Category stats ── */
-.cat-stat-list{display:flex;flex-direction:column;gap:9px;}
-.cat-stat-row{display:flex;align-items:center;gap:8px;}
-.csr-name{font-size:12.5px;color:var(--text-muted);min-width:80px;}
-.csr-bar-wrap{flex:1;height:4px;background:var(--dark-2);border-radius:2px;}
-.csr-bar{height:4px;border-radius:2px;background:var(--gradient);
-  transition:width 0.7s cubic-bezier(.4,0,.2,1);}
-.csr-num{font-size:12px;font-weight:700;color:var(--primary);min-width:22px;text-align:right;}
+/* By field: a count per category, bars in the one teal. */
+.cat-stat-list{display:flex;flex-direction:column;gap:2px;margin-top:10px;}
+.cat-stat-row{display:grid;grid-template-columns:minmax(0,1fr) 72px 28px;align-items:center;gap:10px;min-height:28px;}
+.csr-name{font-size:13px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.csr-bar-wrap{height:4px;background:var(--gl-rule);border-radius:2px;overflow:hidden;}
+.csr-bar{height:4px;border-radius:2px;background:#005D63;}
+html[data-taqa-theme="dark"] .csr-bar{background:#00BBB6;}
+.csr-num{font-size:12.5px;font-weight:700;color:var(--text);text-align:end;font-variant-numeric:tabular-nums;}
 
 /* ── Toast ── */
-.toast{position:fixed;bottom:28px;right:28px;z-index:9999;
-  background:var(--glass-2);border:1px solid rgba(0,93,99,0.16);
-  border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:12px;
-  box-shadow:0 12px 40px rgba(0,0,0,0.13);min-width:256px;max-width:360px;
+.gl-toast{position:fixed;bottom:28px;inset-inline-end:28px;z-index:9999;
+  background:var(--gl-paper);border-radius:16px;padding:14px 18px;display:flex;align-items:center;gap:12px;
+  box-shadow:0 22px 44px -18px rgba(0,40,42,0.35),0 0 0 1px var(--gl-rule);min-width:256px;max-width:360px;
   transform:translateY(20px);opacity:0;visibility:hidden;
   transition:opacity 0.35s cubic-bezier(.4,0,.2,1),transform 0.35s cubic-bezier(.4,0,.2,1),visibility 0s linear 0.35s;
   pointer-events:none;}
-.toast.show{transform:none;opacity:1;visibility:visible;pointer-events:auto;
+.gl-toast.show{transform:none;opacity:1;visibility:visible;pointer-events:auto;
   transition:opacity 0.35s cubic-bezier(.4,0,.2,1),transform 0.35s cubic-bezier(.4,0,.2,1),visibility 0s linear 0s;}
-.toast-icon{width:36px;height:36px;border-radius:50%;background:var(--gradient);
+.gl-toast-icon{width:36px;height:36px;border-radius:50%;background:var(--gradient);
   display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.toast-body{flex:1;}
-.toast-title{font-size:13.5px;font-weight:700;color:var(--text);}
-.toast-sub{font-size:12px;color:var(--text-muted);margin-top:1px;}
+.gl-toast-body{flex:1;min-width:0;}
+.gl-toast-title{font-size:13.5px;font-weight:700;color:var(--text);}
+.gl-toast-sub{font-size:12.5px;color:var(--text-muted);margin-top:1px;}
 
-/* ── Scroll ring ── */
-.scroll-top-btn{position:fixed;bottom:28px;left:28px;z-index:900;width:46px;height:46px;
-  border:none;background:var(--glass-2);border-radius:50%;cursor:pointer;
+/* ── Back to top ── */
+.scroll-top-btn{position:fixed;bottom:28px;inset-inline-start:28px;z-index:900;width:46px;height:46px;
+  border:none;background:var(--gl-paper);border-radius:50%;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 18px rgba(0,0,0,0.11);transition:transform 0.25s,box-shadow 0.25s;
+  box-shadow:0 10px 24px -10px rgba(0,40,42,0.4),0 0 0 1px var(--gl-rule);transition:opacity 0.25s,transform 0.25s;
   opacity:0;pointer-events:none;}
 .scroll-top-btn.visible{opacity:1;pointer-events:auto;}
-.scroll-top-btn:hover{transform:scale(1.08);box-shadow:0 8px 28px rgba(0,0,0,0.16);}
+@media (hover:hover){.scroll-top-btn:hover{transform:translateY(-2px);}}
+.scroll-top-btn:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;}
 .scroll-top-btn svg{position:absolute;}
-.stp-arrow{font-size:15px;color:var(--primary);font-weight:700;position:relative;}
+.stp-arrow{font-size:15px;color:var(--primary-ink);font-weight:700;position:relative;}
 
 /* ── Footer ── */
 footer{border-top:none;padding:0;background:transparent;position:relative;margin-top:auto;height:4px;}
-footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#005D63;}
-.footer-inner{max-width:1240px;margin:0 auto;display:flex;
-  justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
-.footer-brand{font-family:'BwGradual','Urbanist',sans-serif;font-weight:700;font-size:13.5px;
-  background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.footer-copy{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
-.footer-links{display:flex;gap:20px;}
-.footer-links a{font-size:12.5px;color:var(--text-muted);text-decoration:none;transition:color 0.2s;}
-.footer-links a:hover{color:var(--primary);}
+footer::before{content:'';position:absolute;top:0;inset-inline:0;height:3px;background:#005D63;}
 
-/* ── Dark mode ── */
-html[data-theme="dark"]{
-  --dark:#0e1521;--dark-2:#162033;--dark-3:#1c2b3a;
-  --glass:rgba(22,32,51,0.90);--glass-2:rgba(28,43,58,0.98);
-  --glass-border:rgba(255,255,255,0.08);--glass-border-hover:rgba(0,187,182,0.35);
-  --text:#e2e8f0;--text-muted:#94a3b8;
+/* Beside the list, the By category card already carries the counts, so
+   the pills drop theirs and settle into two quiet rows. */
+@media (min-width:1001px){.gl-pill-n{display:none;}}
+
+/* ── Tablet ── the side column drops below the list. */
+@media (max-width:1000px){
+  .glossary-layout{grid-template-columns:minmax(0,1fr);gap:28px;padding:24px 24px 80px;}
+  .glossary-main{max-width:760px;width:100%;margin-inline:auto;}
+  .glossary-sidebar{max-width:760px;width:100%;margin-inline:auto;display:grid;grid-template-columns:1fr 1fr;align-items:start;}
 }
-html[data-theme="dark"] nav{background:rgba(14,21,33,0.92);}
-html[data-theme="dark"] .nav-brand-name{color:#00BBB6;}
-html[data-theme="dark"] footer{background:rgba(14,21,33,0.88);}
-html[data-theme="dark"] .sf-input,html[data-theme="dark"] .sf-select,html[data-theme="dark"] .sf-textarea{background:rgba(255,255,255,0.04);}
-html[data-theme="dark"] .glossary-search-bar{background:rgba(22,32,51,0.97);}
-html[data-theme="dark"] #glossary-input{color:#e2e8f0;}
-html[data-theme="dark"] #glossary-input::placeholder{color:#4b5563;}
-html[data-theme="dark"] .term-card::after{background:linear-gradient(105deg,transparent 0%,rgba(255,255,255,0.05) 50%,transparent 100%);}
-html[data-theme="dark"] .tc-def{color:#94a3b8;}
 
-/* ── Responsive ── */
-@media(max-width:960px){
-  nav{padding:0 20px;}
-  .page-hero{padding:100px 20px 60px;}
-  .glossary-layout{grid-template-columns:1fr;padding:24px 20px 60px;}
-  /*
-    KEY FIX: grid items default min-width is min-content.
-    Without min-width:0, a grid item expands to fit all its content
-    (e.g. the no-wrap pill row = ~840px) and pushes the page wider.
-    min-width:0 lets the column stay at 1fr and the content scrolls inside.
-  */
-  .glossary-main{min-width:0;order:1;}
-  .glossary-sidebar{min-width:0;order:2;}
+/* ── Phone ── */
+@media (max-width:720px){
+  .page-hero{padding:88px 16px 26px;}
+  .page-hero-tag{margin-bottom:12px;}
+  .page-hero-content h1{font-size:34px;margin-bottom:8px;}
+  .page-hero-content p{font-size:14px;line-height:1.6;}
+  .hero-part{margin-top:10px;}
+  .glossary-search-wrap{margin:18px 0 12px;}
+  .glossary-search-bar{min-height:54px;padding-inline-start:14px;border-radius:14px;}
+  .hero-stats{gap:6px 16px;}
+
+  .glossary-layout{padding:14px 16px 72px;gap:24px;}
+  .glossary-sidebar{grid-template-columns:1fr;}
+
+  /* Pills and letters each become one sideways row. */
+  .gl-cats{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding-inline:13px;
+    -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;}
+  .gl-cats::-webkit-scrollbar{display:none;}
+  .gl-pill{flex:0 0 auto;}
+  .gl-az{margin-inline:-16px;padding:2px 10px;justify-content:flex-start;overflow-x:auto;scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;margin-top:4px;}
+  .gl-az::-webkit-scrollbar{display:none;}
+  .gl-az-btn{width:44px;height:44px;border-radius:50%;border:6px solid transparent;background-clip:padding-box;font-size:15px;}
+
+  /* One flowing line per term: the meaning runs on after the
+     abbreviation and wraps under it, which on a 390px screen keeps most
+     terms to a single line. */
+  .gl-row{display:flex;align-items:flex-start;gap:12px;min-height:44px;padding:10px 14px;}
+  .gl-line{display:block;flex:1 1 auto;min-width:0;}
+  .gl-abbr{display:inline;font-size:15.5px;line-height:23px;margin-inline-end:8px;}
+  .gl-full{display:inline;font-size:15.5px;line-height:23px;}
+  .gl-snip{display:-webkit-box;margin-top:3px;}
+  .gl-chev{flex:0 0 28px;height:23px;margin:0;background:transparent;position:relative;}
+  .gl-chev::before{content:'';position:absolute;inset:-2.5px 0;border-radius:50%;background:var(--gl-disc);}
+  .gl-chev svg{position:relative;}
+  .gl-body{padding:0 14px 16px;padding-inline-start:14px;padding-inline-end:14px;}
+  .gl-def{font-size:14.5px;}
+  .gl-letter{font-size:18px;margin-bottom:6px;}
+  .gl-group{margin-top:16px;}
+  .gl-sheet{border-radius:16px;}
+
+  /* Adding a term folds away until asked for. */
+  .sb-add .scard-head{display:none;}
+  .sb-toggle{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:4px 0;border:0;background:transparent;
+    cursor:pointer;text-align:start;color:var(--text);-webkit-tap-highlight-color:transparent;}
+  .sb-toggle-t{flex:1;font-family:'BwGradual','Urbanist',sans-serif;font-weight:700;font-size:16px;}
+  .sb-toggle-s{display:block;font-family:'Inter',sans-serif;font-weight:400;font-size:12.5px;color:var(--text-muted);margin-top:2px;}
+  .sb-toggle .gl-chev svg{transition:transform 240ms var(--gl-ease);}
+  .sb-toggle[aria-expanded="true"] .gl-chev svg{transform:rotate(180deg);}
+  .sb-toggle:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;border-radius:10px;}
+  .sb-add .sb-fold{display:grid;grid-template-rows:0fr;transition:grid-template-rows 240ms var(--gl-ease);}
+  .sb-add.is-open .sb-fold{grid-template-rows:1fr;}
+  .sb-fold-in{min-height:0;overflow:hidden;visibility:hidden;transition:visibility 0s linear 240ms;}
+  .sb-add.is-open .sb-fold-in{visibility:visible;transition-delay:0s;padding-top:10px;}
+  .sidebar-card{padding:14px 16px;border-radius:16px;}
+  .sb-stats{padding:18px 16px;}
+  .sf-input,.sf-select,.sf-textarea{font-size:16px;}
+
+  .gl-toast{inset-inline:16px;bottom:16px;min-width:0;max-width:none;}
+  /* Over the list the button would sit on the row chevrons. While the
+     rail is stuck the rail and top bar are the way around, so it waits
+     until the list has scrolled away. */
+  .scroll-top-btn{bottom:calc(18px + env(safe-area-inset-bottom,0px));inset-inline-start:auto;inset-inline-end:16px;width:44px;height:44px;}
+  html.gl-rail-stuck .scroll-top-btn{opacity:0;pointer-events:none;visibility:hidden;}
 }
-@media(max-width:640px){
-  .nav-right .btn,.nav-right a.btn{display:none!important;}
-  .page-hero{padding:90px 16px 44px;}
-  .hero-stats{gap:10px;flex-wrap:wrap;justify-content:center;}
 
-  /* Search bar: input must have min-width:0 to shrink in flex */
-  .glossary-search-wrap{width:100%;max-width:100%;}
-  #glossary-input{min-width:0;flex:1 1 0;}
-  .btn-go{padding:10px 12px;font-size:13px;flex-shrink:0;white-space:nowrap;}
-  .glossary-clear{flex-shrink:0;}
-
-  /* Category pills: single scrollable row, pills never shrink or wrap */
-  .cat-filter{
-    display:flex;flex-wrap:nowrap;gap:6px;
-    overflow-x:auto;-webkit-overflow-scrolling:touch;
-    scrollbar-width:none;padding-bottom:6px;
-  }
-  .cat-filter::-webkit-scrollbar{display:none;}
-  .cat-pill{flex-shrink:0;white-space:nowrap;}
-
-  /* Terms: single column */
-  .terms-grid{grid-template-columns:1fr;}
-
-  /* Expandable cards on touch: no lift (full-width cards look odd lifting),
-     always show "Read more" hint since hover is unreliable on touch */
-  .term-card.tc-open{transform:none!important;}
-  .term-card.expandable .tc-expand{opacity:1;}
-
-  /* Sidebar: constrain but don't block scrollable children */
-  .sidebar-card{padding:16px;}
-  .submit-form,.sf-row{width:100%;}
-  .sf-input,.sf-select,.sf-textarea,.btn-submit{
-    width:100%!important;max-width:100%!important;
-    min-width:0!important;box-sizing:border-box!important;
-  }
-}
-@media(max-width:480px){
-  .glossary-layout{padding:12px 14px 60px;}
-  .term-card{padding:14px 16px;}
-  .sidebar-card{padding:14px;}
-  /* 16px stops iOS Safari from auto-zooming when tapping an input */
-  .sf-input,.sf-select,.sf-textarea{font-size:16px!important;}
-  .page-hero-content p{font-size:13.5px;}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;}
+  body,body.page-exit{animation:none;}
+  .page-hero-bg{animation:none;}
+  .gl-panel,.gl-panel-in,.gl-chev svg,.sb-fold,.sb-fold-in,.sb-toggle .gl-chev svg,.gl-row,.gl-pill,.gl-az-btn,.gl-az,.gl-toast,.gl-toast.show,.scroll-top-btn{transition:none!important;}
 }
 </style>
+<link rel="stylesheet" href="topbar.css">
 </head>
 <body>
 
-<div class="bg-blobs" aria-hidden="true">
-  <div class="bg-blob bg-blob-1"></div>
-  <div class="bg-blob bg-blob-2"></div>
-</div>
 <div class="page-wrapper">
 
 <!-- ── Navigation ── -->
-<nav>
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
   <a href="index.html" class="nav-brand">
-    <span class="nav-brand-text">
-      <span class="nav-brand-name">TAQA</span> <span class="nav-brand-hub">Knowledge Hub</span>
-      <span class="nav-subtitle" style="white-space:nowrap"><em style="color:#005D63; font-style:italic;">Tech Hub</em> <span style="color:#94a3b8;">(working name)</span></span>
-    </span>
+    <span class="nav-title"><span class="nav-title-brand">TAQA</span> <span class="nav-title-hub">Knowledge Hub</span></span>
+    <span class="nav-subtitle"><em>TechHub Platform</em></span>
   </a>
   <ul class="nav-links">
-    <div class="nav-pill" id="nav-pill"></div>
     <li><a href="index.html">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
     <li><a href="ai-search.html">Document Search</a></li>
-    <li><a href="glossary.html" class="active">Field Glossary</a></li>
-    <li><a href="upload.html">Upload</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
+    <li><a href="glossary.html" class="active" aria-current="page">Field Glossary</a></li>
     <li><a href="support-ticket.html">Ask Expert</a></li>
   </ul>
   <div class="nav-right">
-    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode">
-      <svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>
-    </button>
-    <button class="bell-btn" id="nav-bell" onclick="location.href='dashboard.html'" title="Pending approvals" aria-label="Pending approvals"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge">3</span></button>
-    <a href="upload.html" class="btn btn-primary">Upload Document</a>
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
 <!-- ── Hero ── -->
 <div class="page-hero">
-  <div class="page-hero-bg"></div>
-  <div class="page-hero-glow"></div>
+  <div class="page-hero-bg" aria-hidden="true"></div>
   <div class="page-hero-content">
     <div class="page-hero-tag">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       Oilfield Reference
     </div>
     <h1>Field <span class="grad">Glossary</span></h1>
-    <p>Instantly look up any oilfield abbreviation — BOP, CT, ROP, WOB, and 150+ more. Built for TAQA field operations. Can't find a term? Add it yourself.</p>
-    <div style="margin-top:18px;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);">Part of <em style="color:#4DD9D3;font-style:italic;font-weight:700;text-transform:none;letter-spacing:0;">Tech Hub</em> <span style="opacity:0.7;font-style:normal;">(working name)</span></div>
-    <div class="glossary-search-wrap">
+    <p>Look up any oilfield abbreviation, BOP, CT, ROP, WOB and <span id="stat-more">200</span> more. Built for TAQA field operations. Can't find a term? Add it yourself.</p>
+    <div class="hero-part">Part of <em>TechHub Platform</em></div>
+    <div class="glossary-search-wrap" role="search">
       <div class="glossary-search-bar">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="8" cy="8" r="5.5" stroke="#94a3b8" stroke-width="1.6"/><path d="m12.5 12.5 3 3" stroke="#94a3b8" stroke-width="1.6" stroke-linecap="round"/></svg>
-        <input type="text" id="glossary-input" placeholder="Type an abbreviation… e.g. BOP, CT, ROP, WOB" autocomplete="off" spellcheck="false">
-        <button class="glossary-clear hidden" id="glossary-clear" onclick="clearSearch()" title="Clear">✕</button>
-        <button class="btn-go" onclick="renderCards()">Search</button>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.6"/><path d="m12.5 12.5 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <label for="glossary-input" class="sr-only">Search the glossary</label>
+        <input type="search" id="glossary-input" placeholder="Type an abbreviation, e.g. BOP, ROP" autocomplete="off" spellcheck="false" enterkeyhint="search" aria-controls="gl-list">
+        <button type="button" class="glossary-clear hidden" id="glossary-clear" onclick="clearSearch()" aria-label="Clear search"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
       </div>
     </div>
     <div class="hero-stats">
       <span class="hstat"><strong id="stat-total">0</strong> Terms</span>
-      <span class="hstat"><strong>11</strong> Categories</span>
+      <span class="hstat"><strong id="stat-cats">0</strong> Categories</span>
       <span class="hstat"><strong id="stat-custom">0</strong> Community Added</span>
     </div>
   </div>
@@ -415,104 +482,102 @@ html[data-theme="dark"] .tc-def{color:#94a3b8;}
 <!-- ── Main Layout ── -->
 <div class="glossary-layout">
 
-  <!-- Left: Browse / Results -->
-  <div class="glossary-main">
+  <!-- Browse / Results -->
+  <main class="glossary-main" id="main-content">
 
-    <div class="cat-filter" id="cat-filter">
-      <span class="cat-pill active" data-cat="all" onclick="filterCat(this)">All</span>
-      <span class="cat-pill" data-cat="drilling" onclick="filterCat(this)">Drilling</span>
-      <span class="cat-pill" data-cat="wellcontrol" onclick="filterCat(this)">Well Control</span>
-      <span class="cat-pill" data-cat="production" onclick="filterCat(this)">Production</span>
-      <span class="cat-pill" data-cat="safety" onclick="filterCat(this)">Safety &amp; HSE</span>
-      <span class="cat-pill" data-cat="engineering" onclick="filterCat(this)">Engineering</span>
-      <span class="cat-pill" data-cat="logging" onclick="filterCat(this)">Logging &amp; Reservoir</span>
-      <span class="cat-pill" data-cat="commercial" onclick="filterCat(this)">Commercial</span>
-      <span class="cat-pill" data-cat="maintenance" onclick="filterCat(this)">Maintenance</span>
-      <span class="cat-pill" data-cat="hr" onclick="filterCat(this)">Human Resources</span>
-      <span class="cat-pill" data-cat="cybersecurity" onclick="filterCat(this)">Cybersecurity</span>
+    <button type="button" class="gl-skip" id="gl-skip" onclick="skipToTerms()">Skip to the terms</button>
+    <div class="gl-cats" id="cat-filter" role="group" aria-label="Filter by category"></div>
+
+    <nav class="gl-az" id="alpha-nav" aria-label="Jump to letter"></nav>
+
+    <div class="gl-bar">
+      <span class="gl-count" id="results-count" aria-live="polite" tabindex="-1"><strong>0</strong> terms</span>
+      <button type="button" class="gl-collapse" id="gl-collapse" onclick="collapseAll()" hidden>Close all</button>
     </div>
 
-    <div class="alpha-nav" id="alpha-nav"></div>
+    <div class="gl-list" id="gl-list"></div>
+  </main>
 
-    <div class="results-header">
-      <span class="results-count" id="results-count"><strong>0</strong> terms</span>
-    </div>
+  <!-- Side column -->
+  <aside class="glossary-sidebar" aria-label="Add a term and category counts">
 
-    <div class="terms-grid" id="terms-grid"></div>
-  </div>
-
-  <!-- Right: Sidebar -->
-  <aside class="glossary-sidebar">
-
-    <div class="sidebar-card">
-      <div class="scard-title">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M7 4.5v5M4.5 7h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Add New Term
+    <section class="sidebar-card sb-add" id="sb-add" aria-labelledby="sb-add-title">
+      <div class="scard-head">
+        <h2 class="scard-title" id="sb-add-title">
+          <span class="scard-disc" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none"><path d="M7 2.5v9M2.5 7h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+          Add a term
+        </h2>
+        <p class="scard-sub">Missing an abbreviation your crew uses? Add it for everyone on this device.</p>
       </div>
-      <div class="submit-form">
-        <div class="sf-row">
-          <span class="sf-label">Abbreviation *</span>
-          <input class="sf-input" id="sf-abbr" placeholder="e.g. WBHP" maxlength="20">
+      <button type="button" class="sb-toggle" id="sb-toggle" aria-expanded="false" aria-controls="sb-fold" onclick="toggleAddForm()">
+        <span class="scard-disc" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none"><path d="M7 2.5v9M2.5 7h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+        <span class="sb-toggle-t">Add a term<span class="sb-toggle-s">Missing an abbreviation your crew uses?</span></span>
+        <span class="gl-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+      </button>
+      <div class="sb-fold" id="sb-fold"><div class="sb-fold-in">
+        <div class="submit-form">
+          <div class="sf-row">
+            <label class="sf-label" for="sf-abbr">Abbreviation <i>(required)</i></label>
+            <input class="sf-input" id="sf-abbr" placeholder="e.g. WBHP" maxlength="20" autocomplete="off" autocapitalize="characters">
+          </div>
+          <div class="sf-row">
+            <label class="sf-label" for="sf-full">Full name <i>(required)</i></label>
+            <input class="sf-input" id="sf-full" placeholder="e.g. Wellbore Hydrostatic Pressure" autocomplete="off">
+          </div>
+          <div class="sf-row">
+            <label class="sf-label" for="sf-def">Definition</label>
+            <textarea class="sf-textarea" id="sf-def" placeholder="A short explanation of the term"></textarea>
+          </div>
+          <div class="sf-row">
+            <label class="sf-label" for="sf-cat">Field</label>
+            <select class="sf-select" id="sf-cat">
+              <option value="drilling">Drilling</option>
+              <option value="wellcontrol">Well Control</option>
+              <option value="production">Production</option>
+              <option value="safety">Safety &amp; HSE</option>
+              <option value="engineering">Engineering</option>
+              <option value="logging">Logging &amp; Reservoir</option>
+              <option value="commercial">Commercial</option>
+              <option value="maintenance">Maintenance</option>
+              <option value="hr">Human Resources</option>
+              <option value="cybersecurity">Cybersecurity</option>
+              <option value="doccontrol">Document Control</option>
+              <option value="general">General</option>
+            </select>
+          </div>
+          <button type="button" class="gl-btn gl-btn-primary btn-submit" onclick="submitTerm()">Add to glossary</button>
         </div>
-        <div class="sf-row">
-          <span class="sf-label">Full Name *</span>
-          <input class="sf-input" id="sf-full" placeholder="e.g. Wellbore Hydrostatic Pressure">
-        </div>
-        <div class="sf-row">
-          <span class="sf-label">Definition</span>
-          <textarea class="sf-textarea" id="sf-def" placeholder="Brief explanation of the term…"></textarea>
-        </div>
-        <div class="sf-row">
-          <span class="sf-label">Category</span>
-          <select class="sf-select" id="sf-cat">
-            <option value="drilling">Drilling</option>
-            <option value="wellcontrol">Well Control</option>
-            <option value="production">Production</option>
-            <option value="safety">Safety &amp; HSE</option>
-            <option value="engineering">Engineering</option>
-            <option value="logging">Logging &amp; Reservoir</option>
-            <option value="commercial">Commercial</option>
-            <option value="maintenance">Maintenance</option>
-            <option value="general">General</option>
-            <option value="hr">Human Resources</option>
-            <option value="cybersecurity">Cybersecurity</option>
-          </select>
-        </div>
-        <button class="btn-submit" onclick="submitTerm()">Submit Term</button>
-      </div>
-    </div>
+      </div></div>
+    </section>
 
-    <div class="sidebar-card">
-      <div class="scard-title">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="1" width="5" height="5" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="8" width="5" height="5" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="8" width="5" height="5" rx="1.5" stroke="currentColor" stroke-width="1.4"/></svg>
-        By Category
-      </div>
+    <section class="sidebar-card sb-stats" aria-labelledby="sb-stats-title">
+      <h2 class="scard-title" id="sb-stats-title">
+        <span class="scard-disc" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="4.5" height="4.5" rx="1.2" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="1.5" width="4.5" height="4.5" rx="1.2" stroke="currentColor" stroke-width="1.4"/><rect x="1.5" y="8" width="4.5" height="4.5" rx="1.2" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="8" width="4.5" height="4.5" rx="1.2" stroke="currentColor" stroke-width="1.4"/></svg></span>
+        By category
+      </h2>
       <div class="cat-stat-list" id="cat-stat-list"></div>
-    </div>
+    </section>
 
   </aside>
 </div>
 
-<!-- ── Scroll Progress Ring ── -->
-<button class="scroll-top-btn" id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top" aria-label="Back to top">
-  <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- ── Back to top ── -->
+<button type="button" class="scroll-top-btn" id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:REDUCE()?'auto':'smooth'})" title="Back to top" aria-label="Back to top">
+  <svg viewBox="0 0 46 46" width="46" height="46" fill="none" aria-hidden="true">
     <circle cx="23" cy="23" r="19" stroke="rgba(0,93,99,0.12)" stroke-width="2.5"/>
-    <circle id="stp-ring" cx="23" cy="23" r="19" stroke="url(#stpg)" stroke-width="2.5"
+    <circle id="stp-ring" cx="23" cy="23" r="19" stroke="#00BBB6" stroke-width="2.5"
       stroke-linecap="round" stroke-dasharray="119.4" stroke-dashoffset="119.4"
       transform="rotate(-90 23 23)"/>
-    <defs><linearGradient id="stpg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#005D63"/><stop offset="100%" stop-color="#00BBB6"/>
-    </linearGradient></defs>
   </svg>
-  <span class="stp-arrow">↑</span>
+  <span class="stp-arrow" aria-hidden="true">↑</span>
 </button>
 
 <!-- ── Toast ── -->
-<div class="toast" id="toast">
-  <div class="toast-icon" id="toast-icon"></div>
-  <div class="toast-body">
-    <div class="toast-title" id="toast-title"></div>
-    <div class="toast-sub" id="toast-sub"></div>
+<div class="gl-toast" id="toast" role="status" aria-live="polite">
+  <div class="gl-toast-icon" id="toast-icon" aria-hidden="true"></div>
+  <div class="gl-toast-body">
+    <div class="gl-toast-title" id="toast-title"></div>
+    <div class="gl-toast-sub" id="toast-sub"></div>
   </div>
 </div>
 
@@ -524,6 +589,17 @@ html[data-theme="dark"] .tc-def{color:#94a3b8;}
 <script>
 /* ── Glossary Data ─────────────────────────────────────────────── */
 const BUILT_IN = [
+  /* The marks on every document card's type square, as the register
+     (documents-master.js, TAQA_DOC_LOOKUPS.types) defines them. WI appears
+     twice in this glossary on purpose: Working Interest in the commercial
+     sense, Work Instruction on a document card. */
+  {abbr:'SOP',full:'Standard Operating Procedure',def:'A controlled document setting out how a task is done, step by step. Its number carries the code SOP, owned by the relevant SPL or function and approved by the operations director, reviewed every 24 months.',cat:'doccontrol'},
+  {abbr:'WI',full:'Work Instruction',def:'A controlled document, shown as WI on a document card: the detailed technical instruction or manual behind a procedure. Owned and approved by the subject matter expert, reviewed every 36 months.',cat:'doccontrol'},
+  {abbr:'ST',full:'Standard',def:'A controlled document setting the requirements an area must meet. Shown as ST on a card; in a document number its code is S, as in TQ-TDS-DSS-S001. Reviewed every 36 months.',cat:'doccontrol'},
+  {abbr:'POL',full:'Policy',def:'The top of the TQ-QHSE-S001 document hierarchy, signed by the CEO and applying to every segment, function and center. Shown as POL on a card; its numbering code is P. Reviewed every 24 months.',cat:'doccontrol'},
+  {abbr:'ALT',full:'Technical Alert',def:'A controlled notice of an operational hazard or change that needs attention before the next job. Owned by the QHSE manager, reviewed every 12 months.',cat:'doccontrol'},
+  {abbr:'LL',full:'Lesson Learned',def:'A controlled record of what happened, why, and what changed as a result, shared so it does not happen again. Owned and approved by the QHSE manager.',cat:'doccontrol'},
+  {abbr:'ZIP',full:'Software Asset',def:'A software tool listed in an area\'s library. Tools are distributed by Digital Transformation and are not placed under document control by TQ-QHSE-S001.',cat:'doccontrol'},
   /* Drilling */
   {abbr:'BHA',full:'Bottom Hole Assembly',def:'The lower portion of the drill string, consisting of drill collars, stabilizers, and the drill bit, providing weight and directional control during drilling.',cat:'drilling'},
   {abbr:'WOB',full:'Weight on Bit',def:'The compressive force applied to the drill bit by the drill string, measured in klbs. Higher WOB increases ROP but risks bit damage and drill string buckling.',cat:'drilling'},
@@ -543,11 +619,11 @@ const BUILT_IN = [
   {abbr:'TVD',full:'True Vertical Depth',def:'The vertical distance measured straight down from the reference point (Kelly Bushing) to the bottomhole location, regardless of wellbore trajectory.',cat:'drilling'},
   {abbr:'MD',full:'Measured Depth',def:'The actual along-hole length of the wellbore from the surface reference point to the point of interest, measured along the drill string path.',cat:'drilling'},
   {abbr:'KB',full:'Kelly Bushing',def:'The primary depth reference datum at surface, located on the rig floor. All depths are measured from KB elevation.',cat:'drilling'},
-  {abbr:'RKB',full:'Rotary Kelly Bushing',def:'Same as Kelly Bushing — the standard depth reference datum on the rig floor used for all depth measurements in a well.',cat:'drilling'},
+  {abbr:'RKB',full:'Rotary Kelly Bushing',def:'Same as Kelly Bushing, the standard depth reference datum on the rig floor used for all depth measurements in a well.',cat:'drilling'},
   {abbr:'HWDP',full:'Heavy Weight Drill Pipe',def:'Thick-walled drill pipe used between drill collars and standard drill pipe to provide a stress transition zone and reduce fatigue failures at the top of the BHA.',cat:'drilling'},
   {abbr:'DC',full:'Drill Collar',def:'Heavy, thick-walled steel pipes at the bottom of the drill string that provide weight on bit and maintain the string in tension above the neutral point.',cat:'drilling'},
   {abbr:'DDR',full:'Daily Drilling Report',def:'A daily operational summary documenting hole depth, footage drilled, activities performed, mud properties, bit usage, and non-productive time.',cat:'drilling'},
-  {abbr:'NPT',full:'Non-Productive Time',def:'Rig time that does not advance wellbore construction — includes stuck pipe, fishing, equipment failure, waiting on weather, and other unplanned events.',cat:'drilling'},
+  {abbr:'NPT',full:'Non-Productive Time',def:'Rig time that does not advance wellbore construction, includes stuck pipe, fishing, equipment failure, waiting on weather, and other unplanned events.',cat:'drilling'},
   {abbr:'LOT',full:'Leak-Off Test',def:'Pressure test at the casing shoe to determine the maximum pressure the formation can withstand before fracturing, establishing the upper mud weight limit for the next open-hole section.',cat:'drilling'},
   {abbr:'FIT',full:'Formation Integrity Test',def:'Pressure test at the casing shoe to confirm the formation can support a defined mud weight without fracturing. Less severe than a LOT as it does not take the rock to failure.',cat:'drilling'},
   {abbr:'KOP',full:'Kick-Off Point',def:'The depth at which a directional well starts to deviate from vertical, marking the beginning of the build section.',cat:'drilling'},
@@ -625,11 +701,11 @@ const BUILT_IN = [
   /* Engineering & Facilities */
   {abbr:'P&ID',full:'Piping and Instrumentation Diagram',def:'A detailed engineering diagram showing all piping, valves, instruments, equipment, and control elements in a process system. The key reference document for operations and maintenance.',cat:'engineering'},
   {abbr:'PFD',full:'Process Flow Diagram',def:'A simplified diagram showing the main process flow path, major equipment items, and key operating data such as flow rates, temperatures, and pressures.',cat:'engineering'},
-  {abbr:'FEED',full:'Front End Engineering Design',def:'The engineering phase between conceptual study and detailed design, defining project scope, cost, and schedule to ±10–15% accuracy for a final investment decision.',cat:'engineering'},
+  {abbr:'FEED',full:'Front End Engineering Design',def:'The engineering phase between conceptual study and detailed design, defining project scope, cost, and schedule to ±10, 15% accuracy for a final investment decision.',cat:'engineering'},
   {abbr:'EPIC',full:'Engineering, Procurement, Installation & Commissioning',def:'A contract type where a single contractor manages all project phases from design through to operational handover, bearing responsibility for cost, schedule, and quality.',cat:'engineering'},
   {abbr:'EPC',full:'Engineering, Procurement & Construction',def:'A project delivery model where one contractor designs, procures materials, and builds the facility, bearing overall responsibility for delivery.',cat:'engineering'},
   {abbr:'IFC',full:'Issued for Construction',def:'The final authorised revision of an engineering drawing or document, approved for use in actual construction or fabrication activities.',cat:'engineering'},
-  {abbr:'SIL',full:'Safety Integrity Level',def:'A rating (SIL 1–4) defining the required probability of failure on demand for a safety instrumented function, per IEC 61508 / IEC 61511 standards.',cat:'engineering'},
+  {abbr:'SIL',full:'Safety Integrity Level',def:'A rating (SIL 1, 4) defining the required probability of failure on demand for a safety instrumented function, per IEC 61508 / IEC 61511 standards.',cat:'engineering'},
   {abbr:'SIS',full:'Safety Instrumented System',def:'An independent instrumented system that brings a process to a safe state when predetermined conditions are exceeded, separate from the basic process control system.',cat:'engineering'},
   {abbr:'DCS',full:'Distributed Control System',def:'A computerised control system with control functions distributed among multiple controllers linked by a communication network for centralised monitoring and operation.',cat:'engineering'},
   {abbr:'SCADA',full:'Supervisory Control and Data Acquisition',def:'A system for centralised monitoring and control of geographically distributed field assets, using remote terminal units, communication networks, and graphical interfaces.',cat:'engineering'},
@@ -654,7 +730,7 @@ const BUILT_IN = [
   {abbr:'STOIIP',full:'Stock Tank Oil Initially In Place',def:'The total volume of crude oil estimated to exist in a reservoir at initial conditions, expressed in stock-tank barrels. Not all STOIIP is technically recoverable.',cat:'logging'},
   {abbr:'GIIP',full:'Gas Initially In Place',def:'The total volume of gas in a reservoir at initial conditions, expressed in Bcf or Tcf. Also called OGIP (Original Gas In Place).',cat:'logging'},
   {abbr:'EUR',full:'Estimated Ultimate Recovery',def:'The total quantity of oil or gas estimated to be produced from a well or field over its entire producing life under current technical and economic conditions.',cat:'logging'},
-  {abbr:'RF',full:'Recovery Factor',def:'The fraction of STOIIP or GIIP that can be technically recovered, expressed as a percentage. Typical oil RF ranges from 20–50%; gas RF from 60–90%.',cat:'logging'},
+  {abbr:'RF',full:'Recovery Factor',def:'The fraction of STOIIP or GIIP that can be technically recovered, expressed as a percentage. Typical oil RF ranges from 20, 50%; gas RF from 60, 90%.',cat:'logging'},
   {abbr:'EOR',full:'Enhanced Oil Recovery',def:'Techniques applied after primary and secondary recovery to increase production, including chemical flooding, thermal injection (steam), and miscible gas injection (CO₂).',cat:'logging'},
   {abbr:'PVT',full:'Pressure-Volume-Temperature',def:'Laboratory analysis of reservoir fluid samples characterising phase behaviour, fluid properties (GOR, FVF, viscosity, density) as a function of pressure and temperature.',cat:'logging'},
   /* Commercial & Contracts */
@@ -677,7 +753,7 @@ const BUILT_IN = [
   /* Maintenance & Reliability */
   {abbr:'PM',full:'Preventive Maintenance',def:'Scheduled maintenance activities performed at predetermined intervals to prevent equipment failure, reduce downtime, and extend asset service life.',cat:'maintenance'},
   {abbr:'PdM',full:'Predictive Maintenance',def:'Condition monitoring using real-time data (vibration, temperature, oil analysis) to predict imminent failure and schedule maintenance before breakdown occurs.',cat:'maintenance'},
-  {abbr:'RCM',full:'Reliability Centred Maintenance',def:'A systematic methodology determining the most effective maintenance strategy for each asset based on failure modes, consequences, and reliability requirements.',cat:'maintenance'},
+  {abbr:'RCM',full:'Reliability Centerd Maintenance',def:'A systematic methodology determining the most effective maintenance strategy for each asset based on failure modes, consequences, and reliability requirements.',cat:'maintenance'},
   {abbr:'MTBF',full:'Mean Time Between Failures',def:'The average operating time between successive failures of a repairable system, a standard measure of equipment reliability.',cat:'maintenance'},
   {abbr:'MTTR',full:'Mean Time to Repair',def:'The average time to restore a failed component to operational status, measuring system maintainability and maintenance team efficiency.',cat:'maintenance'},
   {abbr:'IMR',full:'Inspection, Maintenance and Repair',def:'A combined scope of work maintaining asset integrity and reliability, typically awarded as a long-term blanket service contract on production facilities.',cat:'maintenance'},
@@ -686,22 +762,22 @@ const BUILT_IN = [
   {abbr:'SAT',full:'Site Acceptance Test',def:'Testing performed at the installation site after delivery to confirm equipment operates correctly in its final location before handover to operations.',cat:'maintenance'},
   {abbr:'CBM',full:'Condition Based Maintenance',def:'Maintenance triggered by actual equipment condition measurements rather than fixed time intervals, using sensor data and diagnostics to determine when intervention is needed.',cat:'maintenance'},
   /* Human Resources */
-  {abbr:'HRIS',full:'Human Resource Information System',def:'Software platform centralising employee data — payroll, benefits, recruitment, performance, and attendance — enabling HR teams to manage the full employee lifecycle from a single database.',cat:'hr'},
+  {abbr:'HRIS',full:'Human Resource Information System',def:'Software platform centralising employee data, payroll, benefits, recruitment, performance, and attendance, enabling HR teams to manage the full employee lifecycle from a single database.',cat:'hr'},
   {abbr:'HRBP',full:'Human Resources Business Partner',def:'A senior HR professional embedded within a business unit who aligns HR strategy with operational needs, acting as a strategic advisor to line managers on people-related decisions.',cat:'hr'},
-  {abbr:'OKR',full:'Objectives and Key Results',def:'A goal-setting framework where Objectives are qualitative aspirational goals and Key Results are quantifiable measures of progress. Teams typically set 3–5 OKRs per quarter for alignment and accountability.',cat:'hr'},
-  {abbr:'ATS',full:'Applicant Tracking System',def:'Software that automates recruitment workflows — collecting applications, screening CVs, scheduling interviews, and tracking candidates through the hiring pipeline from job posting to offer letter.',cat:'hr'},
+  {abbr:'OKR',full:'Objectives and Key Results',def:'A goal-setting framework where Objectives are qualitative aspirational goals and Key Results are quantifiable measures of progress. Teams typically set 3, 5 OKRs per quarter for alignment and accountability.',cat:'hr'},
+  {abbr:'ATS',full:'Applicant Tracking System',def:'Software that automates recruitment workflows, collecting applications, screening CVs, scheduling interviews, and tracking candidates through the hiring pipeline from job posting to offer letter.',cat:'hr'},
   {abbr:'PIP',full:'Performance Improvement Plan',def:'A structured, time-bound plan co-created by a manager and an underperforming employee to address specific performance gaps, with clear expectations, milestones, and scheduled checkpoint reviews.',cat:'hr'},
   {abbr:'IDP',full:'Individual Development Plan',def:'A personal growth roadmap created between an employee and their manager, outlining short- and long-term career goals, development activities, required training, and target completion timelines.',cat:'hr'},
   {abbr:'TNA',full:'Training Needs Analysis',def:'A systematic process identifying the gap between current and required competencies across a team or organisation, used to prioritise L&D investment and design targeted training programmes.',cat:'hr'},
-  {abbr:'EAP',full:'Employee Assistance Programme',def:'A confidential employer-sponsored service providing employees and their families with counselling, mental health support, financial advice, and referrals to specialist services — typically free at point of use.',cat:'hr'},
-  {abbr:'FTE',full:'Full-Time Equivalent',def:'A unit measuring workforce capacity — one FTE equals one full-time employee working standard hours. Part-time employees are expressed as a fraction (e.g. 20 hrs/week = 0.5 FTE). Used in headcount and budget planning.',cat:'hr'},
-  {abbr:'OJT',full:'On-the-Job Training',def:'Workplace learning conducted while performing the actual job role, with experienced colleagues or supervisors coaching new employees directly in the work environment — the most common form of skills transfer.',cat:'hr'},
+  {abbr:'EAP',full:'Employee Assistance Programme',def:'A confidential employer-sponsored service providing employees and their families with counselling, mental health support, financial advice, and referrals to specialist services, typically free at point of use.',cat:'hr'},
+  {abbr:'FTE',full:'Full-Time Equivalent',def:'A unit measuring workforce capacity, one FTE equals one full-time employee working standard hours. Part-time employees are expressed as a fraction (e.g. 20 hrs/week = 0.5 FTE). Used in headcount and budget planning.',cat:'hr'},
+  {abbr:'OJT',full:'On-the-Job Training',def:'Workplace learning conducted while performing the actual job role, with experienced colleagues or supervisors coaching new employees directly in the work environment, the most common form of skills transfer.',cat:'hr'},
   {abbr:'EVP',full:'Employee Value Proposition',def:'The total package of rewards, culture, career opportunities, and working conditions an employer offers in exchange for skills and commitment, used to attract, engage, and retain talent.',cat:'hr'},
   {abbr:'WFP',full:'Workforce Planning',def:'The strategic process of analysing current workforce capability, forecasting future people needs, and developing action plans to close gaps through hiring, training, redeployment, or restructuring.',cat:'hr'},
   {abbr:'EEO',full:'Equal Employment Opportunity',def:'The legal principle prohibiting discrimination in hiring, promotion, or treatment based on race, gender, age, religion, disability, or national origin. Governed by national employment law frameworks.',cat:'hr'},
   {abbr:'PMS',full:'Performance Management System',def:'An integrated framework of goal-setting, continuous feedback, mid-year check-ins, and annual appraisals used to evaluate employee performance and link results to rewards, development, or corrective action.',cat:'hr'},
   {abbr:'COLA',full:'Cost of Living Adjustment',def:'A periodic salary or allowance increase tied to inflation or the consumer price index, preserving employees\' real purchasing power as the cost of goods and services rises over time.',cat:'hr'},
-  {abbr:'SWP',full:'Strategic Workforce Planning',def:'A long-range approach (typically 3–5 years) aligning talent supply with business strategy — identifying critical roles, future skill needs, succession gaps, and sourcing strategies before they become urgent.',cat:'hr'},
+  {abbr:'SWP',full:'Strategic Workforce Planning',def:'A long-range approach (typically 3, 5 years) aligning talent supply with business strategy, identifying critical roles, future skill needs, succession gaps, and sourcing strategies before they become urgent.',cat:'hr'},
   {abbr:'JD',full:'Job Description',def:'A formal document defining the purpose, key responsibilities, reporting lines, required qualifications, and competencies for a specific role, used in recruitment, onboarding, and performance management.',cat:'hr'},
   {abbr:'L&D',full:'Learning & Development',def:'The HR function responsible for employee training programmes, career development initiatives, coaching, mentoring, and building the organisational capabilities required to meet current and future business goals.',cat:'hr'},
   {abbr:'TMP',full:'Talent Management Programme',def:'A holistic HR strategy covering the identification, development, engagement, and retention of high-potential employees, including succession planning, leadership pipelines, and career pathways.',cat:'hr'},
@@ -709,65 +785,90 @@ const BUILT_IN = [
   /* Cybersecurity */
   {abbr:'IAM',full:'Identity & Access Management',def:'A security framework of policies and technologies ensuring the right users have appropriate access to technology resources. Encompasses authentication, authorisation, provisioning, SSO, MFA, and account lifecycle management.',cat:'cybersecurity'},
   {abbr:'MFA',full:'Multi-Factor Authentication',def:'An authentication method requiring users to verify identity through two or more independent factors: something you know (password), something you have (OTP token), or something you are (biometric). Significantly reduces account compromise risk.',cat:'cybersecurity'},
-  {abbr:'SOC',full:'Security Operations Centre',def:'A centralised team continuously monitoring organisational systems for cybersecurity threats, investigating alerts, coordinating incident response, and managing security tools 24/7.',cat:'cybersecurity'},
+  {abbr:'SOC',full:'Security Operations Center',def:'A centralised team continuously monitoring organisational systems for cybersecurity threats, investigating alerts, coordinating incident response, and managing security tools 24/7.',cat:'cybersecurity'},
   {abbr:'SIEM',full:'Security Information & Event Management',def:'A platform aggregating and correlating log data from across IT infrastructure in real time, applying rules and analytics to detect anomalies, generate alerts, and support forensic investigation.',cat:'cybersecurity'},
   {abbr:'VPN',full:'Virtual Private Network',def:'An encrypted tunnel between a user\'s device and a network endpoint, masking traffic from interception and enabling secure remote access to internal corporate systems over the public internet.',cat:'cybersecurity'},
   {abbr:'EDR',full:'Endpoint Detection & Response',def:'Security software deployed on endpoints (laptops, servers, workstations) that continuously monitors for suspicious activity, detects threats via behavioural analytics, and provides automated or guided response capabilities.',cat:'cybersecurity'},
-  {abbr:'DLP',full:'Data Loss Prevention',def:'Tools and policies detecting and preventing unauthorised transmission of sensitive data outside the organisation — monitoring email, web uploads, USB transfers, clipboard activity, and cloud storage.',cat:'cybersecurity'},
-  {abbr:'APT',full:'Advanced Persistent Threat',def:'A sophisticated, long-duration targeted cyberattack where an intruder establishes an undetected presence in a network to exfiltrate data or disrupt operations over months or years — often state-sponsored.',cat:'cybersecurity'},
+  {abbr:'DLP',full:'Data Loss Prevention',def:'Tools and policies detecting and preventing unauthorised transmission of sensitive data outside the organisation, monitoring email, web uploads, USB transfers, clipboard activity, and cloud storage.',cat:'cybersecurity'},
+  {abbr:'APT',full:'Advanced Persistent Threat',def:'A sophisticated, long-duration targeted cyberattack where an intruder establishes an undetected presence in a network to exfiltrate data or disrupt operations over months or years, often state-sponsored.',cat:'cybersecurity'},
   {abbr:'CVE',full:'Common Vulnerabilities & Exposures',def:'A publicly maintained dictionary of known cybersecurity vulnerabilities, each assigned a unique CVE ID and CVSS severity score. Used globally to track, prioritise, and communicate vulnerability remediation.',cat:'cybersecurity'},
   {abbr:'WAF',full:'Web Application Firewall',def:'A security appliance or cloud service filtering HTTP/HTTPS traffic to and from a web application, blocking common attacks such as SQL injection, cross-site scripting (XSS), and OWASP Top-10 threats.',cat:'cybersecurity'},
   {abbr:'PAM',full:'Privileged Access Management',def:'A security discipline controlling, monitoring, and auditing access by privileged accounts (admins, service accounts) to critical systems, enforcing least-privilege principles, session recording, and just-in-time access.',cat:'cybersecurity'},
   {abbr:'ZTA',full:'Zero Trust Architecture',def:'A security model assuming no user, device, or network segment is inherently trusted. Every access request must be explicitly verified using identity, device health, and contextual signals before granting minimum required access.',cat:'cybersecurity'},
-  {abbr:'PII',full:'Personally Identifiable Information',def:'Any data that can identify a specific individual — name, national ID, email, location, biometric data. Subject to data protection regulations (PDPL, GDPR) requiring secure handling, restricted storage, and controlled disposal.',cat:'cybersecurity'},
+  {abbr:'PII',full:'Personally Identifiable Information',def:'Any data that can identify a specific individual, name, national ID, email, location, biometric data. Subject to data protection regulations (PDPL, GDPR) requiring secure handling, restricted storage, and controlled disposal.',cat:'cybersecurity'},
   {abbr:'PDPL',full:'Personal Data Protection Law',def:'Saudi Arabia\'s national data privacy law (effective 2023) governing collection, processing, and storage of personal data by entities operating in the Kingdom, enforced by the Saudi Data & AI Authority (SDAIA).',cat:'cybersecurity'},
-  {abbr:'NCA',full:'National Cybersecurity Authority',def:'The Saudi Arabian government body responsible for cybersecurity policy, regulation, and oversight — issuing the Essential Cybersecurity Controls (ECC) and Cybersecurity Standard for Critical Systems (CSCC) that all entities must comply with.',cat:'cybersecurity'},
-  {abbr:'OT',full:'Operational Technology',def:'Hardware and software monitoring or controlling physical processes, equipment, and infrastructure — including industrial control systems, SCADA, DCS, and PLCs. OT cybersecurity is critical for energy and industrial organisations.',cat:'cybersecurity'},
-  {abbr:'ICS',full:'Industrial Control System',def:'A broad category of systems controlling industrial processes — encompassing SCADA, DCS, RTUs, and PLCs. ICS security focuses on protecting operational continuity from cyber disruption, sabotage, or unauthorised access.',cat:'cybersecurity'},
+  {abbr:'NCA',full:'National Cybersecurity Authority',def:'The Saudi Arabian government body responsible for cybersecurity policy, regulation, and oversight, issuing the Essential Cybersecurity Controls (ECC) and Cybersecurity Standard for Critical Systems (CSCC) that all entities must comply with.',cat:'cybersecurity'},
+  {abbr:'OT',full:'Operational Technology',def:'Hardware and software monitoring or controlling physical processes, equipment, and infrastructure, including industrial control systems, SCADA, DCS, and PLCs. OT cybersecurity is critical for energy and industrial organisations.',cat:'cybersecurity'},
+  {abbr:'ICS',full:'Industrial Control System',def:'A broad category of systems controlling industrial processes, encompassing SCADA, DCS, RTUs, and PLCs. ICS security focuses on protecting operational continuity from cyber disruption, sabotage, or unauthorised access.',cat:'cybersecurity'},
   {abbr:'RTO',full:'Recovery Time Objective',def:'The maximum acceptable downtime following a disruption before business operations must be restored. Drives DR infrastructure sizing and contractual service commitments in business continuity planning.',cat:'cybersecurity'},
-  {abbr:'RPO',full:'Recovery Point Objective',def:'The maximum acceptable data loss following a disruption, expressed as a time window. Determines backup frequency — an RPO of 1 hour requires backups to run at least every 60 minutes.',cat:'cybersecurity'},
-  {abbr:'SSO',full:'Single Sign-On',def:'An authentication scheme allowing users to log in once and access multiple applications without re-entering credentials, reducing password fatigue and centralising access control — most effective when combined with MFA.',cat:'cybersecurity'},
+  {abbr:'RPO',full:'Recovery Point Objective',def:'The maximum acceptable data loss following a disruption, expressed as a time window. Determines backup frequency, an RPO of 1 hour requires backups to run at least every 60 minutes.',cat:'cybersecurity'},
+  {abbr:'SSO',full:'Single Sign-On',def:'An authentication scheme allowing users to log in once and access multiple applications without re-entering credentials, reducing password fatigue and centralising access control, most effective when combined with MFA.',cat:'cybersecurity'},
   {abbr:'PKI',full:'Public Key Infrastructure',def:'A framework of policies, hardware, software, and procedures managing digital certificates and public-private key pairs, enabling encrypted communications, digital signatures, and identity verification across networks.',cat:'cybersecurity'},
   {abbr:'TLS',full:'Transport Layer Security',def:'The cryptographic protocol (successor to SSL) securing data in transit between clients and servers. TLS 1.3 is the current standard, encrypting all web, API, email, and file-transfer communications.',cat:'cybersecurity'},
-  {abbr:'CIA',full:'Confidentiality, Integrity & Availability',def:'The three core principles of information security — Confidentiality (data accessible only to authorised parties), Integrity (data is accurate and unaltered), Availability (systems accessible when needed). Also called the CIA Triad.',cat:'cybersecurity'},
-  {abbr:'CSIRT',full:'Computer Security Incident Response Team',def:'A designated team responsible for coordinating the organisation\'s response to cybersecurity incidents — detection, containment, eradication, recovery, and post-incident review to prevent recurrence.',cat:'cybersecurity'},
+  {abbr:'CIA',full:'Confidentiality, Integrity & Availability',def:'The three core principles of information security, Confidentiality (data accessible only to authorised parties), Integrity (data is accurate and unaltered), Availability (systems accessible when needed). Also called the CIA Triad.',cat:'cybersecurity'},
+  {abbr:'CSIRT',full:'Computer Security Incident Response Team',def:'A designated team responsible for coordinating the organisation\'s response to cybersecurity incidents, detection, containment, eradication, recovery, and post-incident review to prevent recurrence.',cat:'cybersecurity'},
 ];
 
 const CAT_LABELS = {
   drilling:'Drilling',wellcontrol:'Well Control',production:'Production',
   safety:'Safety & HSE',engineering:'Engineering',logging:'Logging & Reservoir',
-  commercial:'Commercial',maintenance:'Maintenance',general:'General',
+  commercial:'Commercial',maintenance:'Maintenance',general:'General',doccontrol:'Document Control',
   hr:'Human Resources',cybersecurity:'Cybersecurity',custom:'Community'
 };
-const CAT_CLS = {
-  drilling:'cat-drilling',wellcontrol:'cat-wellcontrol',production:'cat-production',
-  safety:'cat-safety',engineering:'cat-engineering',logging:'cat-logging',
-  commercial:'cat-commercial',maintenance:'cat-maintenance',general:'cat-general',
-  hr:'cat-hr',cybersecurity:'cat-cybersecurity',custom:'cat-custom'
-};
+/* The order the pills and the counts read in. */
+const CAT_ORDER = ['drilling','wellcontrol','production','safety','engineering','logging','commercial','maintenance','hr','cybersecurity','doccontrol'];
+const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+const REDUCE = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e) { return false; } };
 
 /* ── State ─────────────────────────────────────────────────────── */
 let allTerms = [...BUILT_IN];
 let activeCat = 'all';
-let activeAlpha = 'all';
 let searchQ = '';
 let toastTimer = null;
+const openKeys = new Set();
+
+const keyOf = t => t.abbr + '|' + t.cat + '|' + t.full;
+const letterOf = t => { const c = (t.abbr || '').charAt(0).toUpperCase(); return /[A-Z]/.test(c) ? c : '#'; };
 
 function loadCustom() {
   try {
     const s = JSON.parse(localStorage.getItem('taqa_glossary_custom') || '[]');
-    s.forEach(t => { if (!allTerms.find(x => x.abbr === t.abbr)) allTerms.push(t); });
+    s.forEach(t => { if (t && t.abbr && t.full && !allTerms.find(x => x.abbr === t.abbr)) allTerms.push(t); });
   } catch(e){}
 }
 function saveCustom() {
-  localStorage.setItem('taqa_glossary_custom', JSON.stringify(allTerms.filter(t => t.cat === 'custom')));
+  try { localStorage.setItem('taqa_glossary_custom', JSON.stringify(allTerms.filter(t => t.cat === 'custom'))); } catch(e){}
+}
+
+/* ── Text helpers ──────────────────────────────────────────────── */
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+/* Escape first, then mark the query inside the escaped text, so a term
+   someone typed into the form can never become markup. */
+function hl(text, q) {
+  const e = esc(text);
+  if (!q) return e;
+  const eq = esc(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return e.replace(new RegExp('(' + eq + ')', 'gi'), '<mark class="hl">$1</mark>');
+}
+/* A short window of the definition around the first match, for terms
+   found only by what their definition says. */
+function snippet(def, q) {
+  const i = def.toLowerCase().indexOf(q.toLowerCase());
+  if (i < 0) return '';
+  let start = Math.max(0, i - 36), end = Math.min(def.length, i + q.length + 70);
+  /* Snap both ends to a space so no word is cut in half. */
+  if (start > 0) { const s = def.lastIndexOf(' ', start); start = s < 0 ? 0 : s + 1; }
+  if (end < def.length) { const e = def.indexOf(' ', end); end = e < 0 ? def.length : e; }
+  return (start > 0 ? '… ' : '') + def.slice(start, end).trim().replace(/[,;:]$/, '') + (end < def.length ? ' …' : '');
 }
 
 /* ── Filtering ─────────────────────────────────────────────────── */
 function getFiltered() {
   let list = allTerms;
   if (activeCat !== 'all') list = list.filter(t => t.cat === activeCat);
-  if (activeAlpha !== 'all') list = list.filter(t => t.abbr[0].toUpperCase() === activeAlpha);
   if (searchQ) {
     const q = searchQ.toLowerCase();
     list = list.filter(t =>
@@ -776,74 +877,275 @@ function getFiltered() {
       (t.def && t.def.toLowerCase().includes(q))
     );
   }
-  return list.sort((a, b) => a.abbr.localeCompare(b.abbr));
+  const byName = (a, b) => a.abbr.localeCompare(b.abbr) || a.full.localeCompare(b.full);
+  if (!searchQ) return list.slice().sort(byName);
+  /* A search reads best by how closely each term matches: the
+     abbreviation itself, then abbreviations that start with it, then
+     other name matches, and last the terms only their definition
+     mentions. */
+  const q = searchQ.toLowerCase();
+  const rank = t => {
+    const a = t.abbr.toLowerCase();
+    if (a === q) return 0;
+    if (a.startsWith(q)) return 1;
+    if (a.includes(q) || t.full.toLowerCase().includes(q)) return 2;
+    return 3;
+  };
+  return list.slice().sort((a, b) => rank(a) - rank(b) || byName(a, b));
 }
 
-function hl(text, q) {
-  if (!q || !text) return text || '';
-  const safe = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return text.replace(new RegExp(`(${safe})`, 'gi'), '<span class="hl">$1</span>');
+/* Other meanings of the same abbreviation, straight from the list:
+   WI is a Work Instruction on a document card and a Working Interest in
+   a contract. */
+function alsoMeans(t) {
+  return allTerms.filter(x => x !== t && x.abbr.toUpperCase() === t.abbr.toUpperCase());
 }
 
 /* ── Render ────────────────────────────────────────────────────── */
+function rowHTML(t, i, q) {
+  const k = keyOf(t);
+  const open = openKeys.has(k);
+  const inName = q && (t.abbr.toLowerCase().includes(q.toLowerCase()) || t.full.toLowerCase().includes(q.toLowerCase()));
+  const snip = q && !inName && t.def ? snippet(t.def, q) : '';
+  const catLabel = CAT_LABELS[t.cat] || t.cat;
+  const others = alsoMeans(t);
+  let notes = '';
+  if (t.cat === 'custom') {
+    notes += `<span class="gl-note">Added by the community on this device${t.field && CAT_LABELS[t.field] ? `, field: <b>${esc(CAT_LABELS[t.field])}</b>` : ''}</span>`;
+  }
+  if (others.length) {
+    notes += `<span class="gl-note">Also: ${others.map(o => `<b>${esc(o.full)}</b> (${esc(CAT_LABELS[o.cat] || o.cat)})`).join(', ')}</span>`;
+  }
+  return `<li class="gl-item${open ? ' is-open' : ''}" data-k="${esc(k)}">
+    <h3 class="gl-h"><button type="button" class="gl-row" id="gr-${i}" aria-expanded="${open}" aria-controls="gp-${i}">
+      <span class="gl-line"><span class="gl-abbr">${hl(t.abbr, q)}</span> <span class="gl-full">${hl(t.full, q)}</span>${snip ? `<span class="gl-snip">${hl(snip, q)}</span>` : ''}</span>
+      <span class="gl-chev" aria-hidden="true">${CHEV}</span>
+    </button></h3>
+    <div class="gl-panel" id="gp-${i}"><div class="gl-panel-in"><div class="gl-body">
+      <p class="gl-def">${hl(t.def || 'No definition recorded.', q)}</p>
+      <div class="gl-meta"><span class="gl-chip cat-${esc(t.cat)}">${esc(catLabel)}</span>${notes}</div>
+    </div></div></div>
+  </li>`;
+}
+
 function renderCards() {
   const filtered = getFiltered();
-  document.getElementById('results-count').innerHTML = `<strong>${filtered.length}</strong> term${filtered.length !== 1 ? 's' : ''}`;
-  const grid = document.getElementById('terms-grid');
-  if (!filtered.length) {
-    grid.innerHTML = `<div class="no-results">
-      <span class="no-results-icon">🔍</span>
-      <h3>No terms found</h3>
-      <p>Try a different search term, or add it using the form on the right.</p>
-    </div>`;
-    return;
-  }
-  const q = searchQ.toLowerCase();
-  grid.innerHTML = filtered.map(t => {
-    const catCls = CAT_CLS[t.cat] || 'cat-general';
-    const catLabel = CAT_LABELS[t.cat] || t.cat;
-    const fullDef = t.def || '';
-    const isLong = fullDef.length > 155;
-    return `<div class="term-card${isLong ? ' expandable' : ''}"${isLong ? ' onclick="toggleCard(this)"' : ''}>
-      <div class="tc-abbr">${hl(t.abbr, q)}</div>
-      <div class="tc-full">${hl(t.full, q)}</div>
-      <div class="tc-def-wrap"><div class="tc-def">${hl(fullDef, q)}</div></div>
-      ${isLong ? `<div class="tc-expand">
-        <svg class="tc-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-        <span class="tc-expand-lbl">Read more</span>
-      </div>` : ''}
-      <div class="tc-footer">
-        <span class="tc-cat ${catCls}">${catLabel}</span>
-        ${t.cat === 'custom' ? '<span class="tc-community">Community</span>' : ''}
+  const n = filtered.length;
+  const where = activeCat !== 'all' ? ` in ${esc(CAT_LABELS[activeCat] || activeCat)}` : '';
+  const what = searchQ ? ` matching “${esc(searchQ)}”` : '';
+  document.getElementById('results-count').innerHTML = `<strong>${n}</strong> term${n !== 1 ? 's' : ''}${where}${what}`;
+  const list = document.getElementById('gl-list');
+
+  if (!n) {
+    const canAdd = searchQ && searchQ.length <= 20;
+    list.innerHTML = `<div class="gl-empty">
+      <h2>No term matches${searchQ ? ` “${esc(searchQ)}”` : ' this filter'}</h2>
+      <p>Check the spelling or try the full name.${canAdd ? ' If your crew uses it, add it to the glossary.' : ''}</p>
+      <div class="gl-empty-acts">
+        ${searchQ ? '<button type="button" class="gl-btn gl-btn-quiet" onclick="clearSearch()">Clear search</button>' : '<button type="button" class="gl-btn gl-btn-quiet" onclick="setCat(\'all\')">Show all terms</button>'}
+        ${canAdd ? `<button type="button" class="gl-btn gl-btn-primary" onclick="startAdd()">Add “${esc(searchQ.toUpperCase())}”</button>` : ''}
       </div>
     </div>`;
-  }).join('');
-}
+    buildAlphaNav(filtered);
+    updateCollapse();
+    return;
+  }
 
-function toggleCard(card) {
-  const open = card.classList.toggle('tc-open');
-  const lbl = card.querySelector('.tc-expand-lbl');
-  if (lbl) lbl.textContent = open ? 'Read less' : 'Read more';
-}
-
-function buildAlphaNav() {
-  const available = new Set(allTerms.map(t => t.abbr[0].toUpperCase()));
-  const nav = document.getElementById('alpha-nav');
-  const allBtn = `<button class="alpha-btn${activeAlpha === 'all' ? ' active' : ''}" data-l="all" onclick="setAlpha(this,'all')">All</button>`;
-  const btns = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l =>
-    `<button class="alpha-btn${!available.has(l) ? ' disabled' : ''}${activeAlpha === l ? ' active' : ''}" data-l="${l}" onclick="setAlpha(this,'${l}')">${l}</button>`
+  let i = 0;
+  /* While searching, one sheet in order of match; the letter headers
+     would split a handful of results into many one-row sheets. */
+  if (searchQ) {
+    list.innerHTML = `<section class="gl-group gl-group-flat" aria-labelledby="glh-results">
+      <h2 class="sr-only" id="glh-results">Search results</h2>
+      <ul class="gl-sheet">${filtered.map(t => rowHTML(t, i++, searchQ)).join('')}</ul>
+    </section>`;
+    buildAlphaNav(filtered);
+    updateCollapse();
+    spy();
+    return;
+  }
+  const groups = new Map();
+  filtered.forEach(t => { const L = letterOf(t); if (!groups.has(L)) groups.set(L, []); groups.get(L).push(t); });
+  list.innerHTML = [...groups.entries()].map(([L, terms]) =>
+    `<section class="gl-group" id="gl-${L === '#' ? 'num' : L}" aria-labelledby="glh-${L === '#' ? 'num' : L}">
+      <h2 class="gl-letter" id="glh-${L === '#' ? 'num' : L}" tabindex="-1">${L}<span class="gl-letter-n">${terms.length} term${terms.length !== 1 ? 's' : ''}</span></h2>
+      <ul class="gl-sheet">${terms.map(t => rowHTML(t, i++, searchQ)).join('')}</ul>
+    </section>`
   ).join('');
-  nav.innerHTML = allBtn + btns;
+  buildAlphaNav(filtered);
+  updateCollapse();
+  spy();
 }
 
+/* One listener for every row, so a re-render never loses it. */
+document.getElementById('gl-list').addEventListener('click', function(e) {
+  const btn = e.target.closest('.gl-row');
+  if (!btn) return;
+  const item = btn.closest('.gl-item');
+  const open = !item.classList.contains('is-open');
+  item.classList.toggle('is-open', open);
+  btn.setAttribute('aria-expanded', String(open));
+  if (open) openKeys.add(item.dataset.k); else openKeys.delete(item.dataset.k);
+  updateCollapse();
+});
+
+function collapseAll() {
+  const hadFocus = document.activeElement === document.getElementById('gl-collapse');
+  openKeys.clear();
+  document.querySelectorAll('.gl-item.is-open').forEach(it => {
+    it.classList.remove('is-open');
+    const b = it.querySelector('.gl-row'); if (b) b.setAttribute('aria-expanded', 'false');
+  });
+  updateCollapse();
+  /* The button hides itself; hand focus to the count beside it rather
+     than let it fall back to the top of the page. */
+  if (hadFocus) document.getElementById('results-count').focus({ preventScroll: true });
+}
+function updateCollapse() {
+  const b = document.getElementById('gl-collapse');
+  if (b) b.hidden = !document.querySelector('.gl-item.is-open');
+}
+
+/* ── Category pills ────────────────────────────────────────────── */
+function buildCatPills() {
+  const counts = {};
+  allTerms.forEach(t => { counts[t.cat] = (counts[t.cat] || 0) + 1; });
+  const cats = CAT_ORDER.filter(c => counts[c]);
+  if (counts.custom) cats.push('custom');
+  const pill = (c, label, n) => `<button type="button" class="gl-pill${c === 'custom' ? ' is-community' : ''}" data-cat="${c}" aria-pressed="${activeCat === c}" onclick="setCat('${c}')">${esc(label)}<span class="gl-pill-n">${n}</span></button>`;
+  document.getElementById('cat-filter').innerHTML =
+    pill('all', 'All', allTerms.length) + cats.map(c => pill(c, CAT_LABELS[c], counts[c])).join('');
+}
+function setCat(c) {
+  activeCat = c;
+  document.querySelectorAll('.gl-pill').forEach(p => p.setAttribute('aria-pressed', String(p.dataset.cat === c)));
+  renderCards();
+}
+/* Kept for anything that still calls the old name with a pill element. */
+function filterCat(el) { setCat(el && el.dataset ? el.dataset.cat : 'all'); }
+
+/* ── A to Z ────────────────────────────────────────────────────── */
+/* The rail is one tab stop: Tab lands on the current letter, the arrow
+   keys, Home and End move along the letters that have terms. */
+function buildAlphaNav(filtered) {
+  const az = document.getElementById('alpha-nav');
+  /* A search shows one sheet with no letter headers, so there is
+     nothing to jump to. */
+  az.hidden = !!searchQ;
+  const have = new Set((filtered || getFiltered()).map(letterOf));
+  az.innerHTML = LETTERS.map(L =>
+    `<button type="button" class="gl-az-btn" data-l="${L}" tabindex="-1"${have.has(L) ? '' : ' disabled'} aria-label="${have.has(L) ? 'Jump to ' + L : L + ', no terms'}">${L}</button>`
+  ).join('');
+  const first = az.querySelector('.gl-az-btn:not(:disabled)');
+  if (first) first.tabIndex = 0;
+  /* A new filter can leave the phone rail scrolled past every letter
+     that still has terms; bring the first of them back into view. */
+  if (first && az.scrollWidth > az.clientWidth) az.scrollLeft = Math.max(0, first.offsetLeft - 10);
+}
+function railStop(b) {
+  const az = document.getElementById('alpha-nav');
+  az.querySelectorAll('.gl-az-btn').forEach(x => { x.tabIndex = x === b ? 0 : -1; });
+}
+document.getElementById('alpha-nav').addEventListener('click', function(e) {
+  const b = e.target.closest('.gl-az-btn');
+  if (b && !b.disabled) { railStop(b); jumpTo(b.dataset.l); }
+});
+document.getElementById('alpha-nav').addEventListener('keydown', function(e) {
+  const b = e.target.closest('.gl-az-btn');
+  if (!b) return;
+  const on = [...this.querySelectorAll('.gl-az-btn:not(:disabled)')];
+  const i = on.indexOf(b);
+  const rtl = getComputedStyle(this).direction === 'rtl';
+  let to = null;
+  if (e.key === 'ArrowRight') to = on[i + (rtl ? -1 : 1)];
+  else if (e.key === 'ArrowLeft') to = on[i + (rtl ? 1 : -1)];
+  else if (e.key === 'Home') to = on[0];
+  else if (e.key === 'End') to = on[on.length - 1];
+  else return;
+  e.preventDefault();
+  if (!to) return;
+  railStop(to);
+  to.focus();
+});
+
+function topOffset() {
+  const nav = document.getElementById('navbar');
+  const navB = nav ? Math.max(0, nav.getBoundingClientRect().bottom) : 64;
+  const az = document.getElementById('alpha-nav');
+  return navB + (az && !az.hidden ? az.offsetHeight : 0) + 10;
+}
+/* The letter last chosen on the rail. Near the end of the list the page
+   runs out before the header can reach the rail; spy() then trusts the
+   choice instead of marking the letter above it. Any scroll the reader
+   makes by hand clears it. */
+let jumped = null;
+['wheel', 'touchmove'].forEach(ev => window.addEventListener(ev, () => { jumped = null; }, { passive: true }));
+document.addEventListener('keydown', e => { if (/^(Arrow(Up|Down)|Page(Up|Down)|Home|End| )$/.test(e.key) && !e.target.closest('#alpha-nav')) jumped = null; });
+function jumpTo(L) {
+  const g = document.getElementById('gl-' + L);
+  if (!g) return;
+  jumped = L;
+  const y = g.getBoundingClientRect().top + window.scrollY - topOffset();
+  window.scrollTo({ top: Math.max(0, y), behavior: REDUCE() ? 'auto' : 'smooth' });
+  const h = g.querySelector('.gl-letter');
+  if (h) h.focus({ preventScroll: true });
+  spy();
+}
+function skipToTerms() {
+  const row = document.querySelector('#gl-list .gl-row, #gl-list .gl-btn');
+  const list = document.getElementById('gl-list');
+  const y = list.getBoundingClientRect().top + window.scrollY - topOffset() - 50;
+  window.scrollTo({ top: Math.max(0, y), behavior: REDUCE() ? 'auto' : 'smooth' });
+  if (row) row.focus({ preventScroll: true });
+}
+/* Mark the letter now under the rail, and keep it in view on a phone. */
+let spyQueued = false;
+function spy() {
+  const az = document.getElementById('alpha-nav');
+  if (!az) return;
+  const nav = document.getElementById('navbar');
+  const navB = nav ? Math.max(0, nav.getBoundingClientRect().bottom) : 64;
+  /* Stuck means resting against the top bar; once the list ends the rail
+     rides up and away with it. */
+  const azTop = az.getBoundingClientRect().top;
+  const stuck = !az.hidden && window.scrollY > 0 && azTop <= navB + 0.5 && azTop >= navB - 1;
+  az.classList.toggle('is-stuck', stuck);
+  document.documentElement.classList.toggle('gl-rail-stuck', stuck);
+  const line = topOffset() + 4;
+  let cur = null;
+  document.querySelectorAll('.gl-group:not(.gl-group-flat)').forEach(g => { if (g.getBoundingClientRect().top <= line) cur = g.id.slice(3); });
+  if (jumped) {
+    const g = document.getElementById('gl-' + jumped);
+    const atEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+    if (g && atEnd && g.getBoundingClientRect().top < window.innerHeight) cur = jumped;
+  }
+  const railHasFocus = az.contains(document.activeElement);
+  az.querySelectorAll('.gl-az-btn').forEach(b => {
+    const on = b.dataset.l === cur;
+    if (on) {
+      if (b.getAttribute('aria-current') !== 'true') {
+        b.setAttribute('aria-current', 'true');
+        if (!railHasFocus) railStop(b);
+        if (az.scrollWidth > az.clientWidth) {
+          const want = b.offsetLeft - (az.clientWidth - b.offsetWidth) / 2;
+          az.scrollTo({ left: want, behavior: REDUCE() ? 'auto' : 'smooth' });
+        }
+      }
+    } else if (b.hasAttribute('aria-current')) b.removeAttribute('aria-current');
+  });
+}
+
+/* ── Side column ───────────────────────────────────────────────── */
 function buildCatStats() {
-  const cats = ['drilling','wellcontrol','production','safety','engineering','logging','commercial','maintenance','hr','cybersecurity'];
+  const cats = CAT_ORDER.slice();
   const counts = Object.fromEntries(cats.map(c => [c, allTerms.filter(t => t.cat === c).length]));
+  const custom = allTerms.filter(t => t.cat === 'custom').length;
+  if (custom) { cats.push('custom'); counts.custom = custom; }
   const max = Math.max(...Object.values(counts), 1);
   document.getElementById('cat-stat-list').innerHTML = cats.map(c =>
     `<div class="cat-stat-row">
-      <span class="csr-name">${CAT_LABELS[c]}</span>
-      <div class="csr-bar-wrap"><div class="csr-bar" style="width:${(counts[c]/max*100).toFixed(1)}%"></div></div>
+      <span class="csr-name">${esc(CAT_LABELS[c])}</span>
+      <div class="csr-bar-wrap" aria-hidden="true"><div class="csr-bar" style="width:${(counts[c]/max*100).toFixed(1)}%"></div></div>
       <span class="csr-num">${counts[c]}</span>
     </div>`
   ).join('');
@@ -852,39 +1154,57 @@ function buildCatStats() {
 function updateStats() {
   document.getElementById('stat-total').textContent = allTerms.length;
   document.getElementById('stat-custom').textContent = allTerms.filter(t => t.cat === 'custom').length;
+  document.getElementById('stat-cats').textContent = new Set(BUILT_IN.map(t => t.cat)).size;
+  const more = document.getElementById('stat-more');
+  if (more) more.textContent = Math.max(0, allTerms.length - 4);
 }
 
-/* ── Interactions ──────────────────────────────────────────────── */
-document.getElementById('glossary-input').addEventListener('input', function() {
+function toggleAddForm(force) {
+  const card = document.getElementById('sb-add');
+  const btn = document.getElementById('sb-toggle');
+  const open = typeof force === 'boolean' ? force : !card.classList.contains('is-open');
+  card.classList.toggle('is-open', open);
+  btn.setAttribute('aria-expanded', String(open));
+}
+/* From the empty state: carry the search into the form. */
+function startAdd() {
+  const f = document.getElementById('sf-abbr');
+  f.value = searchQ.toUpperCase().slice(0, 20);
+  toggleAddForm(true);
+  const card = document.getElementById('sb-add');
+  const y = card.getBoundingClientRect().top + window.scrollY - topOffset() + 40;
+  window.scrollTo({ top: Math.max(0, y), behavior: REDUCE() ? 'auto' : 'smooth' });
+  setTimeout(() => document.getElementById('sf-full').focus({ preventScroll: true }), REDUCE() ? 0 : 350);
+}
+
+/* ── Search ────────────────────────────────────────────────────── */
+const input = document.getElementById('glossary-input');
+input.addEventListener('input', function() {
   searchQ = this.value.trim();
-  document.getElementById('glossary-clear').classList.toggle('hidden', !searchQ);
-  const showAlpha = !searchQ && activeCat === 'all';
-  document.getElementById('alpha-nav').style.display = showAlpha ? 'flex' : 'none';
+  document.getElementById('glossary-clear').classList.toggle('hidden', !this.value);
   renderCards();
+});
+/* Enter puts the phone keyboard away and brings the results up. */
+input.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    this.blur();
+    /* With a search the rail is away, so the count line goes just under
+       the top bar; without one, the rail settles above the list. */
+    const bar = document.getElementById(searchQ ? 'results-count' : 'alpha-nav');
+    const y = bar.getBoundingClientRect().top + window.scrollY - (searchQ ? topOffset() : topOffset() - bar.offsetHeight - 10);
+    if (window.scrollY < y) window.scrollTo({ top: y, behavior: REDUCE() ? 'auto' : 'smooth' });
+  } else if (e.key === 'Escape' && this.value) {
+    clearSearch();
+  }
 });
 
 function clearSearch() {
-  document.getElementById('glossary-input').value = '';
+  input.value = '';
   searchQ = '';
   document.getElementById('glossary-clear').classList.add('hidden');
-  document.getElementById('alpha-nav').style.display = 'flex';
   renderCards();
-}
-
-function filterCat(el) {
-  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
-  el.classList.add('active');
-  activeCat = el.dataset.cat;
-  activeAlpha = 'all';
-  buildAlphaNav();
-  renderCards();
-}
-
-function setAlpha(el, letter) {
-  activeAlpha = letter;
-  document.querySelectorAll('.alpha-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  renderCards();
+  input.focus();
 }
 
 /* ── Submit new term ───────────────────────────────────────────── */
@@ -892,66 +1212,61 @@ function submitTerm() {
   const abbr = document.getElementById('sf-abbr').value.trim().toUpperCase();
   const full  = document.getElementById('sf-full').value.trim();
   const def   = document.getElementById('sf-def').value.trim();
-  const cat   = document.getElementById('sf-cat').value;
-  if (!abbr || !full) { showToast('Missing Fields', 'Please fill in the abbreviation and full name.', 'warn'); return; }
-  if (allTerms.find(t => t.abbr === abbr)) { showToast('Already Exists', `"${abbr}" is already in the glossary.`, 'warn'); return; }
-  allTerms.push({ abbr, full, def: def || 'No definition provided.', cat: 'custom' });
+  const field = document.getElementById('sf-cat').value;
+  if (!abbr || !full) { showGlossaryToast('Missing fields', 'Please fill in the abbreviation and full name.', 'warn'); return; }
+  if (allTerms.find(t => t.abbr === abbr)) { showGlossaryToast('Already exists', `"${abbr}" is already in the glossary.`, 'warn'); return; }
+  const term = { abbr, full, def: def || 'No definition provided.', cat: 'custom', field };
+  allTerms.push(term);
   saveCustom();
   updateStats();
-  buildAlphaNav();
   buildCatStats();
   document.getElementById('sf-abbr').value = '';
   document.getElementById('sf-full').value = '';
   document.getElementById('sf-def').value = '';
-  showToast('Term Added', `"${abbr}" is now in the glossary`, 'ok');
-  activeCat = 'all'; activeAlpha = 'all'; searchQ = '';
-  document.getElementById('glossary-input').value = '';
+  showGlossaryToast('Term added', `"${abbr}" is now in the glossary`, 'ok');
+  activeCat = 'all'; searchQ = '';
+  input.value = '';
   document.getElementById('glossary-clear').classList.add('hidden');
-  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
-  document.querySelector('.cat-pill[data-cat="all"]').classList.add('active');
-  document.getElementById('alpha-nav').style.display = 'flex';
-  buildAlphaNav();
+  openKeys.add(keyOf(term));
+  buildCatPills();
   renderCards();
+  /* Show the new row, open, where it now sits in the list. */
+  const row = document.querySelector(`.gl-item[data-k="${CSS.escape(keyOf(term))}"]`);
+  if (row) {
+    const y = row.getBoundingClientRect().top + window.scrollY - topOffset() - 8;
+    window.scrollTo({ top: Math.max(0, y), behavior: REDUCE() ? 'auto' : 'smooth' });
+  }
 }
 
 /* ── Toast ─────────────────────────────────────────────────────── */
 const ICON_OK   = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const ICON_WARN = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5v4M8 11.5v.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`;
-function showToast(title, sub, type = 'ok') {
+/* Named for this page on purpose. shared.js loads later and assigns
+   window.showToast, which silently replaced this function, and its global
+   .toast styles restyled this element, so the page's own toast never ran. */
+function showGlossaryToast(title, sub, type = 'ok') {
   document.getElementById('toast-title').textContent = title;
   document.getElementById('toast-sub').textContent = sub;
   const icon = document.getElementById('toast-icon');
   icon.innerHTML = type === 'warn' ? ICON_WARN : ICON_OK;
-  icon.style.background = type === 'warn' ? 'linear-gradient(135deg,#FD691D,#f59e0b)' : 'var(--gradient)';
+  /* Warnings stay in the TAQA orange family, never red. */
+  icon.style.background = type === 'warn' ? '#A8431A' : 'var(--gradient)';
   const t = document.getElementById('toast');
   t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
 }
 
-/* ── Dark mode ─────────────────────────────────────────────────── */
-const MOON_SVG = `<path d="M13 7a6 6 0 1 1-6-6 4.5 4.5 0 0 0 6 6Z" fill="currentColor"/>`;
-const SUN_SVG  = `<path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"`;
-function toggleDark() {
-  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
-  localStorage.setItem('taqa-theme', dark ? 'light' : 'dark');
-  document.getElementById('dark-icon').innerHTML = dark ? SUN_SVG + '"/>' : MOON_SVG;
-}
-(function initTheme() {
-  const t = localStorage.getItem('taqa-theme') || 'light';
-  document.documentElement.setAttribute('data-theme', t);
-  if (t === 'dark') document.getElementById('dark-icon').innerHTML = MOON_SVG;
-})();
-
-/* ── Scroll ring ───────────────────────────────────────────────── */
+/* ── Scroll: back-to-top ring and the letter rail ──────────────── */
 window.addEventListener('scroll', function() {
   const ratio = window.scrollY / Math.max(1, document.body.scrollHeight - window.innerHeight);
   const ring = document.getElementById('stp-ring');
   if (ring) ring.style.strokeDashoffset = (119.4 * (1 - ratio)).toFixed(2);
   const btn = document.getElementById('scroll-top-btn');
-  if (btn) btn.classList.toggle('visible', window.scrollY > 200);
-});
+  if (btn) btn.classList.toggle('visible', window.scrollY > 600);
+  if (!spyQueued) { spyQueued = true; requestAnimationFrame(() => { spyQueued = false; spy(); }); }
+}, { passive: true });
+window.addEventListener('resize', () => spy());
 
 /* ── Page exit transition ──────────────────────────────────────── */
 document.addEventListener('click', function(e) {
@@ -959,33 +1274,25 @@ document.addEventListener('click', function(e) {
   if (!a) return;
   const h = a.getAttribute('href') || '';
   if (!h || h.startsWith('#') || h.startsWith('http') || h.startsWith('mailto') || a.target === '_blank') return;
+  if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
   e.preventDefault();
+  if (REDUCE()) { window.location.href = h; return; }
   document.body.classList.add('page-exit');
   setTimeout(() => window.location.href = h, 270);
 });
 
-/* ── Nav pill ──────────────────────────────────────────────────── */
-function positionPill() {
-  const active = document.querySelector('.nav-links a.active');
-  const pill = document.getElementById('nav-pill');
-  if (!active || !pill) return;
-  const r  = active.getBoundingClientRect();
-  const pr = document.querySelector('.nav-links').getBoundingClientRect();
-  pill.style.cssText = `left:${r.left - pr.left}px;top:${r.top - pr.top}px;width:${r.width}px;height:${r.height}px;`;
-}
-window.addEventListener('load', positionPill);
-window.addEventListener('resize', positionPill);
-
 /* ── Init ──────────────────────────────────────────────────────── */
 loadCustom();
-buildAlphaNav();
+buildCatPills();
 buildCatStats();
 updateStats();
 renderCards();
 </script>
+<script src="roles.js"></script>
+<script src="documents-master.js"></script>
+<script src="store.js"></script>
 <script src="shared.js"></script>
-<script src="fixes.js"></script>
-<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary-ink);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#C8102E;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-taqa-theme="dark"] .bell-badge{border-color:#002326;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
 </body>
 </html>

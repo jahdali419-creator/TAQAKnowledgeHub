@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en" data-taqa-theme="light" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#005D63">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<title>About this platform, TAQA Knowledge Hub</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* About this platform. A reference sheet for the IT team, QMS and
+   auditors, set in the same calm language as the home page's Explore by
+   Discipline: white sheets on the canvas, hairlines between rows, one soft
+   diffuse shadow, teal as the only accent. Figures are set light, never
+   ExtraBold, and every one of them is read from the register on load.
+   Neutrals are built from Monument Gray so the greys run warm. --ink-4 draws
+   hairline chrome only; at 1.8:1 on paper it never carries a word. */
+:root{
+  --ink:#1E1C1A; --ink-2:#524D48; --ink-3:#756A61; --ink-4:#BEB8B2;
+  --paper:#FFFFFF; --canvas:#F4F4F3; --inset:#EDEBE8;
+  --lamina:rgba(117,106,97,.10);        /* between rows            */
+  --bedding:rgba(117,106,97,.13);       /* sheet edge, table head  */
+  --sheet-shadow:0 1px 2px rgba(0,88,90,.04), 0 22px 44px -26px rgba(0,88,90,.22);
+  /* --primary is a ground and holds still across themes; --primary-ink is
+     the only teal allowed to colour text and lifts in the dark. */
+  --primary:#005D63; --primary-ink:#005D63;
+  --disc:rgba(0,93,99,.06); --disc-press:rgba(0,93,99,.11);
+  --scuff:rgba(0,93,99,.035);
+  --warn-ink:#8A6200; --ok-ink:#00705F; --stop-ink:#C8102E; --info-ink:#0076A8; --alert-ink:#A8431A;
+  --mono:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+  --read:'Inter',system-ui,sans-serif;
+  --head:'BwGradual','Urbanist',sans-serif;
+  --ease:cubic-bezier(.23,1,.32,1);
+  --gap:20px;
+}
+html[data-taqa-theme="dark"]{
+  --ink:#C7DBDD; --ink-2:#8CB6B9; --ink-3:#619B9E; --ink-4:#00484B;
+  --paper:#002326; --canvas:#001314; --inset:#002D30;
+  --lamina:rgba(0,187,182,.09);
+  --bedding:rgba(0,187,182,.13);
+  --sheet-shadow:0 22px 44px -26px rgba(0,0,0,.5);
+  --primary-ink:#00BBB6;
+  --disc:rgba(0,187,182,.08); --disc-press:rgba(0,187,182,.14);
+  --scuff:rgba(0,187,182,.05);
+  --warn-ink:#FFB81C; --ok-ink:#4FD1B5; --stop-ink:#FF8A94; --info-ink:#6BC5EE; --alert-ink:#FF9B5E;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{overflow-x:clip;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+/* shared.js sets overflow-x:hidden on html and body, which turns body into a
+   scroll container and stops the bar and the contents rail from sticking.
+   clip keeps the same guard against sideways scroll without that. */
+:root, html body{overflow-x:clip;}
+body{font-family:var(--read);background:var(--canvas);color:var(--ink-2);
+  font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+a{color:var(--primary-ink);text-decoration:none;}
+:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;border-radius:6px;}
+
+/* The shared bar is fixed elsewhere; here the page does not reserve room
+   for it, so it sits in the flow and sticks. */
+html #navbar{position:sticky;top:0;}
+
+/* ── Frame: a contents rail beside one reading column ── */
+.frame{max-width:1120px;margin:0 auto;padding:44px 32px 88px;
+  display:grid;grid-template-columns:200px minmax(0,1fr);column-gap:56px;}
+.rail{grid-column:1;grid-row:1 / span 2;}
+.intro,.body{grid-column:2;min-width:0;max-width:780px;}
+.rail nav{position:sticky;top:96px;}
+.rail-t{font:600 11px/1 var(--read);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
+  margin:6px 0 12px;}
+.rail ol{list-style:none;}
+.rail li + li{border-top:1px solid var(--lamina);}
+.rail a{display:flex;gap:10px;align-items:baseline;padding:10px 0;color:var(--ink-2);
+  font:300 14.5px/1.35 var(--head);transition:color 140ms var(--ease);}
+.rail a span{font:400 12px/1 var(--read);color:var(--ink-3);min-width:12px;font-variant-numeric:tabular-nums;}
+@media (hover:hover) and (pointer:fine){.rail a:hover{color:var(--primary-ink);}}
+.rail a[aria-current="location"]{color:var(--primary-ink);font-weight:400;}
+.rail a[aria-current="location"] span{color:var(--primary-ink);}
+
+/* ── Opening ── */
+.kicker{font:600 11px/1.3 var(--read);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px;}
+h1{font-family:var(--head);font-size:34px;font-weight:700;color:var(--ink);letter-spacing:-.02em;line-height:1.12;}
+.lede{font-size:15.5px;line-height:1.65;color:var(--ink-2);margin-top:14px;max-width:62ch;}
+.note{display:grid;grid-template-columns:30px minmax(0,1fr);column-gap:14px;align-items:start;
+  margin-top:26px;padding-top:20px;border-top:1px solid var(--bedding);
+  font-size:13.5px;line-height:1.65;color:var(--ink-2);max-width:68ch;}
+.note b{color:var(--ink);font-weight:600;}
+.disc{width:30px;height:30px;border-radius:50%;background:var(--disc);color:var(--primary-ink);
+  display:grid;place-items:center;flex-shrink:0;transition:background-color 160ms ease;}
+.disc svg{width:16px;height:16px;}
+
+/* ── Sheets ── */
+.body{margin-top:40px;display:flex;flex-direction:column;gap:28px;}
+.sheet{background:var(--paper);border:1px solid var(--bedding);border-radius:20px;
+  box-shadow:var(--sheet-shadow);overflow:clip;scroll-margin-top:84px;}
+.sh-head{display:grid;grid-template-columns:30px minmax(0,1fr);column-gap:14px;align-items:start;
+  padding:22px var(--gap) 18px;}
+.sh-no{width:30px;height:30px;border-radius:50%;background:var(--disc);color:var(--primary-ink);
+  display:grid;place-items:center;font:600 13px/1 var(--read);font-variant-numeric:tabular-nums;margin-top:-2px;}
+h2{font-family:var(--head);font-size:19px;font-weight:700;color:var(--ink);letter-spacing:-.01em;line-height:1.25;}
+.sh-sub{font-size:13.5px;line-height:1.6;color:var(--ink-2);margin-top:6px;max-width:64ch;}
+
+/* Rows: figure, words, chevron. The same row serves a link and a note. */
+.rows{list-style:none;border-top:1px solid var(--lamina);}
+.rows > li + li{border-top:1px solid var(--lamina);}
+.row{display:grid;grid-template-columns:76px minmax(0,1fr) 30px;column-gap:16px;align-items:center;
+  min-height:64px;padding:16px var(--gap);color:inherit;
+  -webkit-tap-highlight-color:transparent;transition:background-color 140ms ease;}
+.rows.nofig .row{grid-template-columns:minmax(0,1fr) 30px;}
+.row.static{grid-template-columns:76px minmax(0,1fr);}
+.rows.nofig .row.static{grid-template-columns:minmax(0,1fr);}
+.fig{font:300 30px/1 var(--head);color:var(--ink);letter-spacing:-.02em;font-variant-numeric:tabular-nums;
+  align-self:start;padding-top:2px;}
+.fig small{font:400 12px/1 var(--read);letter-spacing:0;color:var(--ink-3);margin-inline-start:4px;}
+.rmain{display:flex;flex-direction:column;gap:4px;min-width:0;}
+.rname{font:300 16.5px/1.3 var(--head);color:var(--ink);}
+.rdesc{font-size:13.5px;line-height:1.6;color:var(--ink-2);}
+.rdesc b{font-weight:600;color:var(--ink);}
+.rmeta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-top:3px;font-size:12.5px;color:var(--ink-3);}
+.rmeta .num{font-family:var(--mono);font-size:12px;color:var(--ink-2);overflow-wrap:anywhere;}
+.state{font-size:12.5px;font-weight:600;}
+.state.ok{color:var(--ok-ink);} .state.warn{color:var(--warn-ink);} .state.stop{color:var(--stop-ink);}
+.state.info{color:var(--info-ink);}
+.chev{width:30px;height:30px;border-radius:50%;background:var(--disc);color:var(--primary-ink);
+  display:grid;place-items:center;transition:background-color 160ms ease;}
+.chev svg{width:16px;height:16px;transition:transform 200ms var(--ease);}
+[dir="rtl"] .chev svg{transform:scaleX(-1);}
+a.row:active{background:var(--scuff);}
+@media (hover:hover) and (pointer:fine){
+  a.row:hover{background:var(--scuff);}
+  a.row:hover .chev{background:var(--disc-press);}
+  a.row:hover .chev svg{transform:translateX(2px);}
+  [dir="rtl"] a.row:hover .chev svg{transform:scaleX(-1) translateX(2px);}
+}
+a.row:focus-visible{outline-offset:-3px;border-radius:0;}
+
+/* Document type mark, the square badge the register uses. */
+.mark{display:inline-grid;place-items:center;min-width:36px;height:22px;padding:0 6px;border-radius:6px;
+  background:var(--disc);color:var(--primary-ink);font:600 11px/1 var(--read);letter-spacing:.04em;}
+.row .mark{justify-self:start;align-self:start;margin-top:2px;}
+
+/* ── Tables: real tables on a wide screen, stacked rows on a phone ── */
+.tbl{width:100%;border-collapse:collapse;border-top:1px solid var(--lamina);}
+.tbl th{text-align:start;padding:12px var(--gap) 10px;font:600 11px/1.2 var(--read);letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--bedding);}
+.tbl td{padding:15px var(--gap);vertical-align:top;font-size:13.5px;line-height:1.6;color:var(--ink-2);}
+.tbl tbody tr + tr td{border-top:1px solid var(--lamina);}
+.tbl td b{color:var(--ink);font-weight:600;}
+.nowrap{white-space:nowrap;}
+.code{font-family:var(--mono);font-size:12.5px;color:var(--ink);overflow-wrap:anywhere;}
+.code.was{color:var(--ink-3);}
+.arrow{display:none;color:var(--ink-3);margin-inline:6px;}
+.clash{font-size:inherit;font-weight:600;color:var(--warn-ink);}
+.rl-name{font:300 16px/1.3 var(--head);color:var(--ink);display:block;}
+.rl-sub{display:block;font-size:12.5px;color:var(--ink-3);margin-top:3px;}
+.rl-n{font:300 22px/1.1 var(--head);color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.rl-n small{display:block;font:400 12px/1.3 var(--read);color:var(--ink-3);margin-top:3px;}
+
+/* ── Foot ── */
+.foot{grid-column:2;max-width:780px;margin-top:40px;padding-top:18px;border-top:1px solid var(--bedding);
+  display:flex;flex-wrap:wrap;align-items:center;gap:0 22px;font-size:13px;color:var(--ink-3);}
+.foot a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;font-weight:500;}
+.foot a[hidden]{display:none;}
+.foot span{margin-inline-end:auto;}
+
+@media (max-width:1000px){
+  .frame{grid-template-columns:minmax(0,1fr);padding:32px 24px 72px;}
+  .rail{display:none;}
+  .intro,.body,.foot{grid-column:1;max-width:none;}
+}
+@media (max-width:640px){
+  :root{--gap:16px;}
+  .frame{padding:26px 16px 64px;}
+  h1{font-size:28px;}
+  .lede{font-size:15px;}
+  .body{margin-top:30px;gap:20px;}
+  .sheet{border-radius:18px;}
+  .sh-head{padding:18px var(--gap) 16px;column-gap:12px;}
+  h2{font-size:18px;}
+  .row{grid-template-columns:58px minmax(0,1fr) 30px;column-gap:12px;min-height:60px;padding:15px var(--gap);}
+  .row.static{grid-template-columns:58px minmax(0,1fr);}
+  .row.doc{grid-template-columns:44px minmax(0,1fr) 30px;}
+  .fig{font-size:26px;}
+  .rname{font-size:16px;}
+  /* The tables stack: each row becomes a short block, so nothing scrolls
+     sideways. Roles are restated in the markup so readers keep the grid. */
+  .tbl thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+  .tbl, .tbl tbody, .tbl tr, .tbl td{display:block;}
+  .tbl tbody tr{padding:14px var(--gap);}
+  .tbl tbody tr + tr{border-top:1px solid var(--lamina);}
+  .tbl tbody tr + tr td{border-top:0;}
+  .tbl td{padding:0;}
+  .tbl-map td:first-child{display:inline;}
+  .tbl-map td:nth-child(2){display:inline;}
+  .tbl-map .arrow{display:inline;}
+  .tbl-map td:nth-child(3){margin-top:6px;}
+  .tbl-roles tr{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;}
+  .tbl-roles td:nth-child(2){text-align:end;}
+  .tbl-roles td:nth-child(3){grid-column:1 / -1;margin-top:8px;}
+  .foot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px;}
+  .foot span{grid-column:1 / -1;padding-block:6px 2px;}
+  .foot a{justify-content:flex-start;}
+}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{transition-duration:.01ms!important;animation:none!important;}}
+</style>
+<link rel="stylesheet" href="topbar.css">
+</head>
+<body>
+
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+  <a href="index.html" class="nav-brand">
+    <span class="nav-title"><span class="nav-title-brand">TAQA</span> <span class="nav-title-hub">Knowledge Hub</span></span>
+    <span class="nav-subtitle"><em>TechHub Platform</em></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
+    <li><a href="ai-search.html">Document Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
+  <div class="nav-right">
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<script src="roles.js"></script>
+<script>
+/* This page explains the platform to the people who build and check the
+   register: the IT team, QMS and external auditors. It is open to the roles
+   that hold the register view, like the Master List. See TAQA_ROLE.refuse. */
+(function(){
+  if (typeof TAQA_ROLE === 'undefined' || TAQA_ROLE.canRegister()) return;
+  TAQA_ROLE.refuse('This page is for QMS and auditors',
+    'It explains how the platform works and what the back end has to supply. It is open to QMS and to external auditors. The IT team can read it by switching the preview role to QMS or External Auditor.');
+})();
+</script>
+
+<div class="frame">
+
+  <aside class="rail">
+    <nav aria-labelledby="rail-t">
+      <div class="rail-t" id="rail-t">On this page</div>
+      <ol>
+        <li><a href="#s-register"><span>1</span>The register</a></li>
+        <li><a href="#s-metadata"><span>2</span>Control metadata</a></li>
+        <li><a href="#s-numbering"><span>3</span>Numbering</a></li>
+        <li><a href="#s-roles"><span>4</span>Roles</a></li>
+        <li><a href="#s-qhse"><span>5</span>Open with QHSE</a></li>
+      </ol>
+    </nav>
+  </aside>
+
+  <header class="intro">
+    <div class="kicker">For the IT team, QMS and auditors</div>
+    <h1>About this platform</h1>
+    <p class="lede">What the document control layer does, what the back end has to supply, and what is still open with QHSE.</p>
+    <p class="note">
+      <span class="disc" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.2"/></svg></span>
+      <span><b>About the data.</b> Titles for the twelve original segments are real; newer areas carry representative ones. Revision, approval and status values are generated so the controls can be seen working. Every figure here is counted from the register.</span>
+    </p>
+  </header>
+
+  <main class="body">
+
+    <section class="sheet" id="s-register" aria-labelledby="h-register">
+      <div class="sh-head">
+        <span class="sh-no" aria-hidden="true">1</span>
+        <div>
+          <h2 id="h-register">A register, where there was none</h2>
+          <p class="sh-sub">TQ-QHSE-S001 5.1 requires a Master Document List. The Hub held its documents in three copies that nothing kept in step.</p>
+        </div>
+      </div>
+      <ul class="rows">
+        <li><a class="row" href="master-list.html">
+          <span class="fig" data-n="total"></span>
+          <span class="rmain"><span class="rname">The register</span>
+            <span class="rdesc">Filter by area, type, status, class or language. Every view is a link you can send.</span></span>
+          <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </a></li>
+        <li><a class="row" href="master-list.html?view=provisional">
+          <span class="fig" data-n="prov"></span>
+          <span class="rmain"><span class="rname">Waiting on a short form</span>
+            <span class="rdesc">These cannot take a conformant number under TQ-QHSE-S001 5.3 until QHSE assigns one.</span></span>
+          <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </a></li>
+        <li><a class="row" href="master-list.html?view=overdue">
+          <span class="fig" data-n="ov180"></span>
+          <span class="rmain"><span class="rname">More than six months overdue</span>
+            <span class="rdesc">Of <b data-n="ov"></b> reviews past their date, <b data-n="ov180"></b> are more than 180 days late.</span></span>
+          <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </a></li>
+      </ul>
+    </section>
+
+    <section class="sheet" id="s-metadata" aria-labelledby="h-metadata">
+      <div class="sh-head">
+        <span class="sh-no" aria-hidden="true">2</span>
+        <div>
+          <h2 id="h-metadata">Documents carry real control metadata</h2>
+          <p class="sh-sub">The viewer used to derive revision, issue date and author by hashing the title against a list of six names. It now reads the register, and says plainly when a value is missing.</p>
+        </div>
+      </div>
+      <ul class="rows" id="doc-rows">
+        <li><a class="row" data-doc="TQ-TWS-CTSS-SOP-012" data-note="Download, print, offline pin and the reference card are all disabled. Each would create an uncontrolled copy. Try this one first."></a></li>
+        <li><a class="row" data-doc="TQ-TWS-CTSS-SOP-004" data-note="Still in force, but nobody has confirmed it is still suitable, and the banner says exactly that."></a></li>
+        <li><a class="row" data-doc="TQ-TWS-CTSS-SOP-001-AR" data-note="Linked to its English source and inheriting its revision. TQ-QHSE-S001 has no translation clause at all."></a></li>
+      </ul>
+    </section>
+
+    <section class="sheet" id="s-numbering" aria-labelledby="h-numbering">
+      <div class="sh-head">
+        <span class="sh-no" aria-hidden="true">3</span>
+        <div>
+          <h2 id="h-numbering">Numbering follows <span class="nowrap">TQ-QHSE-S001 5.3</span></h2>
+          <p class="sh-sub">The Hub was inventing its own scheme, and two of its prefixes collided with short forms the standard had already assigned elsewhere.</p>
+        </div>
+      </div>
+      <table class="tbl tbl-map" role="table">
+        <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col" style="width:22%">Was</th><th role="columnheader" scope="col" style="width:32%">Now</th><th role="columnheader" scope="col">Why it mattered</th></tr></thead>
+        <tbody role="rowgroup">
+          <tr role="row"><td role="cell"><span class="code was">CT-001</span><span class="arrow" aria-hidden="true">to</span></td><td role="cell"><span class="code">TQ-TWS-CTSS-SOP-001</span></td><td role="cell">Business unit, service line and type are all carried in the number.</td></tr>
+          <tr role="row"><td role="cell"><span class="code was">WS-001</span><span class="arrow" aria-hidden="true">to</span></td><td role="cell"><span class="code">TQ-TWS-WSS-SOP-001</span></td><td role="cell"><span class="clash">Collision.</span> The Hub used WS for Well Safety. The standard assigns WS to Wireline Services.</td></tr>
+          <tr role="row"><td role="cell"><span class="code was">CS-PROC-001</span><span class="arrow" aria-hidden="true">to</span></td><td role="cell"><span class="code">TQ-GRC-SOP-001</span></td><td role="cell"><span class="clash">Collision.</span> The Hub used CS for Cybersecurity. The standard assigns CS to Customer Service, and the entity is now Governance, Risk &amp; Compliance.</td></tr>
+          <tr role="row"><td role="cell"><span class="code was">ALERT-CT-001</span><span class="arrow" aria-hidden="true">to</span></td><td role="cell"><span class="code">TQ-TWS-CTSS-ALT-001</span></td><td role="cell">Technical Alert is not a type defined in section 4, so no conformant code exists.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="sheet" id="s-roles" aria-labelledby="h-roles">
+      <div class="sh-head">
+        <span class="sh-no" aria-hidden="true">4</span>
+        <div>
+          <h2 id="h-roles">Who can see and control what</h2>
+          <p class="sh-sub">Role decides which functions you get. Classification decides which documents. Every role can still confirm the current revision of a document before a job, through Search and the area libraries, because TQ-QHSE-S001 5.5 requires it.</p>
+        </div>
+      </div>
+      <table class="tbl tbl-roles" role="table">
+        <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col" style="width:34%">Role</th><th role="columnheader" scope="col" style="width:16%">Sees</th><th role="columnheader" scope="col">Controls</th></tr></thead>
+        <tbody role="rowgroup" id="role-rows"></tbody>
+      </table>
+      <ul class="rows nofig">
+        <li><div class="row static">
+          <span class="rmain"><span class="rname">Try it: switch role</span>
+            <span class="rdesc">Use the View as switch on the top bar; on a phone it sits under Viewing as, at the foot of the menu. As Employee, the Master List, this page and the export close, and <b data-n="hidden"></b> documents drop out of view.</span></span>
+        </div></li>
+        <li><div class="row static">
+          <span class="rmain"><span class="rname">A specification, not a security control</span>
+            <span class="rdesc">Role switching runs in the browser and proves nothing. The back end applies the same rules on the server, from an Entra ID group through the SSO claim to a check on every record.</span></span>
+        </div></li>
+      </ul>
+    </section>
+
+    <section class="sheet" id="s-qhse" aria-labelledby="h-qhse">
+      <div class="sh-head">
+        <span class="sh-no" aria-hidden="true">5</span>
+        <div>
+          <h2 id="h-qhse">Open with QHSE</h2>
+          <p class="sh-sub">Applying the standard in code is what exposed these. None can be settled in the Hub.</p>
+        </div>
+      </div>
+      <ul class="rows">
+        <li><a class="row" href="master-list.html?view=provisional">
+          <span class="fig" data-n="prov"></span>
+          <span class="rmain"><span class="rname">Cannot be numbered</span>
+            <span class="rdesc"><b data-n="grcName"></b> holds <span data-n="grc"></span> of them, and <b data-n="ldName"></b> has no assigned short form either, though it owns this platform. <b data-n="altName"></b> (<span data-n="alt"></span>) and <b data-n="llName"></b> (<span data-n="ll"></span>) are not types defined in section 4.</span></span>
+          <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </a></li>
+        <li><div class="row static">
+          <span class="fig"><span data-n="ret"></span><small>yrs</small></span>
+          <span class="rmain"><span class="rname">Retention the register keeps</span>
+            <span class="rdesc">TQ-QHSE-S001 7.5 sets five years, with ten as an API Q1 and medical exception. API Q2 3rd Edition 4.5 requires ten for all records. QHSE has to settle which the standard says.</span></span>
+        </div></li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer class="foot">
+    <span>TAQA Knowledge Hub</span>
+    <a href="index.html">Home</a>
+    <a href="ai-search.html">Document Search</a>
+    <a href="master-list.html">Master List</a>
+    <a href="dashboard.html" id="foot-desk" hidden>Dashboard</a>
+    <a href="glossary.html">Field Glossary</a>
+  </footer>
+</div>
+
+<script src="documents-master.js"></script>
+<script src="store.js"></script>
+<script src="shared.js"></script>
+<script>
+/* Every figure is counted from the register, never typed beside it, and
+   repainted when the register changes here or in another tab. */
+(function(){
+  if (typeof TAQA_STORE === 'undefined' || typeof TAQA_DOC === 'undefined') return;
+  var L = TAQA_DOC_LOOKUPS;
+  var esc = function(t){ return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  var CHEV = '<span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>';
+  var STATUS = { 'current':['Current','ok'], 'under-review':['Under review','info'], 'superseded':['Superseded','warn'],
+                 'obsolete':['Obsolete, withdrawn','stop'], 'draft':['Draft','info'] };
+  var segName = function(k){ return (L.segments[k] || {}).name || k; };
+  var typeLabel = function(k){ return (L.types[k] || {}).label || k; };
+
+  function set(key, v){
+    document.querySelectorAll('[data-n="'+key+'"]').forEach(function(el){ el.textContent = v; });
+  }
+
+  function roleLine(k, R, seen){
+    var cls = R.classifications.map(function(c){ return c.charAt(0).toUpperCase() + c.slice(1); }).join(', ');
+    var drafts = R.statuses.indexOf('draft') === -1 ? 'no drafts' : (R.scope === 'own' ? 'own area drafts' : 'all drafts');
+    var does = [];
+    if (R.controlPanel) does.push('Sees the overdue queue and numbering report' + (R.scope === 'own' ? ' for their own area' : ''));
+    if (R.approve)      does.push('Approves where the register names them approver' + (R.scope === 'own' ? ', in their own area' : ''));
+    if (R.delegate)     does.push('Delegates that authority for a fixed period');
+    if (R.countersign)  does.push('Countersigns a release before it goes live');
+    if (R.editMetadata) does.push('Edits document metadata');
+    if (R.registerView) does.push('Opens the Master List');
+    if (R.export)       does.push('Exports TQ-QHSE-F086');
+    var changes = R.approve || R.countersign || R.delegate || R.editMetadata;
+    var ctl = does.length ? does.join('. ') + '.' : 'Reads documents.';
+    if (!changes) ctl += ' Changes nothing.';
+    return '<tr role="row"><td role="cell"><span class="rl-name">' + esc(R.label) + '</span>' +
+             '<span class="rl-sub">' + esc(cls) + ', ' + esc(drafts) +
+               (R.scope === 'own' ? ' (counted for ' + esc(TAQA_ROLE.areaName()) + ')' : '') + '</span></td>' +
+           '<td role="cell"><span class="rl-n">' + seen + '<small>documents</small></span></td>' +
+           '<td role="cell">' + esc(ctl) + '</td></tr>';
+  }
+
+  function paint(){
+    var R = TAQA_STORE.rows('register');
+    var ov = R.filter(function(d){ return TAQA_DOC.overdue(d); });
+    var ov180 = ov.filter(function(d){ var n = TAQA_DOC.reviewDays(d); return n != null && n < -180; });
+    var prov = R.filter(function(d){ return d.numberStatus === 'provisional'; });
+    var provIn = function(f){ return prov.filter(f).length; };
+    set('total', R.length);
+    set('prov', prov.length);
+    set('ov', ov.length);
+    set('ov180', ov180.length);
+    set('grcName', segName('cybersecurity'));
+    set('grc', provIn(function(d){ return d.segment === 'cybersecurity'; }));
+    set('ldName', segName('learning-center'));
+    set('altName', typeLabel('alert'));
+    set('alt', provIn(function(d){ return d.docType === 'alert'; }));
+    set('llName', typeLabel('lesson'));
+    set('ll', provIn(function(d){ return d.docType === 'lesson'; }));
+    var ret = Object.keys(L.types).map(function(k){ return L.types[k].retentionYears; }).filter(Boolean);
+    set('ret', ret.length ? Math.max.apply(null, ret) : 'Not recorded');
+
+    // Roles, straight from the specification in roles.js.
+    var seen = {};
+    TAQA_ROLE_ORDER.forEach(function(k){ seen[k] = R.filter(function(d){ return TAQA_ROLE.canSee(d, k); }).length; });
+    set('hidden', R.length - seen.employee);
+    var tb = document.getElementById('role-rows');
+    if (tb) tb.innerHTML = TAQA_ROLE_ORDER.map(function(k){ return roleLine(k, TAQA_ROLES[k], seen[k]); }).join('');
+
+    // The three example documents, read from their register records.
+    document.querySelectorAll('#doc-rows [data-doc]').forEach(function(a){
+      var d = TAQA_STORE.findDoc ? TAQA_STORE.findDoc(a.dataset.doc) : null;
+      d = d || TAQA_DOC.byNumber(a.dataset.doc);
+      if (!d) { a.outerHTML = '<div class="row static"><span class="mark">?</span><span class="rmain"><span class="rname">' + esc(a.dataset.doc) + '</span><span class="rdesc">Not in the register.</span></span></div>'; return; }
+      var t = TAQA_DOC.type(d), st = STATUS[d.status] || [d.status, 'info'];
+      var flags = '<span class="state ' + st[1] + '">' + esc(st[0]) + '</span>';
+      if (TAQA_DOC.overdue(d)) flags += '<span class="state warn">Review overdue</span>';
+      if (d.translationOf || d.language === 'ar') flags += '<span>Arabic, translation of ' + esc(d.translationOf || '') + '</span>';
+      a.classList.add('doc');
+      a.href = 'viewer.html?doc=' + encodeURIComponent(d.docNumber) + '&seg=' + encodeURIComponent(d.segment) +
+               '&type=' + encodeURIComponent(d.docType) + '&title=' + encodeURIComponent(d.title);
+      a.innerHTML = '<span class="mark" title="' + esc(t.label || d.docType) + '">' + esc(t.mark || d.docType) + '</span>' +
+        '<span class="rmain"><span class="rname"><bdi>' + esc(d.title) + '</bdi></span>' +
+        '<span class="rdesc">' + esc(a.dataset.note) + '</span>' +
+        '<span class="rmeta"><span class="num">' + esc(d.docNumber) + '</span>' + flags + '</span></span>' + CHEV;
+    });
+  }
+  TAQA_STORE.onChange(paint);
+})();
+/* The contents rail marks the section being read: the last one whose top
+   has passed a line a third of the way down, or the last section once the
+   page can scroll no further. A jump marks its target at once. */
+(function(){
+  var links = [].slice.call(document.querySelectorAll('.rail a[href^="#"]'));
+  var secs = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  if (!links.length || secs.indexOf(null) !== -1) return;
+  var mark = function(i){ links.forEach(function(a, j){
+    if (j === i) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current'); }); };
+  var pinned = -1, queued = false;
+  function measure(){
+    queued = false;
+    if (!links[0].offsetParent) return;          // the rail is hidden below 1000px
+    if (pinned !== -1) { mark(pinned); return; } // a jump holds its target
+    var de = document.documentElement, i = 0;
+    if (window.innerHeight + window.scrollY >= de.scrollHeight - 2) i = secs.length - 1;
+    else secs.forEach(function(s, j){ if (s.getBoundingClientRect().top <= window.innerHeight * 0.35) i = j; });
+    mark(i);
+  }
+  function onScroll(){ if (!queued) { queued = true; requestAnimationFrame(measure); } }
+  links.forEach(function(a, j){ a.addEventListener('click', function(){ pinned = j; mark(j);
+    setTimeout(function(){ pinned = -1; }, 1000); }); });
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  measure();
+})();
+/* QMS keeps a one-tap way back to the area desk; the dashboard refuses the others. */
+(function(){
+  var a = document.getElementById('foot-desk');
+  if (a && typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.canManage && TAQA_ROLE.canManage()) a.hidden = false;
+})();
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-// Shared segment data — loaded by dashboard.html
+// Shared segment data, loaded by dashboard.html
 const TAQA_SEGMENTS = {
   'coiled-tubing': {
     name:'Coiled Tubing', icon:'🔄', tag:'Operations',
@@ -14,14 +14,14 @@ const TAQA_SEGMENTS = {
         'Chemical Handling Manual','Data Acquisition Manual','CT Wellhead Equipment Manual'],
       policies:['CT Operations Authorization Policy','Equipment Certification Policy','Crew Competency Requirements',
         'Environmental Compliance Policy','CT Asset Management Policy','Incident Reporting Policy'],
-      alerts:['ALERT-CT-001: BHA connector fatigue — inspect all units before next run',
-        'ALERT-CT-002: New pressure rating for 2-inch CT string — effective immediately',
+      alerts:['ALERT-CT-001: BHA connector fatigue, inspect all units before next run',
+        'ALERT-CT-002: New pressure rating for 2-inch CT string, effective immediately',
         'ALERT-CT-003: Chemical compatibility update for H2S environments'],
-      lessons:['LL-CT-001: Near-miss during CT rig-up — lessons from H2 field',
-        'LL-CT-002: CT string failure analysis — root cause and prevention',
+      lessons:['LL-CT-001: Near-miss during CT rig-up, lessons from H2 field',
+        'LL-CT-002: CT string failure analysis, root cause and prevention',
         'LL-CT-003: Lessons from coiled tubing fishing operation',
-        'LL-CT-004: Mud motor stall — diagnosis and recovery',
-        'LL-CT-005: Pressure integrity test failure — field findings'],
+        'LL-CT-004: Mud motor stall, diagnosis and recovery',
+        'LL-CT-005: Pressure integrity test failure, field findings'],
       software:['Orion CT Control System | v2.3','WellPlan CT Simulator | v4.1','CoilScan Inspection Reporter | v1.8']
     }
   },
@@ -43,24 +43,24 @@ const TAQA_SEGMENTS = {
       policies:['Frac Authorization & WOCS Policy','High Pressure Operations Policy','Fluid Disposal Policy',
         'Personnel Safety Policy','Equipment Inspection Policy','Environmental Impact Policy',
         'Chemical Management Policy','Night Operations Policy'],
-      alerts:['ALERT-FRAC-001: Iron fatigue update — mandatory NDT before Q3 campaign',
+      alerts:['ALERT-FRAC-001: Iron fatigue update, mandatory NDT before Q3 campaign',
         'ALERT-FRAC-002: Revised MAASP limits for slim-hole completions',
         'ALERT-FRAC-003: New proppant concentration limits for high-temperature wells',
-        'ALERT-FRAC-004: Fluid additive compatibility change — check all blends',
-        'ALERT-FRAC-005: Screen-out risk in carbonate formations — updated protocol'],
-      lessons:['LL-FRAC-001: Surface line failure during multi-stage frac — preventive actions',
-        'LL-FRAC-002: Premature screen-out — root cause analysis',
-        'LL-FRAC-003: Chemical spill during fluid mixing — improved containment',
-        'LL-FRAC-004: Equipment failure in extreme temperature — design modifications',
-        'LL-FRAC-005: Wellhead pressure anomaly — identification and mitigation',
-        'LL-FRAC-006: Crew safety observation — confined space near pump unit',
-        'LL-FRAC-007: Data acquisition failure — system improvements implemented'],
+        'ALERT-FRAC-004: Fluid additive compatibility change, check all blends',
+        'ALERT-FRAC-005: Screen-out risk in carbonate formations, updated protocol'],
+      lessons:['LL-FRAC-001: Surface line failure during multi-stage frac, preventive actions',
+        'LL-FRAC-002: Premature screen-out, root cause analysis',
+        'LL-FRAC-003: Chemical spill during fluid mixing, improved containment',
+        'LL-FRAC-004: Equipment failure in extreme temperature, design modifications',
+        'LL-FRAC-005: Wellhead pressure anomaly, identification and mitigation',
+        'LL-FRAC-006: Crew safety observation, confined space near pump unit',
+        'LL-FRAC-007: Data acquisition failure, system improvements implemented'],
       software:['FracPro RT Fracturing Simulator | v10.5','GOHFER Hydraulic Fracturing Software | v8.2','DataVan Monitoring Suite | v3.0']
     }
   },
   'wireline': {
-    name:'Wireline', icon:'📡', tag:'Logging',
-    desc:'Wireline logging, perforating, and well intervention operations — memory, pump-down, and slickline procedures.',
+    name:'Wireline Services', icon:'📡', tag:'Logging',
+    desc:'Wireline logging, perforating, and well intervention operations, memory, pump-down, and slickline procedures.',
     sops:10, manuals:8, policies:5, alerts:0, lessons:4, software:2,
     docs:{
       sops:['WL-001 Pre-Job Hazard Assessment','WL-002 Tool String Assembly SOP','WL-003 Perforation Operations SOP',
@@ -72,15 +72,15 @@ const TAQA_SEGMENTS = {
       policies:['Wireline Authorization Policy','Explosives Handling Policy','Pressure Control Policy',
         'Data Security Policy','Personnel Certification Policy'],
       alerts:[],
-      lessons:['LL-WL-001: Tool string stuck — successful retrieval and lessons',
-        'LL-WL-002: Perforating misfire — investigation and protocol update',
-        'LL-WL-003: Data loss during real-time logging — system redundancy added',
-        'LL-WL-004: PCE leak detection — early intervention that prevented incident'],
+      lessons:['LL-WL-001: Tool string stuck, successful retrieval and lessons',
+        'LL-WL-002: Perforating misfire, investigation and protocol update',
+        'LL-WL-003: Data loss during real-time logging, system redundancy added',
+        'LL-WL-004: PCE leak detection, early intervention that prevented incident'],
       software:['WellCAD Log Analysis Suite | v5.8','Warrior Wireline Logging System | v8.4']
     }
   },
   'drilling': {
-    name:'Drilling', icon:'⛏️', tag:'Drilling Ops',
+    name:'Drilling Services', icon:'⛏️', tag:'Drilling Ops',
     desc:'Drilling engineering, well planning, rig operations, mud systems, BHA design, and formation evaluation procedures.',
     sops:22, manuals:15, policies:12, alerts:7, lessons:9, software:3,
     docs:{
@@ -100,22 +100,22 @@ const TAQA_SEGMENTS = {
         'Environmental Drilling Policy','Chemical Use Policy','Night Drilling Policy',
         'Data Ownership Policy','Emergency Response Plan Policy','BOP Testing Policy',
         'Waste Management Policy','Crew Rotation Policy','Equipment Certification Policy'],
-      alerts:['ALERT-DRL-001: Revised kick tolerance — update all well programs',
+      alerts:['ALERT-DRL-001: Revised kick tolerance, update all well programs',
         'ALERT-DRL-002: New BOP test frequency requirements effective June 2026',
         'ALERT-DRL-003: Drilling fluid compatibility issue in Zone B formations',
-        'ALERT-DRL-004: H2S concentration increase in Shedgum area — update PPE',
-        'ALERT-DRL-005: String torque limits revised — consult engineer before operations',
-        'ALERT-DRL-006: Casing wear report — mandated inspection before running',
+        'ALERT-DRL-004: H2S concentration increase in Shedgum area, update PPE',
+        'ALERT-DRL-005: String torque limits revised, consult engineer before operations',
+        'ALERT-DRL-006: Casing wear report, mandated inspection before running',
         'ALERT-DRL-007: New directional steering tool limitations in high-temperature wells'],
-      lessons:['LL-DRL-001: Stuck pipe incident — lessons and preventive measures',
-        'LL-DRL-002: Well control event — blowout preventer response review',
-        'LL-DRL-003: Casing collapse in depleted zone — design improvement',
-        'LL-DRL-004: Lost circulation management — successful remediation',
-        'LL-DRL-005: Directional well tortuosity — planning improvements',
-        'LL-DRL-006: Mud system failure — rapid response and redesign',
-        'LL-DRL-007: Tool failure at depth — retrieval and analysis',
+      lessons:['LL-DRL-001: Stuck pipe incident, lessons and preventive measures',
+        'LL-DRL-002: Well control event, blowout preventer response review',
+        'LL-DRL-003: Casing collapse in depleted zone, design improvement',
+        'LL-DRL-004: Lost circulation management, successful remediation',
+        'LL-DRL-005: Directional well tortuosity, planning improvements',
+        'LL-DRL-006: Mud system failure, rapid response and redesign',
+        'LL-DRL-007: Tool failure at depth, retrieval and analysis',
         'LL-DRL-008: Sidetrack planning in complex geology',
-        'LL-DRL-009: Wellbore instability — geomechanical study findings'],
+        'LL-DRL-009: Wellbore instability, geomechanical study findings'],
       software:['Well Seeker Pro Directional Software | v2.6','COMPASS Directional Planning Suite | v5.1','INTEQ Drilling Manager | v4.3']
     }
   },
@@ -132,19 +132,19 @@ const TAQA_SEGMENTS = {
         'Float Equipment Catalog & Manual','Centralizer Selection Manual','Plug & Abandonment Manual',
         'Cementing Data Analysis Manual','Chemical Additive Manual','Equipment Maintenance Manual'],
       policies:['Cementing Quality Assurance Policy','Lab Testing Requirements Policy','Cement Vendor Qualification Policy',
-        'Environmental Policy — Cement Waste','Remedial Cementing Authorization Policy',
+        'Environmental Policy, Cement Waste','Remedial Cementing Authorization Policy',
         'P&A Regulatory Compliance Policy','Data Management Policy'],
       alerts:[],
-      lessons:['LL-CEM-001: Cement top failure — investigation and corrective action',
-        'LL-CEM-002: Free water observed after primary cement — mix design review',
-        'LL-CEM-003: Failed squeeze job — lessons from over-pressuring zone',
-        'LL-CEM-004: Float collar failure — pre-job testing enhancement',
-        'LL-CEM-005: Centralizer placement issue in deviated well — planning improvement'],
+      lessons:['LL-CEM-001: Cement top failure, investigation and corrective action',
+        'LL-CEM-002: Free water observed after primary cement, mix design review',
+        'LL-CEM-003: Failed squeeze job, lessons from over-pressuring zone',
+        'LL-CEM-004: Float collar failure, pre-job testing enhancement',
+        'LL-CEM-005: Centralizer placement issue in deviated well, planning improvement'],
       software:['OptiCem Slurry Design Software | v8.2','CemCADE Cement Job Simulator | v6.4']
     }
   },
   'inspection': {
-    name:'Inspection Services', icon:'🔍', tag:'Compliance',
+    name:'Inspection', icon:'🔍', tag:'Compliance',
     desc:'Equipment inspection standards, NDT methods, compliance requirements, certification workflows, and audit documentation.',
     sops:15, manuals:10, policies:9, alerts:3, lessons:6, software:2,
     docs:{
@@ -159,20 +159,20 @@ const TAQA_SEGMENTS = {
       policies:['Inspector Qualification Policy','Third-Party Certification Policy','Equipment Release Policy',
         'Non-Conformance Management Policy','Audit Frequency Policy','Data Retention Policy',
         'Equipment Color-Coding Policy','Vendor Inspection Policy','Regulatory Compliance Policy'],
-      alerts:['ALERT-INS-001: Updated API 5CT wall loss rejection criteria — revise all checklists',
+      alerts:['ALERT-INS-001: Updated API 5CT wall loss rejection criteria, revise all checklists',
         'ALERT-INS-002: BOP inspection intervals reduced to 14 days in H2S zones',
         'ALERT-INS-003: Third-party inspector qualification renewal required by August 2026'],
-      lessons:['LL-INS-001: Missed crack in BOP body — enhanced inspection protocol',
-        'LL-INS-002: Incorrect rejection call on tubulars — calibration findings',
-        'LL-INS-003: Lifting equipment failure after passed inspection — gap analysis',
-        'LL-INS-004: Vendor inspection discrepancy — dual verification implemented',
-        'LL-INS-005: Crane overload incident — pre-lift checklist improvements',
-        'LL-INS-006: NDT equipment drift — calibration frequency doubled'],
+      lessons:['LL-INS-001: Missed crack in BOP body, enhanced inspection protocol',
+        'LL-INS-002: Incorrect rejection call on tubulars, calibration findings',
+        'LL-INS-003: Lifting equipment failure after passed inspection, gap analysis',
+        'LL-INS-004: Vendor inspection discrepancy, dual verification implemented',
+        'LL-INS-005: Crane overload incident, pre-lift checklist improvements',
+        'LL-INS-006: NDT equipment drift, calibration frequency doubled'],
       software:['InspectTrack Pro Inspection Manager | v3.2','NTDS Tubular Inspection Database | v2.1']
     }
   },
   'well-safety': {
-    name:'Well Safety', icon:'🛡️', tag:'Safety Critical',
+    name:'Safety Services', icon:'🛡️', tag:'Safety Critical',
     desc:'Well control procedures, blowout prevention, emergency response plans, pressure management, and safety management systems.',
     sops:20, manuals:12, policies:15, alerts:8, lessons:9, software:2,
     docs:{
@@ -192,23 +192,23 @@ const TAQA_SEGMENTS = {
         'Safety Critical Element Policy','Barrier Philosophy Policy','HSE Case Policy',
         'Simultaneous Operations (SIMOPS) Policy','Contractor Well Safety Policy','Night Operations Policy',
         'Dropped Objects Policy','Work Permit Policy','Change Management Policy'],
-      alerts:['ALERT-WS-001: CRITICAL — Revised well control kill weight calculation — mandatory briefing',
-        'ALERT-WS-002: BOP ram seals replacement schedule accelerated — check unit status',
-        'ALERT-WS-003: H2S detector calibration failure found — immediate re-calibration required',
-        'ALERT-WS-004: Barrier integrity concern on 3 wells — inspection ordered',
+      alerts:['ALERT-WS-001: CRITICAL, Revised well control kill weight calculation, mandatory briefing',
+        'ALERT-WS-002: BOP ram seals replacement schedule accelerated, check unit status',
+        'ALERT-WS-003: H2S detector calibration failure found, immediate re-calibration required',
+        'ALERT-WS-004: Barrier integrity concern on 3 wells, inspection ordered',
         'ALERT-WS-005: New SIMOPS restriction near active completions',
-        'ALERT-WS-006: Updated evacuation assembly point — all rigs to update muster cards',
-        'ALERT-WS-007: Dropped object incident — mandatory dropped object survey',
-        'ALERT-WS-008: Revised kill sheet template — all drillers must recertify'],
-      lessons:['LL-WS-001: Gas influx during tripping — well shut-in case study',
-        'LL-WS-002: BOP function test failure — corrective actions taken',
-        'LL-WS-003: Near-miss H2S exposure — detection gap analysis',
-        'LL-WS-004: Well integrity anomaly — early detection success story',
-        'LL-WS-005: Evacuation drill findings — mustering improvements',
+        'ALERT-WS-006: Updated evacuation assembly point, all rigs to update muster cards',
+        'ALERT-WS-007: Dropped object incident, mandatory dropped object survey',
+        'ALERT-WS-008: Revised kill sheet template, all drillers must recertify'],
+      lessons:['LL-WS-001: Gas influx during tripping, well shut-in case study',
+        'LL-WS-002: BOP function test failure, corrective actions taken',
+        'LL-WS-003: Near-miss H2S exposure, detection gap analysis',
+        'LL-WS-004: Well integrity anomaly, early detection success story',
+        'LL-WS-005: Evacuation drill findings, mustering improvements',
         'LL-WS-006: SIMOPS incident during concurrent operations',
         'LL-WS-007: Barrier verification failure found during well handover',
-        'LL-WS-008: Surface safety valve failure — testing protocol enhancement',
-        'LL-WS-009: Night-time well control event — communications lesson'],
+        'LL-WS-008: Surface safety valve failure, testing protocol enhancement',
+        'LL-WS-009: Night-time well control event, communications lesson'],
       software:['OLGA Well Control Simulator | v2024.1','SafetyNet BOP Management System | v4.0']
     }
   },
@@ -231,17 +231,17 @@ const TAQA_SEGMENTS = {
         'Management of Change Policy','Audit Frequency Policy','Incident Reporting Policy',
         'Stop Work Authority Policy','Chemical Management Policy','Environmental Monitoring Policy',
         'Permit to Work Policy','Community Relations Policy','Data Confidentiality Policy','Quality Assurance Policy'],
-      alerts:['ALERT-QHSE-001: New waste segregation requirements — effective immediately',
-        'ALERT-QHSE-002: PPE standard update — Type III gloves now required in all chemical zones',
+      alerts:['ALERT-QHSE-001: New waste segregation requirements, effective immediately',
+        'ALERT-QHSE-002: PPE standard update, Type III gloves now required in all chemical zones',
         'ALERT-QHSE-003: Contractor HSE re-qualification required Q3 2026',
-        'ALERT-QHSE-004: Environmental monitoring frequency doubled — spill risk area'],
-      lessons:['LL-QHSE-001: JSA failure that led to near-miss — quality of assessment reviewed',
-        'LL-QHSE-002: Environmental spill — improved bunding and response',
-        'LL-QHSE-003: Contractor incident — pre-qualification gap identified',
-        'LL-QHSE-004: Permit to Work violation — systemic fix applied',
-        'LL-QHSE-005: Chemical exposure incident — improved storage and labeling',
-        'LL-QHSE-006: MOC bypass led to equipment failure — process strengthened',
-        'LL-QHSE-007: Waste classification error — training and audit response'],
+        'ALERT-QHSE-004: Environmental monitoring frequency doubled, spill risk area'],
+      lessons:['LL-QHSE-001: JSA failure that led to near-miss, quality of assessment reviewed',
+        'LL-QHSE-002: Environmental spill, improved bunding and response',
+        'LL-QHSE-003: Contractor incident, pre-qualification gap identified',
+        'LL-QHSE-004: Permit to Work violation, systemic fix applied',
+        'LL-QHSE-005: Chemical exposure incident, improved storage and labeling',
+        'LL-QHSE-006: MOC bypass led to equipment failure, process strengthened',
+        'LL-QHSE-007: Waste classification error, training and audit response'],
       software:['IncidentTracker Pro HSSE Suite | v5.1','HSSE Management System v3.4']
     }
   },
@@ -263,11 +263,11 @@ const TAQA_SEGMENTS = {
         'Employee Data Privacy Policy','Business Travel Policy','Expense Reimbursement Policy',
         'Disciplinary & Termination Policy','Grievance & Appeals Policy','Promotion & Succession Policy'],
       alerts:[],
-      lessons:['LL-HR-001: Onboarding gaps identified through exit interview analysis — process redesigned',
-        'LL-HR-002: Performance review cycle delay — revised timeline and manager training',
-        'LL-HR-003: Recruitment timeline reduction — structured interview process adopted',
-        'LL-HR-004: Policy communication failure — multi-channel distribution approach adopted',
-        'LL-HR-005: HRMS data accuracy issues — validation controls implemented'],
+      lessons:['LL-HR-001: Onboarding gaps identified through exit interview analysis, process redesigned',
+        'LL-HR-002: Performance review cycle delay, revised timeline and manager training',
+        'LL-HR-003: Recruitment timeline reduction, structured interview process adopted',
+        'LL-HR-004: Policy communication failure, multi-channel distribution approach adopted',
+        'LL-HR-005: HRMS data accuracy issues, validation controls implemented'],
       software:['Oracle HRMS Integration Pack | v12.2']
     }
   },
@@ -289,12 +289,12 @@ const TAQA_SEGMENTS = {
         'Workshop Safety Policy','Third-Party Repair Policy','Spare Parts Management Policy',
         'Tool Identification & Tagging Policy','Return-to-Service Policy'],
       alerts:[],
-      lessons:['LL-TWS-001: In-field tool failure — PM gap identified and corrected',
-        'LL-TWS-002: Calibration drift not caught — revised frequency policy',
-        'LL-TWS-003: Hydraulic seal failure — new inspection criteria added',
-        'LL-TWS-004: Incorrect reassembly after overhaul — checklist improvement',
-        'LL-TWS-005: Motor bearing failure — vibration monitoring added',
-        'LL-TWS-006: Spare parts stockout — inventory management improvement'],
+      lessons:['LL-TWS-001: In-field tool failure, PM gap identified and corrected',
+        'LL-TWS-002: Calibration drift not caught, revised frequency policy',
+        'LL-TWS-003: Hydraulic seal failure, new inspection criteria added',
+        'LL-TWS-004: Incorrect reassembly after overhaul, checklist improvement',
+        'LL-TWS-005: Motor bearing failure, vibration monitoring added',
+        'LL-TWS-006: Spare parts stockout, inventory management improvement'],
       software:['SAP PM Integration Toolkit | v7.4','AssetTrak Maintenance Manager | v3.2']
     }
   },
@@ -314,21 +314,21 @@ const TAQA_SEGMENTS = {
         'Flowback & Clean-Up Manual','Well Test Data Analysis Manual'],
       policies:['Well Testing Authorization Policy','Surface Testing Equipment Policy',
         'H2S Management Policy for Well Tests','Data Ownership & Confidentiality Policy',
-        'Third-Party Equipment Policy','Environmental Compliance — Well Testing'],
-      alerts:['ALERT-WT-001: H2S risk elevation in Unayzah formation — mandatory briefing before all tests',
-        'ALERT-WT-002: Separator pressure rating update — verify all units before deployment'],
-      lessons:['LL-WT-001: Well test data loss due to gauge failure — redundancy protocol added',
-        'LL-WT-002: Unexpected H2S during DST — emergency response review',
-        'LL-WT-003: Separator overflow incident — improved monitoring implemented',
-        'LL-WT-004: Flow rate measurement discrepancy — calibration procedure improved'],
+        'Third-Party Equipment Policy','Environmental Compliance, Well Testing'],
+      alerts:['ALERT-WT-001: H2S risk elevation in Unayzah formation, mandatory briefing before all tests',
+        'ALERT-WT-002: Separator pressure rating update, verify all units before deployment'],
+      lessons:['LL-WT-001: Well test data loss due to gauge failure, redundancy protocol added',
+        'LL-WT-002: Unexpected H2S during DST, emergency response review',
+        'LL-WT-003: Separator overflow incident, improved monitoring implemented',
+        'LL-WT-004: Flow rate measurement discrepancy, calibration procedure improved'],
       software:['Saphir Well Test Analysis Software | v5.0','OFM Well & Reservoir Analysis | v2019.1']
     }
   },
   'cybersecurity': {
-    name:'Cybersecurity', icon:'🔐', tag:'IT & Security',
+    name:'Governance, Risk & Compliance', icon:'🔐', tag:'GRC',
     desc:'Cybersecurity governance, policies, standards, operational procedures, security awareness programs, and compliance documentation for TAQA\'s IT and OT environments.',
     sops:10, manuals:8, policies:12, alerts:5, lessons:6, software:2,
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Compliance', lessons:'Awareness'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Compliance', lessons:'Awareness'},
     contributors:[{name:'Mohammed Al Obaid', role:'Cybersecurity Director'},{name:'Afnan Al Khabty', role:'Senior Cyber Security Analyst'}],
     docs:{
       sops:['CS-PROC-001 Incident Response Procedure','CS-PROC-002 Access Control Request Procedure',
@@ -346,17 +346,17 @@ const TAQA_SEGMENTS = {
         'Bring Your Own Device (BYOD) Policy','Physical Security Policy',
         'Cyber Incident Response Policy','Business Continuity & Disaster Recovery Policy',
         'Software Licensing & Asset Management Policy'],
-      alerts:['COMP-001: Annual security awareness training due — all staff must complete by July 2026',
-        'COMP-002: ISO 27001 internal audit scheduled — prepare evidence packages',
-        'COMP-003: NCA CSCC compliance review Q3 2026 — assess current posture',
-        'COMP-004: Third-party vendor security assessments due — 12 vendors pending',
-        'COMP-005: PDPL (Data Protection Law) compliance deadline — review data handling processes'],
-      lessons:['AWR-001: Phishing simulation results — 18% click rate identified, targeted training deployed',
-        'AWR-002: Social engineering awareness — lessons from simulated vishing campaign',
-        'AWR-003: USB drop test findings — physical security awareness gap addressed',
-        'AWR-004: Password hygiene campaign — results from enterprise-wide audit',
-        'AWR-005: Ransomware tabletop exercise — incident response gaps identified',
-        'AWR-006: Insider threat awareness — case study and preventive controls'],
+      alerts:['COMP-001: Annual security awareness training due, all staff must complete by July 2026',
+        'COMP-002: ISO 27001 internal audit scheduled, prepare evidence packages',
+        'COMP-003: NCA CSCC compliance review Q3 2026, assess current posture',
+        'COMP-004: Third-party vendor security assessments due, 12 vendors pending',
+        'COMP-005: PDPL (Data Protection Law) compliance deadline, review data handling processes'],
+      lessons:['AWR-001: Phishing simulation results, 18% click rate identified, targeted training deployed',
+        'AWR-002: Social engineering awareness, lessons from simulated vishing campaign',
+        'AWR-003: USB drop test findings, physical security awareness gap addressed',
+        'AWR-004: Password hygiene campaign, results from enterprise-wide audit',
+        'AWR-005: Ransomware tabletop exercise, incident response gaps identified',
+        'AWR-006: Insider threat awareness, case study and preventive controls'],
       software:['Microsoft Defender for Endpoint | v4.18','CyberArk Privileged Access Manager | v13.0']
     },
     docRevisions: {
@@ -365,15 +365,15 @@ const TAQA_SEGMENTS = {
         history: [
           { rev:4, date:'May 2026',  author:'Mohammed Al Obaid',  note:'Strengthened escalation workflow; added direct communication protocol with Saudi CERT and mandatory 2-hour containment deadline for Critical (P1) incidents.' },
           { rev:3, date:'Jan 2026',  author:'Afnan Al Khabty',    note:'Integrated NCA Essential Cybersecurity Controls v2.0 requirements; added OT/ICS environment-specific response steps.' },
-          { rev:2, date:'Aug 2025',  author:'Mohammed Al Obaid',  note:'Updated incident classification matrix (P1–P4); revised external notification thresholds and CIRT activation criteria.' },
-          { rev:1, date:'Mar 2025',  author:'Afnan Al Khabty',    note:'Initial release — baseline incident response procedure aligned with ISO/IEC 27035 and NIST SP 800-61.' }
+          { rev:2, date:'Aug 2025',  author:'Mohammed Al Obaid',  note:'Updated incident classification matrix (P1, P4); revised external notification thresholds and CIRT activation criteria.' },
+          { rev:1, date:'Mar 2025',  author:'Afnan Al Khabty',    note:'Initial release, baseline incident response procedure aligned with ISO/IEC 27035 and NIST SP 800-61.' }
         ]
       },
       'TAQA Cybersecurity Framework Standard v2.0': {
         current: 2,
         history: [
           { rev:2, date:'Apr 2026',  author:'Mohammed Al Obaid',  note:'Added OT/ICS security controls section; aligned with NERC CIP standards and NCA Operational Technology security guidelines.' },
-          { rev:1, date:'Sep 2025',  author:'Mohammed Al Obaid',  note:'Initial framework standard — covers governance, risk management, compliance and technical security control domains.' }
+          { rev:1, date:'Sep 2025',  author:'Mohammed Al Obaid',  note:'Initial framework standard, covers governance, risk management, compliance and technical security control domains.' }
         ]
       },
       'Information Security Policy': {
@@ -381,9 +381,197 @@ const TAQA_SEGMENTS = {
         history: [
           { rev:3, date:'Mar 2026',  author:'Mohammed Al Obaid',  note:'Updated to reflect Saudi PDPL (Personal Data Protection Law) requirements; expanded cloud and SaaS security scope.' },
           { rev:2, date:'Oct 2025',  author:'Afnan Al Khabty',    note:'Added remote access security controls; mandated MFA for all corporate systems and privileged accounts.' },
-          { rev:1, date:'Apr 2025',  author:'Mohammed Al Obaid',  note:'Initial policy release — establishes information security governance, responsibilities, and baseline controls.' }
+          { rev:1, date:'Apr 2025',  author:'Mohammed Al Obaid',  note:'Initial policy release, establishes information security governance, responsibilities, and baseline controls.' }
         ]
       }
     }
+  },
+  'slickline': {
+    name:"Slickline", icon:'\u25CB', tag:"Logging",
+    desc:"Slickline conveyance, pressure control and toolstring procedures.",
+    sops:2, manuals:1, policies:0, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Slickline Pressure Control Equipment Rig-Up", "Wireline Valve Function Test"],
+      manuals:["Toolstring Make-Up and Inspection"],
+      policies:[],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'well-completions': {
+    name:"Well Completions", icon:'\u25CB', tag:"Well Operations",
+    desc:"Completion design, running and commissioning procedures.",
+    sops:2, manuals:1, policies:0, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Completion String Running Procedure", "Production Packer Setting and Testing"],
+      manuals:["Downhole Gauge Installation"],
+      policies:[],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'marine-services': {
+    name:"Marine Services", icon:'\u25CB', tag:"Marine",
+    desc:"Vessel operations, cargo handling and offshore marine safety.",
+    sops:3, manuals:0, policies:0, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Vessel Mobilisation Checklist", "Cargo Securing and Sea Fastening", "Man Overboard Response"],
+      manuals:[],
+      policies:[],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'finance': {
+    name:"Finance", icon:'\u25CB', tag:"Finance",
+    desc:"Financial authority, reporting and expenditure control.",
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    sops:1, manuals:0, policies:2, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Month-End Close Procedure"],
+      manuals:[],
+      policies:["Delegation of Authority Policy", "Travel and Expense Policy"],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'it': {
+    name:"Information Technology", icon:'\u25CB', tag:"IT",
+    desc:"IT service delivery, change control and platform operations.",
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    sops:2, manuals:0, policies:1, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["IT Change Management Procedure", "Backup and Restore Procedure"],
+      manuals:[],
+      policies:["Acceptable Use Policy"],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'supply-chain': {
+    name:"Supply Chain", icon:'\u25CB', tag:"Procurement",
+    desc:"Sourcing, supplier qualification and goods receipt.",
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    sops:1, manuals:1, policies:1, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Purchase Requisition and Approval Procedure"],
+      manuals:["Goods Receipt and Inspection"],
+      policies:["Supplier Qualification Policy"],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'legal': {
+    name:"Legal", icon:'\u25CB', tag:"Legal",
+    desc:"Contracting authority, legal review and compliance obligations.",
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    sops:1, manuals:0, policies:2, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Legal Hold Procedure"],
+      manuals:[],
+      policies:["Contract Review and Approval Policy", "Delegation of Signing Authority"],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'learning-center': {
+    name:"Learning and Development", icon:'\u25CB', tag:"Training",
+    desc:"Competency frameworks, training delivery and instructor standards.",
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    sops:2, manuals:0, policies:1, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Training Needs Analysis Procedure", "Instructor Qualification Procedure"],
+      manuals:[],
+      policies:["Competency Assessment Policy"],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'commercial': {
+    name:"Commercial & Sales", icon:'\u25CB', tag:"Commercial",
+    desc:"Bidding, pricing authority and customer contract handover.",
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    sops:1, manuals:0, policies:2, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Customer Contract Handover Procedure"],
+      manuals:[],
+      policies:["Bid Approval Policy", "Pricing Authority Matrix"],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'pt-drilling-coe': {
+    name:"Drilling Solutions Center of Excellence", icon:'\u25CB', tag:"Edmonton, Canada",
+    desc:"Downhole drilling tools, drilling optimisation products and tool redress.",
+    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Standards', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
+    sops:3, manuals:2, policies:1, alerts:1, lessons:1, software:0,
+    contributors:[],
+    docs:{
+      sops:["Drilling Jar Assembly and Test Procedure", "Downhole Tool Redress Procedure", "Tool Failure Investigation Procedure"],
+      manuals:["Drilling Optimisation Tool Product Manual", "Agitator System Operating Manual"],
+      policies:["Product Quality Release Policy"],
+      alerts:["Jar Mandrel Inspection Interval Revised"],
+      lessons:["Premature Jar Firing on High Dogleg Sections"],
+      software:[]
+    }
+  },
+  'pt-completions-coe': {
+    name:"Well Completions Center of Excellence", icon:'\u25CB', tag:"Aberdeen, United Kingdom",
+    desc:"Completions technology: inflow control, swellable packers and sand screens.",
+    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Standards', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
+    sops:3, manuals:2, policies:1, alerts:0, lessons:1, software:0,
+    contributors:[],
+    docs:{
+      sops:["Inflow Control Device Installation Procedure", "Swellable Packer Handling and Running Procedure", "Sand Screen Make-Up Procedure"],
+      manuals:["FloSure Autonomous ICD Product Manual", "Completion Simulation Software User Manual"],
+      policies:["Technology Qualification Policy"],
+      alerts:[],
+      lessons:["Screen Plugging Traced to Brine Incompatibility"],
+      software:[]
+    }
+  },
+  'pt-intervention-coe': {
+    name:"Well Intervention Center of Excellence", icon:'\u25CB', tag:"Stavanger, Norway",
+    desc:"Through-tubing intervention tools, tractors, fishing and milling assemblies.",
+    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Standards', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
+    sops:3, manuals:2, policies:1, alerts:1, lessons:1, software:0,
+    contributors:[],
+    docs:{
+      sops:["Through-Tubing Intervention Tool Qualification Procedure", "Fishing Tool Redress and Test Procedure", "Milling Assembly Build and Dress Procedure"],
+      manuals:["Coiled Tubing Tractor Operating Manual", "Downhole Video Tool Product Manual"],
+      policies:["Intervention Technology Readiness Policy"],
+      alerts:["Tractor Wheel Wear Limits Revised"],
+      lessons:["Milling Assembly Failure, North Sea Campaign"],
+      software:[]
+    }
+  },
+  'geothermal-coe': {
+    name:"Geothermal Center of Excellence", icon:'\u25CB', tag:"Advisory",
+    desc:"Geothermal well design review and resource assessment advisory.",
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    sops:2, manuals:1, policies:0, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Geothermal Well Design Review Procedure", "Resource Assessment Procedure"],
+      manuals:["Technology Readiness Review"],
+      policies:[],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  // 'company' was missing here even though TAQA_DOC_LOOKUPS.segments (the
+  // register's own lookup table, documents-master.js) has always carried
+  // it. Every page that reads this table's .name for company-wide policies
+  // (dashboard.html, documents.html) fell back to a title-cased id and
+  // showed "Company" instead of the real name below; segment.html was
+  // already reading the register's own lookup table directly and never had
+  // the bug. No fabricated document list is added: the schema, not invented
+  // titles, is the deliverable.
+  'company': {
+    name:"Company Wide", icon:'\u25A0', tag:"Policy",
+    desc:"Company wide policies, signed by the CEO. Apply to every segment, function and center.",
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Policies', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    sops:0, manuals:0, policies:0, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{ sops:[], manuals:[], policies:[], alerts:[], lessons:[], software:[] }
   }
 };

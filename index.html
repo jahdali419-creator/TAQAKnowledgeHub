@@ -1,8 +1,14 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-taqa-theme="light">
 <head>
 <meta charset="UTF-8">
-<script>try{var _t=localStorage.getItem('taqa-theme');if(_t)document.documentElement.setAttribute('data-theme',_t);}catch(e){}</script>
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TAQA Knowledge Hub</title>
@@ -10,22 +16,23 @@
 <meta name="theme-color" content="#005D63">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Tech Hub">
+<meta name="apple-mobile-web-app-title" content="TechHub Platform">
 <link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="fonts/fonts.css">
 <noscript></noscript>
 <style>
 :root {
-  --primary: #005D63;
+  --primary: #005D63;--primary-ink:#005D63;--primary-light:#00BBB6;
   --primary-hover: #00474C;
   --accent: #FD691D;
-  --bg: #f5f6f8;
+  --bg: #F4F6F6;
   --bg-white: #ffffff;
-  --border: #e2e5e9;
+  --border: #C7DBDD;
   --border-focus: #005D63;
-  --text: #1c2b3a;
-  --text-muted: #6b7a8d;
-  --text-light: #9aa5b4;
+  --text: #1E1C1A;
+  --text-muted: #524D48;
+  --text-light: #756A61;
   --gradient:#005D63; /* flat brand teal - no gradient */
   --shadow-sm: 0 1px 4px rgba(0,0,0,0.07);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
@@ -36,99 +43,8 @@
 html { scroll-behavior:smooth; }
 body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); line-height:1.5; }
 
-/* ── Navigation ── */
-nav {
-  position:fixed; top:0; left:0; right:0; z-index:1000;
-  height:64px; padding:0 48px;
-  display:flex; align-items:center; justify-content:space-between;
-  background:rgba(255,255,255,0.92); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
-  border-bottom:1px solid rgba(0,0,0,0.08); box-shadow:0 1px 12px rgba(0,0,0,0.06);
-}
-.nav-brand { display:flex; align-items:center; gap:12px; text-decoration:none; }
-.nav-logo {
-  width:40px; height:40px; border-radius:11px;
-  background:var(--gradient);
-  display:flex; align-items:center; justify-content:center;
-  flex-shrink:0; position:relative; overflow:hidden;
-  box-shadow:0 4px 18px rgba(0,93,99,0.38);
-}
-.nav-logo::before {
-  content:''; position:absolute; top:-10px; left:-6px;
-  width:32px; height:32px;
-  background:rgba(255,255,255,0.13);
-  border-radius:50%; pointer-events:none;
-}
-.nav-title { font-family:'BwGradual','Urbanist',sans-serif; font-size:15px; }
-.nav-title-brand { font-weight:800; color:var(--primary); }
-.nav-title-hub { font-weight:500; color:#64748b; }
-.nav-subtitle { font-size:11px; color:var(--text-muted); display:block; margin-top:-2px; }
-.nav-links { display:flex; gap:2px; list-style:none; }
-.nav-links a {
-  padding:7px 15px; border-radius:6px; text-decoration:none;
-  font-size:13.5px; font-weight:500; color:var(--text-muted);
-  transition:background 0.2s, color 0.2s;
-}
-.nav-links a:hover { background:#f0f1f3; color:var(--text); }
-.nav-links a.active {
-  background:transparent; color:var(--primary); font-weight:600;
-  position:relative;
-}
-.nav-links a.active::after {
-  content:''; position:absolute; bottom:3px; left:15px; right:15px;
-  height:2px; background:var(--primary); border-radius:2px;
-}
-/* ── Segments Dropdown ── */
-.nav-dropdown { position:relative; list-style:none; }
-.nav-dropdown-btn {
-  display:flex; align-items:center; gap:5px;
-  padding:7px 15px; border-radius:6px; border:none; background:transparent; cursor:pointer;
-  font-size:13.5px; font-weight:500; color:var(--text-muted); font-family:'Inter',sans-serif;
-  transition:background 0.2s, color 0.2s;
-}
-.nav-dropdown-btn:hover, .nav-dropdown-li.open .nav-dropdown-btn { background:#f0f1f3; color:var(--text); }
-.nav-dropdown-arrow { transition:transform 0.22s; flex-shrink:0; }
-.nav-dropdown-li.open .nav-dropdown-arrow { transform:rotate(180deg); }
-.nav-dropdown-panel {
-  position:absolute; top:calc(100% + 8px); left:50%; transform:translateX(-50%) translateY(-6px);
-  width:min(420px, calc(100vw - 24px)); background:#fff; border:1px solid var(--border);
-  border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,0.13);
-  padding:8px; display:grid; grid-template-columns:1fr 1fr; gap:3px;
-  overflow:hidden;
-  opacity:0; pointer-events:none; transition:opacity 0.18s, transform 0.18s;
-  z-index:2000;
-}
-.nav-dropdown-li:hover .nav-dropdown-panel,
-.nav-dropdown-li.open .nav-dropdown-panel {
-  opacity:1; pointer-events:all; transform:translateX(-50%) translateY(0);
-}
-.seg-dd-item {
-  display:flex; align-items:center; gap:6px;
-  padding:7px 8px; border-radius:8px; text-decoration:none;
-  transition:background 0.15s; min-width:0;
-}
-.seg-dd-item:hover { background:#f4f5f7; }
-.seg-dd-name { font-size:11px; font-weight:600; color:var(--text); flex:1; min-width:0; }
-.seg-dd-tag { font-size:9px; font-weight:600; color:var(--primary); background:rgba(0,93,99,0.08); padding:1px 5px; border-radius:20px; white-space:nowrap; flex-shrink:0; }
-html[data-theme="dark"] .nav-dropdown-panel { background:#1e2a3a; border-color:rgba(255,255,255,0.1); }
-html[data-theme="dark"] .seg-dd-item:hover { background:rgba(255,255,255,0.06); }
-html[data-theme="dark"] .seg-dd-name { color:#e2e8f0; }
 
-/* Mobile segments section */
-.mob-seg-label {
-  font-size:10.5px; font-weight:700; color:var(--primary); letter-spacing:0.9px;
-  text-transform:uppercase; padding:14px 0 6px; border-bottom:1px solid var(--border);
-}
-.mob-seg-link {
-  display:block; padding:11px 0 11px 14px; font-size:14px; font-weight:500;
-  color:var(--text-muted); text-decoration:none;
-  border-bottom:1px solid var(--border); transition:color 0.2s;
-}
-.mob-seg-link:last-of-type { border-bottom:none; }
-.mob-seg-link:hover, .mob-seg-link:active { color:var(--primary); }
-html[data-theme="dark"] .mob-seg-label { color:var(--primary-light); }
-html[data-theme="dark"] .mob-seg-link { border-color:#243044; }
 
-.nav-actions { display:flex; gap:8px; align-items:center; }
 .btn {
   padding:8px 18px; border-radius:7px; font-size:13.5px; font-weight:500;
   cursor:pointer; border:none; font-family:'Inter',sans-serif;
@@ -136,14 +52,26 @@ html[data-theme="dark"] .mob-seg-link { border-color:#243044; }
   transition:background 0.2s, border-color 0.2s, color 0.2s;
 }
 .btn-outline { background:#fff; border:1px solid var(--border); color:var(--text-muted); }
-.btn-outline:hover { border-color:var(--primary); color:var(--primary); }
+.btn-outline:hover { border-color:var(--primary); color:var(--primary-ink); }
 .btn-primary { background:var(--primary); color:#fff; }
 .btn-primary:hover { background:var(--primary-hover); }
 
-/* ── Hero ── */
+/* ── Hero ──
+   A band, not a page. It used to fill the whole first screen with one
+   search box and pushed Explore by Discipline below the fold, so the
+   reader scrolled past a photo before reaching anything they could open.
+   Now it takes about half a desktop screen and about 380px on a phone,
+   and the search field is the one thing in it to act on. */
 .hero-wrap {
+  /* The photo and the overlay that darken this band are siblings of the
+     text, not ancestors of it, and the overlay's far stop is only 22%
+     opaque. Without a base colour here the right of the band is whatever
+     the photo happens to be, and white type on it is a coin toss. Naming
+     the ground states what the type is written for and holds it if the
+     photo never arrives. */
+  background:#001314;
   position:relative; overflow:hidden;
-  min-height:100vh; display:flex; flex-direction:column;
+  min-height:clamp(400px, 48vh, 520px); display:flex; flex-direction:column;
 }
 .hero-bg-layer {
   position:absolute; inset:-4%;
@@ -160,121 +88,121 @@ html[data-theme="dark"] .mob-seg-link { border-color:#243044; }
 }
 .hero-overlay {
   position:absolute; inset:0; z-index:2;
-  background:linear-gradient(105deg, rgba(6,18,26,0.93) 0%, rgba(6,18,26,0.78) 45%, rgba(6,18,26,0.22) 100%);
+  background:linear-gradient(105deg, rgba(0,19,20,0.93) 0%, rgba(0,19,20,0.78) 45%, rgba(0,19,20,0.22) 100%);
+}
+/* In RTL the text column sits on the right, so the dark end of the
+   gradient follows it there. */
+[dir="rtl"] .hero-overlay {
+  background:linear-gradient(255deg, rgba(0,19,20,0.93) 0%, rgba(0,19,20,0.78) 45%, rgba(0,19,20,0.22) 100%);
 }
 .hero {
   position:relative; z-index:3; flex:1;
-  padding:80px 48px 60px;
+  /* The top bar is fixed over this band, so the text starts below it. */
+  padding-block:calc(var(--nav-h, 64px) + 28px) 40px;
+  padding-inline:48px;
   max-width:1200px; margin:0 auto; width:100%;
-  display:grid; grid-template-columns:1fr 360px; gap:64px;
+  display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:64px;
   align-items:center; align-content:center;
 }
+.hero-left { max-width:640px; }
 
-/* ── Hero Watermark ── */
-.hero-watermark {
-  position:absolute; z-index:2;
-  font-family:'BwGradual','Urbanist',sans-serif; font-weight:800; font-style:italic;
-  font-size:clamp(100px,18vw,260px);
-  color:rgba(255,255,255,0.04);
-  letter-spacing:12px; text-transform:uppercase;
-  bottom:-10px; right:-10px;
-  pointer-events:none; user-select:none; white-space:nowrap;
-  line-height:1;
-}
-
-/* ── Hero Scroll Hint ── */
-.hero-scroll-hint {
-  position:absolute; bottom:36px; left:50%; transform:translateX(-50%);
-  z-index:4; display:flex; flex-direction:column; align-items:center; gap:7px;
-  opacity:0; animation:hintFadeIn 0.7s ease 2.5s forwards;
-  transition:opacity 0.4s; pointer-events:none;
-}
-.hero-scroll-text {
-  font-size:10px; font-weight:600; letter-spacing:2px; text-transform:uppercase;
-  color:rgba(255,255,255,0.45);
-}
-.hero-scroll-chevron {
-  width:14px; height:14px;
-  border-right:2px solid rgba(255,255,255,0.4);
-  border-bottom:2px solid rgba(255,255,255,0.4);
-  transform:rotate(45deg);
-  animation:scrollBounce 1.6s ease-in-out infinite;
-}
-@keyframes hintFadeIn { to { opacity:1; } }
-@keyframes scrollBounce {
-  0%,100% { transform:rotate(45deg) translate(0,0); }
-  50%      { transform:rotate(45deg) translate(2px,2px); }
-}
-
+/* The band under the hero photo is dark in both themes, so the legacy teal is
+   legal here as text. It used to be a lighter mix of its own, which is a shade
+   the palette does not have; the hover lifts to white. */
 .hero-label {
-  display:inline-block; font-size:14px; font-weight:700; letter-spacing:0.3px;
-  color:#4DD9D3; margin-bottom:16px;
+  display:inline-block; font-size:13.5px; font-weight:700; letter-spacing:0.3px;
+  color:var(--primary-light); margin-bottom:14px;
 }
 a.hero-label {
-  text-decoration:none; border-bottom:1px solid rgba(77,217,211,0.35);
+  text-decoration:none; border-bottom:1px solid rgba(0,187,182,0.35);
   padding-bottom:2px; transition:color 150ms cubic-bezier(0.23,1,0.32,1),
   border-color 150ms cubic-bezier(0.23,1,0.32,1);
 }
-a.hero-label:hover { color:#7FE8E3; border-bottom-color:#7FE8E3; }
-a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; border-radius:2px; }
+a.hero-label:hover { color:#fff; border-bottom-color:#fff; }
+/* shared.js sets a site-wide #005D63 focus ring with !important, which is
+   about 2:1 on this dark band, so the band's own ring has to win. */
+.hero a.hero-label:focus-visible { outline:2px solid #00BBB6 !important; outline-offset:3px; border-radius:2px; }
 .hero h1 {
-  font-family:'BwGradual','Urbanist',sans-serif; font-size:clamp(28px,3.5vw,44px);
-  font-weight:700; line-height:1.18; color:#ffffff;
-  margin-bottom:18px; letter-spacing:-0.5px;
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:clamp(28px,2.9vw,40px);
+  font-weight:700; line-height:1.16; color:#ffffff;
+  margin-bottom:26px; letter-spacing:-0.5px;
 }
-.hero h1 span { color:#4DD9D3; }
-.hero-upper { text-transform:uppercase; letter-spacing:3px; color:#ffffff; }
-.hero h1 .hero-muted { color:rgba(255,255,255,0.45); font-size:0.88em; letter-spacing:0; }
-.hero-desc {
-  font-size:15px; color:rgba(255,255,255,0.72); line-height:1.78;
-  max-width:440px; margin-bottom:32px;
+.hero h1 span { color:var(--primary-light); }
+.hero h1 .hero-h1-lead { color:#ffffff; }
+.hero h1 .hero-h1-sub {
+  display:inline-block; margin-top:6px;
+  font-style:italic; font-weight:400; font-size:0.62em; letter-spacing:0;
+  color:rgba(255,255,255,0.84);
 }
-.hero-search-bar {
-  display:flex; gap:8px;
-  background:rgba(255,255,255,0.1);
-  backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
-  border:1px solid rgba(255,255,255,0.22); border-radius:8px;
-  padding:6px 6px 6px 16px; margin-bottom:24px;
-  transition:border-color 0.2s, box-shadow 0.2s;
+
+/* The search field is the primary element of the band: a solid sheet, not
+   glass, so it reads in sun glare and does not borrow the photo behind it. */
+.hero-search {
+  --hs-ground:#FFFFFF; --hs-text:#1E1C1A; --hs-hint:#756A61; --hs-icon:#756A61;
+  --hs-edge:rgba(255,255,255,0.0);
+  display:flex; align-items:center; gap:8px;
+  min-height:58px; padding-block:6px; padding-inline:18px 6px;
+  background:var(--hs-ground); border:1px solid var(--hs-edge); border-radius:14px;
+  box-shadow:0 22px 44px -22px rgba(0,0,0,0.55);
+  transition:box-shadow 180ms cubic-bezier(0.23,1,0.32,1), border-color 180ms cubic-bezier(0.23,1,0.32,1);
 }
-.hero-search-bar:focus-within {
-  border-color:rgba(77,217,211,0.6);
-  box-shadow:0 0 0 3px rgba(0,187,182,0.15);
+html[data-taqa-theme="dark"] .hero-search {
+  --hs-ground:#002D30; --hs-text:#C7DBDD; --hs-hint:#8CB6B9; --hs-icon:#8CB6B9;
+  --hs-edge:rgba(0,187,182,0.36);
 }
-.hero-search-bar input {
-  flex:1; border:none; outline:none; background:transparent;
-  font-size:14px; font-family:'Inter',sans-serif; color:#ffffff;
+/* The field carries the input's focus ring, so the input drops the
+   site-wide outline instead of drawing a second box within the first.
+   It keys on the input, not :focus-within, so a focused button shows
+   only its own ring and not two concentric ones. */
+.hero-search:has(input:focus) {
+  border-color:#00BBB6;
+  box-shadow:0 22px 44px -22px rgba(0,0,0,0.55), 0 0 0 4px rgba(0,187,182,0.34);
 }
-.hero-search-bar input::placeholder { color:rgba(255,255,255,0.45); }
-.hero-search-bar .btn { padding:8px 20px; border-radius:5px; }
-.hero-links { display:flex; gap:20px; }
-.hero-links a {
-  font-size:13.5px; color:rgba(255,255,255,0.6); text-decoration:none;
-  font-weight:500; transition:color 0.2s;
+.hero-search input:focus-visible { outline:none !important; }
+.hero-search-icon { width:19px; height:19px; flex-shrink:0; color:var(--hs-icon); }
+.hero-search input {
+  flex:1; min-width:0; height:44px; border:none; outline:none; background:transparent;
+  font-size:16px; font-family:'Inter',sans-serif; color:var(--hs-text);
+  text-overflow:ellipsis;
 }
-.hero-links a:hover { color:#fff; }
+.hero-search input::placeholder { color:var(--hs-hint); opacity:1; }
+.hero-search input::-webkit-search-cancel-button { display:none; }
+.hero-search-btn {
+  flex-shrink:0; height:46px; padding-inline:22px; border-radius:10px;
+  font-size:14.5px; font-weight:600; justify-content:center;
+  transition:background 150ms cubic-bezier(0.23,1,0.32,1), transform 100ms cubic-bezier(0.23,1,0.32,1);
+}
+.hero-search-btn:active { transform:scale(0.97); }
+.hero .hero-search-btn:focus-visible { outline:2px solid #00BBB6 !important; outline-offset:2px; }
+/* On the dark field the #005D63 fill is about 1.9:1, so the button gets a
+   teal edge that reads at about 3.7:1 against the field. */
+html[data-taqa-theme="dark"] .hero-search-btn { box-shadow:inset 0 0 0 1px rgba(0,187,182,0.5); }
+.hero-search-btn svg { display:none; width:18px; height:18px; }
+[dir="rtl"] .hero-search-btn svg { transform:scaleX(-1); }
 
 .hero-stats-panel {
-  background:rgba(255,255,255,0.06);
+  /* A dark glass, not a white one: the overlay is only 22% at this end of
+     the band, so the panel brings its own ground for the white labels. */
+  background:rgba(0,19,20,0.55);
   backdrop-filter:blur(32px); -webkit-backdrop-filter:blur(32px);
-  border:1px solid rgba(255,255,255,0.14);
-  border-radius:var(--radius);
-  padding:28px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:16px;
+  padding:20px 24px 12px;
+  box-shadow:0 22px 44px -26px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
 }
 .stats-panel-title {
   font-family:'BwGradual','Urbanist',sans-serif;
   font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px;
-  color:rgba(255,255,255,0.45); margin-bottom:20px;
+  color:rgba(255,255,255,0.82); margin-bottom:6px;
 }
 .stats-list { display:flex; flex-direction:column; gap:0; }
 .stat-row {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.1);
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:11px 0; border-bottom:1px solid rgba(255,255,255,0.09);
 }
 .stat-row:last-child { border-bottom:none; }
-.stat-row-label { font-family:'BwGradual','Urbanist',sans-serif; font-size:13.5px; font-weight:700; color:rgba(255,255,255,0.6); }
-.stat-row-value { font-family:'BwGradual','Urbanist',sans-serif; font-size:22px; font-weight:700; color:#4DD9D3; }
+.stat-row-label { font-family:'BwGradual','Urbanist',sans-serif; font-size:14px; font-weight:400; color:rgba(255,255,255,0.82); }
+.stat-row-value { font-family:'BwGradual','Urbanist',sans-serif; font-size:20px; font-weight:700; color:var(--primary-light); font-variant-numeric:tabular-nums; }
 
 /* ── Alert Banner ── */
 .alert-bar {
@@ -292,14 +220,14 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 }
 .alert-bar-text { font-size:13.5px; color:var(--text); flex:1; }
 .alert-bar-text strong { font-weight:600; }
-.alert-bar-link { font-size:13px; font-weight:600; color:var(--primary); text-decoration:none; white-space:nowrap; }
+.alert-bar-link { font-size:13px; font-weight:600; color:var(--primary-ink); text-decoration:none; white-space:nowrap; }
 .alert-bar-link:hover { text-decoration:underline; }
 
 /* ── Main Two-Panel Layout ── */
 .main-wrapper { padding:48px 48px; }
 .main-inner {
   max-width:1200px; margin:0 auto;
-  display:grid; grid-template-columns:1fr 310px; gap:44px; align-items:stretch;
+  display:grid; grid-template-columns:1fr 310px; gap:44px; align-items:start;
 }
 
 /* Panel header */
@@ -315,31 +243,22 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 }
 .panel-subtitle { font-size:13px; color:var(--text-muted); }
 .panel-badge {
-  font-size:11.5px; font-weight:600; color:var(--primary);
+  font-size:11.5px; font-weight:600; color:var(--primary-ink);
   background:rgba(0,93,99,0.07); border:1px solid rgba(0,93,99,0.18);
   border-radius:20px; padding:5px 13px; white-space:nowrap; flex-shrink:0; margin-top:2px;
 }
 
-/* ── Segment colour map ── */
-[data-id="coiled-tubing"]  { --seg-color:#E67E22; }
-[data-id="fracturing"]     { --seg-color:#E74C3C; }
-[data-id="wireline"]       { --seg-color:#3498DB; }
-[data-id="drilling"]       { --seg-color:#1A5276; }
-[data-id="cementing"]      { --seg-color:#8E44AD; }
-[data-id="inspection"]     { --seg-color:#16A085; }
-[data-id="well-safety"]    { --seg-color:#FD691D; }
-[data-id="qhse"]           { --seg-color:#27AE60; }
-[data-id="tws-maintenance"]{ --seg-color:#D35400; }
-[data-id="hr"]             { --seg-color:#2471A3; }
-[data-id="well-testing"]   { --seg-color:#1ABC9C; }
-[data-id="cybersecurity"]  { --seg-color:#0EA5E9; }
+/* A per-segment colour map lived here: twelve hues including a violet and
+   two off-brand blues. Nothing on the page carries data-id any more, so it
+   coloured nothing, and it would have told whoever builds the back end
+   that each segment has a brand colour. It does not. */
 
 /* ── Segment Accordion ── */
 .seg-accordion {
   border:1px solid var(--border); border-radius:10px;
   overflow:hidden; background:var(--bg-white); box-shadow:var(--shadow-sm);
 }
-.seg-acc-item { border-bottom:1px solid var(--border); --seg-color:#6b7a8d; }
+.seg-acc-item { border-bottom:1px solid var(--border); --seg-color:#524D48; }
 .seg-acc-item:last-child { border-bottom:none; }
 
 .seg-acc-row {
@@ -349,7 +268,7 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
   background:linear-gradient(to right, transparent 3px, transparent 3px);
 }
 .seg-acc-row:hover {
-  background:linear-gradient(to right, var(--seg-color) 3px, #f8f9fb 3px);
+  background:linear-gradient(to right, var(--seg-color) 3px, #F7F6F5 3px);
 }
 .seg-acc-item.open .seg-acc-row {
   background:linear-gradient(to right, var(--seg-color) 3px, rgba(0,93,99,0.04) 3px);
@@ -361,7 +280,7 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
   transition:transform 0.28s cubic-bezier(.4,0,.2,1), color 0.2s;
   width:14px; text-align:center; flex-shrink:0;
 }
-.seg-acc-item.open .acc-chevron { transform:rotate(90deg); color:var(--primary); }
+.seg-acc-item.open .acc-chevron { transform:rotate(90deg); color:var(--primary-ink); }
 
 .seg-acc-num {
   font-size:9.5px; font-weight:700; letter-spacing:0.8px;
@@ -387,7 +306,7 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
   padding:1px 7px; flex-shrink:0; transition:all 0.2s;
 }
 .seg-acc-item.open .seg-acc-tag {
-  background:rgba(0,93,99,0.08); border-color:rgba(0,93,99,0.2); color:var(--primary);
+  background:rgba(0,93,99,0.08); border-color:rgba(0,93,99,0.2); color:var(--primary-ink);
 }
 
 .seg-acc-right { display:flex; align-items:center; gap:16px; flex-shrink:0; }
@@ -404,13 +323,13 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 .seg-acc-panel {
   max-height:0; overflow:hidden;
   transition:max-height 0.35s cubic-bezier(.4,0,.2,1);
-  background:linear-gradient(to right, rgba(0,93,99,0.06) 3px, #fafbfc 3px);
+  background:linear-gradient(to right, rgba(0,93,99,0.06) 3px, #F9F8F7 3px);
   border-top:none;
 }
 .seg-acc-item.open .seg-acc-panel {
   max-height:300px;
   border-top:1px solid rgba(0,0,0,0.06);
-  background:linear-gradient(to right, var(--seg-color) 3px, #fafbfc 3px);
+  background:linear-gradient(to right, var(--seg-color) 3px, #F9F8F7 3px);
 }
 .seg-acc-panel-inner {
   padding:16px 20px 20px 68px;
@@ -442,99 +361,343 @@ a.hero-label:focus-visible { outline:2px solid #4DD9D3; outline-offset:3px; bord
 .seg-acc-item:hover::after { animation:shineSwipe 0.6s ease forwards; }
 @keyframes shineSwipe { from{left:-130%;opacity:1;} to{left:165%;opacity:1;} }
 
-/* ── Command Center ── */
-.cmd-center {
-  background:rgba(0,93,99,0.05); border-radius:12px; padding:24px;
-  border:1px solid rgba(0,93,99,0.15);
-  box-shadow:0 4px 20px rgba(0,93,99,0.08);
+/* ── Discipline bands ──────────────────────────────────────────────────────
+   Two bands, because the twelve areas are two kinds of thing. Operations
+   deliver work and sit on white. Functions set rules that bind every segment,
+   so they sit on a Teal Green ground and read as a layer above, not a peer.
+   Tile width follows document count, so the grid is asymmetric because the
+   data is, not because asymmetry looks busy.                               */
+/* ── Gateway cards ─────────────────────────────────────────────────────────
+   Two doors instead of twenty five tiles. Each rises from below on scroll
+   through the page's existing .reveal observer, and opens its own group
+   underneath rather than navigating away.                                 */
+.gates { display:grid; grid-template-columns:repeat(3,1fr); gap:13px; }
+@media(max-width:1180px){ .gates { grid-template-columns:1fr 1fr; } }
+@media(max-width:760px){ .gates { grid-template-columns:1fr; } }
+
+.gate {
+  position:relative; isolation:isolate; overflow:hidden; text-align:start;
+  display:flex; flex-direction:column; gap:0; min-height:230px;
+  padding:24px 24px 20px; cursor:pointer; font-family:inherit;
+  background:var(--bg-white); border:1px solid var(--border); border-radius:18px;
+  /* The two flat shadows draw the edge of a second sheet under the card, so a
+     closed door reads as something with pages behind it. */
+  box-shadow:0 1px 2px rgba(0,88,90,0.05),
+             0 7px 0 -4px var(--bg-white),
+             0 7px 0 -3px var(--border);
+  transition:transform 320ms cubic-bezier(0.16,1,0.3,1),
+             box-shadow 320ms cubic-bezier(0.16,1,0.3,1),
+             border-color 320ms cubic-bezier(0.16,1,0.3,1);
 }
-.cmd-header {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:20px; padding-bottom:16px;
-  border-bottom:1px solid rgba(0,93,99,0.12);
+/* The cards arrive one after another, far enough apart to read as a sequence. */
+.gates .gate:nth-child(2) { transition-delay:0.09s; }
+.gates .gate:nth-child(3) { transition-delay:0.18s; }
+
+/* Cursor-following light. Sits behind the content on its own layer. */
+.gate::before {
+  content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  opacity:0; transition:opacity 320ms ease;
+  background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),
+    rgba(0,93,99,0.09), transparent 60%);
 }
-.cmd-header-left { display:flex; align-items:center; gap:10px; }
-.cmd-live-dot {
-  width:8px; height:8px; border-radius:50%; background:#00BBB6; flex-shrink:0;
-  box-shadow:0 0 0 3px rgba(0,187,182,0.18);
-  animation:alertPulse 2s ease-in-out infinite;
+/* A teal rule draws itself across the top edge on hover and stays while open. */
+.gate::after {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, var(--primary), #00BBB6);
+  transform:scaleX(0); transform-origin:left center;
+  transition:transform 480ms cubic-bezier(0.16,1,0.3,1);
 }
-.cmd-header-title {
-  font-family:'BwGradual','Urbanist',sans-serif; font-size:13px; font-weight:700;
-  letter-spacing:1.8px; text-transform:uppercase; color:var(--text);
+@media (hover:hover) and (pointer:fine){
+  .gate:hover { transform:translateY(-3px);
+    box-shadow:0 18px 38px rgba(0,88,90,0.15),
+               0 7px 0 -4px var(--bg-white),
+               0 7px 0 -3px var(--border);
+    border-color:rgba(0,93,99,0.28); }
+  .gate:hover::before { opacity:1; }
+  .gate:hover::after { transform:scaleX(1); }
+  .gate:hover .gate-go { background:var(--primary); border-color:var(--primary); color:#fff; }
 }
-.cmd-header-live {
-  font-size:9.5px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase;
-  color:#00BBB6; background:rgba(0,187,182,0.1); border:1px solid rgba(0,187,182,0.22);
-  border-radius:4px; padding:2px 8px;
-}
-.cmd-header-count { font-size:11px; color:var(--text-muted); letter-spacing:0.3px; }
-.cmd-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-.cmd-card {
-  background:var(--bg-white); border:1px solid var(--border);
-  border-top:2px solid var(--primary);
-  border-radius:8px; padding:14px 14px 12px;
-  text-decoration:none; display:flex; flex-direction:column;
-  position:relative; overflow:hidden;
-  transition:transform 0.28s cubic-bezier(0.16,1,0.3,1), box-shadow 0.28s, border-color 0.28s;
-}
-.cmd-card::after {
-  content:''; position:absolute; top:0; left:-130%; width:52%; height:100%;
-  background:linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
-  transform:skewX(-16deg); pointer-events:none;
-}
-.cmd-card:hover::after { animation:shineSwipe 0.55s ease forwards; }
-.cmd-card::before {
-  content:''; position:absolute; bottom:0; left:0; right:0; height:55%;
-  background:linear-gradient(to top, var(--seg-color,#005D63), transparent);
-  opacity:0; pointer-events:none; transition:opacity 0.4s; border-radius:0 0 8px 8px;
-}
-.cmd-card:hover::before { opacity:0.09; }
-html[data-theme="dark"] .cmd-card::before { opacity:0; }
-html[data-theme="dark"] .cmd-card:hover::before { opacity:0.13; }
-.cmd-card:hover {
-  transform:translateY(-4px);
-  box-shadow:0 12px 32px rgba(0,93,99,0.18);
+.gate:active { transform:translateY(-1px); }
+.gate:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
+/* An open door has nothing behind it any more, so the sheet edge goes. */
+.gate[aria-expanded="true"] {
   border-color:var(--primary);
+  box-shadow:0 0 0 1px var(--primary) inset, 0 12px 28px rgba(0,88,90,0.13);
 }
-.cmd-card-top {
-  display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
+.gate[aria-expanded="true"]::after { transform:scaleX(1); }
+
+.gate-top { display:flex; align-items:baseline; gap:10px; }
+.gate-n {
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:44px; font-weight:800;
+  line-height:1; letter-spacing:-1.7px; color:var(--primary-ink);
+  font-variant-numeric:tabular-nums;
 }
-.cmd-card-num {
-  font-size:9.5px; font-weight:700; letter-spacing:1px;
-  color:var(--text-light); font-family:'BwGradual','Urbanist',sans-serif;
+.gate-k {
+  font-size:10.5px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase;
+  color:var(--text-light);
 }
-.cmd-indicator { width:7px; height:7px; border-radius:50%; }
-.cmd-indicator.alert {
-  background:#E74C3C; box-shadow:0 0 0 2px rgba(231,76,60,0.22);
-  animation:cmdAlertPulse 2s ease-in-out infinite;
+.gate-t {
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:18px; font-weight:700;
+  color:var(--text); letter-spacing:-0.3px; margin-top:16px;
 }
-.cmd-indicator.clear { background:#00BBB6; box-shadow:0 0 0 2px rgba(0,187,182,0.2); }
-@keyframes cmdAlertPulse {
-  0%,100%{box-shadow:0 0 0 2px rgba(231,76,60,0.22);}
-  50%{box-shadow:0 0 0 5px rgba(231,76,60,0);}
+.gate-d { font-size:12.5px; line-height:1.6; color:var(--text-muted); margin-top:6px; }
+
+/* How much of the hub's library this group holds. Review status belongs to
+   document control, so it is not on a page everyone opens. */
+.gate-meter-row {
+  margin-top:auto; padding-top:18px; display:flex; align-items:center; gap:10px;
 }
-.cmd-card-name {
+.gate-meter {
+  flex:1; height:5px; border-radius:999px; overflow:hidden; background:var(--border);
+}
+.gate-meter i {
+  display:block; height:100%; width:0; min-width:4px; border-radius:999px;
+  background:linear-gradient(90deg, var(--primary), #00BBB6);
+  transition:width 900ms cubic-bezier(0.16,1,0.3,1);
+}
+.gate-share {
+  font-size:11px; font-weight:700; color:var(--primary-ink);
+  font-variant-numeric:tabular-nums; flex-shrink:0;
+}
+.gate-foot {
+  margin-top:12px; display:flex; align-items:center;
+  justify-content:space-between; gap:10px;
+}
+.gate-stat { font-size:12px; color:var(--text-muted); font-variant-numeric:tabular-nums;
+  white-space:nowrap; }
+.gate-stat b { color:var(--text); font-weight:700; }
+
+/* The call to action sits where the eye finishes the card, not where a close
+   button would live. */
+.gate-go {
+  width:36px; height:36px; flex-shrink:0;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:50%; border:1px solid var(--border); color:var(--primary-ink);
+  background:transparent;
+  transition:background 280ms cubic-bezier(0.16,1,0.3,1),
+             border-color 280ms cubic-bezier(0.16,1,0.3,1),
+             color 280ms cubic-bezier(0.16,1,0.3,1);
+}
+.gate-go svg { width:15px; height:15px;
+  transition:transform 380ms cubic-bezier(0.16,1,0.3,1); }
+.gate[aria-expanded="true"] .gate-go {
+  background:var(--primary); border-color:var(--primary); color:#fff;
+}
+.gate[aria-expanded="true"] .gate-go svg { transform:rotate(90deg); }
+
+html[data-taqa-theme="dark"] .gate {
+  background:#002326; border-color:#003A3D;
+  box-shadow:0 1px 2px rgba(0,0,0,0.25),
+             0 7px 0 -4px #002326,
+             0 7px 0 -3px #003A3D;
+}
+html[data-taqa-theme="dark"] .gate[aria-expanded="true"] {
+  box-shadow:0 0 0 1px var(--primary) inset, 0 12px 28px rgba(0,0,0,0.35);
+}
+html[data-taqa-theme="dark"] .gate-go { border-color:#00484B; }
+html[data-taqa-theme="dark"] .gate-meter { background:#003A3D; }
+@media (prefers-reduced-motion: reduce){
+  .gate-meter i { transition:none; }
+  .gate::after { transition:none; }
+}
+
+/* The panel animates a measured height. A grid track of 0fr to 1fr handles
+   opening, but swapping one door for another changes the content height with
+   nothing to interpolate, which is the jump that made it feel like a popup. */
+.gate-panel {
+  height:0; overflow:hidden;
+  transition:height 420ms cubic-bezier(0.22,1,0.36,1);
+}
+.gate-panel.instant { transition:none; }
+/* The contents arrive as one calm block. Eleven tiles each rising on their
+   own timer, while the container was still growing, was the other half of it. */
+.gate-body {
+  padding-top:18px;
+  opacity:0; transform:translateY(8px);
+  transition:opacity 300ms ease, transform 380ms cubic-bezier(0.22,1,0.36,1);
+}
+.gate-panel.shown .gate-body { opacity:1; transform:none; }
+.gate-panel:not(.shown) .gate-body {
+  transition:opacity 170ms ease, transform 170ms ease;
+}
+.gate-head {
+  display:flex; align-items:baseline; justify-content:space-between; gap:16px;
+  flex-wrap:wrap; margin-bottom:12px;
+}
+.gate-head h4 {
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:12px; font-weight:700;
+  letter-spacing:1.5px; text-transform:uppercase; color:var(--text);
+}
+.gate-head span { font-size:12px; color:var(--text-muted); }
+.gate-head span b { color:var(--text); font-weight:700; font-variant-numeric:tabular-nums; }
+@media (prefers-reduced-motion: reduce){
+  .gate-panel { transition:none; }
+}
+
+.band { margin-bottom:22px; }
+.band-head {
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:16px; flex-wrap:wrap; margin-bottom:14px;
+}
+.band-title { display:flex; align-items:center; gap:10px; }
+.band-title h3 {
   font-family:'BwGradual','Urbanist',sans-serif; font-size:13px; font-weight:700;
-  color:var(--text); line-height:1.3; margin-bottom:3px;
+  letter-spacing:1.6px; text-transform:uppercase; color:var(--text);
 }
-.cmd-card-tag {
-  font-size:9.5px; color:var(--text-muted);
-  text-transform:uppercase; letter-spacing:0.7px; margin-bottom:12px; flex:1;
+.band-dot {
+  width:7px; height:7px; border-radius:50%; background:var(--primary); flex-shrink:0;
+  box-shadow:0 0 0 3px rgba(0,93,99,0.14);
 }
-.cmd-card-footer {
-  display:flex; align-items:center; justify-content:space-between;
-  border-top:1px solid var(--border); padding-top:9px;
+.band-note { font-size:12px; color:var(--text-muted); }
+.band-note b { color:var(--text); font-weight:600; font-variant-numeric:tabular-nums; }
+
+/* The grid. Twelve columns so a tile can take 6, 4 or 3 of them. */
+.bento { display:grid; grid-template-columns:repeat(12,1fr); gap:10px; }
+.tile {
+  grid-column:span 3; position:relative; isolation:isolate; overflow:hidden;
+  display:flex; flex-direction:column; min-height:132px;
+  padding:18px 17px 15px; text-decoration:none;
+  background:var(--bg-white); border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow:0 1px 2px rgba(0,88,90,0.04);
+  transition:transform 260ms cubic-bezier(0.16,1,0.3,1),
+             box-shadow 260ms cubic-bezier(0.16,1,0.3,1),
+             border-color 260ms cubic-bezier(0.16,1,0.3,1);
 }
-.cmd-card-docs { font-size:11px; color:var(--text-muted); }
-.cmd-card-alert-count { font-size:10.5px; font-weight:700; color:#E74C3C; }
-.cmd-card-clear { font-size:10.5px; font-weight:600; color:var(--primary); }
-html[data-theme="dark"] .cmd-center { background:rgba(0,93,99,0.1); border-color:rgba(0,93,99,0.22); }
-html[data-theme="dark"] .cmd-card { background:#19263a; border-color:#243044; }
-html[data-theme="dark"] .cmd-card-footer { border-color:#243044; }
-html[data-theme="dark"] .cmd-header { border-color:rgba(0,93,99,0.2); }
-@media(max-width:900px) { .cmd-grid { grid-template-columns:repeat(3,1fr); } }
-@media(max-width:600px) { .cmd-grid { grid-template-columns:repeat(2,1fr); } }
+.tile.w6 { grid-column:span 6; min-height:156px; }
+.tile.w4 { grid-column:span 4; }
+.tile.w3 { grid-column:span 3; }
+.tile.w12 { grid-column:span 12; min-height:156px; }
+
+/* The cursor lights the tile from where it actually is. Two custom properties
+   set on pointermove; nothing re-renders and nothing but opacity animates. */
+.tile::before {
+  content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  opacity:0; transition:opacity 260ms ease;
+  background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),
+    rgba(0,93,99,0.10), transparent 62%);
+}
+.tile::after {
+  content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  border-radius:inherit; opacity:0; transition:opacity 260ms ease;
+  background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%),
+    rgba(0,187,178,0.26), transparent 60%);
+  -webkit-mask:linear-gradient(#000,#000) content-box, linear-gradient(#000,#000);
+  mask:linear-gradient(#000,#000) content-box, linear-gradient(#000,#000);
+  -webkit-mask-composite:xor; mask-composite:exclude; padding:1px;
+}
+@media (hover:hover) and (pointer:fine) {
+  .tile:hover { transform:translateY(-3px); box-shadow:0 14px 30px rgba(0,88,90,0.13);
+    border-color:rgba(0,93,99,0.24); }
+  .tile:hover::before, .tile:hover::after { opacity:1; }
+  .tile:hover .tile-ghost { opacity:0.10; transform:translateY(4px); }
+  .tile:hover .tile-go { background:var(--primary); border-color:var(--primary);
+    color:#fff; transform:translateX(2px); }
+}
+.tile:active { transform:translateY(-1px); }
+.tile:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
+
+/* The rank is set as a watermark, cropped by the tile's own edge. It gives
+   the card depth without adding a line anyone has to read. */
+.tile-ghost {
+  position:absolute; top:-18px; inset-inline-end:4px; z-index:-1; pointer-events:none;
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:74px; font-weight:800;
+  line-height:1; letter-spacing:-4px; color:var(--primary-ink); opacity:0.055;
+  font-variant-numeric:tabular-nums; user-select:none;
+  transition:opacity 320ms ease, transform 460ms cubic-bezier(0.16,1,0.3,1);
+}
+.tile.w6 .tile-ghost { font-size:92px; top:-24px; }
+.tile-name {
+  font-family:'BwGradual','Urbanist',sans-serif; font-weight:700; color:var(--text);
+  font-size:15px; line-height:1.25; letter-spacing:-0.2px;
+}
+.tile.w6 .tile-name { font-size:19px; }
+.tile-tag {
+  font-size:10px; letter-spacing:0.7px; text-transform:uppercase;
+  color:var(--text-muted); margin-top:4px;
+}
+.tile-foot {
+  margin-top:auto; padding-top:14px; display:flex;
+  align-items:center; justify-content:space-between; gap:10px;
+}
+.tile-docs {
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:19px; font-weight:800;
+  color:var(--text); font-variant-numeric:tabular-nums; letter-spacing:-0.5px;
+}
+.tile-docs span { font-size:11px; font-weight:500; color:var(--text-muted);
+  letter-spacing:0; margin-inline-start:5px; }
+/* The same ring the doors carry, so a tile and a card speak one language. */
+.tile-go {
+  width:30px; height:30px; flex-shrink:0;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:50%; border:1px solid var(--border); color:var(--primary-ink);
+  transition:background 260ms cubic-bezier(0.16,1,0.3,1),
+             border-color 260ms cubic-bezier(0.16,1,0.3,1),
+             color 260ms cubic-bezier(0.16,1,0.3,1),
+             transform 260ms cubic-bezier(0.16,1,0.3,1);
+}
+.tile-go svg { width:13px; height:13px; }
+html[dir="rtl"] .tile-go svg { transform:scaleX(-1); }
+
+/* The functions band inverts: rules sit over the work, so they sit on teal. */
+/* Approved entities with nothing filed yet. A chip, not a tile: an empty card
+   claims a place in the picture that the data has not earned. */
+.waiting { display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin-top:12px; }
+.wait-label {
+  font-size:10px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase;
+  color:var(--text-light); margin-inline-end:4px;
+}
+.wait-chip {
+  font-size:11.5px; font-weight:500; color:var(--text-muted);
+  padding:5px 11px; border-radius:999px;
+  border:1px dashed var(--border); background:transparent;
+}
+.band-move {
+  margin-top:12px; font-size:11.5px; line-height:1.6; color:var(--text-muted);
+  padding-inline-start:11px; border-inline-start:2px solid var(--border);
+}
+.band-move b { color:var(--text); font-weight:700; font-variant-numeric:tabular-nums; }
+/* Both bands sit on the same white. The functions band is set apart by a
+   rule and a line of type, not by a block of colour: a coloured panel makes
+   the difference look decorative when it is structural. */
+.band-fn {
+  margin-top:30px; padding-top:24px;
+  border-top:1px solid var(--border);
+}
+.band-fn .band-dot {
+  background:transparent; border:2px solid var(--primary);
+  box-shadow:none; width:8px; height:8px;
+}
+.band-fn-line {
+  font-size:12.5px; line-height:1.65; color:var(--text-muted);
+  margin:2px 0 16px; max-width:64ch;
+}
+.band-fn-line b { color:var(--text); font-weight:600; }
+
+html[data-taqa-theme="dark"] .tile { background:#002326; border-color:#003A3D; }
+html[data-taqa-theme="dark"] .tile-go { border-color:#00484B; }
+html[data-taqa-theme="dark"] .tile-ghost { opacity:0.09; color:#00BBB6; }
+html[data-taqa-theme="dark"] .tile:hover .tile-ghost { opacity:0.16; }
+
+@media(max-width:1100px){
+  .tile, .tile.w4 { grid-column:span 4; }
+  .tile.w6 { grid-column:span 8; }
+}
+@media(max-width:760px){
+  .tile, .tile.w4, .tile.w6 { grid-column:span 6; min-height:120px; }
+  .tile.w6 .tile-name { font-size:16px; }
+  .band-fn { margin-top:24px; padding-top:20px; }
+}
+@media(max-width:460px){
+  .tile, .tile.w4, .tile.w6 { grid-column:span 6; min-height:118px; padding:13px 13px 11px; }
+  .tile-name, .tile.w6 .tile-name { font-size:14px; }
+  .tile-docs { font-size:17px; }
+  .bento { gap:8px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .tile { opacity:1; transform:none; animation:none; }
+  .tile-ghost { transition:none; }
+}
 
 /* Sidebar */
 .panel-sidebar { display:flex; flex-direction:column; }
@@ -544,7 +707,7 @@ html[data-theme="dark"] .cmd-header { border-color:rgba(0,93,99,0.2); }
   color:var(--text-muted); margin-bottom:14px; padding-bottom:14px;
   border-bottom:1px solid var(--border); display:block;
 }
-.sidebar-tools { display:flex; flex-direction:column; gap:12px; flex:1; }
+.sidebar-tools { display:flex; flex-direction:column; gap:12px; }
 .sidebar-tool {
   background:var(--bg-white); border:1px solid var(--border); border-radius:var(--radius);
   padding:20px; text-decoration:none; color:var(--text);
@@ -558,7 +721,7 @@ html[data-theme="dark"] .cmd-header { border-color:rgba(0,93,99,0.2); }
 }
 .sidebar-tool-tag {
   font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px;
-  color:var(--primary); margin-bottom:7px; display:block;
+  color:var(--primary-ink); margin-bottom:7px; display:block;
 }
 .sidebar-tool-title {
   font-family:'BwGradual','Urbanist',sans-serif; font-size:14.5px; font-weight:600;
@@ -568,7 +731,7 @@ html[data-theme="dark"] .cmd-header { border-color:rgba(0,93,99,0.2); }
   font-size:12.5px; color:var(--text-muted); line-height:1.6; margin-bottom:12px;
 }
 .sidebar-tool-cta {
-  font-size:12px; font-weight:600; color:var(--primary); display:block;
+  font-size:12px; font-weight:600; color:var(--primary-ink); display:block;
 }
 
 /* ── Featured Tool Card ── */
@@ -578,7 +741,6 @@ html[data-theme="dark"] .cmd-header { border-color:rgba(0,93,99,0.2); }
   display:flex; flex-direction:column; position:relative; overflow:hidden;
   transition:transform 0.22s, box-shadow 0.22s;
   box-shadow:0 4px 20px rgba(0,93,99,0.28);
-  flex:1;
 }
 .sidebar-tool-featured:hover { transform:translateY(-2px); box-shadow:0 10px 32px rgba(0,93,99,0.42); }
 .sidebar-tool-featured::after {
@@ -588,7 +750,7 @@ html[data-theme="dark"] .cmd-header { border-color:rgba(0,93,99,0.2); }
 }
 .sidebar-tool-featured-tag {
   font-size:10.5px; font-weight:700; text-transform:uppercase;
-  letter-spacing:0.8px; color:rgba(255,255,255,0.65); margin-bottom:6px; display:block;
+  letter-spacing:0.8px; color:rgba(255,255,255,0.82); margin-bottom:6px; display:block;
 }
 .sidebar-tool-featured-title {
   font-family:'BwGradual','Urbanist',sans-serif; font-size:17px; font-weight:700;
@@ -620,7 +782,7 @@ html[data-theme="dark"] .cmd-header { border-color:rgba(0,93,99,0.2); }
   width:36px; height:36px; border-radius:8px;
   background:rgba(0,93,99,0.08);
   display:flex; align-items:center; justify-content:center;
-  flex-shrink:0; color:var(--primary);
+  flex-shrink:0; color:var(--primary-ink);
 }
 .sidebar-tool-compact-body { flex:1; min-width:0; }
 .sidebar-tool-compact-title {
@@ -630,9 +792,9 @@ html[data-theme="dark"] .cmd-header { border-color:rgba(0,93,99,0.2); }
 .sidebar-tool-compact-arrow {
   font-size:14px; color:var(--text-light); flex-shrink:0; transition:color 0.2s, transform 0.2s;
 }
-.sidebar-tool-compact:hover .sidebar-tool-compact-arrow { color:var(--primary); transform:translateX(2px); }
-html[data-theme="dark"] .sidebar-tool-compact { background:#19263a; border-color:#243044; }
-html[data-theme="dark"] .sidebar-tool-compact-icon { background:rgba(0,187,182,0.1); }
+.sidebar-tool-compact:hover .sidebar-tool-compact-arrow { color:var(--primary-ink); transform:translateX(2px); }
+html[data-taqa-theme="dark"] .sidebar-tool-compact { background:#002326; border-color:#003A3D; }
+html[data-taqa-theme="dark"] .sidebar-tool-compact-icon { background:rgba(0,187,182,0.1); }
 
 /* Sidebar alert widget */
 .sidebar-alert {
@@ -653,7 +815,7 @@ html[data-theme="dark"] .sidebar-tool-compact-icon { background:rgba(0,187,182,0
 }
 .sidebar-alert-title { font-size:12px; font-weight:700; color:var(--text); }
 .sidebar-alert-body { font-size:12px; color:var(--text-muted); line-height:1.55; margin-bottom:10px; }
-.sidebar-alert-link { font-size:12px; font-weight:600; color:var(--primary); text-decoration:none; }
+.sidebar-alert-link { font-size:12px; font-weight:600; color:var(--primary-ink); text-decoration:none; }
 .sidebar-alert-link:hover { text-decoration:underline; }
 
 /* ── Divider ── */
@@ -669,11 +831,11 @@ footer::before {
   background:#005D63;
 }
 .footer-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; }
-.footer-brand { font-family:'BwGradual','Urbanist',sans-serif; font-weight:600; font-size:13.5px; color:var(--primary); }
+.footer-brand { font-family:'BwGradual','Urbanist',sans-serif; font-weight:600; font-size:13.5px; color:var(--primary-ink); }
 .footer-copy { font-size:12px; color:var(--text-muted); margin-top:2px; }
 .footer-links { display:flex; gap:20px; }
 .footer-links a { font-size:12.5px; color:var(--text-muted); text-decoration:none; }
-.footer-links a:hover { color:var(--primary); }
+.footer-links a:hover { color:var(--primary-ink); }
 
 
 /* ── Page load fade ── */
@@ -692,27 +854,17 @@ body { animation:pageFadeIn 0.4s cubic-bezier(.4,0,.2,1); }
 .bg-blob { position:absolute; border-radius:50%; filter:blur(100px); }
 .bg-blob-1 { width:720px; height:720px; top:-220px; left:-200px;
   background:radial-gradient(circle, rgba(0,187,182,0.16) 0%, transparent 65%);
-  animation:blob1 26s ease-in-out infinite; }
+   }
 .bg-blob-2 { width:580px; height:580px; top:38%; right:-160px;
   background:radial-gradient(circle, rgba(0,93,99,0.12) 0%, transparent 65%);
-  animation:blob2 32s ease-in-out infinite; }
+   }
 .bg-blob-3 { width:460px; height:460px; bottom:-80px; left:28%;
   background:radial-gradient(circle, rgba(0,187,182,0.10) 0%, transparent 65%);
-  animation:blob3 22s ease-in-out infinite; }
+   }
 @keyframes blob1 { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(50px,-70px) scale(1.08);} }
 @keyframes blob2 { 0%,100%{transform:translate(0,0) scale(1);} 40%{transform:translate(-60px,50px) scale(1.06);} 80%{transform:translate(30px,-30px) scale(0.95);} }
 @keyframes blob3 { 0%,100%{transform:translate(0,0) scale(1);} 60%{transform:translate(-40px,60px) scale(1.1);} }
 
-/* ── 2. Sliding Pill Nav ── */
-.nav-links { position:relative; }
-.nav-pill {
-  position:absolute; top:50%; transform:translateY(-50%);
-  height:34px; background:rgba(0,93,99,0.1); border-radius:8px;
-  transition:left 0.28s cubic-bezier(.4,0,.2,1), width 0.28s cubic-bezier(.4,0,.2,1), opacity 0.2s;
-  pointer-events:none; z-index:0; opacity:0;
-}
-.nav-links a { position:relative; z-index:1; }
-.nav-links a.active::after { display:none; }
 
 
 /* ── 4. Custom Scrollbar ── */
@@ -721,45 +873,32 @@ body { animation:pageFadeIn 0.4s cubic-bezier(.4,0,.2,1); }
 ::-webkit-scrollbar-thumb { background:rgba(0,93,99,0.28); border-radius:3px; }
 ::-webkit-scrollbar-thumb:hover { background:rgba(0,93,99,0.5); }
 
-/* ── 5. Dark Mode Toggle Button ── */
-.dark-toggle {
-  width:36px; height:36px; border-radius:8px; border:1px solid var(--border);
-  background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center;
-  color:var(--text-muted); transition:border-color 0.2s, color 0.2s, background 0.2s;
-  flex-shrink:0; padding:0;
-}
-.dark-toggle:hover { border-color:var(--primary); color:var(--primary); background:rgba(0,93,99,0.06); }
 
 /* ── 6. Dark Mode Variables ── */
-html[data-theme="dark"] {
-  --bg:#0e1824; --bg-white:#19263a; --border:#243044;
-  --text:#dde4ef; --text-muted:#7e94ab; --text-light:#4d6070;
+html[data-taqa-theme="dark"] {--primary-ink:#00BBB6;--primary-light:#00BBB6;
+  --bg:#001314; --bg-white:#002326; --border:#003A3D;
+  --text:#C7DBDD; --text-muted:#8CB6B9; --text-light:#619B9E;
   --shadow-sm:0 1px 4px rgba(0,0,0,0.4); --shadow-md:0 4px 16px rgba(0,0,0,0.45);
 }
-html[data-theme="dark"] body { background:var(--bg); }
-html[data-theme="dark"] nav { background:rgba(14,24,36,0.92); border-color:rgba(255,255,255,0.06); }
-html[data-theme="dark"] .nav-title-brand { color:#00BBB6; }
-html[data-theme="dark"] .nav-title-hub { color:#7e94ab; }
-html[data-theme="dark"] .nav-pill { background:rgba(0,187,182,0.12); }
-html[data-theme="dark"] .btn-outline { background:rgba(255,255,255,0.03); border-color:#243044; color:#7e94ab; }
-html[data-theme="dark"] .dark-toggle { border-color:#243044; color:#7e94ab; }
-html[data-theme="dark"] footer { background:#19263a; border-color:#243044; }
-html[data-theme="dark"] .seg-accordion { background:#19263a; border-color:#243044; }
-html[data-theme="dark"] .seg-acc-item { border-color:#243044; }
-html[data-theme="dark"] .seg-acc-row:hover { background:linear-gradient(to right, var(--seg-color) 3px, rgba(255,255,255,0.03) 3px); }
-html[data-theme="dark"] .seg-acc-item.open .seg-acc-row { background:linear-gradient(to right, var(--seg-color) 3px, rgba(0,93,99,0.14) 3px); }
-html[data-theme="dark"] .seg-acc-item.open .seg-acc-panel { background:linear-gradient(to right, var(--seg-color) 3px, rgba(255,255,255,0.03) 3px); }
-html[data-theme="dark"] .seg-acc-stat { background:rgba(255,255,255,0.04); border-color:#243044; }
-html[data-theme="dark"] .seg-acc-stat.has-alert { background:rgba(192,57,43,0.15); }
-html[data-theme="dark"] .seg-acc-tag { background:rgba(255,255,255,0.05); border-color:#243044; }
-html[data-theme="dark"] .sidebar-tool { background:#19263a; border-color:#243044; }
-html[data-theme="dark"] .sidebar-alert { background:rgba(0,93,99,0.13); border-color:rgba(0,93,99,0.28); }
-html[data-theme="dark"] .alert-bar-inner { background:rgba(0,93,99,0.1); border-color:rgba(0,93,99,0.22); }
-html[data-theme="dark"] .panel-badge { background:rgba(0,93,99,0.2); }
-html[data-theme="dark"] .bg-blob-1 { background:radial-gradient(circle,rgba(0,187,182,0.07) 0%,transparent 65%); }
-html[data-theme="dark"] .bg-blob-2 { background:radial-gradient(circle,rgba(0,93,99,0.06) 0%,transparent 65%); }
-html[data-theme="dark"] .bg-blob-3 { background:radial-gradient(circle,rgba(0,187,182,0.05) 0%,transparent 65%); }
-html[data-theme="dark"] ::-webkit-scrollbar-thumb { background:rgba(0,187,182,0.2); }
+html[data-taqa-theme="dark"] body { background:var(--bg); }
+html[data-taqa-theme="dark"] .btn-outline { background:rgba(255,255,255,0.03); border-color:#003A3D; color:#619B9E; }
+html[data-taqa-theme="dark"] footer { background:#002326; border-color:#003A3D; }
+html[data-taqa-theme="dark"] .seg-accordion { background:#002326; border-color:#003A3D; }
+html[data-taqa-theme="dark"] .seg-acc-item { border-color:#003A3D; }
+html[data-taqa-theme="dark"] .seg-acc-row:hover { background:linear-gradient(to right, var(--seg-color) 3px, rgba(255,255,255,0.03) 3px); }
+html[data-taqa-theme="dark"] .seg-acc-item.open .seg-acc-row { background:linear-gradient(to right, var(--seg-color) 3px, rgba(0,93,99,0.14) 3px); }
+html[data-taqa-theme="dark"] .seg-acc-item.open .seg-acc-panel { background:linear-gradient(to right, var(--seg-color) 3px, rgba(255,255,255,0.03) 3px); }
+html[data-taqa-theme="dark"] .seg-acc-stat { background:rgba(255,255,255,0.04); border-color:#003A3D; }
+html[data-taqa-theme="dark"] .seg-acc-stat.has-alert { background:rgba(192,57,43,0.15); }
+html[data-taqa-theme="dark"] .seg-acc-tag { background:rgba(255,255,255,0.05); border-color:#003A3D; }
+html[data-taqa-theme="dark"] .sidebar-tool { background:#002326; border-color:#003A3D; }
+html[data-taqa-theme="dark"] .sidebar-alert { background:rgba(0,93,99,0.13); border-color:rgba(0,93,99,0.28); }
+html[data-taqa-theme="dark"] .alert-bar-inner { background:rgba(0,93,99,0.1); border-color:rgba(0,93,99,0.22); }
+html[data-taqa-theme="dark"] .panel-badge { background:rgba(0,93,99,0.2); }
+html[data-taqa-theme="dark"] .bg-blob-1 { background:radial-gradient(circle,rgba(0,187,182,0.07) 0%,transparent 65%); }
+html[data-taqa-theme="dark"] .bg-blob-2 { background:radial-gradient(circle,rgba(0,93,99,0.06) 0%,transparent 65%); }
+html[data-taqa-theme="dark"] .bg-blob-3 { background:radial-gradient(circle,rgba(0,187,182,0.05) 0%,transparent 65%); }
+html[data-taqa-theme="dark"] ::-webkit-scrollbar-thumb { background:rgba(0,187,182,0.2); }
 
 /* ── Page Exit Transition ── */
 @keyframes pageFadeOut { from{opacity:1;transform:translateY(0);} to{opacity:0;transform:translateY(-5px);} }
@@ -779,8 +918,8 @@ body.page-exit { animation:pageFadeOut 0.28s ease forwards; pointer-events:none;
 .scroll-top-btn.stp-visible { opacity:1; transform:translateY(0); }
 .scroll-top-btn:hover { box-shadow:0 8px 28px rgba(0,93,99,0.3); transform:translateY(-3px) !important; }
 .scroll-top-btn svg { position:absolute; top:0; left:0; width:46px; height:46px; }
-.stp-arrow { font-size:13px; color:var(--primary); position:relative; z-index:1; font-weight:800; }
-html[data-theme="dark"] .scroll-top-btn { background:rgba(14,24,36,0.92); border-color:#243044; }
+.stp-arrow { font-size:13px; color:var(--primary-ink); position:relative; z-index:1; font-weight:800; }
+html[data-taqa-theme="dark"] .scroll-top-btn { background:rgba(0,35,38,0.92); border-color:#003A3D; }
 
 /* ── Hero Word Animations ── */
 @media (prefers-reduced-motion: reduce) {
@@ -792,19 +931,18 @@ html[data-theme="dark"] .scroll-top-btn { background:rgba(14,24,36,0.92); border
 }
 
 @keyframes heroWordIn {
-  from { opacity:0; transform:translateY(28px); }
+  from { opacity:0; transform:translateY(12px); }
   to   { opacity:1; transform:translateY(0); }
 }
-.hw { opacity:0; animation:heroWordIn 0.75s cubic-bezier(0.16,1,0.3,1) forwards; }
+.hw { opacity:0; animation:heroWordIn 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
 .hw-i { display:inline-block; }
-.hw-1 { animation-delay:0.08s; }
-.hw-2 { animation-delay:0.30s; }
-.hw-3 { animation-delay:0.55s; }
-.hw-4 { animation-delay:0.78s; }
-.hw-5 { animation-delay:1.04s; }
-.hw-6 { animation-delay:1.20s; }
-.hw-7 { animation-delay:1.34s; }
-.hw-8 { animation-delay:0.90s; }
+/* The search field is what the band is for, so it arrives early. */
+.hw-1 { animation-delay:0.05s; }
+.hw-2 { animation-delay:0.14s; }
+.hw-3 { animation-delay:0.24s; }
+.hw-4 { animation-delay:0.34s; }
+.hw-5 { animation-delay:0.40s; }
+.hw-8 { animation-delay:0.48s; }
 
 /* ── Stats Bridge Strip ── */
 .stats-strip {
@@ -822,29 +960,50 @@ html[data-theme="dark"] .scroll-top-btn { background:rgba(14,24,36,0.92); border
 }
 .stats-strip-item:hover { background:rgba(0,93,99,0.03); }
 .stats-strip-num {
-  font-family:'BwGradual','Urbanist',sans-serif; font-size:28px; font-weight:800; color:var(--primary);
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:28px; font-weight:800; color:var(--primary-ink);
   line-height:1; letter-spacing:-0.5px;
 }
 .stats-strip-label { font-size:11.5px; color:var(--text-muted); font-weight:500; letter-spacing:0.3px; }
 .stats-strip-divider { width:1px; background:var(--border); margin:16px 0; flex-shrink:0; }
-html[data-theme="dark"] .stats-strip { background:#19263a; border-color:#243044; }
-html[data-theme="dark"] .stats-strip-divider { background:#243044; }
+html[data-taqa-theme="dark"] .stats-strip { background:#002326; border-color:#003A3D; }
+html[data-taqa-theme="dark"] .stats-strip-divider { background:#003A3D; }
 
+
+/* ── Your desk ── */
+.desk{background:var(--bg-white);border-bottom:1px solid var(--border);padding:13px 48px;}
+.desk-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.desk-who{font-size:10px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;
+  color:#fff;background:var(--primary);border-radius:20px;padding:4px 11px;flex-shrink:0;}
+.desk-who,.desk-who.d-owner,.desk-who.d-qms,.desk-who.d-auditor{
+  background:rgba(0,93,99,0.10);color:var(--primary-ink);}
+.desk-line{font-size:13.5px;color:var(--text);flex:1;min-width:0;line-height:1.5;}
+.desk-line b{font-weight:800;font-variant-numeric:tabular-nums;}
+.desk-go{flex-shrink:0;font-size:12.5px;font-weight:600;color:#fff;background:var(--primary);
+  border-radius:8px;padding:7px 16px;text-decoration:none;transition:background .2s;}
+.desk-go:hover{background:var(--primary-hover);}
+html[data-taqa-theme="dark"] .desk{background:#002326;border-color:#003A3D;}
+/* In dark theme the light tint lands on the desk's own colour and the pill
+   disappears behind the line, so the role is tinted in the dark teal instead. */
+html[data-taqa-theme="dark"] .desk-who{background:rgba(0,187,182,0.12);}
+@media(max-width:640px){.desk{padding:12px 20px;}.desk-line{flex:1 1 100%;order:3;}}
 /* ── Continue Reading Strip ── */
 .continue-strip{background:var(--bg-white);border-bottom:1px solid var(--border);padding:12px 48px;}
 .continue-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
-.continue-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--primary);flex-shrink:0;}
+.continue-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--primary-ink);flex-shrink:0;}
 .continue-card{display:flex;align-items:center;gap:12px;padding:8px 16px;background:rgba(0,93,99,0.04);border:1px solid rgba(0,93,99,0.15);border-radius:8px;text-decoration:none;transition:border-color 0.2s,background 0.2s;flex:1;min-width:0;max-width:480px;}
 .continue-card:hover{border-color:rgba(0,93,99,0.3);background:rgba(0,93,99,0.08);}
-.continue-icon{width:32px;height:32px;border-radius:7px;background:rgba(0,93,99,0.12);color:var(--primary);font-size:9px;font-weight:700;font-family:'BwGradual','Urbanist',sans-serif;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.continue-icon{width:32px;height:32px;border-radius:7px;background:rgba(0,93,99,0.12);color:var(--primary-ink);font-size:9px;font-weight:700;font-family:'BwGradual','Urbanist',sans-serif;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .continue-info{flex:1;min-width:0;}
 .continue-title{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .continue-meta{font-size:11px;color:var(--text-muted);margin-top:1px;}
-.continue-arr{font-size:14px;color:var(--primary);flex-shrink:0;}
-html[data-theme="dark"] .continue-strip{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] .continue-card{background:rgba(0,187,182,0.04);border-color:rgba(0,187,182,0.15);}
-html[data-theme="dark"] .continue-card:hover{background:rgba(0,187,182,0.08);}
-html[data-theme="dark"] .continue-icon{background:rgba(0,187,182,0.12);color:#00BBB6;}
+.continue-arr{font-size:14px;color:var(--primary-ink);flex-shrink:0;}
+html[data-taqa-theme="dark"] .continue-strip{background:#002326;border-color:#003A3D;}
+html[data-taqa-theme="dark"] .continue-card{background:rgba(0,187,182,0.04);border-color:rgba(0,187,182,0.15);}
+html[data-taqa-theme="dark"] .continue-card:hover{background:rgba(0,187,182,0.08);}
+html[data-taqa-theme="dark"] .continue-icon{background:rgba(0,187,182,0.12);color:#00BBB6;}
+/* An alert keeps the orange family here as it does on every card. */
+.continue-icon.is-alert{background:rgba(253,105,29,0.12);color:var(--alert-ink,#A8431A);}
+html[data-taqa-theme="dark"] .continue-icon.is-alert{background:rgba(253,105,29,0.16);color:var(--alert-ink,#FF9B5E);}
 @media(max-width:640px){
   .continue-strip{padding:10px 20px;}
   .continue-inner{gap:10px;}
@@ -856,13 +1015,369 @@ html[data-theme="dark"] .continue-icon{background:rgba(0,187,182,0.12);color:#00
 .section-headline { margin-bottom:20px; }
 .section-hl-tag {
   font-size:10.5px; font-weight:700; letter-spacing:1.8px; text-transform:uppercase;
-  color:var(--primary); display:block; margin-bottom:7px;
+  color:var(--primary-ink); display:block; margin-bottom:7px;
 }
 .section-hl-title {
   font-family:'BwGradual','Urbanist',sans-serif; font-size:clamp(20px,2.2vw,26px);
   font-weight:700; color:var(--text); letter-spacing:-0.4px; font-style:italic;
 }
-html[data-theme="dark"] .section-hl-title { color:var(--text); }
+html[data-taqa-theme="dark"] .section-hl-title { color:var(--text); }
+
+/* ── Explore by Discipline: the cross-section ──────────────────────────
+   One sheet, read like a well log. The company policies are the cap rock:
+   the only coloured ground in the section, spanning the full width, so
+   they read as the layer every area sits under. The three groups are the
+   beds beneath it. Choosing a group opens its bed and its areas appear
+   inside it, so a group and its members are visibly one body, and nothing
+   is ever shown as chosen by filling it with colour. That is what ends the
+   confusion between the policies and the group you picked.            */
+#focus.strata {
+  --st-paper:#FFFFFF;
+  --st-shale:#1E1C1A;                 /* names            16.99:1 on paper */
+  --st-silt:#524D48;                  /* counts, meta      8.35:1          */
+  --st-clay:#756A61;                  /* lines of work     5.26:1          */
+  --st-bedding:rgba(117,106,97,0.30); /* between groups                    */
+  --st-lamina:rgba(117,106,97,0.17);  /* between areas                     */
+  --st-bore:#005D63;                  /* chevrons, open group, focus ring  */
+  --st-scuff:rgba(0,93,99,0.045);
+  --st-press:rgba(0,93,99,0.085);
+  --st-caprock:#005D63;
+  --st-caprock-worn:#00565C;
+  --st-caprock-deep:#004A4F;
+  --st-cap-ink:#FFFFFF;               /* 7.65:1 on caprock                 */
+  --st-cap-ink-2:#CFE3E4;             /* 5.74:1 on caprock                 */
+  --st-cap-lamina:rgba(255,255,255,0.17);
+  --st-gap:16px;
+  --st-ease:cubic-bezier(0.23,1,0.32,1);
+  --st-top:64px;                      /* under the fixed nav               */
+}
+html[data-taqa-theme="dark"] #focus.strata {
+  --st-paper:#002326;
+  --st-shale:#C7DBDD;                 /* 11.51:1 on #002326 */
+  --st-silt:#8CB6B9;                  /*  7.50:1            */
+  --st-clay:#6FA7AA;                  /*  6.14:1            */
+  --st-bedding:rgba(0,187,182,0.24);
+  --st-lamina:rgba(0,187,182,0.12);
+  --st-bore:#00BBB6;                  /*  6.92:1            */
+  --st-scuff:rgba(0,187,182,0.06);
+  --st-press:rgba(0,187,182,0.11);
+  --st-caprock-worn:#006369;
+  --st-caprock-deep:#00535A;
+}
+
+/* ── The sheet ── clip, not hidden, so an open bed's header can stick. */
+#focus.strata .st-col {
+  position:relative; overflow:clip; overflow-anchor:none;
+  background:var(--st-paper);
+  border:1px solid var(--st-bedding);
+  border-radius:12px;
+}
+
+/* ── The cap rock: the company policies ── */
+#focus.strata .st-cap { background:var(--st-caprock); color:var(--st-cap-ink); }
+#focus.strata .st-capbtn {
+  display:grid; grid-template-columns:minmax(0,1fr) auto;
+  column-gap:14px; align-items:start;
+  width:100%; margin:0; padding:18px var(--st-gap);
+  border:0; border-radius:0; background:var(--st-caprock); color:var(--st-cap-ink);
+  font:inherit; text-align:start; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color 160ms ease;
+}
+#focus.strata .cap-main { display:flex; flex-direction:column; gap:5px; min-width:0; }
+#focus.strata .cap-t {
+  font-family:'BwGradual','Urbanist',sans-serif; font-weight:700;
+  font-size:18px; line-height:1.2; letter-spacing:-0.25px; color:var(--st-cap-ink);
+}
+#focus.strata .cap-d { font-size:13px; line-height:1.45; color:var(--st-cap-ink-2); }
+#focus.strata .cap-act {
+  display:inline-flex; align-items:center; gap:3px; min-height:22px;
+  font-size:12.5px; font-weight:600; color:var(--st-cap-ink); white-space:nowrap;
+}
+#focus.strata .cap-act svg { width:16px; height:16px; transition:transform 240ms var(--st-ease); }
+#focus.strata .cap-hide { display:none; }
+#focus.strata .st-capbtn[aria-expanded="true"] .cap-show { display:none; }
+#focus.strata .st-capbtn[aria-expanded="true"] .cap-hide { display:inline; }
+#focus.strata .st-capbtn[aria-expanded="true"] .cap-act svg { transform:rotate(180deg); }
+
+/* The twelve, inside the cap rock. */
+#focus.strata .charter-panel { height:0; overflow:hidden; transition:height 300ms var(--st-ease); }
+#focus.strata .ch-grid { display:grid; grid-template-columns:1fr; padding:0 var(--st-gap) 4px; }
+#focus.strata .charter-panel:not(.open) .ch-row,
+#focus.strata .charter-panel:not(.open) .st-fold { visibility:hidden; }
+#focus.strata .ch-row {
+  display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:10px; row-gap:2px;
+  align-items:baseline; align-content:start; min-height:52px; padding:10px 0;
+  border-top:1px solid var(--st-cap-lamina);
+  text-decoration:none; color:var(--st-cap-ink);
+  transition:background-color 140ms ease;
+}
+#focus.strata .ch-name {
+  grid-column:1 / -1; grid-row:1; align-self:center;
+  font-size:14px; font-weight:600; line-height:1.35; color:var(--st-cap-ink);
+}
+
+/* ── The beds ── */
+#focus.strata .st-layer { position:relative; border-top:1px solid var(--st-bedding); }
+#focus.strata .st-cap + .st-layer { border-top:0; }
+#focus.strata .st-h { margin:0; font:inherit; }
+#focus.strata .st-head {
+  display:grid; grid-template-columns:minmax(0,1fr) 20px;
+  grid-template-areas:"name chev" "meta chev";
+  column-gap:12px; row-gap:3px; align-items:center;
+  width:100%; min-height:68px; margin:0; padding:14px var(--st-gap);
+  border:0; border-radius:0; background:transparent; color:var(--st-shale);
+  font:inherit; text-align:start; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color 160ms ease;
+}
+#focus.strata .st-name {
+  grid-area:name;
+  font-family:'BwGradual','Urbanist',sans-serif; font-weight:700;
+  font-size:18px; line-height:1.2; letter-spacing:-0.25px; color:var(--st-shale);
+  transition:color 160ms ease;
+}
+#focus.strata .st-meta {
+  grid-area:meta; display:flex; flex-wrap:wrap; align-items:baseline;
+  font-size:12.5px; line-height:1.4; color:var(--st-silt);
+}
+#focus.strata .st-stat b { font-weight:700; color:var(--st-shale); font-variant-numeric:tabular-nums; }
+#focus.strata .st-stat + .st-stat::before,
+#focus.strata .st-desc::before { content:'\00B7'; padding-inline:7px; color:var(--st-clay); }
+#focus.strata .st-desc { display:none; }
+#focus.strata .st-chev {
+  grid-area:chev; width:20px; height:20px; display:grid; place-items:center; color:var(--st-bore);
+}
+#focus.strata .st-chev svg { width:18px; height:18px; transition:transform 240ms var(--st-ease); }
+
+/* An open bed says so in more than the chevron: its name takes the teal
+   ink, a teal rule closes the header, and the header stays in view while
+   you scroll its areas, so halfway down eleven rows you still know which
+   group you are in. None of it is a fill. */
+#focus.strata .st-layer[data-open="true"] .st-chev svg { transform:rotate(180deg); }
+#focus.strata .st-layer[data-open="true"] .st-name { color:var(--st-bore); }
+#focus.strata .st-layer[data-open="true"] .st-h {
+  position:sticky; top:var(--st-top); z-index:2; background:var(--st-paper);
+  box-shadow:inset 0 -2px 0 var(--st-bore);
+}
+
+#focus.strata .st-body {
+  display:grid; grid-template-rows:0fr;
+  transition:grid-template-rows 200ms var(--st-ease);
+}
+#focus.strata .st-layer[data-open="true"] .st-body { grid-template-rows:1fr; transition-duration:300ms; }
+#focus.strata .st-body-in {
+  min-height:0; overflow:hidden; visibility:hidden;
+  transition:visibility 0s linear 200ms;
+}
+#focus.strata .st-layer[data-open="true"] .st-body-in { visibility:visible; transition-delay:0s; }
+
+#focus.strata .st-members { list-style:none; margin:0; padding:0; }
+#focus.strata .st-members li { position:relative; }
+/* Hairlines between areas; a firmer line between groups. */
+#focus.strata .st-members li::before {
+  content:''; position:absolute; top:0; inset-inline:0 0;
+  height:1px; background:var(--st-lamina); pointer-events:none;
+}
+#focus.strata .st-members li:first-child::before { display:none; }
+#focus.strata .st-layer[data-open="true"] .st-members li {
+  animation:st-emerge 280ms var(--st-ease) both;
+  animation-delay:calc(var(--i, 0) * 16ms + 60ms);
+}
+@keyframes st-emerge { from { opacity:0; transform:translateY(-6px); } }
+
+#focus.strata .st-row {
+  position:relative;
+  display:grid; grid-template-columns:minmax(0,1fr) auto 14px;
+  grid-template-areas:"name docs go" "tag docs go";
+  column-gap:12px; row-gap:2px; align-items:center;
+  min-height:56px; padding:10px var(--st-gap);
+  text-decoration:none; color:var(--st-shale);
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color 140ms ease;
+}
+/* Areas are set light, so the bold group name above them stays the one
+   heading; the line of work follows, quieter. */
+#focus.strata .st-rname {
+  grid-area:name; min-width:0;
+  font-family:'BwGradual','Urbanist',sans-serif; font-weight:300;
+  font-size:16px; line-height:1.25; letter-spacing:0; color:var(--st-shale);
+}
+#focus.strata .st-rtag {
+  grid-area:tag; min-width:0;
+  font-size:12px; font-weight:500; line-height:1.3;
+  color:var(--st-clay);
+}
+#focus.strata .st-rtag:empty { display:none; }
+#focus.strata .st-rdocs {
+  grid-area:docs; justify-self:end; white-space:nowrap;
+  font-size:11.5px; color:var(--st-silt); font-variant-numeric:tabular-nums;
+}
+#focus.strata .st-rdocs b {
+  font-family:'BwGradual','Urbanist',sans-serif; font-weight:700;
+  font-size:16px; line-height:1; letter-spacing:-0.2px; color:var(--st-shale);
+  margin-inline-end:3px;
+}
+#focus.strata .st-rgo { grid-area:go; display:grid; place-items:center; color:var(--st-bore); }
+#focus.strata .st-rgo svg { width:14px; height:14px; transition:transform 180ms var(--st-ease); }
+[dir="rtl"] #focus.strata .st-rgo svg { transform:scaleX(-1); }
+
+/* The way out of a long bed, at its foot, so nobody is left below eleven
+   rows hunting for the header. Also closes the policies. */
+#focus.strata .st-fold {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  width:100%; min-height:48px; margin:0; padding:0 var(--st-gap);
+  border:0; border-top:1px solid var(--st-lamina); background:transparent;
+  font:inherit; font-size:13px; font-weight:600; color:var(--st-bore); cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+#focus.strata .st-fold svg { width:15px; height:15px; transform:rotate(180deg); }
+#focus.strata .st-cap .st-fold { color:var(--st-cap-ink); border-top-color:var(--st-cap-lamina); }
+
+/* ── States ── */
+@media (hover:hover) and (pointer:fine){
+  #focus.strata .st-head:hover,
+  #focus.strata .st-row:hover,
+  #focus.strata .st-body .st-fold:hover { background:var(--st-scuff); }
+  #focus.strata .st-layer[data-open="true"] .st-head:hover { background:transparent; }
+  #focus.strata .st-row:hover .st-rgo svg { transform:translateX(2px); }
+  [dir="rtl"] #focus.strata .st-row:hover .st-rgo svg { transform:scaleX(-1) translateX(2px); }
+  #focus.strata .st-capbtn:hover { background:var(--st-caprock-worn); }
+  #focus.strata .ch-row:hover,
+  #focus.strata .st-cap .st-fold:hover { background:rgba(255,255,255,0.06); }
+}
+#focus.strata .st-head:active,
+#focus.strata .st-row:active { background:var(--st-press); }
+#focus.strata .st-capbtn:active { background:var(--st-caprock-deep); }
+
+/* The site's ring sits 3px outside, where this sheet clips it. Inside the
+   sheet the ring is drawn inset, whole, in the bed ink (white on the cap). */
+#focus.strata .st-head:focus-visible,
+#focus.strata .st-row:focus-visible,
+#focus.strata .st-body .st-fold:focus-visible {
+  outline:2px solid var(--st-bore) !important; outline-offset:-2px !important;
+}
+#focus.strata .st-capbtn:focus-visible,
+#focus.strata .ch-row:focus-visible,
+#focus.strata .st-cap .st-fold:focus-visible {
+  outline:2px solid #FFFFFF !important; outline-offset:-3px !important;
+}
+
+/* ── Wider: the same sheet. Areas sit in two columns that read down the
+   first column and then the second, so the ranking stays in order. ── */
+@media (min-width:700px){
+  #focus.strata { --st-gap:22px; }
+  #focus.strata .st-col { border-radius:14px; }
+  #focus.strata .st-capbtn { padding:22px var(--st-gap) 20px; }
+    #focus.strata .cap-t { font-size:20px; }
+  #focus.strata .cap-d { font-size:13.5px; }
+  #focus.strata .ch-grid {
+    grid-template-columns:1fr 1fr; column-gap:28px; padding-bottom:10px;
+  }
+  #focus.strata .st-head { min-height:72px; padding:16px var(--st-gap); }
+  #focus.strata .st-name { font-size:20px; }
+  #focus.strata .st-meta { font-size:13px; }
+  #focus.strata .st-desc { display:inline; }
+
+  #focus.strata .st-members {
+    display:grid; grid-template-columns:1fr 1fr;
+    grid-template-rows:repeat(var(--rows, 6), auto); grid-auto-flow:column;
+  }
+  #focus.strata .st-members li:first-child::before,
+  #focus.strata .st-members li.st-top::before { display:none; }
+  #focus.strata .st-members li.st-c2 .st-row::before {
+    content:''; position:absolute; inset-inline-start:0; top:14px; bottom:14px;
+    width:1px; background:var(--st-lamina);
+  }
+  #focus.strata .st-row { min-height:62px; padding-block:11px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  #focus.strata .st-body,
+  #focus.strata .st-body-in,
+  #focus.strata .charter-panel,
+  #focus.strata .st-chev svg,
+  #focus.strata .cap-act svg { transition:none; }
+  #focus.strata .st-layer[data-open="true"] .st-members li { animation:none; }
+}
+
+/* ── Softer on the eye ──────────────────────────────────────────────────
+   The first cut read as hard: an ExtraBold numeral in white on a solid
+   slab that ran edge to edge, near-black bold headings, and rules strong
+   enough to be the first thing you saw. The structure stays; the contrast
+   comes down to what the eye needs and no more.
+   - The policies band floats inside the sheet with its own rounded corners
+     and a gentle two-tone teal, instead of being cut off square.
+   - Lines between groups and areas are hairlines, headings a softer ink,
+     and the sheet sits on a diffuse shadow rather than a hard border.
+   - Chevrons sit in a faint teal disc so they read as a control, softly.
+   Every text pair still clears WCAG AA in both themes.                 */
+#focus.strata {
+  --st-shale:#2B2724;                 /* 14.6:1 on paper */
+  --st-bedding:rgba(117,106,97,0.13);
+  --st-lamina:rgba(117,106,97,0.09);
+}
+html[data-taqa-theme="dark"] #focus.strata {
+  --st-shale:#C7DBDD;
+  --st-bedding:rgba(0,187,182,0.13);
+  --st-lamina:rgba(0,187,182,0.08);
+}
+#focus.strata .st-col {
+  padding:6px; border-radius:20px;
+  border:1px solid rgba(117,106,97,0.12);
+  box-shadow:0 1px 2px rgba(0,88,90,0.04), 0 22px 44px -26px rgba(0,88,90,0.22);
+}
+html[data-taqa-theme="dark"] #focus.strata .st-col {
+  border-color:rgba(0,187,182,0.12);
+  box-shadow:0 22px 44px -26px rgba(0,0,0,0.5);
+}
+#focus.strata .st-cap {
+  border-radius:15px; overflow:hidden;
+  background:linear-gradient(135deg, #005D63 0%, #0A686D 100%);
+}
+#focus.strata .st-capbtn { background:transparent; }
+@media (hover:hover) and (pointer:fine){
+  #focus.strata .st-capbtn:hover { background:rgba(255,255,255,0.04); }
+}
+#focus.strata .st-capbtn:active { background:rgba(0,0,0,0.06); }
+#focus.strata .cap-t { font-weight:600; letter-spacing:-0.15px; }
+#focus.strata .cap-act {
+  padding:6px 12px 6px 13px; border-radius:999px;
+  background:rgba(255,255,255,0.10); font-weight:500;
+  transition:background-color 160ms ease;
+}
+@media (hover:hover) and (pointer:fine){
+  #focus.strata .st-capbtn:hover .cap-act { background:rgba(255,255,255,0.16); }
+}
+#focus.strata .st-cap + .st-layer { margin-top:4px; }
+#focus.strata .st-layer:last-child { margin-bottom:0; }
+#focus.strata .st-head { border-radius:12px; }
+#focus.strata .st-name { font-size:17.5px; letter-spacing:-0.15px; }
+#focus.strata .st-stat b { font-weight:600; color:var(--st-silt); }
+#focus.strata .st-chev {
+  width:30px; height:30px; border-radius:50%;
+  background:rgba(0,93,99,0.06);
+  transition:background-color 160ms ease;
+}
+html[data-taqa-theme="dark"] #focus.strata .st-chev { background:rgba(0,187,182,0.08); }
+#focus.strata .st-chev svg { width:16px; height:16px; }
+#focus.strata .st-head { grid-template-columns:minmax(0,1fr) 30px; }
+@media (hover:hover) and (pointer:fine){
+  #focus.strata .st-head:hover .st-chev { background:rgba(0,93,99,0.11); }
+}
+#focus.strata .st-layer[data-open="true"] .st-h { box-shadow:inset 0 -1.5px 0 rgba(0,93,99,0.45); }
+html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { box-shadow:inset 0 -1.5px 0 rgba(0,187,182,0.5); }
+#focus.strata .st-rdocs b { font-weight:600; }
+
+#focus.strata .ch-name { font-family:'BwGradual','Urbanist',sans-serif; font-weight:300; font-size:15px; }
+#focus.strata .ch-row { border-top-color:rgba(255,255,255,0.12); }
+@media (max-width:699px){
+  /* On a phone the worded pill squeezed the title onto two lines; the
+     same round chevron as the groups below says the same thing. */
+  #focus.strata .cap-act { width:30px; height:30px; padding:0; justify-content:center; }
+  #focus.strata .cap-show, #focus.strata .st-capbtn[aria-expanded="true"] .cap-hide { display:none; }
+  #focus.strata .st-capbtn { grid-template-columns:minmax(0,1fr) 30px; }
+}
 
 /* ── Footer Credit ── */
 .footer-credit {
@@ -872,7 +1387,7 @@ html[data-theme="dark"] .section-hl-title { color:var(--text); }
 /* ── Sidebar Brand Card ── */
 .sidebar-brand-card {
   margin-top:12px; border-radius:var(--radius); padding:20px;
-  background:linear-gradient(145deg, #06121a 0%, #0d2030 100%);
+  background:linear-gradient(145deg, #001314 0%, #002326 100%);
   border:1px solid rgba(0,187,182,0.18);
   position:relative; overflow:hidden;
   flex-shrink:0;
@@ -885,54 +1400,31 @@ html[data-theme="dark"] .section-hl-title { color:var(--text); }
 }
 .sidebar-brand-card-name {
   font-family:'BwGradual','Urbanist',sans-serif; font-size:22px; font-weight:700; font-style:italic;
-  color:#4DD9D3; letter-spacing:-0.3px; display:block; margin-bottom:4px;
+  letter-spacing:-0.3px; display:block; margin-bottom:4px;
+  background:linear-gradient(120deg, #00BBB6 15%, #EAFFFD 85%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
 }
-.sidebar-brand-card-wip {
-  display:inline-block; margin-bottom:8px;
-  font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:1px;
-  color:rgba(255,255,255,0.55); border:1px dashed rgba(255,255,255,0.3);
-  border-radius:3px; padding:2px 6px;
+@media (prefers-contrast:more){
+  .sidebar-brand-card-name{background:none; -webkit-text-fill-color:unset; color:var(--primary-light);}
 }
 .sidebar-brand-card-tagline {
   font-size:12.5px; color:rgba(255,255,255,0.6); line-height:1.65; margin-bottom:16px;
 }
 .sidebar-brand-card-credit {
   font-size:10px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase;
-  color:rgba(255,255,255,0.28);
+  color:rgba(255,255,255,0.6);
 }
-.sidebar-brand-card-credit span { color:rgba(0,187,182,0.7); }
+.sidebar-brand-card-credit span { color:var(--primary-light); }
 
-/* ── Mobile Nav ── */
-.nav-hamburger {
-  display:none; background:none; border:1px solid var(--border);
-  border-radius:7px; padding:7px 9px; cursor:pointer;
-  flex-direction:column; gap:4px; align-items:center; justify-content:center;
-}
-.nav-hamburger span { display:block; width:17px; height:2px; background:var(--text-muted); border-radius:2px; transition:all 0.25s; }
-.nav-mobile-menu {
-  display:none; position:fixed; top:64px; left:0; right:0; z-index:998;
-  background:rgba(255,255,255,0.97); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border); padding:8px 20px 20px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.1);
-}
-.nav-mobile-menu.open { display:block; }
-.nav-mobile-menu a {
-  display:block; padding:13px 0; font-size:15px; font-weight:500;
-  color:var(--text); text-decoration:none; border-bottom:1px solid var(--border); transition:color 0.2s;
-}
-.nav-mobile-menu a:last-child { border-bottom:none; }
-.nav-mobile-menu a.active, .nav-mobile-menu a:hover { color:var(--primary); }
-html[data-theme="dark"] .nav-mobile-menu { background:rgba(14,24,36,0.97); border-color:#243044; }
-html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
 
 /* ── Responsive ── */
 @media(max-width:1100px) {
   .main-inner { grid-template-columns:1fr 280px; gap:32px; }
 }
 @media(max-width:1024px) {
-  .hero { grid-template-columns:1fr; gap:40px; padding:80px 48px 60px; }
+  .hero { grid-template-columns:minmax(0,1fr); gap:40px; }
   .hero-right { display:none; }
-  .hero-overlay { background:linear-gradient(105deg, rgba(6,18,26,0.92) 0%, rgba(6,18,26,0.85) 100%); }
+  .hero-overlay, [dir="rtl"] .hero-overlay { background:linear-gradient(105deg, rgba(0,19,20,0.92) 0%, rgba(0,19,20,0.85) 100%); }
   .main-inner { grid-template-columns:1fr; align-items:start; }
   .panel-sidebar { display:block; }
   .sidebar-inner { position:static; flex:none; display:block; }
@@ -946,17 +1438,13 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
   .alert-bar { padding:0 24px 24px; }
   .sidebar-tools { grid-template-columns:1fr; }
   .stats-strip-inner { padding:0 24px; }
-  .nav-actions .btn { display:none !important; }
 }
 @media(max-width:640px) {
-  nav { padding:0 20px; }
-  .nav-links { display:none; }
-  .nav-hamburger { display:flex; }
-  .nav-actions .btn { display:none; }
-  .hero { padding:80px 20px 56px; }
-  .hero h1 { font-size:clamp(24px,7.5vw,36px); }
-  .hero-search-bar { flex-wrap:wrap; }
-  .hero-search-bar .btn { width:100%; justify-content:center; }
+  .hero-wrap { min-height:380px; }
+  .hero { padding-block:calc(var(--nav-h, 64px) + 22px) 30px; padding-inline:20px; }
+  .hero-label { margin-bottom:12px; }
+  .hero h1 { font-size:clamp(25px,7vw,30px); margin-bottom:22px; }
+  .hero-search { min-height:56px; padding-inline:16px 5px; border-radius:13px; }
   .main-wrapper { padding:28px 20px; }
   .alert-bar { padding:0 20px 24px; }
   .stats-strip-inner { padding:0 16px; flex-wrap:wrap; }
@@ -971,14 +1459,31 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
   .cmd-header { flex-wrap:wrap; gap:8px; }
   .segments-grid { grid-template-columns:repeat(2,1fr); }
 }
+/* A phone held sideways is wide but short: the band shrinks to its
+   content so the strip below still shows on the first screen. */
+@media (max-height:520px) {
+  .hero-wrap { min-height:0; }
+  .hero { padding-block:calc(var(--nav-h, 64px) + 16px) 24px; }
+}
+/* The label is a 23px line of text; on touch it gets a 44px hit area
+   without moving anything around it. */
+@media (max-width:640px), (pointer:coarse) {
+  a.hero-label { position:relative; }
+  a.hero-label::after { content:''; position:absolute; inset-inline:-8px; inset-block:-11px; }
+}
 @media(max-width:480px) {
   .segments-grid { grid-template-columns:1fr; }
-  .cmd-grid { grid-template-columns:1fr; }
   .cmd-header-count { width:100%; }
   .sidebar-tools { grid-template-columns:1fr; }
-  .hero-search-bar input { font-size:14px; }
+  /* The button keeps its name for assistive tech and shows the arrow, so
+     the field keeps room for the placeholder on a narrow phone. */
+  .hero-search-btn { width:46px; padding:0; }
+  .hero-search-btn span { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+  .hero-search-btn svg { display:block; }
 }
+
 </style>
+<link rel="stylesheet" href="topbar.css">
 </head>
 <body>
 
@@ -991,76 +1496,33 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
 </div>
 
 <!-- ── Navigation ── -->
-<nav id="navbar">
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
   <a href="index.html" class="nav-brand">
-    <div>
-      <span class="nav-title"><span class="nav-title-brand">TAQA</span> <span class="nav-title-hub">Knowledge Hub</span></span>
-      <span class="nav-subtitle" style="white-space:nowrap"><em style="color:#005D63; font-style:italic;">Tech Hub</em> <span style="color:#94a3b8;">(working name)</span></span>
-    </div>
+    <span class="nav-title"><span class="nav-title-brand">TAQA</span> <span class="nav-title-hub">Knowledge Hub</span></span>
+    <span class="nav-subtitle"><em>TechHub Platform</em></span>
   </a>
   <ul class="nav-links">
-    <div class="nav-pill" id="nav-pill"></div>
-    <li><a href="index.html" class="active">Home</a></li>
-    <li class="nav-dropdown nav-dropdown-li" id="seg-dropdown-li">
-      <button class="nav-dropdown-btn" id="seg-dropdown-btn" aria-haspopup="true" aria-expanded="false">
-        Segments
-        <svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <div class="nav-dropdown-panel" role="menu">
-        <a href="segment.html?id=coiled-tubing" class="seg-dd-item"><span class="seg-dd-name">Coiled Tubing</span><span class="seg-dd-tag">Operations</span></a>
-        <a href="segment.html?id=fracturing" class="seg-dd-item"><span class="seg-dd-name">Fracturing</span><span class="seg-dd-tag">Stimulation</span></a>
-        <a href="segment.html?id=wireline" class="seg-dd-item"><span class="seg-dd-name">Wireline</span><span class="seg-dd-tag">Logging</span></a>
-        <a href="segment.html?id=drilling" class="seg-dd-item"><span class="seg-dd-name">Drilling</span><span class="seg-dd-tag">Well Operations</span></a>
-        <a href="segment.html?id=cementing" class="seg-dd-item"><span class="seg-dd-name">Cementing</span><span class="seg-dd-tag">Well Integrity</span></a>
-        <a href="segment.html?id=inspection" class="seg-dd-item"><span class="seg-dd-name">Inspection Services</span><span class="seg-dd-tag">Compliance</span></a>
-        <a href="segment.html?id=well-safety" class="seg-dd-item"><span class="seg-dd-name">Well Safety</span><span class="seg-dd-tag">HSE Critical</span></a>
-        <a href="segment.html?id=qhse" class="seg-dd-item"><span class="seg-dd-name">QHSE</span><span class="seg-dd-tag">Quality & Safety</span></a>
-        <a href="segment.html?id=tws-maintenance" class="seg-dd-item"><span class="seg-dd-name">TWS Maintenance</span><span class="seg-dd-tag">Maintenance</span></a>
-        <a href="segment.html?id=hr" class="seg-dd-item"><span class="seg-dd-name">Human Resources</span><span class="seg-dd-tag">HR & People</span></a>
-        <a href="segment.html?id=well-testing" class="seg-dd-item"><span class="seg-dd-name">Well Testing</span><span class="seg-dd-tag">Testing Services</span></a>
-        <a href="segment.html?id=cybersecurity" class="seg-dd-item"><span class="seg-dd-name">Cybersecurity</span><span class="seg-dd-tag">IT &amp; Data Security</span></a>
-      </div>
+    <li><a href="index.html" class="active" aria-current="page">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
     </li>
     <li><a href="ai-search.html">Document Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
     <li><a href="glossary.html">Field Glossary</a></li>
-    <li><a href="upload.html">Upload</a></li>
     <li><a href="support-ticket.html">Ask Expert</a></li>
   </ul>
-  <div class="nav-actions">
-    <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
-    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode">
-      <svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor">
-        <path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/>
-      </svg>
-    </button>
-    <button class="bell-btn" id="nav-bell" onclick="location.href='dashboard.html'" title="Pending approvals" aria-label="Pending approvals"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge">3</span></button>
-    <a href="ai-search.html" class="btn btn-outline">Search Documents</a>
-    <a href="upload.html" class="btn btn-primary">Upload Document</a>
+  <div class="nav-right">
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
 <!-- ── Mobile Nav Menu ── -->
-<div class="nav-mobile-menu" id="nav-mobile-menu">
-  <a href="index.html" class="active">Home</a>
-  <a href="ai-search.html">Document Search</a>
-  <a href="glossary.html">Field Glossary</a>
-  <a href="upload.html">Upload</a>
-  <a href="support-ticket.html">Ask Expert</a>
-  <div class="mob-seg-label">Segments</div>
-  <a href="segment.html?id=coiled-tubing" class="mob-seg-link">Coiled Tubing</a>
-  <a href="segment.html?id=fracturing" class="mob-seg-link">Fracturing</a>
-  <a href="segment.html?id=wireline" class="mob-seg-link">Wireline</a>
-  <a href="segment.html?id=drilling" class="mob-seg-link">Drilling</a>
-  <a href="segment.html?id=cementing" class="mob-seg-link">Cementing</a>
-  <a href="segment.html?id=inspection" class="mob-seg-link">Inspection Services</a>
-  <a href="segment.html?id=well-safety" class="mob-seg-link">Well Safety</a>
-  <a href="segment.html?id=qhse" class="mob-seg-link">QHSE</a>
-  <a href="segment.html?id=tws-maintenance" class="mob-seg-link">TWS Maintenance</a>
-  <a href="segment.html?id=hr" class="mob-seg-link">Human Resources</a>
-  <a href="segment.html?id=well-testing" class="mob-seg-link">Well Testing</a>
-</div>
 
 <!-- ── Hero ── -->
 <div class="hero-wrap">
@@ -1069,71 +1531,75 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
 
 <div class="hero">
   <div class="hero-left">
-<a class="hero-label hw hw-1" href="https://engage.cloud.microsoft/main/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyMTA0NzY4NjgyOTQyNDY0In0/all" target="_blank" rel="noopener noreferrer" aria-label="#BetterTogether@TAQA — opens the initiative community in Viva Engage">#BetterTogether@TAQA</a>
-<h1><span class="hw hw-2 hw-i" style="color:#ffffff;">Knowledge Is&nbsp;</span><span class="hw hw-3 hw-i">Better Together.</span><br><span class="hw hw-4 hw-i" style="font-style:italic;font-size:0.74em;color:rgba(255,255,255,0.82);">Every Answer, Within Reach.</span></h1>
-    <div class="hero-search-bar hw hw-5">
-      <input type="text" id="hero-search-input" placeholder="Search documents, procedures, manuals..." autocomplete="off">
-      <a href="ai-search.html" class="btn btn-primary" id="hero-search-btn">Search</a>
-    </div>
-    <div class="hero-links hw hw-6">
-      <a href="#segments">Browse Segments</a>
-      <a href="ai-search.html">AI Document Search</a>
-    </div>
+<a class="hero-label hw hw-1" href="https://engage.cloud.microsoft/main/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyMTA0NzY4NjgyOTQyNDY0In0/all" target="_blank" rel="noopener noreferrer" aria-label="#BetterTogether@TAQA, opens the initiative community in Viva Engage">#BetterTogether@TAQA</a>
+<h1><span class="hw hw-2 hw-i hero-h1-lead">Knowledge Is&nbsp;</span><span class="hw hw-3 hw-i">Better Together.</span><br><span class="hw hw-4 hw-i hero-h1-sub">Every Answer, Within Reach.</span></h1>
+    <form class="hero-search hw hw-5" id="hero-search" action="ai-search.html" method="get" role="search" aria-label="Search the register">
+      <svg class="hero-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+      <input type="search" id="hero-search-input" name="q" placeholder="Search documents, procedures, manuals" autocomplete="off" enterkeyhint="search" aria-label="Search documents, procedures and manuals">
+      <button type="submit" class="btn btn-primary hero-search-btn" id="hero-search-btn"><span>Search</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
+    </form>
   </div>
   <div class="hero-right">
     <div class="hero-stats-panel hw hw-8">
       <div class="stats-panel-title">Platform Overview</div>
       <div class="stats-list">
         <div class="stat-row">
-          <span class="stat-row-label">Total Documents</span>
-          <span class="stat-row-value" data-target="523">0</span>
+          <span class="stat-row-label">Documents in Force</span>
+          <span class="stat-row-value" data-target="">…</span>
         </div>
         <div class="stat-row">
           <span class="stat-row-label">Business Segments</span>
-          <span class="stat-row-value" data-target="11">0</span>
+          <span class="stat-row-value" data-target="">…</span>
         </div>
         <div class="stat-row">
           <span class="stat-row-label">Active Technical Alerts</span>
-          <span class="stat-row-value" data-target="25">0</span>
+          <span class="stat-row-value" data-target="">…</span>
         </div>
         <div class="stat-row">
-          <span class="stat-row-label">Registered Users</span>
-          <span class="stat-row-value" data-target="1200">0</span>
+          <span class="stat-row-label">Awaiting QMS Approval</span>
+          <span class="stat-row-value" data-target="">…</span>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<div class="hero-scroll-hint" id="scroll-hint">
-    <span style="font-size:10px; color:rgba(255,255,255,0.45); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:8px; display:block;">Built by <span style="color:#4DD9D3;">TAQA LEARNING CENTER</span></span>
-    <span class="hero-scroll-text">Scroll</span>
-    <div class="hero-scroll-chevron"></div>
-  </div>
 </div><!-- /hero-wrap -->
 
 <!-- ── Stats Bridge Strip ── -->
 <div class="stats-strip reveal">
   <div class="stats-strip-inner">
     <div class="stats-strip-item">
-      <span class="stats-strip-num" data-target="523">0</span>
+      <span class="stats-strip-num" data-target="">…</span>
       <span class="stats-strip-label">Documents</span>
     </div>
     <div class="stats-strip-divider"></div>
     <div class="stats-strip-item">
-      <span class="stats-strip-num" data-target="11">0</span>
-      <span class="stats-strip-label">Segments</span>
+      <span class="stats-strip-num" data-target="">…</span>
+      <span class="stats-strip-label">Operational Segments</span>
     </div>
     <div class="stats-strip-divider"></div>
     <div class="stats-strip-item">
-      <span class="stats-strip-num" data-target="160" data-suffix="+">0</span>
-      <span class="stats-strip-label">Glossary Terms</span>
+      <span class="stats-strip-num" data-target="">…</span>
+      <span class="stats-strip-label">Corporate Functions</span>
     </div>
     <div class="stats-strip-divider"></div>
     <div class="stats-strip-item">
-      <span class="stats-strip-num" data-target="1">0</span>
-      <span class="stats-strip-label">Platform</span>
+      <span class="stats-strip-num" data-target="">…</span>
+      <span class="stats-strip-label">Products &amp; Technology</span>
     </div>
+  </div>
+</div>
+
+<!-- ── Your desk ──────────────────────────────────────────────────────
+     What is waiting on you, which is a different question for each door.
+     Hidden entirely for a role with nothing to act on, rather than shown
+     empty, because an empty queue for someone who holds no step is noise. -->
+<div class="desk reveal" id="desk" hidden>
+  <div class="desk-inner">
+    <span class="desk-who" id="desk-who"></span>
+    <span class="desk-line" id="desk-line"></span>
+    <a class="desk-go" id="desk-go" href="dashboard.html">Open</a>
   </div>
 </div>
 
@@ -1162,399 +1628,25 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
         <span class="section-hl-tag">Explore by Discipline</span>
         <h2 class="section-hl-title">One platform. Every discipline.</h2>
       </div>
-      <div class="cmd-center reveal">
-        <div class="cmd-header">
-          <div class="cmd-header-left">
-            <span class="cmd-live-dot"></span>
-            <span class="cmd-header-title">Operational Segments</span>
-            <span class="cmd-header-live">Live Status</span>
+      <div class="strata reveal" id="focus">
+        <div class="st-col">
+          <div class="st-cap">
+            <button type="button" class="st-capbtn" id="charter" aria-expanded="false" aria-controls="charter-list">
+              <span class="cap-main">
+                <span class="cap-t">Company policies</span>
+                <span class="cap-d">Signed by the CEO. Every segment, function and center below follows them.</span>
+              </span>
+              <span class="cap-act" aria-hidden="true"><span class="cap-show">See all</span><span class="cap-hide">Hide</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9.5l6 6 6-6"/></svg></span>
+            </button>
+            <div class="charter-panel" id="charter-list"></div>
           </div>
-          <span class="cmd-header-count">12 Segments · 553 Documents</span>
-        </div>
-        <div class="cmd-grid">
-
-          <a href="segment.html?id=coiled-tubing" class="cmd-card reveal" style="transition-delay:0.05s" data-id="coiled-tubing">
-            <div class="cmd-card-top"><span class="cmd-card-num">01</span></div>
-            <div class="cmd-card-name">Coiled Tubing</div>
-            <div class="cmd-card-tag">Operations</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">35 docs</span><span class="cmd-card-alert-count">⚠ 3</span></div>          </a>
-
-          <a href="segment.html?id=fracturing" class="cmd-card reveal" style="transition-delay:0.10s" data-id="fracturing">
-            <div class="cmd-card-top"><span class="cmd-card-num">02</span></div>
-            <div class="cmd-card-name">Fracturing</div>
-            <div class="cmd-card-tag">Stimulation</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">49 docs</span><span class="cmd-card-alert-count">⚠ 5</span></div>          </a>
-
-          <a href="segment.html?id=wireline" class="cmd-card reveal" style="transition-delay:0.15s" data-id="wireline">
-            <div class="cmd-card-top"><span class="cmd-card-num">03</span></div>
-            <div class="cmd-card-name">Wireline</div>
-            <div class="cmd-card-tag">Logging</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">34 docs</span><span class="cmd-card-clear">Clear</span></div>          </a>
-
-          <a href="segment.html?id=drilling" class="cmd-card reveal" style="transition-delay:0.20s" data-id="drilling">
-            <div class="cmd-card-top"><span class="cmd-card-num">04</span></div>
-            <div class="cmd-card-name">Drilling</div>
-            <div class="cmd-card-tag">Well Operations</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">57 docs</span><span class="cmd-card-alert-count">⚠ 7</span></div>          </a>
-
-          <a href="segment.html?id=cementing" class="cmd-card reveal" style="transition-delay:0.25s" data-id="cementing">
-            <div class="cmd-card-top"><span class="cmd-card-num">05</span></div>
-            <div class="cmd-card-name">Cementing</div>
-            <div class="cmd-card-tag">Well Integrity</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">34 docs</span><span class="cmd-card-clear">Clear</span></div>          </a>
-
-          <a href="segment.html?id=inspection" class="cmd-card reveal" style="transition-delay:0.30s" data-id="inspection">
-            <div class="cmd-card-top"><span class="cmd-card-num">06</span></div>
-            <div class="cmd-card-name">Inspection Services</div>
-            <div class="cmd-card-tag">Compliance</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">44 docs</span><span class="cmd-card-alert-count">⚠ 3</span></div>          </a>
-
-          <a href="segment.html?id=well-safety" class="cmd-card reveal" style="transition-delay:0.35s" data-id="well-safety">
-            <div class="cmd-card-top"><span class="cmd-card-num">07</span></div>
-            <div class="cmd-card-name">Well Safety</div>
-            <div class="cmd-card-tag">HSE Critical</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">52 docs</span><span class="cmd-card-alert-count">⚠ 8</span></div>          </a>
-
-          <a href="segment.html?id=qhse" class="cmd-card reveal" style="transition-delay:0.40s" data-id="qhse">
-            <div class="cmd-card-top"><span class="cmd-card-num">08</span></div>
-            <div class="cmd-card-name">QHSE</div>
-            <div class="cmd-card-tag">Quality &amp; Safety</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">50 docs</span><span class="cmd-card-alert-count">⚠ 4</span></div>          </a>
-
-          <a href="segment.html?id=tws-maintenance" class="cmd-card reveal" style="transition-delay:0.45s" data-id="tws-maintenance">
-            <div class="cmd-card-top"><span class="cmd-card-num">09</span></div>
-            <div class="cmd-card-name">TWS Maintenance</div>
-            <div class="cmd-card-tag">Maintenance</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">39 docs</span><span class="cmd-card-clear">Clear</span></div>          </a>
-
-          <a href="segment.html?id=hr" class="cmd-card reveal" style="transition-delay:0.50s" data-id="hr">
-            <div class="cmd-card-top"><span class="cmd-card-num">10</span></div>
-            <div class="cmd-card-name">Human Resources</div>
-            <div class="cmd-card-tag">HR &amp; People</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">38 docs</span><span class="cmd-card-clear">Clear</span></div>          </a>
-
-          <a href="segment.html?id=well-testing" class="cmd-card reveal" style="transition-delay:0.55s" data-id="well-testing">
-            <div class="cmd-card-top"><span class="cmd-card-num">11</span></div>
-            <div class="cmd-card-name">Well Testing</div>
-            <div class="cmd-card-tag">Testing Services</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">31 docs</span><span class="cmd-card-alert-count">⚠ 2</span></div>          </a>
-
-          <a href="segment.html?id=cybersecurity" class="cmd-card reveal" style="transition-delay:0.60s" data-id="cybersecurity">
-            <div class="cmd-card-top"><span class="cmd-card-num">12</span></div>
-            <div class="cmd-card-name">Cybersecurity</div>
-            <div class="cmd-card-tag">IT &amp; Data Security</div>
-            <div class="cmd-card-footer"><span class="cmd-card-docs">30 docs</span><span class="cmd-card-alert-count">⚠ 4</span></div>          </a>
-
+          <div id="st-beds"></div>
         </div>
       </div>
 
-      <div class="seg-accordion" id="seg-accordion" style="display:none">
-
-        <div class="seg-acc-item reveal" style="transition-delay:0.05s" data-id="coiled-tubing">
-          <div class="seg-acc-row" onclick="toggleAcc(this)">
-            <div class="seg-acc-left">
-              <span class="acc-chevron">›</span>
-              <span class="seg-acc-num">01</span>
-              <span class="seg-acc-name">Coiled Tubing</span>
-              <span class="seg-acc-tag">Operations</span>
-            </div>
-            <div class="seg-acc-right">
-              <span class="seg-acc-count">35 documents</span>
-              <span class="seg-acc-alert">3 Alerts</span>
-            </div>
-          </div>
-          <div class="seg-acc-panel"><div class="seg-acc-panel-inner">
-            <p class="seg-acc-desc">Operations, equipment specifications, and continuous operation field procedures for all CT units.</p>
-            <div class="seg-acc-actions">
-              <a href="segment.html?id=coiled-tubing" class="seg-acc-open">Open Library →</a>
-              <span class="seg-acc-stat">12 SOPs</span>
-              <span class="seg-acc-stat">9 Manuals</span>
-              <span class="seg-acc-stat">6 Policies</span>
-              <span class="seg-acc-stat has-alert">3 Alerts</span>
-              <span class="seg-acc-stat">5 Lessons</span>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="seg-acc-item reveal" style="transition-delay:0.10s" data-id="fracturing">
-          <div class="seg-acc-row" onclick="toggleAcc(this)">
-            <div class="seg-acc-left">
-              <span class="acc-chevron">›</span>
-              <span class="seg-acc-num">02</span>
-              <span class="seg-acc-name">Fracturing</span>
-              <span class="seg-acc-tag">Stimulation</span>
-            </div>
-            <div class="seg-acc-right">
-              <span class="seg-acc-count">49 documents</span>
-              <span class="seg-acc-alert">5 Alerts</span>
-            </div>
-          </div>
-          <div class="seg-acc-panel"><div class="seg-acc-panel-inner">
-            <p class="seg-acc-desc">Hydraulic fracturing design, execution procedures, fluid systems, pump operations, and post-job analysis documentation.</p>
-            <div class="seg-acc-actions">
-              <a href="segment.html?id=fracturing" class="seg-acc-open">Open Library →</a>
-              <span class="seg-acc-stat">18 SOPs</span>
-              <span class="seg-acc-stat">11 Manuals</span>
-              <span class="seg-acc-stat">8 Policies</span>
-              <span class="seg-acc-stat has-alert">5 Alerts</span>
-              <span class="seg-acc-stat">7 Lessons</span>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="seg-acc-item reveal" style="transition-delay:0.15s" data-id="wireline">
-          <div class="seg-acc-row" onclick="toggleAcc(this)">
-            <div class="seg-acc-left">
-              <span class="acc-chevron">›</span>
-              <span class="seg-acc-num">03</span>
-              <span class="seg-acc-name">Wireline</span>
-              <span class="seg-acc-tag">Logging</span>
-            </div>
-            <div class="seg-acc-right">
-              <span class="seg-acc-count">34 documents</span>
-            </div>
-          </div>
-          <div class="seg-acc-panel"><div class="seg-acc-panel-inner">
-            <p class="seg-acc-desc">Logging, perforating, and well intervention operations documentation for all wireline units.</p>
-            <div class="seg-acc-actions">
-              <a href="segment.html?id=wireline" class="seg-acc-open">Open Library →</a>
-              <span class="seg-acc-stat">10 SOPs</span>
-              <span class="seg-acc-stat">8 Manuals</span>
-              <span class="seg-acc-stat">5 Policies</span>
-              <span class="seg-acc-stat">6 Lessons</span>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="seg-acc-item reveal" style="transition-delay:0.20s" data-id="drilling">
-          <div class="seg-acc-row" onclick="toggleAcc(this)">
-            <div class="seg-acc-left">
-              <span class="acc-chevron">›</span>
-              <span class="seg-acc-num">04</span>
-              <span class="seg-acc-name">Drilling</span>
-              <span class="seg-acc-tag">Well Operations</span>
-            </div>
-            <div class="seg-acc-right">
-              <span class="seg-acc-count">57 documents</span>
-              <span class="seg-acc-alert">7 Alerts</span>
-            </div>
-          </div>
-          <div class="seg-acc-panel"><div class="seg-acc-panel-inner">
-            <p class="seg-acc-desc">Well planning, rig operations, mud systems, and formation evaluation procedures across all drilling campaigns.</p>
-            <div class="seg-acc-actions">
-              <a href="segment.html?id=drilling" class="seg-acc-open">Open Library →</a>
-              <span class="seg-acc-stat">20 SOPs</span>
-              <span class="seg-acc-stat">12 Manuals</span>
-              <span class="seg-acc-stat">10 Policies</span>
-              <span class="seg-acc-stat has-alert">7 Alerts</span>
-              <span class="seg-acc-stat">8 Lessons</span>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="seg-acc-item reveal" style="transition-delay:0.25s" data-id="cementing">
-          <div class="seg-acc-row" onclick="toggleAcc(this)">
-            <div class="seg-acc-left">
-              <span class="acc-chevron">›</span>
-              <span class="seg-acc-num">05</span>
-              <span class="seg-acc-name">Cementing</span>
-              <span class="seg-acc-tag">Well Integrity</span>
-            </div>
-            <div class="seg-acc-right">
-              <span class="seg-acc-count">34 documents</span>
-            </div>
-          </div>
-          <div class="seg-acc-panel"><div class="seg-acc-panel-inner">
-            <p class="seg-acc-desc">Primary and remedial cementing operations, quality control, slurry design, and testing procedures.</p>
-            <div class="seg-acc-actions">
-              <a href="segment.html?id=cementing" class="seg-acc-open">Open Library →</a>
-              <span class="seg-acc-stat">12 SOPs</span>
-              <span class="seg-acc-stat">8 Manuals</span>
-              <span class="seg-acc-stat">7 Policies</span>
-              <span class="seg-acc-stat">5 Lessons</span>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="seg-acc-item reveal" style="transition-delay:0.30s" data-id="inspection">
-          <div class="seg-acc-row" onclick="toggleAcc(this)">
-            <div class="seg-acc-left">
-              <span class="acc-chevron">›</span>
-              <span class="seg-acc-num">06</span>
-              <span class="seg-acc-name">Inspection Services</span>
-              <span class="seg-acc-tag">Compliance</span>
-            </div>
-            <div class="seg-acc-right">
-              <span class="seg-acc-count">44 documents</span>
-              <span class="seg-acc-alert">3 Alerts</span>
-            </div>
-          </div>
-          <div class="seg-acc-panel"><div class="seg-acc-panel-inner">
-            <p class="seg-acc-desc">Equipment inspection standards, compliance requirements, NDT procedures, and certification documentation.</p>
-            <div class="seg-acc-actions">
-              <a href="segment.html?id=inspection" class="seg-acc-open">Open Library →</a>
-              <span class="seg-acc-stat">14 SOPs</span>
-              <span class="seg-acc-stat">10 Manuals</span>
-              <span class="seg-acc-stat">8 Policies</span>
-              <span class="seg-acc-stat has-alert">3 Alerts</span>
-              <span class="seg-acc-stat">6 Lessons</span>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="seg-acc-item reveal" style="transition-delay:0.35s" data-id="well-safety">
-          <div class="seg-acc-row" onclick="toggleAcc(this)">
-            <div class="seg-acc-left">
-              <span class="acc-chevron">›</span>
-              <span class="seg-acc-num">07</span>
-              <span class="seg-acc-name">Well Safety</span>
-              <span class="seg-acc-tag">HSE Critical</span>
-            </div>
-            <div class="seg-acc-right">
-              <span class="seg-acc-count">52 documents</span>
-              <span class="seg-acc-alert">8 Alerts</span>
-            </div>
-          </div>
-          <div class="seg-acc-panel"><div class="seg-acc-panel-inner">
-            <p class="seg-acc-desc">Well control procedures, BOP operations, emergency response plans, and safety management systems.</p>
-            <div class="seg-acc-actions">
-              <a href="segment.html?id=well-safety" class="seg-acc-open">Open Library →</a>
-              <span class="seg-acc-stat">16 SOPs</span>
-              <span class="seg-acc-stat">10 Manuals</span>
-              <span class="seg-acc-stat">9 Policies</span>
-              <span class="seg-acc-stat has-alert">8 Alerts</span>
-              <span class="seg-acc-stat">9 Lessons</span>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="seg-acc-item reveal" style="transition-delay:0.40s" data-id="qhse">
-          <div class="seg-acc-row" onclick="toggleAcc(this)">
-            <div class="seg-acc-left">
-              <span class="acc-chevron">›</span>
-              <span class="seg-acc-num">08</span>
-              <span class="seg-acc-name">QHSE</span>
-              <span class="seg-acc-tag">Quality & Safety</span>
-            </div>
-            <div class="seg-acc-right">
-              <span class="seg-acc-count">50 documents</span>
-              <span class="seg-acc-alert">4 Alerts</span>
-            </div>
-          </div>
-          <div class="seg-acc-panel"><div class="seg-acc-panel-inner">
-            <p class="seg-acc-desc">Quality, Health, Safety and Environmental management standards, audit procedures, and compliance documentation.</p>
-            <div class="seg-acc-actions">
-              <a href="segment.html?id=qhse" class="seg-acc-open">Open Library →</a>
-              <span class="seg-acc-stat">14 SOPs</span>
-              <span class="seg-acc-stat">9 Manuals</span>
-              <span class="seg-acc-stat">18 Policies</span>
-              <span class="seg-acc-stat has-alert">4 Alerts</span>
-              <span class="seg-acc-stat">7 Lessons</span>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="seg-acc-item reveal" style="transition-delay:0.45s" data-id="tws-maintenance">
-          <div class="seg-acc-row" onclick="toggleAcc(this)">
-            <div class="seg-acc-left">
-              <span class="acc-chevron">›</span>
-              <span class="seg-acc-num">09</span>
-              <span class="seg-acc-name">TWS Maintenance</span>
-              <span class="seg-acc-tag">Maintenance</span>
-            </div>
-            <div class="seg-acc-right">
-              <span class="seg-acc-count">39 documents</span>
-            </div>
-          </div>
-          <div class="seg-acc-panel"><div class="seg-acc-panel-inner">
-            <p class="seg-acc-desc">Equipment maintenance schedules, preventive maintenance programs, repair procedures, and calibration records.</p>
-            <div class="seg-acc-actions">
-              <a href="segment.html?id=tws-maintenance" class="seg-acc-open">Open Library →</a>
-              <span class="seg-acc-stat">14 SOPs</span>
-              <span class="seg-acc-stat">11 Manuals</span>
-              <span class="seg-acc-stat">8 Policies</span>
-              <span class="seg-acc-stat">6 Lessons</span>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="seg-acc-item reveal" style="transition-delay:0.50s" data-id="hr">
-          <div class="seg-acc-row" onclick="toggleAcc(this)">
-            <div class="seg-acc-left">
-              <span class="acc-chevron">›</span>
-              <span class="seg-acc-num">10</span>
-              <span class="seg-acc-name">Human Resources</span>
-              <span class="seg-acc-tag">HR & People</span>
-            </div>
-            <div class="seg-acc-right">
-              <span class="seg-acc-count">38 documents</span>
-            </div>
-          </div>
-          <div class="seg-acc-panel"><div class="seg-acc-panel-inner">
-            <p class="seg-acc-desc">TAQA HR policies, employee standards, code of conduct, organizational guidelines, and personnel procedures for all employees.</p>
-            <div class="seg-acc-actions">
-              <a href="segment.html?id=hr" class="seg-acc-open">Open Library →</a>
-              <span class="seg-acc-stat">10 SOPs</span>
-              <span class="seg-acc-stat">8 Manuals</span>
-              <span class="seg-acc-stat">15 Policies</span>
-              <span class="seg-acc-stat">5 Lessons</span>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="seg-acc-item reveal" style="transition-delay:0.55s" data-id="well-testing">
-          <div class="seg-acc-row" onclick="toggleAcc(this)">
-            <div class="seg-acc-left">
-              <span class="acc-chevron">›</span>
-              <span class="seg-acc-num">11</span>
-              <span class="seg-acc-name">Well Testing</span>
-              <span class="seg-acc-tag">Testing Services</span>
-            </div>
-            <div class="seg-acc-right">
-              <span class="seg-acc-count">31 documents</span>
-              <span class="seg-acc-alert">2 Alerts</span>
-            </div>
-          </div>
-          <div class="seg-acc-panel"><div class="seg-acc-panel-inner">
-            <p class="seg-acc-desc">Well test design, pressure buildup analysis, surface testing equipment operations, multi-rate flow testing, and production optimization procedures.</p>
-            <div class="seg-acc-actions">
-              <a href="segment.html?id=well-testing" class="seg-acc-open">Open Library →</a>
-              <span class="seg-acc-stat">10 SOPs</span>
-              <span class="seg-acc-stat">8 Manuals</span>
-              <span class="seg-acc-stat">5 Policies</span>
-              <span class="seg-acc-stat has-alert">2 Alerts</span>
-              <span class="seg-acc-stat">6 Lessons</span>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="seg-acc-item reveal" style="transition-delay:0.60s" data-id="cybersecurity">
-          <div class="seg-acc-row" onclick="toggleAcc(this)">
-            <div class="seg-acc-left">
-              <span class="acc-chevron">›</span>
-              <span class="seg-acc-num">12</span>
-              <span class="seg-acc-name">Cybersecurity</span>
-              <span class="seg-acc-tag">IT &amp; Data Security</span>
-            </div>
-            <div class="seg-acc-right">
-              <span class="seg-acc-count">30 documents</span>
-              <span class="seg-acc-alert">4 Compliance</span>
-            </div>
-          </div>
-          <div class="seg-acc-panel"><div class="seg-acc-panel-inner">
-            <p class="seg-acc-desc">Cybersecurity governance, incident response, data protection policies, and awareness resources for TAQA’s IT operations.</p>
-            <div class="seg-acc-actions">
-              <a href="segment.html?id=cybersecurity" class="seg-acc-open">Open Library →</a>
-              <span class="seg-acc-stat">8 Procedures</span>
-              <span class="seg-acc-stat">7 Standards</span>
-              <span class="seg-acc-stat">6 Policies</span>
-              <span class="seg-acc-stat">5 Awareness</span>
-              <span class="seg-acc-stat has-alert">4 Compliance</span>
-            </div>
-          </div></div>
-        </div>
-
-      </div>
+      <!-- The hardcoded segment accordion lived here. It was 306 lines, it was
+           display:none, nothing ever unhid it, and its names had outlived four
+           renames. The focus layout below replaced it. -->
     </div><!-- /panel-segments -->
 
     <!-- ── Right Panel: Sidebar ── -->
@@ -1572,7 +1664,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
           <a href="glossary.html" class="sidebar-tool-featured reveal">
             <span class="sidebar-tool-featured-tag">Field Reference</span>
             <div class="sidebar-tool-featured-title">Field Glossary</div>
-            <p class="sidebar-tool-featured-desc">Instantly look up any oilfield abbreviation — BOP, CT, ROP, WOB, and 160+ more. Employees can also add new terms.</p>
+            <p class="sidebar-tool-featured-desc">Instantly look up any oilfield abbreviation, BOP, CT, ROP, WOB, and 190+ more. Employees can also add new terms.</p>
             <span class="sidebar-tool-featured-btn">Open Glossary →</span>
           </a>
 
@@ -1604,7 +1696,7 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
 
         <!-- Brand Card -->
         <div class="sidebar-brand-card reveal reveal-delay-3">
-          <span class="sidebar-brand-card-name">Tech Hub</span><span class="sidebar-brand-card-wip">working name</span>
+          <span class="sidebar-brand-card-name">TechHub Platform</span>
           <p class="sidebar-brand-card-tagline">Your single source of truth for all TAQA operations. Every document. Every discipline. One platform.</p>
           <span class="sidebar-brand-card-credit">Built by <span>TAQA LEARNING CENTER</span></span>
         </div>
@@ -1633,9 +1725,9 @@ html[data-theme="dark"] .nav-mobile-menu a { border-color:#243044; }
 <footer>
   <div class="footer-inner">
     <div>
-      <div class="footer-brand">TAQA Knowledge Hub &nbsp;·&nbsp; <em style="color:#00BBB6; font-style:italic; font-weight:700;">Tech Hub</em> <span style="opacity:0.7;font-style:normal;">(working name)</span></div>
-      <div class="footer-copy">© 2026 TAQA — Industrialization &amp; Energy Services Company. All rights reserved.</div>
-      <div class="footer-credit">Built by <span style="color:var(--primary); font-weight:600;">TAQA LEARNING CENTER</span></div>
+      <div class="footer-brand">TAQA Knowledge Hub &nbsp;·&nbsp; <em style="font-style:italic; font-weight:700; background:linear-gradient(120deg, #005D63 20%, #00959C 80%); -webkit-background-clip:text; background-clip:text; color:transparent;">TechHub Platform</em></div>
+      <div class="footer-copy">© 2026 TAQA, Industrialization &amp; Energy Services Company. All rights reserved.</div>
+      <div class="footer-credit">Built by <span style="color:var(--primary-ink); font-weight:600;">TAQA LEARNING CENTER</span></div>
     </div>
   </div>
 </footer>
@@ -1649,8 +1741,16 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
 // ── Animated Counters ──
 function animateCounter(el, target, delay) {
-  const suffix = el.dataset.suffix || (target >= 1000 ? '+' : '');
   setTimeout(() => {
+    // Re-read the target here. The document counts are synced from
+    // segments-data.js at the end of the document; reading at observer-fire
+    // time raced that sync and could animate to the stale hardcoded value.
+    // An empty target means the register never loaded. Leave the dash: counting
+    // up to zero, or to a figure baked into the markup, states something the
+    // page cannot source.
+    if (!el.dataset.target) return;
+    target = parseInt(el.dataset.target, 10) || 0;
+    const suffix = el.dataset.suffix || (target >= 1000 ? '+' : '');
     let start = 0;
     const step = ts => {
       if (!start) start = ts;
@@ -1658,7 +1758,7 @@ function animateCounter(el, target, delay) {
       const ease = 1 - Math.pow(1 - p, 2);
       el.textContent = Math.floor(ease * target).toLocaleString();
       if (p < 1) requestAnimationFrame(step);
-      else el.textContent = target.toLocaleString() + suffix;
+      else { el.textContent = target.toLocaleString() + suffix; el.dataset.counted = '1'; }
     };
     requestAnimationFrame(step);
   }, delay);
@@ -1666,6 +1766,7 @@ function animateCounter(el, target, delay) {
 const cObserver = new IntersectionObserver(entries => {
   entries.forEach(e => {
     if (e.isIntersecting) {
+      if (!e.target.dataset.target) return;   // still waiting on the register
       animateCounter(e.target, parseInt(e.target.dataset.target), 900);
       cObserver.unobserve(e.target);
     }
@@ -1682,77 +1783,29 @@ function toggleAcc(row) {
 }
 
 // ── Hero Search ──
-document.getElementById('hero-search-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    const q = e.target.value.trim();
-    if (q) window.location.href = 'ai-search.html?q=' + encodeURIComponent(q);
-  }
+// A real form, so Enter and the button both submit. An empty query opens
+// Document Search as it is, with no ?q= on the address.
+// The long placeholder is cut off on a phone, so narrow screens get a
+// short one; the aria-label names the whole scope either way.
+(function(){
+  var inp = document.getElementById('hero-search-input');
+  if (!inp || !window.matchMedia) return;
+  var mq = window.matchMedia('(max-width:520px)');
+  function fit(){ inp.placeholder = mq.matches ? 'Search documents' : 'Search documents, procedures, manuals'; }
+  fit();
+  if (mq.addEventListener) mq.addEventListener('change', fit); else if (mq.addListener) mq.addListener(fit);
+})();
+document.getElementById('hero-search').addEventListener('submit', e => {
+  e.preventDefault();
+  const q = document.getElementById('hero-search-input').value.trim();
+  window.location.href = 'ai-search.html' + (q ? '?q=' + encodeURIComponent(q) : '');
 });
 
-// ── Sliding Pill Nav ──
-const pill = document.getElementById('nav-pill');
-const navList = document.querySelector('.nav-links');
-function pillTo(el) {
-  const lr = navList.getBoundingClientRect(), ar = el.getBoundingClientRect();
-  pill.style.left = (ar.left - lr.left) + 'px';
-  pill.style.width = ar.width + 'px';
-  pill.style.opacity = '1';
-}
-function pillToActive() {
-  const active = navList.querySelector('a.active');
-  if (active) pillTo(active); else pill.style.opacity = '0';
-}
-pillToActive();
-navList.querySelectorAll('a').forEach(a => a.addEventListener('mouseenter', () => pillTo(a)));
-navList.addEventListener('mouseleave', pillToActive);
-
-// ── Segments Dropdown ──
-(function(){
-  const li = document.getElementById('seg-dropdown-li');
-  const btn = document.getElementById('seg-dropdown-btn');
-  if (!li || !btn) return;
-  btn.addEventListener('click', function(e){
-    e.stopPropagation();
-    const open = li.classList.toggle('open');
-    btn.setAttribute('aria-expanded', open);
-  });
-  document.addEventListener('click', function(){ li.classList.remove('open'); btn.setAttribute('aria-expanded','false'); });
-  li.addEventListener('click', function(e){ e.stopPropagation(); });
-})();
-
-// ── Dark Mode ──
-const MOON_PATH = 'M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
-const SUN_PATH  = 'M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
-function toggleDark() {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const next = isDark ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  const p = document.querySelector('#dark-icon path');
-  if (p) p.setAttribute('d', next === 'dark' ? MOON_PATH : SUN_PATH);
-  localStorage.setItem('taqa-theme', next);
-}
-(function() {
-  const saved = localStorage.getItem('taqa-theme');
-  if (saved === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    const p = document.querySelector('#dark-icon path');
-    if (p) p.setAttribute('d', MOON_PATH);
-  }
-})();
 
 
-// ── Mobile Nav — handled entirely by shared.js ──
+// ── Mobile Nav, handled entirely by shared.js ──
 // shared.js wires the hamburger click and close-on-outside-click via document listeners.
-// Do not add a second handler here — it causes double-toggle on some iOS browsers.
-
-// ── Scroll Hint Hide ──
-(function(){
-  const hint = document.getElementById('scroll-hint');
-  if (!hint) return;
-  window.addEventListener('scroll', function(){
-    hint.style.opacity = window.scrollY > 60 ? '0' : '';
-  }, { passive:true });
-})();
+// Do not add a second handler here, it causes double-toggle on some iOS browsers.
 
 // ── Scroll Progress Ring ──
 (function(){
@@ -1789,12 +1842,12 @@ document.addEventListener('click',function(e){
     '.rv-strip{display:flex;align-items:center;gap:10px;padding:0 0 18px;flex-wrap:wrap;}'+
     '.rv-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-light);flex-shrink:0;white-space:nowrap;}'+
     '.rv-chip{display:inline-flex;align-items:center;gap:7px;padding:5px 12px 5px 8px;border-radius:50px;background:var(--bg-white);border:1px solid var(--border);font-size:12px;font-weight:500;color:var(--text-muted);text-decoration:none;transition:all 0.2s;}'+
-    '.rv-chip:hover{background:rgba(0,187,182,0.08);border-color:rgba(0,187,182,0.35);color:var(--primary);}'+
-    '.rv-chip-tag{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#005D63;background:rgba(0,93,99,0.08);border-radius:20px;padding:1px 7px;}'+
-    'html[data-theme="dark"] .rv-chip{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);}'+
-    'html[data-theme="dark"] .rv-chip:hover{background:rgba(0,187,182,0.1);border-color:rgba(0,187,182,0.3);color:#4DD9D3;}'+
-    'html[data-theme="dark"] .rv-chip-tag{color:rgba(0,187,182,0.75);background:rgba(0,187,182,0.1);}'+
-    'html[data-theme="dark"] .rv-label{color:rgba(255,255,255,0.3);}';
+    '.rv-chip:hover{background:rgba(0,187,182,0.08);border-color:rgba(0,187,182,0.35);color:var(--primary-ink);}'+
+    '.rv-chip-tag{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--primary-ink);background:rgba(0,93,99,0.08);border-radius:20px;padding:1px 7px;}'+
+    'html[data-taqa-theme="dark"] .rv-chip{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);}'+
+    'html[data-taqa-theme="dark"] .rv-chip:hover{background:rgba(0,187,182,0.1);border-color:rgba(0,187,182,0.3);color:var(--primary-ink);}'+
+    'html[data-taqa-theme="dark"] .rv-chip-tag{color:#00BBB6;background:rgba(0,187,182,0.1);}'+
+    'html[data-taqa-theme="dark"] .rv-label{color:var(--text-light);}';
   document.head.appendChild(s);
   var chips=recent.map(function(r){
     return '<a href="segment.html?id='+r.id+'" class="rv-chip"><span class="rv-chip-tag">'+r.tag+'</span>'+r.name+'</a>';
@@ -1802,13 +1855,15 @@ document.addEventListener('click',function(e){
   var strip=document.createElement('div');
   strip.className='rv-strip';
   strip.innerHTML='<span class="rv-label">Recently visited</span>'+chips;
-  var grid=document.querySelector('.cmd-grid');
-  if(grid&&grid.parentNode)grid.parentNode.insertBefore(strip,grid);
+  var anchor=document.getElementById('segments');
+  if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(strip,anchor);
 })();
 </script>
 <script>
 // ── Continue Reading ──
-(function(){
+// Runs once the page has parsed, because the register it reads the type
+// marks and area names from loads further down.
+document.addEventListener('DOMContentLoaded', function(){
   try {
     var events = JSON.parse(localStorage.getItem('taqa-analytics') || '[]');
     var lastOpen = null;
@@ -1818,15 +1873,22 @@ document.addEventListener('click',function(e){
     if(!lastOpen) return;
     var type = (lastOpen.x && lastOpen.x.type) || 'sop';
     var seg  = (lastOpen.x && lastOpen.x.seg)  || '';
-    var labels = {sop:'SOP',manual:'MNL',policy:'POL',lesson:'LSN',alert:'ALT',software:'ZIP'};
-    var segName = seg ? seg.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}) : 'Document';
+    // The type mark and the area name both come from the register, like every
+    // other page: this map said MNL and LSN, had no Standard at all, and the
+    // name was rebuilt from the URL, so centres came out as "Pt Drilling Coe".
+    var TY = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.types) || {};
+    var labels = {sop:'SOP',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT',software:'ZIP'};
+    Object.keys(TY).forEach(function(k){ if (TY[k] && TY[k].mark) labels[k] = TY[k].mark; });
+    var SG = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments) || {};
+    var segName = seg ? ((SG[seg] && SG[seg].name) || seg.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();})) : 'Document';
     document.getElementById('continue-title').textContent = lastOpen.k;
     document.getElementById('continue-meta').textContent  = segName + ' · ' + (labels[type] || 'DOC');
     document.getElementById('continue-icon').textContent  = labels[type] || 'DOC';
+    document.getElementById('continue-icon').classList.toggle('is-alert', type === 'alert');
     document.getElementById('continue-card').href = 'viewer.html?seg=' + (seg||'') + '&type=' + type + '&title=' + encodeURIComponent(lastOpen.k);
     document.getElementById('continue-strip').style.display = '';
   } catch(e) {}
-})();
+});
 </script>
 <!-- ── First-Time Tour ── -->
 <div id="tour-backdrop"></div>
@@ -1846,11 +1908,11 @@ document.addEventListener('click',function(e){
 </div>
 
 <style>
-#tour-backdrop{position:fixed;inset:0;background:rgba(6,18,26,0.7);z-index:9990;display:none;pointer-events:all;}
+#tour-backdrop{position:fixed;inset:0;background:rgba(0,19,20,0.7);z-index:9990;display:none;pointer-events:all;}
 #tour-spot{
   position:fixed;border-radius:12px;
   border:2.5px solid #00BBB6;
-  box-shadow:0 0 0 4px rgba(0,187,182,0.18), 0 0 0 9999px rgba(6,18,26,0.68);
+  box-shadow:0 0 0 4px rgba(0,187,182,0.18), 0 0 0 9999px rgba(0,19,20,0.68);
   z-index:9992;pointer-events:none;
   transition:top .4s cubic-bezier(.4,0,.2,1),left .4s cubic-bezier(.4,0,.2,1),width .4s cubic-bezier(.4,0,.2,1),height .4s cubic-bezier(.4,0,.2,1),opacity .3s;
   opacity:0;
@@ -1865,23 +1927,26 @@ document.addEventListener('click',function(e){
   transition:top .4s cubic-bezier(.4,0,.2,1),left .4s cubic-bezier(.4,0,.2,1),opacity .25s;
   display:none;
 }
-html[data-theme="dark"] #tour-card{background:#1e2a3a;box-shadow:0 24px 64px rgba(0,0,0,0.5);}
-#tour-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:15px;color:#94a3b8;cursor:pointer;line-height:1;padding:4px;}
-#tour-close:hover{color:#64748b;}
-#tc-step{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#00BBB6;margin-bottom:6px;}
-#tc-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:17px;font-weight:800;color:#1a2235;margin-bottom:8px;line-height:1.3;}
-html[data-theme="dark"] #tc-title{color:#e2e8f0;}
-#tc-desc{font-size:13.5px;color:#64748b;line-height:1.65;margin:0 0 18px;}
-html[data-theme="dark"] #tc-desc{color:#94a3b8;}
+html[data-taqa-theme="dark"] #tour-card{background:#002D30;box-shadow:0 24px 64px rgba(0,0,0,0.5);}
+/* This card flips from white to #002D30 with the theme, so its inks have to be
+   tokens. The grey and the teal were fixed values, and each of them was landing
+   on the wrong one of the two grounds. */
+#tour-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:15px;color:var(--text-light);cursor:pointer;line-height:1;padding:4px;}
+#tour-close:hover{color:var(--text);}
+#tc-step{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--primary-ink);margin-bottom:6px;}
+#tc-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:17px;font-weight:800;color:#1E1C1A;margin-bottom:8px;line-height:1.3;}
+html[data-taqa-theme="dark"] #tc-title{color:#C7DBDD;}
+#tc-desc{font-size:13.5px;color:#756A61;line-height:1.65;margin:0 0 18px;}
+html[data-taqa-theme="dark"] #tc-desc{color:#8CB6B9;}
 #tc-footer{display:flex;align-items:center;justify-content:space-between;}
 #tc-dots{display:flex;gap:5px;}
-.t-dot{width:7px;height:7px;border-radius:50%;background:#e2e8f0;transition:background .2s,transform .2s;}
+.t-dot{width:7px;height:7px;border-radius:50%;background:#C7DBDD;transition:background .2s,transform .2s;}
 .t-dot.on{background:#005D63;transform:scale(1.25);}
-html[data-theme="dark"] .t-dot{background:#2d3f55;}
-html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
+html[data-taqa-theme="dark"] .t-dot{background:#00484B;}
+html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
 #tc-btns{display:flex;gap:8px;align-items:center;}
-#tc-skip{background:none;border:none;font-size:13px;color:#94a3b8;cursor:pointer;padding:7px 10px;border-radius:8px;font-family:'Inter',sans-serif;transition:color .2s;}
-#tc-skip:hover{color:#64748b;}
+#tc-skip{background:none;border:none;font-size:13px;color:var(--text-light);cursor:pointer;padding:7px 10px;border-radius:8px;font-family:'Inter',sans-serif;transition:color .2s;}
+#tc-skip:hover{color:var(--text);}
 #tc-next{background:#005D63;color:#fff;border:none;padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .2s;}
 #tc-next:hover{opacity:.88;}
 </style>
@@ -1893,13 +1958,13 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
   var STEPS=[
     {
       title:'Welcome to TAQA Knowledge Hub',
-      desc:'Your single platform for all field documents, procedures, and expert support across 12 operational segments. Let us show you around.',
+      desc:'Your single platform for all field documents, procedures, and expert support across 11 operational segments, 10 corporate functions and 3 Centers of Excellence. Let us show you around.',
       target:null
     },
     {
       title:'Browse Your Segment',
-      desc:'All 12 operational segments are here — Drilling, Coiled Tubing, Cybersecurity, and more. Tap any card to access its latest policies, standards, procedures, awareness content, and compliance resources.',
-      target:'.segments-grid'
+      desc:'Every area is here: 11 operational segments, 10 corporate functions and 3 Centers of Excellence. Open a group to see its areas, then tap one for its policies, standards, procedures and lessons.',
+      target:'#focus'
     },
     {
       title:'Search Any Document',
@@ -1926,7 +1991,8 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
   var card=document.getElementById('tour-card');
   var backdrop=document.getElementById('tour-backdrop');
 
-  function isMob(){return window.innerWidth<=640;}
+  // The bar folds its links into the menu at 1180px (topbar.css), not 640px.
+  function isMob(){return window.matchMedia?window.matchMedia('(max-width:1180px)').matches:window.innerWidth<=1180;}
 
   function dots(){
     var d=document.getElementById('tc-dots');
@@ -1944,7 +2010,7 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     var vw=window.innerWidth;
     var vh=window.innerHeight;
     var P=16;
-    if(isMob()||!rect){
+    if(window.innerWidth<=640||!rect){
       card.style.left='50%';
       card.style.transform='translateX(-50%)';
       card.style.bottom=(P+16)+'px';
@@ -1980,8 +2046,9 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
     document.getElementById('tc-desc').textContent=desc;
 
     var el=step.target?document.querySelector(step.target):null;
-    var hidden=el&&(getComputedStyle(el).display==='none'||getComputedStyle(el).visibility==='hidden');
-    if(hidden) el=null;
+    var hidden=el&&(!el.getClientRects().length||getComputedStyle(el).visibility==='hidden');
+    // A link folded into the menu: point at the menu button instead.
+    if(hidden){ el=(mob&&step.mobileLabel)?document.getElementById('nav-hamburger'):null; if(el&&!el.getClientRects().length) el=null; }
 
     card.style.display='block';
 
@@ -2024,42 +2091,352 @@ html[data-theme="dark"] .t-dot.on{background:#00BBB6;}
 })();
 </script>
 
+<script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script src="store.js"></script>
 <script src="segments-data.js"></script>
 <script>
+/* ── Headline figures ──────────────────────────────────────────────────────
+   The hero panel, the strip and the two doors all read the same register,
+   so no two places on this page can quote a different number.            */
 (function(){
-  if(typeof TAQA_SEGMENTS==='undefined') return;
-  function _cnt(seg){if(!seg||!seg.docs)return 0;return Object.values(seg.docs).reduce(function(s,a){return s+(Array.isArray(a)?a.length:0);},0);}
-  var _segs=Object.values(TAQA_SEGMENTS);
-  var _totalDocs=_segs.reduce(function(s,seg){return s+_cnt(seg);},0);
-  var _totalAlerts=_segs.reduce(function(s,seg){return s+(seg.docs&&Array.isArray(seg.docs.alerts)?seg.docs.alerts.length:0);},0);
-  var _totalSegs=_segs.length;
-  // Update stats strip counters
+  if (typeof TAQA_STORE === 'undefined') return;
+  var S = TAQA_STORE;
+
+  // The three families used to be three lists of ids typed out here, which is
+  // how this page came to claim ten segments while the register held eleven.
+  // They are now whatever the register says they are.
+  function paint(){
+  var totalDocs  = S.count('live');
+  var totalAlert = S.count('live', { docType:'alert' });
+  var segN = S.areasIn('segment').length,
+      fnN  = S.areasIn('function').length,
+      ptN  = S.areasIn('product').length;
+
+  // Re-animating from zero on every repaint would make an upload look like a
+  // reload, so a figure that is already on screen is nudged, not restarted.
+  function set(el, n){
+    if (!el) return;
+    el.dataset.target = n;
+    var shown = parseInt((el.textContent||'0').replace(/\D/g,''),10);
+    if (el.dataset.counted === '1' && shown !== n) el.textContent = n;
+  }
+
   document.querySelectorAll('.stats-strip-item').forEach(function(item){
-    var lbl=item.querySelector('.stats-strip-label');
-    var num=item.querySelector('[data-target]');
-    if(!lbl||!num)return;
-    var t=lbl.textContent.trim();
-    if(t.indexOf('Document')!==-1)num.dataset.target=_totalDocs;
-    else if(t.indexOf('Segment')!==-1)num.dataset.target=_totalSegs;
+    var lbl = item.querySelector('.stats-strip-label'),
+        num = item.querySelector('[data-target]');
+    if (!lbl || !num) return;
+    var t = lbl.textContent.trim();
+    if (t.indexOf('Document') !== -1)        set(num, totalDocs);
+    else if (t.indexOf('Function') !== -1)   set(num, fnN);
+    else if (t.indexOf('Technology') !== -1) set(num, ptN);
+    else if (t.indexOf('Segment') !== -1)    set(num, segN);
   });
-  // Update sidebar stats list
+
   document.querySelectorAll('.stat-row').forEach(function(row){
-    var lbl=row.querySelector('.stat-row-label');
-    var val=row.querySelector('.stat-row-value');
-    if(!lbl||!val)return;
-    var t=lbl.textContent.trim();
-    if(t.indexOf('Document')!==-1)val.dataset.target=_totalDocs;
-    else if(t.indexOf('Segment')!==-1)val.dataset.target=_totalSegs;
-    else if(t.indexOf('Alert')!==-1)val.dataset.target=_totalAlerts;
-    else if(t.indexOf('User')!==-1)row.style.display='none';
+    var lbl = row.querySelector('.stat-row-label'),
+        val = row.querySelector('.stat-row-value');
+    if (!lbl || !val) return;
+    var t = lbl.textContent.trim();
+    if (t.indexOf('Document') !== -1)        set(val, totalDocs);
+    else if (t.indexOf('Function') !== -1)   set(val, fnN);
+    else if (t.indexOf('Technology') !== -1) set(val, ptN);
+    else if (t.indexOf('Segment') !== -1)    set(val, segN);
+    else if (t.indexOf('Alert') !== -1)      set(val, totalAlert);
+    else if (t.indexOf('Approval') !== -1)   set(val, S.count('pending'));
   });
-  // Update live header count text
-  var cc=document.querySelector('.cmd-header-count');
-  if(cc)cc.textContent=_totalSegs+' Segments · '+_totalDocs+' Documents';
+
+  var cc = document.querySelector('.cmd-header-count');
+  if (cc) cc.textContent = (segN + fnN + ptN) + ' areas · ' + totalDocs + ' documents in force';
+  }
+  S.onChange(paint);
+  // paint() fills data-target after the observer has already passed over these
+  // elements. An element on screen at load fired once while the target was
+  // still empty and was skipped, and observe() on an element already being
+  // observed is a no-op, so it would never fire again and the figure stayed a
+  // dash. Drop it and pick it up again to force a fresh observation.
+  if (typeof cObserver !== 'undefined')
+    document.querySelectorAll('[data-target]').forEach(function(el){
+      if (!el.dataset.target || el.dataset.counted === '1') return;
+      cObserver.unobserve(el);
+      cObserver.observe(el);
+    });
+})();
+</script>
+<script>
+/* ── Explore by Discipline ─────────────────────────────────────────────
+   Every figure comes from the register, so this sheet and the master list
+   can never quote different numbers, and an upload moves both.         */
+(function(){
+  if (typeof TAQA_MASTER_DOCS === 'undefined') return;
+  var D = TAQA_MASTER_DOCS, L = TAQA_DOC_LOOKUPS, A = TAQA_DOC;
+  var focus = document.getElementById('focus'),
+      beds  = document.getElementById('st-beds');
+  if (!focus || !beds) return;
+
+  // The three families come from the register's own "group" field. A tag is
+  // display copy, so it stays here, keyed by id.
+  var TAGS = {
+    drilling:'Well Operations', 'well-safety':'HSE Critical', fracturing:'Stimulation',
+    inspection:'Compliance', 'coiled-tubing':'Operations', cementing:'Well Integrity',
+    'well-testing':'Testing Services', wireline:'Logging', slickline:'Logging',
+    'well-completions':'Well Operations', 'marine-services':'Marine',
+    qhse:'Quality & Safety', cybersecurity:'GRC', hr:'HR & People', finance:'Finance',
+    it:'IT', 'supply-chain':'Procurement', legal:'Legal',
+    'learning-center':'Training', commercial:'Commercial', 'geothermal-coe':'Advisory',
+    'pt-drilling-coe':'Edmonton, Canada', 'pt-completions-coe':'Aberdeen, United Kingdom',
+    'pt-intervention-coe':'Stavanger, Norway'
+  };
+  var ORDER = ['seg','fn','pt'];
+  // What each bed is for, in one line. Functions used to be "Functions that
+  // set the rules", which is what the policies above them do, and was part
+  // of the confusion between the two.
+  var META = {
+    seg: { group:'segment',  title:'Operational Segments',  noun:'segments',  desc:'Service lines that deliver the work' },
+    fn:  { group:'function', title:'Corporate Functions',   noun:'functions', desc:'The functions that run the company' },
+    pt:  { group:'product',  title:'Products & Technology', noun:'centers',   desc:'Technical home of each discipline' }
+  };
+  var CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" ' +
+             'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+             '<path d="M6 9.5l6 6 6-6"/></svg>';
+  var GO   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+             'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+             '<path d="M9.5 6l6 6-6 6"/></svg>';
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c];
+    });
+  }
+
+  // Read fresh each time, so a document filed in this browser moves the
+  // counts without a reload.
+  function groups(){
+    var ST = (typeof TAQA_STORE !== 'undefined') ? TAQA_STORE : null,
+        controlled = ST ? ST.rows('live') : D.filter(A.controlled);
+    var out = {};
+    ORDER.forEach(function(k){
+      var m = META[k];
+      var rows = Object.keys(L.segments)
+        .filter(function(id){ return L.segments[id].group === m.group; })
+        .map(function(id){
+          var nm = L.segments[id].name, tg = TAGS[id] || '';
+          // A tag that only repeats the name (Finance, Finance) says nothing.
+          if (tg && nm.toLowerCase().indexOf(tg.toLowerCase()) === 0) tg = '';
+          return { id:id, name:nm, tag:tg,
+                   docs: ST ? ST.area(id).live
+                            : controlled.filter(function(d){ return d.segment === id; }).length };
+        })
+        .sort(function(a,b){ return b.docs - a.docs || a.name.localeCompare(b.name); });
+      out[k] = { rows:rows, docs:rows.reduce(function(s,x){ return s + x.docs; }, 0) };
+    });
+    out.company = controlled.filter(function(d){ return d.scope === 'company'; });
+    return out;
+  }
+
+  var open = null;
+  function paint(){
+    var G = groups();
+    beds.innerHTML = ORDER.map(function(k){
+      var m = META[k], g = G[k], half = Math.ceil(g.rows.length / 2);
+      return '<div class="st-layer" data-k="' + k + '" data-open="' + (open === k) + '">' +
+        '<h3 class="st-h">' +
+          '<button type="button" class="st-head" id="st-h-' + k + '" data-group="' + k + '" ' +
+            'aria-expanded="' + (open === k) + '" aria-controls="st-b-' + k + '">' +
+            '<span class="st-name">' + esc(m.title) + '</span>' +
+            '<span class="st-meta">' +
+              '<span class="st-stat"><b>' + g.rows.length + '</b> ' + m.noun + '</span>' +
+              '<span class="st-stat"><b>' + g.docs + '</b> documents</span>' +
+              '<span class="st-desc">' + esc(m.desc) + '</span>' +
+            '</span>' +
+            '<span class="st-chev">' + CHEV + '</span>' +
+          '</button>' +
+        '</h3>' +
+        '<div class="st-body" id="st-b-' + k + '" role="region" aria-labelledby="st-h-' + k + '">' +
+          '<div class="st-body-in">' +
+            '<ul class="st-members" style="--rows:' + half + '">' +
+            g.rows.map(function(x, i){
+              var cls = i >= half ? (i === half ? 'st-c2 st-top' : 'st-c2') : '';
+              return '<li' + (cls ? ' class="' + cls + '"' : '') + ' style="--i:' + i + '">' +
+                '<a class="st-row" href="segment.html?id=' + encodeURIComponent(x.id) + '">' +
+                  '<span class="st-rname">' + esc(x.name) + '</span>' +
+                  '<span class="st-rtag">' + esc(x.tag) + '</span>' +
+                  '<span class="st-rdocs"><b>' + x.docs + '</b>docs</span>' +
+                  '<span class="st-rgo">' + GO + '</span>' +
+                '</a></li>';
+            }).join('') +
+            '</ul>' +
+            '<button type="button" class="st-fold" data-fold="' + k + '">' + CHEV +
+              'Close ' + esc(m.title) + '</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return G;
+  }
+
+  function setOpen(k){
+    open = k;
+    beds.querySelectorAll('.st-layer').forEach(function(el){
+      var on = el.dataset.k === k;
+      el.dataset.open = String(on);
+      el.querySelector('.st-head').setAttribute('aria-expanded', String(on));
+    });
+  }
+
+  // Which bed is open on arrival. On a phone the whole cross-section reads
+  // first, cap rock and three beds, so none is; on a wide screen the first
+  // is. After that, whatever this person last opened, because people come
+  // back for their own area. A convenience only: correct without storage.
+  var KEY = 'taqa-strata-bed', saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  var narrow = window.matchMedia && matchMedia('(max-width:699px)').matches;
+  open = saved === 'none' ? null : (META[saved] ? saved : (narrow ? null : 'seg'));
+  var G = paint();
+
+  // The header you touched stays under your finger while a bed above it
+  // closes. Scroll anchoring is off on the sheet so the two never fight.
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function pin(el, y0){
+    var t0 = performance.now();
+    (function step(){
+      var dy = el.getBoundingClientRect().top - y0;
+      if (Math.abs(dy) > 0.5) window.scrollBy(0, dy);
+      if (!reduce && performance.now() - t0 < 360) requestAnimationFrame(step);
+    })();
+  }
+  function remember(k){ try { localStorage.setItem(KEY, k || 'none'); } catch (e) {} }
+
+  beds.addEventListener('click', function(e){
+    var b = e.target.closest('.st-head');
+    if (b) {
+      // A sticky header may be the one tapped while pinned under the nav;
+      // pin to where the bed itself sits, not where the header floats.
+      var layer = b.closest('.st-layer'),
+          y0 = layer.getBoundingClientRect().top,
+          next = open === b.dataset.group ? null : b.dataset.group;
+      setOpen(next); remember(next);
+      if (y0 >= 0) pin(layer, y0);
+      else layer.scrollIntoView({ block:'start', behavior: reduce ? 'auto' : 'smooth' });
+      return;
+    }
+    var f = e.target.closest('.st-fold');
+    if (f) {
+      var lay = f.closest('.st-layer');
+      setOpen(null); remember(null);
+      var top = lay.getBoundingClientRect().top;
+      if (top < 72) window.scrollBy({ top: top - 80, behavior: reduce ? 'auto' : 'smooth' });
+      var h = lay.querySelector('.st-head'); if (h) h.focus({ preventScroll:true });
+    }
+  });
+
+  // ── The cap rock: the company policies ──────────────────────────────
+  var btn  = document.getElementById('charter'),
+      pane = document.getElementById('charter-list');
+  function fillCharter(company){
+    pane.innerHTML = '<div class="ch-grid">' + company.map(function(d){
+      return '<a class="ch-row" href="viewer.html?seg=company&type=' +
+               encodeURIComponent(d.docType || 'policy') +
+               '&title=' + encodeURIComponent(d.title) +
+               (d.numberStatus === 'provisional' ? '' : '&doc=' + encodeURIComponent(d.docNumber)) + '">' +
+               '<span class="ch-name">' + esc(d.title) + '</span>' +
+             '</a>';
+    }).join('') + '</div>' +
+    '<button type="button" class="st-fold" data-fold="charter">' + CHEV + 'Hide the policies</button>';
+  }
+  var shown = false;
+  function showCharter(on){
+    shown = on;
+    pane.style.height = pane.offsetHeight + 'px';
+    void pane.offsetHeight;
+    pane.classList.toggle('open', shown);
+    var inner = 0;
+    for (var c = pane.firstElementChild; c; c = c.nextElementSibling) inner += c.offsetHeight;
+    pane.style.height = (shown ? inner : 0) + 'px';
+    btn.setAttribute('aria-expanded', String(shown));
+    clearTimeout(pane._settle);
+    pane._settle = setTimeout(function(){ if (shown) pane.style.height = 'auto'; }, 320);
+  }
+  if (btn && pane) {
+    fillCharter(G.company);
+    btn.addEventListener('click', function(){ showCharter(!shown); });
+    pane.addEventListener('click', function(e){
+      if (!e.target.closest('.st-fold')) return;
+      showCharter(false);
+      var top = btn.getBoundingClientRect().top;
+      if (top < 72) window.scrollBy({ top: top - 80, behavior: reduce ? 'auto' : 'smooth' });
+      btn.focus({ preventScroll:true });
+    });
+  }
+
+  // A document filed or released elsewhere moves these counts.
+  window.addEventListener('taqa:register-changed', function(){
+    var g = paint();
+    if (btn && pane) { fillCharter(g.company); if (shown) pane.style.height = 'auto'; }
+  });
+})();
+</script>
+<script>
+/* ── Your desk ─────────────────────────────────────────────────────────
+   The one line on the home page that differs by door. Everything else on
+   this page is the same for everyone, which is the point: one hub, one
+   register, and only the actions change.                                */
+(function(){
+  if (typeof TAQA_STORE === 'undefined' || typeof TAQA_ROLE === 'undefined') return;
+  var desk = document.getElementById('desk');
+  if (!desk) return;
+
+  function paint(){
+    var k = TAQA_ROLE.current(), cap = TAQA_ROLE.effective(), R = TAQA_ROLES[k];
+    var who = document.getElementById('desk-who'),
+        line= document.getElementById('desk-line'),
+        go  = document.getElementById('desk-go');
+    var d = (typeof TAQA_DELEGATION !== 'undefined') && TAQA_DELEGATION.current();
+
+    who.className = 'desk-who d-' + k;
+    // A director is a director OF somewhere. Saying only "Segment Director"
+    // leaves the one thing that decides what they can sign unstated.
+    who.textContent = d ? 'Delegate'
+      : (cap.scope === 'own' ? TAQA_ROLE.areaTitle() : R.label);
+
+    var n, txt, href = 'dashboard.html', cta = 'Open the queue';
+    if (cap.countersign) {
+      n = TAQA_STORE.count('awaiting-qms');
+      txt = n ? '<b>' + n + '</b> document' + (n===1?'':'s') +
+                ' approved and waiting on your countersignature.'
+              : 'Nothing is waiting on your countersignature. <b>' +
+                TAQA_STORE.count('awaiting-director') + '</b> still with their approvers.';
+      cta = n ? 'Countersign' : 'Open the register';
+      if (!n) href = 'master-list.html';
+    } else if (cap.approve) {
+      var seg = cap.ownSegment;
+      n = TAQA_STORE.rows('awaiting-director', seg ? { segment: seg } : null)
+            .filter(function(x){ return TAQA_APPROVAL.canApprove(x); }).length;
+      var over = seg ? TAQA_STORE.area(seg).overdue : 0;
+      var where = TAQA_ROLE.areaName(seg);
+      txt = (n ? '<b>' + n + '</b> document' + (n===1?'':'s') + ' waiting on your sign-off'
+               : 'Nothing waiting on your sign-off') +
+            ' in <b>' + where + '</b>' +
+            (over ? ', and <b>' + over + '</b> past review there.' : '.');
+      href = 'dashboard.html?id=' + (seg || '');
+      cta = n ? 'Approve' : 'Open your segment';
+    } else if (k === 'auditor') {
+      txt = 'Read only across <b>' + TAQA_STORE.count('register') +
+            '</b> records, including the export. Nothing here changes on your account.';
+      href = 'master-list.html'; cta = 'Open the register';
+    } else {
+      // An employee has no queue, and the hero search already does what this
+      // line offered, so the desk is not drawn for them at all.
+      desk.hidden = true;
+      return;
+    }
+    line.innerHTML = txt; go.href = href; go.textContent = cta;
+    desk.hidden = false;
+  }
+  TAQA_STORE.onChange(paint);
 })();
 </script>
 <script src="shared.js"></script>
-<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary-ink);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#C8102E;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-taqa-theme="dark"] .bell-badge{border-color:#002326;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
 </body>
 </html>

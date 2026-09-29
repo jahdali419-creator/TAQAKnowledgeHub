@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="en" data-taqa-theme="light" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#005D63">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TechHub Platform">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<title>Master Document List, TAQA Knowledge Hub</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="topbar.css">
+<style>
+/* TAQA identity. Brand hues exactly as specified; the neutral ramp is built
+   from Monument Gray so the greys run warm rather than blue. */
+:root{
+  --ink:#1E1C1A; --ink-2:#524D48; --ink-3:#756A61; --ink-4:#BEB8B2;
+  /* The inset here is a shade lighter than the hub's #EDEBE8 because tier 3
+     has to clear 4.5 on it, and the toolbar, the sticky header, the footnote
+     and a hovered row all carry tier 3 text: on #EDEBE8 that pairing measures
+     4.42, on this one 4.96. */
+  --paper:#FFFFFF; --canvas:#F4F4F3; --inset:#F9F8F8;
+  --rule:rgba(117,106,97,.26); --rule-soft:rgba(117,106,97,.15); --rule-firm:rgba(117,106,97,.44);
+  /* Two teal roles rather than one. --primary is the ground a button or an
+     active pill is painted with, and white text sits on it in both themes.
+     --primary-ink is teal used AS text, which has to lift to the legacy
+     teal in dark mode because #005D63 on the dark ground is about 2 to 1. */
+  --primary:#005D63; --primary-ink:#005D63; --primary-light:#00BBB6;
+  --brand-soft:rgba(0,93,99,.07);
+  --due:#C8102E; --out:var(--ink-3); --prov:var(--primary-ink);
+  /* The same state-ink pair every other hub page carries in its own :root
+     (viewer.html, dashboard.html, segment.html, whats-new.html). Reused
+     verbatim rather than invented here, so the amber "review due soon" mark
+     added below reads as the one warning colour the rest of the site already
+     uses, not a new one this page introduces on its own. */
+  --warn-ink:#8A6200;
+  --r1:4px; --r2:7px; --r3:10px;
+  --mono:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+  --read:'Inter',system-ui,sans-serif;   /* the minority face, for long small copy */
+  --out-ease:cubic-bezier(.23,1,.32,1);
+}
+/* The brand allows two grounds, white or Teal Green. Dark mode takes the teal
+   one rather than a generic near-black, so it still reads as TAQA. */
+html[data-taqa-theme="dark"]{
+  --ink:#C7DBDD; --ink-2:#8CB6B9; --ink-3:#619B9E; --ink-4:#00484B;
+  --paper:#002326; --canvas:#001314; --inset:#002D30;
+  --rule:rgba(0,187,182,.20); --rule-soft:rgba(0,187,182,.11); --rule-firm:rgba(0,187,182,.34);
+  --primary:#005D63; --primary-ink:#00BBB6; --primary-light:#00BBB6;
+  --brand-soft:rgba(0,187,182,.13);
+  --due:#FD691D;
+  --warn-ink:#FFB81C;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+/* A class that sets display beats the browser rule for [hidden], so the
+   Export button stayed on screen for roles that may not export. */
+[hidden]{display:none!important;}
+/* The closed drawer parks at translateX(102%), which widened the document.
+   clip trims it without creating a scroll container, so sticky still works. */
+html{overflow-x:clip;}
+body{font-family:'BwGradual','Inter',system-ui,sans-serif;background:var(--canvas);color:var(--ink-2);
+  font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;}
+a{color:var(--primary-ink);text-decoration:none;}
+:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;border-radius:var(--r1);}
+.skip{position:absolute;inset-inline-start:-9999px;}
+.skip:focus{inset-inline-start:10px;top:10px;z-index:99;background:var(--paper);padding:8px 14px;border:1px solid var(--rule-firm);border-radius:var(--r2);}
+
+/* ── Buttons ───────────────────────────────────────────────────────────────
+   One button, three weights. Press feedback at 140ms so the interface answers
+   the finger before anything else happens.                                  */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 12px;
+  border-radius:var(--r2);border:1px solid var(--rule-firm);background:var(--paper);color:var(--ink-2);
+  font:600 12.5px/1 'BwGradual',sans-serif;cursor:pointer;white-space:nowrap;
+  transition:background 140ms var(--out-ease),border-color 140ms var(--out-ease),
+             color 140ms var(--out-ease),transform 140ms var(--out-ease);}
+.btn svg{width:14px;height:14px;flex-shrink:0;}
+.btn:active{transform:scale(.97);}
+.btn-quiet{border-color:transparent;background:transparent;color:var(--ink-3);}
+.btn-icon{width:32px;padding:0;}
+@media (hover:hover) and (pointer:fine){
+  .btn:hover{background:var(--inset);border-color:var(--rule-firm);color:var(--ink);}
+  .btn-quiet:hover{background:var(--inset);border-color:transparent;}
+}
+select,input[type=search]{font:500 12.5px/1 'BwGradual',sans-serif;color:var(--ink-2);background:var(--paper);
+  border:1px solid var(--rule-firm);border-radius:var(--r2);height:32px;padding:0 10px;outline:none;
+  transition:border-color 140ms var(--out-ease),background 140ms var(--out-ease);cursor:pointer;}
+select:hover,input[type=search]:hover{border-color:var(--ink-3);}
+input[type=search]{cursor:text;}
+input[type=search]::placeholder{color:var(--ink-3);}
+input[type=search]::-webkit-search-cancel-button{cursor:pointer;}
+
+/* ── Brand lockup and the About popover ── */
+.pop-wrap{position:relative;}
+.pop{position:absolute;top:calc(100% + 8px);inset-inline-start:0;width:min(420px,88vw);z-index:50;
+  background:var(--paper);border:1px solid var(--rule-firm);border-radius:var(--r3);padding:15px 17px;
+  box-shadow:0 12px 28px rgba(0,93,99,.15),0 2px 6px rgba(0,93,99,.07);
+  transform-origin:top left;opacity:0;transform:scale(.96);pointer-events:none;
+  transition:opacity 170ms var(--out-ease),transform 170ms var(--out-ease);}
+html[dir="rtl"] .pop{transform-origin:top right;}
+.pop.open{opacity:1;transform:scale(1);pointer-events:auto;}
+.pop h2{font:700 12px/1.3 'BwGradual',sans-serif;color:var(--ink);margin-bottom:7px;}
+.pop p{font-family:var(--read);font-size:12px;line-height:1.6;color:var(--ink-2);}
+.pop p + p{margin-top:9px;}
+.pop b{color:var(--ink);font-weight:600;}
+
+/* ── Shell: a fixed sidebar and a scrolling canvas ────────────────────────
+   Two teals were on the table here. The whole hub already ships #005D63 as
+   Teal Green, so the sidebar accent uses that rather than introducing a
+   second, near-identical brand teal that nothing else on the site knows. */
+.shell{display:grid;grid-template-columns:250px 1fr;min-height:100dvh;}
+.side{background:var(--paper);border-inline-end:1px solid var(--rule);
+  position:sticky;top:0;height:100dvh;overflow-y:auto;overscroll-behavior:contain;
+  display:flex;flex-direction:column;padding:18px 14px 20px;}
+.side-sec{font:700 9.5px/1 'BwGradual',sans-serif;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--ink-3);padding:16px 10px 8px;}
+.side-rule{height:1px;background:var(--rule);margin:14px 6px;}
+.nav-i{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:var(--r2);
+  color:var(--ink-2);text-decoration:none;font:500 13px/1.2 'BwGradual',sans-serif;
+  border:none;background:transparent;width:100%;cursor:pointer;text-align:start;
+  transition:background 140ms var(--out-ease),color 140ms var(--out-ease);}
+.nav-i svg{width:16px;height:16px;flex-shrink:0;color:var(--ink-3);
+  transition:color 140ms var(--out-ease);}
+.nav-i span{flex:1;min-width:0;}
+.nav-i b{font:700 11.5px/1 'BwGradual',sans-serif;color:var(--ink-3);
+  font-variant-numeric:tabular-nums;}
+@media (hover:hover) and (pointer:fine){
+  .nav-i:hover{background:var(--inset);color:var(--ink);}
+  .nav-i:hover svg{color:var(--ink-2);}
+}
+.nav-i[aria-current],.nav-i[aria-pressed="true"]{background:var(--primary);color:#FFFFFF;font-weight:600;}
+.nav-i[aria-current] svg,.nav-i[aria-pressed="true"] svg{color:#FFFFFF;}
+.nav-i[aria-pressed="true"] b{color:#FFFFFF;}
+
+/* ── Canvas ── */
+.main{min-width:0;padding:20px 26px 64px;max-width:1520px;}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  flex-wrap:wrap;margin-bottom:18px;}
+.top-l{display:flex;align-items:center;gap:9px;}
+h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:20px;font-weight:800;color:var(--ink);
+  letter-spacing:-.02em;line-height:1.18;}
+.kicker{font:700 9.5px/1 'BwGradual',sans-serif;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--ink-3);margin-bottom:6px;}
+.top-r{display:flex;align-items:center;gap:8px;}
+
+/* ── Banner ── */
+.hero{position:relative;overflow:hidden;border-radius:var(--r3);background:var(--primary);
+  color:#FFFFFF;padding:26px 30px 28px;margin-bottom:16px;min-height:168px;
+  display:flex;align-items:center;}
+.hero-in{position:relative;z-index:2;max-width:56ch;}
+.hero h2{font-family:'BwGradual','Urbanist',sans-serif;font-size:23px;font-weight:800;
+  letter-spacing:-.02em;line-height:1.2;margin-bottom:9px;}
+.hero p{font-family:var(--read);font-size:13px;line-height:1.65;color:rgba(255,255,255,.78);
+  margin-bottom:16px;}
+.hero p b{color:#FFFFFF;font-weight:600;font-variant-numeric:tabular-nums;}
+.hero-btn{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 15px;
+  border-radius:var(--r2);border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.14);
+  color:#FFFFFF;font:600 12.5px/1 'BwGradual',sans-serif;cursor:pointer;
+  transition:background 140ms var(--out-ease);}
+.hero-btn svg{width:14px;height:14px;}
+.hero-btn:hover{background:rgba(255,255,255,.24);}
+.hero-art{position:absolute;inset-block:0;inset-inline-end:0;width:min(44%,430px);
+  background-size:cover;background-position:center;z-index:1;
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 42%);
+  mask-image:linear-gradient(to right,transparent,#000 42%);}
+html[dir="rtl"] .hero-art{-webkit-mask-image:linear-gradient(to left,transparent,#000 42%);
+  mask-image:linear-gradient(to left,transparent,#000 42%);}
+.hero::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(105deg,#005D63 0%,rgba(0,93,99,.86) 44%,rgba(0,93,99,.20) 100%);}
+.hero-in{z-index:3;}
+@media(max-width:700px){.hero-art{display:none;} .hero::after{display:none;}}
+
+/* ── Stat cards ── */
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
+@media(max-width:1280px){.tiles{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:620px){.tiles{grid-template-columns:1fr;}}
+.tile{background:var(--paper);border:1px solid var(--rule);border-radius:var(--r3);
+  padding:16px 17px 13px;display:flex;flex-direction:column;min-width:0;
+  box-shadow:0 1px 2px rgba(0,93,99,.05);}
+.tile h3{font:700 13px/1.3 'BwGradual',sans-serif;color:var(--ink);}
+.tile .sub{font-family:var(--read);font-size:11.5px;line-height:1.5;color:var(--ink-3);
+  margin-top:3px;min-height:34px;}
+.tile-body{flex:1;display:flex;flex-direction:column;justify-content:flex-end;
+  margin-top:10px;min-width:0;}
+.tile-body.mid{justify-content:center;}
+.tile-foot{display:flex;align-items:center;gap:7px;margin-top:12px;padding-top:11px;
+  border-top:1px solid var(--rule-soft);font-family:var(--read);font-size:11.5px;color:var(--ink-3);}
+.tile-foot i{width:6px;height:6px;border-radius:50%;background:var(--primary-ink);flex-shrink:0;}
+.tile-foot b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;}
+
+/* Mini column chart: bars grow from a shared baseline, one column inked to
+   mark the row that matters. Columns are buttons, so a chart is a filter. */
+.mini{display:flex;align-items:flex-end;gap:4px;height:74px;}
+.mcol{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;
+  height:100%;border:none;background:transparent;padding:0;cursor:pointer;}
+.mcol i{display:block;width:100%;border-radius:2px;background:var(--o2);
+  min-height:3px;transform-origin:bottom center;
+  transition:background 140ms var(--out-ease),opacity 140ms var(--out-ease);}
+.mcol.on i{background:var(--primary-ink);}
+.mcol.dim i{opacity:.4;}
+@media (hover:hover) and (pointer:fine){.mcol:hover i{background:var(--primary-ink);opacity:1;}}
+.mkeys{display:flex;gap:4px;margin-top:8px;}
+.mkeys span{flex:1;min-width:0;text-align:center;font:500 9.5px/1.2 'BwGradual',sans-serif;
+  color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mkeys span.on{color:var(--ink-2);font-weight:700;}
+
+/* Donut tile */
+.dwrap{display:flex;align-items:center;gap:14px;}
+.dnt{position:relative;width:96px;height:96px;flex-shrink:0;}
+.dnt svg{width:96px;height:96px;transform:rotate(-90deg);}
+.dnt circle{fill:none;stroke-linecap:butt;
+  transition:stroke-dasharray 760ms var(--out-ease),opacity 160ms var(--out-ease);}
+.dnt-mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;pointer-events:none;text-align:center;}
+.dnt-n{font:800 21px/1 'BwGradual',sans-serif;color:var(--ink);letter-spacing:-.03em;}
+.dnt-l{font:500 8.5px/1.2 'BwGradual',sans-serif;color:var(--ink-3);margin-top:2px;
+  letter-spacing:.08em;text-transform:uppercase;}
+.dkeys{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;}
+.dkey{display:flex;align-items:center;gap:7px;width:100%;border:none;background:transparent;
+  font:inherit;cursor:pointer;padding:3px 6px;border-radius:var(--r1);text-align:start;
+  font-size:11.5px;color:var(--ink-2);
+  transition:background 140ms var(--out-ease),color 140ms var(--out-ease);}
+.dkey i{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.dkey span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dkey b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums;}
+.dkey[aria-pressed="true"]{background:var(--brand-soft);color:var(--ink);}
+@media (hover:hover) and (pointer:fine){.dkey:hover{background:var(--inset);color:var(--ink);}}
+
+/* Attention tile */
+.att{display:flex;flex-direction:column;gap:2px;}
+.att button > span{flex:1;min-width:0;}
+.att button{display:flex;align-items:flex-start;gap:10px;width:100%;border:none;
+  background:transparent;font:inherit;cursor:pointer;padding:7px 6px;border-radius:var(--r2);
+  text-align:start;transition:background 140ms var(--out-ease);}
+@media (hover:hover) and (pointer:fine){.att button:hover{background:var(--inset);}}
+.att svg{width:15px;height:15px;flex-shrink:0;margin-top:2px;color:var(--ink-3);}
+.att-t{display:block;font:600 12.5px/1.35 'BwGradual',sans-serif;color:var(--ink);}
+.att-s{display:block;font-family:var(--read);font-size:11px;color:var(--ink-3);margin-top:2px;}
+.att .due svg{color:#C8102E;}
+html[data-taqa-theme="dark"] .att .due svg{color:#FD691D;}
+.pill{display:inline-flex;align-items:center;align-self:flex-start;padding:4px 10px;
+  border-radius:var(--r-pill,999px);background:var(--brand-soft);color:var(--primary-ink);
+  font:700 11px/1 'BwGradual',sans-serif;font-variant-numeric:tabular-nums;margin-top:10px;}
+
+/* Below the sidebar's own width the shell folds: the rail becomes a single
+   scrolling row so every destination and every cut stays reachable without
+   a drawer to open. */
+@media(max-width:980px){
+  .shell{grid-template-columns:1fr;}
+  .side{position:static;height:auto;flex-direction:row;align-items:center;gap:3px;
+    overflow-x:auto;overflow-y:hidden;padding:9px 12px;
+    border-inline-end:0;border-bottom:1px solid var(--rule);}
+  .side-sec,.side-rule{display:none;}
+  /* the cuts are a block list in the rail, so let their buttons become
+     direct children of the row instead of stacking inside a wrapper */
+  #cuts{display:contents;}
+  .nav-i{width:auto;flex-shrink:0;white-space:nowrap;padding:8px 11px;}
+  .nav-i b{margin-inline-start:5px;}
+  .main{padding:16px 16px 54px;}
+  .hero{padding:22px 20px 24px;min-height:0;}
+  .hero h2{font-size:20px;}
+}
+@media(max-width:560px){
+  .top{align-items:flex-start;}
+}
+
+/* ── Toolbar ── */
+.bar{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding:11px 13px;background:var(--inset);
+  border-bottom:1px solid var(--rule);border-radius:var(--r3) var(--r3) 0 0;}
+.find{display:flex;align-items:center;gap:7px;flex:1 1 240px;min-width:190px;background:var(--paper);
+  border:1px solid var(--rule-firm);border-radius:var(--r2);height:32px;padding:0 10px;
+  transition:border-color 140ms var(--out-ease);}
+.find:focus-within{border-color:var(--primary-ink);}
+.find svg{width:13px;height:13px;color:var(--ink-3);flex-shrink:0;}
+.find input{border:none;background:transparent;height:30px;padding:0;flex:1;min-width:0;}
+.find input:hover{border:none;}
+.count{margin-inline-start:auto;font:600 11.5px/1 var(--mono);color:var(--ink-3);white-space:nowrap;}
+
+/* ── Register ── */
+.reg{background:var(--paper);border:1px solid var(--rule);border-radius:var(--r3);}
+.scroll{overflow-x:visible;}
+table{width:100%;border-collapse:collapse;}
+thead th{position:sticky;top:0;z-index:10;background:var(--inset);text-align:start;padding:10px 14px;
+  border-bottom:1px solid var(--rule-firm);white-space:nowrap;
+  font:700 9.5px/1 'BwGradual',sans-serif;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--rule-soft);vertical-align:top;}
+tbody tr{cursor:pointer;transition:background 120ms var(--out-ease);}
+tbody tr:last-child td{border-bottom:none;}
+@media (hover:hover) and (pointer:fine){tbody tr:hover{background:var(--inset);}}
+tbody tr[aria-selected="true"]{background:var(--brand-soft);}
+.num{font:600 11.5px/1.5 var(--mono);color:var(--ink);white-space:nowrap;}
+.num.prov{color:var(--prov);}
+.was{font:500 10px/1.4 var(--mono);color:var(--ink-3);margin-top:2px;}
+.ttl{font-weight:600;color:var(--ink);max-width:42ch;}
+.org{font-size:11px;color:var(--ink-3);margin-top:2px;}
+.dat{font:500 11.5px/1.5 var(--mono);color:var(--ink-2);white-space:nowrap;}
+.dat.late{color:var(--due);font-weight:600;}
+/* Amber pre-warning: the review date is inside the 30-day window (see
+   DUE_SOON_DAYS in the script below) but the document is not overdue yet.
+   Sits right next to .dat.late, which due() below already used for the red
+   overdue state, and the two can never both apply to one row since due()
+   branches on the same number either side of zero. --warn-ink is the site's
+   existing warning colour (viewer.html, dashboard.html, whats-new.html), so
+   this never risks being mistaken for --due, the red "already late" ink. */
+.dat.soon{color:var(--warn-ink);font-weight:600;}
+.dat.nil{color:var(--ink-3);}
+.mark{display:inline-flex;align-items:center;gap:6px;padding:3px 9px 3px 7px;
+  border:1px solid var(--rule-firm);border-radius:var(--r1);background:var(--paper);
+  font:700 9.5px/1.2 'BwGradual',sans-serif;letter-spacing:.07em;text-transform:uppercase;
+  white-space:nowrap;color:var(--ink-2);}
+.mark::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--dot,var(--ink-3));flex-shrink:0;}
+.m-current{--dot:#008675;}
+.m-review{--dot:#FD691D;}
+.m-draft{--dot:#0076A8;border-style:dashed;}
+.m-superseded,.m-obsolete{--dot:#C8102E;}
+.m-asset{--dot:var(--ink-3);color:var(--ink-3);}
+.cls{font:600 10px/1.3 'BwGradual',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);}
+.cls.hi{color:var(--ink-2);font-weight:700;}
+/* A selected row is painted with the teal tint, which lifts the ground far
+   enough in dark mode that tier 3 loses its margin on it, so the quiet text
+   in that one row moves up a tier. */
+tbody tr[aria-selected="true"] .org,
+tbody tr[aria-selected="true"] .was,
+tbody tr[aria-selected="true"] .cls,
+tbody tr[aria-selected="true"] .dat.nil,
+tbody tr[aria-selected="true"] .ar{color:var(--ink-2);}
+/* Lifting every classification to tier 2 put a RESTRICTED document in the
+   same ink as an INTERNAL one on the selected row. The higher class moves
+   up a tier too, so the step between them survives the selection. */
+tbody tr[aria-selected="true"] .cls.hi{color:var(--ink);}
+.ar{font:700 9px/1 var(--mono);border:1px solid var(--rule-firm);border-radius:var(--r1);
+  padding:2px 4px;color:var(--ink-3);margin-inline-start:5px;}
+.more{width:100%;padding:12px;border:none;border-top:1px solid var(--rule);background:var(--inset);
+  font:600 12px 'BwGradual',sans-serif;color:var(--primary-ink);cursor:pointer;
+  transition:background 140ms var(--out-ease);}
+.more:hover{background:var(--brand-soft);}
+.none{padding:56px 20px;text-align:center;color:var(--ink-3);
+  display:flex;flex-direction:column;align-items:center;gap:9px;}
+.none svg{width:34px;height:34px;color:var(--ink-4);}
+.none .empty-t{font:700 13px/1.4 'BwGradual',sans-serif;color:var(--ink-2);}
+.none .empty-s{font-family:var(--read);font-size:12px;line-height:1.6;color:var(--ink-3);max-width:36ch;}
+.none .btn{margin-top:5px;}
+.note{font-family:var(--read);padding:11px 14px;border-top:1px solid var(--rule);background:var(--inset);
+  border-radius:0 0 var(--r3) var(--r3);font-size:11.5px;color:var(--ink-3);}
+
+/* ── Bulk selection ───────────────────────────────────────────────────────
+   The checkbox column exists in every row's markup regardless of role (see
+   render() below); .no-bulk, set once in renderRole() from the same
+   countersign flag that gates bulkAction(), just hides it. That keeps the
+   row template from branching on role and matches how #export-btn is
+   hidden elsewhere on this page rather than left out of the DOM. */
+th.bulk-col,td.bulk-col{width:34px;padding-inline-end:2px;}
+.reg.no-bulk .bulk-col{display:none;}
+.chk{text-align:center;}
+.chk input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--primary-ink);
+  vertical-align:middle;}
+.chk input[type=checkbox]:disabled{cursor:default;opacity:.4;}
+
+#bulk-bar{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:70;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;
+  background:var(--paper);border:1px solid var(--rule-firm);border-radius:var(--r3);
+  padding:10px 12px 10px 16px;box-shadow:0 10px 30px rgba(0,0,0,.20),0 2px 6px rgba(0,93,99,.1);
+  max-width:min(560px,92vw);}
+#bulk-bar[hidden]{display:none;}
+#bulk-count{font:700 12px/1.3 'BwGradual',sans-serif;color:var(--ink);white-space:nowrap;}
+.bulk-actions{display:flex;gap:7px;flex-wrap:wrap;}
+@media(max-width:560px){
+  #bulk-bar{left:16px;right:16px;bottom:14px;transform:none;max-width:none;
+    justify-content:space-between;}
+}
+
+/* ── Register surface: the same glass as the summary above it ── */
+.reg{backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);}
+.reg{background:rgba(255,255,255,.74);border-color:rgba(255,255,255,.86);
+  box-shadow:0 1px 2px rgba(0,93,99,.06),0 8px 26px rgba(0,93,99,.09);}
+.bar{background:rgba(249,248,248,.74);border-color:rgba(255,255,255,.86);}
+html[data-taqa-theme="dark"] .reg{background:rgba(0,45,48,.60);border-color:rgba(0,187,182,.16);
+  box-shadow:0 1px 2px rgba(0,10,11,.38),0 8px 26px rgba(0,10,11,.34);}
+html[data-taqa-theme="dark"] .bar{background:rgba(0,35,38,.66);border-color:rgba(0,187,182,.16);}
+@supports not (backdrop-filter:blur(1px)){
+  .reg{background:var(--paper);} .bar{background:var(--inset);}
+}
+thead th{background:rgba(249,248,248,.95);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+html[data-taqa-theme="dark"] thead th{background:rgba(0,35,38,.95);}
+
+/* Rows arrive in sequence the first time a page is drawn */
+tbody tr{opacity:0;transform:translateY(4px);animation:rowIn 260ms var(--out-ease) forwards;}
+@keyframes rowIn{to{opacity:1;transform:none;}}
+
+/* ── Pager ── */
+.pager{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 14px;
+  border-top:1px solid var(--rule);}
+.pager-info{font:500 11.5px/1 var(--mono);color:var(--ink-3);}
+.pages{display:flex;gap:3px;margin-inline-start:auto;align-items:center;}
+.pg{min-width:29px;height:29px;padding:0 8px;border:1px solid transparent;background:transparent;
+  border-radius:var(--r2);font:600 12px/1 'BwGradual',sans-serif;color:var(--ink-3);cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background 140ms var(--out-ease),color 140ms var(--out-ease),
+             border-color 140ms var(--out-ease),transform 140ms var(--out-ease);}
+.pg:active{transform:scale(.94);}
+.pg[aria-current="page"]{background:var(--primary);border-color:var(--primary);color:#fff;}
+.pg:disabled{opacity:.35;cursor:default;}
+.pg.dots{cursor:default;color:var(--ink-3);min-width:18px;padding:0;}
+@media (hover:hover) and (pointer:fine){
+  .pg:not(:disabled):not(.dots):not([aria-current]):hover{background:var(--inset);color:var(--ink);}
+}
+
+/* ── Toast ── */
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);z-index:90;
+  background:var(--primary);color:#FFFFFF;font-size:12.5px;font-weight:500;padding:11px 16px;
+  border-radius:var(--r2);box-shadow:0 10px 30px rgba(0,0,0,.24);opacity:0;pointer-events:none;
+  max-width:min(460px,90vw);line-height:1.5;
+  transition:opacity 200ms var(--out-ease),transform 200ms var(--out-ease);}
+#toast.on{opacity:1;transform:translate(-50%,0);}
+
+
+/* ── Chart palette ────────────────────────────────────────────────────────
+   Every colour ran through the dataviz validator against both surfaces.  */
+.viz{--c-met:#008675; --c-part:#FD691D; --c-back:#0076A8; --c-qhse:#C8102E;
+  --o1:#99BEC1; --o2:#669EA1; --o3:#337D82; --o4:#005D63;
+  --neutral:#C0BAB5; --grid:#EAE8E6;}
+html[data-taqa-theme="dark"] .viz{--c-met:#008675; --c-back:#0076A8; --c-qhse:#D34058;
+  --o1:#005D63; --o2:#337D82; --o3:#669EA1; --o4:#99BEC1;
+  --neutral:#4C8E92; --grid:#247479;}
+.viz .rise{opacity:0;transform:translateY(8px);}
+.viz.go .rise{opacity:1;transform:none;
+  transition:opacity 300ms var(--out-ease) var(--d,0ms),transform 300ms var(--out-ease) var(--d,0ms);}
+.viz .grow{transform:scaleY(0);transform-origin:bottom center;}
+.viz.go .grow{transform:scaleY(1);transition:transform 480ms var(--out-ease) var(--d,0ms);}
+@media (prefers-reduced-motion: reduce){
+  .viz .rise,.viz.go .rise,.viz .grow,.viz.go .grow{opacity:1;transform:none;transition:none;}
+  .dnt circle{transition:none;}
+}
+#tip{position:fixed;z-index:80;background:var(--primary);color:#FFFFFF;font-size:11.5px;font-weight:500;
+  padding:6px 9px;border-radius:5px;pointer-events:none;opacity:0;
+  transition:opacity 120ms var(--out-ease);white-space:nowrap;}
+#tip.on{opacity:1;}
+
+/* ── Drawer ── */
+.scrim{position:fixed;inset:0;background:rgba(0,19,20,.44);opacity:0;pointer-events:none;
+  transition:opacity 190ms var(--out-ease);z-index:60;}
+.scrim.open{opacity:1;pointer-events:auto;}
+.dw{position:fixed;top:0;inset-inline-end:0;height:100dvh;width:min(428px,100%);background:var(--paper);
+  border-inline-start:1px solid var(--rule-firm);z-index:61;display:flex;flex-direction:column;
+  transform:translateX(102%);transition:transform 260ms cubic-bezier(.32,.72,0,1);}
+html[dir="rtl"] .dw{transform:translateX(-102%);}
+.dw.open{transform:translateX(0);}
+.dw-h{padding:16px 18px;border-bottom:1px solid var(--rule-firm);display:flex;gap:10px;align-items:flex-start;}
+.dw-h h2{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;font-weight:800;color:var(--ink);line-height:1.3;}
+.dw-n{font:600 11.5px/1.5 var(--mono);color:var(--ink-3);margin-top:4px;}
+.dw-b{flex:1;overflow-y:auto;padding-bottom:20px;}
+.dw-s{padding:15px 18px 5px;font:700 9.5px/1 'BwGradual',sans-serif;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3);}
+.dw-r{display:flex;justify-content:space-between;gap:14px;padding:8px 18px;border-bottom:1px solid var(--rule-soft);}
+.dw-k{font-size:12px;color:var(--ink-3);}
+.dw-k small{display:block;font:500 9px/1.3 var(--mono);color:var(--ink-3);margin-top:1px;}
+.dw-v{font-size:12.5px;color:var(--ink);text-align:end;font-weight:500;}
+.dw-v.mono{font-family:var(--mono);font-size:11.5px;}
+.dw-v.nil{color:var(--ink-3);font-weight:400;font-style:italic;}
+.dw-note{font-family:var(--read);margin:13px 18px 0;padding:11px 13px;border:1px solid var(--rule);
+  border-inline-start:2px solid var(--prov);border-radius:var(--r2);font-size:11.5px;line-height:1.6;}
+.dw-note.out{border-inline-start-color:var(--out);}
+.dw-note b{color:var(--ink);font-weight:600;}
+.dw-f{padding:13px 18px;border-top:1px solid var(--rule-firm);display:flex;gap:7px;}
+.dw-f .btn{flex:1;}
+
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+@media(max-width:1180px){.frame{padding:16px 13px 54px;}}
+@media(max-width:1100px){.scroll{overflow-x:auto;}}
+@media(max-width:760px){
+  /* The popover is anchored to a trigger that sits mid-page, so on a narrow
+     screen it ran past the right edge. Pin it to the viewport instead. */
+  .pop{position:fixed;inset-inline:12px;width:auto;top:auto;bottom:12px;transform-origin:bottom center;
+    transform:scale(.97) translateY(6px);}
+  .pop.open{transform:none;}
+  .counts{flex-wrap:wrap;}
+  .ct{flex:1 1 50%;min-width:50%;border-bottom:1px solid var(--rule-soft);}
+  .head{align-items:flex-start;}
+}
+
+/* Six filters share this row, so a long area name cannot be given more room.
+   It ends in an ellipsis instead of mid letter, and the full name is on the
+   title attribute for a hover or a screen reader. */
+.filter-bar select, #f-seg, #f-type, #f-status, #f-cls, #f-lang {
+  text-overflow:ellipsis; padding-inline-end:30px;
+}
+
+/* ── The site's top bar ──
+   This page carries the same bar as every other page (topbar.css, shared.js).
+   The bar is fixed, so the shell starts below it, the rail and the table
+   header stick below it, and the detail drawer, being modal, covers it. */
+.shell{padding-top:var(--nav-h,64px);}
+.side{top:var(--nav-h,64px);height:calc(100dvh - var(--nav-h,64px));}
+thead th{top:var(--nav-h,64px);}
+.scrim{z-index:1005;}
+.dw{z-index:1006;}
+@media(max-width:980px){.side{height:auto;}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the register</a>
+
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+  <a href="index.html" class="nav-brand">
+    <span class="nav-title"><span class="nav-title-brand">TAQA</span> <span class="nav-title-hub">Knowledge Hub</span></span>
+    <span class="nav-subtitle"><em>TechHub Platform</em></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
+    <li><a href="ai-search.html">Document Search</a></li>
+    <li class="nav-reg"><a href="master-list.html" class="active" aria-current="page">Master List</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
+  <div class="nav-right">
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="shell">
+
+<aside class="side" aria-label="In this register">
+  <div class="side-sec">In this register</div>
+  <div id="cuts"></div>
+
+  <div class="side-rule"></div>
+  <a class="nav-i" href="whats-new.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.2"/></svg>
+    <span>About this platform</span></a>
+  <a class="nav-i" href="dashboard.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
+    <span>Dashboard</span></a>
+
+</aside>
+
+<main class="main viz" id="main">
+
+  <div class="top">
+    <div>
+      <div class="kicker">Document control</div>
+      <div class="top-l">
+        <h1>Master Document List</h1>
+        <div class="pop-wrap">
+          <button class="btn btn-quiet btn-icon" id="about-btn" onclick="togglePop()" aria-expanded="false" aria-label="About this register">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v5.5"/><path d="M12 7.6v.2"/></svg>
+          </button>
+          <div class="pop" id="about-pop" role="dialog" aria-label="About this register">
+            <h2>About the data</h2>
+            <p>Titles for the twelve original segments are real. The fourteen areas added with the new entity model carry representative titles, because no documents have been filed against them yet. Revision, approval, review and status values are generated throughout so the controls can be seen working. The schema is what matters: it sets the fields the back end supplies.</p>
+            <p>Owner and approver hold <b>roles, not names</b>. Role switching runs in the browser and proves nothing about access. The server has to apply the same rules.</p>
+            <p id="pop-role"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="top-r">
+      <button class="btn" id="export-btn" onclick="exportCsv()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+    </div>
+  </div>
+
+  <section class="hero rise" style="--d:0ms">
+    <div class="hero-art" style="background-image:url('taqa-hero-4.jpg')" role="presentation"></div>
+    <div class="hero-in">
+      <h2>Every controlled document, one list</h2>
+      <p id="hero-line">&nbsp;</p>
+      <a class="hero-btn" href="whats-new.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6.5L18.5 12 13 17.5"/></svg>
+        About this platform
+      </a>
+    </div>
+  </section>
+
+  <div class="tiles">
+    <div class="tile rise" style="--d:60ms">
+      <h3>By status</h3>
+      <div class="sub">Where every controlled document stands today.</div>
+      <div class="tile-body mid">
+        <div class="dwrap">
+          <div class="dnt">
+            <svg viewBox="0 0 96 96" id="dn-mix" role="img" aria-label="Documents by status"></svg>
+            <div class="dnt-mid"><span class="dnt-n" id="dn-mix-n">0</span><span class="dnt-l">total</span></div>
+          </div>
+          <div class="dkeys" id="k-mix" role="group" aria-label="Filter by status"></div>
+        </div>
+      </div>
+      <div class="tile-foot"><i></i><span id="f-mix"></span></div>
+    </div>
+
+    <div class="tile rise" style="--d:120ms">
+      <h3>Overdue review ageing</h3>
+      <div class="sub">Days past the stored review date, under API Q2 4.4.3 c.</div>
+      <div class="tile-body">
+        <div class="mini" id="ch-age"></div>
+        <div class="mkeys" id="k-age"></div>
+      </div>
+      <div class="tile-foot"><i></i><span id="f-age"></span></div>
+    </div>
+
+    <div class="tile rise" style="--d:180ms">
+      <h3>Busiest segments</h3>
+      <div class="sub">The six largest by document count. Pick one to filter.</div>
+      <div class="tile-body">
+        <div class="mini" id="ch-seg"></div>
+        <div class="mkeys" id="k-seg"></div>
+      </div>
+      <div class="tile-foot"><i></i><span id="f-seg-note"></span></div>
+    </div>
+
+    <div class="tile rise" style="--d:240ms">
+      <h3>Needs attention</h3>
+      <div class="sub">What Document Control has open right now.</div>
+      <div class="tile-body">
+        <div class="att" id="att"></div>
+        <span class="pill" id="att-pill"></span>
+      </div>
+      <div class="tile-foot"><i></i><span id="f-att"></span></div>
+    </div>
+  </div>
+
+  <section class="reg" id="reg">
+    <div class="bar">
+      <div class="find">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="q" type="search" placeholder="Search" oninput="page=1;render()" autocomplete="off" aria-label="Search the register">
+      </div>
+      <select id="f-seg" onchange="page=1;chartSeg();render()" aria-label="Segment"><option value="">All segments</option></select>
+      <select id="f-type" onchange="page=1;render()" aria-label="Type"><option value="">All types</option></select>
+      <select id="f-status" onchange="page=1;render()" aria-label="Status">
+        <option value="">Any status</option><option value="current">Current</option>
+        <option value="under-review">Review due</option><option value="draft">Draft</option>
+        <option value="superseded">Superseded</option><option value="obsolete">Obsolete</option>
+      </select>
+      <select id="f-cls" onchange="page=1;render()" aria-label="Classification">
+        <option value="">Any class</option><option value="internal">Internal</option>
+        <option value="confidential">Confidential</option><option value="restricted">Restricted</option>
+      </select>
+      <select id="f-lang" onchange="page=1;render()" aria-label="Language">
+        <option value="">Both languages</option><option value="en">English</option><option value="ar">العربية</option>
+      </select>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr>
+          <th scope="col" class="bulk-col chk"><input type="checkbox" id="sel-all" onchange="toggleSelectAll(this)" aria-label="Select all rows on this page"></th>
+          <th scope="col">Number</th><th scope="col">Title</th><th scope="col">Rev</th>
+          <th scope="col">Issued</th><th scope="col">Review due</th>
+          <th scope="col">Status</th><th scope="col">Class</th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div class="none" id="empty" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8.5 11h5"/></svg>
+        <span class="empty-t">Nothing matches these filters.</span>
+        <span class="empty-s">Try a different segment, status or search text, or clear everything and start again.</span>
+        <button type="button" class="btn" onclick="clearFilters()">Clear filters</button>
+      </div>
+    </div>
+    <div class="pager" id="pager">
+      <span class="pager-info" id="pager-info"></span>
+      <div class="pages" id="pages"></div>
+    </div>
+    <div class="note" id="note"></div>
+  </section>
+
+</main>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- The floating tooltip the chart bars/donut wedges bind to (bindTip below).
+     Its CSS (#tip) has always been here; the element itself was not, so
+     hovering any chart mark threw and the tooltip never appeared. -->
+<div id="tip" role="tooltip" aria-hidden="true"></div>
+
+<div id="bulk-bar" hidden role="region" aria-label="Bulk actions">
+  <span id="bulk-count">0 documents selected</span>
+  <div class="bulk-actions">
+    <button type="button" class="btn btn-quiet" onclick="clearSelection()">Clear</button>
+    <button type="button" class="btn" id="bulk-approve" onclick="bulkAction('approve')">Approve selected</button>
+    <button type="button" class="btn" id="bulk-withdraw" onclick="bulkAction('withdraw')">Withdraw selected</button>
+  </div>
+</div>
+
+<div class="scrim" id="scrim" onclick="closeDetail()"></div>
+<aside class="dw" id="dw" role="dialog" aria-modal="true" aria-labelledby="dw-title" aria-hidden="true">
+  <div class="dw-h">
+    <div style="flex:1;min-width:0;">
+      <h2 id="dw-title"></h2>
+      <div class="dw-n" id="dw-num"></div>
+    </div>
+    <button class="btn btn-quiet btn-icon" onclick="closeDetail()" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="dw-b" id="dw-body"></div>
+  <div class="dw-f" id="dw-foot"></div>
+</aside>
+
+<script src="roles.js"></script>
+<script>
+/* The register view refuses here, before the rest of the page is parsed.
+   Hiding the navigation entry does not protect a URL, and in Azure it is the
+   API that declines to return the register rather than the browser declining
+   to draw it; this states the same rule where it can be seen.
+
+   window.stop() rather than an exception: the page ends quietly instead of
+   leaving a console error behind and letting the scripts below it run on a
+   document that has just been replaced. */
+(function(){
+  if (typeof TAQA_ROLE === 'undefined' || TAQA_ROLE.canRegister()) return;
+  var who = (TAQA_ROLES[TAQA_ROLE.current()] || {}).label || 'your role';
+  document.documentElement.setAttribute('data-taqa-theme',
+    (function(){ try { return localStorage.getItem('taqa-theme-v3') === 'dark' ? 'dark' : 'light'; }
+                 catch(e){ return 'light'; } })());
+  document.body.innerHTML =
+    '<div style="max-width:620px;margin:16vh auto;padding:0 24px;text-align:center;' +
+      'font-family:Inter,system-ui,sans-serif">' +
+      '<div style="font-family:BwGradual,Urbanist,sans-serif;font-size:22px;font-weight:800;' +
+        'letter-spacing:-0.3px;margin-bottom:12px;color:#1E1C1A">' +
+        'The Master List is the document controller\u2019s view</div>' +
+      '<p style="font-size:14px;line-height:1.7;color:#524D48;margin:0 0 10px">' +
+        'It carries the register export, the overdue queue and every revision ' +
+        'including withdrawn ones. QMS and an external auditor work from it. ' +
+        'You are signed in as <b style="color:#1E1C1A">' + who + '</b>.</p>' +
+      '<p style="font-size:14px;line-height:1.7;color:#524D48;margin:0 0 24px">' +
+        'Every document you need is still open to you, and each one tells you ' +
+        'whether it is current before you use it.</p>' +
+      '<a href="ai-search.html" style="display:inline-block;font-size:13.5px;font-weight:600;' +
+        'color:#fff;background:#005D63;border-radius:9px;padding:11px 22px;text-decoration:none;' +
+        'margin-right:8px">Search the documents</a>' +
+      '<a href="index.html" style="display:inline-block;font-size:13.5px;font-weight:600;' +
+        'color:#005D63;border:1px solid #BEB8B2;border-radius:9px;padding:11px 22px;' +
+        'text-decoration:none">Home</a></div>';
+  document.body.style.background = '#f4f4f3';
+  if (window.stop) window.stop();
+})();
+</script>
+<script src="documents-master.js"></script>
+<script src="store.js"></script>
+<script>
+
+const D=TAQA_MASTER_DOCS, L=TAQA_DOC_LOOKUPS, A=TAQA_DOC;
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):null;
+const LABEL={current:'Current','under-review':'Review due',draft:'Draft',superseded:'Superseded',obsolete:'Obsolete',asset:'Asset'};
+
+const fs=document.getElementById('f-seg'), ft=document.getElementById('f-type');
+Object.keys(L.segments).sort((a,b)=>L.segments[a].name.localeCompare(L.segments[b].name))
+  .forEach(k=>fs.insertAdjacentHTML('beforeend',`<option value="${k}">${esc(L.segments[k].name)}</option>`));
+Object.keys(L.types).forEach(k=>ft.insertAdjacentHTML('beforeend',`<option value="${k}">${esc(L.types[k].label)}</option>`));
+
+let quick='controlled', page=1, selected=null;
+const PER_PAGE=20;
+// Review date, not stored status: how many days out the amber pre-warning
+// starts, one field on from the red "late" state due() already draws.
+const DUE_SOON_DAYS=30;
+// Bulk selection. docNumbers, not row indexes, so a selection survives a
+// re-render (the register redraws on every keystroke and on every external
+// store change). lastSlice is the page of records render() most recently
+// drew, which is what the header checkbox and toggleRowSelect() need to know
+// "select all" and "am I now fully selected" against; lastFilterKey is the
+// filter/search/quick signature at that same render, so changing any of
+// them clears a selection that no longer means what it did, while simply
+// turning the page, or a store update repainting the same view, does not.
+let selectedRows=new Set(), lastSlice=[], lastFilterKey=null;
+const CT=[
+  {k:'controlled', l:'All controlled',f:d=>A.controlled(d),               strip:true},
+  {k:'current',    l:'Current',       f:d=>d.status==='current'},
+  {k:'review',     l:'Review due',    f:d=>d.status==='under-review'},
+  {k:'draft',      l:'Draft',         f:d=>d.status==='draft'},
+  {k:'obsolete',   l:'Withdrawn',     f:d=>d.status==='obsolete'||d.status==='superseded'},
+  {k:'overdue',    l:'Review overdue',f:d=>A.overdue(d), flag:'due', control:true, strip:true},
+  {k:'provisional',l:'Provisional',   f:d=>d.numberStatus==='provisional', flag:'out', control:true, strip:true},
+  {k:'ar',         l:'Arabic',        f:d=>!!d.translationOf,              strip:true},
+  {k:'asset',      l:'Software assets',f:d=>!A.controlled(d),              strip:true}
+];
+
+const F={q:'q',seg:'f-seg',type:'f-type',status:'f-status',cls:'f-cls',lang:'f-lang'};
+function readUrl(){
+  const u=new URLSearchParams(location.search);
+  for(const [key,id] of Object.entries(F)){
+    const v=u.get(key); if(v==null)continue;
+    const el=document.getElementById(id); if(!el)continue;
+    if(el.tagName==='SELECT'&&!Array.from(el.options).some(o=>o.value===v))continue;
+    el.value=v;
+  }
+  const k=u.get('view'); if(k&&CT.some(c=>c.k===k))quick=k;
+}
+function writeUrl(){
+  const u=new URLSearchParams();
+  for(const [key,id] of Object.entries(F)){const el=document.getElementById(id); if(el&&el.value)u.set(key,el.value);}
+  if(quick&&quick!=='controlled')u.set('view',quick);
+  const qs=u.toString();
+  history.replaceState(null,'',qs?location.pathname+'?'+qs:location.pathname);
+}
+
+function role(){return TAQA_ROLE.current();}
+// Reads the store, not the shipped array, so a document submitted through the
+// upload form is in this list the moment a role is allowed to see it.
+function visible(){
+  const src = (typeof TAQA_STORE!=='undefined') ? TAQA_STORE.all() : D;
+  return src.filter(d=>TAQA_ROLE.canSee(d,role()));
+}
+
+let popOpen=false;
+function togglePop(){
+  popOpen=!popOpen;
+  document.getElementById('about-pop').classList.toggle('open',popOpen);
+  document.getElementById('about-btn').setAttribute('aria-expanded',popOpen);
+}
+document.addEventListener('click',e=>{
+  if(popOpen&&!e.target.closest('.pop-wrap'))togglePop();
+});
+
+// The role itself is switched from the bar's door pill, the same control
+// every other page uses; it reloads on a change, which is what lets a
+// switch to a role that cannot open this register hand off to the refusal
+// screen. This just reflects whichever role the page loaded as.
+function renderRole(){
+  const k=role(), R=TAQA_ROLES[k];
+  const hidden=D.length-visible().length;
+  document.getElementById('pop-role').innerHTML='<b>'+esc(R.label)+'.</b> '+esc(R.blurb)+
+    (hidden>0?' '+hidden+(hidden===1?' document is':' documents are')+' outside this role.':'');
+  document.getElementById('export-btn').hidden=!TAQA_ROLE.can('export',k);
+  const dr=document.querySelector('#f-status option[value="draft"]');
+  if(dr)dr.hidden=!R.statuses.includes('draft');
+  // Set once here, from the role, rather than on every render(): a role
+  // switch reloads the page (see the comment above), so nothing after the
+  // first paint can change what canBulk() answers.
+  document.getElementById('reg').classList.toggle('no-bulk', !canBulk());
+  if(!canBulk()){selectedRows.clear();}
+}
+// The Master List is already refused at the door to everyone but qms and
+// auditor (TAQA_ROLE.canRegister(), checked before this script even loads).
+// Of those two, auditor is deliberately read-only end to end: approve,
+// countersign and editMetadata are all false on that role in roles.js. qms
+// is the one that holds countersign, the register-release step whose own
+// comment in store.js says setStatus() "is what QMS approval and withdrawal
+// call" - the exact call bulkAction() below makes. So countersign is reused
+// here rather than a new flag, and it is the same test that keeps bulk
+// approve/withdraw out of reach for auditor while leaving every single-row
+// read (the detail drawer, export) exactly as open as it always was.
+function canBulk(){
+  return !!TAQA_ROLES[role()].countersign;
+}
+function clearFilters(){
+  document.getElementById('q').value='';
+  ['f-seg','f-type','f-status','f-cls','f-lang'].forEach(id=>{document.getElementById(id).value='';});
+  quick='controlled'; page=1;
+  chartSeg(); renderCuts(); syncDonut(); render();
+}
+function quickFilter(k){quick=(quick===k&&k!=='controlled')?'controlled':k;
+  page=1;renderCuts();syncDonut();render();}
+function segFilter(id){const el=document.getElementById('f-seg');
+  el.value=el.value===id?'':id; page=1; chartSeg(); render();}
+
+function current(){
+  const q=document.getElementById('q').value.trim().toLowerCase();
+  const seg=document.getElementById('f-seg').value, typ=document.getElementById('f-type').value;
+  const st=document.getElementById('f-status').value, cl=document.getElementById('f-cls').value;
+  const lg=document.getElementById('f-lang').value;
+  const c=quick?CT.find(x=>x.k===quick):null, k=role();
+  return visible().filter(d=>{
+    if(c&&!c.f(d))return false;
+    if(c&&c.control&&!TAQA_ROLE.inControlScope(d,k))return false;
+    if(seg&&d.segment!==seg)return false;
+    if(typ&&d.docType!==typ)return false;
+    if(st&&d.status!==st)return false;
+    if(cl&&d.classification!==cl)return false;
+    if(lg&&d.language!==lg)return false;
+    if(q&&![d.docNumber,d.legacyId,d.title,A.seg(d).spl,A.seg(d).name].join(' ').toLowerCase().includes(q))return false;
+    return true;
+  });
+}
+function due(d){
+  if(d.status==='obsolete'||d.status==='superseded')return '<span class="dat nil">Withdrawn</span>';
+  if(!d.nextReviewDate)return '<span class="dat nil">Not set</span>';
+  const n=A.reviewDays(d);
+  if(n<0)return `<span class="dat late">${fmt(d.nextReviewDate)}<br>${Math.abs(n)} days late</span>`;
+  // Amber pre-warning: not overdue yet, but inside DUE_SOON_DAYS. Reads the
+  // same reviewDays() the line above already reads for the red state, so the
+  // two never disagree about the same document.
+  if(n<=DUE_SOON_DAYS)return `<span class="dat soon">${fmt(d.nextReviewDate)}<br>due in ${n} day${n===1?'':'s'}</span>`;
+  return `<span class="dat">${fmt(d.nextReviewDate)}</span>`;
+}
+// Twenty rows a page. A register is read a screen at a time, and an endless
+// list makes "where was that one" impossible to answer.
+function pageButtons(total){
+  const el=document.getElementById('pages');
+  if(total<=1){el.innerHTML='';return;}
+  const win=[], push=n=>{if(!win.includes(n))win.push(n);};
+  push(1); for(let i=page-1;i<=page+1;i++)if(i>1&&i<total)push(i); push(total);
+  win.sort((a,b)=>a-b);
+  let html='<button class="pg" onclick="goPage('+(page-1)+')"'+(page===1?' disabled':'')+' aria-label="Previous page">&#8249;</button>';
+  let last=0;
+  win.forEach(n=>{
+    if(last&&n-last>1)html+='<span class="pg dots" aria-hidden="true">&#8230;</span>';
+    html+='<button class="pg" onclick="goPage('+n+')"'+(n===page?' aria-current="page"':'')+'>'+n+'</button>';
+    last=n;
+  });
+  html+='<button class="pg" onclick="goPage('+(page+1)+')"'+(page===total?' disabled':'')+' aria-label="Next page">&#8250;</button>';
+  el.innerHTML=html;
+}
+function goPage(n){
+  page=n; render();
+  document.getElementById('reg').scrollIntoView({block:'start',
+    behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+}
+
+function render(){
+  writeUrl();
+  // A changed filter, search term or quick cut means the rows a prior
+  // selection pointed at are not the set the person is looking at any more,
+  // so drop it. Paging within the same view, or a store change repainting
+  // it, leaves the key untouched and the selection stands.
+  const fKey=[document.getElementById('q').value,document.getElementById('f-seg').value,
+    document.getElementById('f-type').value,document.getElementById('f-status').value,
+    document.getElementById('f-cls').value,document.getElementById('f-lang').value,quick].join('|');
+  if(fKey!==lastFilterKey){selectedRows.clear();lastFilterKey=fKey;}
+  const rows=current();
+  const totalPages=Math.max(Math.ceil(rows.length/PER_PAGE),1);
+  if(page>totalPages)page=totalPages;
+  const from=(page-1)*PER_PAGE, slice=rows.slice(from,from+PER_PAGE);
+  document.getElementById('count').textContent=rows.length+' of '+visible().length;
+  document.getElementById('empty').hidden=rows.length>0;
+  document.getElementById('pager').hidden=rows.length===0;
+  document.getElementById('pager-info').textContent=rows.length
+    ? (from+1)+' to '+(from+slice.length)+' of '+rows.length : '';
+  pageButtons(totalPages);
+  const p=rows.filter(d=>d.numberStatus==='provisional').length;
+  document.getElementById('note').textContent = (p
+    ? p+' of these cannot be numbered yet because TQ-QHSE-S001 5.3 assigns no short form. '
+    : 'Every number here follows TQ-QHSE-S001 5.3. ')
+    + 'Retention runs to 10 years under API Q2 3rd Edition 4.5.';
+  document.getElementById('rows').innerHTML=slice.map((d,i)=>{
+    const s=A.seg(d), pv=d.numberStatus==='provisional';
+    return `<tr tabindex="0" aria-selected="${!!selected&&selected===d.docNumber}"
+        onclick="openDetail(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetail(${i});}">
+      <td class="bulk-col chk" onclick="event.stopPropagation()" onkeydown="event.stopPropagation()"><input type="checkbox" class="row-chk" data-doc="${esc(d.docNumber||'')}"
+        ${d.docNumber?'':'disabled'} ${d.docNumber&&selectedRows.has(d.docNumber)?'checked':''}
+        onchange="toggleRowSelect(this)" aria-label="Select ${esc(d.title)}"></td>
+      <td><div class="num${pv?' prov':''}">${esc(d.docNumber||'Not numbered')}</div>${d.legacyId?`<div class="was">was ${esc(d.legacyId)}</div>`:''}</td>
+      <td><div class="ttl">${esc(d.title)}${d.language==='ar'?'<span class="ar">AR</span>':''}</div><div class="org">${esc(s.name)}</div></td>
+      <td><span class="dat">${esc(d.revision||'n/a')}</span></td>
+      <td><span class="dat${d.issueDate?'':' nil'}">${fmt(d.issueDate)||'Not recorded'}</span></td>
+      <td>${due(d)}</td>
+      <td><span class="mark m-${d.status.replace('under-review','review')}">${LABEL[d.status]||d.status}</span></td>
+      <td><span class="cls${d.classification==='restricted'?' hi':''}">${esc(d.classification||'')}</span></td>
+    </tr>`}).join('');
+  lastSlice=slice;
+  const chkAll=document.getElementById('sel-all');
+  if(chkAll){
+    const pageDocs=slice.filter(d=>d.docNumber).map(d=>d.docNumber);
+    const selOnPage=pageDocs.filter(n=>selectedRows.has(n));
+    chkAll.checked=pageDocs.length>0&&selOnPage.length===pageDocs.length;
+    chkAll.indeterminate=selOnPage.length>0&&selOnPage.length<pageDocs.length;
+    chkAll.disabled=pageDocs.length===0;
+  }
+  updateBulkBar();
+}
+
+// ── Bulk selection and action ───────────────────────────────────────────
+function toggleSelectAll(el){
+  const docs=lastSlice.filter(d=>d.docNumber).map(d=>d.docNumber);
+  if(el.checked)docs.forEach(n=>selectedRows.add(n));
+  else docs.forEach(n=>selectedRows.delete(n));
+  document.querySelectorAll('#rows .row-chk').forEach(cb=>{cb.checked=el.checked&&!cb.disabled;});
+  updateBulkBar();
+}
+function toggleRowSelect(el){
+  const num=el.dataset.doc; if(!num)return;
+  if(el.checked)selectedRows.add(num); else selectedRows.delete(num);
+  const chkAll=document.getElementById('sel-all');
+  if(chkAll){
+    const pageDocs=lastSlice.filter(d=>d.docNumber).map(d=>d.docNumber);
+    const selOnPage=pageDocs.filter(n=>selectedRows.has(n));
+    chkAll.checked=pageDocs.length>0&&selOnPage.length===pageDocs.length;
+    chkAll.indeterminate=selOnPage.length>0&&selOnPage.length<pageDocs.length;
+  }
+  updateBulkBar();
+}
+function clearSelection(){selectedRows.clear();render();}
+function updateBulkBar(){
+  const bar=document.getElementById('bulk-bar');
+  const n=selectedRows.size;
+  if(!canBulk()||n===0){bar.hidden=true;return;}
+  bar.hidden=false;
+  document.getElementById('bulk-count').textContent=n+' document'+(n===1?'':'s')+' selected';
+}
+
+// Both actions call TAQA_STORE.setStatus(), the same call documents.html's
+// single Withdraw button makes (store.js: "what QMS approval and withdrawal
+// call"), so the register updates for every reader everywhere else in the
+// hub, not just in this table. A selected row that is not eligible, such as
+// a document already current or already withdrawn, is left untouched rather
+// than acted on or silently dropped, and the confirm dialog says so by name
+// before anything happens, the same honesty documents.html's own withdraw
+// confirm uses.
+function bulkAction(kind){
+  if(!canBulk()||typeof TAQA_STORE==='undefined')return;
+  const chosen=Array.from(selectedRows).map(n=>TAQA_STORE.findDoc(n)).filter(Boolean);
+  const eligible=chosen.filter(kind==='approve'
+    ? d=>d.status==='draft'||d.status==='under-review'
+    : d=>d.status!=='obsolete'&&d.status!=='superseded');
+  const skipped=chosen.length-eligible.length;
+  if(!eligible.length){
+    toast(kind==='approve'
+      ? 'Nothing selected is waiting on approval. Already-current and withdrawn documents are left as they are.'
+      : 'Nothing selected can be withdrawn. It is already marked obsolete or superseded.');
+    return;
+  }
+  const n=eligible.length, s=n===1?'':'s';
+  // skipped is only ever >0 here alongside at least one eligible document, so
+  // the pool being referred to ("the selected documents") always has two or
+  // more in it; only is/are and it/they, tied to skipped itself, need to
+  // agree with how many of those are being left alone.
+  const skipNote=skipped
+    ? ' '+skipped+' of the selected documents '+(skipped===1?'is':'are')+
+      ' already '+(kind==='approve'?'current or withdrawn':'withdrawn')+
+      ' and will be left as '+(skipped===1?'it is':'they are')+'.'
+    : '';
+  const msg=kind==='approve'
+    ? n+' document'+s+' will be approved and marked Current.'+skipNote+
+      ' This updates the register everywhere it is read. This cannot be undone from here.'
+    : n+' document'+s+' will be marked obsolete. Every reader will see "Withdrawn, do not use." '+
+      (n===1?'It stays':'They stay')+' in the register, but '+(n===1?'leaves':'leave')+' the live list.'+skipNote;
+  if(!confirm(msg))return;
+  eligible.forEach(d=>TAQA_STORE.setStatus(d.docNumber, kind==='approve'?'current':'obsolete'));
+  selectedRows.clear();
+  renderCuts(); render(); drawSummary();
+  toast((kind==='approve'?'Approved ':'Withdrew ')+n+' document'+s+'.');
+}
+
+let lastFocus=null;
+function dwRow(k,v,clause,mono){
+  const has=v!==null&&v!==undefined&&v!=='';
+  return `<div class="dw-r"><div class="dw-k">${k}${clause?`<small>${clause}</small>`:''}</div>
+    <div class="dw-v${mono?' mono':''}${has?'':' nil'}">${has?v:'Not recorded'}</div></div>`;
+}
+function openDetail(i){
+  const rows=current(), d=rows[(page-1)*PER_PAGE+i]; if(!d)return;
+  lastFocus=document.activeElement; selected=d.docNumber;
+  const t=A.type(d), s=A.seg(d), n=A.reviewDays(d), gone=d.status==='obsolete'||d.status==='superseded';
+  document.getElementById('dw-title').textContent=d.title;
+  document.getElementById('dw-num').textContent=(d.docNumber||'Not numbered')+(d.legacyId?'   was '+d.legacyId:'');
+  let notes='';
+  if(d.status==='obsolete')notes+='<div class="dw-note out"><b>Withdrawn. Do not use.</b> Destroy or mark any printed copy. Take the current document from SCORE.</div>';
+  else if(d.status==='superseded')notes+=`<div class="dw-note out"><b>Superseded by ${esc(d.supersededBy||'a later revision')}.</b> Use the current revision from SCORE.</div>`;
+  else if(d.status==='draft')notes+='<div class="dw-note"><b>Draft.</b> Approval is not complete, so this carries no authority.</div>';
+  else if(A.overdue(d))notes+=`<div class="dw-note"><b>Review overdue by ${Math.abs(n)} days.</b> It stays in force until withdrawn, but nobody has confirmed it is still suitable.</div>`;
+  if(d.numberStatus==='provisional')notes+=`<div class="dw-note"><b>Provisional number.</b> ${esc(A.numberNote(d)||'')}</div>`;
+  document.getElementById('dw-body').innerHTML = notes +
+    '<div class="dw-s">Identification</div>'+
+    dwRow('Type',esc(t.label))+dwRow('Segment',esc(s.name)+', '+esc(s.spl))+
+    dwRow('Language',d.language==='ar'?'العربية':'English')+
+    (d.translationOf?dwRow('Translation of',esc(d.translationOf),'API Q2 4.4.3',true):'')+
+    '<div class="dw-s">Revision and approval</div>'+
+    dwRow('Revision',esc(d.revision),'API Q2 4.4.3 d',true)+
+    dwRow('Issued',fmt(d.issueDate),null,true)+
+    dwRow('Approved',fmt(d.approvedDate),'API Q2 4.4.3 b',true)+
+    dwRow('Supersedes',esc(d.supersedes),null,true)+
+    '<div class="dw-s">Authority</div>'+
+    dwRow('Owner',esc(A.owner(d)),'API Q2 4.4.3 a, role')+
+    dwRow('Approval authority',esc(A.approver(d)),'API Q2 4.4.3 a, role')+
+    '<div class="dw-s">Review, protection, retention</div>'+
+    dwRow('Review cycle',A.cycle(d)?A.cycle(d)+' months':null,'API Q2 4.4.3 c')+
+    dwRow('Review due',gone?'Not applicable':fmt(d.nextReviewDate),null,true)+
+    dwRow('Classification',esc((d.classification||'').toUpperCase()),'ISO 9001 7.5.3.1 b')+
+    dwRow('Retention',A.retention(d)?A.retention(d)+' years':null,'API Q2 4.5')+
+    dwRow('Status',LABEL[d.status]||d.status,'API Q2 4.4.3');
+  const url=A.scoreUrl(d), open='viewer.html?doc='+encodeURIComponent(d.docNumber||'')+'&seg='+encodeURIComponent(d.segment)+'&type='+encodeURIComponent(d.docType)+'&title='+encodeURIComponent(d.title);
+  document.getElementById('dw-foot').innerHTML=
+    `<a class="btn" href="${esc(open)}">Open document</a>`+(url?`<a class="btn" href="${esc(url)}" rel="noopener">Master in SCORE</a>`:'');
+  document.getElementById('scrim').classList.add('open');
+  const w=document.getElementById('dw');
+  w.classList.add('open'); w.setAttribute('aria-hidden','false');
+  w.querySelector('.btn').focus();
+  render();
+}
+function closeDetail(){
+  selected=null;
+  document.getElementById('scrim').classList.remove('open');
+  const w=document.getElementById('dw');
+  w.classList.remove('open'); w.setAttribute('aria-hidden','true');
+  if(lastFocus&&lastFocus.focus)lastFocus.focus();
+  render();
+}
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  if(document.getElementById('dw').classList.contains('open'))closeDetail();
+  else if(popOpen)togglePop();
+});
+
+let toastTimer=null;
+function toast(msg,ms){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('on');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('on'),ms||4400);
+}
+
+function csvText(rows){
+  const head=['Document Number','Legacy ID','Title','Type','Segment','SPL','Revision','Issued','Approved','Owner Role','Approver Role','Review Cycle (months)','Review Due','Overdue','Status','Supersedes','Superseded By','Classification','Retention (years)','Language','Translation Of','Number Status','SCORE URL'];
+  const cell=v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`;
+  const body=rows.map(d=>[d.docNumber,d.legacyId,d.title,A.type(d).label,A.seg(d).name,A.seg(d).spl,d.revision,d.issueDate,d.approvedDate,A.owner(d),A.approver(d),A.cycle(d),d.nextReviewDate,A.overdue(d)?'YES':'NO',d.status,d.supersedes,d.supersededBy,d.classification,A.retention(d),d.language,d.translationOf,d.numberStatus,A.scoreUrl(d)].map(cell).join(','));
+  return '﻿'+[head.map(cell).join(','),...body].join('\r\n');
+}
+
+// The register is often read inside an embed, and a sandboxed frame refuses
+// downloads outright. Rather than a button that silently does nothing, fall
+// back to the clipboard and say plainly what happened.
+function exportCsv(){
+  if(!TAQA_ROLE.can('export',role()))return;
+  const rows=current();
+  if(!rows.length){toast('Nothing to export in this view.');return;}
+  const text=csvText(rows);
+  const name='TQ-QHSE-F086_Master_Document_List_'+new Date().toISOString().slice(0,10)+'.csv';
+  let framed=true; try{framed=window.self!==window.top;}catch(e){framed=true;}
+
+  if(!framed){
+    const url=URL.createObjectURL(new Blob([text],{type:'text/csv;charset=utf-8;'}));
+    const a=document.createElement('a');
+    a.href=url; a.download=name; a.style.display='none';
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},2000);
+    toast('Exported '+rows.length+' rows as '+name);
+    return;
+  }
+  copyOut(text,rows.length,name);
+}
+
+function copyOut(text,n,name){
+  const done=()=>toast('Downloads are blocked inside this preview, so '+n+' rows went to the clipboard instead. Paste into a file and save it as '+name,6500);
+  if(navigator.clipboard&&navigator.clipboard.writeText)
+    navigator.clipboard.writeText(text).then(done).catch(()=>legacyCopy(text,done));
+  else legacyCopy(text,done);
+}
+function legacyCopy(text,done){
+  const ta=document.createElement('textarea');
+  ta.value=text; ta.setAttribute('readonly','');
+  ta.style.cssText='position:fixed;top:0;left:-9999px;';
+  document.body.appendChild(ta); ta.select();
+  let ok=false; try{ok=document.execCommand('copy');}catch(e){}
+  ta.remove();
+  if(ok)done();
+  else toast('This preview blocks downloads and clipboard access. Open the register in its own tab to export.',6500);
+}
+
+// ── Tiles ─────────────────────────────────────────────────────────────────
+// Every tile reads the whole register the current role can see, never the
+// filtered slice, so choosing a cut narrows the table without reshaping the
+// picture above it. Every mark is a button: the charts are the filters.
+const tip=document.getElementById('tip');
+function bindTip(el,text){
+  el.addEventListener('mouseenter',()=>{tip.textContent=text;tip.classList.add('on');});
+  el.addEventListener('mousemove',e=>{
+    const w=tip.offsetWidth, x=Math.min(Math.max(e.clientX-w/2,8),innerWidth-w-8);
+    tip.style.left=x+'px'; tip.style.top=(e.clientY-34)+'px';});
+  el.addEventListener('mouseleave',()=>tip.classList.remove('on'));
+}
+const svgEl=(n,a)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',n);
+  for(const k in a)e.setAttribute(k,a[k]);return e;};
+
+// A mini column chart. Bars share a baseline and one column is inked to mark
+// the row that matters; the rest carry the neutral so nothing shouts.
+function columns(hostId,keysId,items,onPick){
+  const host=document.getElementById(hostId), keys=document.getElementById(keysId);
+  const max=Math.max(...items.map(x=>x.n),1);
+  const anyOn=items.some(x=>x.on);
+  host.innerHTML=items.map((x,i)=>
+    `<button type="button" class="mcol${x.on?' on':''}${anyOn&&!x.on?' dim':''}" data-i="${i}"
+       aria-label="${esc(x.full||x.k)}: ${x.n}"><i class="grow" style="height:${
+       Math.max(Math.round(x.n/max*100),4)}%;--d:${180+i*26}ms"></i></button>`).join('');
+  keys.innerHTML=items.map(x=>`<span class="${x.on?'on':''}">${esc(x.k)}</span>`).join('');
+  [...host.children].forEach((b,i)=>{
+    bindTip(b,(items[i].full||items[i].k)+': '+items[i].n);
+    if(onPick)b.addEventListener('click',()=>onPick(items[i]));
+  });
+}
+
+const R=36, CIRC=2*Math.PI*R, GAP_DEG=3;
+function tileStatus(){
+  const rows=visible().filter(d=>A.controlled(d));
+  const parts=[
+    {k:'Current',    q:'current',  n:rows.filter(d=>d.status==='current').length,      c:'var(--c-met)'},
+    {k:'Review due', q:'review',   n:rows.filter(d=>d.status==='under-review').length, c:'var(--c-part)'},
+    {k:'Draft',      q:'draft',    n:rows.filter(d=>d.status==='draft').length,        c:'var(--c-back)'},
+    {k:'Withdrawn',  q:'obsolete', n:rows.filter(d=>d.status==='obsolete'||d.status==='superseded').length,
+      c:'var(--c-qhse)'}
+  ];
+  const total=rows.length||1;
+  const svg=document.getElementById('dn-mix'); svg.innerHTML='';
+  svg.appendChild(svgEl('circle',{cx:48,cy:48,r:R,stroke:'var(--grid)','stroke-width':12,fill:'none'}));
+  let acc=0; const drawn=[];
+  parts.forEach((p,i)=>{
+    if(!p.n)return;
+    const frac=p.n/total;
+    const gap=parts.filter(x=>x.n).length>1 ? (GAP_DEG/360)*CIRC : 0;
+    const len=Math.max(frac*CIRC-gap,1.5);
+    const c=svgEl('circle',{cx:48,cy:48,r:R,stroke:p.c,'stroke-width':12,fill:'none',
+      'stroke-dasharray':'0 '+CIRC,'stroke-dashoffset':-(acc*CIRC)});
+    c.dataset.q=p.q; c.style.cursor='pointer'; c.style.transitionDelay=(i*80)+'ms';
+    c.addEventListener('click',()=>quickFilter(p.q));
+    bindTip(c,p.k+': '+p.n+' of '+total+', '+Math.round(frac*100)+' per cent');
+    svg.appendChild(c); drawn.push([c,len]); acc+=frac;
+  });
+  requestAnimationFrame(()=>requestAnimationFrame(()=>
+    drawn.forEach(([c,len])=>c.setAttribute('stroke-dasharray',len+' '+(CIRC-len)))));
+  document.getElementById('k-mix').innerHTML=parts.filter(p=>p.n).map(p=>
+    `<button type="button" class="dkey" data-q="${p.q}" aria-pressed="${quick===p.q}"
+       onclick="quickFilter('${p.q}')"><i style="background:${p.c}"></i>
+       <span>${p.k}</span><b>${p.n}</b></button>`).join('');
+  countTo(document.getElementById('dn-mix-n'), rows.length);
+  const cur=parts[0].n;
+  document.getElementById('f-mix').innerHTML=
+    '<b>'+Math.round(cur/total*100)+'%</b> on their current revision';
+  syncDonut();
+}
+function syncDonut(){
+  const on=[...document.querySelectorAll('#dn-mix circle[data-q]')].some(c=>c.dataset.q===quick);
+  document.querySelectorAll('#dn-mix circle[data-q]').forEach(c=>{
+    c.style.opacity = on ? (c.dataset.q===quick?1:.28) : 1;});
+  document.querySelectorAll('#k-mix .dkey').forEach(b=>
+    b.setAttribute('aria-pressed', b.dataset.q===quick));
+}
+
+function tileAgeing(){
+  const k=role(), card=document.getElementById('ch-age').closest('.tile');
+  if(!TAQA_ROLES[k].controlPanel){card.hidden=true;return;}
+  card.hidden=false;
+  const late=visible().filter(d=>A.overdue(d)&&TAQA_ROLE.inControlScope(d,k)).map(d=>-A.reviewDays(d));
+  const b=[
+    {k:'1 to 30',   full:'1 to 30 days',   f:n=>n<=30},
+    {k:'31 to 90',  full:'31 to 90 days',  f:n=>n>30&&n<=90},
+    {k:'91 to 180', full:'91 to 180 days', f:n=>n>90&&n<=180},
+    {k:'180+',      full:'Over 180 days',  f:n=>n>180}
+  ].map(x=>({...x,n:late.filter(x.f).length}));
+  b[3].on=true;
+  columns('ch-age','k-age',b,()=>quickFilter('overdue'));
+  document.getElementById('f-age').innerHTML=
+    '<b>'+b[3].n+'</b> of '+late.length+' are past six months';
+}
+
+// Twelve columns in a tile this narrow cannot carry twelve readable labels,
+// so the chart shows the six busiest and the segment select covers the rest.
+const SEG_TOP=6;
+function segKey(id){
+  const g=L.segments[id];
+  if(g.spl)return g.spl;                       // the real short form
+  return g.name.replace(/[^A-Za-z ]/g,'').split(' ')
+    .map(w=>w[0]).join('').slice(0,3).toUpperCase();
+}
+function chartSeg(){
+  const rows=visible().filter(d=>A.controlled(d));
+  const sel=document.getElementById('f-seg').value;
+  const all=Object.keys(L.segments)
+    .map(id=>({id,k:segKey(id),full:L.segments[id].name,
+      n:rows.filter(d=>d.segment===id).length,on:sel===id}))
+    .filter(x=>x.n).sort((a,b)=>b.n-a.n);
+  // A chosen segment always shows, even when it is not in the busiest six.
+  const segs=all.slice(0,SEG_TOP);
+  if(sel&&!segs.some(x=>x.on)){const me=all.find(x=>x.on); if(me)segs[SEG_TOP-1]=me;}
+  columns('ch-seg','k-seg',segs,x=>segFilter(x.id));
+  const top=all[0];
+  document.getElementById('f-seg-note').innerHTML= top
+    ? '<b>'+top.n+'</b> in '+esc(top.full)+', of '+all.length+' segments'
+    : 'No documents in scope';
+}
+
+function tileAttention(){
+  const rows=visible().filter(d=>A.controlled(d)), k=role();
+  const ctrl=TAQA_ROLES[k].controlPanel;
+  const prov=rows.filter(d=>d.numberStatus==='provisional').length;
+  const over=rows.filter(d=>A.overdue(d)&&TAQA_ROLE.inControlScope(d,k)).length;
+  const draft=rows.filter(d=>d.status==='draft').length;
+  const ar=rows.filter(d=>d.translationOf).length;
+  const WARN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 8v5"/><path d="M12 16.5v.2"/><circle cx="12" cy="12" r="9"/></svg>';
+  const TAG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11.5V4.5h7l9.5 9.5-7 7z"/><path d="M7.4 7.6v.2"/></svg>';
+  const PEN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4.5L16 4.6a2 2 0 013 2.8L8 18.9z"/></svg>';
+  const GLB='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3.2 12h17.6"/><path d="M12 3a15 15 0 010 18a15 15 0 010-18z"/></svg>';
+  const items=[];
+  if(ctrl)items.push({c:'due',i:WARN,t:over+' reviews overdue',s:'Past their stored review date',q:'overdue'});
+  if(ctrl)items.push({c:'',i:TAG,t:prov+' waiting on a short form',s:'No conformant number under 5.3',q:'provisional'});
+  items.push({c:'',i:PEN,t:draft+' in draft',s:'Not yet approved for use',q:'draft'});
+  items.push({c:'',i:GLB,t:ar+' Arabic versions',s:'Linked to an English source',q:'ar'});
+  document.getElementById('att').innerHTML=items.slice(0,3).map(x=>
+    `<button type="button" class="${x.c}" onclick="quickFilter('${x.q}')">${x.i}
+      <span><span class="att-t">${esc(x.t)}</span><span class="att-s">${esc(x.s)}</span></span></button>`).join('');
+  const open=ctrl?over+prov:draft+ar;
+  document.getElementById('att-pill').textContent=
+    Math.round(open/(rows.length||1)*100)+'% of the register';
+  document.getElementById('f-att').innerHTML=
+    '<b>'+rows.length+'</b> controlled documents visible to you';
+}
+
+function renderCuts(){
+  const k=role(), ctrl=TAQA_ROLES[k].controlPanel, rows=visible();
+  const DOC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>';
+  const CLK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 1.8"/></svg>';
+  const HSH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9.5 3.5L7.5 20.5M16.5 3.5l-2 17M4 8.5h16M3.5 15.5h16"/></svg>';
+  const GLB='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/><path d="M12 3.5a14 14 0 010 17a14 14 0 010-17z"/></svg>';
+  const BOX='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="7" width="17" height="13" rx="2"/><path d="M3.5 11h17M8 4v3"/></svg>';
+  const ICON={controlled:DOC,overdue:CLK,provisional:HSH,ar:GLB,asset:BOX};
+  document.getElementById('cuts').innerHTML=CT.filter(c=>c.strip&&(ctrl||!c.control)).map(c=>{
+    const n=(c.control?rows.filter(d=>c.f(d)&&TAQA_ROLE.inControlScope(d,k)):rows.filter(c.f)).length;
+    return `<button type="button" class="nav-i" aria-pressed="${quick===c.k}"
+      onclick="quickFilter('${c.k}')">${ICON[c.k]||DOC}<span>${c.l}</span><b>${n}</b></button>`;}).join('');
+}
+
+function countTo(el,to){
+  if(el.dataset.seen||matchMedia('(prefers-reduced-motion: reduce)').matches){
+    el.textContent=to; el.dataset.seen='1'; return;}
+  el.dataset.seen='1';
+  const t0=performance.now(), dur=780;
+  const step=t=>{const p=Math.min((t-t0)/dur,1); el.textContent=Math.round((1-Math.pow(1-p,3))*to);
+    if(p<1)requestAnimationFrame(step);};
+  requestAnimationFrame(step);
+}
+
+function drawSummary(){
+  const v=document.getElementById('main');
+  v.classList.remove('go');
+  tileStatus();tileAgeing();chartSeg();tileAttention();
+  heroLine();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>v.classList.add('go')));
+}
+function heroLine(){
+  const rows=visible().filter(d=>A.controlled(d));
+  const segs=new Set(rows.map(d=>d.segment)).size;
+  // This line said "400 controlled documents" while the home page said 600.
+  // Both were right: the list only ever shows what your role may see. It now
+  // says so, and names the size of the register behind it, so the two figures
+  // read as one fact rather than as a contradiction.
+  const total = (typeof TAQA_STORE!=='undefined') ? TAQA_STORE.count('controlled') : rows.length;
+  const hidden = total - rows.length;
+  document.getElementById('hero-line').innerHTML=
+    '<b>'+rows.length+'</b> controlled documents across <b>'+segs+'</b> areas'+
+    (hidden>0 ? ', of <b>'+total+'</b> in the register. The rest are drafts and '+
+                'withdrawn revisions your role does not see.' : '.')+
+    ' Number, revision, owner, issue date and review date on every record, so the '+
+    'current revision can be confirmed before a job starts.';
+}
+
+renderRole(); readUrl();
+if(quick){const c=CT.find(x=>x.k===quick); if(c&&c.control&&!TAQA_ROLES[role()].controlPanel)quick='controlled';}
+renderCuts(); render(); drawSummary();
+// An upload or an approval in another tab changes the register under this
+// list, so redraw rather than showing a count that is quietly out of date.
+if (typeof TAQA_STORE !== 'undefined') window.addEventListener(TAQA_STORE.EVENT, function(){
+  renderCuts(); render(); drawSummary();
+});
+</script>
+
+<script>
+/* A truncated option still has to be readable, so the control carries its own
+   selected text as a tooltip and updates it on every change. */
+(function(){
+  function label(sel){
+    var o = sel.selectedOptions && sel.selectedOptions[0];
+    sel.title = o ? o.textContent.trim() : '';
+  }
+  document.querySelectorAll('select').forEach(function(sel){
+    label(sel);
+    sel.addEventListener('change', function(){ label(sel); });
+  });
+})();
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

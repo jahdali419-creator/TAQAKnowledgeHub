@@ -1,26 +1,37 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-taqa-theme="light">
 <head>
 <meta charset="UTF-8">
-<script>try{var _t=localStorage.getItem('taqa-theme');if(_t)document.documentElement.setAttribute('data-theme',_t);}catch(e){}</script>
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#005D63">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Tech Hub">
+<meta name="apple-mobile-web-app-title" content="TechHub Platform">
 <link rel="apple-touch-icon" href="icons/icon.svg">
-<title>Upload Document — TAQA Knowledge Hub</title>
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<title>Upload Document, TAQA Knowledge Hub</title>
 <link rel="stylesheet" href="fonts/fonts.css">
 <noscript></noscript>
 <style>
 :root{
-  --primary:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
-  --dark:#f4f5f7;--dark-2:#eaecf0;--dark-3:#ffffff;
+  --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
+  --dark:#F4F4F3;--dark-2:#EDEBE8;--dark-3:#ffffff;
   --glass:rgba(255,255,255,0.85);--glass-2:rgba(255,255,255,0.98);
   --glass-border:rgba(0,0,0,0.09);--glass-border-hover:rgba(0,93,99,0.35);
-  --text:#1a2235;--text-muted:#64748b;--gradient:#005D63; /* flat brand teal - no gradient */
+  --text:#1E1C1A;--text-muted:#756A61;--gradient:#005D63; /* flat brand teal - no gradient */
+  /* Orange and red are legible as a fill long before they are legible as a
+     glyph, so warning and error TEXT runs through these darkened inks and
+     the panels keep the untouched hue as their tint. */
+  --alert-ink:#A8431A;--stop-ink:#C8102E;
 }
 *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
 @keyframes pageFadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
@@ -28,42 +39,27 @@ body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min
 #bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
 .page-wrapper{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
 
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
-  display:flex;align-items:center;justify-content:space-between;
-  background:rgba(255,255,255,0.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--glass-border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
-.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
-.nav-brand-icon{width:40px;height:40px;border-radius:11px;background:var(--gradient);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  position:relative;overflow:hidden;box-shadow:0 4px 18px rgba(0,93,99,0.38);}
-.nav-brand-icon::before{content:'';position:absolute;top:-10px;left:-6px;width:32px;height:32px;
-  background:rgba(255,255,255,0.13);border-radius:50%;pointer-events:none;}
-.nav-brand-text{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;}
-.nav-brand-name{font-weight:800;color:var(--primary);}
-.nav-brand-hub{font-weight:500;color:#64748b;}
-.nav-subtitle{font-size:11px;color:var(--text-muted);display:block;margin-top:-1px;}
-.nav-links{display:flex;gap:2px;list-style:none;}
-.nav-links a{padding:7px 15px;border-radius:6px;text-decoration:none;font-size:13.5px;font-weight:500;color:var(--text-muted);transition:background 0.2s,color 0.2s;position:relative;}
-.nav-links a:hover{background:#f0f1f3;color:var(--text);}
-.nav-links a.active{background:transparent;color:var(--primary);font-weight:600;}
-.nav-links a.active::after{content:'';position:absolute;bottom:3px;left:15px;right:15px;height:2px;background:var(--primary);border-radius:2px;}
-.nav-right{display:flex;gap:10px;}
 .btn{padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
   transition:all 0.25s;border:none;font-family:'Inter',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:7px;}
 .btn-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--text-muted);}
-.btn-ghost:hover{border-color:var(--glass-border-hover);color:var(--primary-light);}
+.btn-ghost:hover{border-color:var(--glass-border-hover);color:var(--primary-ink);}
 .btn-primary{background:var(--gradient);color:#fff;}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,93,99,0.4);}
 
 @keyframes heroKenBurns{0%{transform:scale(1) translate(0%,0%);}30%{transform:scale(1.06) translate(-1.2%,0.4%);}65%{transform:scale(1.09) translate(0.8%,-0.6%);}100%{transform:scale(1.04) translate(-0.4%,0.8%);}}
 /* ── Page Hero ── */
-.page-hero{position:relative;overflow:hidden;padding:112px 48px 56px;}
+/* The band is dark in both themes, but the photo and the overlay that
+   darken it are siblings of the text, not ancestors of it. Naming the
+   base colour here says what ground the white and teal type is written
+   for, and holds that ground if the photo never arrives. */
+.page-hero{position:relative;overflow:hidden;padding:112px 48px 56px;background:#001314;}
 .page-hero-bg{position:absolute;inset:0;background-size:cover;background-position:center 30%;animation:heroKenBurns 18s ease-in-out infinite;}
 .page-hero-overlay{position:absolute;inset:0;
-  background:linear-gradient(105deg,rgba(6,18,26,0.93) 0%,rgba(6,18,26,0.76) 55%,rgba(0,93,99,0.25) 100%);}
+  background:linear-gradient(105deg,rgba(0,19,20,0.93) 0%,rgba(0,19,20,0.76) 55%,rgba(0,93,99,0.25) 100%);}
 .page-hero-content{position:relative;z-index:2;max-width:1000px;margin:0 auto;}
 .page-hero-tag{display:inline-block;padding:4px 14px;margin-bottom:16px;
-  background:rgba(77,217,211,0.12);border:1px solid rgba(77,217,211,0.28);
-  border-radius:50px;font-size:11px;color:#4DD9D3;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;}
+  background:rgba(0,187,182,0.12);border:1px solid rgba(0,187,182,0.28);
+  border-radius:50px;font-size:11px;color:var(--primary-light);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;}
 .page-hero-content h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:clamp(26px,4vw,40px);
   font-weight:800;letter-spacing:-0.8px;color:#fff;margin-bottom:12px;}
 .page-hero-content p{font-size:15px;color:rgba(255,255,255,0.62);line-height:1.75;max-width:540px;}
@@ -75,10 +71,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .ustep-num{width:28px;height:28px;border-radius:50%;border:2px solid var(--glass-border);
   display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;
   color:var(--text-muted);transition:all 0.35s;flex-shrink:0;}
-.ustep.active{color:var(--primary);}
+.ustep.active{color:var(--primary-ink);}
 .ustep.active .ustep-num{background:var(--gradient);border-color:transparent;color:#fff;box-shadow:0 4px 14px rgba(0,93,99,0.3);}
-.ustep.done{color:var(--primary-light);}
-.ustep.done .ustep-num{background:rgba(0,187,182,0.12);border-color:rgba(0,187,182,0.3);color:var(--primary-light);}
+.ustep.done{color:var(--primary-ink);}
+.ustep.done .ustep-num{background:rgba(0,187,182,0.12);border-color:rgba(0,187,182,0.3);color:var(--primary-ink);}
 .ustep-line{flex:1;height:2px;background:var(--glass-border);margin:0 14px;border-radius:1px;transition:background 0.35s;}
 .ustep-line.done{background:rgba(0,187,182,0.3);}
 
@@ -105,7 +101,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .drop-btn{padding:9px 22px;border-radius:9px;font-size:13.5px;font-weight:500;
   background:var(--glass-2);border:1px solid var(--glass-border);color:var(--text);cursor:pointer;
   font-family:'Inter',sans-serif;transition:all 0.25s;}
-.drop-btn:hover{border-color:var(--glass-border-hover);color:var(--primary-light);}
+.drop-btn:hover{border-color:var(--glass-border-hover);color:var(--primary-ink);}
 .drop-types{margin-top:16px;font-size:11px;color:var(--text-muted);}
 
 /* ── File Queue ── */
@@ -118,12 +114,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   padding:14px 16px;margin-bottom:8px;
 }
 .file-item-icon{width:42px;height:42px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'BwGradual','Urbanist',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;}
-.fi-pdf{background:rgba(220,38,38,0.1);color:#f87171;border:1px solid rgba(220,38,38,0.18);}
-.fi-doc{background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.18);}
-.fi-xls{background:rgba(34,197,94,0.1);color:#4ade80;border:1px solid rgba(34,197,94,0.18);}
-.fi-ppt{background:rgba(251,146,60,0.1);color:#fb923c;border:1px solid rgba(251,146,60,0.18);}
-.fi-default{background:rgba(100,116,139,0.1);color:#94a3b8;border:1px solid rgba(100,116,139,0.18);}
-.fi-zip{background:rgba(56,189,248,0.1);color:#38bdf8;border:1px solid rgba(56,189,248,0.18);}
+/* The badge already spells out PDF, XLS, PPT, so a hue per format was a
+   second, redundant encoding and five off-palette colours. One calm teal
+   treatment for all of them; the word carries the meaning. */
+.fi-pdf,.fi-doc,.fi-xls,.fi-ppt,.fi-default,.fi-zip{
+  background:rgba(0,93,99,0.1);color:var(--primary-ink);border:1px solid rgba(0,93,99,0.18);}
 .file-item-name{font-size:13.5px;font-weight:500;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .file-item-size{font-size:11.5px;color:var(--text-muted);}
 .progress-bar-wrap{height:4px;background:var(--glass-border);border-radius:2px;margin-top:7px;overflow:hidden;}
@@ -131,17 +126,28 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .file-remove{width:28px;height:28px;border-radius:7px;border:1px solid var(--glass-border);
   background:transparent;cursor:pointer;color:var(--text-muted);font-size:14px;
   display:flex;align-items:center;justify-content:center;transition:all 0.25s;}
-.file-remove:hover{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.2);color:#f87171;}
+.file-remove:hover{background:rgba(200,16,46,0.09);border-color:rgba(200,16,46,0.22);color:var(--stop-ink);}
 
 /* ── Form Fields ── */
 .form-section{margin-bottom:24px;}
-.form-section-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:13px;font-weight:600;color:var(--primary-light);
+.form-section-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:13px;font-weight:600;color:var(--primary-ink);
   text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--glass-border);}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+/* An area name runs to "Well Completions Center of Excellence", which needs
+   about 256px. Half of this form is 179px, so the box was eating the name.
+   The area gets two thirds of the row and the type, which is shorter, gets
+   the rest. Below 640px they stack and each has the full width. */
+.form-row.wide-first{grid-template-columns:1.5fr 1fr;}
+@media(max-width:640px){ .form-row,.form-row.wide-first{grid-template-columns:1fr;} }
+/* Where a select still cannot be widened, it ends in an ellipsis rather than
+   mid letter, and the full text is on the title attribute. */
+.form-select{text-overflow:ellipsis;padding-inline-end:38px;}
 .form-group{margin-bottom:16px;}
 .form-group:last-child{margin-bottom:0;}
 .form-label{display:block;font-size:13px;font-weight:500;color:var(--text-muted);margin-bottom:7px;}
-.form-label span{color:var(--accent);}
+/* Required marks were raw Brave Orange as text, 2.9:1 on the card. The
+   orange ink is the fill darkened until it holds a glyph. */
+.form-label span{color:var(--alert-ink);}
 .form-input,.form-select,.form-textarea{
   width:100%;padding:11px 15px;
   background:var(--glass-2);border:1px solid var(--glass-border);border-radius:10px;
@@ -151,9 +157,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:rgba(0,187,182,0.4);box-shadow:0 0 0 3px rgba(0,93,99,0.08);}
 .form-input::placeholder,.form-textarea::placeholder{color:transparent;}
 .form-select{cursor:pointer;appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a8ba0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23756A61' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 14px center;}
-.form-select option{background:#ffffff;color:var(--text);}
+.form-select option{background:var(--dark-3);color:var(--text);}
 .form-textarea{resize:vertical;min-height:90px;line-height:1.6;}
 
 /* ── Floating Label ── */
@@ -165,23 +171,23 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   transition:top 0.2s,font-size 0.2s,color 0.2s;
   background:transparent;
 }
-.fl-label .req{color:var(--accent);margin-left:2px;}
+.fl-label .req{color:var(--alert-ink);margin-inline-start:2px;}
 .fl-wrap .form-input:focus ~ .fl-label,
 .fl-wrap .form-input:not(:placeholder-shown) ~ .fl-label,
 .fl-wrap .form-textarea:focus ~ .fl-label,
 .fl-wrap .form-textarea:not(:placeholder-shown) ~ .fl-label{
-  top:6px;font-size:10.5px;color:var(--primary-light);font-weight:600;
+  top:6px;font-size:10.5px;color:var(--primary-ink);font-weight:600;
 }
 .fl-wrap .form-input::placeholder,.fl-wrap .form-textarea::placeholder{color:transparent;}
 
 /* ── Approval Note ── */
 .approval-note{
-  background:linear-gradient(135deg,rgba(59,130,246,0.06),rgba(59,130,246,0.02));
-  border:1px solid rgba(59,130,246,0.15);border-radius:12px;padding:16px 20px;margin-bottom:24px;
+  background:linear-gradient(135deg,rgba(0,93,99,0.07),rgba(0,93,99,0.02));
+  border:1px solid rgba(0,93,99,0.16);border-radius:12px;padding:16px 20px;margin-bottom:24px;
   display:flex;gap:12px;align-items:flex-start;
 }
 .approval-icon{display:flex;align-items:center;flex-shrink:0;}
-.approval-text strong{font-size:13px;color:#60a5fa;display:block;margin-bottom:3px;}
+.approval-text strong{font-size:13px;color:var(--primary-ink);display:block;margin-bottom:3px;}
 .approval-text small{font-size:12px;color:var(--text-muted);line-height:1.5;}
 
 /* ── Submit ── */
@@ -211,93 +217,95 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .wf-text small{font-size:11.5px;color:var(--text-muted);line-height:1.4;}
 .allowed-types{display:flex;flex-wrap:wrap;gap:6px;}
 .type-chip{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;
-  background:rgba(0,93,99,0.1);border:1px solid rgba(0,187,182,0.12);color:var(--primary-light);}
+  background:rgba(0,93,99,0.1);border:1px solid rgba(0,93,99,0.18);color:var(--primary-ink);}
 
 /* ── Toast ── */
-.toast{position:fixed;bottom:32px;right:32px;z-index:9999;
+/* Its own class: the site-wide .toast in shared.js animates itself in on
+   load, which put "Upload Submitted! Ref: --" on screen before anything
+   had been uploaded. */
+.up-toast{position:fixed;bottom:32px;right:32px;z-index:9999;
   background:var(--dark-3);border:1px solid rgba(0,187,182,0.3);border-radius:14px;
   padding:18px 24px;display:flex;align-items:center;gap:14px;
   box-shadow:0 12px 40px rgba(0,0,0,0.5);min-width:320px;
   transform:translateY(100px);opacity:0;transition:all 0.4s cubic-bezier(.4,0,.2,1);}
-.toast.show{transform:translateY(0);opacity:1;}
-.toast-icon{display:flex;align-items:center;flex-shrink:0;}
-.toast strong{font-family:'BwGradual','Urbanist',sans-serif;font-size:14px;display:block;margin-bottom:3px;}
-.toast small{font-size:12px;color:var(--text-muted);}
+.up-toast.show{transform:translateY(0);opacity:1;}
+.up-toast .toast-icon{display:flex;align-items:center;flex-shrink:0;}
+.up-toast strong{font-family:'BwGradual','Urbanist',sans-serif;font-size:14px;display:block;margin-bottom:3px;}
+.up-toast small{font-size:12px;color:var(--text-muted);}
 
 footer{border-top:none;padding:0;background:transparent;position:relative;margin-top:auto;height:4px;}
 footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#005D63;}
 .footer-inner{max-width:1000px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
-.footer-brand{font-family:'BwGradual','Urbanist',sans-serif;font-weight:700;font-size:13.5px;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.footer-brand{font-family:'BwGradual','Urbanist',sans-serif;font-weight:700;font-size:13.5px;color:var(--primary-ink);}
 .footer-copy{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
 .footer-links{display:flex;gap:20px;}
 .footer-links a{font-size:12.5px;color:var(--text-muted);text-decoration:none;transition:color 0.2s;}
-.footer-links a:hover{color:var(--primary);}
+.footer-links a:hover{color:var(--primary-ink);}
 .bg-blobs{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
 .bg-blob{position:absolute;border-radius:50%;filter:blur(100px);}
-.bg-blob-1{width:720px;height:720px;top:-220px;left:-200px;background:radial-gradient(circle,rgba(0,187,182,0.13) 0%,transparent 65%);animation:blob1 26s ease-in-out infinite;}
-.bg-blob-2{width:580px;height:580px;top:38%;right:-160px;background:radial-gradient(circle,rgba(0,93,99,0.10) 0%,transparent 65%);animation:blob2 32s ease-in-out infinite;}
-.bg-blob-3{width:460px;height:460px;bottom:-80px;left:28%;background:radial-gradient(circle,rgba(0,187,182,0.08) 0%,transparent 65%);animation:blob3 22s ease-in-out infinite;}
+.bg-blob-1{width:720px;height:720px;top:-220px;left:-200px;background:radial-gradient(circle,rgba(0,187,182,0.13) 0%,transparent 65%);}
+.bg-blob-2{width:580px;height:580px;top:38%;right:-160px;background:radial-gradient(circle,rgba(0,93,99,0.10) 0%,transparent 65%);}
+.bg-blob-3{width:460px;height:460px;bottom:-80px;left:28%;background:radial-gradient(circle,rgba(0,187,182,0.08) 0%,transparent 65%);}
 @keyframes blob1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(50px,-70px) scale(1.08);}}
 @keyframes blob2{0%,100%{transform:translate(0,0) scale(1);}40%{transform:translate(-60px,50px) scale(1.06);}80%{transform:translate(30px,-30px) scale(0.95);}}
 @keyframes blob3{0%,100%{transform:translate(0,0) scale(1);}60%{transform:translate(-40px,60px) scale(1.1);}}
 ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(0,93,99,0.28);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:rgba(0,93,99,0.5);}
-.nav-links{position:relative;}.nav-pill{position:absolute;top:50%;transform:translateY(-50%);height:34px;background:rgba(0,93,99,0.1);border-radius:8px;transition:left 0.28s cubic-bezier(.4,0,.2,1),width 0.28s cubic-bezier(.4,0,.2,1),opacity 0.2s;pointer-events:none;z-index:0;opacity:0;}
-.nav-links a.active::after{display:none!important;}
-.dark-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:border-color 0.2s,color 0.2s,background 0.2s;flex-shrink:0;padding:0;}
-.dark-toggle:hover{border-color:var(--primary);color:var(--primary);background:rgba(0,93,99,0.06);}
-html[data-theme="dark"]{--dark:#0e1824;--glass:rgba(25,38,58,0.88);--glass-border:rgba(255,255,255,0.07);--text:#dde4ef;--text-muted:#7e94ab;}
-html[data-theme="dark"] body{background:#0e1824;}
-html[data-theme="dark"] nav{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.06);}
-html[data-theme="dark"] .nav-brand-name{color:#dde4ef;}html[data-theme="dark"] .nav-brand-hub{color:#7e94ab;}
-html[data-theme="dark"] .nav-pill{background:rgba(0,187,182,0.12);}
-html[data-theme="dark"] .dark-toggle{border-color:rgba(255,255,255,0.1);color:#7e94ab;}
-html[data-theme="dark"] .upload-card,.upload-form-card{background:#19263a!important;border-color:#243044!important;}
-html[data-theme="dark"] .drop-zone{background:#111e2d;border-color:#243044;}
-html[data-theme="dark"] .drop-zone.drag-over{background:rgba(0,93,99,0.12);border-color:rgba(0,187,182,0.4);}
-html[data-theme="dark"] .form-group input,html[data-theme="dark"] .form-group select,html[data-theme="dark"] .form-group textarea{background:#0e1824;border-color:#243044;color:#dde4ef;}
-html[data-theme="dark"] .form-group label{color:#7e94ab;}
-html[data-theme="dark"] .sidebar-card{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] footer{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2);}
-html[data-theme="dark"] .bg-blob-1{background:radial-gradient(circle,rgba(0,187,182,0.05) 0%,transparent 65%);}
-html[data-theme="dark"] .bg-blob-2{background:radial-gradient(circle,rgba(0,93,99,0.04) 0%,transparent 65%);}
-html[data-theme="dark"] .bg-blob-3{background:radial-gradient(circle,rgba(0,187,182,0.03) 0%,transparent 65%);}
-html[data-theme="dark"] .scroll-top-btn{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.1);}
+html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--dark:#001314;--glass:rgba(0,45,48,0.88);--glass-2:rgba(0,19,20,0.98);
+  --dark-2:#002D30;--dark-3:#002326;--glass-border:rgba(255,255,255,0.07);--text:#C7DBDD;--text-muted:#8CB6B9;
+  --alert-ink:#FF9B5E;--stop-ink:#FF8A94;}
+/* shared.js paints the trail on var(--primary), which is a ground colour.
+   On the dark canvas that is teal on near-black, so the current crumb is
+   pulled back onto the ink. The extra html raises specificity over the
+   sheet shared.js appends after ours. */
+html[data-taqa-theme="dark"] .form-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23619B9E' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");}
+html[data-taqa-theme="dark"] body{background:#001314;}
+html[data-taqa-theme="dark"] .upload-card,.upload-form-card{background:#002326!important;border-color:#00484B!important;}
+html[data-taqa-theme="dark"] .drop-zone{background:#002D30;border-color:#00484B;}
+html[data-taqa-theme="dark"] .drop-zone.drag-over{background:rgba(0,93,99,0.12);border-color:rgba(0,187,182,0.4);}
+html[data-taqa-theme="dark"] .form-group input,html[data-taqa-theme="dark"] .form-group select,html[data-taqa-theme="dark"] .form-group textarea{background:#001314;border-color:#00484B;color:#C7DBDD;}
+html[data-taqa-theme="dark"] .form-group label{color:#619B9E;}
+html[data-taqa-theme="dark"] .sidebar-card{background:#002326;border-color:#00484B;}
+html[data-taqa-theme="dark"] footer{background:#002326;border-color:#00484B;}
+html[data-taqa-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2);}
+html[data-taqa-theme="dark"] .bg-blob-1{background:radial-gradient(circle,rgba(0,187,182,0.05) 0%,transparent 65%);}
+html[data-taqa-theme="dark"] .bg-blob-2{background:radial-gradient(circle,rgba(0,93,99,0.04) 0%,transparent 65%);}
+html[data-taqa-theme="dark"] .bg-blob-3{background:radial-gradient(circle,rgba(0,187,182,0.03) 0%,transparent 65%);}
+html[data-taqa-theme="dark"] .scroll-top-btn{background:rgba(0,35,38,0.92);border-color:rgba(255,255,255,0.1);}
 
 /* ── Duplicate Detection (user side) ── */
-.dup-warn-panel{background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:none;}
-.dup-warn-hd{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#d97706;margin-bottom:10px;}
-.dup-warn-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(245,158,11,0.12);}
+.dup-warn-panel{background:rgba(255,184,28,0.09);border:1px solid rgba(255,184,28,0.35);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:none;}
+.dup-warn-hd{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--alert-ink);margin-bottom:10px;}
+.dup-warn-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,184,28,0.14);}
 .dup-warn-item:last-child{border-bottom:none;padding-bottom:0;}
-.dup-warn-bar-wrap{width:38px;height:3px;background:rgba(245,158,11,0.2);border-radius:2px;flex-shrink:0;}
-.dup-warn-bar{height:100%;border-radius:2px;background:#f59e0b;}
+.dup-warn-bar-wrap{width:38px;height:3px;background:rgba(117,106,97,0.22);border-radius:2px;flex-shrink:0;}
+.dup-warn-bar{height:100%;border-radius:2px;background:#FFB81C;}
 .dup-warn-title{font-size:12.5px;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.dup-warn-pct{font-size:10.5px;font-weight:700;color:#d97706;white-space:nowrap;}
-.dup-warn-note{font-size:11.5px;color:var(--text-muted);margin-top:10px;padding-top:10px;border-top:1px solid rgba(245,158,11,0.15);}
-.dup-error-panel{background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:none;}
-.dup-error-hd{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#ef4444;margin-bottom:4px;}
+.dup-warn-pct{font-size:10.5px;font-weight:700;color:var(--alert-ink);white-space:nowrap;}
+.dup-warn-note{font-size:11.5px;color:var(--text-muted);margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,184,28,0.18);}
+.dup-error-panel{background:rgba(200,16,46,0.07);border:1px solid rgba(200,16,46,0.3);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:none;}
+.dup-error-hd{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--stop-ink);margin-bottom:4px;}
 .dup-error-sub{font-size:12px;color:var(--text-muted);line-height:1.5;}
 .doc-id-row{position:relative;}
 .doc-id-status{font-size:11.5px;margin-top:5px;display:flex;align-items:center;gap:5px;min-height:18px;}
-.id-ok{color:#00868a;}
-.id-warn{color:#d97706;}
-.id-err{color:#ef4444;}
+.id-ok{color:var(--primary-ink);}
+.id-warn{color:var(--alert-ink);}
+.id-err{color:var(--stop-ink);}
 .doc-status-toggle{display:flex;border:1px solid var(--glass-border);border-radius:10px;overflow:hidden;margin-bottom:0;}
 .status-btn{flex:1;padding:10px 14px;border:none;background:transparent;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;color:var(--text-muted);transition:all 0.2s;}
 .status-btn.active{background:var(--gradient);color:#fff;}
-.status-btn:not(.active):hover{background:rgba(0,93,99,0.07);color:var(--primary);}
-.supersedes-section{background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.18);border-radius:12px;padding:14px 18px;margin-top:12px;display:none;}
-.supersedes-hd{font-size:11px;font-weight:700;color:#60a5fa;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.status-btn:not(.active):hover{background:rgba(0,93,99,0.07);color:var(--primary-ink);}
+.supersedes-section{background:rgba(0,93,99,0.06);border:1px solid rgba(0,93,99,0.18);border-radius:12px;padding:14px 18px;margin-top:12px;display:none;}
+.supersedes-hd{font-size:11px;font-weight:700;color:var(--primary-ink);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
 .hash-display{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(0,93,99,0.04);border:1px solid rgba(0,187,182,0.18);border-radius:8px;margin-top:10px;display:none;}
 .hash-display span{font-size:11px;color:var(--text-muted);white-space:nowrap;flex-shrink:0;}
 .hash-value{font-family:monospace;font-size:10px;color:var(--text);word-break:break-all;flex:1;}
-.hash-status-ok{font-size:11px;font-weight:600;color:#00868a;white-space:nowrap;}
-.hash-status-dup{font-size:11px;font-weight:600;color:#ef4444;white-space:nowrap;}
-html[data-theme="dark"] .dup-warn-panel{background:rgba(245,158,11,0.05);border-color:rgba(245,158,11,0.2);}
-html[data-theme="dark"] .dup-error-panel{background:rgba(239,68,68,0.05);border-color:rgba(239,68,68,0.2);}
-html[data-theme="dark"] .supersedes-section{background:rgba(59,130,246,0.04);border-color:rgba(59,130,246,0.15);}
-html[data-theme="dark"] .hash-display{background:rgba(0,93,99,0.06);border-color:rgba(0,187,182,0.12);}
-html[data-theme="dark"] .doc-status-toggle{border-color:rgba(255,255,255,0.1);}
+.hash-status-ok{font-size:11px;font-weight:600;color:var(--primary-ink);white-space:nowrap;}
+.hash-status-dup{font-size:11px;font-weight:600;color:var(--stop-ink);white-space:nowrap;}
+html[data-taqa-theme="dark"] .dup-warn-panel{background:rgba(255,184,28,0.06);border-color:rgba(255,184,28,0.24);}
+html[data-taqa-theme="dark"] .dup-error-panel{background:rgba(200,16,46,0.05);border-color:rgba(200,16,46,0.2);}
+html[data-taqa-theme="dark"] .supersedes-section{background:rgba(0,187,182,0.05);border-color:rgba(0,187,182,0.16);}
+html[data-taqa-theme="dark"] .hash-display{background:rgba(0,93,99,0.06);border-color:rgba(0,187,182,0.12);}
+html[data-taqa-theme="dark"] .doc-status-toggle{border-color:rgba(255,255,255,0.1);}
 
 /* ── Page Exit Transition ── */
 @keyframes pageFadeOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-5px);}}
@@ -316,11 +324,9 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 .scroll-top-btn.stp-visible{opacity:1;transform:translateY(0);}
 .scroll-top-btn:hover{box-shadow:0 8px 28px rgba(0,93,99,0.3);transform:translateY(-3px)!important;}
 .scroll-top-btn svg{position:absolute;top:0;left:0;width:46px;height:46px;}
-.stp-arrow{font-size:13px;color:var(--primary);position:relative;z-index:1;font-weight:800;}
+.stp-arrow{font-size:13px;color:var(--primary-ink);position:relative;z-index:1;font-weight:800;}
 
 @media(max-width:640px){
-  nav{padding:0 20px;}
-  .nav-right .btn,.nav-right a.btn{display:none!important;}
   .page-header,.upload-layout,footer{padding-left:20px;padding-right:20px;}
   .form-row{grid-template-columns:1fr;}
   .page-header{padding-top:88px;padding-bottom:24px;}
@@ -336,29 +342,131 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .form-input,.form-select{font-size:16px;}
   .dup-warn-panel,.dup-error-panel{padding:12px 14px;}
 }
+
+/* ── A policy is a different animal, so the form says so ── */
+.policy-rules {
+  margin:0 0 20px; padding:16px 18px; border-radius:14px;
+  background:linear-gradient(135deg, rgba(0,93,99,0.09), rgba(0,187,182,0.045));
+  border:1px solid rgba(0,93,99,0.2);
+}
+.pr-head { display:flex; align-items:center; gap:9px; font-family:'BwGradual','Urbanist',sans-serif;
+  font-size:13.5px; font-weight:700; color:var(--primary-ink); margin-bottom:10px; }
+.pr-head svg { width:18px; height:18px; flex-shrink:0; }
+.pr-list { margin:0; padding-inline-start:18px; display:flex; flex-direction:column; gap:6px; }
+.pr-list li { font-size:12.5px; line-height:1.6; color:var(--text-muted); }
+.pr-list b { color:var(--text); font-weight:700; }
+.locked-note { font-size:11.5px; color:var(--text-muted); margin-top:5px; }
+.locked-note b { color:var(--primary-ink); }
+html[data-taqa-theme="dark"] .policy-rules {
+  background:linear-gradient(135deg, rgba(0,187,182,0.1), rgba(0,93,99,0.05));
+  border-color:rgba(0,187,182,0.24);
+}
+
+/* ── One question at a time ────────────────────────────────────────────
+   The step bar at the top of this page promised three steps and delivered
+   one long scroll of eighteen boxes. The steps are real now, and half the
+   boxes are gone: three textareas asked the same question in different
+   words, and a name, an email and an owner are things an identity provider
+   knows without asking. */
+.ustep-panel { animation:panelIn 380ms cubic-bezier(0.22,1,0.36,1); }
+.ustep-panel[hidden] { display:none; }
+@keyframes panelIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+.sect-note { font-size:12.5px; line-height:1.65; color:var(--text-muted); margin:-6px 0 20px; max-width:62ch; }
+.step-nav {
+  display:flex; align-items:center; gap:14px; margin-top:22px;
+  padding-top:20px; border-top:1px solid var(--glass-border);
+}
+.step-hint { flex:1; font-size:12px; color:var(--text-muted); }
+.btn-step {
+  padding:12px 24px; border-radius:11px; border:none; cursor:pointer;
+  background:var(--gradient); color:#fff; font-size:14px; font-weight:700;
+  font-family:inherit; transition:transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+  box-shadow:0 6px 18px rgba(0,93,99,0.28);
+}
+.btn-step:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 10px 26px rgba(0,93,99,0.36); }
+.btn-step:disabled { opacity:0.4; cursor:not-allowed; box-shadow:none; }
+.btn-back {
+  padding:12px 18px; border-radius:11px; cursor:pointer; font-family:inherit;
+  background:transparent; border:1px solid var(--glass-border);
+  color:var(--text-muted); font-size:13.5px; font-weight:600;
+  transition:border-color 0.2s, color 0.2s;
+}
+.btn-back:hover { border-color:var(--primary); color:var(--primary-ink); }
+
+/* The number is generated, so it is shown as a result and edited on purpose. */
+.numchip {
+  display:flex; align-items:center; gap:12px; margin-top:4px;
+  padding:13px 16px; border-radius:12px;
+  background:linear-gradient(135deg, rgba(0,93,99,0.1), rgba(0,187,182,0.05));
+  border:1px solid rgba(0,93,99,0.2);
+}
+.nc-k { font-size:10.5px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase;
+  color:var(--primary-ink); flex-shrink:0; }
+.nc-v { flex:1; font-family:'BwGradual','Urbanist',sans-serif; font-size:16px; font-weight:800;
+  letter-spacing:0.3px; color:var(--text); font-variant-numeric:tabular-nums; }
+.nc-edit { display:none; flex:1; background:transparent; border:none; outline:none;
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:16px; font-weight:800;
+  color:var(--text); border-bottom:1px solid var(--primary); }
+.numchip.editing .nc-v { display:none; }
+.numchip.editing .nc-edit { display:block; }
+.nc-btn { background:transparent; border:none; cursor:pointer; font-family:inherit;
+  font-size:12px; font-weight:700; color:var(--primary-ink); flex-shrink:0; }
+
+.more-detail { margin-top:6px; border-top:1px solid var(--glass-border); padding-top:14px; }
+.more-detail summary { cursor:pointer; font-size:12.5px; font-weight:600; color:var(--primary-ink);
+  list-style:none; }
+.more-detail summary::-webkit-details-marker { display:none; }
+.more-detail summary::before { content:'+ '; font-weight:800; }
+.more-detail[open] summary::before { content:'- '; }
+
+/* The record as it will be filed, before it is filed. */
+.rec-card { border:1px solid var(--glass-border); border-radius:14px; overflow:hidden; }
+.rec-row { display:grid; grid-template-columns:190px 1fr; gap:16px;
+  padding:12px 18px; border-bottom:1px solid var(--glass-border); font-size:13.5px; }
+.rec-row:last-child { border-bottom:none; }
+.rec-row:nth-child(odd) { background:var(--glass-2); }
+.rec-k { color:var(--text-muted); font-size:12.5px; }
+.rec-v { color:var(--text); font-weight:600; word-break:break-word; }
+.rec-v .derived { display:inline-block; margin-inline-start:8px; font-size:10px; font-weight:700;
+  letter-spacing:0.8px; text-transform:uppercase; color:var(--primary-ink);
+  background:rgba(0,93,99,0.09); padding:2px 7px; border-radius:20px; }
+.rec-v .warn { color:var(--alert-ink); font-weight:600; font-size:12px; display:block; margin-top:3px; }
+.whoami { margin-top:16px; padding:13px 16px; border-radius:12px;
+  background:var(--glass-2); border:1px solid var(--glass-border);
+  font-size:12.5px; color:var(--text-muted); line-height:1.6; }
+.whoami b { color:var(--text); }
+@media(max-width:640px){ .rec-row { grid-template-columns:1fr; gap:3px; } }
 </style>
+<link rel="stylesheet" href="topbar.css">
 </head>
 <body>
 <div class="bg-blobs" aria-hidden="true"><div class="bg-blob bg-blob-1"></div><div class="bg-blob bg-blob-2"></div><div class="bg-blob bg-blob-3"></div></div>
 <canvas id="bg-canvas"></canvas>
 <div class="page-wrapper">
 
-<nav>
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
   <a href="index.html" class="nav-brand">
-    <span class="nav-brand-text"><span class="nav-brand-name">TAQA</span> <span class="nav-brand-hub">Knowledge Hub</span><span class="nav-subtitle" style="white-space:nowrap"><em style="color:#005D63; font-style:italic;">Tech Hub</em> <span style="color:#94a3b8;">(working name)</span></span></span>
+    <span class="nav-title"><span class="nav-title-brand">TAQA</span> <span class="nav-title-hub">Knowledge Hub</span></span>
+    <span class="nav-subtitle"><em>TechHub Platform</em></span>
   </a>
   <ul class="nav-links">
-    <div class="nav-pill" id="nav-pill"></div>
     <li><a href="index.html">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
     <li><a href="ai-search.html">Document Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
     <li><a href="glossary.html">Field Glossary</a></li>
-    <li><a href="upload.html" class="active">Upload</a></li>
     <li><a href="support-ticket.html">Ask Expert</a></li>
   </ul>
   <div class="nav-right">
-    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode"><svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
-    <button class="bell-btn" id="nav-bell" onclick="location.href='dashboard.html'" title="Pending approvals" aria-label="Pending approvals"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge">3</span></button>
-    <a href="support-ticket.html" class="btn btn-primary">Ask an Expert</a>
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html" aria-current="page"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
@@ -368,8 +476,8 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="page-hero-content">
     <span class="page-hero-tag">Document Upload</span>
     <h1>Upload a Document</h1>
-    <p>Submit new SOPs, manuals, policies, technical alerts, or lessons learned. All documents go through an approval workflow before going live.</p>
-    <div style="margin-top:18px;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);">Part of <em style="color:#4DD9D3;font-style:italic;font-weight:700;text-transform:none;letter-spacing:0;">Tech Hub</em> <span style="opacity:0.7;font-style:normal;">(working name)</span></div>
+    <p>Submit a standard, procedure, manual, technical alert or lesson learned. All documents go through an approval workflow before going live.</p>
+    <div style="margin-top:18px;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.62);">Part of <em style="font-style:italic;font-weight:700;text-transform:none;letter-spacing:0;background:linear-gradient(120deg, #00BBB6 15%, #EAFFFD 85%);-webkit-background-clip:text;background-clip:text;color:transparent;">TechHub Platform</em></div>
   </div>
 </div>
 
@@ -387,7 +495,8 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 
   <div class="upload-card">
 
-    <!-- ── Drop Zone ── -->
+    <!-- ══ Step 1: the file ══ -->
+    <section class="ustep-panel" id="panel-1">
     <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
       <span class="drop-icon"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 28V16M20 16L15 21M20 16L25 21" stroke="#00BBB6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 30C6.686 30 4 27.314 4 24C4 21.12 5.954 18.69 8.64 18.13C8.226 17.146 8 16.1 8 15C8 10.582 11.582 7 16 7C19.456 7 22.414 9.094 23.618 12.11C24.37 11.41 25.376 11 26.5 11C28.985 11 31 13.015 31 15.5C31 15.906 30.948 16.3 30.85 16.676C32.718 17.448 34 19.278 34 21.5C34 24.538 31.538 27 28.5 27H28" stroke="#00BBB6" stroke-width="2" stroke-linecap="round"/></svg></span>
       <div class="drop-title">Drag & drop your file here</div>
@@ -410,55 +519,59 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
       <span id="hash-status"></span>
     </div>
 
-    <!-- ── Document Details ── -->
+      <div class="step-nav" id="nav-1">
+        <span class="step-hint" id="hint-1">Add a file to continue.</span>
+        <button type="button" class="btn-step" onclick="goStep(2)" id="go-2" disabled>Continue &#8594;</button>
+      </div>
+    </section>
+
     <form id="upload-form" onsubmit="submitUpload(event)">
+
+      <!-- ══ Step 2: where it belongs ══ -->
+      <section class="ustep-panel" id="panel-2" hidden>
       <div class="form-section">
-        <div class="form-section-title">Document Details</div>
-        <div class="form-group">
-          <label class="form-label">Document Reference ID <span>*</span></label>
-          <div class="doc-id-row">
-            <input type="text" class="form-input" id="doc-ref-id" placeholder="e.g. CT-SOP-007, DRL-POL-003, ALERT-WS-001" oninput="checkDocId()" autocomplete="off">
-            <div class="doc-id-status" id="doc-id-status"></div>
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="fl-wrap">
-            <input type="text" class="form-input" id="doc-title-input" placeholder=" " required oninput="runDupChecks()">
-            <label class="fl-label">Document Title<span class="req">*</span></label>
-          </div>
-        </div>
-        <div class="form-row">
+        <div class="form-section-title">Where it belongs</div>
+        <p class="sect-note">Two answers decide the rest: which area owns it, and what kind of document it is. The controlled number follows from them.</p>
+        <div class="form-row wide-first">
           <div class="form-group">
             <label class="form-label">Segment <span>*</span></label>
             <select class="form-select" id="seg-select" required onchange="onSegmentChange(this.value)">
-              <option value="" disabled selected>Select segment</option>
-              <option value="coiled-tubing">Coiled Tubing</option>
-              <option value="fracturing">Fracturing</option>
-              <option value="wireline">Wireline</option>
-              <option value="drilling">Drilling</option>
-              <option value="cementing">Cementing</option>
-              <option value="inspection">Inspection Services</option>
-              <option value="well-safety">Well Safety</option>
-              <option value="cybersecurity">Cybersecurity</option>
-              <option value="qhse">QHSE</option>
-              <option value="tws-maintenance">TWS Maintenance</option>
-              <option value="hr">Human Resources</option>
-              <option value="well-testing">Well Testing</option>
+              <option value="" disabled selected>Select area</option>
             </select>
           </div>
           <div class="form-group">
             <label class="form-label">Document Type <span>*</span></label>
-            <select class="form-select" id="doc-type-select" required onchange="toggleSoftwareFields(this.value)">
+            <select class="form-select" id="doc-type-select" required onchange="onTypeChange(this.value)">
               <option value="" disabled selected>Select type</option>
-              <option>SOP</option>
-              <option>Manual</option>
-              <option>Policy</option>
-              <option>Technical Alert</option>
-              <option>Lesson Learned</option>
-              <option value="Software">Software / Tool</option>
             </select>
           </div>
         </div>
+        <div class="policy-rules" id="policy-rules" hidden>
+          <div class="pr-head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3.6v5.1c0 4.6-3.2 8.2-8 9.3-4.8-1.1-8-4.7-8-9.3V6.6L12 3z"/><path d="M9 12l2 2 4-4"/></svg>
+            A policy follows different rules
+          </div>
+          <ul class="pr-list">
+            <li><b>No area owns it.</b> It is filed as Company Wide and binds every segment, function and center.</li>
+            <li><b>The CEO approves it</b>, not an Operation Director.</li>
+            <li><b>It numbers as TAQA-&lt;Function&gt;-P0XX</b>, the corporate series, not the TQ series in 5.3.</li>
+            <li><b>It is Internal and cannot be restricted.</b> TQ-QHSE-S001 5.5 says policies shall be accessible to all employees.</li>
+            <li>Review cycle 24 months.</li>
+          </ul>
+          <div class="form-row" style="margin-top:14px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Issuing Function <span>*</span></label>
+              <select class="form-select" id="policy-fn" onchange="autoFillRefId()">
+                <option value="" disabled selected>Which function issues it?</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Approver</label>
+              <input type="text" class="form-input" id="policy-approver" value="Chief Executive Officer" readonly>
+            </div>
+          </div>
+        </div>
+
         <div class="form-group">
           <label class="form-label">Document Status <span>*</span></label>
           <div class="doc-status-toggle">
@@ -479,16 +592,6 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
             <div style="font-size:11.5px;color:var(--text-muted);margin-top:5px;">The selected document will be archived when this revision is approved by the admin.</div>
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Revision Number</label>
-            <input type="text" class="form-input" placeholder="e.g. Rev 1.0, v2.3">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Document Date</label>
-            <input type="date" class="form-input">
-          </div>
-        </div>
         <div class="form-row" id="software-fields" style="display:none;">
           <div class="form-group">
             <label class="form-label">Software Version <span>*</span></label>
@@ -499,17 +602,33 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
             <input type="text" class="form-input" placeholder="e.g. Windows 10/11, Windows Server 2019">
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Document Author / Owner</label>
-          <input type="text" class="form-input" placeholder="Name of document owner or originating department">
+        <div class="numchip" id="numchip" hidden>
+          <span class="nc-k">Controlled number</span>
+          <span class="nc-v" id="doc-ref-id-view">,</span>
+          <input type="text" class="nc-edit" id="doc-ref-id" oninput="checkDocId()" autocomplete="off" aria-label="Controlled number">
+          <button type="button" class="nc-btn" id="nc-edit-btn" onclick="editNumber()">Edit</button>
         </div>
+        <div class="doc-id-status" id="doc-id-status"></div>
       </div>
 
+      <div class="step-nav">
+        <button type="button" class="btn-back" onclick="goStep(1)">&#8592; Back</button>
+        <span class="step-hint" id="hint-2"></span>
+        <button type="button" class="btn-step" onclick="goStep(3)" id="go-3">Continue &#8594;</button>
+      </div>
+      </section>
+
+      <!-- ══ Step 3: what it is ══ -->
+      <section class="ustep-panel" id="panel-3" hidden>
       <div class="form-section">
-        <div class="form-section-title">Document Summary <span style="color:var(--accent);font-style:normal;">*</span></div>
-        <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:18px;line-height:1.6;">
-          Provide a clear and complete summary of the document. This summary will be displayed to all users in the document library so they can quickly understand the document before opening it.
-        </p>
+        <div class="form-section-title">What it is</div>
+        <p class="sect-note">This is what a person sees in the library before they open the file, so it is worth getting right.</p>
+        <div class="form-group">
+          <div class="fl-wrap">
+            <input type="text" class="form-input" id="doc-title-input" placeholder=" " required oninput="runDupChecks()">
+            <label class="fl-label">Document Title<span class="req">*</span></label>
+          </div>
+        </div>
         <div class="form-group">
           <label class="form-label">What does this document cover? <span>*</span></label>
           <textarea class="form-textarea" id="summary-main" style="min-height:110px;"
@@ -518,24 +637,12 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Purpose / Objective <span>*</span></label>
-            <textarea class="form-textarea" style="min-height:80px;"
-              placeholder="Why does this document exist? What problem does it solve or what requirement does it fulfill?" required></textarea>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Scope of Application <span>*</span></label>
-            <textarea class="form-textarea" style="min-height:80px;"
-              placeholder="Which operations, locations, job roles, or equipment does this document apply to?" required></textarea>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Target Audience <span>*</span></label>
-            <select class="form-select" required>
-              <option value="" disabled selected>Who is this document for?</option>
+            <label class="form-label">Who it applies to <span>*</span></label>
+            <select class="form-select" id="audience-select" required>
+              <option value="" disabled selected>Choose the audience</option>
               <option>Field Operators</option>
               <option>Supervisors &amp; Engineers</option>
-              <option>All Segment Personnel</option>
+              <option>All personnel in this area</option>
               <option>Management</option>
               <option>Safety &amp; QHSE Personnel</option>
               <option>Maintenance Technicians</option>
@@ -543,38 +650,40 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Key Topics / Keywords</label>
-            <input type="text" class="form-input" placeholder="e.g. well control, BOP, H2S, pressure testing — separate with commas">
+            <label class="form-label">Keywords</label>
+            <input type="text" class="form-input" id="keywords-input" placeholder="well control, BOP, H2S, pressure testing">
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Prerequisites / Related Documents</label>
-          <textarea class="form-textarea" style="min-height:70px;"
-            placeholder="List any documents that should be read before this one, or any related SOPs, manuals, or policies that are referenced in this document."></textarea>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Change Summary <span style="font-size:11px;font-weight:400;color:var(--text-muted);">(for revised documents)</span></label>
-          <textarea class="form-textarea" style="min-height:70px;"
-            placeholder="If this is a revised version, describe what changed from the previous version and the reason for the revision."></textarea>
-        </div>
+
+        <details class="more-detail">
+          <summary>Add related documents or a change note</summary>
+          <div class="form-group" style="margin-top:14px;">
+            <label class="form-label">Related documents</label>
+            <textarea class="form-textarea" id="related-input" style="min-height:66px;"
+              placeholder="Anything that should be read first, or that this one refers to."></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">What changed in this revision</label>
+            <textarea class="form-textarea" id="change-input" style="min-height:66px;"
+              placeholder="Only needed if this replaces an existing document."></textarea>
+          </div>
+        </details>
       </div>
 
+      <div class="step-nav">
+        <button type="button" class="btn-back" onclick="goStep(2)">&#8592; Back</button>
+        <span class="step-hint" id="hint-3"></span>
+        <button type="button" class="btn-step" onclick="goStep(4)" id="go-4">Review &#8594;</button>
+      </div>
+      </section>
+
+      <!-- ══ Step 4: the record before it exists ══ -->
+      <section class="ustep-panel" id="panel-4" hidden>
       <div class="form-section">
-        <div class="form-section-title">Submitted By</div>
-        <div class="form-row">
-          <div class="form-group">
-            <div class="fl-wrap">
-              <input type="text" class="form-input" placeholder=" " required>
-              <label class="fl-label">Your Name<span class="req">*</span></label>
-            </div>
-          </div>
-          <div class="form-group">
-            <div class="fl-wrap">
-              <input type="email" class="form-input" placeholder=" " required>
-              <label class="fl-label">Your Email<span class="req">*</span></label>
-            </div>
-          </div>
-        </div>
+        <div class="form-section-title">Check the record</div>
+        <p class="sect-note">This is the register entry that will be created. Nothing below was typed by you unless it says so.</p>
+        <div class="rec-card" id="rec-card"></div>
+        <div class="whoami" id="whoami"></div>
       </div>
 
       <!-- Exact duplicate warning -->
@@ -599,14 +708,16 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
         <span class="approval-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#00BBB6" stroke-width="1.5"/><path d="M8 7v5M8 5v.5" stroke="#00BBB6" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         <div class="approval-text">
           <strong>Approval Workflow</strong>
-          <small>Documents are reviewed by the Knowledge Team Lead before being published. You'll receive an email notification when your document is approved or if any changes are needed.</small>
+          <small>Documents are reviewed by QMS, then approved by the authority the type names, before being published. You'll see it in your notifications bell here if it's approved or if changes are needed; email notifications arrive once this connects to Azure.</small>
         </div>
       </div>
 
       <div class="submit-row">
-        <button type="submit" class="btn-submit">Submit for Review →</button>
+        <button type="button" class="btn-back" onclick="goStep(3)">&#8592; Back</button>
+        <button type="submit" class="btn-submit" id="submit-btn">Submit for Review &#8594;</button>
         <a href="index.html" class="btn-cancel">Cancel</a>
       </div>
+      </section>
     </form>
   </div>
 
@@ -621,7 +732,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
         </div>
         <div class="wf-step">
           <div class="wf-dot pending">2</div>
-          <div class="wf-text"><strong>Review</strong><small>Knowledge Team Lead reviews within 1 business day.</small></div>
+          <div class="wf-text"><strong>Review</strong><small>QMS checks the record and the numbering.</small></div>
         </div>
         <div class="wf-step">
           <div class="wf-dot wait">3</div>
@@ -645,7 +756,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
         <span class="type-chip">PPTX</span>
         <span class="type-chip">PPT</span>
       </div>
-      <p style="font-size:12px;color:var(--text-muted);margin-top:12px;line-height:1.6;">Max 50 MB per file. For files larger than 50 MB, contact the Knowledge Team for alternative upload options.</p>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:12px;line-height:1.6;">Max 500 MB per file. For anything larger, contact the Knowledge Team.</p>
     </div>
 
     <div class="info-card">
@@ -662,7 +773,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 </div>
 
 <!-- ── Toast ── -->
-<div class="toast" id="toast">
+<div class="up-toast" id="toast" role="status" aria-live="polite">
   <span class="toast-icon" id="toast-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="rgba(0,187,182,0.15)" stroke="#00BBB6" stroke-width="1.5"/><path d="M7 11l3 3 5-5" stroke="#00BBB6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
   <div>
     <strong id="toast-title">Upload Submitted!</strong>
@@ -687,6 +798,9 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 <footer></footer>
 </div>
 
+<script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script src="store.js"></script>
 <script src="segments-data.js"></script>
 <script>
 function toggleSoftwareFields(val) {
@@ -753,16 +867,28 @@ function showUploadToast(title, sub, iconHTML) {
 // the file picker's "All files" option both bypass.
 const ALLOWED_EXT = ['pdf','doc','docx','xls','xlsx','ppt','pptx','zip'];
 
+// The "Max file size: 500 MB per file" copy above and in the sidebar used to
+// promise a limit nothing here actually checked, so a file of any size was
+// silently accepted. Enforced here for the same reason as the extension
+// allow-list: the label is not the control.
+const MAX_FILE_SIZE_BYTES = 500 * 1024 * 1024;
+
 function extOf(name) {
   const i = String(name).lastIndexOf('.');
   return i === -1 ? '' : String(name).slice(i + 1).toLowerCase();
 }
 
+function unlockStep1(){
+  var b = document.getElementById('go-2');
+  if (b) b.disabled = !stepReady(1);
+}
 function addFiles(files) {
   let added = 0;
   const rejected = [];
+  const oversized = [];
   files.forEach(f => {
     if (!ALLOWED_EXT.includes(extOf(f.name))) { rejected.push(f.name); return; }
+    if (f.size > MAX_FILE_SIZE_BYTES) { oversized.push(f.name); return; }
     if (selectedFiles.find(x => x.name === f.name)) return;
     selectedFiles.push(f);
     added++;
@@ -786,6 +912,7 @@ function addFiles(files) {
   });
 
   fileQueue.style.display = selectedFiles.length ? 'block' : 'none';
+  unlockStep1();
   if (added > 0) {
     showUploadToast('File Added', files[0].name.length > 32 ? files[0].name.substring(0,32)+'…' : files[0].name, ICON_ADD);
     computeAndCheckHash(files[0]);
@@ -795,6 +922,11 @@ function addFiles(files) {
       rejected.length + ' file' + (rejected.length > 1 ? 's were' : ' was') +
       ' refused. Allowed: ' + ALLOWED_EXT.join(', ') + '.', ICON_WARN);
   }
+  if (oversized.length) {
+    showUploadToast('File too large',
+      oversized.length + ' file' + (oversized.length > 1 ? 's exceed' : ' exceeds') +
+      ' the 500 MB limit and ' + (oversized.length > 1 ? 'were' : 'was') + ' not added.', ICON_WARN);
+  }
 
 }
 
@@ -803,6 +935,7 @@ function removeFile(id, name) {
   const el = document.getElementById(id);
   if (el) el.remove();
   fileQueue.style.display = selectedFiles.length ? 'block' : 'none';
+  unlockStep1();
   showUploadToast('File Removed', name.length > 36 ? name.substring(0,36)+'…' : name, ICON_REMOVE);
 }
 
@@ -813,7 +946,7 @@ if (summaryMain && summaryCount) {
   summaryMain.addEventListener('input', () => {
     const len = summaryMain.value.length;
     summaryCount.textContent = len + ' / 500 characters';
-    summaryCount.style.color = len > 400 ? '#FD691D' : '#6b7a8d';
+    summaryCount.style.color = len > 400 ? 'var(--alert-ink)' : 'var(--text-muted)';
   });
 }
 
@@ -835,83 +968,288 @@ function submitUpload(e) {
   if (!selectedFiles.length) {
     showUploadToast('No file selected', 'Please attach a document before submitting.', ICON_REMOVE);
     const dz = document.getElementById('drop-zone');
-    if (dz) { dz.style.borderColor = '#ef4444'; setTimeout(() => dz.style.borderColor = '', 1800); }
+    if (dz) { dz.style.borderColor = 'var(--stop-ink)'; setTimeout(() => dz.style.borderColor = '', 1800); }
     return;
   }
+  // It used to mint a random UPL reference and discard everything typed. The
+  // record is assembled here instead, in the shape TAQA_MASTER_DOCS stores, so
+  // what the back end has to accept is written down rather than implied.
+  const rec = buildRecord();
+  if (!rec.docNumber) {
+    showUploadToast('No document number', 'Go back and choose an area and a type so a number can be assigned.', ICON_WARN);
+    return;
+  }
+  console.info('[upload] record to POST', rec);
+  window.TAQA_LAST_UPLOAD = rec;
+
+  // The record used to stop here, on a global nobody read, which is why no
+  // figure anywhere on the site ever moved when someone uploaded. Commit it
+  // to the register instead. It lands as a draft, per TQ-QHSE-S001 4.4, so
+  // the register total and the pending queue move now and the in-force counts
+  // move when QMS approves it. Every open page repaints off this one call.
+  if (typeof TAQA_STORE !== 'undefined') TAQA_STORE.add(rec);
+
   setUploadStep(3);
-  const ref = 'UPL-' + new Date().getFullYear() + '-' + Math.floor(1000+Math.random()*9000);
-  document.getElementById('upload-ref').textContent = ref;
-  document.getElementById('toast-title').textContent = 'Upload Submitted!';
-  document.getElementById('toast-sub').textContent = 'Queued for review. Ref: ' + ref;
+  const ref = rec.docNumber;
+  // showUploadToast() sets toast-sub's textContent wholesale, which wipes out
+  // the #upload-ref span nested inside it. Writing the sub line directly here
+  // used to have the exact same problem: setting toast-sub.textContent to a
+  // whole new string destroyed the #upload-ref span the line right above it
+  // had just filled in, leaving the toast readable but #upload-ref gone from
+  // the DOM. Composed from text nodes instead, so the span (and its id)
+  // survives every submission, not just the first line that touches it.
+  document.getElementById('toast-title').textContent = 'Submitted for review';
+  var toastSub = document.getElementById('toast-sub');
+  if (toastSub) {
+    toastSub.textContent = 'Queued as ';
+    var refEl = document.createElement('span');
+    refEl.id = 'upload-ref';
+    refEl.textContent = ref;
+    toastSub.appendChild(refEl);
+    toastSub.appendChild(document.createTextNode('. In the register now, in force once QMS approves.'));
+  }
   document.getElementById('toast-icon').innerHTML = ICON_OK;
   const toast = document.getElementById('toast');
   toast.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { toast.classList.remove('show'); setUploadStep(1); }, 5000);
+  // reset() restores native controls only, so the generated number, the policy
+  // panel and the step you were on all survived it. Clear them by hand.
   e.target.reset();
   selectedFiles = [];
   fileList.innerHTML = '';
   fileQueue.style.display = 'none';
+  const ref2 = document.getElementById('doc-ref-id');
+  if (ref2) { ref2.value = ''; delete ref2.dataset.autofilled; }
+  const chip = document.getElementById('numchip');
+  if (chip) { chip.hidden = true; chip.classList.remove('editing'); }
+  const rules = document.getElementById('policy-rules');
+  if (rules) rules.hidden = true;
+  const st = document.getElementById('doc-id-status'); if (st) st.innerHTML = '';
+  docStatus = 'new'; setDocStatus('new');
+  unlockStep1();
+  goStep(1);
+}
+
+/* Everything the register would store, assembled from the form. A field the
+   form cannot answer is left null rather than guessed, which is the honest
+   way to hand a gap to the people building the back end. */
+function buildRecord(){
+  const L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : {segments:{},types:{}};
+  const typeKey = (document.getElementById('doc-type-select') || {}).value || null;
+  const isPolicy = typeKey === 'policy';
+  const t = L.types[typeKey] || {};
+  const segKey = isPolicy ? 'company' : ((document.getElementById('seg-select') || {}).value || null);
+  const e = L.segments[segKey] || {};
+  const today = new Date();
+  const due = new Date(today.getTime());
+  due.setMonth(due.getMonth() + (t.reviewCycleMonths || 24));
+  const iso = d => d.toISOString().slice(0,10);
+  const sup = (document.getElementById('supersedes-select') || {}).value || null;
+
+  return {
+    docNumber:      (document.getElementById('doc-ref-id') || {}).value || null,
+    legacyId:       null,
+    title:          (document.getElementById('doc-title-input') || {}).value.trim() || null,
+    segment:        segKey,
+    docType:        typeKey,
+    scope:          isPolicy ? 'company' : 'area',
+    revision:       docStatus === 'revision' ? null : '1.0',
+    issueDate:      iso(today),
+    approvedDate:   null,                 // set when the approver signs
+    nextReviewDate: iso(due),
+    reviewOverdue:  false,
+    status:         'draft',              // API Q2 4.4.3 b): no authority until approved
+    supersedes:     sup,
+    supersededBy:   null,
+    classification: 'internal',           // 5.5: a policy must stay accessible to all
+    language:       'en',
+    translationOf:  null,
+    numberStatus:   (e.provisional || t.provisional) ? 'provisional' : 'conformant',
+    summary:        (document.getElementById('summary-main') || {}).value.trim() || null,
+    audience:       (document.getElementById('audience-select') || {}).value || null,
+    keywords:       ((document.getElementById('keywords-input') || {}).value || '')
+                      .split(',').map(x => x.trim()).filter(Boolean),
+    related:        (document.getElementById('related-input') || {}).value.trim() || null,
+    changeNote:     (document.getElementById('change-input') || {}).value.trim() || null,
+    issuingFunction: isPolicy ? ((document.getElementById('policy-fn') || {}).value || null) : null,
+    files:          selectedFiles.map(f => ({ name:f.name, size:f.size })),
+    submittedBy:    'from the signed-in identity, not typed on this form'
+  };
 }
 
 // ── Reference ID Auto-Generation ──
-const SEG_ID_FORMATS = {
-  'coiled-tubing':   { SOP:'CT-{N}',     Manual:'CT-MAN-{N}',   Policy:'CT-POL-{N}',   'Technical Alert':'ALERT-CT-{N}',   'Lesson Learned':'LL-CT-{N}',   Software:'CT-SW-{N}'   },
-  'fracturing':      { SOP:'FRAC-{N}',   Manual:'FRAC-MAN-{N}', Policy:'FRAC-POL-{N}', 'Technical Alert':'ALERT-FRAC-{N}', 'Lesson Learned':'LL-FRAC-{N}', Software:'FRAC-SW-{N}' },
-  'wireline':        { SOP:'WL-{N}',     Manual:'WL-MAN-{N}',   Policy:'WL-POL-{N}',   'Technical Alert':'ALERT-WL-{N}',   'Lesson Learned':'LL-WL-{N}',   Software:'WL-SW-{N}'   },
-  'drilling':        { SOP:'DRL-{N}',    Manual:'DRL-MAN-{N}',  Policy:'DRL-POL-{N}',  'Technical Alert':'ALERT-DRL-{N}',  'Lesson Learned':'LL-DRL-{N}',  Software:'DRL-SW-{N}'  },
-  'cementing':       { SOP:'CEM-{N}',    Manual:'CEM-MAN-{N}',  Policy:'CEM-POL-{N}',  'Technical Alert':'ALERT-CEM-{N}',  'Lesson Learned':'LL-CEM-{N}',  Software:'CEM-SW-{N}'  },
-  'inspection':      { SOP:'INS-{N}',    Manual:'INS-MAN-{N}',  Policy:'INS-POL-{N}',  'Technical Alert':'ALERT-INS-{N}',  'Lesson Learned':'LL-INS-{N}',  Software:'INS-SW-{N}'  },
-  'well-safety':     { SOP:'WS-{N}',     Manual:'WS-MAN-{N}',   Policy:'WS-POL-{N}',   'Technical Alert':'ALERT-WS-{N}',   'Lesson Learned':'LL-WS-{N}',   Software:'WS-SW-{N}'   },
-  'qhse':            { SOP:'QHSE-{N}',   Manual:'QHSE-MAN-{N}', Policy:'QHSE-POL-{N}', 'Technical Alert':'ALERT-QHSE-{N}', 'Lesson Learned':'LL-QHSE-{N}', Software:'QHSE-SW-{N}' },
-  'hr':              { SOP:'HR-{N}',     Manual:'HR-MAN-{N}',   Policy:'HR-POL-{N}',   'Technical Alert':'ALERT-HR-{N}',   'Lesson Learned':'LL-HR-{N}',   Software:'HR-SW-{N}'   },
-  'tws-maintenance': { SOP:'TWS-{N}',    Manual:'TWS-MAN-{N}',  Policy:'TWS-POL-{N}',  'Technical Alert':'ALERT-TWS-{N}',  'Lesson Learned':'LL-TWS-{N}',  Software:'TWS-SW-{N}'  },
-  'well-testing':    { SOP:'WT-{N}',     Manual:'WT-MAN-{N}',   Policy:'WT-POL-{N}',   'Technical Alert':'ALERT-WT-{N}',   'Lesson Learned':'LL-WT-{N}',   Software:'WT-SW-{N}'   },
-  'cybersecurity':   { SOP:'CS-PROC-{N}',Manual:'CS-STD-{N}',   Policy:'CS-POL-{N}',   'Technical Alert':'CS-COMP-{N}',    'Lesson Learned':'CS-AWR-{N}',  Software:'CS-SW-{N}'   }
-};
-const DOC_TYPE_COUNT = { SOP:'sops', Manual:'manuals', Policy:'policies', 'Technical Alert':'alerts', 'Lesson Learned':'lessons', Software:'software' };
 
 let isAutoFilling = false;
 
-function generateRefId(segId, docType) {
-  const tpl = (SEG_ID_FORMATS[segId] || {})[docType];
-  if (!tpl) return '';
-  const seg = (typeof TAQA_SEGMENTS !== 'undefined') ? TAQA_SEGMENTS[segId] : null;
-  if (!seg) return '';
+/* ── What this form may offer, and to whom ───────────────────────────────
+   Built from the register rather than typed here, so an area added in Azure
+   appears by itself and a renamed one cannot go stale.
 
-  // Derive the exact prefix that appears before the number in each doc title
-  const prefix = tpl.replace('-{N}', '');
-  const docsKey = DOC_TYPE_COUNT[docType];
-  const docList = (seg.docs && seg.docs[docsKey]) ? seg.docs[docsKey] : [];
+   A POLICY is the exception the business asked for. It is a company
+   commitment signed by the CEO, so it belongs to no area and only QMS may
+   file one. The option is absent for every other role rather than shown and
+   disabled: a document owner in Coiled Tubing has no business filing company
+   policy, and a greyed control invites the argument. */
+(function(){
+  var L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : null;
+  if (!L) return;
 
-  // Scan every title in that list for "PREFIX-NNN" and find the highest number
-  const escaped = prefix.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-  const pat = new RegExp('^' + escaped + '-(\\d+)', 'i');
-  let maxNum = 0;
-  docList.forEach(title => {
-    const m = title.match(pat);
-    if (m) maxNum = Math.max(maxNum, parseInt(m[1], 10));
-  });
+  var isQMS = (typeof TAQA_ROLE !== 'undefined') && TAQA_ROLE.current() === 'qms';
+  window.TAQA_UPLOAD_IS_QMS = isQMS;
 
-  // Fall back to the segment count when titles don't carry numbered prefixes
-  if (maxNum === 0) maxNum = seg[docsKey] || 0;
+  // ── Areas: everything real, minus the company tier, which is not an area ──
+  var segSel = document.getElementById('seg-select');
+  if (segSel) {
+    // "company" is the policy tier, not an area. "tws-maintenance" is a holding
+    // pen: its documents reassign to the segment that owns the equipment, so
+    // nothing new should be filed into it.
+    var NOT_FILEABLE = ['company', 'tws-maintenance'];
+    // Grouped by family rather than run together alphabetically, so twenty four
+    // areas are something you can find your way around.
+    var FAMILIES = [
+      ['segment',  'Operational Segments'],
+      ['function', 'Corporate Functions'],
+      ['product',  'Products & Technology']
+    ];
+    segSel.innerHTML = '<option value="" disabled selected>Select area</option>' +
+      FAMILIES.map(function(f){
+        var ids = Object.keys(L.segments)
+          .filter(function(k){ return NOT_FILEABLE.indexOf(k) === -1 && L.segments[k].group === f[0]; })
+          .sort(function(a,b){ return L.segments[a].name.localeCompare(L.segments[b].name); });
+        if (!ids.length) return '';
+        return '<optgroup label="' + f[1] + '">' + ids.map(function(k){
+          return '<option value="' + k + '">' + L.segments[k].name + '</option>';
+        }).join('') + '</optgroup>';
+      }).join('');
+    segSel.addEventListener('change', function(){ this.title = this.selectedOptions[0].textContent; });
+  }
 
-  return tpl.replace('{N}', String(maxNum + 1).padStart(3, '0'));
+  // ── Types: the register's own list, with Policy gated ──
+  // The issuing function list was typed by hand and wrong in both directions:
+  // it omitted five of the ten functions, so IT, Supply Chain, Learning and
+  // Development, Commercial and Geothermal could not issue a policy at all,
+  // and it offered CS, which is the pre-rename identity of GRC, and P&T,
+  // which is a business unit rather than a function.
+  var fnSel = document.getElementById('policy-fn');
+  if (fnSel) {
+    fnSel.innerHTML = '<option value="" disabled selected>Which function issues it?</option>' +
+      Object.keys(L.segments)
+        .filter(function(k){ return L.segments[k].group === 'function'; })
+        .sort(function(a,b){ return L.segments[a].name.localeCompare(L.segments[b].name); })
+        .map(function(k){
+          return '<option value="' + L.segments[k].spl + '">' + L.segments[k].name + '</option>';
+        }).join('');
+  }
+
+  var typeSel = document.getElementById('doc-type-select');
+  if (typeSel) {
+    var order = ['policy','standard','sop','manual','alert','lesson','software'];
+    typeSel.innerHTML = '<option value="" disabled selected>Select type</option>' +
+      order.filter(function(t){
+        if (!L.types[t]) return false;
+        if (t === 'policy') return isQMS;        // absent, not disabled
+        return true;
+      }).map(function(t){
+        return '<option value="' + t + '">' + L.types[t].label + '</option>';
+      }).join('');
+  }
+
+})();
+
+/* Choosing Policy rewrites the form: no area, a function instead, the CEO as
+   approver, and a classification that cannot be raised. 5.5 says a policy
+   shall be accessible to all employees, so Confidential is not available. */
+function onTypeChange(val){
+  var isPolicy = (val === 'policy');
+  var rules    = document.getElementById('policy-rules');
+  var segGroup = document.getElementById('seg-select') ? document.getElementById('seg-select').closest('.form-group') : null;
+  var segSel   = document.getElementById('seg-select');
+  var btn      = document.getElementById('submit-btn');
+
+  if (rules) rules.hidden = !isPolicy;
+  if (segGroup) segGroup.style.display = isPolicy ? 'none' : '';
+  if (segSel) {
+    segSel.required = !isPolicy;
+    if (isPolicy) segSel.value = '';
+  }
+  if (btn) btn.innerHTML = isPolicy
+    ? 'Submit to QMS for CEO approval &#8594;'
+    : 'Submit for Review &#8594;';
+
+  var fn = document.getElementById('policy-fn');
+  if (fn) fn.required = isPolicy;
+
+  toggleSoftwareFields(val === 'software' ? 'Software' : val);
+  autoFillRefId();
 }
 
-function autoFillRefId() {
-  const segId    = (document.getElementById('seg-select') || {}).value;
-  const docType  = (document.getElementById('doc-type-select') || {}).value;
-  const refField = document.getElementById('doc-ref-id');
-  const statusEl = document.getElementById('doc-id-status');
-  if (!segId || !docType || !refField) return;
-  if (refField.dataset.autofilled === 'user') return; // user typed manually — respect it
-  const id = generateRefId(segId, docType);
-  if (!id) return;
+/* ── Numbering, per TQ-QHSE-S001 5.3 ─────────────────────────────────────
+   The old table here produced legacy ids like CT-001, which is the shape the
+   register is trying to retire. A number is now built from the business unit,
+   the short form and the type letter, and it is marked provisional when the
+   standard has not assigned one of those parts. */
+function taqaRefId(){
+  var L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : null;
+  var D = registerDocs();   // includes drafts filed in this browser, so a second upload takes the next number
+  if (!L) return null;
+  var type = (document.getElementById('doc-type-select') || {}).value;
+  if (!type || !L.types[type]) return null;
+  var letter = L.types[type].letter;
+
+  if (type === 'policy') {
+    var fn = (document.getElementById('policy-fn') || {}).value;
+    if (!fn) return null;
+    var used = D.filter(function(d){
+      return d.scope === 'company' && d.docNumber &&
+             d.docNumber.indexOf('TAQA-' + fn + '-P') === 0;
+    }).map(function(d){ return parseInt(d.docNumber.slice(-3), 10) || 0; });
+    var nextP = (used.length ? Math.max.apply(null, used) : 0) + 1;
+    return { id:'TAQA-' + fn + '-P' + String(nextP).padStart(3,'0'),
+             note:'Corporate policy series. Not the scheme 5.3 sets out for other documents.' };
+  }
+
+  var segId = (document.getElementById('seg-select') || {}).value;
+  var e = segId && L.segments[segId];
+  if (!e) return null;
+  if (!letter) return { id:'', note:'This type carries no letter in 5.3, so it takes no number.' };
+
+  var stem = 'TQ-' + (e.bu ? e.bu + '-' : '') + e.spl + '-' + letter;
+  var sep  = (letter.length > 1) ? '-' : '';
+  var re   = new RegExp('^' + stem.replace(/[.*+?^${}()|[\]\\&]/g, '\\$&') + sep + '(\\d+)$');
+  var nums = D.map(function(d){
+    var m = d.docNumber && d.docNumber.match(re); return m ? parseInt(m[1],10) : 0;
+  });
+  var next = (nums.length ? Math.max.apply(null, nums) : 0) + 1;
+
+  var why = [];
+  if (!e.bu) why.push('no business unit is assigned to ' + e.name);
+  if (e.provisional) why.push('"' + e.spl + '" is not a short form assigned in 5.3');
+  if (L.types[type].provisional) why.push('"' + letter + '" is not a type letter defined in section 4');
+
+  return { id: stem + sep + String(next).padStart(3,'0'),
+           note: why.length ? 'Provisional: ' + why.join(', ') + '.' : '' };
+}
+
+function autoFillRefId(){
+  var refField = document.getElementById('doc-ref-id');
+  var statusEl = document.getElementById('doc-id-status');
+  if (!refField) return;
+  if (refField.dataset.autofilled === 'user') return;   // a typed number is respected
+  var r = taqaRefId();
+  if (!r) {                     // nothing to build one from yet, so say nothing
+    refField.value = '';
+    if (statusEl) statusEl.innerHTML = '';
+    return;
+  }
   isAutoFilling = true;
-  refField.value = id;
+  refField.value = r.id;
   refField.dataset.autofilled = 'auto';
-  statusEl.innerHTML = '<span class="id-ok">⚡ Auto-generated · edit if needed</span>';
+  if (statusEl) {
+    statusEl.innerHTML = r.note
+      ? '<span class="id-warn">' + r.note + '</span>'
+      : '<span class="id-ok">Follows 5.3. Edit if needed.</span>';
+  }
   isAutoFilling = false;
 }
 
@@ -921,19 +1259,27 @@ let docStatus = 'new';
 
 const STOP_WORDS = new Set(['the','a','an','of','in','for','and','or','to','with','at','by','from','on','is','are','its','this','that','was','been','rev','revision','version','update']);
 
-function segmentTitles(segId) {
-  if (typeof TAQA_SEGMENTS === 'undefined' || !TAQA_SEGMENTS[segId]) return [];
-  const seg = TAQA_SEGMENTS[segId];
-  return [
-    ...(seg.docs.sops||[]),...(seg.docs.manuals||[]),...(seg.docs.policies||[]),
-    ...(seg.docs.alerts||[]),...(seg.docs.lessons||[])
-  ].map(t => String(t).replace(/^⚠️\s*/,''));
+// What this area already holds, read from the register rather than from the
+// page copy in segments-data.js, so a supersedes list can never offer a
+// document that was withdrawn or miss one that was just filed.
+function registerDocs() {
+  if (typeof TAQA_STORE !== 'undefined') return TAQA_STORE.all();
+  return (typeof TAQA_MASTER_DOCS !== 'undefined') ? TAQA_MASTER_DOCS : [];
 }
-
+function areaDocs(segId) {
+  if (!segId) return [];
+  return registerDocs().filter(function(d){
+    return d.segment === segId && d.docType !== 'software' &&
+           d.status !== 'obsolete' && d.status !== 'superseded';
+  });
+}
+function segmentTitles(segId) {
+  return areaDocs(segId).map(function(d){
+    return (d.docNumber ? d.docNumber + '  ' : '') + d.title;
+  });
+}
 function segmentIds(segId) {
-  const titles = segmentTitles(segId);
-  // extract leading IDs: uppercase alphanumeric-hyphen token at start of title
-  return titles.map(t => { const m=t.match(/^([A-Z0-9][A-Z0-9\-]+)\b/); return m?m[1]:null; }).filter(Boolean);
+  return areaDocs(segId).map(function(d){ return d.docNumber; }).filter(Boolean);
 }
 
 function kw(s){ return s.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(w=>w.length>2&&!STOP_WORDS.has(w)); }
@@ -1034,7 +1380,7 @@ async function computeAndCheckHash(file) {
     const stored = JSON.parse(localStorage.getItem('taqa-doc-hashes')||'[]');
     const match = stored.find(h => h.hash === hex);
     if (match) {
-      hashStatus.innerHTML = `<span class="hash-status-dup">✕ Duplicate — matches "${esc(match.title)}"</span>`;
+      hashStatus.innerHTML = `<span class="hash-status-dup">✕ Duplicate, matches "${esc(match.title)}"</span>`;
       document.getElementById('dup-error-panel').style.display = '';
       document.getElementById('dup-error-msg').textContent = `File fingerprint matches a document already in the library: "${match.title}"`;
     } else {
@@ -1054,25 +1400,18 @@ resize();window.addEventListener('resize',resize);
 function initPts(){pts=[];const n=Math.floor(W*H/20000);
   for(let i=0;i<n;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,s:Math.random()*1.5+.3});}
 initPts();
-function draw(){ctx.fillStyle='#f4f5f7';ctx.fillRect(0,0,W,H);
+// The canvas is an opaque sheet over the body, so it has to carry the
+// canvas colour of whichever theme is live or it hands the dark page a
+// white backdrop.
+function draw(){ctx.fillStyle=document.documentElement.getAttribute('data-taqa-theme')==='dark'?'#001314':'#F4F4F3';ctx.fillRect(0,0,W,H);
   const g=ctx.createRadialGradient(W*.15,H*.8,0,W*.15,H*.8,380);
-  g.addColorStop(0,'rgba(59,130,246,0.04)');g.addColorStop(1,'transparent');
+  g.addColorStop(0,'rgba(0,93,99,0.05)');g.addColorStop(1,'transparent');
   ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
   pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;
     if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
     ctx.beginPath();ctx.arc(p.x,p.y,p.s,0,Math.PI*2);ctx.fillStyle='rgba(0,93,99,0.1)';ctx.fill();});
   requestAnimationFrame(draw);}
 draw();
-// ── Sliding Pill Nav ──
-const pill=document.getElementById('nav-pill'),navList=document.querySelector('.nav-links');
-function pillTo(el){const lr=navList.getBoundingClientRect(),ar=el.getBoundingClientRect();pill.style.left=(ar.left-lr.left)+'px';pill.style.width=ar.width+'px';pill.style.opacity='1';}
-function pillToActive(){const a=navList.querySelector('a.active');if(a)pillTo(a);else pill.style.opacity='0';}
-pillToActive();navList.querySelectorAll('a').forEach(a=>a.addEventListener('mouseenter',()=>pillTo(a)));navList.addEventListener('mouseleave',pillToActive);
-// ── Dark Mode ──
-const MOON='M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
-const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
-function toggleDark(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme',next);}
-(function(){const s=localStorage.getItem('taqa-theme');if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
 
 // ── Scroll Progress Ring ──
 (function(){
@@ -1097,10 +1436,170 @@ document.addEventListener('click',function(e){
   document.body.classList.add('page-exit');
   setTimeout(()=>window.location.href=h,270);
 });
+
+/* ── Steps ─────────────────────────────────────────────────────────────
+   Four panels, one at a time, each gated on the answers it needs. The bar
+   at the top of the page has always shown steps; now it means them. */
+var _step = 1, _maxStep = 1;
+
+function goStep(n){
+  if (n > _step && !stepReady(_step)) return;
+  _step = n;
+  _maxStep = Math.max(_maxStep, n);
+  for (var i = 1; i <= 4; i++) {
+    var panel = document.getElementById('panel-' + i);
+    if (panel) panel.hidden = (i !== n);
+  }
+  paintStepBar();
+  if (n === 4) paintRecord();
+  var card = document.querySelector('.upload-card');
+  if (card) window.scrollTo({ top: card.offsetTop - 90, behavior: 'smooth' });
+}
+
+// Steps 1 and 2 map onto the first two lamps; 3 and 4 share the last one.
+function paintStepBar(){
+  var lamp = { 1:1, 2:2, 3:2, 4:3 }[_step];
+  for (var i = 1; i <= 3; i++) {
+    var el = document.getElementById('ustep-' + i);
+    if (!el) continue;
+    el.classList.toggle('active', i === lamp);
+    el.classList.toggle('done', i < lamp);
+  }
+  for (var j = 1; j <= 2; j++) {
+    var ln = document.getElementById('ustep-line-' + j);
+    if (ln) ln.classList.toggle('done', j < lamp);
+  }
+}
+
+function stepReady(n){
+  var say = function(id, msg){ var e = document.getElementById(id); if (e) e.textContent = msg || ''; };
+  if (n === 1) {
+    var ok = (typeof selectedFiles !== 'undefined') && selectedFiles.length > 0;
+    say('hint-1', ok ? '' : 'Add a file to continue.');
+    return ok;
+  }
+  if (n === 2) {
+    var type = document.getElementById('doc-type-select').value;
+    var seg  = document.getElementById('seg-select').value;
+    var isPolicy = type === 'policy';
+    var fn = (document.getElementById('policy-fn') || {}).value;
+    if (!type)                  { say('hint-2', 'Choose a document type.'); return false; }
+    if (isPolicy && !fn)        { say('hint-2', 'Choose the issuing function.'); return false; }
+    if (!isPolicy && !seg)      { say('hint-2', 'Choose the area that owns it.'); return false; }
+    if (docStatus === 'revision' && !document.getElementById('supersedes-select').value) {
+      say('hint-2', 'Choose the document this revision replaces.'); return false;
+    }
+    say('hint-2', ''); return true;
+  }
+  if (n === 3) {
+    var t = document.getElementById('doc-title-input').value.trim();
+    var sum = document.getElementById('summary-main').value.trim();
+    var aud = document.getElementById('audience-select').value;
+    if (!t)   { say('hint-3', 'A title is needed.'); return false; }
+    if (!sum) { say('hint-3', 'A summary is needed, it is what people read first.'); return false; }
+    if (!aud) { say('hint-3', 'Say who it applies to.'); return false; }
+    say('hint-3', ''); return true;
+  }
+  return true;
+}
+
+function editNumber(){
+  var chip = document.getElementById('numchip');
+  var f = document.getElementById('doc-ref-id');
+  chip.classList.add('editing');
+  f.dataset.autofilled = 'user';
+  f.focus(); f.select();
+}
+
+// Keep the read-only face of the number in step with the field behind it.
+(function(){
+  var f = document.getElementById('doc-ref-id');
+  if (!f) return;
+  var sync = function(){
+    var v = document.getElementById('doc-ref-id-view');
+    if (v) v.textContent = f.value || 'Not assigned yet';
+    var chip = document.getElementById('numchip');
+    if (chip) chip.hidden = !f.value;
+  };
+  new MutationObserver(sync).observe(f, { attributes:true, attributeFilter:['value'] });
+  f.addEventListener('input', sync);
+  setInterval(sync, 400);
+})();
+
+/* ── The record, before it exists ──────────────────────────────────────
+   Everything the register would store, with each value marked as typed or
+   derived, so nobody is surprised by what gets filed. */
+function paintRecord(){
+  var L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : null;
+  var box = document.getElementById('rec-card');
+  if (!L || !box) return;
+
+  var typeKey = document.getElementById('doc-type-select').value;
+  var t = L.types[typeKey] || {};
+  var isPolicy = typeKey === 'policy';
+  var segKey = isPolicy ? 'company' : document.getElementById('seg-select').value;
+  var e = L.segments[segKey] || {};
+  var num = document.getElementById('doc-ref-id').value;
+  var note = (document.getElementById('doc-id-status') || {}).textContent || '';
+
+  var today = new Date();
+  var due = new Date(today.getTime());
+  due.setMonth(due.getMonth() + (t.reviewCycleMonths || 24));
+  var fmt = function(d){ return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); };
+
+  var D = function(){ return '<span class="derived">derived</span>'; };
+  var rows = [
+    ['Document number', (esc(num) || 'Not assigned') + (note.trim() ? '<span class="warn">' + esc(note.trim()) + '</span>' : '')],
+    ['Title', esc(document.getElementById('doc-title-input').value.trim()) || ',' ],
+    ['Type', (t.label || typeKey || ',')+ D()],
+    [isPolicy ? 'Scope' : 'Area', (e.name || ',') + (isPolicy ? ' ' + D() : '')],
+    ['Revision', (docStatus === 'revision' ? 'Supersedes ' +
+        (document.getElementById('supersedes-select').value || 'a document not yet chosen')
+      : 'Rev 1.0, first issue') + D()],
+    ['Owner', (t.owner || ',') + D()],
+    ['Approver', (isPolicy ? 'Chief Executive Officer' : (t.approver || ',')) + D()],
+    ['Review cycle', (t.reviewCycleMonths || 24) + ' months' + D()],
+    ['Next review due', fmt(due) + D()],
+    ['Retention', (t.retentionYears || 10) + ' years' + D() +
+      '<span class="warn">TQ-QHSE-S001 7.5 says five. API Q2 4.5 requires ten, so ten is used.</span>'],
+    ['Classification', isPolicy
+      ? 'Internal, and it cannot be raised<span class="warn">TQ-QHSE-S001 5.5: a policy shall be accessible to all employees.</span>'
+      : 'Internal' + D()],
+    ['Applies to', document.getElementById('audience-select').value || ','],
+    ['Status on filing', 'Draft, pending approval' + D()]
+  ];
+  box.innerHTML = rows.map(function(r){
+    return '<div class="rec-row"><div class="rec-k">' + r[0] + '</div><div class="rec-v">' + r[1] + '</div></div>';
+  }).join('');
+
+  var who = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE.def() : null;
+  var w = document.getElementById('whoami');
+  if (w) w.innerHTML = 'Filed as <b>' + (who ? who.label : 'Employee') +
+    '</b>. Your name, your email and the document owner come from your sign-in, ' +
+    'so there is nothing here to type. In Azure these are Entra ID claims.';
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  paintStepBar();
+  // Arriving from an area's empty tab, that area is already chosen.
+  var want = new URLSearchParams(location.search).get('seg');
+  var ss = document.getElementById('seg-select');
+  if (want && ss && ss.querySelector('option[value="' + want.replace(/[^a-z0-9-]/gi,'') + '"]')) {
+    ss.value = want;
+    ss.dispatchEvent(new Event('change', {bubbles:true}));
+  }
+  ['doc-type-select','seg-select','policy-fn','supersedes-select'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('change', function(){ stepReady(2); });
+  });
+  ['doc-title-input','summary-main','audience-select'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', function(){ stepReady(3); });
+  });
+});
 </script>
 <script src="shared.js"></script>
-<script src="fixes.js"></script>
-<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary-ink);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#C8102E;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-taqa-theme="dark"] .bell-badge{border-color:#002326;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
 </body>
 </html>

@@ -56,7 +56,6 @@ These are the only browser capabilities the application touches. None of them re
 | API | Where it is used | What it does |
 |---|---|---|
 | `localStorage` | Throughout | Stores preferences on the visitor's own device. Contents listed in section 4 |
-| `sessionStorage` | `fixes.js` | Reads a key named `taqa_user` if present. This is a placeholder for the future Entra ID integration and nothing currently writes to it |
 | Service Worker | `service-worker.js` | Caches the site's own pages so they open offline |
 | `navigator.clipboard` | Segment and QR views | Copies a page link when the user clicks Copy |
 | `navigator.onLine` | Shared script | Shows an offline banner when the connection drops |
@@ -138,7 +137,7 @@ There are no real documents in the platform. Document titles are reference metad
 
 | Control | Status | Evidence |
 |---|---|---|
-| Content-Security-Policy | In place | Enforced on every page, restricted to `'self'`. Any attempt to contact a third party is blocked by the browser itself rather than merely being absent from the source |
+| Content-Security-Policy | In place, with a known exception | Enforced on every page via `<meta>`, `default-src 'self'`. `script-src` and `style-src` still carry `'unsafe-inline'` (see R-05); every other directive is `'self'`-only, so a third party host is still blocked |
 | Transport security | In place | HTTPS only. `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN` and `Referrer-Policy` are configured in `staticwebapp.config.json` for the Azure deployment |
 | Output encoding | In place | All user-controlled values are HTML-escaped before display. Added 3 August 2026 after a confirmed cross-site scripting finding, covered in section 7 |
 | File type restriction | In place | A code-level allow-list, not the HTML `accept` attribute. `.exe` and `.msi` are refused, including double extensions such as `trick.pdf.exe`. Verified through the drag-and-drop bypass path |

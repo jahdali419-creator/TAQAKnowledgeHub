@@ -1,8 +1,14 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-taqa-theme="light">
 <head>
 <meta charset="UTF-8">
-<script>try{var _t=localStorage.getItem('taqa-theme');if(_t)document.documentElement.setAttribute('data-theme',_t);}catch(e){}</script>
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="qrcode.js"></script>
@@ -11,18 +17,22 @@
 <meta name="theme-color" content="#005D63">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Tech Hub">
+<meta name="apple-mobile-web-app-title" content="TechHub Platform">
 <link rel="apple-touch-icon" href="icons/icon.svg">
-<title>Segment — TAQA Knowledge Hub</title>
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<title>Segment, TAQA Knowledge Hub</title>
 <link rel="stylesheet" href="fonts/fonts.css">
 <noscript></noscript>
 <style>
 :root{
-  --primary:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
-  --dark:#f4f5f7;--dark-2:#eaecf0;--dark-3:#ffffff;--dark-4:#f9fafb;
+  --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
+  /* The five state inks, carried here as well as in shared.js because the
+     cards render before shared.js injects its styles. */
+  --alert-ink:#A8431A;--warn-ink:#8A6200;--ok-ink:#00705F;--stop-ink:#C8102E;--info-ink:#0076A8;
+  --dark:#F4F4F3;--dark-2:#EDEBE8;--dark-3:#FFFFFF;--dark-4:#F9F8F7;
   --glass:rgba(255,255,255,0.85);--glass-2:rgba(255,255,255,0.98);
   --glass-border:rgba(0,0,0,0.09);--glass-border-hover:rgba(0,93,99,0.35);
-  --text:#1a2235;--text-muted:#64748b;--gradient:#005D63; /* flat brand teal - no gradient */
+  --text:#1E1C1A;--text-muted:#756A61;--text-light:#756A61;--gradient:#005D63; /* flat brand teal - no gradient */
   --glow:0 4px 24px rgba(0,0,0,0.1);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -32,46 +42,22 @@ body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);ove
 #bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
 .page-wrapper{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
 
-/* ── Nav ── */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
-  display:flex;align-items:center;justify-content:space-between;
-  background:rgba(255,255,255,0.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--glass-border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
-.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
-.nav-brand-icon{width:40px;height:40px;border-radius:11px;background:var(--gradient);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  position:relative;overflow:hidden;box-shadow:0 4px 18px rgba(0,93,99,0.38);}
-.nav-brand-icon::before{content:'';position:absolute;top:-10px;left:-6px;width:32px;height:32px;
-  background:rgba(255,255,255,0.13);border-radius:50%;pointer-events:none;}
-.nav-brand-text{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;}
-.nav-brand-name{font-weight:800;color:var(--primary);}
-.nav-brand-hub{font-weight:500;color:#64748b;}
-.nav-subtitle{font-size:11px;color:var(--text-muted);display:block;margin-top:-1px;}
-.nav-links{display:flex;gap:2px;list-style:none;}
-.nav-links a{padding:7px 15px;border-radius:6px;text-decoration:none;font-size:13.5px;font-weight:500;color:var(--text-muted);transition:background 0.2s,color 0.2s;position:relative;}
-.nav-links a:hover{background:#f0f1f3;color:var(--text);}
-.nav-links a.active{background:transparent;color:var(--primary);font-weight:600;}
-.nav-links a.active::after{content:'';position:absolute;bottom:3px;left:15px;right:15px;height:2px;background:var(--primary);border-radius:2px;}
-.nav-dropdown{position:relative;list-style:none;}
-.nav-dropdown-btn{display:flex;align-items:center;gap:5px;padding:7px 15px;border-radius:6px;border:none;background:transparent;cursor:pointer;font-size:13.5px;font-weight:500;color:var(--text-muted);font-family:'Inter',sans-serif;transition:background 0.2s,color 0.2s;}
-.nav-dropdown-btn:hover,.nav-dropdown-li.open .nav-dropdown-btn{background:#f0f1f3;color:var(--text);}
-.nav-dropdown-arrow{transition:transform 0.22s;flex-shrink:0;}
-.nav-dropdown-li.open .nav-dropdown-arrow{transform:rotate(180deg);}
-.nav-dropdown-panel{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(-6px);width:420px;background:#fff;border:1px solid rgba(0,0,0,0.09);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.13);padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:3px;opacity:0;pointer-events:none;transition:opacity 0.18s,transform 0.18s;z-index:2000;}
-.nav-dropdown-li:hover .nav-dropdown-panel,.nav-dropdown-li.open .nav-dropdown-panel{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0);}
-.seg-dd-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;text-decoration:none;transition:background 0.15s;}
-.seg-dd-item:hover{background:#f4f5f7;}
-.seg-dd-name{font-size:13px;font-weight:600;color:#1a2235;flex:1;}
-.seg-dd-tag{font-size:10px;font-weight:600;color:#005D63;background:rgba(0,93,99,0.08);padding:2px 7px;border-radius:20px;white-space:nowrap;}
-.nav-right{display:flex;gap:10px;align-items:center;}
 .btn{padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
   transition:all 0.25s;border:none;font-family:'Inter',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:7px;}
 .btn-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--text-muted);}
-.btn-ghost:hover{border-color:var(--glass-border-hover);color:var(--primary-light);}
+.btn-ghost:hover{border-color:var(--glass-border-hover);color:var(--primary-ink);}
 .btn-primary{background:var(--gradient);color:#fff;}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,93,99,0.4);}
 
 /* ── Segment Hero Banner ── */
 .seg-hero-banner{
+  /* The photo and the overlay that darken this band are siblings of the
+     text, not ancestors of it, and the overlay's far stop is only 22%
+     opaque. Without a base colour here the right of the band is whatever
+     the photo happens to be, and white type on it is a coin toss. Naming
+     the ground states what the type is written for and holds it if the
+     photo never arrives. */
+  background:#001314;
   position:relative; overflow:hidden;
 }
 .hero-bg-img{
@@ -89,17 +75,19 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 @media(prefers-reduced-motion:reduce){.hero-bg-img{animation:none;}}
 .seg-hero-banner::before{
   content:''; position:absolute; inset:0;
-  background:linear-gradient(110deg,rgba(6,18,26,0.92) 0%,rgba(6,18,26,0.76) 50%,rgba(6,18,26,0.42) 100%);
+  background:linear-gradient(110deg,rgba(0,19,20,0.92) 0%,rgba(0,19,20,0.76) 50%,rgba(0,19,20,0.42) 100%);
   z-index:1;
 }
 .seg-hero-banner > *{position:relative;z-index:2;}
 .seg-hero-banner > .hero-bg-img{position:absolute;z-index:0;}
 
 /* ── Breadcrumb ── */
-.breadcrumb{padding:88px 48px 8px;max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:8px;font-size:13px;}
+/* The middle crumb carries no class of its own, so it inherited the page ink
+   and went near black on the photo band. The trail sets its own light ink. */
+.breadcrumb{padding:88px 48px 8px;max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,0.72);}
 .breadcrumb a{color:rgba(255,255,255,0.55);text-decoration:none;transition:color 0.2s;}
 .breadcrumb a:hover{color:#fff;}
-.breadcrumb .bc-sep{color:rgba(255,255,255,0.3);}
+.breadcrumb .bc-sep{color:rgba(255,255,255,0.55);}
 .breadcrumb .current{color:rgba(255,255,255,0.9);font-weight:500;}
 
 /* ── Segment Hero ── */
@@ -107,78 +95,74 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .seg-hero-inner{
   background:none; border:none; backdrop-filter:none;
   padding:0;
-  display:grid;grid-template-columns:1fr auto;align-items:center;gap:48px;
+  display:block;
 }
 .seg-hero-icon{font-size:48px;width:80px;height:80px;border-radius:18px;
   background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);backdrop-filter:blur(12px);
   display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+.seg-hero-tag[hidden]{display:none;}
 .seg-hero-tag{display:inline-block;padding:4px 14px;margin-bottom:14px;
   background:rgba(0,187,182,0.15);border:1px solid rgba(0,187,182,0.3);
-  border-radius:50px;font-size:11px;color:#4DD9D3;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;}
+  border-radius:50px;font-size:11px;color:var(--primary-light);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;}
 .seg-hero h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:36px;font-weight:800;color:#fff;
   letter-spacing:-0.8px;margin-bottom:10px;}
 .seg-hero-desc{font-size:15px;color:rgba(255,255,255,0.72);line-height:1.7;max-width:520px;margin-bottom:24px;}
 .seg-hero-meta{display:flex;gap:24px;flex-wrap:wrap;}
 .seg-meta-item{display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(255,255,255,0.58);}
 .seg-meta-item strong{color:#fff;font-weight:600;}
-.seg-hero-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;min-width:200px;}
-.mini-stat{
-  background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.16);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  border-radius:12px;padding:16px 20px;text-align:center;
-}
-.mini-stat-num{font-family:'BwGradual','Urbanist',sans-serif;font-size:26px;font-weight:700;color:#4DD9D3;-webkit-text-fill-color:#4DD9D3;}
-.mini-stat-label{font-size:11px;color:rgba(255,255,255,0.52);margin-top:2px;}
+
+html.seg-unknown .seg-hero-meta,html.seg-unknown #manage-btn,html.seg-unknown .copy-link-btn,html.seg-unknown .tabs-outer,
+html.seg-unknown .doc-toolbar,html.seg-unknown .pg-wrap,html.seg-unknown #recent-strip,
+html.seg-unknown #breadcrumb-tab,html.seg-unknown .bc-sep:has(+ #breadcrumb-tab){display:none!important;}
+html.seg-unknown .content-outer{padding-top:32px;}
 
 /* ── Tab Navigation ── */
-.tabs-outer{padding:10px 48px;max-width:none;margin:0;position:sticky;top:68px;z-index:500;background:var(--dark);border-bottom:1px solid var(--glass-border);box-shadow:0 2px 8px rgba(0,0,0,0.04);}
-.tabs-outer .tabs{max-width:1200px;margin:0 auto;}
-html[data-theme="dark"] .tabs-outer{background:#0d1520;}
-html[data-theme="dark"] .tabs-outer{border-color:rgba(255,255,255,0.06);}
+.tabs-outer{padding:10px 48px;max-width:none;margin:0;position:sticky;top:var(--nav-h,64px);z-index:500;background:var(--dark);border-bottom:1px solid var(--glass-border);box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+.tabs-outer .tabs{max-width:1104px;margin:0 auto;}
+html[data-taqa-theme="dark"] .tabs-outer{background:#001314;}
+html[data-taqa-theme="dark"] .tabs-outer{border-color:rgba(255,255,255,0.06);}
 .tabs{display:flex;gap:4px;background:var(--glass);border:1px solid var(--glass-border);
   border-radius:12px;padding:5px;overflow-x:auto;}
 .tab-btn{
   padding:9px 20px;border-radius:9px;font-size:13.5px;font-weight:500;
-  cursor:pointer;border:none;background:transparent;color:var(--text-muted);
-  font-family:'Inter',sans-serif;white-space:nowrap;transition:all 0.25s;
+  cursor:pointer;border:none;background:transparent;color:var(--primary-ink);
+  font-family:'BwGradual','Urbanist',sans-serif;white-space:nowrap;transition:all 0.25s;
   display:flex;align-items:center;gap:7px;
 }
-.tab-btn:hover{color:var(--text);background:var(--glass-2);}
-.tab-btn.active{background:var(--dark-3);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,0.3);}
-.tab-btn.active .tab-count{background:var(--gradient);color:#fff;}
-.tab-count{padding:2px 8px;border-radius:50px;font-size:10px;font-weight:600;
-  background:rgba(255,255,255,0.08);color:var(--text-muted);}
-.tab-alert-count{padding:2px 8px;border-radius:50px;font-size:10px;font-weight:600;
-  background:rgba(253,105,29,0.15);color:var(--accent);}
-.alert-pulse-dot{display:none;width:7px;height:7px;background:#FD691D;border-radius:50%;flex-shrink:0;animation:alertPulse 1.6s ease-in-out infinite;}
-@keyframes alertPulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.35;transform:scale(0.65);}}
-@keyframes manageGlow{0%,100%{box-shadow:0 0 0 0 rgba(0,187,182,0);border-color:rgba(0,187,182,0.25);}50%{box-shadow:0 0 12px 4px rgba(0,187,182,0.45);border-color:rgba(0,187,182,0.8);}}
-.manage-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:rgba(0,187,182,0.12);border:1px solid rgba(0,187,182,0.25);color:#4DD9D3;font-size:11.5px;font-weight:600;text-decoration:none;letter-spacing:0.3px;transition:background 0.2s;animation:manageGlow 2s ease-in-out infinite;}
+.tab-btn:hover{color:var(--primary-ink);background:var(--glass-2);}
+.tab-btn.active{background:var(--dark-3);color:var(--primary-ink);font-weight:700;box-shadow:0 1px 3px rgba(0,88,90,0.10);}
+.tab-count,.tab-btn.active .tab-count{
+  padding:0;border-radius:0;background:none;
+  font-size:11.5px;font-weight:600;color:var(--text-light,#756A61);
+  font-variant-numeric:tabular-nums;}
+.tab-btn.active .tab-count{color:var(--primary-ink);}
+/* The one count that is a warning keeps its colour, and only when it is not
+   zero. Everything else in the bar is now a number, not a signal. */
+.tab-alert-count{padding:0;border-radius:0;background:none;
+  font-size:11.5px;font-weight:700;color:var(--alert-ink,#A8431A);font-variant-numeric:tabular-nums;}
+.alert-pulse-dot{display:none;}
+.manage-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:rgba(0,187,182,0.12);border:1px solid rgba(0,187,182,0.25);color:var(--primary-light);font-size:11.5px;font-weight:600;text-decoration:none;letter-spacing:0.3px;transition:background 0.2s,border-color 0.2s;}
 .manage-btn:hover{background:rgba(0,187,182,0.22);}
-.doc-new-badge{display:inline-block;padding:1px 7px;border-radius:50px;font-size:9.5px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;background:rgba(34,197,94,0.12);color:#4ade80;border:1px solid rgba(34,197,94,0.25);margin-left:6px;vertical-align:middle;}
-.doc-new-badge.updated{background:rgba(0,187,182,0.1);color:#00BBB6;border-color:rgba(0,187,182,0.22);}
-.doc-rev-badge{display:inline-block;padding:1px 7px;border-radius:50px;font-size:9.5px;font-weight:700;letter-spacing:0.3px;background:rgba(99,102,241,0.1);color:#818cf8;border:1px solid rgba(99,102,241,0.25);margin-left:6px;vertical-align:middle;}
-.empty-state-upload{display:inline-block;margin-top:14px;padding:8px 20px;border-radius:9px;background:rgba(0,93,99,0.1);border:1px solid rgba(0,187,182,0.2);color:var(--primary-light);font-size:13px;font-weight:500;text-decoration:none;transition:background 0.2s;}
+.empty-state-upload{display:inline-block;margin-top:14px;padding:8px 20px;border-radius:9px;background:rgba(0,93,99,0.1);border:1px solid rgba(0,187,182,0.2);color:var(--primary-ink);font-size:13px;font-weight:500;text-decoration:none;transition:background 0.2s;font-family:'Inter',sans-serif;cursor:pointer;}
 .empty-state-upload:hover{background:rgba(0,93,99,0.18);}
 
 /* ── Content Area ── */
-.content-outer{padding:0 48px 80px;max-width:1200px;margin:0 auto;}
+.content-outer{width:100%;padding:0 48px 80px;max-width:1200px;margin:0 auto;}
 .tab-panel{display:none;}
 .tab-panel.active{display:block;animation:fadeIn 0.35s ease;}
 .section-head{display:none;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--glass-border);}
 .sh-pill{padding:3px 10px;border-radius:6px;font-size:10.5px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;flex-shrink:0;}
-.sh-pill.sop{background:rgba(0,93,99,0.12);color:#00BBB6;border:1px solid rgba(0,187,182,0.2);}
-.sh-pill.manual{background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.2);}
-.sh-pill.policy{background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.2);}
-.sh-pill.alert{background:rgba(253,105,29,0.1);color:#FD691D;border:1px solid rgba(253,105,29,0.2);}
-.sh-pill.lesson{background:rgba(34,197,94,0.1);color:#4ade80;border:1px solid rgba(34,197,94,0.2);}
-.sh-pill.software{background:rgba(56,189,248,0.12);color:#38bdf8;border:1px solid rgba(56,189,248,0.22);}
+/* The word in the pill already says which type it is, so the five hues it used
+   to take are one calm treatment. Alert keeps the warning family. */
+.sh-pill.sop,.sh-pill.manual,.sh-pill.policy,.sh-pill.lesson,.sh-pill.software{
+  background:rgba(0,93,99,0.07);color:var(--primary-ink);border:1px solid rgba(0,93,99,0.12);}
+.sh-pill.alert{background:rgba(253,105,29,0.1);color:#A8431A;border:1px solid rgba(253,105,29,0.2);}
 .sh-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:18px;font-weight:700;color:var(--text);}
-html[data-theme="dark"] .section-head{border-color:rgba(255,255,255,0.07);}
+html[data-taqa-theme="dark"] .section-head{border-color:rgba(255,255,255,0.07);}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 @keyframes fadeOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-4px);}}
-.search-hl{background:rgba(0,187,182,0.22);color:var(--primary,#005D63);border-radius:2px;padding:0 1px;}
-html[data-theme="dark"] .search-hl{background:rgba(0,187,182,0.18);color:#4DD9D3;}
+.search-hl{background:rgba(0,187,182,0.22);color:var(--primary-ink);border-radius:2px;padding:0 1px;}
+html[data-taqa-theme="dark"] .search-hl{background:rgba(0,187,182,0.18);color:var(--primary-ink);}
 .copy-link-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:8px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.55);font-size:11.5px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;line-height:1;}
 .copy-link-btn:hover{background:rgba(255,255,255,0.13);color:#fff;}
 
@@ -195,15 +179,15 @@ html[data-theme="dark"] .search-hl{background:rgba(0,187,182,0.18);color:#4DD9D3
 /* ── Pagination ── */
 .pg-wrap{display:flex;align-items:center;justify-content:flex-end;gap:4px;padding:16px 0 8px;flex-wrap:wrap;}
 .pg-btn{min-width:36px;height:36px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text-muted);font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0 10px;transition:all 0.18s;font-family:'Inter',sans-serif;white-space:nowrap;}
-.pg-btn:hover:not(:disabled):not(.pg-dots){border-color:var(--glass-border-hover);color:var(--primary);}
+.pg-btn:hover:not(:disabled):not(.pg-dots){border-color:var(--glass-border-hover);color:var(--primary-ink);}
 .pg-btn.active{background:var(--gradient);color:#fff;border-color:transparent;font-weight:600;box-shadow:0 2px 10px rgba(0,93,99,0.35);}
 .pg-btn:disabled{opacity:0.3;cursor:not-allowed;pointer-events:none;}
 .pg-btn.pg-dots{border:none;background:none;cursor:default;letter-spacing:1px;}
 .pg-btn.pg-nav{padding:0 14px;gap:5px;font-weight:500;}
 .pg-nums{display:flex;gap:4px;align-items:center;}
 .pg-info{display:none;font-size:13px;font-weight:600;color:var(--text-muted);padding:0 6px;}
-html[data-theme="dark"] .pg-btn{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1);color:#94a3b8;}
-html[data-theme="dark"] .pg-btn:hover:not(:disabled):not(.pg-dots){border-color:rgba(0,187,182,0.4);color:#00BBB6;}
+html[data-taqa-theme="dark"] .pg-btn{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1);color:#8CB6B9;}
+html[data-taqa-theme="dark"] .pg-btn:hover:not(:disabled):not(.pg-dots){border-color:rgba(0,187,182,0.4);color:var(--primary-ink);}
 @media(max-width:600px){
   .pg-nums{display:none;}
   .pg-info{display:block;}
@@ -217,174 +201,386 @@ html[data-theme="dark"] .pg-btn:hover:not(:disabled):not(.pg-dots){border-color:
 /* Sort buttons */
 .sort-row{display:flex;gap:4px;flex-shrink:0;}
 .sort-btn{padding:5px 11px;border-radius:6px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;font-size:11px;font-weight:500;color:var(--text-muted);font-family:'Inter',sans-serif;transition:all 0.2s;white-space:nowrap;}
-.sort-btn.sort-on{background:rgba(0,93,99,0.08);border-color:rgba(0,93,99,0.25);color:var(--primary);font-weight:600;}
-.sort-btn:hover{border-color:rgba(0,93,99,0.25);color:var(--primary);}
-/* Mark as Read badge */
-.doc-read-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:#22c55e;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:middle;}
+.sort-btn.sort-on{background:rgba(0,93,99,0.08);border-color:rgba(0,93,99,0.25);color:var(--primary-ink);font-weight:600;}
+.sort-btn:hover{border-color:rgba(0,93,99,0.25);color:var(--primary-ink);}
 
-/* ── Document Cards ── */
-.docs-grid{display:flex;flex-direction:column;gap:10px;}
+/* ── The library sheet ──
+   One quiet sheet of rows, in the same language as the home page's
+   disciplines: white paper, hairlines, one soft shadow, teal as the only
+   accent. A document used to be a 95px card with a View button, a star and
+   a QR square, so 21 SOPs ran to two pages. Each is now one row: the whole
+   row opens it, and the rarer actions wait behind a menu at its end. */
+.docs-grid{
+  --row-paper:#FFFFFF;
+  --row-ink:#1E1C1A;          /* titles        16.9:1 on paper */
+  --row-meta:#524D48;         /* meta line      8.3:1          */
+  --row-light:#756A61;        /* separators     5.3:1          */
+  --row-hair:rgba(117,106,97,0.12);
+  --row-scuff:rgba(0,93,99,0.04);
+  --row-press:rgba(0,93,99,0.08);
+  --row-disc:rgba(0,93,99,0.06);
+  --row-mark-bg:rgba(0,93,99,0.065);
+  --row-alert-bg:rgba(253,105,29,0.11);
+  --row-alert-rule:#FD691D;
+  --row-ease:cubic-bezier(0.23,1,0.32,1);
+  position:relative;overflow:clip;
+  background:var(--row-paper);
+  border-radius:18px;
+  box-shadow:0 0 0 1px rgba(117,106,97,0.08),0 22px 44px -26px rgba(0,88,90,0.22);
+}
+html[data-taqa-theme="dark"] .docs-grid{
+  --row-paper:#002326;
+  --row-ink:#C7DBDD;          /* 11.5:1 */
+  --row-meta:#8CB6B9;         /*  7.5:1 */
+  --row-light:#6FA7AA;        /*  6.1:1 */
+  --row-hair:rgba(0,187,182,0.11);
+  --row-scuff:rgba(0,187,182,0.05);
+  --row-press:rgba(0,187,182,0.10);
+  --row-disc:rgba(0,187,182,0.08);
+  --row-mark-bg:rgba(0,187,182,0.09);
+  --row-alert-bg:rgba(255,155,94,0.11);
+  --row-alert-rule:#FF9B5E;
+  box-shadow:0 0 0 1px rgba(0,187,182,0.08),0 22px 44px -26px rgba(0,0,0,0.55);
+}
 .doc-card{
-  background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;
-  padding:20px 24px;backdrop-filter:blur(8px);
-  display:grid;grid-template-columns:auto 1fr auto;align-items:start;gap:20px;
-  transition:border-color 0.25s,box-shadow 0.25s;cursor:pointer;
+  position:relative;display:flex;align-items:center;
+  min-height:68px;color:var(--row-ink);
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color 140ms ease;
 }
-.doc-card:hover{background:var(--glass-2);border-color:var(--glass-border-hover);box-shadow:0 4px 16px rgba(0,0,0,0.08);}
+/* Hairlines start where the text starts, so the marks read as one column. */
+.doc-card + .doc-card::before,
+.doc-group + .doc-card::before{
+  content:'';position:absolute;top:0;inset-inline:68px 16px;height:1px;
+  background:var(--row-hair);pointer-events:none;
+}
+.doc-group + .doc-card::before{display:none;}
+.doc-row-link{
+  flex:1;min-width:0;align-self:stretch;
+  display:grid;grid-template-columns:36px minmax(0,1fr);column-gap:16px;align-items:center;
+  padding-block:10px;padding-inline:16px 4px;
+  color:inherit;text-decoration:none;border-radius:inherit;
+}
+.doc-row-link:focus-visible{outline:2px solid var(--primary-ink)!important;outline-offset:-2px!important;border-radius:12px;}
+@media (hover:hover) and (pointer:fine){
+  .doc-card:not(.is-asset):hover{background:var(--row-scuff);}
+}
+.doc-card:not(.is-asset):active{background:var(--row-press);}
+
 .doc-type-icon{
-  width:44px;height:44px;border-radius:10px;flex-shrink:0;
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-family:'BwGradual','Urbanist',sans-serif;font-size:9.5px;font-weight:700;
-  letter-spacing:0.6px;text-transform:uppercase;
+  font-family:'BwGradual','Urbanist',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:0.5px;text-transform:uppercase;
+  background:var(--row-mark-bg);color:var(--primary-ink);
 }
-.doc-type-icon.sop{background:rgba(0,93,99,0.12);color:#00BBB6;border:1px solid rgba(0,187,182,0.2);}
-.doc-type-icon.manual{background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.2);}
-.doc-type-icon.policy{background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.2);}
-.doc-type-icon.alert{background:rgba(253,105,29,0.1);color:#FD691D;border:1px solid rgba(253,105,29,0.2);}
-.doc-type-icon.lesson{background:rgba(34,197,94,0.1);color:#4ade80;border:1px solid rgba(34,197,94,0.2);}
-.doc-type-icon.software{background:rgba(56,189,248,0.12);color:#38bdf8;border:1px solid rgba(56,189,248,0.22);}
-.doc-type-badge.software{background:rgba(56,189,248,0.1);color:#38bdf8;border:1px solid rgba(56,189,248,0.18);}
-.sw-version{display:inline-block;padding:1px 7px;border-radius:50px;font-size:9.5px;font-weight:700;letter-spacing:0.4px;background:rgba(56,189,248,0.1);color:#38bdf8;border:1px solid rgba(56,189,248,0.22);margin-left:6px;vertical-align:middle;}
-.doc-info-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:14.5px;font-weight:600;margin-bottom:5px;line-height:1.3;}
-.doc-summary{font-size:12.5px;color:var(--text-muted);line-height:1.6;margin-bottom:8px;max-width:620px;}
-.doc-info-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
-.doc-meta-item{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:4px;}
-.doc-type-badge{padding:2px 9px;border-radius:50px;font-size:10.5px;font-weight:600;}
-.doc-type-badge.sop{background:rgba(0,93,99,0.12);color:var(--primary-light);border:1px solid rgba(0,187,182,0.15);}
-.doc-type-badge.manual{background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.15);}
-.doc-type-badge.policy{background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.15);}
-.doc-type-badge.alert{background:rgba(253,105,29,0.1);color:var(--accent);border:1px solid rgba(253,105,29,0.15);}
-.doc-type-badge.lesson{background:rgba(34,197,94,0.1);color:#4ade80;border:1px solid rgba(34,197,94,0.15);}
-.doc-actions{
-  display:flex;flex-direction:column;gap:6px;align-items:stretch;
-  min-width:92px;
+/* Every type gets the square from the base class; only Alert overrides,
+   because it is the one operational warning among the types. */
+.doc-type-icon.alert{background:var(--row-alert-bg);color:var(--alert-ink,#A8431A);}
+/* An alert keeps a thin orange rule on its leading edge and its square in
+   the orange family. That is enough to find one in the All tab. */
+.doc-card.is-alert::after{
+  content:'';position:absolute;inset-inline-start:0;top:16px;bottom:16px;width:2px;
+  border-start-end-radius:3px;border-end-end-radius:3px;
+  background:var(--row-alert-rule);pointer-events:none;
 }
-.doc-action-btn{
-  width:100%;padding:8px 12px;border-radius:8px;
-  border:1px solid var(--glass-border);background:transparent;
-  cursor:pointer;color:var(--text-muted);font-size:12px;font-weight:500;
+
+.doc-body{min-width:0;display:flex;flex-direction:column;gap:2px;}
+/* The eyebrow carries the reference: number, revision, then the quiet
+   words. It is one line tall and wraps into a hidden second line, so on a
+   narrow screen a word that does not fit drops out whole instead of being
+   cut in half. The number always comes first and always fits. */
+.doc-eyebrow{
+  display:flex;flex-wrap:wrap;align-items:center;column-gap:6px;min-width:0;
+  height:15px;line-height:15px;overflow:hidden;
+  font-family:'Inter',sans-serif;font-size:11.5px;
+}
+.doc-eyebrow > *{flex-shrink:0;white-space:nowrap;}
+.doc-num{
+  font-weight:600;letter-spacing:0;
+  color:var(--primary-ink);font-variant-numeric:tabular-nums;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;
+}
+.doc-rev{font-weight:500;color:var(--row-meta);font-variant-numeric:tabular-nums;}
+.doc-rev::before,.doc-new-badge::before,.doc-read-badge::before{
+  content:'\00B7';color:var(--row-light);margin-inline-end:6px;font-weight:400;
+}
+.doc-info-title{
+  font-family:'BwGradual','Urbanist',sans-serif;font-weight:300;
+  font-size:16px;line-height:1.3;letter-spacing:0;color:var(--row-ink);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  overflow-wrap:anywhere;
+}
+.doc-info-title .search-hl{font-weight:400;}
+.doc-meta{
+  font-size:12.5px;line-height:1.4;color:var(--row-meta);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.doc-meta .sep{color:var(--row-light);padding-inline:6px;}
+/* An overdue review is a warning, the same yellow family as the viewer's
+   review banner. The stop red is kept for withdrawn and obsolete. */
+.doc-review-late{color:var(--warn-ink,#8A6200);font-weight:600;}
+/* Review due soon: the same amber ink, at a lighter weight, so the eye can
+   tell "already late" from "coming up" without a second colour. Same role
+   gate as the overdue flag above: never shown to Employee, who still sees
+   the plain "Review due" line for anything further out. */
+.doc-review-soon{color:var(--warn-ink,#8A6200);font-weight:500;}
+
+/* New and Revised are a word in sentence case, not a pill, so they never
+   read as part of the all-capitals reference beside them. New keeps the
+   current-document green; Revised is only a note, in the meta grey. */
+.doc-new-badge{font-size:11px;font-weight:600;color:var(--ok-ink,#00705F);}
+.doc-new-badge.updated{font-weight:500;color:var(--row-meta);}
+.doc-read-badge{font-size:11px;font-weight:500;color:var(--row-light);}
+/* The bookmark flag shows only while the document is saved. It carries the
+   bm-btn class so the bookmarks panel clears it when a bookmark is removed. */
+.bm-flag{display:none;font-size:11px;line-height:1;color:var(--primary-ink);flex-shrink:0;}
+.bm-flag.bm-on{display:inline;}
+
+/* The overflow: one 44px target at the row's end. */
+.doc-more{
+  flex-shrink:0;align-self:center;margin-inline-end:8px;
+  width:44px;height:44px;border-radius:50%;border:0;padding:0;
+  display:grid;place-items:center;cursor:pointer;
+  background:transparent;color:var(--row-light);
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color 140ms ease,color 140ms ease;
+}
+.doc-more svg{width:18px;height:18px;}
+@media (hover:hover) and (pointer:fine){
+  .doc-more:hover{background:var(--row-disc);color:var(--primary-ink);}
+}
+.doc-more[aria-expanded="true"]{background:var(--row-disc);color:var(--primary-ink);}
+.doc-more:active{background:var(--row-press);}
+.doc-more:focus-visible{outline:2px solid var(--primary-ink)!important;outline-offset:-2px!important;}
+
+/* ── Swipe-to-reveal quick actions (touch only) ──
+   Bookmark and QR code, the two shortcuts worth a swipe from the row's own
+   overflow menu. The surface that carries the row's normal content sits on
+   top of the actions panel and only turns opaque, and only shows the panel
+   at all, on a touch/coarse pointer: a mouse row never changes. */
+.swipe-actions{
+  position:absolute;inset-block:0;inset-inline-end:0;
+  display:none;align-items:stretch;
+}
+.swipe-act{
+  width:64px;border:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  font-family:'Inter',sans-serif;font-size:10.5px;font-weight:600;color:#fff;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.swipe-act svg{width:18px;height:18px;}
+.swipe-act.act-bm{background:var(--primary,#005D63);}
+.swipe-act.act-qr{background:var(--primary-light,#00BBB6);}
+.swipe-act:active{filter:brightness(0.92);}
+.swipe-surface{display:flex;align-items:center;flex:1;min-width:0;position:relative;}
+@media (hover:none),(pointer:coarse){
+  .doc-card{overflow:hidden;}
+  .swipe-actions{display:flex;}
+  .swipe-surface{
+    background:var(--row-paper);
+    touch-action:pan-y;
+    transition:transform 220ms var(--row-ease,cubic-bezier(0.23,1,0.32,1));
+  }
+  .swipe-surface.is-dragging{transition:none;}
+  /* The surface's own opaque paper would otherwise sit in front of the
+     row's tap-press tint and hide it. */
+  .doc-card:not(.is-asset):active .swipe-surface{background:var(--row-press);}
+}
+@media (prefers-reduced-motion:reduce){.swipe-surface{transition:none;}}
+
+/* A software asset is listed, not controlled, and opens nothing. */
+.doc-card.is-asset .doc-row-link{cursor:default;padding-inline-end:16px;}
+.doc-card.is-asset .doc-meta{white-space:normal;}
+.doc-meta .nw{white-space:nowrap;}
+
+/* The All tab's shelves, inside the sheet. */
+.doc-group{
+  display:flex;align-items:baseline;gap:8px;
+  padding-block:18px 8px;padding-inline:16px;
+  border-top:1px solid var(--row-hair);
+}
+.doc-group:first-child{border-top:0;padding-top:16px;}
+.doc-group-t{font-family:'BwGradual','Urbanist',sans-serif;font-size:13.5px;font-weight:700;color:var(--row-ink);letter-spacing:0.01em;}
+.doc-group-n{font-size:12px;color:var(--row-meta);font-variant-numeric:tabular-nums;}
+
+/* ── The row menu ── one element, placed beside whichever row opened it. */
+.row-menu{
+  position:absolute;z-index:950;min-width:212px;padding:6px;
+  background:#FFFFFF;border-radius:14px;
+  box-shadow:0 0 0 1px rgba(117,106,97,0.12),0 22px 44px -18px rgba(0,88,90,0.34),0 2px 6px -2px rgba(0,88,90,0.10);
   font-family:'Inter',sans-serif;
-  display:flex;align-items:center;justify-content:center;gap:5px;
-  transition:all 0.22s;white-space:nowrap;
+  transform-origin:top right;
+  animation:rowMenuIn 150ms cubic-bezier(0.23,1,0.32,1);
 }
-.doc-action-btn:hover{background:var(--glass-2);border-color:var(--glass-border-hover);color:var(--primary-light);}
-.doc-action-btn.primary-action{background:rgba(0,93,99,0.08);border-color:rgba(0,93,99,0.2);color:var(--primary);font-weight:600;}
-.doc-action-btn.primary-action:hover{background:rgba(0,93,99,0.16);}
-.doc-act-pair{display:flex;gap:6px;}
-.doc-act-pair .doc-action-btn{flex:1;padding:7px 6px;}
-.bm-btn{font-size:14px;}
-.bm-btn.bm-on{color:#f59e0b!important;border-color:rgba(245,158,11,0.3)!important;background:rgba(245,158,11,0.08)!important;}
+.row-menu[data-up]{transform-origin:bottom right;}
+[dir="rtl"] .row-menu{transform-origin:top left;}
+.row-menu[hidden]{display:none;}
+@keyframes rowMenuIn{from{opacity:0;transform:scale(0.97) translateY(-2px);}}
+.row-menu-item{
+  display:flex;align-items:center;gap:12px;width:100%;min-height:44px;
+  padding-inline:12px 16px;border:0;border-radius:9px;background:transparent;
+  font:inherit;font-size:14px;font-weight:500;color:#1E1C1A;text-align:start;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.row-menu-item svg{width:17px;height:17px;flex-shrink:0;color:#005D63;}
+.row-menu-item:hover,.row-menu-item:focus-visible{background:rgba(0,93,99,0.06);outline:none;}
+.row-menu-item:focus-visible{box-shadow:inset 0 0 0 2px #005D63;outline:none!important;}
+.row-menu-item:active{background:rgba(0,93,99,0.10);}
+/* On the dark canvas a shadow does not show, so the menu is lifted by its
+   surface and ring instead, with a faint light edge along the top. */
+html[data-taqa-theme="dark"] .row-menu{background:#00363A;box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1px rgba(0,187,182,0.26),0 22px 44px -18px rgba(0,0,0,0.7);}
+html[data-taqa-theme="dark"] .row-menu-item{color:#C7DBDD;}
+html[data-taqa-theme="dark"] .row-menu-item svg{color:#00BBB6;}
+html[data-taqa-theme="dark"] .row-menu-item:hover,html[data-taqa-theme="dark"] .row-menu-item:focus-visible{background:rgba(0,187,182,0.08);}
+html[data-taqa-theme="dark"] .row-menu-item:focus-visible{box-shadow:inset 0 0 0 2px #00BBB6;}
+@media (prefers-reduced-motion:reduce){.row-menu{animation:none;}.doc-card,.doc-more{transition:none;}}
+
+/* Wide screens: the review state and classification move to a column of
+   their own before the menu, so the row is two lines, not three, and the
+   eye does not cross an empty sheet to find them. */
+@media(min-width:900px){
+  .doc-card.has-state .doc-body{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:24px;row-gap:2px;
+    grid-template-areas:"eyebrow meta" "title meta";align-items:center;
+  }
+  .doc-card.has-state .doc-eyebrow{grid-area:eyebrow;}
+  .doc-card.has-state .doc-info-title{grid-area:title;}
+  .doc-card.has-state .doc-meta{grid-area:meta;text-align:end;max-width:320px;}
+}
+/* Phone: a row is never more than three lines of text: the reference, then
+   two for the title, or one for the title and one for its state. A title
+   cut short is read in full by a screen reader and in the viewer, and a
+   search shows it whole again so the match is never hidden. */
+@media(max-width:640px){
+  .doc-card{min-height:64px;}
+  .doc-row-link{grid-template-columns:32px minmax(0,1fr);column-gap:12px;padding-block:9px;padding-inline:14px 0;}
+  .doc-type-icon{width:32px;height:32px;border-radius:9px;font-size:9.5px;}
+  .doc-card + .doc-card::before{inset-inline:58px 14px;}
+  .doc-eyebrow{font-size:11px;height:14px;line-height:14px;}
+  .doc-info-title{font-size:15.5px;line-height:1.22;}
+  /* A title used to lose its second line on a phone whenever the row also
+     carried a status badge. The full title matters more than a tidy row
+     height, so it wraps the same as everywhere else and the row grows. */
+  .doc-meta{font-size:12px;line-height:1.3;}
+  .doc-more{margin-inline-end:2px;}
+  .docs-grid{border-radius:16px;}
+  .doc-group{padding-inline:14px;}
+}
+.doc-type-badge{padding:2px 9px;border-radius:50px;font-size:10.5px;font-weight:600;
+  background:rgba(0,93,99,0.07);color:var(--primary-ink);border:1px solid rgba(0,93,99,0.12);}
+.doc-type-badge.alert{background:rgba(253,105,29,0.1);color:#A8431A;border:1px solid rgba(253,105,29,0.2);}
+.doc-type-badge.software{background:rgba(0,93,99,0.07);color:var(--primary-ink);border:1px solid rgba(0,93,99,0.12);}
+html[data-taqa-theme="dark"] .doc-type-badge.alert,
+html[data-taqa-theme="dark"] .sh-pill.alert{color:#FF9B5E;}
 /* ── QR Modal ── */
-.qr-overlay{position:fixed;inset:0;z-index:900;background:rgba(10,20,32,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity 0.25s;display:flex;align-items:center;justify-content:center;}
-.qr-overlay.open{opacity:1;pointer-events:auto;}
+.qr-overlay{position:fixed;inset:0;z-index:900;background:rgba(0,28,30,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity 0.25s;display:flex;align-items:center;justify-content:center;}
+.qr-overlay:not(.open){visibility:hidden;transition:opacity 0.25s,visibility 0s linear 0.25s;}
+.qr-overlay.open{opacity:1;pointer-events:auto;visibility:visible;}
+/* With reduced motion the fade is dropped, and with it the delayed
+   visibility, so the dialog can take focus the moment it opens. */
+@media (prefers-reduced-motion:reduce){.qr-overlay,.qr-overlay:not(.open),.qr-box{transition:none!important;}}
+@media(max-width:640px){.qr-copy,.qr-url-in,.qr-close{min-height:44px;}}
 .qr-box{width:min(300px,88vw);background:rgba(255,255,255,0.98);border-radius:20px;padding:24px 20px 20px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.22);transform:scale(0.9);transition:transform 0.28s cubic-bezier(.32,1.12,.64,1);}
 .qr-overlay.open .qr-box{transform:scale(1);}
-.qr-doc-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:13px;font-weight:700;color:#1a2235;margin-bottom:14px;line-height:1.4;max-height:3.2em;overflow:hidden;}
-.qr-img{width:170px;height:170px;border-radius:10px;margin:0 auto 14px;display:block;border:3px solid #f4f5f7;}
+.qr-doc-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:13px;font-weight:700;color:#1E1C1A;margin-bottom:14px;line-height:1.4;max-height:3.2em;overflow:hidden;}
+.qr-img{width:170px;height:170px;border-radius:10px;margin:0 auto 14px;display:block;border:3px solid #F4F4F3;}
 .qr-url-row{display:flex;gap:7px;margin-bottom:8px;}
-.qr-url-in{flex:1;padding:7px 10px;border:1px solid rgba(0,0,0,0.1);border-radius:7px;font-size:10.5px;color:#64748b;background:#f8fafc;font-family:'Inter',sans-serif;min-width:0;}
+.qr-url-in{flex:1;padding:7px 10px;border:1px solid rgba(0,0,0,0.1);border-radius:7px;font-size:10.5px;color:#756A61;background:#F4F4F3;font-family:'Inter',sans-serif;min-width:0;}
+html[data-taqa-theme="dark"] .qr-url-in{background:#001314;border-color:rgba(0,187,182,0.2);color:#8CB6B9;}
 .qr-copy{padding:7px 12px;border-radius:7px;border:none;background:#005D63;color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
-.qr-close{display:block;width:100%;padding:9px;border-radius:9px;border:1px solid rgba(0,0,0,0.1);background:transparent;color:#64748b;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;}
-html[data-theme="dark"] .qr-box{background:rgba(20,32,50,0.99);}
-html[data-theme="dark"] .qr-doc-title{color:#dde4ef;}
-
-/* ── Alert Cards ── */
-.alert-card{
-  background:linear-gradient(135deg,rgba(253,105,29,0.06),rgba(253,105,29,0.02));
-  border:1px solid rgba(253,105,29,0.15);border-radius:14px;padding:20px 24px;
-  display:grid;grid-template-columns:auto 1fr auto;align-items:start;gap:20px;
-  transition:border-color 0.25s,box-shadow 0.25s;cursor:pointer;
-}
-.alert-card:hover{border-color:rgba(253,105,29,0.3);box-shadow:0 4px 16px rgba(0,0,0,0.08);}
-.alert-sev-badge{padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700;}
-.sev-high{background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.2);}
-.sev-medium{background:rgba(253,105,29,0.12);color:var(--accent);border:1px solid rgba(253,105,29,0.2);}
-.sev-low{background:rgba(234,179,8,0.1);color:#fbbf24;border:1px solid rgba(234,179,8,0.15);}
+.qr-close{display:block;width:100%;padding:9px;border-radius:9px;border:1px solid rgba(0,0,0,0.1);background:transparent;color:var(--text-light);font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;}
+html[data-taqa-theme="dark"] .qr-box{background:rgba(0,45,48,0.99);}
+html[data-taqa-theme="dark"] .qr-doc-title{color:#C7DBDD;}
 
 /* ── Empty State ── */
-.empty-state{text-align:center;padding:80px 40px;}
+.empty-state{text-align:center;padding:56px 24px;}
 .empty-icon{font-size:48px;margin-bottom:16px;opacity:0.4;}
 
 /* ── Skeleton Loading ── */
 @keyframes skeletonPulse{0%,100%{opacity:0.4;}50%{opacity:0.9;}}
-.skeleton-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:20px 24px;display:flex;gap:16px;align-items:flex-start;}
-.skel-icon{width:44px;height:44px;border-radius:10px;background:rgba(120,140,160,0.15);flex-shrink:0;animation:skeletonPulse 1.4s ease-in-out infinite;}
-.skel-lines{flex:1;display:flex;flex-direction:column;gap:10px;padding-top:4px;}
-.skel-line{height:11px;border-radius:6px;background:rgba(120,140,160,0.12);animation:skeletonPulse 1.4s ease-in-out infinite;}
+.skeleton-card{display:flex;gap:16px;align-items:center;min-height:72px;padding:13px 16px;position:relative;}
+.skeleton-card + .skeleton-card{border-top:1px solid var(--row-hair,rgba(117,106,97,0.12));}
+.skel-icon{width:36px;height:36px;border-radius:10px;background:rgba(150,140,131,0.15);flex-shrink:0;animation:skeletonPulse 1.4s ease-in-out infinite;}
+.skel-lines{flex:1;display:flex;flex-direction:column;gap:8px;}
+.skel-line{height:10px;border-radius:6px;background:rgba(150,140,131,0.12);animation:skeletonPulse 1.4s ease-in-out infinite;}
 .skel-line.w80{width:80%;}.skel-line.w60{width:60%;}.skel-line.w40{width:40%;}
 
 /* ── Recently Viewed ── */
 .recent-strip{margin-bottom:28px;}
-.recent-strip-label{font-size:10.5px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--primary);margin-bottom:12px;}
-.recent-cards{display:flex;gap:10px;flex-wrap:wrap;}
-.recent-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;padding:11px 16px;cursor:pointer;transition:border-color 0.2s,box-shadow 0.2s;min-width:0;flex:0 0 auto;max-width:260px;}
+.recent-strip-label{font-size:10px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--text-light,#756A61);margin-bottom:8px;}
+/* A row of equal cells rather than pills that size themselves to their text,
+   which is what made the strip look ragged and take more room than it earns. */
+.recent-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:10px;}
+@media(max-width:820px){.recent-cards{grid-template-columns:1fr;}}
+.recent-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;padding:10px 14px;cursor:pointer;transition:border-color 0.2s,box-shadow 0.2s;min-width:0;}
 .recent-card:hover{border-color:var(--glass-border-hover);box-shadow:0 4px 12px rgba(0,0,0,0.08);}
 .recent-card-title{font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
-.recent-card-meta{font-size:11px;color:var(--text-muted);}
+.recent-card-meta{font-size:10.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
 /* ── Copy Link feedback ── */
-.copy-ok{color:var(--primary)!important;border-color:rgba(0,187,182,0.3)!important;}
+.copy-ok{color:var(--primary-ink)!important;border-color:rgba(0,187,182,0.3)!important;}
 
 /* ── Print ── */
 @media print{
-  nav,.seg-hero-banner,footer,.doc-toolbar,.tabs-outer,.scroll-top-btn,.doc-actions,.alert-pulse-dot,.doc-new-badge{display:none!important;}
+  /* Paper is white whichever theme was on screen, so marks print in the
+     light inks; the dark-theme teal measured 2.4:1 on paper. */
+  .doc-type-icon,.doc-type-badge,.doc-num{color:#005D63!important;}
+  .doc-type-icon.alert,.doc-type-badge.alert{color:#A8431A!important;}
+  .doc-meta{color:#524D48!important;}
+  nav,.seg-hero-banner,footer,.doc-toolbar,.tabs-outer,.scroll-top-btn,.doc-more,.row-menu,.alert-pulse-dot,.doc-new-badge{display:none!important;}
   body{background:#fff!important;color:#111!important;}
   .page-wrapper{background:#fff!important;}
-  .doc-card,.alert-card{border:1px solid #ddd!important;background:#fff!important;box-shadow:none!important;page-break-inside:avoid;margin-bottom:8px;}
-  .doc-summary{color:#444!important;}
+  .docs-grid{box-shadow:none!important;background:#fff!important;}
+  .doc-card{page-break-inside:avoid;}
+  .doc-info-title{color:#1E1C1A!important;}
   .tab-panel{display:block!important;}
   .content-outer{padding:0!important;}
 }
+.empty-icon.empty-mark{opacity:1;}
+.empty-mark{display:inline-flex;align-items:center;justify-content:center;min-width:52px;height:52px;padding:0 10px;margin-bottom:14px;border-radius:12px;border:1.5px dashed rgba(0,93,99,0.35);color:var(--primary-ink);font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;font-weight:700;letter-spacing:.04em;}
+html[data-taqa-theme="dark"] .empty-mark{border-color:rgba(0,187,182,0.4);}
 .empty-state h3{font-family:'BwGradual','Urbanist',sans-serif;font-size:18px;font-weight:600;margin-bottom:8px;color:var(--text-muted);}
-.empty-state p{font-size:14px;color:var(--text-dim);}
+.empty-state p{font-size:14px;color:var(--text-muted);}
 
 /* ── Footer ── */
 footer{border-top:none;padding:0;background:transparent;position:relative;margin-top:auto;height:4px;}
 footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#005D63;}
 .footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
-.footer-brand{font-family:'BwGradual','Urbanist',sans-serif;font-weight:700;font-size:13.5px;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.footer-brand{font-family:'BwGradual','Urbanist',sans-serif;font-weight:700;font-size:13.5px;color:var(--primary-ink);}
 .footer-copy{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
 .footer-links{display:flex;gap:20px;}
 .footer-links a{font-size:12.5px;color:var(--text-muted);text-decoration:none;transition:color 0.2s;}
-.footer-links a:hover{color:var(--primary);}
+.footer-links a:hover{color:var(--primary-ink);}
 .bg-blobs{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
 .bg-blob{position:absolute;border-radius:50%;filter:blur(100px);}
-.bg-blob-1{width:720px;height:720px;top:-220px;left:-200px;background:radial-gradient(circle,rgba(0,187,182,0.13) 0%,transparent 65%);animation:blob1 26s ease-in-out infinite;}
-.bg-blob-2{width:580px;height:580px;top:38%;right:-160px;background:radial-gradient(circle,rgba(0,93,99,0.10) 0%,transparent 65%);animation:blob2 32s ease-in-out infinite;}
-.bg-blob-3{width:460px;height:460px;bottom:-80px;left:28%;background:radial-gradient(circle,rgba(0,187,182,0.08) 0%,transparent 65%);animation:blob3 22s ease-in-out infinite;}
+.bg-blob-1{width:720px;height:720px;top:-220px;left:-200px;background:radial-gradient(circle,rgba(0,187,182,0.13) 0%,transparent 65%);}
+.bg-blob-2{width:580px;height:580px;top:38%;right:-160px;background:radial-gradient(circle,rgba(0,93,99,0.10) 0%,transparent 65%);}
+.bg-blob-3{width:460px;height:460px;bottom:-80px;left:28%;background:radial-gradient(circle,rgba(0,187,182,0.08) 0%,transparent 65%);}
 @keyframes blob1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(50px,-70px) scale(1.08);}}
 @keyframes blob2{0%,100%{transform:translate(0,0) scale(1);}40%{transform:translate(-60px,50px) scale(1.06);}80%{transform:translate(30px,-30px) scale(0.95);}}
 @keyframes blob3{0%,100%{transform:translate(0,0) scale(1);}60%{transform:translate(-40px,60px) scale(1.1);}}
 ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(0,93,99,0.28);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:rgba(0,93,99,0.5);}
-.nav-links{position:relative;}.nav-pill{position:absolute;top:50%;transform:translateY(-50%);height:34px;background:rgba(0,93,99,0.1);border-radius:8px;transition:left 0.28s cubic-bezier(.4,0,.2,1),width 0.28s cubic-bezier(.4,0,.2,1),opacity 0.2s;pointer-events:none;z-index:0;opacity:0;}
-.nav-links a.active::after{display:none!important;}
-.dark-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:border-color 0.2s,color 0.2s,background 0.2s;flex-shrink:0;padding:0;}
-.dark-toggle:hover{border-color:var(--primary);color:var(--primary);background:rgba(0,93,99,0.06);}
-html[data-theme="dark"]{--dark:#0e1824;--dark-2:#111e2d;--dark-3:#19263a;--dark-4:#19263a;--glass:rgba(25,38,58,0.88);--glass-border:rgba(255,255,255,0.07);--text:#dde4ef;--text-muted:#7e94ab;}
-html[data-theme="dark"] body{background:#0e1824;}
-html[data-theme="dark"] nav{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.06);}
-html[data-theme="dark"] .nav-brand-name{color:#dde4ef;}html[data-theme="dark"] .nav-brand-hub{color:#7e94ab;}
-html[data-theme="dark"] .nav-pill{background:rgba(0,187,182,0.12);}
-html[data-theme="dark"] .dark-toggle{border-color:rgba(255,255,255,0.1);color:#7e94ab;}
-html[data-theme="dark"] .btn-ghost{border-color:rgba(255,255,255,0.1);color:#7e94ab;}
-html[data-theme="dark"] .tabs{background:rgba(25,38,58,0.9);border-color:rgba(255,255,255,0.07);}
-html[data-theme="dark"] .tab-btn{color:#7e94ab;}html[data-theme="dark"] .tab-btn.active{background:#19263a;color:#dde4ef;}
-html[data-theme="dark"] .doc-card{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] .doc-card:hover{border-color:rgba(0,187,182,0.3);}
-html[data-theme="dark"] .sidebar-card{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] footer{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2);}
-html[data-theme="dark"] .bg-blob-1{background:radial-gradient(circle,rgba(0,187,182,0.05) 0%,transparent 65%);}
-html[data-theme="dark"] .bg-blob-2{background:radial-gradient(circle,rgba(0,93,99,0.04) 0%,transparent 65%);}
-html[data-theme="dark"] .bg-blob-3{background:radial-gradient(circle,rgba(0,187,182,0.03) 0%,transparent 65%);}
-html[data-theme="dark"] .doc-modal-panel{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] .doc-modal-overlay{background:rgba(0,0,0,0.65);}
-html[data-theme="dark"] .scroll-top-btn{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.1);}
+/* Tier 3 existed only as a fallback baked into two rules, so the light ramp's
+   grey walked into dark mode with them. Named here, it lifts with the theme. */
+html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--alert-ink:#FF9B5E;--warn-ink:#FFB81C;--ok-ink:#4FD1B5;--stop-ink:#FF8A94;--info-ink:#6BC5EE;--dark:#001314;--dark-2:#002D30;--dark-3:#002326;--dark-4:#002326;--glass:rgba(0,45,48,0.88);--glass-border:rgba(255,255,255,0.07);--text:#C7DBDD;--text-muted:#8CB6B9;--text-light:#619B9E;}
+html[data-taqa-theme="dark"] body{background:#001314;}
+html[data-taqa-theme="dark"] .btn-ghost{border-color:rgba(255,255,255,0.1);color:#619B9E;}
+html[data-taqa-theme="dark"] .tabs{background:rgba(0,45,48,0.9);border-color:rgba(255,255,255,0.07);}
+html[data-taqa-theme="dark"] .tab-btn{color:#00BBB6;}html[data-taqa-theme="dark"] .tab-btn.active{background:#002326;color:#00BBB6;}
+html[data-taqa-theme="dark"] .sidebar-card{background:#002326;border-color:#003A3D;}
+html[data-taqa-theme="dark"] footer{background:#002326;border-color:#003A3D;}
+html[data-taqa-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2);}
+html[data-taqa-theme="dark"] .bg-blob-1{background:radial-gradient(circle,rgba(0,187,182,0.05) 0%,transparent 65%);}
+html[data-taqa-theme="dark"] .bg-blob-2{background:radial-gradient(circle,rgba(0,93,99,0.04) 0%,transparent 65%);}
+html[data-taqa-theme="dark"] .bg-blob-3{background:radial-gradient(circle,rgba(0,187,182,0.03) 0%,transparent 65%);}
+html[data-taqa-theme="dark"] .doc-modal-panel{background:#002326;border-color:#003A3D;}
+html[data-taqa-theme="dark"] .doc-modal-overlay{background:rgba(0,0,0,0.65);}
+html[data-taqa-theme="dark"] .scroll-top-btn{background:rgba(0,35,38,0.92);border-color:rgba(255,255,255,0.1);}
 
 /* ── Document Detail Modal ── */
 .doc-modal-overlay{
   position:fixed;inset:0;z-index:800;
-  background:rgba(10,20,32,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  background:rgba(0,28,30,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
   opacity:0;transition:opacity 0.3s;pointer-events:none;
 }
 .doc-modal-overlay.open{opacity:1;pointer-events:auto;}
@@ -414,12 +610,14 @@ html[data-theme="dark"] .scroll-top-btn{background:rgba(14,24,36,0.92);border-co
   width:52px;height:52px;border-radius:13px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
   font-family:'BwGradual','Urbanist',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.5px;margin-bottom:14px;
+  background:rgba(0,93,99,0.07);color:var(--primary-ink);border:1px solid rgba(0,93,99,0.14);
 }
+.doc-modal-type-icon.alert{background:rgba(253,105,29,0.10);color:var(--alert-ink,#A8431A);border-color:rgba(253,105,29,0.22);}
 .doc-modal-body{flex:1;overflow-y:auto;padding:24px 28px 32px;}
 .doc-modal-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px;line-height:1.3;}
 .doc-modal-badge-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
 .doc-modal-section{margin-bottom:20px;}
-.doc-modal-section-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--primary-light);margin-bottom:8px;}
+.doc-modal-section-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--primary-ink);margin-bottom:8px;}
 .doc-modal-text{font-size:13.5px;color:var(--text-muted);line-height:1.7;}
 .doc-modal-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
 .doc-modal-meta-cell{background:rgba(0,93,99,0.04);border:1px solid var(--glass-border);border-radius:9px;padding:12px 14px;}
@@ -430,7 +628,7 @@ html[data-theme="dark"] .scroll-top-btn{background:rgba(14,24,36,0.92);border-co
 .doc-modal-btn-primary{background:var(--gradient);color:#fff;border:none;}
 .doc-modal-btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,93,99,0.35);}
 .doc-modal-btn-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--text-muted);}
-.doc-modal-btn-ghost:hover{border-color:var(--glass-border-hover);color:var(--primary-light);}
+.doc-modal-btn-ghost:hover{border-color:var(--glass-border-hover);color:var(--primary-ink);}
 
 /* ── Page Exit Transition ── */
 @keyframes pageFadeOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-5px);}}
@@ -449,26 +647,20 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 .scroll-top-btn.stp-visible{opacity:1;transform:translateY(0);}
 .scroll-top-btn:hover{box-shadow:0 8px 28px rgba(0,93,99,0.3);transform:translateY(-3px)!important;}
 .scroll-top-btn svg{position:absolute;top:0;left:0;width:46px;height:46px;}
-.stp-arrow{font-size:13px;color:var(--primary);position:relative;z-index:1;font-weight:800;}
+.stp-arrow{font-size:13px;color:var(--primary-ink);position:relative;z-index:1;font-weight:800;}
 
 @media(max-width:768px){
-  .seg-hero-inner{grid-template-columns:1fr;}
-  .seg-hero-stats{display:none;}
-  .seg-hero-banner::before{background:rgba(6,18,26,0.88);}
-  nav{padding:0 20px;}.breadcrumb,.seg-hero,.content-outer{padding-left:20px;padding-right:20px;}
-  .tabs-outer{padding:8px 12px;top:64px;}
-  .doc-card{grid-template-columns:auto 1fr;}
-  .doc-actions{grid-column:1/-1;flex-direction:row;min-width:unset;gap:8px;}
-  .doc-action-btn{width:auto;padding:7px 14px;font-size:12px;}
+  .seg-hero-banner::before{background:rgba(0,19,20,0.88);}
+  .breadcrumb,.seg-hero,.content-outer{padding-left:20px;padding-right:20px;}
+  .tabs-outer{padding:8px 12px;top:var(--nav-h,64px);}
   footer{padding:12px 20px;}
   .footer-links{display:none;}
   .footer-copy{display:none;}
 }
 @media(max-width:640px){
-  .nav-right .btn,.nav-right a.btn{display:none!important;}
   /* Breadcrumb: 72px clears the 64px mobile nav with 8px margin (not 88px) */
   .breadcrumb{padding-top:72px;font-size:11px;}
-  /* Icon: hide on mobile — it stacks and eats ~80px of vertical space */
+  /* Icon: hide on mobile, it stacks and eats ~80px of vertical space */
   .seg-hero-icon{display:none;}
   /* Hero: correct element selectors (not .seg-hero-title/.seg-hero-sub) */
   .seg-hero h1{font-size:clamp(22px,5.5vw,30px);letter-spacing:-0.4px;}
@@ -478,71 +670,74 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .seg-hero-tag{font-size:10px;margin-bottom:10px;}
   .seg-hero-meta{gap:12px;}
   .seg-meta-item{font-size:12px;}
-  /* Contributors row uses white-space:nowrap inline — hides the entire page right
+  /* Contributors row uses white-space:nowrap inline, hides the entire page right
      on mobile. Hide it; the name/total/alert meta above gives enough context. */
   #seg-contributors-row{display:none!important;}
   .seg-hero{padding-bottom:28px;}
   .doc-toolbar{flex-direction:column;align-items:stretch;gap:10px;}
   .doc-search{max-width:100%;}
   .doc-count-label{font-size:12px;}
-  .doc-card-title{font-size:13.5px;}
-  .doc-summary{-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;}
-  .alert-card{flex-direction:column;gap:12px;}
-  .mini-stats{gap:12px;}
-  .mini-stat{padding:12px 16px;}
   .manage-btn{font-size:10.5px;padding:5px 10px;}
+  /* Touch: every control in the library answers a 44px finger. The tab bar
+     and the small buttons keep their drawn size and grow an invisible hit
+     area; pagination is simply drawn at 44px. */
+  .tab-btn,.sort-btn,.manage-btn,.copy-link-btn,.breadcrumb a{position:relative;}
+  .tab-btn::after{content:'';position:absolute;inset:-5px 0;}
+  .sort-btn::after{content:'';position:absolute;inset:-10px -2px;}
+  .manage-btn::after,.copy-link-btn::after{content:'';position:absolute;inset:-11px -4px;}
+  .manage-btn,.copy-link-btn,.sort-btn{z-index:1;}
+  /* The crumbs sit 16px under the top bar, room for a full finger-sized
+     hit area that does not reach under the bar. */
+  .breadcrumb{position:relative;z-index:2;padding-top:80px;padding-bottom:16px;}
+  .seg-hero{padding-top:0;}
+  .breadcrumb a::after{content:'';position:absolute;inset:-15px -8px;}
+  .pg-btn,.pg-btn.pg-nav{height:44px;min-width:44px;}
 }
+/* shared.js sets overflow-x:hidden on both html and body. That makes the
+   body a scroll box of its own, which never scrolls, so the tab bar had
+   nothing to stick to on a phone and slid away under the top bar. Clip
+   hides the same sideways overflow without making a scroll box. */
+html:root{overflow-x:clip;}
+html body{overflow-x:clip;}
 @media(max-width:480px){
-  .breadcrumb{padding-top:68px;}
-  .seg-hero{padding-top:10px;padding-bottom:20px;}
+  .seg-hero{padding-top:2px;padding-bottom:20px;}
   .seg-hero h1{font-size:22px;}
   .seg-hero-desc{font-size:13px;}
-  .doc-actions{flex-wrap:wrap;}
-  .doc-action-btn.primary-action{flex:1;}
 }
+
+
+
 </style>
+<link rel="stylesheet" href="topbar.css">
 </head>
 <body>
 <div class="bg-blobs" aria-hidden="true"><div class="bg-blob bg-blob-1"></div><div class="bg-blob bg-blob-2"></div><div class="bg-blob bg-blob-3"></div></div>
 <canvas id="bg-canvas"></canvas>
 <div class="page-wrapper">
 
-<nav>
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
   <a href="index.html" class="nav-brand">
-    <span class="nav-brand-text"><span class="nav-brand-name">TAQA</span> <span class="nav-brand-hub">Knowledge Hub</span><span class="nav-subtitle" style="white-space:nowrap"><em style="color:#005D63; font-style:italic;">Tech Hub</em> <span style="color:#94a3b8;">(working name)</span></span></span>
+    <span class="nav-title"><span class="nav-title-brand">TAQA</span> <span class="nav-title-hub">Knowledge Hub</span></span>
+    <span class="nav-subtitle"><em>TechHub Platform</em></span>
   </a>
   <ul class="nav-links">
-    <div class="nav-pill" id="nav-pill"></div>
     <li><a href="index.html">Home</a></li>
-    <li class="nav-dropdown nav-dropdown-li" id="seg-dropdown-li">
-      <button class="nav-dropdown-btn" id="seg-dropdown-btn" aria-haspopup="true" aria-expanded="false">
-        Segments
-        <svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <div class="nav-dropdown-panel" role="menu">
-        <a href="segment.html?id=coiled-tubing" class="seg-dd-item"><span class="seg-dd-name">Coiled Tubing</span><span class="seg-dd-tag">Operations</span></a>
-        <a href="segment.html?id=fracturing" class="seg-dd-item"><span class="seg-dd-name">Fracturing</span><span class="seg-dd-tag">Stimulation</span></a>
-        <a href="segment.html?id=wireline" class="seg-dd-item"><span class="seg-dd-name">Wireline</span><span class="seg-dd-tag">Logging</span></a>
-        <a href="segment.html?id=drilling" class="seg-dd-item"><span class="seg-dd-name">Drilling</span><span class="seg-dd-tag">Well Operations</span></a>
-        <a href="segment.html?id=cementing" class="seg-dd-item"><span class="seg-dd-name">Cementing</span><span class="seg-dd-tag">Well Integrity</span></a>
-        <a href="segment.html?id=inspection" class="seg-dd-item"><span class="seg-dd-name">Inspection Services</span><span class="seg-dd-tag">Compliance</span></a>
-        <a href="segment.html?id=well-safety" class="seg-dd-item"><span class="seg-dd-name">Well Safety</span><span class="seg-dd-tag">HSE Critical</span></a>
-        <a href="segment.html?id=qhse" class="seg-dd-item"><span class="seg-dd-name">QHSE</span><span class="seg-dd-tag">Quality & Safety</span></a>
-        <a href="segment.html?id=tws-maintenance" class="seg-dd-item"><span class="seg-dd-name">TWS Maintenance</span><span class="seg-dd-tag">Maintenance</span></a>
-        <a href="segment.html?id=hr" class="seg-dd-item"><span class="seg-dd-name">Human Resources</span><span class="seg-dd-tag">HR & People</span></a>
-        <a href="segment.html?id=well-testing" class="seg-dd-item"><span class="seg-dd-name">Well Testing</span><span class="seg-dd-tag">Testing Services</span></a>
-      </div>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn active" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
     </li>
     <li><a href="ai-search.html">Document Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
     <li><a href="glossary.html">Field Glossary</a></li>
-    <li><a href="upload.html">Upload</a></li>
     <li><a href="support-ticket.html">Ask Expert</a></li>
   </ul>
   <div class="nav-right">
-    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode"><svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
-    <button class="bell-btn" id="nav-bell" onclick="location.href='dashboard.html'" title="Pending approvals" aria-label="Pending approvals"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge">3</span></button>
-    <a href="ai-search.html" class="btn btn-ghost">AI Search</a>
-    <a href="upload.html" class="btn btn-primary">+ Upload</a>
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
@@ -565,14 +760,15 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
         <h1 id="seg-name">Loading...</h1>
         <p class="seg-hero-desc" id="seg-desc">Loading segment description...</p>
         <div class="seg-hero-meta">
-          <div class="seg-meta-item"><strong id="seg-total">–</strong> Total Documents</div>
-          <div class="seg-meta-item"><strong id="seg-alerts">–</strong> Active Alerts</div>
+          <div class="seg-meta-item"><strong id="seg-total">,</strong> Documents in Force</div>
+          <div class="seg-meta-item"><strong id="seg-alerts">,</strong> Active Alerts</div>
+          <div class="seg-meta-item" id="seg-pending-wrap" hidden><strong id="seg-pending">0</strong> Awaiting Approval</div>
           <div class="seg-meta-item">Updated <strong id="seg-updated">recently</strong></div>
-          <div class="seg-meta-item" id="seg-contributors-row" style="display:none;"><strong id="seg-contributors">–</strong></div>
+          <div class="seg-meta-item" id="seg-contributors-row" style="display:none;"><strong id="seg-contributors">,</strong></div>
         </div>
         <div style="margin-top:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-          <span style="font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);">Part of <em style="color:#4DD9D3;font-style:italic;font-weight:700;text-transform:none;letter-spacing:0;">Tech Hub</em> <span style="opacity:0.7;font-style:normal;">(working name)</span></span>
-          <a href="dashboard.html" class="manage-btn">
+          <span style="font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.72);">Part of <em style="font-style:italic;font-weight:700;text-transform:none;letter-spacing:0;background:linear-gradient(120deg, #00BBB6 15%, #EAFFFD 85%);-webkit-background-clip:text;background-clip:text;color:transparent;">TechHub Platform</em></span>
+          <a href="dashboard.html" class="manage-btn" id="manage-btn" hidden>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
             Manage Segment
           </a>
@@ -582,28 +778,23 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
           </button>
         </div>
       </div>
-      <div class="seg-hero-stats">
-        <div class="mini-stat"><div class="mini-stat-num" id="ms-sops">–</div><div class="mini-stat-label" id="ms-label-sops">SOPs</div></div>
-        <div class="mini-stat"><div class="mini-stat-num" id="ms-manuals">–</div><div class="mini-stat-label" id="ms-label-manuals">Manuals</div></div>
-        <div class="mini-stat"><div class="mini-stat-num" id="ms-policies">–</div><div class="mini-stat-label">Policies</div></div>
-        <div class="mini-stat"><div class="mini-stat-num" id="ms-lessons">–</div><div class="mini-stat-label" id="ms-label-lessons">Lessons</div></div>
-        <div class="mini-stat"><div class="mini-stat-num" id="ms-software" style="color:#38bdf8;">–</div><div class="mini-stat-label">Software</div></div>
-      </div>
     </div>
   </div>
 
 </div><!-- /seg-hero-banner -->
 
+
+
 <!-- ── Tabs ── -->
 <div class="tabs-outer">
   <div class="tabs" id="tab-bar">
-    <button class="tab-btn" data-tab="all">All <span class="tab-count" id="tc-all" style="background:var(--gradient);color:#fff;">–</span></button>
-    <button class="tab-btn active" data-tab="sops">SOPs <span class="tab-count" id="tc-sops">–</span></button>
-    <button class="tab-btn" data-tab="manuals">Manuals <span class="tab-count" id="tc-manuals">–</span></button>
-    <button class="tab-btn" data-tab="policies">Policies <span class="tab-count" id="tc-policies">–</span></button>
-    <button class="tab-btn" data-tab="alerts">Alerts <span class="tab-alert-count" id="tc-alerts">–</span><span class="alert-pulse-dot" id="alert-pulse-dot"></span></button>
-    <button class="tab-btn" data-tab="lessons">Lessons Learned <span class="tab-count" id="tc-lessons">–</span></button>
-    <button class="tab-btn" data-tab="software">Software <span class="tab-count" id="tc-software" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8);">–</span></button>
+    <button class="tab-btn" data-tab="all">All <span class="tab-count" id="tc-all">,</span></button>
+    <button class="tab-btn" data-tab="policies">Standards <span class="tab-count" id="tc-policies">,</span></button>
+    <button class="tab-btn active" data-tab="sops">SOPs <span class="tab-count" id="tc-sops">,</span></button>
+    <button class="tab-btn" data-tab="manuals">Manuals <span class="tab-count" id="tc-manuals">,</span></button>
+    <button class="tab-btn" data-tab="alerts">Alerts <span class="tab-alert-count" id="tc-alerts">,</span><span class="alert-pulse-dot" id="alert-pulse-dot"></span></button>
+    <button class="tab-btn" data-tab="lessons">Lessons Learned <span class="tab-count" id="tc-lessons">,</span></button>
+    <button class="tab-btn" data-tab="software">Software <span class="tab-count" id="tc-software">,</span></button>
   </div>
 </div>
 
@@ -618,8 +809,8 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-all">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search all documents..." oninput="filterDocs(this,'all')"></div>
-      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'all','default')">Default</button><button class="sort-btn" onclick="setSort(this,'all','az')">A–Z</button></div>
-      <span class="doc-count-label">Showing <strong id="vis-all">–</strong> documents</span>
+      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'all','default')">Default</button><button class="sort-btn" onclick="setSort(this,'all','az')">A, Z</button><button class="sort-btn sort-overdue" onclick="setSort(this,'all','overdue')" hidden>Overdue first</button></div>
+      <span class="doc-count-label">Showing <strong id="vis-all">,</strong> documents</span>
     </div>
     <div class="docs-grid" id="list-all"></div>
   </div>
@@ -627,8 +818,8 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel active" id="panel-sops">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search SOPs..." oninput="filterDocs(this,'sops')"></div>
-      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'sops','default')">Default</button><button class="sort-btn" onclick="setSort(this,'sops','az')">A–Z</button></div>
-      <span class="doc-count-label">Showing <strong id="vis-sops">–</strong> procedures</span>
+      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'sops','default')">Default</button><button class="sort-btn" onclick="setSort(this,'sops','az')">A, Z</button><button class="sort-btn sort-overdue" onclick="setSort(this,'sops','overdue')" hidden>Overdue first</button></div>
+      <span class="doc-count-label">Showing <strong id="vis-sops">,</strong> procedures</span>
     </div>
     <div class="docs-grid" id="list-sops"></div>
   </div>
@@ -636,8 +827,8 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-manuals">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search manuals..." oninput="filterDocs(this,'manuals')"></div>
-      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'manuals','default')">Default</button><button class="sort-btn" onclick="setSort(this,'manuals','az')">A–Z</button></div>
-      <span class="doc-count-label">Showing <strong id="vis-manuals">–</strong> manuals</span>
+      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'manuals','default')">Default</button><button class="sort-btn" onclick="setSort(this,'manuals','az')">A, Z</button><button class="sort-btn sort-overdue" onclick="setSort(this,'manuals','overdue')" hidden>Overdue first</button></div>
+      <span class="doc-count-label">Showing <strong id="vis-manuals">,</strong> manuals</span>
     </div>
     <div class="docs-grid" id="list-manuals"></div>
   </div>
@@ -645,8 +836,8 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-policies">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search policies..." oninput="filterDocs(this,'policies')"></div>
-      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'policies','default')">Default</button><button class="sort-btn" onclick="setSort(this,'policies','az')">A–Z</button></div>
-      <span class="doc-count-label">Showing <strong id="vis-policies">–</strong> policies</span>
+      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'policies','default')">Default</button><button class="sort-btn" onclick="setSort(this,'policies','az')">A, Z</button><button class="sort-btn sort-overdue" onclick="setSort(this,'policies','overdue')" hidden>Overdue first</button></div>
+      <span class="doc-count-label">Showing <strong id="vis-policies">,</strong> standards</span>
     </div>
     <div class="docs-grid" id="list-policies"></div>
   </div>
@@ -654,8 +845,8 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-alerts">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search alerts..." oninput="filterDocs(this,'alerts')"></div>
-      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'alerts','default')">Default</button><button class="sort-btn" onclick="setSort(this,'alerts','az')">A–Z</button></div>
-      <span class="doc-count-label">Showing <strong id="vis-alerts">–</strong> alerts</span>
+      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'alerts','default')">Default</button><button class="sort-btn" onclick="setSort(this,'alerts','az')">A, Z</button><button class="sort-btn sort-overdue" onclick="setSort(this,'alerts','overdue')" hidden>Overdue first</button></div>
+      <span class="doc-count-label">Showing <strong id="vis-alerts">,</strong> alerts</span>
     </div>
     <div class="docs-grid" id="list-alerts"></div>
   </div>
@@ -663,8 +854,8 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-lessons">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search lessons..." oninput="filterDocs(this,'lessons')"></div>
-      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'lessons','default')">Default</button><button class="sort-btn" onclick="setSort(this,'lessons','az')">A–Z</button></div>
-      <span class="doc-count-label">Showing <strong id="vis-lessons">–</strong> lessons</span>
+      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'lessons','default')">Default</button><button class="sort-btn" onclick="setSort(this,'lessons','az')">A, Z</button><button class="sort-btn sort-overdue" onclick="setSort(this,'lessons','overdue')" hidden>Overdue first</button></div>
+      <span class="doc-count-label">Showing <strong id="vis-lessons">,</strong> lessons</span>
     </div>
     <div class="docs-grid" id="list-lessons"></div>
   </div>
@@ -672,8 +863,8 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <div class="tab-panel" id="panel-software">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search software & tools..." oninput="filterDocs(this,'software')"></div>
-      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'software','default')">Default</button><button class="sort-btn" onclick="setSort(this,'software','az')">A–Z</button></div>
-      <span class="doc-count-label">Showing <strong id="vis-software">–</strong> tools</span>
+      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'software','default')">Default</button><button class="sort-btn" onclick="setSort(this,'software','az')">A, Z</button></div>
+      <span class="doc-count-label">Showing <strong id="vis-software">,</strong> tools</span>
     </div>
     <div class="docs-grid" id="list-software"></div>
   </div>
@@ -725,6 +916,9 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   <span class="stp-arrow">↑</span>
 </button>
 
+<script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script src="store.js"></script>
 <script>
 // ── Segment Data ──
 const SEGMENTS = {
@@ -742,14 +936,14 @@ const SEGMENTS = {
         'Chemical Handling Manual','Data Acquisition Manual','CT Wellhead Equipment Manual'],
       policies:['CT Operations Authorization Policy','Equipment Certification Policy','Crew Competency Requirements',
         'Environmental Compliance Policy','CT Asset Management Policy','Incident Reporting Policy'],
-      alerts:['⚠️ ALERT-CT-001: BHA connector fatigue — inspect all units before next run',
-        '⚠️ ALERT-CT-002: New pressure rating for 2-inch CT string — effective immediately',
+      alerts:['⚠️ ALERT-CT-001: BHA connector fatigue, inspect all units before next run',
+        '⚠️ ALERT-CT-002: New pressure rating for 2-inch CT string, effective immediately',
         '⚠️ ALERT-CT-003: Chemical compatibility update for H2S environments'],
-      lessons:['LL-CT-001: Near-miss during CT rig-up — lessons from H2 field',
-        'LL-CT-002: CT string failure analysis — root cause and prevention',
+      lessons:['LL-CT-001: Near-miss during CT rig-up, lessons from H2 field',
+        'LL-CT-002: CT string failure analysis, root cause and prevention',
         'LL-CT-003: Lessons from coiled tubing fishing operation',
-        'LL-CT-004: Mud motor stall — diagnosis and recovery',
-        'LL-CT-005: Pressure integrity test failure — field findings'],
+        'LL-CT-004: Mud motor stall, diagnosis and recovery',
+        'LL-CT-005: Pressure integrity test failure, field findings'],
       software:['Orion CT Control System | v2.3 | Windows 10/11 | 145 MB',
         'WellPlan CT Simulator | v4.1 | Windows 10/11 | 312 MB',
         'CoilScan Inspection Reporter | v1.8 | Windows 10 | 89 MB']
@@ -773,17 +967,17 @@ const SEGMENTS = {
       policies:['Frac Authorization & WOCS Policy','High Pressure Operations Policy','Fluid Disposal Policy',
         'Personnel Safety Policy','Equipment Inspection Policy','Environmental Impact Policy',
         'Chemical Management Policy','Night Operations Policy'],
-      alerts:['⚠️ ALERT-FRAC-001: Iron fatigue update — mandatory NDT before Q3 campaign',
+      alerts:['⚠️ ALERT-FRAC-001: Iron fatigue update, mandatory NDT before Q3 campaign',
         '⚠️ ALERT-FRAC-002: Revised MAASP limits for slim-hole completions',
         '⚠️ ALERT-FRAC-003: New proppant concentration limits for high-temperature wells',
-        '⚠️ ALERT-FRAC-004: Fluid additive compatibility change — check all blends',
-        '⚠️ ALERT-FRAC-005: Screen-out risk in carbonate formations — updated protocol'],
-      lessons:['LL-FRAC-001: Surface line failure during multi-stage frac — preventive actions',
-        'LL-FRAC-002: Premature screen-out — root cause analysis','LL-FRAC-003: Chemical spill during fluid mixing — improved containment',
-        'LL-FRAC-004: Equipment failure in extreme temperature — design modifications',
-        'LL-FRAC-005: Wellhead pressure anomaly — identification and mitigation',
-        'LL-FRAC-006: Crew safety observation — confined space near pump unit',
-        'LL-FRAC-007: Data acquisition failure — system improvements implemented'],
+        '⚠️ ALERT-FRAC-004: Fluid additive compatibility change, check all blends',
+        '⚠️ ALERT-FRAC-005: Screen-out risk in carbonate formations, updated protocol'],
+      lessons:['LL-FRAC-001: Surface line failure during multi-stage frac, preventive actions',
+        'LL-FRAC-002: Premature screen-out, root cause analysis','LL-FRAC-003: Chemical spill during fluid mixing, improved containment',
+        'LL-FRAC-004: Equipment failure in extreme temperature, design modifications',
+        'LL-FRAC-005: Wellhead pressure anomaly, identification and mitigation',
+        'LL-FRAC-006: Crew safety observation, confined space near pump unit',
+        'LL-FRAC-007: Data acquisition failure, system improvements implemented'],
       software:['FracPro RT Fracturing Simulator | v10.5 | Windows 10/11 | 425 MB',
         'GOHFER Hydraulic Fracturing Software | v8.2 | Windows 10 | 280 MB',
         'DataVan Monitoring Suite | v3.0 | Windows 10/11 | 156 MB']
@@ -791,7 +985,7 @@ const SEGMENTS = {
   },
   'wireline': {
     name:'Wireline', icon:'📡', tag:'Logging',
-    desc:'Wireline logging, perforating, and well intervention operations — memory, pump-down, and slickline procedures.',
+    desc:'Wireline logging, perforating, and well intervention operations, memory, pump-down, and slickline procedures.',
     sops:10, manuals:8, policies:5, alerts:0, lessons:4, software:2,
     docs:{
       sops:['WL-001 Pre-Job Hazard Assessment','WL-002 Tool String Assembly SOP','WL-003 Perforation Operations SOP',
@@ -803,10 +997,10 @@ const SEGMENTS = {
       policies:['Wireline Authorization Policy','Explosives Handling Policy','Pressure Control Policy',
         'Data Security Policy','Personnel Certification Policy'],
       alerts:[],
-      lessons:['LL-WL-001: Tool string stuck — successful retrieval and lessons',
-        'LL-WL-002: Perforating misfire — investigation and protocol update',
-        'LL-WL-003: Data loss during real-time logging — system redundancy added',
-        'LL-WL-004: PCE leak detection — early intervention that prevented incident'],
+      lessons:['LL-WL-001: Tool string stuck, successful retrieval and lessons',
+        'LL-WL-002: Perforating misfire, investigation and protocol update',
+        'LL-WL-003: Data loss during real-time logging, system redundancy added',
+        'LL-WL-004: PCE leak detection, early intervention that prevented incident'],
       software:['WellCAD Log Analysis Suite | v5.8 | Windows 10/11 | 234 MB',
         'Warrior Wireline Logging System | v8.4 | Windows 10 | 178 MB']
     }
@@ -832,22 +1026,22 @@ const SEGMENTS = {
         'Environmental Drilling Policy','Chemical Use Policy','Night Drilling Policy',
         'Data Ownership Policy','Emergency Response Plan Policy','BOP Testing Policy',
         'Waste Management Policy','Crew Rotation Policy','Equipment Certification Policy'],
-      alerts:['⚠️ ALERT-DRL-001: Revised kick tolerance — update all well programs',
+      alerts:['⚠️ ALERT-DRL-001: Revised kick tolerance, update all well programs',
         '⚠️ ALERT-DRL-002: New BOP test frequency requirements effective June 2026',
         '⚠️ ALERT-DRL-003: Drilling fluid compatibility issue in Zone B formations',
-        '⚠️ ALERT-DRL-004: H2S concentration increase in Shedgum area — update PPE',
-        '⚠️ ALERT-DRL-005: String torque limits revised — consult engineer before operations',
-        '⚠️ ALERT-DRL-006: Casing wear report — mandated inspection before running',
+        '⚠️ ALERT-DRL-004: H2S concentration increase in Shedgum area, update PPE',
+        '⚠️ ALERT-DRL-005: String torque limits revised, consult engineer before operations',
+        '⚠️ ALERT-DRL-006: Casing wear report, mandated inspection before running',
         '⚠️ ALERT-DRL-007: New directional steering tool limitations in high-temperature wells'],
-      lessons:['LL-DRL-001: Stuck pipe incident — lessons and preventive measures',
-        'LL-DRL-002: Well control event — blowout preventer response review',
-        'LL-DRL-003: Casing collapse in depleted zone — design improvement',
-        'LL-DRL-004: Lost circulation management — successful remediation',
-        'LL-DRL-005: Directional well tortuosity — planning improvements',
-        'LL-DRL-006: Mud system failure — rapid response and redesign',
-        'LL-DRL-007: Tool failure at depth — retrieval and analysis',
+      lessons:['LL-DRL-001: Stuck pipe incident, lessons and preventive measures',
+        'LL-DRL-002: Well control event, blowout preventer response review',
+        'LL-DRL-003: Casing collapse in depleted zone, design improvement',
+        'LL-DRL-004: Lost circulation management, successful remediation',
+        'LL-DRL-005: Directional well tortuosity, planning improvements',
+        'LL-DRL-006: Mud system failure, rapid response and redesign',
+        'LL-DRL-007: Tool failure at depth, retrieval and analysis',
         'LL-DRL-008: Sidetrack planning in complex geology',
-        'LL-DRL-009: Wellbore instability — geomechanical study findings'],
+        'LL-DRL-009: Wellbore instability, geomechanical study findings'],
       software:['Well Seeker Pro Directional Software | v2.6 | Windows 10/11 | 512 MB',
         'COMPASS Directional Planning Suite | v5.1 | Windows 10 | 290 MB',
         'INTEQ Drilling Manager | v4.3 | Windows 10/11 | 380 MB']
@@ -866,14 +1060,14 @@ const SEGMENTS = {
         'Float Equipment Catalog & Manual','Centralizer Selection Manual','Plug & Abandonment Manual',
         'Cementing Data Analysis Manual','Chemical Additive Manual','Equipment Maintenance Manual'],
       policies:['Cementing Quality Assurance Policy','Lab Testing Requirements Policy','Cement Vendor Qualification Policy',
-        'Environmental Policy — Cement Waste','Remedial Cementing Authorization Policy',
+        'Environmental Policy, Cement Waste','Remedial Cementing Authorization Policy',
         'P&A Regulatory Compliance Policy','Data Management Policy'],
       alerts:[],
-      lessons:['LL-CEM-001: Cement top failure — investigation and corrective action',
-        'LL-CEM-002: Free water observed after primary cement — mix design review',
-        'LL-CEM-003: Failed squeeze job — lessons from over-pressuring zone',
-        'LL-CEM-004: Float collar failure — pre-job testing enhancement',
-        'LL-CEM-005: Centralizer placement issue in deviated well — planning improvement'],
+      lessons:['LL-CEM-001: Cement top failure, investigation and corrective action',
+        'LL-CEM-002: Free water observed after primary cement, mix design review',
+        'LL-CEM-003: Failed squeeze job, lessons from over-pressuring zone',
+        'LL-CEM-004: Float collar failure, pre-job testing enhancement',
+        'LL-CEM-005: Centralizer placement issue in deviated well, planning improvement'],
       software:['OptiCem Slurry Design Software | v8.2 | Windows 10/11 | 198 MB',
         'CemCADE Cement Job Simulator | v6.4 | Windows 10 | 267 MB']
     }
@@ -894,15 +1088,15 @@ const SEGMENTS = {
       policies:['Inspector Qualification Policy','Third-Party Certification Policy','Equipment Release Policy',
         'Non-Conformance Management Policy','Audit Frequency Policy','Data Retention Policy',
         'Equipment Color-Coding Policy','Vendor Inspection Policy','Regulatory Compliance Policy'],
-      alerts:['⚠️ ALERT-INS-001: Updated API 5CT wall loss rejection criteria — revise all checklists',
+      alerts:['⚠️ ALERT-INS-001: Updated API 5CT wall loss rejection criteria, revise all checklists',
         '⚠️ ALERT-INS-002: BOP inspection intervals reduced to 14 days in H2S zones',
         '⚠️ ALERT-INS-003: Third-party inspector qualification renewal required by August 2026'],
-      lessons:['LL-INS-001: Missed crack in BOP body — enhanced inspection protocol',
-        'LL-INS-002: Incorrect rejection call on tubulars — calibration findings',
-        'LL-INS-003: Lifting equipment failure after passed inspection — gap analysis',
-        'LL-INS-004: Vendor inspection discrepancy — dual verification implemented',
-        'LL-INS-005: Crane overload incident — pre-lift checklist improvements',
-        'LL-INS-006: NDT equipment drift — calibration frequency doubled'],
+      lessons:['LL-INS-001: Missed crack in BOP body, enhanced inspection protocol',
+        'LL-INS-002: Incorrect rejection call on tubulars, calibration findings',
+        'LL-INS-003: Lifting equipment failure after passed inspection, gap analysis',
+        'LL-INS-004: Vendor inspection discrepancy, dual verification implemented',
+        'LL-INS-005: Crane overload incident, pre-lift checklist improvements',
+        'LL-INS-006: NDT equipment drift, calibration frequency doubled'],
       software:['InspectTrack Pro Inspection Manager | v3.2 | Windows 10/11 | 156 MB',
         'NTDS Tubular Inspection Database | v2.1 | Windows 10 | 98 MB']
     }
@@ -928,23 +1122,23 @@ const SEGMENTS = {
         'Safety Critical Element Policy','Barrier Philosophy Policy','HSE Case Policy',
         'Simultaneous Operations (SIMOPS) Policy','Contractor Well Safety Policy','Night Operations Policy',
         'Dropped Objects Policy','Work Permit Policy','Change Management Policy'],
-      alerts:['⚠️ ALERT-WS-001: CRITICAL — Revised well control kill weight calculation — mandatory briefing',
-        '⚠️ ALERT-WS-002: BOP ram seals replacement schedule accelerated — check unit status',
-        '⚠️ ALERT-WS-003: H2S detector calibration failure found — immediate re-calibration required',
-        '⚠️ ALERT-WS-004: Barrier integrity concern on 3 wells — inspection ordered',
+      alerts:['⚠️ ALERT-WS-001: CRITICAL, Revised well control kill weight calculation, mandatory briefing',
+        '⚠️ ALERT-WS-002: BOP ram seals replacement schedule accelerated, check unit status',
+        '⚠️ ALERT-WS-003: H2S detector calibration failure found, immediate re-calibration required',
+        '⚠️ ALERT-WS-004: Barrier integrity concern on 3 wells, inspection ordered',
         '⚠️ ALERT-WS-005: New SIMOPS restriction near active completions',
-        '⚠️ ALERT-WS-006: Updated evacuation assembly point — all rigs to update muster cards',
-        '⚠️ ALERT-WS-007: Dropped object incident — mandatory dropped object survey',
-        '⚠️ ALERT-WS-008: Revised kill sheet template — all drillers must recertify'],
-      lessons:['LL-WS-001: Gas influx during tripping — well shut-in case study',
-        'LL-WS-002: BOP function test failure — corrective actions taken',
-        'LL-WS-003: Near-miss H2S exposure — detection gap analysis',
-        'LL-WS-004: Well integrity anomaly — early detection success story',
-        'LL-WS-005: Evacuation drill findings — mustering improvements',
+        '⚠️ ALERT-WS-006: Updated evacuation assembly point, all rigs to update muster cards',
+        '⚠️ ALERT-WS-007: Dropped object incident, mandatory dropped object survey',
+        '⚠️ ALERT-WS-008: Revised kill sheet template, all drillers must recertify'],
+      lessons:['LL-WS-001: Gas influx during tripping, well shut-in case study',
+        'LL-WS-002: BOP function test failure, corrective actions taken',
+        'LL-WS-003: Near-miss H2S exposure, detection gap analysis',
+        'LL-WS-004: Well integrity anomaly, early detection success story',
+        'LL-WS-005: Evacuation drill findings, mustering improvements',
         'LL-WS-006: SIMOPS incident during concurrent operations',
         'LL-WS-007: Barrier verification failure found during well handover',
-        'LL-WS-008: Surface safety valve failure — testing protocol enhancement',
-        'LL-WS-009: Night-time well control event — communications lesson'],
+        'LL-WS-008: Surface safety valve failure, testing protocol enhancement',
+        'LL-WS-009: Night-time well control event, communications lesson'],
       software:['OLGA Well Control Simulator | v2024.1 | Windows 10/11 | 620 MB',
         'SafetyNet BOP Management System | v4.0 | Windows 10/11 | 145 MB']
     }
@@ -968,17 +1162,17 @@ const SEGMENTS = {
         'Management of Change Policy','Audit Frequency Policy','Incident Reporting Policy',
         'Stop Work Authority Policy','Chemical Management Policy','Environmental Monitoring Policy',
         'Permit to Work Policy','Community Relations Policy','Data Confidentiality Policy','Quality Assurance Policy'],
-      alerts:['⚠️ ALERT-QHSE-001: New waste segregation requirements — effective immediately',
-        '⚠️ ALERT-QHSE-002: PPE standard update — Type III gloves now required in all chemical zones',
+      alerts:['⚠️ ALERT-QHSE-001: New waste segregation requirements, effective immediately',
+        '⚠️ ALERT-QHSE-002: PPE standard update, Type III gloves now required in all chemical zones',
         '⚠️ ALERT-QHSE-003: Contractor HSE re-qualification required Q3 2026',
-        '⚠️ ALERT-QHSE-004: Environmental monitoring frequency doubled — spill risk area'],
-      lessons:['LL-QHSE-001: JSA failure that led to near-miss — quality of assessment reviewed',
-        'LL-QHSE-002: Environmental spill — improved bunding and response',
-        'LL-QHSE-003: Contractor incident — pre-qualification gap identified',
-        'LL-QHSE-004: Permit to Work violation — systemic fix applied',
-        'LL-QHSE-005: Chemical exposure incident — improved storage and labeling',
-        'LL-QHSE-006: MOC bypass led to equipment failure — process strengthened',
-        'LL-QHSE-007: Waste classification error — training and audit response'],
+        '⚠️ ALERT-QHSE-004: Environmental monitoring frequency doubled, spill risk area'],
+      lessons:['LL-QHSE-001: JSA failure that led to near-miss, quality of assessment reviewed',
+        'LL-QHSE-002: Environmental spill, improved bunding and response',
+        'LL-QHSE-003: Contractor incident, pre-qualification gap identified',
+        'LL-QHSE-004: Permit to Work violation, systemic fix applied',
+        'LL-QHSE-005: Chemical exposure incident, improved storage and labeling',
+        'LL-QHSE-006: MOC bypass led to equipment failure, process strengthened',
+        'LL-QHSE-007: Waste classification error, training and audit response'],
       software:['IncidentTracker Pro HSSE Suite | v5.1 | Windows 10/11 | 187 MB',
         'HSSE Management System v3.4 | v3.4 | Windows 10/11 | 234 MB']
     }
@@ -1001,11 +1195,11 @@ const SEGMENTS = {
         'Employee Data Privacy Policy','Business Travel Policy','Expense Reimbursement Policy',
         'Disciplinary & Termination Policy','Grievance & Appeals Policy','Promotion & Succession Policy'],
       alerts:[],
-      lessons:['LL-HR-001: Onboarding gaps identified through exit interview analysis — process redesigned',
-        'LL-HR-002: Performance review cycle delay — revised timeline and manager training',
-        'LL-HR-003: Recruitment timeline reduction — structured interview process adopted',
-        'LL-HR-004: Policy communication failure — multi-channel distribution approach adopted',
-        'LL-HR-005: HRMS data accuracy issues — validation controls implemented'],
+      lessons:['LL-HR-001: Onboarding gaps identified through exit interview analysis, process redesigned',
+        'LL-HR-002: Performance review cycle delay, revised timeline and manager training',
+        'LL-HR-003: Recruitment timeline reduction, structured interview process adopted',
+        'LL-HR-004: Policy communication failure, multi-channel distribution approach adopted',
+        'LL-HR-005: HRMS data accuracy issues, validation controls implemented'],
       software:['Oracle HRMS Integration Pack | v12.2 | Windows 10/11 | 156 MB']
     }
   },
@@ -1027,12 +1221,12 @@ const SEGMENTS = {
         'Workshop Safety Policy','Third-Party Repair Policy','Spare Parts Management Policy',
         'Tool Identification & Tagging Policy','Return-to-Service Policy'],
       alerts:[],
-      lessons:['LL-TWS-001: In-field tool failure — PM gap identified and corrected',
-        'LL-TWS-002: Calibration drift not caught — revised frequency policy',
-        'LL-TWS-003: Hydraulic seal failure — new inspection criteria added',
-        'LL-TWS-004: Incorrect reassembly after overhaul — checklist improvement',
-        'LL-TWS-005: Motor bearing failure — vibration monitoring added',
-        'LL-TWS-006: Spare parts stockout — inventory management improvement'],
+      lessons:['LL-TWS-001: In-field tool failure, PM gap identified and corrected',
+        'LL-TWS-002: Calibration drift not caught, revised frequency policy',
+        'LL-TWS-003: Hydraulic seal failure, new inspection criteria added',
+        'LL-TWS-004: Incorrect reassembly after overhaul, checklist improvement',
+        'LL-TWS-005: Motor bearing failure, vibration monitoring added',
+        'LL-TWS-006: Spare parts stockout, inventory management improvement'],
       software:['SAP PM Integration Toolkit | v7.4 | Windows 10/11 | 312 MB',
         'AssetTrak Maintenance Manager | v3.2 | Windows 10/11 | 178 MB']
     }
@@ -1053,22 +1247,22 @@ const SEGMENTS = {
         'Flowback & Clean-Up Manual','Well Test Data Analysis Manual'],
       policies:['Well Testing Authorization Policy','Surface Testing Equipment Policy',
         'H2S Management Policy for Well Tests','Data Ownership & Confidentiality Policy',
-        'Third-Party Equipment Policy','Environmental Compliance — Well Testing'],
-      alerts:['⚠️ ALERT-WT-001: H2S risk elevation in Unayzah formation — mandatory briefing before all tests',
-        '⚠️ ALERT-WT-002: Separator pressure rating update — verify all units before deployment'],
-      lessons:['LL-WT-001: Well test data loss due to gauge failure — redundancy protocol added',
-        'LL-WT-002: Unexpected H2S during DST — emergency response review',
-        'LL-WT-003: Separator overflow incident — improved monitoring implemented',
-        'LL-WT-004: Flow rate measurement discrepancy — calibration procedure improved'],
+        'Third-Party Equipment Policy','Environmental Compliance, Well Testing'],
+      alerts:['⚠️ ALERT-WT-001: H2S risk elevation in Unayzah formation, mandatory briefing before all tests',
+        '⚠️ ALERT-WT-002: Separator pressure rating update, verify all units before deployment'],
+      lessons:['LL-WT-001: Well test data loss due to gauge failure, redundancy protocol added',
+        'LL-WT-002: Unexpected H2S during DST, emergency response review',
+        'LL-WT-003: Separator overflow incident, improved monitoring implemented',
+        'LL-WT-004: Flow rate measurement discrepancy, calibration procedure improved'],
       software:['Saphir Well Test Analysis Software | v5.0 | Windows 10/11 | 345 MB',
         'OFM Well & Reservoir Analysis | v2019.1 | Windows 10/11 | 482 MB']
     }
   },
   'cybersecurity': {
-    name:'Cybersecurity', icon:'🔐', tag:'IT & Security',
+    name:'Governance, Risk & Compliance', icon:'🔐', tag:'GRC',
     desc:'Cybersecurity governance, policies, standards, operational procedures, security awareness programs, and compliance documentation for TAQA\'s IT and OT environments.',
     sops:10, manuals:8, policies:12, alerts:5, lessons:6, software:2,
-    tabLabels:{sops:'Procedures', manuals:'Standards', policies:'Policies', alerts:'Compliance', lessons:'Awareness'},
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Compliance', lessons:'Awareness'},
     contributors:[{name:'Mohammed Al Obaid', role:'Cybersecurity Director'},{name:'Afnan Al Khabty', role:'Senior Cyber Security Analyst'}],
     docs:{
       sops:['CS-PROC-001 Incident Response Procedure','CS-PROC-002 Access Control Request Procedure',
@@ -1086,30 +1280,263 @@ const SEGMENTS = {
         'Bring Your Own Device (BYOD) Policy','Physical Security Policy',
         'Cyber Incident Response Policy','Business Continuity & Disaster Recovery Policy',
         'Software Licensing & Asset Management Policy'],
-      alerts:['⚠️ COMP-001: Annual security awareness training due — all staff must complete by July 2026',
-        '⚠️ COMP-002: ISO 27001 internal audit scheduled — prepare evidence packages',
-        '⚠️ COMP-003: NCA CSCC compliance review Q3 2026 — assess current posture',
-        '⚠️ COMP-004: Third-party vendor security assessments due — 12 vendors pending',
-        '⚠️ COMP-005: PDPL (Data Protection Law) compliance deadline — review data handling processes'],
-      lessons:['AWR-001: Phishing simulation results — 18% click rate identified, targeted training deployed',
-        'AWR-002: Social engineering awareness — lessons from simulated vishing campaign',
-        'AWR-003: USB drop test findings — physical security awareness gap addressed',
-        'AWR-004: Password hygiene campaign — results from enterprise-wide audit',
-        'AWR-005: Ransomware tabletop exercise — incident response gaps identified',
-        'AWR-006: Insider threat awareness — case study and preventive controls'],
+      alerts:['⚠️ COMP-001: Annual security awareness training due, all staff must complete by July 2026',
+        '⚠️ COMP-002: ISO 27001 internal audit scheduled, prepare evidence packages',
+        '⚠️ COMP-003: NCA CSCC compliance review Q3 2026, assess current posture',
+        '⚠️ COMP-004: Third-party vendor security assessments due, 12 vendors pending',
+        '⚠️ COMP-005: PDPL (Data Protection Law) compliance deadline, review data handling processes'],
+      lessons:['AWR-001: Phishing simulation results, 18% click rate identified, targeted training deployed',
+        'AWR-002: Social engineering awareness, lessons from simulated vishing campaign',
+        'AWR-003: USB drop test findings, physical security awareness gap addressed',
+        'AWR-004: Password hygiene campaign, results from enterprise-wide audit',
+        'AWR-005: Ransomware tabletop exercise, incident response gaps identified',
+        'AWR-006: Insider threat awareness, case study and preventive controls'],
       software:['Microsoft Defender for Endpoint | v4.18 | Windows 10/11 | 245 MB',
         'CyberArk Privileged Access Manager | v13.0 | Windows 10/11 | 380 MB']
     }
+  },
+  'slickline': {
+    name:"Slickline", icon:'\u25CB', tag:"Logging",
+    desc:"Slickline conveyance, pressure control and toolstring procedures.",
+    sops:2, manuals:1, policies:0, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Slickline Pressure Control Equipment Rig-Up", "Wireline Valve Function Test"],
+      manuals:["Toolstring Make-Up and Inspection"],
+      policies:[],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'well-completions': {
+    name:"Well Completions", icon:'\u25CB', tag:"Well Operations",
+    desc:"Completion design, running and commissioning procedures.",
+    sops:2, manuals:1, policies:0, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Completion String Running Procedure", "Production Packer Setting and Testing"],
+      manuals:["Downhole Gauge Installation"],
+      policies:[],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'marine-services': {
+    name:"Marine Services", icon:'\u25CB', tag:"Marine",
+    desc:"Vessel operations, cargo handling and offshore marine safety.",
+    sops:3, manuals:0, policies:0, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Vessel Mobilisation Checklist", "Cargo Securing and Sea Fastening", "Man Overboard Response"],
+      manuals:[],
+      policies:[],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'finance': {
+    name:"Finance", icon:'\u25CB', tag:"Finance",
+    desc:"Financial authority, reporting and expenditure control.",
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    sops:1, manuals:0, policies:2, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Month-End Close Procedure"],
+      manuals:[],
+      policies:["Delegation of Authority Policy", "Travel and Expense Policy"],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'it': {
+    name:"Information Technology", icon:'\u25CB', tag:"IT",
+    desc:"IT service delivery, change control and platform operations.",
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    sops:2, manuals:0, policies:1, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["IT Change Management Procedure", "Backup and Restore Procedure"],
+      manuals:[],
+      policies:["Acceptable Use Policy"],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'supply-chain': {
+    name:"Supply Chain", icon:'\u25CB', tag:"Procurement",
+    desc:"Sourcing, supplier qualification and goods receipt.",
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    sops:1, manuals:1, policies:1, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Purchase Requisition and Approval Procedure"],
+      manuals:["Goods Receipt and Inspection"],
+      policies:["Supplier Qualification Policy"],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'legal': {
+    name:"Legal", icon:'\u25CB', tag:"Legal",
+    desc:"Contracting authority, legal review and compliance obligations.",
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    sops:1, manuals:0, policies:2, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Legal Hold Procedure"],
+      manuals:[],
+      policies:["Contract Review and Approval Policy", "Delegation of Signing Authority"],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'learning-center': {
+    name:"Learning and Development", icon:'\u25CB', tag:"Training",
+    desc:"Competency frameworks, training delivery and instructor standards.",
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    sops:2, manuals:0, policies:1, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Training Needs Analysis Procedure", "Instructor Qualification Procedure"],
+      manuals:[],
+      policies:["Competency Assessment Policy"],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'commercial': {
+    name:"Commercial & Sales", icon:'\u25CB', tag:"Commercial",
+    desc:"Bidding, pricing authority and customer contract handover.",
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    sops:1, manuals:0, policies:2, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Customer Contract Handover Procedure"],
+      manuals:[],
+      policies:["Bid Approval Policy", "Pricing Authority Matrix"],
+      alerts:[], lessons:[], software:[]
+    }
+  },
+  'pt-drilling-coe': {
+    name:"Drilling Solutions Center of Excellence", icon:'\u25CB', tag:"Edmonton, Canada",
+    desc:"Downhole drilling tools, drilling optimisation products and tool redress.",
+    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Standards', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
+    sops:3, manuals:2, policies:1, alerts:1, lessons:1, software:0,
+    contributors:[],
+    docs:{
+      sops:["Drilling Jar Assembly and Test Procedure", "Downhole Tool Redress Procedure", "Tool Failure Investigation Procedure"],
+      manuals:["Drilling Optimisation Tool Product Manual", "Agitator System Operating Manual"],
+      policies:["Product Quality Release Policy"],
+      alerts:["Jar Mandrel Inspection Interval Revised"],
+      lessons:["Premature Jar Firing on High Dogleg Sections"],
+      software:[]
+    }
+  },
+  'pt-completions-coe': {
+    name:"Well Completions Center of Excellence", icon:'\u25CB', tag:"Aberdeen, United Kingdom",
+    desc:"Completions technology: inflow control, swellable packers and sand screens.",
+    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Standards', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
+    sops:3, manuals:2, policies:1, alerts:0, lessons:1, software:0,
+    contributors:[],
+    docs:{
+      sops:["Inflow Control Device Installation Procedure", "Swellable Packer Handling and Running Procedure", "Sand Screen Make-Up Procedure"],
+      manuals:["FloSure Autonomous ICD Product Manual", "Completion Simulation Software User Manual"],
+      policies:["Technology Qualification Policy"],
+      alerts:[],
+      lessons:["Screen Plugging Traced to Brine Incompatibility"],
+      software:[]
+    }
+  },
+  'pt-intervention-coe': {
+    name:"Well Intervention Center of Excellence", icon:'\u25CB', tag:"Stavanger, Norway",
+    desc:"Through-tubing intervention tools, tractors, fishing and milling assemblies.",
+    tabLabels:{sops:'Procedures', manuals:'Product Manuals', policies:'Standards', alerts:'Product Bulletins', lessons:'Lessons Learned', software:'Systems'},
+    sops:3, manuals:2, policies:1, alerts:1, lessons:1, software:0,
+    contributors:[],
+    docs:{
+      sops:["Through-Tubing Intervention Tool Qualification Procedure", "Fishing Tool Redress and Test Procedure", "Milling Assembly Build and Dress Procedure"],
+      manuals:["Coiled Tubing Tractor Operating Manual", "Downhole Video Tool Product Manual"],
+      policies:["Intervention Technology Readiness Policy"],
+      alerts:["Tractor Wheel Wear Limits Revised"],
+      lessons:["Milling Assembly Failure, North Sea Campaign"],
+      software:[]
+    }
+  },
+  'geothermal-coe': {
+    name:"Geothermal Center of Excellence", icon:'\u25CB', tag:"Advisory",
+    desc:"Geothermal well design review and resource assessment advisory.",
+    tabLabels:{sops:'Procedures', manuals:'Manuals', policies:'Standards', alerts:'Notices', lessons:'Lessons Learned', software:'Systems'},
+    sops:2, manuals:1, policies:0, alerts:0, lessons:0, software:0,
+    contributors:[],
+    docs:{
+      sops:["Geothermal Well Design Review Procedure", "Resource Assessment Procedure"],
+      manuals:["Technology Readiness Review"],
+      policies:[],
+      alerts:[], lessons:[], software:[]
+    }
   }
 };
+
+// ── The register decides what this area holds ─────────────────────────
+// The object above is page copy: an icon, a description, a set of tab labels.
+// Its counts and its document lists were a second copy of the register, and
+// they had drifted. Coiled Tubing said twelve SOPs while the register held
+// nineteen. Counts and lists are now read from the register, so an upload or
+// a withdrawal moves this page without anyone editing it.
+(function(){
+  if (typeof TAQA_STORE === 'undefined' || typeof TAQA_DOC_LOOKUPS === 'undefined') return;
+  // 'policy' was missing, so opening Company Wide as an area showed an empty
+  // library and a total of zero against the register's twelve. An area issues
+  // standards and the company issues policies; both belong in the same tab.
+  var BUCKET = { sop:'sops', manual:'manuals', standard:'policies', policy:'policies',
+                 alert:'alerts', lesson:'lessons', software:'software' };
+  var L = TAQA_DOC_LOOKUPS.segments;
+
+  // This page used to apply its own test for what counts, "anything not
+  // withdrawn", which is why Coiled Tubing read 40 here and 42 on the home
+  // page. It now asks the store for the live population, the same one every
+  // other page asks for, and software assets are counted separately because
+  // TQ-QHSE-S001 does not place them under document control.
+  Object.keys(L).forEach(function(id){
+    var copy = SEGMENTS[id] || {};
+    var docs = { sops:[], manuals:[], policies:[], alerts:[], lessons:[], software:[] };
+    var nStd = 0, nPol = 0;
+    TAQA_STORE.all().forEach(function(d){
+      if (d.segment !== id) return;
+      var live = TAQA_STORE.isLive(d),
+          asset = !TAQA_STORE.isControlled(d) && d.status !== 'obsolete';
+      if (!live && !asset) return;
+      var k = BUCKET[d.docType];
+      if (!k) return;
+      if (d.docType === 'standard') nStd++; else if (d.docType === 'policy') nPol++;
+      docs[k].push(d.docNumber ? d.docNumber + '  ' + d.title : d.title);
+    });
+    SEGMENTS[id] = {
+      name: L[id].name,                                   // the register owns the name
+      icon: copy.icon || '\u25CB',
+      tag:  copy.tag  || L[id].splName || '',
+      desc: copy.desc || (L[id].splName || L[id].name) + '.',
+      // The shared tab is called Standards, which is wrong for Company Wide:
+      // what it issues are Policies, the top of the TQ-QHSE-S001 hierarchy.
+      tabLabels: (nPol && !nStd && !(copy.tabLabels && copy.tabLabels.policies))
+        ? Object.assign({}, copy.tabLabels || {}, { policies:'Policies' })
+        : copy.tabLabels,
+      contributors: copy.contributors || [],
+      sops:docs.sops.length, manuals:docs.manuals.length, policies:docs.policies.length,
+      alerts:docs.alerts.length, lessons:docs.lessons.length, software:docs.software.length,
+      docs: docs
+    };
+  });
+})();
 
 // ── URL Params ──
 const params = new URLSearchParams(window.location.search);
 const segId = params.get('id') || 'drilling';
 const startTab = params.get('tab') || 'sops';
-const seg = SEGMENTS[segId] || SEGMENTS['drilling'];
+// An unknown id used to fall through to Drilling, so a bad link showed one
+// segment's documents under another segment's name. Fail visibly instead,
+// in the shape the rest of this page expects.
+const SEG_KNOWN = !!SEGMENTS[segId];
+const seg = SEGMENTS[segId] || {
+  name:'Area not found', icon:'\u25CB', tag:'',
+  desc:'No area is called \u201c' + segId + '\u201d. The link may be mistyped or out of date.',
+  sops:0, manuals:0, policies:0, alerts:0, lessons:0, software:0,
+  contributors:[],
+  docs:{ sops:[], manuals:[], policies:[], alerts:[], lessons:[], software:[] }
+};
 document.querySelector('.manage-btn').href = 'dashboard.html?id=' + segId;
-document.getElementById('nav-bell').onclick = function(){ location.href = 'dashboard.html?id=' + segId; };
 
 // ── Segment Hero Background ──
 const SEGMENT_IMAGES = {
@@ -1130,19 +1557,61 @@ document.getElementById('hero-bg-img').style.backgroundImage =
   `url('${SEGMENT_IMAGES[segId] || 'taqa-hero.webp'}')`;
 
 // ── Populate Header ──
-document.title = seg.name + ' — TAQA Knowledge Hub';
+document.title = seg.name + ', TAQA Knowledge Hub';
 document.getElementById('breadcrumb-name').textContent = seg.name;
-(function(){try{var r=JSON.parse(localStorage.getItem('taqa-recent')||'[]');r=r.filter(function(x){return x.id!==segId;});r.unshift({id:segId,name:seg.name,tag:seg.tag});localStorage.setItem('taqa-recent',JSON.stringify(r.slice(0,4)));}catch(e){}})();
+if (SEG_KNOWN) (function(){try{var r=JSON.parse(localStorage.getItem('taqa-recent')||'[]');r=r.filter(function(x){return x.id!==segId;});r.unshift({id:segId,name:seg.name,tag:seg.tag});localStorage.setItem('taqa-recent',JSON.stringify(r.slice(0,4)));}catch(e){}})();
 document.getElementById('seg-tag').textContent = seg.tag;
+document.getElementById('seg-tag').hidden = !seg.tag;
 document.getElementById('seg-name').textContent = seg.name;
 document.getElementById('seg-desc').textContent = seg.desc;
-document.getElementById('seg-total').textContent = seg.sops + seg.manuals + seg.policies + seg.alerts + seg.lessons + (seg.software||0);
+// Software is an asset, not a controlled document (TQ-QHSE-S001 4.4), so it is
+// counted on its own tab and left out of this figure. Adding it in was why this
+// header read 39 while the register and documents.html both said 36.
+document.getElementById('seg-total').textContent = seg.sops + seg.manuals + seg.policies + seg.alerts + seg.lessons;
 document.getElementById('seg-alerts').textContent = seg.alerts || 'None';
-document.getElementById('ms-sops').textContent = seg.sops;
-document.getElementById('ms-manuals').textContent = seg.manuals;
-document.getElementById('ms-policies').textContent = seg.policies;
-document.getElementById('ms-lessons').textContent = seg.lessons;
-document.getElementById('ms-software').textContent = seg.software||0;
+// An area that does not exist has no counts, no update date, nothing to
+// manage and no shelves to search, so none of that is drawn for it.
+if (!SEG_KNOWN) document.documentElement.classList.add('seg-unknown');
+/* Managing a segment is a Director's or QMS's job. An Employee and an Auditor
+   read this library; offering them a control they cannot use is noise, and in
+   the Auditor's case it misstates what their access is. Shown only to someone
+   who holds a control panel for THIS area. */
+(function(){
+  var btn = document.getElementById('manage-btn');
+  if (!btn || typeof TAQA_ROLE === 'undefined') return;
+  var cap = TAQA_ROLE.effective();
+  var mayManage = !!cap.editMetadata &&
+                  (cap.scope === 'all' || cap.ownSegment === segId);
+  btn.hidden = !mayManage || !SEG_KNOWN;
+  if (mayManage) btn.href = 'dashboard.html?id=' + encodeURIComponent(segId);
+})();
+
+/* Overdue first is offered only to the Director, QMS and an auditor: the
+   people who see the "Review overdue" state at all (rowMeta, above) and can
+   act on it. An employee's rows carry no such state, so a sort by it would
+   sort nothing. */
+(function(){
+  if (typeof seesComplianceState === 'function' && !seesComplianceState()) return;
+  document.querySelectorAll('.sort-overdue').forEach(function(b){ b.hidden = false; });
+})();
+
+// A document submitted here is a draft until QMS approves it, so it is not in
+// the library count above. Show it anyway: someone who has just uploaded needs
+// to see their document land somewhere.
+(function(){
+  if (typeof TAQA_STORE === 'undefined') return;
+  function paintPending(){
+    var n = TAQA_STORE.count('pending', { segment: segId }),
+        w = document.getElementById('seg-pending-wrap'),
+        v = document.getElementById('seg-pending');
+    if (!w || !v) return;
+    v.textContent = n;
+    w.hidden = !n;
+  }
+  TAQA_STORE.onChange(paintPending);
+})();
+// The hero used to repeat these counts as tiles; the tab bar already carries
+// them, once, beside the shelf they count.
 document.getElementById('tc-sops').textContent = seg.sops;
 document.getElementById('tc-manuals').textContent = seg.manuals;
 document.getElementById('tc-policies').textContent = seg.policies;
@@ -1150,9 +1619,8 @@ document.getElementById('tc-alerts').textContent = seg.alerts;
 document.getElementById('tc-lessons').textContent = seg.lessons;
 document.getElementById('tc-software').textContent = seg.software||0;
 
-// ── Tab label & mini-stat overrides ──
+// ── Tab label overrides ──
 if(seg.tabLabels){
-  const labelMap = {sops:'ms-label-sops', manuals:'ms-label-manuals', lessons:'ms-label-lessons'};
   document.querySelectorAll('#tab-bar .tab-btn').forEach(btn=>{
     const t = btn.dataset.tab;
     if(seg.tabLabels[t]){
@@ -1161,148 +1629,214 @@ if(seg.tabLabels){
       if(span) btn.appendChild(span);
     }
   });
-  Object.keys(labelMap).forEach(k=>{
-    if(seg.tabLabels[k]){
-      const el = document.getElementById(labelMap[k]);
-      if(el) el.textContent = seg.tabLabels[k];
-    }
-  });
 }
+// Each search box names what it searches, taken from its own tab, so the
+// Standards tab stops inviting you to search policies and a function whose
+// tab says Notices searches notices. Acronyms keep their capitals.
+document.querySelectorAll('#tab-bar .tab-btn').forEach(function(btn){
+  var t = btn.dataset.tab; if (!t) return;
+  var inp = document.querySelector('#panel-' + t + ' .doc-search input');
+  if (!inp) return;
+  var raw = (btn.firstChild && btn.firstChild.nodeType === 3 ? btn.firstChild.textContent : btn.textContent)
+    .trim().replace(/\s*\d+$/, '');
+  var name = raw.split(/\s+/).map(function(w){ return /[A-Z].*[A-Z]/.test(w) ? w : w.toLowerCase(); }).join(' ');
+  if (name) inp.placeholder = 'Search ' + (t === 'all' ? 'all documents' : name) + '...';
+  var cnt = document.querySelector('#panel-' + t + ' .doc-count-label');
+  var tail = cnt && cnt.lastChild;
+  if (t !== 'all' && name && tail && tail.nodeType === 3) tail.textContent = ' ' + name;
+});
+// Every operational segment carries the same library: Standards, SOPs,
+// Manuals, Alerts and Lessons Learned, even where one is still empty, so a
+// supervisor moving from Drilling to Slickline finds the same shelves in the
+// same place, and an empty shelf says so rather than vanishing. Functions and
+// centres keep only the tabs they use, because their libraries are different
+// in kind (a function has no SOPs for a well site). Software is not a
+// controlled document, so it only appears where there is some.
+var SEG_GROUP = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments[segId] || {}).group;
+var CORE_TABS = ['policies','sops','manuals','alerts','lessons'];
+document.querySelectorAll('#tab-bar .tab-btn').forEach(function(btn){
+  var t = btn.dataset.tab;
+  if (!t || t === 'all' || (seg[t] || 0)) return;
+  if (SEG_GROUP === 'segment' && CORE_TABS.indexOf(t) > -1) return;
+  btn.style.display = 'none';
+});
+
 // ── Contributors ──
 if(seg.contributors && seg.contributors.length){
   const row = document.getElementById('seg-contributors-row');
   const el = document.getElementById('seg-contributors');
   if(row && el){
-    el.innerHTML = seg.contributors.map(c=>`<span style="white-space:nowrap">${c.name} <span style="color:rgba(255,255,255,0.45);font-weight:400">${c.role}</span></span>`).join('<span style="color:rgba(255,255,255,0.25);margin:0 6px">·</span>');
+    el.innerHTML = seg.contributors.map(c=>`<span style="white-space:nowrap">${c.name} <span style="color:rgba(255,255,255,0.72);font-weight:400">${c.role}</span></span>`).join('<span style="color:rgba(255,255,255,0.55);margin:0 6px">·</span>');
     row.style.display = '';
   }
 }
 
 // ── Build Document Lists ──
-const AUTHORS = seg.contributors
-  ? seg.contributors.map(c=>c.name)
-  : ['Mohammed Al-Ghamdi','Ahmed Al-Zahrani','Saud Al-Harbi','Faisal Al-Otaibi','Khalid Al-Shehri',
-    'Omar Al-Dosari','Nasser Al-Qahtani','Tariq Al-Mutairi','Saleh Al-Asmari'];
-const SIZES = ['1.2 MB','845 KB','2.1 MB','3.4 MB','560 KB','1.8 MB','920 KB','4.2 MB','1.1 MB','780 KB'];
-const MONTHS = ['Jan','Feb','Mar','Apr','May'];
+/* What the register does not know is never made up here. The card used to
+   carry an owner line ("Relevant SPL / Function" on every document, which
+   told nobody anything) and a second date line; both are gone from the row.
+   The viewer still shows the full record. */
 
-function rnd(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-function fmtDate(i){ return `${rnd(MONTHS)} 2026`; }
-
-function getDocSummary(title, type) {
-  const t = title.toLowerCase();
-  if (type === 'lesson') return 'Documents the sequence of events, root cause analysis, contributing factors, and the corrective and preventive actions implemented following this incident or observation.';
-  if (t.includes('pre-job') || t.includes('safety meeting') || t.includes('safety check'))
-    return 'Defines the mandatory pre-operation checks, hazard assessments, toolbox talk requirements, and authorization sign-offs before commencing field activities.';
-  if (t.includes('emergency') || t.includes('shutdown') || t.includes('response'))
-    return 'Outlines the immediate response sequence, personnel responsibilities, notification chain, and recovery steps to be followed during emergency scenarios.';
-  if (t.includes('rig-up') || t.includes('rig-down'))
-    return 'Provides step-by-step instructions for equipment rig-up and rig-down, including connection verification, torque specifications, and pre-operation function checks.';
-  if (t.includes('pressure test') || t.includes('testing') || t.includes('certification'))
-    return 'Specifies test criteria, acceptance limits, equipment setup, test sequences, and documentation requirements for pressure or functional testing activities.';
-  if (t.includes('bop') || t.includes('well control') || t.includes('kill') || t.includes('shut-in'))
-    return 'Covers well control response actions, BOP operating procedures, kill weight calculations, and responsibilities for supervisors and drilling crew during well control events.';
-  if (t.includes('h2s') || t.includes('hydrogen sulfide') || t.includes('toxic'))
-    return 'Details H2S detection thresholds, alarm response levels, PPE requirements, evacuation protocols, and personnel accountability procedures in H2S-risk environments.';
-  if (t.includes('inspection') || t.includes('ndt') || t.includes('mpi') || t.includes('visual'))
-    return 'Defines inspection methods, equipment acceptance criteria, rejection standards, calibration requirements, and documentation procedures for inspection activities.';
-  if (t.includes('maintenance') || t.includes('overhaul') || t.includes('pm schedule'))
-    return 'Describes preventive and corrective maintenance tasks, intervals, torque values, replacement criteria, and return-to-service verification steps.';
-  if (t.includes('policy') || t.includes('authorization'))
-    return 'Establishes the governing rules, approval authorities, scope of application, personnel responsibilities, and compliance requirements for this operational area.';
-  if (t.includes('manual') && (t.includes('operations') || t.includes('ops')))
-    return 'Comprehensive technical reference covering equipment specifications, operating parameters, system interfaces, troubleshooting guides, and maintenance schedules.';
-  if (t.includes('chemical') || t.includes('fluid') || t.includes('additive'))
-    return 'Covers safe handling, storage, compatibility, MSDS references, spill response, and disposal requirements for chemicals and fluid systems used in operations.';
-  if (t.includes('cement') || t.includes('slurry') || t.includes('mixing'))
-    return 'Provides slurry design parameters, mixing procedures, quality control tests, placement methods, and post-job evaluation criteria for cementing operations.';
-  if (t.includes('directional') || t.includes('survey') || t.includes('deviation'))
-    return 'Covers directional drilling planning, steering tool operation, survey acceptance criteria, and wellbore trajectory monitoring requirements.';
-  if (t.includes('permit') || t.includes('work permit') || t.includes('jsa') || t.includes('jha'))
-    return 'Defines the permit-to-work issuance process, hazard identification requirements, control measures, authorization levels, and closure procedures.';
-  if (t.includes('calibration'))
-    return 'Specifies calibration intervals, reference standards, acceptable drift tolerances, calibration procedures, and out-of-tolerance response for measurement equipment.';
-  if (t.includes('report') || t.includes('reporting') || t.includes('end of well'))
-    return 'Outlines reporting requirements, data fields, review and approval process, distribution list, and record retention standards for operational reporting.';
-  if (type === 'sop')
-    return 'Provides a step-by-step operational procedure covering prerequisites, required equipment and personnel, execution sequence, quality checkpoints, and completion criteria.';
-  if (type === 'manual')
-    return 'Serves as the primary technical reference for equipment operation, system design, maintenance requirements, and troubleshooting guidance for field and engineering personnel.';
-  if (type === 'policy')
-    return 'Defines organizational requirements, roles and responsibilities, minimum standards, and compliance obligations applicable to all personnel conducting these activities.';
-  return 'Contains operational guidance, technical specifications, and procedural requirements for field personnel and supervisors involved in these activities.';
+/* The modal states the record in full: revision, classification and when the
+   document is next due for review. */
+function docControlLine(num){
+  var d = (num && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(num) : null;
+  if (!d) return '';
+  var bits = [];
+  if (d.revision) bits.push('Rev ' + d.revision);
+  if (d.classification) bits.push(d.classification.charAt(0).toUpperCase() + d.classification.slice(1));
+  var due = d.nextReviewDate ? new Date(d.nextReviewDate) : null;
+  if (due && !isNaN(due)) {
+    var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var when = MON[due.getMonth()] + ' ' + due.getFullYear();
+    var late = Math.floor((Date.now() - due) / 86400000);
+    bits.push(late > 0
+      ? '<span class="doc-review-late">Review was due ' + when + ', ' + late + ' days late</span>'
+      : 'Review due ' + when);
+  }
+  return bits.join(' · ');
 }
 
-const LIST_TYPE_MAP = {sops:'sop',manuals:'manual',policies:'policy',lessons:'lesson',alerts:'alert'};
+/* The revision in force sits on the reference line. The row's meta line
+   says only what changes what a reader does: the review state when it
+   matters, and the classification when it is anything but Internal. A row
+   with neither has no meta line at all. */
+const MON_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+// An overdue review is a compliance flag, not an operating instruction: the
+// document stays in force and an employee still uses the current revision
+// exactly as before (API Q2 4.4.3 c)). Only the people who act on the flag,
+// the area's Director, QMS and an auditor, are shown it here.
+function seesComplianceState(){
+  if (typeof TAQA_ROLE === 'undefined') return true;
+  var cap = TAQA_ROLE.effective();
+  return !!(cap.editMetadata || TAQA_ROLE.canRegister());
+}
+// How many days past (positive) or before (negative) its review date a
+// record is, or null when the review clock does not apply to it: withdrawn,
+// obsolete or never given a date. Shared by the row's own meta line below
+// and by overdueDays() further down, which is the sort's version of the same
+// question, so the date math lives in exactly one place.
+function reviewDaysDelta(d){
+  if (!d || d.status === 'obsolete' || d.status === 'superseded' || !d.nextReviewDate) return null;
+  const due = new Date(d.nextReviewDate);
+  if (isNaN(due)) return null;
+  return Math.floor((Date.now() - due) / 86400000);
+}
+// The pre-warning window: a review due within this many days, but not yet
+// late, gets the amber "due soon" treatment instead of the plain date.
+const DUE_SOON_DAYS = 30;
+function rowMeta(d){
+  if (!d) return '';
+  const bits = [];
+  const delta = reviewDaysDelta(d);
+  if (delta !== null) {
+    if (delta > 0) {
+      if (seesComplianceState()) {
+        const how = delta < 60 ? delta + (delta === 1 ? ' day' : ' days')
+                              : Math.floor(delta / 30.44) + ' months';
+        bits.push('<span class="doc-review-late">Review overdue, ' + how + '</span>');
+      }
+    } else if (delta > -DUE_SOON_DAYS && seesComplianceState()) {
+      // Amber pre-warning: the review date is close but not yet overdue.
+      // A document stays fully in force either way (API Q2 4.4.3 c), so this
+      // is the same compliance flag as the overdue state above, gated the
+      // same way: never shown to Employee.
+      const soon = -delta;
+      const how = soon < 60 ? soon + (soon === 1 ? ' day' : ' days')
+                            : Math.floor(soon / 30.44) + ' months';
+      bits.push('<span class="doc-review-soon">Review due soon, ' + how + '</span>');
+    } else if (delta > -45) {
+      const due = new Date(d.nextReviewDate);
+      bits.push('Review due ' + MON_SHORT[due.getMonth()] + ' ' + due.getFullYear());
+    }
+  }
+  if (d.classification && String(d.classification).toLowerCase() !== 'internal')
+    bits.push(escHtml(d.classification.charAt(0).toUpperCase() + d.classification.slice(1)));
+  return bits.join('<span class="sep" aria-hidden="true">·</span>');
+}
+function escHtml(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+const LIST_TYPE_MAP = {sops:'sop',manuals:'manual',policies:'standard',lessons:'lesson',alerts:'alert'};
+const MORE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>';
+// Same glass as the doc-search field itself, drawn larger for the empty state.
+const EMPTY_SEARCH_ICON = '<svg width="22" height="22" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+
+function viewerHrefFor(entry, type){
+  const p = splitEntry(entry);
+  return `viewer.html?seg=${segId}&type=${type}` +
+    `&title=${encodeURIComponent(p.title)}` +
+    (p.num ? `&doc=${encodeURIComponent(p.num)}` : '');
+}
 
 function buildDocCard(title, type, idx) {
-  const labels = {sop:'SOP',manual:'Manual',policy:'Policy',alert:'Alert',lesson:'Lesson Learned'};
-  const typeClass = type;
-  const summary = getDocSummary(title, type);
-  const safeTitle = title.replace(/'/g,"&#39;").replace(/"/g,"&quot;");
-  const safeType = typeClass;
-  const newBadge = idx === 0 ? '<span class="doc-new-badge">New</span>' : idx === 1 ? '<span class="doc-new-badge updated">Updated</span>' : '';
-  const segRevs = (typeof TAQA_SEGMENTS !== 'undefined' && TAQA_SEGMENTS[segId]) ? (TAQA_SEGMENTS[segId].docRevisions || {}) : {};
-  const revInfo = segRevs[title];
-  const revBadge = revInfo ? `<span class="doc-rev-badge">Rev ${revInfo.current}</span>` : '';
-  const _ti={sop:'SOP',manual:'MNL',policy:'POL',lesson:'LSN',alert:'ALT'};
-  const icon=`<div class="doc-type-icon ${type}">${_ti[type]||type.slice(0,3).toUpperCase()}</div>`;
+  // The list a row sits in is not its type. Standards and the company's
+  // policies share one tab, so a CEO-signed Policy was drawn as a Standard.
+  // The register record says what the document is.
+  const _p = splitEntry(title);
+  const rec = (_p.num && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(_p.num) : null;
+  if (rec && rec.docType) type = rec.docType;
+  // Titles go into data attributes, never into JavaScript source. The parser
+  // decodes &#39; back to an apostrophe before the handler compiles, so
+  // "Manager's Guide to HR Processes" used to break its own View and QR.
+  const safeTitle = title.replace(/&/g,'&amp;').replace(/'/g,"&#39;").replace(/"/g,"&quot;").replace(/</g,'&lt;');
+  const safeType = type;
+  const newBadge = (function(){
+    if (!rec || !rec.issueDate) return '';
+    var days = (Date.now() - new Date(rec.issueDate)) / 86400000;
+    if (isNaN(days) || days > 120 || days < 0) return '';
+    var rev = parseFloat(rec.revision || '1');
+    return rev > 1
+      ? '<span class="doc-new-badge updated">Revised</span>'
+      : '<span class="doc-new-badge">New</span>';
+  })();
+  const _T = (typeof TAQA_DOC_LOOKUPS!=='undefined' && TAQA_DOC_LOOKUPS.types[type]) || {};
+  const _mark = _T.mark || ({sop:'SOP',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT'})[type] || type.slice(0,3).toUpperCase();
   const isBm = window.TAQA_Bookmarks ? window.TAQA_Bookmarks.has(title, segId) : false;
-  const viewerHref = `viewer.html?seg=${segId}&type=${safeType}&title=${encodeURIComponent(title)}`;
+  const meta = rowMeta(rec);
+  const rev = rec && rec.revision ? '<span class="doc-rev">Rev ' + escHtml(rec.revision) + '</span>' : '';
+  const read = isDocRead(title) ? '<span class="doc-read-badge">Read</span>' : '';
+  const label = _p.title + (_p.num ? ', ' + _p.num : '');
+  // The two swipe shortcuts are the same Bookmark and QR actions the row's
+  // own overflow menu already offers, just reachable a swipe away on a
+  // phone. They carry tabindex="-1" and sit behind aria-hidden: a screen
+  // reader or keyboard user reaches the same two actions through .doc-more
+  // instead, so nothing here is a second, hidden route to the same control.
+  const swipeActions = `
+    <div class="swipe-actions" aria-hidden="true">
+      <button type="button" class="swipe-act act-bm" tabindex="-1" data-act="bm" data-title="${safeTitle}" data-type="${safeType}">${isBm ? ROW_MENU_ICONS.bmOn : ROW_MENU_ICONS.bm}${isBm ? 'Remove' : 'Bookmark'}</button>
+      <button type="button" class="swipe-act act-qr" tabindex="-1" data-act="qr">${ROW_MENU_ICONS.qr}QR code</button>
+    </div>`;
   return `
-  <div class="doc-card">
-    ${icon}
-    <div>
-      <div class="doc-info-title">${title}${revBadge}${newBadge}${isDocRead(title)?'<span class="doc-read-badge">✓ Read</span>':''}</div>
-      <div class="doc-summary">${summary}</div>
-      <div class="doc-info-meta">
-        <span class="doc-type-badge ${typeClass}">${labels[type] || type}</span>
-        <span class="doc-meta-item">${rnd(AUTHORS)}</span>
-        <span class="doc-meta-item">${fmtDate(idx)}</span>
-        <span class="doc-meta-item">${rnd(SIZES)}</span>
-      </div>
-    </div>
-    <div class="doc-actions">
-      <a class="doc-action-btn primary-action" href="${viewerHref}" onclick="saveRecent('${safeTitle}','${safeType}');markDocRead('${safeTitle}');if(window.TAQA_Track)window.TAQA_Track('open','${safeTitle}',{type:'${safeType}',seg:'${segId}'})">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        View
-      </a>
-      <div class="doc-act-pair">
-        <button class="doc-action-btn bm-btn${isBm?' bm-on':''}" data-title="${safeTitle}" data-type="${safeType}" onclick="toggleDocBm(this)" title="${isBm?'Remove bookmark':'Bookmark'}">${isBm?'★':'☆'}</button>
-        <button class="doc-action-btn" onclick="showDocQR('${safeTitle}','${safeType}')" title="QR Code">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="5" y="5" width="3" height="3"/><rect x="16" y="5" width="3" height="3"/><rect x="16" y="16" width="3" height="3"/><rect x="5" y="16" width="3" height="3"/></svg>
-        </button>
-      </div>
+  <div class="doc-card${type==='alert'?' is-alert':''}${meta?' has-state':''}" data-title="${safeTitle}" data-type="${safeType}">
+    ${swipeActions}
+    <div class="swipe-surface">
+    <a class="doc-row-link" href="${viewerHrefFor(title, safeType)}" onclick="var c=this.closest('.doc-card');saveRecent(c.dataset.title,c.dataset.type);markDocRead(c.dataset.title);if(window.TAQA_Track)window.TAQA_Track('open',c.dataset.title,{type:c.dataset.type,seg:'${segId}'})">
+      <span class="doc-type-icon ${type}" aria-hidden="true">${_mark}</span>
+      <span class="doc-body">
+        <span class="doc-eyebrow">${_p.num?`<span class="doc-num">${escHtml(_p.num)}</span>`:''}${rev}${newBadge}<span class="bm-btn bm-flag${isBm?' bm-on':''}" data-title="${safeTitle}" data-type="${safeType}" role="img" aria-label="Bookmarked" title="Bookmarked">★</span>${read}</span>
+        <span class="doc-info-title">${escHtml(_p.title)}</span>
+        ${meta?`<span class="doc-meta">${meta}</span>`:''}
+      </span>
+    </a>
+    <button type="button" class="doc-more" aria-haspopup="menu" aria-expanded="false" aria-controls="row-menu" aria-label="More for ${escHtml(label)}">${MORE_ICON}</button>
     </div>
   </div>`;
 }
 
+/* An alert used to have a card of its own: a peach fill on every card, one
+   sentence of invented guidance repeated on all of them, "Severity not
+   recorded" on every line, the owner typed in by hand, and a View that was
+   a <button> with no handler, so it opened nothing. Alerts are records in
+   the register like any other type, so they now take the same card. */
 function buildAlertCard(text, idx) {
-  const severities = ['sev-high','sev-medium','sev-medium','sev-low'];
-  const sevLabels = ['HIGH','MEDIUM','MEDIUM','LOW'];
-  const sev = idx % 3 === 0 ? 0 : idx % 2 === 0 ? 3 : 1;
-  const alertSummary = 'This technical alert requires immediate review by all supervisors and relevant field personnel. Refer to the full alert document for required actions, affected equipment or procedures, and implementation deadlines.';
-  return `
-  <div class="alert-card">
-    <div>
-      <div class="doc-info-title">${text.replace('⚠️ ','')}</div>
-      <div class="doc-summary">${alertSummary}</div>
-      <div class="doc-info-meta">
-        <span class="alert-sev-badge ${severities[sev]}">${sevLabels[sev]}</span>
-        <span class="doc-meta-item">May 2026</span>
-        <span class="doc-meta-item">QHSE Department</span>
-      </div>
-    </div>
-    <div class="doc-actions">
-      <button class="doc-action-btn primary-action" title="View Alert">View</button>
-    </div>
-  </div>`;
+  return buildDocCard(String(text).replace(/^\u26a0\ufe0f?\s*/, ''), 'alert', idx);
 }
 
-const SKEL = `<div class="skeleton-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>`;
+const SKEL = `<div class="skeleton-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line w40"></div><div class="skel-line w80"></div><div class="skel-line w60"></div></div></div>`;
 
-// ── Paginated rendering — 100K-ready ──
-const PAGE_SIZE = 12;
+// ── Paginated rendering, 100K-ready ──
+// Rows are compact, so a page holds a whole shelf in most areas.
+const PAGE_SIZE = 25;
 const DOCS_STATE = {};
 function _st(type){
   if(!DOCS_STATE[type])DOCS_STATE[type]={all:[],filtered:[],page:0,observer:null,isAlert:false,isSoftware:false};
@@ -1319,22 +1853,63 @@ function _renderPage(type){
   const searching=st.filtered.length<st.all.length&&st.all.length>0;
   const start=searching?0:st.page*PAGE_SIZE;
   const slice=searching?items:items.slice(start,start+PAGE_SIZE);
+  el.classList.toggle('is-searching',searching);
   const build=(t,i)=>{
     if(typeof t==='object'){return t.isSoftware?buildSoftwareCard(t.title,i):t.isAlert?buildAlertCard(t.title,i):buildDocCard(t.title,t.type,i);}
     return st.isSoftware?buildSoftwareCard(t,i):st.isAlert?buildAlertCard(t,i):buildDocCard(t,LIST_TYPE_MAP[type]||type,i);
   };
 
+  if(items.length===0 && st.all.length>0){
+    // The tab holds documents; the search matched none of them. Saying
+    // nothing was ever uploaded here would be false.
+    const inp=document.querySelector('#panel-'+type+' .doc-search input');
+    const q=(inp&&inp.value||'').trim();
+    const btn=document.querySelector('#tab-bar .tab-btn[data-tab="'+type+'"]');
+    const lbl=btn?(btn.firstChild&&btn.firstChild.nodeType===3?btn.firstChild.textContent:btn.textContent).trim().replace(/\s*\d+$/,''):'documents';
+    const noun=type==='all'?'documents':lbl.split(/\s+/).map(w=>/[A-Z].*[A-Z]/.test(w)?w:w.toLowerCase()).join(' ');
+    const esc=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    el.innerHTML='<div class="empty-state"><div class="empty-icon empty-mark">'+EMPTY_SEARCH_ICON+'</div><h3>No '+esc(noun)+' match '+(q?'\u201c'+esc(q)+'\u201d':'this search')+'</h3>'+
+      '<p>Try fewer words, or search every area from Document Search.</p>'+
+      (q?'<button type="button" class="empty-state-upload" onclick="clearDocSearch(\''+type+'\')">Clear search</button>':'')+
+      '</div>';
+    if(vis)vis.textContent='0';
+    _renderPagination(type);
+    return;
+  }
   if(items.length===0){
-    const tl={sops:'procedures',manuals:'manuals',policies:'policies',lessons:'lessons learned',all:'documents'};
-    el.innerHTML=st.isAlert
-      ?`<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,187,182,0.3);font-family:'BwGradual','Urbanist',sans-serif;letter-spacing:2px;">CLEAR</div><h3>No active alerts</h3><p>This segment currently has no outstanding technical alerts.</p></div>`
-      :`<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,187,182,0.15);font-family:'BwGradual','Urbanist',sans-serif;letter-spacing:2px;">—</div><h3>No ${tl[type]||type} uploaded yet</h3><p>Be the first to contribute to this segment.</p><a href="upload.html" class="empty-state-upload">+ Upload Document</a></div>`;
+    // Named from the tab itself, so an empty Standards tab says standards and
+    // a function whose tab reads Notices says notices.
+    const tb=document.querySelector('#tab-bar .tab-btn[data-tab="'+type+'"]');
+    const tlab=tb?(tb.firstChild&&tb.firstChild.nodeType===3?tb.firstChild.textContent:tb.textContent).trim().replace(/\s*\d+$/,''):'documents';
+    const noun=type==='all'?'documents':tlab.split(/\s+/).map(w=>/[A-Z].*[A-Z]/.test(w)?w:w.toLowerCase()).join(' ');
+    const tt=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.types[LIST_TYPE_MAP[type]])||{};
+    const mark=tt.mark||tt.letter||'';
+    const e2=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    // Only someone who can submit to the register is offered the button.
+    const mayUpload=typeof TAQA_ROLE!=='undefined'&&TAQA_ROLE.can('editMetadata');
+    el.innerHTML=!SEG_KNOWN
+      ?`<div class="empty-state"><h3>Choose an area</h3><p>Every area is listed under Areas, in the menu at the top of this page.</p></div>`
+      :st.isAlert
+      ?`<div class="empty-state"><div class="empty-icon empty-mark">${e2(mark||'ALT')}</div><h3>No active alerts</h3><p>${e2(seg.name)} has no outstanding technical alerts.</p></div>`
+      :`<div class="empty-state">${mark?`<div class="empty-icon empty-mark">${e2(mark)}</div>`:''}<h3>No ${e2(noun)} issued for ${e2(seg.name)} yet</h3><p>When one is approved and released it will appear on this tab.</p>${mayUpload?'<a href="upload.html?seg='+encodeURIComponent(segId)+'" class="empty-state-upload">+ Submit a document</a>':''}</div>`;
     if(vis)vis.textContent='0';
     _renderPagination(type);
     return;
   }
 
-  el.innerHTML=slice.map((t,i)=>build(t,start+i)).join('');
+  // The All tab keeps its shelves: a quiet heading inside the sheet each
+  // time the list moves from one kind of document to the next.
+  let lastBucket=null;
+  el.innerHTML=slice.map((t,i)=>{
+    let head='';
+    if(type==='all'&&SORT_STATE.all!=='az'&&typeof t==='object'&&t.bucket&&t.bucket!==lastBucket){
+      lastBucket=t.bucket;
+      const n=items.filter(x=>x.bucket===t.bucket).length;
+      head=`<div class="doc-group" role="heading" aria-level="3"><span class="doc-group-t">${escHtml(tabLabelOf(t.bucket))}</span><span class="doc-group-n">${n}</span></div>`;
+    }
+    return head+build(t,start+i);
+  }).join('');
+  closeRowMenu();
   if(vis)vis.textContent=items.length;
   if(st.isAlert&&items.length>0){const dot=document.getElementById('alert-pulse-dot');if(dot)dot.style.display='inline-block';}
   _renderPagination(type);
@@ -1358,31 +1933,28 @@ renderList('policies', seg.docs.policies, false);
 renderList('alerts', seg.docs.alerts, true);
 renderList('lessons', seg.docs.lessons, false);
 renderSoftware(seg.docs.software || []);
+// The row menu exists, hidden, from the start, so every row button's
+// aria-controls names a real element.
+rowMenuEl();
 
+/* A software asset is listed, not controlled: TQ-QHSE-S001 does not place
+   tools under document control. This card used to invent a version (v1.0), a
+   platform (Windows) and a size (a lone comma), add a boilerplate sentence and
+   two emoji, and offer a Download that was a <button> with nothing behind it.
+   It now shows what the register holds and who distributes the tool. */
 function buildSoftwareCard(raw, idx) {
-  const parts = raw.split(' | ');
-  const name = parts[0] || raw;
-  const ver = parts[1] || 'v1.0';
-  const platform = parts[2] || 'Windows';
-  const size = parts[3] || '–';
-  const safeName = name.replace(/'/g,"&#39;").replace(/"/g,"&quot;");
+  const name = String(raw).split(' | ')[0] || raw;
+  const T = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.types.software) || {};
+  const owner = T.owner || 'Digital Transformation';
+  const mark = T.mark || 'ZIP';
   return `
-  <div class="doc-card">
-    <div class="doc-type-icon software">ZIP</div>
-    <div>
-      <div class="doc-info-title">${name}<span class="sw-version">${ver}</span></div>
-      <div class="doc-summary">Operational software tool for this segment. Download the installer package and follow the setup guide included in the archive.</div>
-      <div class="doc-info-meta">
-        <span class="doc-type-badge software">Software</span>
-        <span class="doc-meta-item">💻 ${platform}</span>
-        <span class="doc-meta-item">📦 ${size}</span>
-      </div>
-    </div>
-    <div class="doc-actions">
-      <button class="doc-action-btn primary-action" title="Download">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Download
-      </button>
+  <div class="doc-card is-asset" data-title="${escHtml(name)}" data-type="software">
+    <div class="doc-row-link">
+      <span class="doc-type-icon software" aria-hidden="true">${escHtml(mark)}</span>
+      <span class="doc-body">
+        <span class="doc-info-title">${escHtml(name)}</span>
+        <span class="doc-meta"><span class="nw">Software asset, not under document control</span><span class="sep" aria-hidden="true">\u00b7</span><span class="nw">Distributed by ${escHtml(owner)}</span></span>
+      </span>
     </div>
   </div>`;
 }
@@ -1396,7 +1968,7 @@ function renderSoftware(items){
   if(el)el.innerHTML=SKEL+SKEL;
   setTimeout(()=>{
     if(!items||items.length===0){
-      if(el)el.innerHTML=`<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(168,85,247,0.2);font-family:'BwGradual','Urbanist',sans-serif;">ZIP</div><h3>No software uploaded yet</h3><p>Upload installer packages or tools relevant to this segment.</p><a href="upload.html" class="empty-state-upload">+ Upload Software</a></div>`;
+      if(el)el.innerHTML=`<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,187,182,0.2);font-family:'BwGradual','Urbanist',sans-serif;">ZIP</div><h3>No software uploaded yet</h3><p>Upload installer packages or tools relevant to this segment.</p><a href="upload.html" class="empty-state-upload">+ Upload Software</a></div>`;
       if(vis)vis.textContent='0';return;
     }
     _renderPage('software');
@@ -1456,7 +2028,7 @@ function goPage(type,page){
 }
 
 // ── Tab Switching ──
-const TAB_LABELS = {sops:'SOPs', manuals:'Manuals', policies:'Policies', alerts:'Alerts', lessons:'Lessons Learned', software:'Software & Tools'};
+const TAB_LABELS = {policies:'Standards', sops:'SOPs', manuals:'Manuals', alerts:'Alerts', lessons:'Lessons Learned', software:'Software & Tools'};
 // ── Tab switching (All + individual) ──
 const _contentOuter = document.querySelector('.content-outer');
 
@@ -1475,12 +2047,12 @@ function openTab(name) {
     const allPanel = document.getElementById('panel-all');
     if (allPanel) allPanel.classList.add('active');
     const combined = [
-      ..._st('sops').all.map(t=>({title:t,type:'sop'})),
-      ..._st('manuals').all.map(t=>({title:t,type:'manual'})),
-      ..._st('policies').all.map(t=>({title:t,type:'policy'})),
-      ..._st('alerts').all.map(t=>({title:t,type:'alert',isAlert:true})),
-      ..._st('lessons').all.map(t=>({title:t,type:'lesson'})),
-      ..._st('software').all.map(t=>({title:t,type:'software',isSoftware:true})),
+      ..._st('policies').all.map(t=>({title:t,type:'policy',bucket:'policies'})),
+      ..._st('sops').all.map(t=>({title:t,type:'sop',bucket:'sops'})),
+      ..._st('manuals').all.map(t=>({title:t,type:'manual',bucket:'manuals'})),
+      ..._st('alerts').all.map(t=>({title:t,type:'alert',isAlert:true,bucket:'alerts'})),
+      ..._st('lessons').all.map(t=>({title:t,type:'lesson',bucket:'lessons'})),
+      ..._st('software').all.map(t=>({title:t,type:'software',isSoftware:true,bucket:'software'})),
     ];
     const stA=_st('all');
     stA.all=combined;stA.filtered=[...combined];stA.page=0;stA.isAlert=false;stA.isSoftware=false;
@@ -1495,21 +2067,33 @@ function openTab(name) {
     });
     const next = document.getElementById('panel-' + name);
     if (next) next.classList.add('active');
-    if (bcTab) bcTab.textContent = TAB_LABELS[name] || name;
+    // Read the label off the tab itself, so Company Wide's breadcrumb says
+    // Policies under a tab that says Policies.
+    const lab = activeBtn && (activeBtn.firstChild && activeBtn.firstChild.nodeType === 3
+      ? activeBtn.firstChild.textContent : activeBtn.textContent).trim().replace(/\s*\d+$/, '');
+    if (bcTab) bcTab.textContent = lab || TAB_LABELS[name] || name;
   }
 }
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => openTab(btn.dataset.tab));
 });
-openTab(startTab);
+// Company Wide has no SOPs, so the default tab was hidden and the page opened
+// on an invisible tab saying no procedures were uploaded, over twelve policies.
+(function(){
+  const b = document.querySelector('#tab-bar .tab-btn[data-tab="' + startTab + '"]');
+  if (b && b.style.display !== 'none') { openTab(startTab); return; }
+  const first = [...document.querySelectorAll('#tab-bar .tab-btn')]
+    .find(x => x.dataset.tab !== 'all' && x.style.display !== 'none');
+  openTab(first ? first.dataset.tab : 'all');
+})();
 
 // Inject section headings (shown only in All mode via CSS)
 (function(){
   const cfg = {
     sops:    {pill:'SOP', cls:'sop',      title:'Standard Operating Procedures'},
     manuals: {pill:'MNL', cls:'manual',   title:'Technical Manuals'},
-    policies:{pill:'POL', cls:'policy',   title:'Policies & Standards'},
+    policies:{pill:'S',   cls:'policy',   title:'Standards'},
     alerts:  {pill:'ALT', cls:'alert',    title:'Technical Alerts'},
     lessons: {pill:'LSN', cls:'lesson',   title:'Lessons Learned'},
     software:{pill:'ZIP', cls:'software', title:'Software & Tools'},
@@ -1526,7 +2110,7 @@ openTab(startTab);
 
 // Update All tab total count after lists render
 setTimeout(() => {
-  const types = ['sops','manuals','policies','alerts','lessons','software'];
+  const types = ['policies','sops','manuals','alerts','lessons','software'];
   const total = types.reduce((s, t) => s + (_st(t).all.length || 0), 0);
   const el = document.getElementById('tc-all');
   if (el) el.textContent = total;
@@ -1540,7 +2124,7 @@ function copySegLink() {
   });
 }
 
-// ── Filter + Highlight (debounced, data-layer — not DOM scan) ──
+// ── Filter + Highlight (debounced, data-layer, not DOM scan) ──
 const _ftm={};
 // ── Sort ──
 const SORT_STATE = {};
@@ -1553,15 +2137,32 @@ function setSort(btn, type, mode) {
   st.page = 0;
   _renderPage(type);
 }
+// How many days past its review date an entry is. Not a controlled review
+// (withdrawn, or no number, or no date recorded) sorts as 0: not overdue.
+function overdueDays(entry) {
+  const num = splitEntry(typeof entry === 'object' ? entry.title : entry).num;
+  const d = num && typeof TAQA_STORE !== 'undefined' ? TAQA_STORE.findDoc(num) : null;
+  const delta = reviewDaysDelta(d);
+  return (delta && delta > 0) ? delta : 0;
+}
 function applySortToState(type) {
   const mode = SORT_STATE[type] || 'default';
   const st = _st(type);
   if (mode === 'az') {
     st.filtered.sort((a, b) => {
-      const ta = (typeof a === 'object' ? a.title : a).toLowerCase();
-      const tb = (typeof b === 'object' ? b.title : b).toLowerCase();
-      return ta < tb ? -1 : ta > tb ? 1 : 0;
+      // Each entry is 'NUMBER  Title', so comparing the whole string sorted
+      // by document number and put every unnumbered tool first.
+      const ta = splitEntry(typeof a === 'object' ? a.title : a).title;
+      const tb = splitEntry(typeof b === 'object' ? b.title : b).title;
+      return ta.localeCompare(tb, undefined, {sensitivity:'base'});
     });
+  } else if (mode === 'overdue') {
+    // Worst first. Everything not overdue is tied at 0 and, because the sort
+    // is stable, keeps the order it already had rather than being reshuffled.
+    st.filtered = st.filtered
+      .map((t, i) => ({ t, i, late: overdueDays(t) }))
+      .sort((a, b) => b.late - a.late || a.i - b.i)
+      .map(x => x.t);
   } else {
     // Restore original order: keep only items currently in filtered, in st.all order
     const kept = new Set(st.filtered.map(t => typeof t === 'object' ? t.title : t));
@@ -1607,6 +2208,16 @@ function filterDocs(input,type){
   },200);
 }
 
+// The empty state's own way to clear a search that matched nothing, so a
+// person is never left staring at a dead end with no way back to the list.
+function clearDocSearch(type){
+  const inp = document.querySelector('#panel-' + type + ' .doc-search input');
+  if (!inp) return;
+  inp.value = '';
+  filterDocs(inp, type);
+  inp.focus();
+}
+
 // ── Canvas ──
 const canvas = document.getElementById('bg-canvas');
 const ctx = canvas.getContext('2d');
@@ -1617,7 +2228,9 @@ function initPts(){ pts=[]; let n=Math.floor(W*H/22000);
   for(let i=0;i<n;i++) pts.push({x:Math.random()*W,y:Math.random()*H,
     vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,s:Math.random()*1.5+.5}); }
 initPts();
-function draw(){ ctx.fillStyle='#f4f5f7';ctx.fillRect(0,0,W,H);
+/* The canvas is painted, not styled, so it cannot inherit the canvas token. It
+   sits above the body background and would hold the light ramp in dark mode. */
+function draw(){ ctx.fillStyle=document.documentElement.getAttribute('data-taqa-theme')==='dark'?'#001314':'#F4F4F3';ctx.fillRect(0,0,W,H);
   const g=ctx.createRadialGradient(W*.15,H*.25,0,W*.15,H*.25,380);
   g.addColorStop(0,'rgba(0,93,99,0.05)');g.addColorStop(1,'transparent');
   ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
@@ -1627,28 +2240,10 @@ function draw(){ ctx.fillStyle='#f4f5f7';ctx.fillRect(0,0,W,H);
     ctx.fillStyle='rgba(0,93,99,0.12)';ctx.fill(); });
   requestAnimationFrame(draw); }
 draw();
-// ── Segments Dropdown ──
-(function(){
-  const li=document.getElementById('seg-dropdown-li'),btn=document.getElementById('seg-dropdown-btn');
-  if(!li||!btn)return;
-  btn.addEventListener('click',function(e){e.stopPropagation();const o=li.classList.toggle('open');btn.setAttribute('aria-expanded',o);});
-  document.addEventListener('click',function(){li.classList.remove('open');btn.setAttribute('aria-expanded','false');});
-  li.addEventListener('click',function(e){e.stopPropagation();});
-})();
-// ── Sliding Pill Nav ──
-const pill=document.getElementById('nav-pill'),navList=document.querySelector('.nav-links');
-function pillTo(el){const lr=navList.getBoundingClientRect(),ar=el.getBoundingClientRect();pill.style.left=(ar.left-lr.left)+'px';pill.style.width=ar.width+'px';pill.style.opacity='1';}
-function pillToActive(){const a=navList.querySelector('a.active');if(a)pillTo(a);else pill.style.opacity='0';}
-pillToActive();navList.querySelectorAll('a').forEach(a=>a.addEventListener('mouseenter',()=>pillTo(a)));navList.addEventListener('mouseleave',pillToActive);
-// ── Dark Mode ──
-const MOON='M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
-const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
-function toggleDark(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme',next);}
-(function(){const s=localStorage.getItem('taqa-theme');if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
 
 // ── Document Detail Modal ──
 const TYPE_LABELS = {sop:'SOP',manual:'Manual',policy:'Policy',lesson:'Lesson Learned',alert:'Alert'};
-const TYPE_COLORS = {sop:'#00BBB6',manual:'#60a5fa',policy:'#f59e0b',lesson:'#4ade80',alert:'#FD691D'};
+const TYPE_COLORS = {sop:'var(--primary-ink)',manual:'var(--primary-ink)',policy:'var(--primary-ink)',lesson:'var(--primary-ink)',alert:'var(--accent)'};
 const SCOPES = {
   sop:'Applies to all field personnel, supervisors, and engineers involved in the specified operation. Must be reviewed before commencing any related activity.',
   manual:'For use by qualified equipment operators, engineers, and maintenance personnel. Serves as the primary technical reference for this system.',
@@ -1656,26 +2251,36 @@ const SCOPES = {
   lesson:'Shared across relevant segments for awareness and preventive action. All supervisors must review and brief their teams.',
   alert:'Requires immediate acknowledgment from all segment supervisors. Applicable to ongoing and planned operations until further notice.'
 };
-const FAKE_VERSIONS = ['Rev 1.0','Rev 2.1','v3.0','v4.2','Rev 5.0','v2.3'];
-const FAKE_DATES = ['Jan 2026','Mar 2026','Apr 2026','May 2026','Feb 2026'];
+/* The modal used to fill Revision and Issued from two short lists with
+   Math.random(), so a document showed a different revision and date each time
+   it was opened, and it drew its square from the first three letters of the
+   type label (STA, ALE, LES). Every field now comes from the register record,
+   and a field the register does not hold says so. */
 function openDocModal(title, type) {
-  const color = TYPE_COLORS[type] || '#00BBB6';
-  const label = TYPE_LABELS[type] || type;
+  const _e = splitEntry(title);
+  const rec = (_e.num && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(_e.num) : null;
+  if (rec && rec.docType) type = rec.docType;
+  const L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : {types:{},segments:{}};
+  const T = L.types[type] || {};
+  const label = T.label || TYPE_LABELS[type] || type;
+  const mark = T.mark || ({sop:'SOP',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT',software:'ZIP'})[type] || type.slice(0,3).toUpperCase();
+  const areaName = (rec && L.segments[rec.segment] && L.segments[rec.segment].name) || seg.name;
+  const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const when = d => { const x = d ? new Date(d) : null; return (x && !isNaN(x)) ? MON[x.getMonth()] + ' ' + x.getFullYear() : 'Not recorded'; };
+  const esc = v => String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const icon = document.getElementById('dm-icon');
   icon.className = 'doc-modal-type-icon ' + type;
-  icon.textContent = label.toUpperCase().substring(0,3);
-  document.getElementById('dm-title').textContent = title;
-  document.getElementById('dm-summary').textContent = getDocSummary(title, type);
-  document.getElementById('dm-scope').textContent = SCOPES[type] || SCOPES.sop;
-  const vi = Math.floor(Math.random()*FAKE_VERSIONS.length);
-  const di = Math.floor(Math.random()*FAKE_DATES.length);
+  icon.textContent = mark;
+  document.getElementById('dm-title').textContent = _e.title;
+  document.getElementById('dm-summary').innerHTML = docControlLine(_e.num);
+  document.getElementById('dm-scope').textContent = SCOPES[type] || SCOPES[type === 'standard' ? 'policy' : 'sop'];
   document.getElementById('dm-meta').innerHTML = `
-    <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Document Type</div><div class="doc-modal-meta-val">${label}</div></div>
-    <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Segment</div><div class="doc-modal-meta-val">${seg.name}</div></div>
-    <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Revision</div><div class="doc-modal-meta-val">${FAKE_VERSIONS[vi]}</div></div>
-    <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Issued</div><div class="doc-modal-meta-val">${FAKE_DATES[di]}</div></div>
+    <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Document Type</div><div class="doc-modal-meta-val">${esc(label)}</div></div>
+    <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Area</div><div class="doc-modal-meta-val">${esc(areaName)}</div></div>
+    <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Revision</div><div class="doc-modal-meta-val">${esc(rec && rec.revision ? 'Rev ' + rec.revision : 'Not recorded')}</div></div>
+    <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Issued</div><div class="doc-modal-meta-val">${esc(when(rec && rec.issueDate))}</div></div>
   `;
-  document.getElementById('dm-badges').innerHTML = `<span class="doc-type-badge ${type}">${label}</span>`;
+  document.getElementById('dm-badges').innerHTML = `<span class="doc-type-badge ${type}">${esc(label)}</span>`;
   document.getElementById('doc-modal-overlay').classList.add('open');
   document.getElementById('doc-modal-panel').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1738,7 +2343,7 @@ function loadRecent() {
   const cards = document.getElementById('recent-cards');
   if (!strip || !cards) return;
   cards.innerHTML = items.slice(0,3).map(i => {
-    const typeLabel = {sop:'SOP',manual:'Manual',policy:'Policy',lesson:'Lesson',alert:'Alert'}[i.type] || i.type;
+    const typeLabel = {sop:'SOP',manual:'Manual',standard:'Standard',policy:'Policy',lesson:'Lesson',alert:'Alert'}[i.type] || i.type;
     return `<div class="recent-card" onclick="openDocModal('${i.title.replace(/'/g,"&#39;")}','${i.type}')">
       <div class="recent-card-title">${i.title}</div>
       <div class="recent-card-meta">${typeLabel} · ${i.segName}</div>
@@ -1747,17 +2352,6 @@ function loadRecent() {
   strip.style.display = 'block';
 }
 loadRecent();
-
-// ── Copy Link ──
-function copyDocLink(btn, title) {
-  const url = location.href.split('#')[0] + '#doc-' + encodeURIComponent(title);
-  navigator.clipboard.writeText(url).then(() => {
-    const orig = btn.textContent;
-    btn.textContent = 'Copied!';
-    btn.classList.add('copy-ok');
-    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copy-ok'); }, 1800);
-  });
-}
 
 // ── / Keyboard Shortcut ──
 document.addEventListener('keydown', e => {
@@ -1774,43 +2368,302 @@ function toggleDocBm(btn) {
   const title = btn.dataset.title;
   const type = btn.dataset.type;
   const added = window.TAQA_Bookmarks.toggle({title, type, segId, segName: seg.name});
-  btn.textContent = added ? '★' : '☆';
-  btn.classList.toggle('bm-on', added);
+  // The same document can be on screen twice, in All and in its own tab, and
+  // tabs render once, so update every star for it, not only the one tapped.
+  document.querySelectorAll('.bm-btn').forEach(function(x){
+    if (x.dataset.title !== title) return;
+    x.classList.toggle('bm-on', added);
+    // A row's star is a mark, not a control: it says Bookmarked and stays
+    // a filled star, and is simply hidden when the bookmark goes.
+    if (x.classList.contains('bm-flag')) { x.textContent = '★'; return; }
+    x.textContent = added ? '★' : '☆';
+    x.title = added ? 'Remove bookmark' : 'Bookmark';
+  });
   if (window.updateBmBadge) window.updateBmBadge();
   if (window.showToast) window.showToast(added ? 'Bookmarked!' : 'Bookmark removed', added ? 'success' : 'info');
+}
+
+// A tab's own words, without its count, so the All tab's shelf headings say
+// what the tabs say (Policies for Company Wide, Notices for a function).
+function tabLabelOf(bucket){
+  const b = document.querySelector('#tab-bar .tab-btn[data-tab="' + bucket + '"]');
+  const raw = b ? (b.firstChild && b.firstChild.nodeType === 3 ? b.firstChild.textContent : b.textContent) : '';
+  return raw.trim().replace(/\s*\d+$/, '') || TAB_LABELS[bucket] || bucket;
+}
+
+// ── Row menu ──
+// One menu serves every row. It is built when opened, so its bookmark label
+// always reads the bookmark store as it is now, whatever the panel did since.
+const ROW_MENU_ICONS = {
+  bm:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg>',
+  bmOn:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg>',
+  qr:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.2"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1.2"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1.2"/><path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18zM14 18.5v2M18.5 14h2"/></svg>',
+  link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>'
+};
+let _rowMenuFrom = null;
+function rowMenuEl(){
+  let m = document.getElementById('row-menu');
+  if (m) return m;
+  m = document.createElement('div');
+  m.id = 'row-menu'; m.className = 'row-menu'; m.setAttribute('role', 'menu'); m.hidden = true;
+  document.body.appendChild(m);
+  m.addEventListener('click', function(e){
+    const it = e.target.closest('.row-menu-item');
+    if (!it || !_rowMenuFrom) return;
+    const from = _rowMenuFrom, row = from.closest('.doc-card');
+    const act = it.dataset.act;
+    closeRowMenu(act !== 'qr');
+    if (!row) return;
+    if (act === 'bm') toggleDocBm(it);
+    else if (act === 'qr') { _qrReturn = from; showDocQR(row.dataset.title, row.dataset.type); }
+    else if (act === 'link') copyRowLink(row.dataset.title, row.dataset.type);
+  });
+  m.addEventListener('keydown', function(e){
+    const items = [...m.querySelectorAll('.row-menu-item')];
+    const i = items.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+    else if (e.key === 'Home') { e.preventDefault(); items[0].focus(); }
+    else if (e.key === 'End') { e.preventDefault(); items[items.length - 1].focus(); }
+    else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeRowMenu(true); }
+    else if (e.key === 'Tab') { closeRowMenu(true); }
+  });
+  return m;
+}
+function openRowMenu(btn){
+  const row = btn.closest('.doc-card');
+  if (!row) return;
+  const m = rowMenuEl();
+  const on = window.TAQA_Bookmarks ? window.TAQA_Bookmarks.has(row.dataset.title, segId) : false;
+  const t = escHtml(row.dataset.title), ty = escHtml(row.dataset.type);
+  m.innerHTML =
+    `<button type="button" class="row-menu-item" role="menuitem" data-act="bm" data-title="${t}" data-type="${ty}">${on ? ROW_MENU_ICONS.bmOn : ROW_MENU_ICONS.bm}${on ? 'Remove bookmark' : 'Bookmark'}</button>` +
+    `<button type="button" class="row-menu-item" role="menuitem" data-act="qr">${ROW_MENU_ICONS.qr}Show QR code</button>` +
+    `<button type="button" class="row-menu-item" role="menuitem" data-act="link">${ROW_MENU_ICONS.link}Copy link</button>`;
+  m.setAttribute('aria-label', 'Actions for ' + (splitEntry(row.dataset.title).title));
+  m.hidden = false;
+  _rowMenuFrom = btn;
+  btn.setAttribute('aria-expanded', 'true');
+  // Hang it under the button, its end edge on the button's end edge; open
+  // upward when the row sits near the bottom of the screen.
+  const r = btn.getBoundingClientRect(), mw = m.offsetWidth, mh = m.offsetHeight;
+  const rtl = getComputedStyle(btn).direction === 'rtl';
+  let x = rtl ? r.left : r.right - mw;
+  x = Math.max(8, Math.min(x, document.documentElement.clientWidth - mw - 8));
+  const up = r.bottom + 6 + mh > window.innerHeight - 8 && r.top - 6 - mh > 72;
+  m.toggleAttribute('data-up', up);
+  m.style.left = (x + window.scrollX) + 'px';
+  m.style.top = ((up ? r.top - 6 - mh : r.bottom + 6) + window.scrollY) + 'px';
+  const first = m.querySelector('.row-menu-item');
+  if (first) first.focus({preventScroll:true});
+}
+function closeRowMenu(refocus){
+  const m = document.getElementById('row-menu');
+  if (!m || m.hidden) return;
+  m.hidden = true;
+  const from = _rowMenuFrom; _rowMenuFrom = null;
+  if (from) {
+    from.setAttribute('aria-expanded', 'false');
+    if (refocus && from.isConnected) from.focus({preventScroll:true});
+  }
+}
+document.addEventListener('click', function(e){
+  const b = e.target.closest('.doc-more');
+  if (b) {
+    e.preventDefault();
+    const again = _rowMenuFrom === b;
+    closeRowMenu(false);
+    if (!again) openRowMenu(b);
+    return;
+  }
+});
+document.addEventListener('pointerdown', function(e){
+  if (!_rowMenuFrom) return;
+  if (e.target.closest('#row-menu') || e.target.closest('.doc-more') === _rowMenuFrom) return;
+  closeRowMenu(false);
+});
+document.addEventListener('keydown', function(e){
+  const b = e.target.closest && e.target.closest('.doc-more');
+  if (b && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) { e.preventDefault(); if (_rowMenuFrom !== b) { closeRowMenu(false); openRowMenu(b); } }
+});
+window.addEventListener('resize', function(){ closeRowMenu(false); });
+
+// ── Swipe-to-reveal quick actions (touch only) ──
+// Dragging a row left reveals Bookmark and QR code, the same two shortcuts
+// the row's own overflow menu already offers. A drag is only claimed once it
+// reads as clearly horizontal, so a vertical drag keeps scrolling the page
+// exactly as it always has; a mouse never sends the touch events this reads.
+(function(){
+  const REVEAL = 128;          // px: the two 64px actions
+  const OPEN_AT = REVEAL / 2;  // snap open once dragged past halfway
+  let dragCard = null, dragSurface = null, startX = 0, startY = 0, lastX = 0, axis = null, openCard = null;
+
+  function setOpen(card, open){
+    const s = card.querySelector('.swipe-surface');
+    if (!s) return;
+    s.style.transform = open ? 'translateX(-' + REVEAL + 'px)' : '';
+    card.classList.toggle('swipe-open', open);
+    if (open) openCard = card; else if (openCard === card) openCard = null;
+  }
+  function closeOpenCard(){ if (openCard) setOpen(openCard, false); }
+
+  document.addEventListener('touchstart', function(e){
+    const card = e.target.closest && e.target.closest('.doc-card');
+    if (!card || card.classList.contains('is-asset')) { closeOpenCard(); return; }
+    const surface = card.querySelector('.swipe-surface');
+    if (!surface) { closeOpenCard(); return; }
+    if (openCard && openCard !== card) closeOpenCard();
+    dragCard = card; dragSurface = surface;
+    startX = e.touches[0].clientX; startY = e.touches[0].clientY; lastX = 0; axis = null;
+    surface.classList.add('is-dragging');
+  }, {passive:true});
+
+  document.addEventListener('touchmove', function(e){
+    if (!dragCard) return;
+    const t = e.touches[0];
+    const mx = t.clientX - startX, my = t.clientY - startY;
+    if (axis === null && (Math.abs(mx) > 6 || Math.abs(my) > 6)) {
+      axis = Math.abs(mx) > Math.abs(my) ? 'x' : 'y';
+    }
+    if (axis !== 'x') return;                     // vertical drag: leave it to the page
+    e.preventDefault();                            // horizontal: this gesture is the row's
+    const base = dragCard.classList.contains('swipe-open') ? -REVEAL : 0;
+    lastX = Math.max(-REVEAL - 24, Math.min(24, base + mx));
+    dragSurface.style.transform = 'translateX(' + lastX + 'px)';
+  }, {passive:false});
+
+  function endDrag(){
+    if (!dragCard) return;
+    dragSurface.classList.remove('is-dragging');
+    if (axis === 'x') setOpen(dragCard, lastX <= -OPEN_AT);
+    dragCard = null; dragSurface = null; axis = null;
+  }
+  document.addEventListener('touchend', endDrag, {passive:true});
+  document.addEventListener('touchcancel', endDrag, {passive:true});
+
+  // A tap on the row link while it is swiped open closes the row instead of
+  // opening the document, the way a phone's own swipe rows behave. This has
+  // to run before the row-link's own onclick (which saves it to Recent and
+  // navigates), so it listens on the capture phase.
+  document.addEventListener('click', function(e){
+    const link = e.target.closest && e.target.closest('.doc-row-link');
+    if (!link) return;
+    const card = link.closest('.doc-card');
+    if (card && card.classList.contains('swipe-open')) {
+      e.preventDefault(); e.stopPropagation();
+      setOpen(card, false);
+    }
+  }, true);
+
+  document.addEventListener('click', function(e){
+    const act = e.target.closest && e.target.closest('.swipe-act');
+    if (act) {
+      const card = act.closest('.doc-card');
+      if (!card) return;
+      if (act.dataset.act === 'bm') toggleDocBm(act);
+      else if (act.dataset.act === 'qr') { _qrReturn = card.querySelector('.doc-more'); showDocQR(card.dataset.title, card.dataset.type); }
+      setOpen(card, false);
+      return;
+    }
+    const onCard = e.target.closest && e.target.closest('.doc-card');
+    if (openCard && onCard !== openCard) closeOpenCard();
+  });
+  window.addEventListener('resize', closeOpenCard);
+  document.addEventListener('scroll', closeOpenCard, {passive:true, capture:true});
+})();
+
+// The link a row opens, whole, so it can be pasted into a message.
+function copyRowLink(title, type){
+  const base = location.origin + location.pathname.replace(/[^/]*$/, '');
+  const url = base + viewerHrefFor(title, type);
+  const done = ok => { if (window.showToast) window.showToast(ok ? 'Link copied' : 'Could not copy link', ok ? 'success' : 'error'); };
+  const fallback = () => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = url; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      const ok = document.execCommand('copy'); ta.remove(); done(ok);
+    } catch (err) { done(false); }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(() => done(true), fallback);
+  else fallback();
+}
+
+// A list entry is "NUMBER  Title". Split it so a link can carry the controlled
+// number, which is what the viewer should resolve on. Passing a title alone was
+// how "Not in the Master Document List" appeared for documents that are in it.
+function splitEntry(entry){
+  const m = String(entry).match(/^((?:TQ|TAQA)-[^\s]+)\s\s+(.+)$/);
+  return m ? { num:m[1], title:m[2] } : { num:'', title:String(entry) };
 }
 
 // ── QR Code modal ──
 function showDocQR(title, type) {
   const base = location.origin + location.pathname.replace(/[^/]*$/, '');
-  const url = base + 'viewer.html?seg=' + segId + '&type=' + type + '&title=' + encodeURIComponent(title);
+  const _q = splitEntry(title);
+  const url = base + 'viewer.html?seg=' + segId + '&type=' + type +
+    '&title=' + encodeURIComponent(_q.title) +
+    (_q.num ? '&doc=' + encodeURIComponent(_q.num) : '');
   document.getElementById('qr-doc-title').textContent = title;
   const inp = document.getElementById('qr-url-in');
   if (inp) inp.value = url;
   const img = document.getElementById('qr-img');
   if (img) img.src = window.TAQA_QR ? window.TAQA_QR(url, 5) : '';
-  document.getElementById('qr-overlay').classList.add('open');
+  const ov = document.getElementById('qr-overlay');
+  ov.classList.add('open');
+  // Focus waits a frame, so the dialog is visible before it is asked to
+  // take focus, and tries once more if the first attempt did not land.
+  const cl = ov.querySelector('.qr-close');
+  if (cl) requestAnimationFrame(function(){
+    cl.focus({preventScroll:true});
+    if (document.activeElement !== cl) setTimeout(function(){ if (ov.classList.contains('open')) cl.focus({preventScroll:true}); }, 60);
+  });
 }
-function closeQR() { document.getElementById('qr-overlay').classList.remove('open'); }
+// Tab stays inside the open dialog. The dialog's markup comes after this
+// script, so the listener sits on the document and looks it up each time.
+document.addEventListener('keydown', function(e){
+  if (e.key !== 'Tab') return;
+  const ov = document.getElementById('qr-overlay');
+  if (!ov || !ov.classList.contains('open')) return;
+  const f = [...ov.querySelectorAll('input,button')].filter(x => !x.disabled);
+  if (!f.length) return;
+  const first = f[0], last = f[f.length - 1], a = document.activeElement;
+  if (!ov.contains(a)) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+  else if (e.shiftKey && a === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+});
+// Focus goes back to the row's menu button the dialog was opened from.
+let _qrReturn = null;
+function closeQR() {
+  const ov = document.getElementById('qr-overlay');
+  if (!ov.classList.contains('open')) return;
+  ov.classList.remove('open');
+  const r = _qrReturn; _qrReturn = null;
+  if (r && r.isConnected) r.focus({preventScroll:true});
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeQR(); });
 // Swipe-down to close QR
-(function(){
+// Deferred to DOMContentLoaded: the dialog is written after this script.
+document.addEventListener('DOMContentLoaded', function(){
   var ov=document.getElementById('qr-overlay'),sy=0;
   if(!ov)return;
   ov.addEventListener('touchstart',function(e){sy=e.touches[0].clientY;},{passive:true});
   ov.addEventListener('touchend',function(e){if(e.changedTouches[0].clientY-sy>60)closeQR();},{passive:true});
-})();
+});
 function copyQRUrl() {
   const v = document.getElementById('qr-url-in').value;
   navigator.clipboard.writeText(v).then(() => { if(window.showToast) window.showToast('Link copied!'); });
 }
 </script>
+<script>
+</script>
 <script src="shared.js"></script>
-<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary-ink);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#C8102E;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-taqa-theme="dark"] .bell-badge{border-color:#002326;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
 
 <!-- ── QR Modal ── -->
 <div class="qr-overlay" id="qr-overlay" onclick="if(event.target===this)closeQR()">
-  <div class="qr-box">
+  <div class="qr-box" role="dialog" aria-modal="true" aria-labelledby="qr-doc-title">
     <div class="qr-doc-title" id="qr-doc-title"></div>
     <img class="qr-img" id="qr-img" alt="QR Code" />
     <div class="qr-url-row">

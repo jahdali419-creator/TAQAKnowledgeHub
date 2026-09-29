@@ -1,0 +1,268 @@
+/* The one top bar. Every page links this sheet and carries the same <nav>
+   markup, so the bar is already drawn in its final form before any script
+   runs. shared.js only adds what depends on the role: the door, Master List,
+   the approvals count and Upload.
+
+   Every rule is scoped to #navbar, which outranks the older class rules some
+   pages still carry, so the bar cannot drift from page to page again. */
+
+:root{
+  --nav-h:64px;
+  --tb-paper:rgba(255,255,255,0.97);
+  --tb-solid:#FFFFFF;
+  --tb-text:#1E1C1A;
+  --tb-muted:#524D48;
+  --tb-light:#756A61;
+  --tb-ink:#005D63;
+  --tb-ink-2:#00959C;
+  --tb-primary:#005D63;
+  --tb-rule:rgba(117,106,97,0.13);
+  --tb-hover:rgba(117,106,97,0.08);
+  --tb-active:rgba(0,93,99,0.07);
+  --tb-disc:rgba(0,93,99,0.06);
+  --tb-shadow:0 22px 44px -26px rgba(0,88,90,0.28),0 2px 6px -2px rgba(0,88,90,0.06);
+}
+html[data-taqa-theme="dark"]{
+  --tb-paper:rgba(0,35,38,0.96);
+  --tb-solid:#002326;
+  --tb-text:#C7DBDD;
+  --tb-muted:#8CB6B9;
+  --tb-light:#8CB6B9;
+  --tb-ink:#00BBB6;
+  --tb-ink-2:#7BEEE6;
+  --tb-primary:#005D63;
+  --tb-rule:rgba(0,187,182,0.13);
+  --tb-hover:rgba(0,187,182,0.07);
+  --tb-active:rgba(0,187,182,0.10);
+  --tb-disc:rgba(0,187,182,0.08);
+  --tb-shadow:0 22px 44px -22px rgba(0,0,0,0.6),0 2px 6px -2px rgba(0,0,0,0.3);
+}
+
+#navbar{
+  position:fixed; top:0; inset-inline:0; z-index:1000;
+  height:var(--nav-h); margin:0; padding:0 max(32px, env(safe-area-inset-right)) 0 max(32px, env(safe-area-inset-left));
+  display:flex; align-items:center; gap:24px;
+  background:var(--tb-paper);
+  -webkit-backdrop-filter:saturate(1.4) blur(18px); backdrop-filter:saturate(1.4) blur(18px);
+  border:0; border-bottom:1px solid var(--tb-rule);
+  box-shadow:none;
+  font-family:'Inter',system-ui,sans-serif;
+  box-sizing:border-box;
+}
+#navbar *,#navbar *::before,#navbar *::after{box-sizing:border-box;}
+
+/* Brand lockup */
+#navbar .nav-brand{
+  display:flex; flex-direction:column; justify-content:center; gap:1px;
+  flex-shrink:0; min-width:0; text-decoration:none; padding:4px 0;
+  border-radius:8px;
+}
+#navbar .nav-title{
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:15.5px; line-height:1.15;
+  white-space:nowrap; letter-spacing:-0.005em;
+}
+#navbar .nav-title-brand{font-weight:800; color:var(--tb-ink);}
+#navbar .nav-title-hub{font-weight:400; color:var(--tb-light);}
+#navbar .nav-subtitle{
+  display:block; margin:0; font-size:11px; line-height:1.3; white-space:nowrap; color:var(--tb-light);
+}
+#navbar .nav-subtitle em{
+  font-style:italic; font-weight:700; letter-spacing:-0.01em;
+  background:linear-gradient(120deg, var(--tb-ink) 20%, var(--tb-ink-2) 80%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+@media (prefers-contrast:more){
+  #navbar .nav-subtitle em{background:none; -webkit-text-fill-color:unset; color:var(--tb-ink);}
+}
+
+/* Links */
+#navbar .nav-links{
+  display:flex; align-items:center; gap:2px; list-style:none;
+  margin:0; margin-inline-start:16px; padding:0; position:relative; min-width:0;
+}
+#navbar .nav-links li{list-style:none; margin:0; padding:0; position:static;}
+/* Only the bar's own links: the Areas sheet sits inside .nav-links too and
+   styles its rows itself. */
+#navbar .nav-links > li > a,
+#navbar .nav-dropdown-btn{
+  position:relative; display:inline-flex; align-items:center; gap:6px;
+  height:38px; padding:0 13px; margin:0; border-radius:10px; border:0;
+  background:transparent; color:var(--tb-muted);
+  font:500 14px/1 'Inter',system-ui,sans-serif; letter-spacing:0; white-space:nowrap;
+  text-decoration:none; cursor:pointer;
+  transition:background-color 150ms cubic-bezier(.23,1,.32,1),color 150ms cubic-bezier(.23,1,.32,1);
+}
+#navbar .nav-links > li > a::after,#navbar .nav-dropdown-btn::after{display:none;}
+@media (hover:hover){
+  #navbar .nav-links > li > a:hover,#navbar .nav-dropdown-btn:hover{background:var(--tb-hover); color:var(--tb-text);}
+}
+#navbar .nav-links > li > a.active,
+#navbar .nav-dropdown-btn.active{background:var(--tb-active); color:var(--tb-ink); font-weight:600;}
+#navbar .nav-dropdown-arrow{flex-shrink:0; opacity:.75; transition:transform 200ms cubic-bezier(.23,1,.32,1);}
+#navbar .nav-dropdown.open .nav-dropdown-btn{background:var(--tb-hover); color:var(--tb-text);}
+#navbar .nav-dropdown.open .nav-dropdown-btn.active{background:var(--tb-active); color:var(--tb-ink);}
+#navbar .nav-dropdown.open .nav-dropdown-arrow{transform:rotate(180deg);}
+
+/* Areas panel: a sheet under the bar, centred on it */
+#navbar .nav-dropdown{position:static;}
+#navbar .nav-dropdown-panel{
+  position:fixed; top:calc(var(--nav-h) + 8px); inset-inline:0; margin-inline:auto;
+  width:min(860px,calc(100vw - 32px)); max-height:calc(100dvh - var(--nav-h) - 24px); overflow-y:auto;
+  transform:translateY(-4px); opacity:0; visibility:hidden; pointer-events:none;
+  background:var(--tb-solid); border:1px solid var(--tb-rule); border-radius:18px;
+  box-shadow:var(--tb-shadow); padding:10px 10px 14px;
+  display:block; z-index:1001;
+  transition:opacity 160ms cubic-bezier(.23,1,.32,1),transform 160ms cubic-bezier(.23,1,.32,1),visibility 0s linear 160ms;
+}
+#navbar .nav-dropdown.open .nav-dropdown-panel{
+  opacity:1; visibility:visible; pointer-events:auto; transform:none;
+  transition:opacity 160ms cubic-bezier(.23,1,.32,1),transform 160ms cubic-bezier(.23,1,.32,1),visibility 0s;
+}
+#navbar .ad-company{
+  display:flex; align-items:center; gap:12px; height:auto; min-height:52px; padding:10px 14px;
+  margin:0 0 6px; border-radius:12px; border-bottom:0;
+  font:700 15px/1.25 'BwGradual','Urbanist',sans-serif; color:var(--tb-text); text-decoration:none;
+}
+#navbar .ad-company .ad-sub{font:400 12.5px/1.3 'Inter',system-ui,sans-serif; color:var(--tb-light); margin-inline-start:2px;}
+#navbar .ad-cols{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0;
+  border-top:1px solid var(--tb-rule); padding-top:8px;}
+#navbar .ad-col{min-width:0; padding:4px 4px 0;}
+#navbar .ad-col + .ad-col{border-inline-start:1px solid var(--tb-rule);}
+#navbar .ad-head{
+  display:flex; align-items:baseline; gap:8px; padding:8px 10px 6px;
+  font:700 13px/1.2 'BwGradual','Urbanist',sans-serif; color:var(--tb-text);
+}
+#navbar .ad-head .ad-n{margin-inline-start:auto;}
+#navbar .ad-col a,#navbar .ad-company{
+  transition:background-color 150ms cubic-bezier(.23,1,.32,1),color 150ms cubic-bezier(.23,1,.32,1);
+}
+#navbar .ad-col a{
+  display:flex; align-items:center; gap:10px; height:auto; min-height:36px; padding:6px 10px;
+  border-radius:9px; background:transparent; text-decoration:none; white-space:normal;
+  font:300 15px/1.3 'BwGradual','Urbanist',sans-serif; color:var(--tb-text);
+}
+#navbar .ad-col a span:first-child{min-width:0;}
+#navbar .ad-n{margin-inline-start:auto; font:500 12px/1 'Inter',system-ui,sans-serif; color:var(--tb-light);
+  font-variant-numeric:tabular-nums; flex-shrink:0;}
+@media (hover:hover){
+  #navbar .ad-col a:hover,#navbar .ad-company:hover{background:var(--tb-hover); color:var(--tb-ink);}
+}
+#navbar .ad-col a.here,#navbar .ad-company.here{background:var(--tb-active); color:var(--tb-ink); font-weight:400;}
+
+/* Right cluster */
+#navbar .nav-right{display:flex; align-items:center; gap:4px; flex-shrink:0; margin:0; margin-inline-start:auto;}
+#navbar .nav-icon,
+#navbar .dark-toggle,
+#navbar .bell-btn{
+  position:relative; width:40px; height:40px; min-width:40px!important; min-height:40px!important;
+  display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
+  padding:0; margin:0; border:0; border-radius:10px; background:transparent;
+  color:var(--tb-muted); cursor:pointer;
+  transition:background-color 150ms cubic-bezier(.23,1,.32,1),color 150ms cubic-bezier(.23,1,.32,1);
+}
+#navbar .nav-icon svg,#navbar .dark-toggle svg,#navbar .bell-btn svg{width:18px; height:18px; display:block;}
+@media (hover:hover){
+  #navbar .nav-icon:hover,#navbar .dark-toggle:hover,#navbar .bell-btn:hover{background:var(--tb-hover); color:var(--tb-text);}
+}
+#navbar .nav-icon[aria-expanded="true"]{background:var(--tb-active); color:var(--tb-ink);}
+#navbar .nav-icon:active,#navbar .dark-toggle:active,#navbar .bell-btn:active{transform:scale(.96);}
+#navbar .bell-badge,
+#navbar .nav-count{
+  position:absolute; top:5px; inset-inline-end:4px; min-width:17px; height:17px; padding:0 4px;
+  border-radius:999px; display:none; align-items:center; justify-content:center;
+  font:700 10px/1 'Inter',system-ui,sans-serif; font-variant-numeric:tabular-nums;
+  background:var(--tb-primary); color:#FFFFFF; border:2px solid var(--tb-solid);
+}
+
+/* Master List and Upload belong to some roles only. A hint in the nav's
+   own markup marks the root before the bar is painted, and shared.js
+   confirms it, so these never appear late and push the links along. */
+#navbar .nav-reg,#navbar .nav-sep.nav-up,#navbar .nav-cta.nav-up{display:none;}
+html[data-tb-reg] #navbar .nav-reg{display:block;}
+html[data-tb-up] #navbar .nav-sep.nav-up{display:block;}
+html[data-tb-up] #navbar .nav-cta.nav-up{display:inline-flex;}
+
+/* The divider that separates the reader's tools from the one action */
+#navbar .nav-sep{width:1px; height:22px; background:var(--tb-rule); margin:0 8px; flex-shrink:0;}
+
+/* Upload, the one primary action, only for roles that may file */
+#navbar .nav-cta{
+  display:inline-flex; align-items:center; gap:7px; height:38px; padding:0 16px; margin:0;
+  border-radius:10px; border:1px solid transparent; background:var(--tb-primary); color:#FFFFFF;
+  font:600 13.5px/1 'Inter',system-ui,sans-serif; text-decoration:none; white-space:nowrap; flex-shrink:0;
+  transition:background-color 150ms cubic-bezier(.23,1,.32,1),transform 100ms cubic-bezier(.23,1,.32,1);
+}
+#navbar .nav-cta svg{width:15px; height:15px;}
+@media (hover:hover){ #navbar .nav-cta:hover{background:#004A4F;} }
+#navbar .nav-cta:active{transform:scale(.97);}
+html[data-taqa-theme="dark"] #navbar .nav-cta{border-color:rgba(0,187,182,0.35);}
+@media (hover:hover){ html[data-taqa-theme="dark"] #navbar .nav-cta:hover{background:#00696F;} }
+
+/* The door, drawn by shared.js, sits first in the cluster */
+#navbar .door-wrap{margin-inline-end:4px;}
+#navbar .door-btn{
+  height:34px; padding:0; padding-inline:10px 12px; border-radius:999px; gap:8px;
+  border:1px solid var(--tb-rule); background:transparent; color:var(--tb-muted);
+  font:500 13px/1 'Inter',system-ui,sans-serif;
+}
+@media (hover:hover){ #navbar .door-btn:hover{border-color:var(--tb-ink); color:var(--tb-ink); background:transparent;} }
+#navbar .door-menu{top:calc(100% + 14px);}
+
+/* Hamburger */
+#navbar .nav-hamburger{
+  display:none; width:44px; height:44px; padding:0; margin:0; margin-inline-end:-6px;
+  border:0; border-radius:10px; background:transparent; cursor:pointer;
+  flex-direction:column; align-items:center; justify-content:center; gap:4.5px;
+}
+#navbar .nav-hamburger span{display:block; width:18px; height:1.75px; border-radius:2px; background:var(--tb-text);
+  transition:transform 200ms cubic-bezier(.23,1,.32,1),opacity 150ms ease;}
+#navbar .nav-hamburger[aria-expanded="true"] span:nth-child(1){transform:translateY(6.25px) rotate(45deg);}
+#navbar .nav-hamburger[aria-expanded="true"] span:nth-child(2){opacity:0;}
+#navbar .nav-hamburger[aria-expanded="true"] span:nth-child(3){transform:translateY(-6.25px) rotate(-45deg);}
+
+#navbar a:focus-visible,#navbar button:focus-visible{outline:2px solid var(--tb-ink)!important; outline-offset:2px!important;}
+
+/* Narrower desktops: the same bar, tighter */
+@media (max-width:1320px){
+  #navbar{padding:0 24px; gap:16px;}
+  #navbar .nav-links{margin-inline-start:4px;}
+  #navbar .nav-links > li > a,#navbar .nav-dropdown-btn{padding:0 10px;}
+  /* An area name does not fit here, so the door says the role instead. */
+  #navbar .door-cap-s{display:inline;}
+  #navbar .door-cap-s + .door-cap{display:none;}
+}
+
+/* Phone and tablet: brand, bell, theme, menu. Everything else is in the menu. */
+@media (max-width:1180px){
+  #navbar{padding:0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); gap:8px;}
+  #navbar .nav-links,#navbar .door-wrap,#navbar #nav-bm,#navbar .nav-cta,#navbar .nav-sep{display:none!important;}
+  /* Hidden links report themselves hidden, for anything (the home tour)
+     that asks a link rather than its list. */
+  #navbar .nav-links > li > a{display:none;}
+  #navbar .nav-brand{min-height:44px;}
+  #navbar .nav-hamburger{display:flex!important;}
+  #navbar .nav-icon,#navbar .dark-toggle,#navbar .bell-btn{width:44px; height:44px; min-width:44px!important; min-height:44px!important;}
+  #navbar .bell-badge{top:6px; inset-inline-end:5px;}
+}
+@media (max-width:360px){
+  #navbar{padding:0 10px; gap:4px;}
+  #navbar .nav-right{gap:0;}
+  #navbar .nav-title{font-size:13px;}
+  #navbar .nav-subtitle{font-size:10px;}
+  #navbar .nav-hamburger{margin-inline-end:0;}
+}
+
+@media (prefers-reduced-motion:reduce){
+  #navbar *,#navbar .nav-dropdown-panel{transition:none!important;}
+}
+@media print{ #navbar{display:none!important;} }
+
+/* The door's menu takes the bar's inks, so it reads the same on every page
+   whatever that page calls its own text colours. */
+#navbar .door-menu{background:var(--tb-solid); border-color:var(--tb-rule); box-shadow:var(--tb-shadow);}
+#navbar .door-hd,#navbar .door-area label,#navbar .door-note{color:var(--tb-light); border-color:var(--tb-rule);}
+#navbar .door-area{border-color:var(--tb-rule);}
+#navbar .door-i .dt{color:var(--tb-text);}
+#navbar .door-i .dd{color:var(--tb-muted);}
+#navbar .door-i .dk{color:var(--tb-ink);}
+#navbar .door-area select{background:var(--tb-solid); color:var(--tb-text); border-color:var(--tb-rule);}

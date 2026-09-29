@@ -1,28 +1,39 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-taqa-theme="light">
 <head>
 <meta charset="UTF-8">
-<script>try{var _t=localStorage.getItem('taqa-theme');if(_t)document.documentElement.setAttribute('data-theme',_t);}catch(e){}</script>
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#005D63">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Tech Hub">
+<meta name="apple-mobile-web-app-title" content="TechHub Platform">
 <link rel="apple-touch-icon" href="icons/icon.svg">
-<title>Segment Control Panel — TAQA Knowledge Hub</title>
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<title>Segment Control Panel, TAQA Knowledge Hub</title>
 <link rel="stylesheet" href="fonts/fonts.css">
 <noscript></noscript>
 <style>
 :root{
-  --primary:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
-  --bg:#f4f5f7;--bg-white:#ffffff;
+  --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
+  --bg:#F4F4F3;--bg-white:#ffffff;--inset:#EDEBE8;
   --glass:rgba(255,255,255,0.85);--glass-2:rgba(255,255,255,0.98);
   --glass-border:rgba(0,0,0,0.09);--glass-border-hover:rgba(0,93,99,0.35);
-  --text:#1a2235;--text-muted:#64748b;--text-dim:#94a3b8;
+  --text:#1E1C1A;--text-muted:#524D48;--text-dim:#756A61;
+  /* The four semantic inks. shared.js publishes the same names and values, but
+     it runs after this page has already been painted, so the page carries its
+     own copy rather than flashing an unthemed colour first. */
+  --alert-ink:#A8431A;--warn-ink:#8A6200;--stop-ink:#C8102E;--info-ink:#0076A8;
   --radius:14px;--gradient:#005D63; /* flat brand teal - no gradient */
-  --border:rgba(0,0,0,0.08);
+  --border:rgba(117,106,97,.26);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
@@ -30,44 +41,24 @@ html{scroll-behavior:smooth;}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;animation:pageFadeIn 0.4s ease;}
 .page-wrapper{min-height:100vh;display:flex;flex-direction:column;}
 
-/* ── Nav ── */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
-  display:flex;align-items:center;justify-content:space-between;
-  background:rgba(255,255,255,0.93);backdrop-filter:blur(24px);
-  border-bottom:1px solid var(--border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
-.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
-.nav-brand-icon{width:40px;height:40px;border-radius:11px;background:var(--gradient);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  box-shadow:0 4px 18px rgba(0,93,99,0.38);}
-.nav-brand-icon svg{width:20px;height:20px;}
-.nav-brand-text{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;}
-.nav-brand-name{font-weight:800;color:var(--primary);}
-.nav-brand-hub{font-weight:500;color:#64748b;}
-.nav-links{display:flex;gap:2px;list-style:none;align-items:center;}
-.nav-links a{padding:7px 15px;border-radius:6px;text-decoration:none;font-size:13.5px;
-  font-weight:500;color:var(--text-muted);transition:background 0.2s,color 0.2s;}
-.nav-links a:hover{background:#f0f1f3;color:var(--text);}
-.nav-links a.active{color:var(--primary);font-weight:600;}
-.nav-right{display:flex;gap:10px;align-items:center;}
-.nav-role-badge{padding:4px 12px;border-radius:20px;font-size:11.5px;font-weight:600;
-  background:rgba(0,93,99,0.1);color:var(--primary);border:1px solid rgba(0,93,99,0.2);
-  letter-spacing:0.3px;}
 .btn{padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
   border:none;font-family:'Inter',sans-serif;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
 .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
-.btn-ghost:hover{border-color:var(--glass-border-hover);color:var(--primary);}
+.btn-ghost:hover{border-color:var(--glass-border-hover);color:var(--primary-ink);}
 .btn-primary{background:var(--gradient);color:#fff;box-shadow:0 4px 14px rgba(0,93,99,0.25);}
 .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,93,99,0.32);}
 
 /* ── Breadcrumb ── */
-.dash-breadcrumb{padding-bottom:16px;font-size:11px;font-weight:500;color:rgba(255,255,255,0.35);display:flex;align-items:center;gap:6px;max-width:1200px;margin:0 auto;position:relative;z-index:1;}
-.dash-breadcrumb a{color:rgba(255,255,255,0.35);text-decoration:none;transition:color 0.2s;}
-.dash-breadcrumb a:hover{color:#00BBB6;}
+/* The band under the crumb is the deep teal hero in both themes, so white is
+   the right ink, but at 0.35 an 11px crumb measured about 3.1:1. */
+.dash-breadcrumb{padding-bottom:16px;font-size:11px;font-weight:500;color:rgba(255,255,255,0.6);display:flex;align-items:center;gap:6px;max-width:1200px;margin:0 auto;position:relative;z-index:1;}
+.dash-breadcrumb a{color:rgba(255,255,255,0.6);text-decoration:none;transition:color 0.2s;}
+.dash-breadcrumb a:hover{color:var(--primary-light);}
 .dash-breadcrumb .bc-sep{opacity:0.35;}
 .dash-breadcrumb .bc-cur{color:rgba(0,187,182,0.85);font-weight:600;}
 
 /* ── Page Hero ── */
-.dash-hero{margin-top:68px;background:linear-gradient(135deg,#06121a 0%,#0d2030 100%);
+.dash-hero{margin-top:var(--nav-h,64px);background:linear-gradient(135deg,#001314 0%,#002326 100%);
   padding:40px 48px;position:relative;overflow:hidden;border-bottom:1px solid rgba(0,187,182,0.12);}
 .dash-hero::before{content:'';position:absolute;top:-80px;right:-80px;width:320px;height:320px;
   border-radius:50%;background:radial-gradient(circle,rgba(0,187,182,0.08) 0%,transparent 70%);pointer-events:none;}
@@ -76,21 +67,21 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .dash-hero-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:32px;position:relative;z-index:1;}
 .dash-hero-left{}
 .dash-hero-tag{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
-  color:rgba(0,187,182,0.7);margin-bottom:10px;display:block;}
+  color:var(--primary-light);margin-bottom:10px;display:block;}
 .dash-hero-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:28px;font-weight:800;color:#fff;
   margin-bottom:6px;letter-spacing:-0.3px;}
-.dash-hero-sub{font-size:13.5px;color:rgba(255,255,255,0.5);margin-bottom:20px;}
+.dash-hero-sub{font-size:13.5px;color:rgba(255,255,255,0.62);margin-bottom:20px;}
 .dash-user-pill{display:inline-flex;align-items:center;gap:10px;
   background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
   border-radius:50px;padding:7px 16px;}
 .dash-user-avatar{width:28px;height:28px;border-radius:50%;background:var(--gradient);
   display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
 .dash-user-name{font-size:13px;font-weight:500;color:rgba(255,255,255,0.8);}
-.dash-user-role{font-size:11px;color:rgba(0,187,182,0.8);font-weight:600;}
+.dash-user-role{font-size:11px;color:var(--primary-light);font-weight:600;}
 .dash-hero-stats{display:flex;gap:24px;}
 .dash-hero-stat{text-align:center;}
 .dash-hero-stat-num{font-family:'BwGradual','Urbanist',sans-serif;font-size:30px;font-weight:800;color:#fff;display:block;line-height:1;}
-.dash-hero-stat-label{font-size:11px;color:rgba(255,255,255,0.35);margin-top:5px;text-transform:uppercase;letter-spacing:1px;}
+.dash-hero-stat-label{font-size:11px;color:rgba(255,255,255,0.6);margin-top:5px;text-transform:uppercase;letter-spacing:1px;}
 
 /* ── Main Layout ── */
 .dash-outer{max-width:1200px;margin:0 auto;padding:32px 48px 80px;}
@@ -107,36 +98,65 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   padding:20px 24px;margin-bottom:10px;transition:box-shadow 0.2s,border-color 0.2s;}
 .pending-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.07);border-color:rgba(0,93,99,0.2);}
 .pending-card.approved{border-left:3px solid #00BBB6;opacity:0.7;}
-.pending-card.rejected{border-left:3px solid #ef4444;opacity:0.7;}
+.pending-card.rejected{border-inline-start:3px solid var(--stop-ink,#C8102E);opacity:0.7;}
 .pending-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px;}
 .pending-doc-info{}
+/* One calm treatment for every document type, because the word already says
+   which type it is. An alert is the exception: it is an operational warning,
+   so it keeps the warm ink. */
 .pending-doc-type{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--primary-light);margin-bottom:5px;}
+  color:var(--primary-ink);margin-bottom:5px;}
+.pending-doc-type.type-alert{color:var(--alert-ink);}
 .pending-doc-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;}
 .pending-doc-meta{font-size:12px;color:var(--text-muted);}
 .pending-status-badge{padding:3px 10px;border-radius:20px;font-size:10.5px;font-weight:600;flex-shrink:0;white-space:nowrap;}
-.badge-pending{background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.2);}
-.badge-approved{background:rgba(0,187,182,0.1);color:#00BBB6;border:1px solid rgba(0,187,182,0.2);}
-.badge-rejected{background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.2);}
+.badge-pending{background:rgba(255,184,28,0.14);color:var(--warn-ink);border:1px solid rgba(255,184,28,0.3);}
+.badge-approved{background:rgba(0,187,182,0.1);color:var(--primary-ink);border:1px solid rgba(0,187,182,0.2);}
+.badge-rejected{background:rgba(200,16,46,0.1);color:var(--stop-ink);border:1px solid rgba(200,16,46,0.25);}
 .pending-doc-preview{font-size:12.5px;color:var(--text-muted);line-height:1.6;
-  background:#f8f9fb;border-radius:8px;padding:10px 14px;margin-bottom:14px;border:1px solid var(--border);}
+  background:var(--inset);border-radius:8px;padding:10px 14px;margin-bottom:14px;border:1px solid var(--border);}
 .pending-actions{display:flex;gap:8px;align-items:center;}
-.btn-approve{background:rgba(0,187,182,0.1);border:1px solid rgba(0,187,182,0.3);color:#00868a;
+.btn-approve{background:rgba(0,187,182,0.1);border:1px solid rgba(0,187,182,0.3);color:var(--primary-ink);
   padding:7px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;
   font-family:'Inter',sans-serif;transition:all 0.2s;}
 .btn-approve:hover{background:rgba(0,187,182,0.2);border-color:var(--primary-light);}
-.btn-reject{background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);color:#ef4444;
+.btn-reject{background:rgba(200,16,46,0.07);border:1px solid rgba(200,16,46,0.22);color:var(--stop-ink);
   padding:7px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;
   font-family:'Inter',sans-serif;transition:all 0.2s;}
-.btn-reject:hover{background:rgba(239,68,68,0.14);}
+.btn-reject:hover{background:rgba(200,16,46,0.12);}
 .btn-preview-link{font-size:12.5px;color:var(--text-muted);text-decoration:none;
   padding:7px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;
   background:transparent;font-family:'Inter',sans-serif;transition:all 0.2s;}
-.btn-preview-link:hover{border-color:var(--glass-border-hover);color:var(--primary);}
+.btn-preview-link:hover{border-color:var(--glass-border-hover);color:var(--primary-ink);}
 .action-result{font-size:12px;font-weight:600;margin-left:4px;display:none;}
 .action-result.show{display:inline;}
-.action-result.approved-txt{color:#00BBB6;}
-.action-result.rejected-txt{color:#ef4444;}
+.action-result.approved-txt{color:var(--primary-ink);}
+.action-result.rejected-txt{color:var(--stop-ink);}
+
+/* ── Reject reason modal ── */
+.reject-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:3000;
+  display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.reject-modal-overlay.open{display:flex;}
+.reject-modal{background:var(--bg-white);border-radius:16px;padding:28px;width:100%;max-width:440px;
+  box-shadow:0 24px 64px rgba(0,0,0,0.2);}
+.reject-modal h3{font-family:'BwGradual','Urbanist',sans-serif;font-size:17px;font-weight:800;
+  color:var(--text);margin-bottom:4px;}
+.reject-modal-doc-name{font-size:12.5px;color:var(--text-muted);margin-bottom:14px;font-style:italic;}
+.reject-modal p{font-size:13px;color:var(--text-muted);margin-bottom:18px;}
+.reject-reason-input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;
+  font-size:13.5px;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg-white);
+  outline:none;resize:vertical;min-height:90px;transition:border-color 0.2s;}
+.reject-reason-input:focus{border-color:var(--stop-ink,#C8102E);box-shadow:0 0 0 3px rgba(200,16,46,0.1);}
+.reject-reason-input.error{border-color:var(--stop-ink,#C8102E) !important;}
+.reject-char-hint{font-size:11px;color:var(--text-muted);margin-top:4px;}
+.reject-modal-actions{display:flex;gap:10px;margin-top:20px;}
+.btn-reject-confirm{flex:1;padding:11px;border-radius:10px;background:var(--stop-ink,#C8102E);
+  color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:'Inter',sans-serif;
+  transition:opacity 0.2s;}
+.btn-reject-confirm:hover{opacity:0.88;}
+.btn-reject-confirm:disabled{opacity:0.45;cursor:not-allowed;}
+.btn-reject-cancel{padding:11px 20px;border-radius:10px;background:transparent;border:1px solid var(--border);
+  color:var(--text-muted);font-size:14px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;}
 
 /* ── Published Docs Link Card ── */
 .pub-docs-link-card{background:var(--bg-white);border:1px solid var(--border);border-radius:var(--radius);
@@ -148,24 +168,26 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .pub-docs-link-sub{font-size:12.5px;color:var(--text-muted);margin-top:3px;}
 
 /* ── Admin Duplicate Detection ── */
-.dup-sim-panel{background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:12px 16px;margin-bottom:12px;}
-.dup-sim-hd{font-size:10.5px;font-weight:700;color:#d97706;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
-.dup-sim-item{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(245,158,11,0.1);}
+.dup-sim-panel{background:rgba(255,184,28,0.08);border:1px solid rgba(255,184,28,0.28);border-radius:10px;padding:12px 16px;margin-bottom:12px;}
+.dup-sim-hd{font-size:10.5px;font-weight:700;color:var(--warn-ink);letter-spacing:0.6px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.dup-sim-item{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,184,28,0.16);}
 .dup-sim-item:last-child{border-bottom:none;padding-bottom:0;}
-.dup-sim-bar-wrap{width:36px;height:3px;background:rgba(245,158,11,0.2);border-radius:2px;flex-shrink:0;}
-.dup-sim-bar{height:100%;border-radius:2px;background:#f59e0b;}
+.dup-sim-bar-wrap{width:36px;height:3px;background:rgba(255,184,28,0.28);border-radius:2px;flex-shrink:0;}
+.dup-sim-bar{height:100%;border-radius:2px;background:#FFB81C;}
 .dup-sim-title{font-size:12px;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.dup-sim-pct{font-size:10px;font-weight:700;color:#d97706;white-space:nowrap;background:rgba(245,158,11,0.1);padding:2px 6px;border-radius:4px;}
-.dup-exact-banner{background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:11px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
-.dup-exact-badge{font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(239,68,68,0.12);color:#ef4444;white-space:nowrap;letter-spacing:0.8px;flex-shrink:0;}
+.dup-sim-pct{font-size:10px;font-weight:700;color:var(--warn-ink);white-space:nowrap;background:rgba(255,184,28,0.14);padding:2px 6px;border-radius:4px;}
+.dup-exact-banner{background:rgba(200,16,46,0.07);border:1px solid rgba(200,16,46,0.25);border-radius:10px;padding:11px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+/* A tint on top of the banner's own tint left this 9.5px badge at 4.3:1, so
+   the strongest flag on the card is a solid fill rather than a wash. */
+.dup-exact-badge{font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:#C8102E;color:#fff;white-space:nowrap;letter-spacing:0.8px;flex-shrink:0;}
 .dup-exact-txt{font-size:12px;color:var(--text-muted);}
-.supersedes-row{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.2);border-radius:8px;margin-bottom:12px;max-width:100%;overflow:hidden;}
-.supersedes-label{font-size:10px;font-weight:700;color:#60a5fa;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;}
+.supersedes-row{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;background:rgba(0,118,168,0.05);border:1px solid rgba(0,118,168,0.2);border-radius:8px;margin-bottom:12px;max-width:100%;overflow:hidden;}
+.supersedes-label{font-size:10px;font-weight:700;color:var(--info-ink);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;}
 .supersedes-doc-title{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pending-card.dup-flagged{border-left:3px solid rgba(239,68,68,0.55);}
-html[data-theme="dark"] .dup-sim-panel{background:rgba(245,158,11,0.04);border-color:rgba(245,158,11,0.15);}
-html[data-theme="dark"] .dup-exact-banner{background:rgba(239,68,68,0.05);border-color:rgba(239,68,68,0.2);}
-html[data-theme="dark"] .supersedes-row{background:rgba(59,130,246,0.05);border-color:rgba(59,130,246,0.15);}
+.pending-card.dup-flagged{border-inline-start:3px solid var(--stop-ink,#C8102E);}
+html[data-taqa-theme="dark"] .dup-sim-panel{background:rgba(255,184,28,0.05);border-color:rgba(255,184,28,0.18);}
+html[data-taqa-theme="dark"] .dup-exact-banner{background:rgba(200,16,46,0.05);border-color:rgba(200,16,46,0.2);}
+html[data-taqa-theme="dark"] .supersedes-row{background:rgba(0,118,168,0.05);border-color:rgba(0,118,168,0.18);}
 
 /* ── Right Column ── */
 .right-col{display:flex;flex-direction:column;gap:20px;}
@@ -177,26 +199,26 @@ html[data-theme="dark"] .supersedes-row{background:rgba(59,130,246,0.05);border-
 .contributor-row:last-child{border-bottom:none;padding-bottom:0;}
 .contributor-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
-.av-teal{background:#005D63;}
-.av-blue{background:linear-gradient(135deg,#3b82f6,#60a5fa);}
-.av-orange{background:linear-gradient(135deg,#f59e0b,#fbbf24);}
-.av-purple{background:linear-gradient(135deg,#8b5cf6,#a78bfa);}
+.av-teal{background:#00474C;}
+.av-blue{background:#00686A;}
+.av-orange{background:#008F8A;}
+.av-purple{background:#4C7A7C;}
 .contributor-info{flex:1;}
 .contributor-name{font-size:13px;font-weight:600;color:var(--text);}
 .contributor-role{font-size:11.5px;color:var(--text-muted);}
 .contributor-role-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;}
-.crole-owner{background:rgba(0,93,99,0.1);color:var(--primary);}
-.crole-editor{background:rgba(59,130,246,0.1);color:#60a5fa;}
-.crole-viewer{background:rgba(100,116,139,0.1);color:var(--text-muted);}
+.crole-owner{background:rgba(0,93,99,0.1);color:var(--primary-ink);}
+.crole-editor{background:rgba(0,118,168,0.05);color:var(--info-ink);}
+.crole-viewer{background:rgba(117,106,97,0.1);color:var(--text-muted);}
 
 /* ── Activity Feed ── */
 .activity-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.05);}
 .activity-item:last-child{border-bottom:none;padding-bottom:0;}
 .activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
 .dot-green{background:#00BBB6;}
-.dot-orange{background:#f59e0b;}
-.dot-red{background:#ef4444;}
-.dot-blue{background:#60a5fa;}
+.dot-orange{background:#FFB81C;}
+.dot-red{background:#C8102E;}
+.dot-blue{background:#0076A8;}
 .activity-text{font-size:12.5px;color:var(--text-muted);line-height:1.5;}
 .activity-text strong{color:var(--text);font-weight:600;}
 .activity-time{font-size:11px;color:var(--text-dim);margin-top:2px;}
@@ -223,12 +245,12 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
 .modal-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;}
 .modal-sub{font-size:13px;color:var(--text-muted);margin-bottom:24px;}
 .modal-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:background 0.15s;}
-.modal-close:hover{background:#f0f1f3;}
+.modal-close:hover{background:var(--inset);}
 .form-group{margin-bottom:16px;}
-.form-label{font-size:12px;font-weight:600;color:var(--text-muted);letter-spacing:0.5px;text-transform:uppercase;display:block;margin-bottom:6px;}
+.form-label{font-family:'BwGradual','Urbanist',sans-serif;font-size:12.5px;font-weight:700;color:var(--text);letter-spacing:-0.05px;text-transform:none;display:block;margin-bottom:5px;}
 .form-input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:#fff;outline:none;transition:border-color 0.2s;}
 .form-input:focus{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(0,187,182,0.1);}
-.form-select{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:#fff;outline:none;cursor:pointer;transition:border-color 0.2s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a8ba0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
+.form-select{width:100%;padding:10px 40px 10px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:#fff;outline:none;cursor:pointer;transition:border-color 0.2s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23968C83' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
 .form-select:focus{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(0,187,182,0.1);}
 .role-hint{font-size:11.5px;color:var(--text-dim);margin-top:5px;}
 .modal-actions{display:flex;gap:10px;margin-top:24px;}
@@ -239,7 +261,7 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
 
 /* ── Notification toast ── */
 .dash-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
-  background:#1a2235;color:#fff;padding:12px 24px;border-radius:50px;font-size:13.5px;font-weight:500;
+  background:#1E1C1A;color:#fff;padding:12px 24px;border-radius:50px;font-size:13.5px;font-weight:500;
   box-shadow:0 8px 32px rgba(0,0,0,0.2);opacity:0;transition:all 0.3s;z-index:9999;pointer-events:none;
   display:flex;align-items:center;gap:10px;}
 .dash-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -248,12 +270,10 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
 @media(max-width:900px){
   .dash-grid{grid-template-columns:1fr;}
   .dash-hero-stats{display:none;}
-  nav{padding:0 20px;}
   .dash-outer{padding:24px 20px 60px;}
   .dash-hero{padding:32px 20px;}
 }
 @media(max-width:640px){
-  .nav-right .btn,.nav-right a.btn{display:none!important;}
   .dash-hero-inner{flex-direction:column;align-items:flex-start;gap:16px;}
   .dash-hero-title{font-size:22px;}
   .dash-hero-sub{font-size:12.5px;}
@@ -281,62 +301,112 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
   .pending-card{padding:16px;}
   .pub-table td,.pub-table th{padding:10px 10px;}
 }
-/* ── Dark Mode ── */
-.dark-toggle{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}
-.dark-toggle:hover{border-color:var(--glass-border-hover);color:var(--primary);}
-html[data-theme="dark"]{--bg:#0e1824;--bg-white:#19263a;--border:#243044;--text:#dde4ef;--text-muted:#7e94ab;--text-dim:#4d6070;}
-html[data-theme="dark"] body{background:#0e1824;}
-html[data-theme="dark"] nav{background:rgba(14,24,36,0.95)!important;border-color:#243044;}
-html[data-theme="dark"] .dark-toggle{border-color:#243044;color:#7e94ab;}
-html[data-theme="dark"] .btn-ghost{border-color:#243044;color:#7e94ab;}
-html[data-theme="dark"] .nav-role-badge{background:rgba(0,187,182,0.12);border-color:rgba(0,187,182,0.2);}
-html[data-theme="dark"] .dash-hero{background:linear-gradient(135deg,#050d14 0%,#091520 100%);}
-html[data-theme="dark"] .pending-card{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] .pending-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.3);}
-html[data-theme="dark"] .pending-doc-preview{background:rgba(255,255,255,0.03);border-color:#243044;color:#7e94ab;}
-html[data-theme="dark"] .section-hd-count{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] .widget{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] .contributor-row{border-color:#243044;}
-html[data-theme="dark"] .activity-item{border-color:#243044;}
-html[data-theme="dark"] .pub-docs-link-card{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] .pub-docs-link-icon{background:rgba(0,187,182,0.1);}
-html[data-theme="dark"] div[style*="background:var(--bg-white)"]{background:#19263a!important;border-color:#243044!important;}
-html[data-theme="dark"] .modal-box{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] .form-input,html[data-theme="dark"] .form-select{background:#111e2d;border-color:#243044;color:#dde4ef;}
-html[data-theme="dark"] .empty-pending{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] .dash-outer{background:transparent;}
-html[data-theme="dark"] footer{background:transparent;}
-html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2);}
+html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--bg:#001314;--bg-white:#002326;--inset:#002D30;--border:#00484B;--text:#C7DBDD;--text-muted:#8CB6B9;--text-dim:#619B9E;
+  --alert-ink:#FF9B5E;--warn-ink:#FFB81C;--stop-ink:#FF8A94;--info-ink:#6BC5EE;}
+html[data-taqa-theme="dark"] body{background:#001314;}
+html[data-taqa-theme="dark"] .btn-ghost{border-color:#00484B;color:#619B9E;}
+html[data-taqa-theme="dark"] .dash-hero{background:linear-gradient(135deg,#001011 0%,#001C1E 100%);}
+html[data-taqa-theme="dark"] .pending-card{background:#002326;border-color:#00484B;}
+html[data-taqa-theme="dark"] .pending-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.3);}
+html[data-taqa-theme="dark"] .pending-doc-preview{border-color:#00484B;color:var(--text-muted);}
+html[data-taqa-theme="dark"] .section-hd-count{background:#002326;border-color:#00484B;}
+html[data-taqa-theme="dark"] .widget{background:#002326;border-color:#00484B;}
+html[data-taqa-theme="dark"] .contributor-row{border-color:#00484B;}
+html[data-taqa-theme="dark"] .activity-item{border-color:#00484B;}
+html[data-taqa-theme="dark"] .pub-docs-link-card{background:#002326;border-color:#00484B;}
+html[data-taqa-theme="dark"] .pub-docs-link-icon{background:rgba(0,187,182,0.1);}
+html[data-taqa-theme="dark"] div[style*="background:var(--bg-white)"]{background:#002326!important;border-color:#00484B!important;}
+html[data-taqa-theme="dark"] .modal-box{background:#002326;border-color:#00484B;}
+html[data-taqa-theme="dark"] .form-input,html[data-taqa-theme="dark"] .form-select{background:#002D30;border-color:#00484B;color:#C7DBDD;}
+html[data-taqa-theme="dark"] .empty-pending{background:#002326;border-color:#00484B;}
+html[data-taqa-theme="dark"] .dash-outer{background:transparent;}
+html[data-taqa-theme="dark"] footer{background:transparent;}
+html[data-taqa-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2);}
+
+/* Long option text ends in an ellipsis rather than being cut mid letter. */
+select { text-overflow:ellipsis; padding-inline-end:30px; }
 </style>
+<style id="deleg-css">
+.deleg-card{border:1px solid var(--border);border-radius:14px;background:var(--bg-white);
+  padding:16px 18px;margin-bottom:18px;}
+.deleg-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;}
+.deleg-t{font-family:'BwGradual','Urbanist',sans-serif;font-size:14px;font-weight:700;color:var(--text);}
+.deleg-s{font-size:12px;color:var(--text-muted);margin-top:3px;line-height:1.55;max-width:58ch;}
+.deleg-open,.deleg-grant{background:var(--primary);color:#fff;border:none;border-radius:8px;
+  padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0;}
+.deleg-open:hover,.deleg-grant:hover{background:var(--primary-hover,#00474C);}
+.deleg-cancel{background:transparent;border:1px solid var(--border);color:var(--text-muted);
+  border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;}
+.deleg-form{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.deleg-grid{display:grid;grid-template-columns:1fr 190px;gap:12px;}
+@media(max-width:620px){.deleg-grid{grid-template-columns:1fr;}}
+.deleg-form label{display:block;font-size:11px;font-weight:700;letter-spacing:.4px;
+  text-transform:uppercase;color:var(--text-muted);margin-bottom:11px;}
+.deleg-form input[type=text],.deleg-form input[type=date]{display:block;width:100%;margin-top:5px;
+  padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--bg-white);
+  color:var(--text);font-size:13px;font-family:inherit;font-weight:400;text-transform:none;letter-spacing:0;}
+.deleg-form input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,93,99,.12);}
+.deleg-check{display:flex;gap:9px;align-items:flex-start;text-transform:none;letter-spacing:0;
+  font-weight:400;font-size:12.5px;color:var(--text-muted);line-height:1.5;}
+.deleg-check input{margin-top:2px;flex-shrink:0;}
+.deleg-err{background:rgba(200,16,46,.07);border:1px solid rgba(200,16,46,.28);color:var(--stop-ink);
+  border-radius:8px;padding:9px 12px;font-size:12.5px;margin-bottom:11px;}
+.deleg-actions{display:flex;gap:9px;}
+.deleg-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border);
+  font-size:12.5px;}
+.deleg-row .dr-main{flex:1;min-width:0;}
+.deleg-row .dr-who{font-weight:700;color:var(--text);}
+.deleg-row .dr-meta{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
+.deleg-row .dr-act{display:flex;gap:7px;flex-shrink:0;}
+.deleg-row button{border:1px solid var(--border);background:transparent;color:var(--text-muted);
+  border-radius:7px;padding:5px 11px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;}
+.deleg-row button.dr-use{border-color:var(--primary);color:var(--primary-ink);}
+.deleg-row button:hover{background:rgba(0,93,99,.07);}
+.deleg-none{font-size:12px;color:var(--text-muted);padding:11px 0 0;border-top:1px solid var(--border);margin-top:12px;}
+html[data-taqa-theme="dark"] .deleg-card{background:#002326;border-color:#00484B;}
+html[data-taqa-theme="dark"] .deleg-form input{background:#001314;border-color:#00484B;color:#C7DBDD;}
+</style>
+<style>
+.av-deep{background:#003A3E;}
+.av-soft{background:#6E9294;}
+.av-unassigned{background:#756A61!important;color:#fff!important;}
+.dash-unknown{max-width:640px;margin:60px auto;padding:28px 30px;text-align:center;
+  border:1px solid var(--border);border-radius:16px;background:var(--bg-white);}
+.dash-unknown h2{font-family:'BwGradual','Urbanist',sans-serif;font-size:19px;color:var(--text);margin-bottom:8px;}
+.dash-unknown p{font-size:13.5px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;}
+.dash-unknown a{font-size:13px;font-weight:600;color:#fff;background:var(--primary);
+  border-radius:8px;padding:9px 18px;text-decoration:none;}
+html[data-taqa-theme="dark"] .dash-unknown{background:#002326;border-color:#00484B;}
+</style>
+<link rel="stylesheet" href="topbar.css">
 </head>
 <body>
 <div class="page-wrapper">
 
 <!-- ── Nav ── -->
-<nav>
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
   <a href="index.html" class="nav-brand">
-    <div class="nav-brand-icon">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 3L4 7v5c0 4.5 3.5 8.7 8 9.9 4.5-1.2 8-5.4 8-9.9V7l-8-4z" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
-        <path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
-    <div class="nav-brand-text">
-      <span class="nav-brand-name">TAQA</span><span class="nav-brand-hub"> Knowledge Hub</span>
-    </div>
+    <span class="nav-title"><span class="nav-title-brand">TAQA</span> <span class="nav-title-hub">Knowledge Hub</span></span>
+    <span class="nav-subtitle"><em>TechHub Platform</em></span>
   </a>
   <ul class="nav-links">
     <li><a href="index.html">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
     <li><a href="ai-search.html">Document Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
     <li><a href="glossary.html">Field Glossary</a></li>
-    <li><a href="upload.html">Upload</a></li>
     <li><a href="support-ticket.html">Ask Expert</a></li>
   </ul>
   <div class="nav-right">
-    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode"><svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
-    <button class="bell-btn" id="nav-bell" onclick="document.getElementById('pending-list').scrollIntoView({behavior:'smooth'})" title="Pending approvals" aria-label="Pending approvals"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge">3</span></button>
-    <a id="back-to-segment" href="segment.html" class="btn btn-ghost" style="font-size:13px;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5"/><path d="M12 5l-7 7 7 7"/></svg> Back to Segment</a>
-    <span class="nav-role-badge">Segment Controller</span>
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
@@ -392,8 +462,46 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2)
 
       <!-- Pending Approvals -->
       <div class="section-hd">
-        <div class="section-hd-title">Pending Approvals</div>
+        <div class="section-hd-title" id="queue-title">Pending Approvals</div>
         <span class="section-hd-count" id="pending-count">3 documents</span>
+      </div>
+
+      <!-- Delegation. Only a role that holds authority can hand any of it on. -->
+      <div id="deleg-box" hidden>
+        <div class="deleg-card">
+          <div class="deleg-hd">
+            <div>
+              <div class="deleg-t">Delegate your authority</div>
+              <div class="deleg-s">While you are away. Expires on its own, and the
+                document records who actually signed.</div>
+            </div>
+            <button type="button" class="deleg-open" id="deleg-open">Delegate</button>
+          </div>
+          <form class="deleg-form" id="deleg-form" hidden>
+            <div class="deleg-grid">
+              <label>Who holds it
+                <input type="text" id="dg-to" placeholder="Full name" autocomplete="off">
+              </label>
+              <label>Until
+                <input type="date" id="dg-until">
+              </label>
+            </div>
+            <label>Why
+              <input type="text" id="dg-reason" placeholder="Annual leave, 12 to 20 October" autocomplete="off">
+            </label>
+            <label class="deleg-check">
+              <input type="checkbox" id="dg-approval" checked>
+              <span>Include the approval signature. Without it they can prepare and
+                edit, but not release.</span>
+            </label>
+            <div class="deleg-err" id="dg-err" hidden></div>
+            <div class="deleg-actions">
+              <button type="submit" class="deleg-grant">Grant</button>
+              <button type="button" class="deleg-cancel" id="dg-cancel">Cancel</button>
+            </div>
+          </form>
+          <div id="deleg-list"></div>
+        </div>
       </div>
 
       <div id="pending-list">
@@ -403,7 +511,7 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2)
           <div class="pending-card-top">
             <div class="pending-doc-info">
               <div class="pending-doc-type">Vendor Manual</div>
-              <div class="pending-doc-title">Halliburton CT-240 Coiled Tubing Unit — Maintenance Manual v3.2</div>
+              <div class="pending-doc-title">Halliburton CT-240 Coiled Tubing Unit, Maintenance Manual v3.2</div>
               <div class="pending-doc-meta">Submitted by <strong>Khalid Al-Otaibi</strong> · 2 hours ago · PDF · 4.8 MB</div>
             </div>
             <span class="pending-status-badge badge-pending">Awaiting Review</span>
@@ -424,7 +532,7 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2)
           <div class="pending-card-top">
             <div class="pending-doc-info">
               <div class="pending-doc-type">Technical Alert</div>
-              <div class="pending-doc-title">ALERT-CT-009: Nitrogen Pump Pressure Relief Valve — Inspection Required</div>
+              <div class="pending-doc-title">ALERT-CT-009: Nitrogen Pump Pressure Relief Valve, Inspection Required</div>
               <div class="pending-doc-meta">Submitted by <strong>Faisal Al-Ghamdi</strong> · 5 hours ago · PDF · 1.2 MB</div>
             </div>
             <span class="pending-status-badge badge-pending">Awaiting Review</span>
@@ -445,7 +553,7 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2)
           <div class="pending-card-top">
             <div class="pending-doc-info">
               <div class="pending-doc-type">SOP Update</div>
-              <div class="pending-doc-title">CT-SOP-007 Wellhead Connection Procedure — Revision 4</div>
+              <div class="pending-doc-title">CT-SOP-007 Wellhead Connection Procedure, Revision 4</div>
               <div class="pending-doc-meta">Submitted by <strong>Omar Al-Harbi</strong> · Yesterday · PDF · 2.1 MB</div>
             </div>
             <span class="pending-status-badge badge-pending">Awaiting Review</span>
@@ -466,7 +574,7 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2)
       <!-- Published Documents -->
       <div class="section-hd" style="margin-top:36px;">
         <div class="section-hd-title">Published Documents</div>
-        <span class="section-hd-count" id="pub-doc-count">— documents</span>
+        <span class="section-hd-count" id="pub-doc-count">, documents</span>
       </div>
       <div class="pub-docs-link-card">
         <div class="pub-docs-link-info">
@@ -479,7 +587,7 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2)
             </svg>
           </div>
           <div>
-            <div class="pub-docs-link-count" id="pub-docs-count-big">—</div>
+            <div class="pub-docs-link-count" id="pub-docs-count-big">,</div>
             <div class="pub-docs-link-sub">documents published in this segment</div>
           </div>
         </div>
@@ -533,7 +641,7 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2)
           <span class="contributor-role-badge crole-editor">Editor</span>
         </div>
         <div class="contributor-row">
-          <div class="contributor-avatar" style="background:linear-gradient(135deg,#64748b,#94a3b8);">SA</div>
+          <div class="contributor-avatar av-soft">SA</div>
           <div class="contributor-info">
             <div class="contributor-name">Segment Access</div>
             <div class="contributor-role">All CT Staff</div>
@@ -552,49 +660,7 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2)
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           Recent Activity
         </div>
-        <div id="activity-feed"><div class="activity-item">
-          <div class="activity-dot dot-orange"></div>
-          <div>
-            <div class="activity-text"><strong>Khalid Al-Otaibi</strong> submitted CT-240 Maintenance Manual for review</div>
-            <div class="activity-time">2 hours ago</div>
-          </div>
-        </div>
-        <div class="activity-item">
-          <div class="activity-dot dot-orange"></div>
-          <div>
-            <div class="activity-text"><strong>Faisal Al-Ghamdi</strong> submitted Technical Alert CT-009</div>
-            <div class="activity-time">5 hours ago</div>
-          </div>
-        </div>
-        <div class="activity-item">
-          <div class="activity-dot dot-green"></div>
-          <div>
-            <div class="activity-text">You approved <strong>CT-SOP-006 Pressure Test Procedure</strong></div>
-            <div class="activity-time">Yesterday</div>
-          </div>
-        </div>
-        <div class="activity-item">
-          <div class="activity-dot dot-red"></div>
-          <div>
-            <div class="activity-text">You rejected <strong>CT-POL-003 draft</strong> — incomplete scope section</div>
-            <div class="activity-time">2 days ago</div>
-          </div>
-        </div>
-        <div class="activity-item">
-          <div class="activity-dot dot-blue"></div>
-          <div>
-            <div class="activity-text"><strong>Omar Al-Harbi</strong> submitted SOP-007 Revision 4 for review</div>
-            <div class="activity-time">Yesterday</div>
-          </div>
-        </div>
-        <div class="activity-item">
-          <div class="activity-dot dot-green"></div>
-          <div>
-            <div class="activity-text">You published <strong>Nowsco CT Unit Manual v4.1</strong></div>
-            <div class="activity-time">3 days ago</div>
-          </div>
-        </div>
-        </div><!-- /activity-feed -->
+        <div id="activity-feed"></div><!-- filled from the register -->
       </div>
 
     </div><!-- /right col -->
@@ -623,9 +689,9 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2)
     <div class="form-group">
       <label class="form-label">Assign Role</label>
       <select class="form-select" id="contrib-role" onchange="updateRoleHint()">
-        <option value="Editor">Editor. Can upload and submit documents for approval</option>
-        <option value="Viewer">Viewer. Can read documents only</option>
-        <option value="Owner">Owner. Full control and manage contributors</option>
+        <option value="Editor">Editor</option>
+        <option value="Viewer">Viewer</option>
+        <option value="Owner">Owner</option>
       </select>
       <div class="role-hint" id="role-hint">Can upload documents. All uploads need approval.</div>
     </div>
@@ -637,11 +703,23 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2)
 </div>
 
 <!-- Toast -->
-<div class="dash-toast" id="dash-toast">
+<div class="dash-toast" id="dash-toast" role="status" aria-live="polite">
   <div class="dash-toast-dot"></div>
   <span id="dash-toast-msg">Done</span>
 </div>
 
+<script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script>
+/* This desk belongs to the holder of the area, or QMS. See TAQA_ROLE.refuse. */
+(function(){
+  if (typeof TAQA_ROLE === 'undefined') return;
+  var id = new URLSearchParams(location.search).get('id') || TAQA_ROLE.area();
+  if (TAQA_ROLE.canManage(id)) return;
+  TAQA_ROLE.refuse("Managing an area is its director\u2019s desk", "The control panel approves, delegates and names contributors for one area. It is open to the holder of that area and to QMS.");
+})();
+</script>
+<script src="store.js"></script>
 <script src="segments-data.js"></script>
 <script>
 let pendingCount = 0;
@@ -655,26 +733,6 @@ const DASH_DATA = {
     {name:'Khalid Al-Otaibi',initials:'KO',title:'CT Engineer',role:'Editor',av:'av-blue'},
     {name:'Faisal Al-Ghamdi',initials:'FG',title:'Field Supervisor',role:'Editor',av:'av-orange'},
     {name:'Omar Al-Harbi',initials:'OH',title:'HSE Lead',role:'Editor',av:'av-purple'}
-  ],
-  published:47,
-  pending:[
-    {type:'Vendor Manual',docId:'CT-MAN-012',title:'Halliburton CT-240 Coiled Tubing Unit — Maintenance Manual v3.2',submitter:'Khalid Al-Otaibi',when:'2 hours ago',size:'4.8 MB',preview:'Covers preventive and corrective maintenance for the CT-240 unit: hydraulic service intervals, injector head inspection, BOP function tests, and reel drum alignment.'},
-    {type:'Technical Alert',docId:'ALERT-CT-009',isExactDup:true,title:'ALERT-CT-009: Nitrogen Pump Pressure Relief Valve — Inspection Required',submitter:'Faisal Al-Ghamdi',when:'5 hours ago',size:'1.2 MB',preview:'A pressure relief valve failure was found on two CT units during routine inspection. All units must be inspected within 48 hours per attached checklist.'},
-    {type:'SOP Update',docId:'CT-SOP-007',isRevision:true,supersedes:'CT-SOP-007 Wellhead Connection Procedure — Revision 3',title:'CT-SOP-007 Wellhead Connection Procedure — Revision 4',submitter:'Omar Al-Harbi',when:'Yesterday',size:'2.1 MB',preview:'Revision 4 updates wellhead connection torque specifications after the Q1 2026 equipment audit. Sections 4.2 and 6.1 updated. Previous Rev 3 to be archived upon approval.'}
-  ],
-  pubDocs:[
-    {title:'CT-SOP-001 Morning Safety Meeting Checklist',type:'sop',date:'Apr 2026',by:'M. Jahdali'},
-    {title:'Nowsco CT Unit Operations Manual v4.1',type:'manual',date:'Mar 2026',by:'K. Al-Otaibi'},
-    {title:'ALERT-CT-007: BOP Ram Seal Replacement',type:'alert',date:'May 2026',by:'F. Al-Ghamdi'},
-    {title:'CT-SOP-003 Wellhead Rigging Procedure',type:'sop',date:'Feb 2026',by:'O. Al-Harbi'},
-    {title:'CT Operations Safety Policy v2.0',type:'policy',date:'Jan 2026',by:'M. Jahdali'}
-  ],
-  activity:[
-    {dot:'dot-orange',text:'<strong>Khalid Al-Otaibi</strong> submitted CT-240 Maintenance Manual for review',time:'2 hours ago'},
-    {dot:'dot-orange',text:'<strong>Faisal Al-Ghamdi</strong> submitted Technical Alert CT-009',time:'5 hours ago'},
-    {dot:'dot-green',text:'You approved <strong>CT-SOP-006 Pressure Test Procedure</strong>',time:'Yesterday'},
-    {dot:'dot-red',text:'You rejected <strong>CT-POL-003 draft</strong> — incomplete scope section',time:'2 days ago'},
-    {dot:'dot-green',text:'You published <strong>Nowsco CT Unit Manual v4.1</strong>',time:'3 days ago'}
   ]
 },
 'fracturing':{
@@ -684,79 +742,23 @@ const DASH_DATA = {
     {name:'Abdulrahman Al-Mutairi',initials:'AM',title:'Frac Engineer',role:'Editor',av:'av-orange'},
     {name:'Waleed Al-Harbi',initials:'WH',title:'Pump Supervisor',role:'Editor',av:'av-purple'},
     {name:'Tariq Al-Asmari',initials:'TA',title:'Field Coordinator',role:'Editor',av:'av-teal'}
-  ],
-  published:39,
-  pending:[
-    {type:'SOP Update',title:'FRAC-SOP-009 Multi-Stage Fracturing Procedure — Revision 2',submitter:'Abdulrahman Al-Mutairi',when:'3 hours ago',size:'3.1 MB',preview:'Incorporates new proppant concentration limits and revised pump rate schedules from Q1 2026 field findings. Sections 3.1–3.5 updated.'},
-    {type:'Technical Alert',title:'ALERT-FRAC-005: Screen-Out Risk in Carbonate Formations — Updated Protocol',submitter:'Tariq Al-Asmari',when:'Yesterday',size:'0.9 MB',preview:'Updated protocol mandates a pre-flush acid stage and reduced proppant loading for all carbonate completions following recent screen-out analysis.'}
-  ],
-  pubDocs:[
-    {title:'FRAC-SOP-001 Pre-Job Safety Meeting',type:'sop',date:'May 2026',by:'S. Al-Qahtani'},
-    {title:'Hydraulic Fracturing Design Manual v4.1',type:'manual',date:'Apr 2026',by:'A. Al-Mutairi'},
-    {title:'FRAC-POL-002 High Pressure Operations Policy',type:'policy',date:'Mar 2026',by:'S. Al-Qahtani'},
-    {title:'ALERT-FRAC-003: Proppant Concentration Limits',type:'alert',date:'Feb 2026',by:'T. Al-Asmari'},
-    {title:'FRAC-SOP-007 Emergency Shutdown Procedure',type:'sop',date:'Jan 2026',by:'W. Al-Harbi'}
-  ],
-  activity:[
-    {dot:'dot-orange',text:'<strong>Abdulrahman Al-Mutairi</strong> submitted FRAC-SOP-009 Revision 2 for review',time:'3 hours ago'},
-    {dot:'dot-orange',text:'<strong>Tariq Al-Asmari</strong> submitted ALERT-FRAC-005 for review',time:'Yesterday'},
-    {dot:'dot-green',text:'You approved <strong>FRAC-POL-003 Fluid Disposal Policy</strong>',time:'2 days ago'},
-    {dot:'dot-green',text:'You published <strong>Hydraulic Fracturing Design Manual v4.1</strong>',time:'4 days ago'}
   ]
 },
 'wireline':{
-  name:'Wireline',
+  name:'Wireline Services',
   owner:{name:'Nasser Al-Dosari',initials:'ND',title:'Wireline Operations Lead',av:'av-teal'},
   contributors:[
     {name:'Saad Al-Zahrani',initials:'SZ',title:'Wireline Engineer',role:'Editor',av:'av-blue'},
     {name:'Majed Al-Otaibi',initials:'MO',title:'PCE Technician',role:'Editor',av:'av-orange'}
-  ],
-  published:27,
-  pending:[
-    {type:'SOP Update',title:'WL-SOP-006 Pump-Down Operations — Revision 3',submitter:'Saad Al-Zahrani',when:'4 hours ago',size:'2.2 MB',preview:'Updates pump-down speed limits and tool string weight constraints for high-angle wells based on recent field incidents.'},
-    {type:'Policy',title:'WL-POL-003 Explosives Handling Policy — Annual Review',submitter:'Majed Al-Otaibi',when:'2 days ago',size:'1.4 MB',preview:'Annual review incorporating updated regulatory requirements. Section 5 (Transport) and Section 8 (Storage) have been revised.'}
-  ],
-  pubDocs:[
-    {title:'WL-SOP-001 Pre-Job Hazard Assessment',type:'sop',date:'May 2026',by:'N. Al-Dosari'},
-    {title:'Wireline Operations Manual v2.8',type:'manual',date:'Apr 2026',by:'S. Al-Zahrani'},
-    {title:'WL-POL-002 Pressure Control Policy',type:'policy',date:'Mar 2026',by:'N. Al-Dosari'},
-    {title:'WL-SOP-004 Slickline Tool Running SOP',type:'sop',date:'Feb 2026',by:'M. Al-Otaibi'},
-    {title:'LL-WL-001: Tool String Stuck — Recovery Lessons',type:'lesson',date:'Jan 2026',by:'S. Al-Zahrani'}
-  ],
-  activity:[
-    {dot:'dot-orange',text:'<strong>Saad Al-Zahrani</strong> submitted WL-SOP-006 Revision 3 for review',time:'4 hours ago'},
-    {dot:'dot-orange',text:'<strong>Majed Al-Otaibi</strong> submitted Explosives Policy annual review',time:'2 days ago'},
-    {dot:'dot-green',text:'You approved <strong>WL-SOP-003 Perforation Operations SOP</strong>',time:'3 days ago'},
-    {dot:'dot-green',text:'You published <strong>Wireline Operations Manual v2.8</strong>',time:'5 days ago'}
   ]
 },
 'drilling':{
-  name:'Drilling',
+  name:'Drilling Services',
   owner:{name:'Ibrahim Al-Shehri',initials:'IS',title:'Drilling Operations Lead',av:'av-orange'},
   contributors:[
     {name:'Saud Al-Qahtani',initials:'SQ',title:'Drilling Engineer',role:'Editor',av:'av-blue'},
     {name:'Nawaf Al-Ghamdi',initials:'NG',title:'Mud Engineer',role:'Editor',av:'av-purple'},
     {name:'Badr Al-Harbi',initials:'BH',title:'Well Control Supervisor',role:'Editor',av:'av-teal'}
-  ],
-  published:64,
-  pending:[
-    {type:'SOP Update',title:'DRL-SOP-003 Well Control Response — Revision 5',submitter:'Badr Al-Harbi',when:'1 hour ago',size:'3.8 MB',preview:'Integrates new kick tolerance margins and updated kill sheet templates per IADC 2026 well control guidelines.'},
-    {type:'Technical Alert',title:'ALERT-DRL-007: Directional Tool Limitations in High-Temperature Wells',submitter:'Saud Al-Qahtani',when:'6 hours ago',size:'1.1 MB',preview:'New limitations for directional steering tools in wells exceeding 180°C. Temporary depth restrictions apply — consult drilling engineer before proceeding.'},
-    {type:'Manual Update',title:'DRL-MAN-008 Cementing Reference Manual — 2026 Edition',submitter:'Nawaf Al-Ghamdi',when:'Yesterday',size:'5.2 MB',preview:'Annual update incorporating new slurry designs and revised displacement procedures for deepwater applications.'}
-  ],
-  pubDocs:[
-    {title:'DRL-SOP-001 Morning Safety Meeting Checklist',type:'sop',date:'May 2026',by:'I. Al-Shehri'},
-    {title:'Drilling Engineering Manual v5.0',type:'manual',date:'Apr 2026',by:'S. Al-Qahtani'},
-    {title:'DRL-POL-001 Drilling Authorization Policy',type:'policy',date:'Mar 2026',by:'I. Al-Shehri'},
-    {title:'ALERT-DRL-001: Revised Kick Tolerance',type:'alert',date:'May 2026',by:'B. Al-Harbi'},
-    {title:'DRL-SOP-003 Well Control Response SOP',type:'sop',date:'Feb 2026',by:'B. Al-Harbi'}
-  ],
-  activity:[
-    {dot:'dot-orange',text:'<strong>Badr Al-Harbi</strong> submitted DRL-SOP-003 Revision 5 for review',time:'1 hour ago'},
-    {dot:'dot-orange',text:'<strong>Saud Al-Qahtani</strong> submitted ALERT-DRL-007',time:'6 hours ago'},
-    {dot:'dot-green',text:'You approved <strong>DRL-SOP-011 H2S Safety SOP</strong>',time:'Yesterday'},
-    {dot:'dot-red',text:'You rejected <strong>DRL-POL-010 draft</strong> — requires legal sign-off',time:'3 days ago'},
-    {dot:'dot-green',text:'You published <strong>Drilling Engineering Manual v5.0</strong>',time:'4 days ago'}
   ]
 },
 'cementing':{
@@ -765,110 +767,31 @@ const DASH_DATA = {
   contributors:[
     {name:'Hamad Al-Shimmari',initials:'HS',title:'Cement Engineer',role:'Editor',av:'av-orange'},
     {name:'Rayan Al-Turki',initials:'RT',title:'Lab Technician',role:'Editor',av:'av-purple'}
-  ],
-  published:34,
-  pending:[
-    {type:'SOP Update',title:'CEM-SOP-003 Primary Cement Job — Revision 3',submitter:'Hamad Al-Shimmari',when:'3 hours ago',size:'2.7 MB',preview:'Updates displacement rates and plug schedule for high-angle wells following field optimisation findings in Q1 2026.'},
-    {type:'Policy',title:'CEM-POL-007 Data Management Policy — Annual Review',submitter:'Rayan Al-Turki',when:'Yesterday',size:'0.8 MB',preview:'Annual review covering lab test record archiving, job data management, and third-party reporting requirements.'}
-  ],
-  pubDocs:[
-    {title:'CEM-SOP-001 Pre-Job Safety Check',type:'sop',date:'Apr 2026',by:'T. Al-Malki'},
-    {title:'Cementing Operations Manual v3.1',type:'manual',date:'Mar 2026',by:'H. Al-Shimmari'},
-    {title:'CEM-POL-001 Cementing Quality Assurance Policy',type:'policy',date:'Feb 2026',by:'T. Al-Malki'},
-    {title:'CEM-SOP-008 Remedial Squeeze SOP',type:'sop',date:'Jan 2026',by:'H. Al-Shimmari'},
-    {title:'LL-CEM-001: Cement Top Failure Analysis',type:'lesson',date:'Dec 2025',by:'R. Al-Turki'}
-  ],
-  activity:[
-    {dot:'dot-orange',text:'<strong>Hamad Al-Shimmari</strong> submitted CEM-SOP-003 Revision 3 for review',time:'3 hours ago'},
-    {dot:'dot-orange',text:'<strong>Rayan Al-Turki</strong> submitted Data Management Policy review',time:'Yesterday'},
-    {dot:'dot-green',text:'You approved <strong>CEM-SOP-010 Thickening Time Test SOP</strong>',time:'3 days ago'},
-    {dot:'dot-green',text:'You published <strong>Cementing Operations Manual v3.1</strong>',time:'5 days ago'}
   ]
 },
 'inspection':{
-  name:'Inspection Services',
-  owner:{name:'Walid Al-Zahrani',initials:'WZ',title:'Inspection Services Lead',av:'av-purple'},
+  name:'Inspection',
+  owner:{name:'Walid Al-Zahrani',initials:'WZ',title:'Inspection Lead',av:'av-purple'},
   contributors:[
     {name:'Faris Al-Bishi',initials:'FB',title:'NDT Inspector',role:'Editor',av:'av-teal'},
     {name:'Mansour Al-Otaibi',initials:'MO',title:'Compliance Officer',role:'Editor',av:'av-blue'},
     {name:'Saleh Al-Dossary',initials:'SD',title:'QC Inspector',role:'Viewer',av:'av-orange'}
-  ],
-  published:44,
-  pending:[
-    {type:'SOP Update',title:'INS-SOP-002 MPI Inspection — Revision 4',submitter:'Faris Al-Bishi',when:'2 hours ago',size:'1.9 MB',preview:'Incorporates updated acceptance criteria per API 5CT 2026 amendment and new fluorescent MPI technique requirements.'},
-    {type:'Technical Alert',title:'ALERT-INS-003: Third-Party Inspector Qualification Renewal — August 2026',submitter:'Mansour Al-Otaibi',when:'4 hours ago',size:'0.7 MB',preview:'All third-party inspection personnel must renew qualifications by August 31, 2026. Updated competency requirements attached.'}
-  ],
-  pubDocs:[
-    {title:'INS-SOP-001 Visual Inspection SOP',type:'sop',date:'May 2026',by:'W. Al-Zahrani'},
-    {title:'NDT Methods Reference Manual',type:'manual',date:'Apr 2026',by:'F. Al-Bishi'},
-    {title:'INS-POL-002 Inspector Qualification Policy',type:'policy',date:'Mar 2026',by:'W. Al-Zahrani'},
-    {title:'ALERT-INS-001: API 5CT Rejection Criteria Update',type:'alert',date:'May 2026',by:'M. Al-Otaibi'},
-    {title:'INS-SOP-012 Third-Party Audit SOP',type:'sop',date:'Feb 2026',by:'S. Al-Dossary'}
-  ],
-  activity:[
-    {dot:'dot-orange',text:'<strong>Faris Al-Bishi</strong> submitted INS-SOP-002 Revision 4 for review',time:'2 hours ago'},
-    {dot:'dot-orange',text:'<strong>Mansour Al-Otaibi</strong> submitted ALERT-INS-003',time:'4 hours ago'},
-    {dot:'dot-green',text:'You approved <strong>INS-SOP-015 Calibration Management SOP</strong>',time:'2 days ago'},
-    {dot:'dot-green',text:'You published <strong>NDT Methods Reference Manual</strong>',time:'4 days ago'}
   ]
 },
 'well-safety':{
-  name:'Well Safety',
-  owner:{name:'Saeed Al-Harbi',initials:'SH',title:'Well Safety Manager',av:'av-teal'},
+  name:'Safety Services',
+  owner:{name:'Saeed Al-Harbi',initials:'SH',title:'Safety Services Manager',av:'av-teal'},
   contributors:[
     {name:'Yasser Al-Anzi',initials:'YA',title:'Well Control Trainer',role:'Editor',av:'av-blue'},
     {name:'Ghassan Al-Malki',initials:'GM',title:'Safety Engineer',role:'Editor',av:'av-orange'},
     {name:'Adel Al-Qahtani',initials:'AQ',title:'Emergency Response Lead',role:'Editor',av:'av-purple'}
-  ],
-  published:56,
-  pending:[
-    {type:'Critical Alert',title:'ALERT-WS-001: Revised Well Control Kill Weight Calculation — Mandatory Briefing',submitter:'Yasser Al-Anzi',when:'30 min ago',size:'1.5 MB',preview:'Updated kill weight calculation methodology based on recent regional well control incidents. ALL drilling crews must attend briefing. New kill sheets attached.'},
-    {type:'SOP Update',title:'WS-SOP-015 Blowout Response — Revision 7',submitter:'Ghassan Al-Malki',when:'3 hours ago',size:'4.2 MB',preview:'Revision 7 restructures the blowout response sequence and updates assembly points following the 2026 emergency response drill findings.'},
-    {type:'Policy Update',title:'WS-POL-011 SIMOPS Restriction Policy — Near Active Completions',submitter:'Adel Al-Qahtani',when:'Yesterday',size:'1.8 MB',preview:'New SIMOPS exclusion zones following contractor incident. Minimum distances updated — applies to all operations within 500m of active completions.'}
-  ],
-  pubDocs:[
-    {title:'WS-SOP-001 Daily BOP Test SOP',type:'sop',date:'May 2026',by:'S. Al-Harbi'},
-    {title:'Well Control Manual v6.0 (IWCF Aligned)',type:'manual',date:'Apr 2026',by:'Y. Al-Anzi'},
-    {title:'WS-POL-001 Well Control Authorization Policy',type:'policy',date:'Mar 2026',by:'S. Al-Harbi'},
-    {title:'ALERT-WS-002: BOP Ram Seals Replacement Schedule',type:'alert',date:'May 2026',by:'G. Al-Malki'},
-    {title:'WS-SOP-007 Emergency Evacuation SOP',type:'sop',date:'Feb 2026',by:'A. Al-Qahtani'}
-  ],
-  activity:[
-    {dot:'dot-orange',text:'<strong>Yasser Al-Anzi</strong> submitted ALERT-WS-001 (CRITICAL) for review',time:'30 min ago'},
-    {dot:'dot-orange',text:'<strong>Ghassan Al-Malki</strong> submitted WS-SOP-015 Revision 7',time:'3 hours ago'},
-    {dot:'dot-red',text:'You rejected <strong>WS-SOP-019 draft</strong> — requires IWCF validation',time:'2 days ago'},
-    {dot:'dot-green',text:'You approved <strong>WS-POL-009 Barrier Management Policy</strong>',time:'3 days ago'},
-    {dot:'dot-green',text:'You published <strong>Well Control Manual v6.0</strong>',time:'5 days ago'}
   ]
 },
 'cybersecurity':{
-  name:'Cybersecurity',
+  name:'Governance, Risk & Compliance',
   owner:{name:'Mohammed Al Obaid',initials:'MO',title:'Cybersecurity Director',av:'av-purple'},
   contributors:[
     {name:'Afnan Al Khabty',initials:'AK',title:'Senior Cyber Security Analyst',role:'Editor',av:'av-teal'}
-  ],
-  published:30,
-  pending:[
-    /* Card 1 — Part match: title overlaps "CS-PROC-006 Privileged Account Management Procedure" (~57%) and "CS-PROC-008 Third-Party Access Procedure" (~29%) */
-    {type:'New Procedure',docId:'CS-PROC-011',title:'Vendor Access Control & Privileged Account Management Procedure',submitter:'Afnan Al Khabty',when:'1 hour ago',size:'1.8 MB',preview:'Establishes access controls for external vendor connections to TAQA IT and OT environments, including privileged account creation, time-limited access windows, real-time session monitoring, and automated revocation for third-party service providers.'},
-    /* Card 2 — Exact/full match: file hash matches the already-published "Data Privacy & Protection Policy" */
-    {type:'Policy',docId:'CS-POL-007',isExactDup:true,title:'Data Privacy & Protection Policy',submitter:'Afnan Al Khabty',when:'3 hours ago',size:'0.8 MB',preview:'Resubmission of the Data Privacy and Protection Policy with minor formatting corrections. File fingerprint matches the currently published version — likely an accidental reupload. No content changes detected.'},
-    /* Card 3 — Revision: supersedes Revision 3, also shows amber panel because title is similar to existing CS-PROC-001 */
-    {type:'SOP Update',docId:'CS-PROC-001',isRevision:true,supersedes:'CS-PROC-001 Incident Response Procedure — Revision 3',title:'CS-PROC-001 Incident Response Procedure — Revision 4',submitter:'Mohammed Al Obaid',when:'Yesterday',size:'2.4 MB',preview:'Revision 4 strengthens the incident escalation workflow, adds direct communication protocols with Saudi CERT, and updates forensic evidence preservation requirements following the NCA CSCC compliance review. Previous Revision 3 to be archived upon approval.'}
-  ],
-  pubDocs:[
-    {title:'CS-PROC-001 Incident Response Procedure',type:'sop',date:'May 2026',by:'A. Al Khabty'},
-    {title:'TAQA Cybersecurity Framework Standard v2.0',type:'manual',date:'Apr 2026',by:'M. Al Obaid'},
-    {title:'Information Security Policy',type:'policy',date:'Mar 2026',by:'M. Al Obaid'},
-    {title:'COMP-001: Annual Security Awareness Training Due',type:'alert',date:'May 2026',by:'A. Al Khabty'},
-    {title:'AWR-001: Phishing Simulation Results',type:'lesson',date:'Feb 2026',by:'A. Al Khabty'}
-  ],
-  activity:[
-    {dot:'dot-orange',text:'<strong>Afnan Al Khabty</strong> submitted CS-PROC-011 Vendor Access Procedure for review',time:'1 hour ago'},
-    {dot:'dot-orange',text:'<strong>Afnan Al Khabty</strong> submitted Data Privacy Policy — duplicate flag raised',time:'3 hours ago'},
-    {dot:'dot-orange',text:'<strong>Mohammed Al Obaid</strong> submitted CS-PROC-001 Revision 4 for review',time:'Yesterday'},
-    {dot:'dot-green',text:'You approved <strong>CS-STD-002 Identity &amp; Access Management Standard</strong>',time:'3 days ago'},
-    {dot:'dot-green',text:'You published <strong>Acceptable Use Policy</strong>',time:'4 days ago'}
   ]
 },
 'qhse':{
@@ -878,24 +801,6 @@ const DASH_DATA = {
     {name:'Hani Al-Rashidi',initials:'HR',title:'HSE Officer',role:'Editor',av:'av-blue'},
     {name:'Laila Al-Otaibi',initials:'LO',title:'Quality Auditor',role:'Editor',av:'av-purple'},
     {name:'Khaled Al-Binsaif',initials:'KB',title:'Environmental Officer',role:'Viewer',av:'av-teal'}
-  ],
-  published:51,
-  pending:[
-    {type:'SOP Update',title:'QHSE-SOP-011 Management of Change (MOC) — Revision 3',submitter:'Hani Al-Rashidi',when:'1 hour ago',size:'2.3 MB',preview:'Strengthens the MOC review board composition and adds mandatory safety impact assessment for all operational changes.'},
-    {type:'Technical Alert',title:'ALERT-QHSE-002: PPE Standard Update — Type III Gloves Required in All Chemical Zones',submitter:'Laila Al-Otaibi',when:'5 hours ago',size:'0.6 MB',preview:'Revised PPE standard following chemical exposure incident. Type III chemical-resistant gloves mandatory in all areas where hazardous chemicals are handled.'}
-  ],
-  pubDocs:[
-    {title:'QHSE-SOP-001 Risk Assessment (HAZID) SOP',type:'sop',date:'May 2026',by:'A. Al-Ghamdi'},
-    {title:'QHSE Management System Manual v2.0',type:'manual',date:'Apr 2026',by:'H. Al-Rashidi'},
-    {title:'QHSE-POL-001 QHSE Policy Statement',type:'policy',date:'Mar 2026',by:'A. Al-Ghamdi'},
-    {title:'ALERT-QHSE-001: Waste Segregation Requirements',type:'alert',date:'May 2026',by:'K. Al-Binsaif'},
-    {title:'QHSE-SOP-004 Incident Investigation SOP',type:'sop',date:'Feb 2026',by:'L. Al-Otaibi'}
-  ],
-  activity:[
-    {dot:'dot-orange',text:'<strong>Hani Al-Rashidi</strong> submitted QHSE-SOP-011 Revision 3 for review',time:'1 hour ago'},
-    {dot:'dot-orange',text:'<strong>Laila Al-Otaibi</strong> submitted ALERT-QHSE-002',time:'5 hours ago'},
-    {dot:'dot-green',text:'You approved <strong>QHSE-POL-010 Audit Frequency Policy</strong>',time:'2 days ago'},
-    {dot:'dot-green',text:'You published <strong>QHSE Management System Manual v2.0</strong>',time:'4 days ago'}
   ]
 },
 'hr':{
@@ -904,24 +809,6 @@ const DASH_DATA = {
   contributors:[
     {name:'Ahmad Al-Zahrani',initials:'AZ',title:'HR Business Partner',role:'Editor',av:'av-teal'},
     {name:'Sara Al-Shehri',initials:'SS',title:'Talent Acquisition Lead',role:'Editor',av:'av-blue'}
-  ],
-  published:33,
-  pending:[
-    {type:'Policy Update',title:'HR-POL-010 Remote & Flexible Work Policy — 2026 Annual Review',submitter:'Ahmad Al-Zahrani',when:'2 hours ago',size:'1.6 MB',preview:'Updated hybrid work guidelines and attendance management requirements following organizational restructuring.'},
-    {type:'Manual Update',title:'Employee Handbook v4.0 — 2026 Edition',submitter:'Sara Al-Shehri',when:'3 hours ago',size:'8.4 MB',preview:'Full update incorporating new HR policies, organisational chart updates, and revised benefits information effective June 2026.'}
-  ],
-  pubDocs:[
-    {title:'HR-SOP-001 Employee Onboarding SOP',type:'sop',date:'Apr 2026',by:'R. Al-Otaibi'},
-    {title:'HR Operations Manual',type:'manual',date:'Mar 2026',by:'A. Al-Zahrani'},
-    {title:'HR-POL-001 Code of Conduct Policy',type:'policy',date:'Feb 2026',by:'R. Al-Otaibi'},
-    {title:'HR-SOP-006 Recruitment & Selection SOP',type:'sop',date:'Jan 2026',by:'S. Al-Shehri'},
-    {title:'LL-HR-001: Onboarding Gap Analysis',type:'lesson',date:'Dec 2025',by:'A. Al-Zahrani'}
-  ],
-  activity:[
-    {dot:'dot-orange',text:'<strong>Ahmad Al-Zahrani</strong> submitted Remote Work Policy review',time:'2 hours ago'},
-    {dot:'dot-orange',text:'<strong>Sara Al-Shehri</strong> submitted Employee Handbook v4.0',time:'3 hours ago'},
-    {dot:'dot-green',text:'You approved <strong>HR-POL-002 Equal Opportunity Policy</strong>',time:'2 days ago'},
-    {dot:'dot-green',text:'You published <strong>Performance Management Manual</strong>',time:'4 days ago'}
   ]
 },
 'tws-maintenance':{
@@ -931,24 +818,6 @@ const DASH_DATA = {
     {name:'Khaled Al-Otaibi',initials:'KO',title:'Maintenance Technician',role:'Editor',av:'av-orange'},
     {name:'Rashid Al-Ghamdi',initials:'RG',title:'Hydraulics Specialist',role:'Editor',av:'av-purple'},
     {name:'Hamoud Al-Shamrani',initials:'HS',title:'Workshop Supervisor',role:'Viewer',av:'av-teal'}
-  ],
-  published:39,
-  pending:[
-    {type:'SOP Update',title:'TWS-SOP-008 Hydraulic System Maintenance — Revision 3',submitter:'Rashid Al-Ghamdi',when:'2 hours ago',size:'2.8 MB',preview:'Adds new seal inspection criteria and revised fluid sampling intervals following hydraulic system failures observed in Q1 2026.'},
-    {type:'Policy',title:'TWS-POL-006 Spare Parts Management Policy — Annual Review',submitter:'Hamoud Al-Shamrani',when:'Yesterday',size:'1.1 MB',preview:'Updated minimum stock levels, vendor qualification requirements, and critical spare parts identification process.'}
-  ],
-  pubDocs:[
-    {title:'TWS-SOP-001 PM Schedule Execution SOP',type:'sop',date:'May 2026',by:'F. Al-Amri'},
-    {title:'Preventive Maintenance Manual v2.1',type:'manual',date:'Apr 2026',by:'K. Al-Otaibi'},
-    {title:'TWS-POL-001 Maintenance Authorization Policy',type:'policy',date:'Mar 2026',by:'F. Al-Amri'},
-    {title:'TWS-SOP-004 Tool Pre-Job Inspection SOP',type:'sop',date:'Feb 2026',by:'H. Al-Shamrani'},
-    {title:'LL-TWS-001: In-Field Tool Failure Analysis',type:'lesson',date:'Jan 2026',by:'R. Al-Ghamdi'}
-  ],
-  activity:[
-    {dot:'dot-orange',text:'<strong>Rashid Al-Ghamdi</strong> submitted TWS-SOP-008 Revision 3 for review',time:'2 hours ago'},
-    {dot:'dot-orange',text:'<strong>Hamoud Al-Shamrani</strong> submitted Spare Parts Policy review',time:'Yesterday'},
-    {dot:'dot-green',text:'You approved <strong>TWS-SOP-007 Motor Overhaul SOP</strong>',time:'3 days ago'},
-    {dot:'dot-green',text:'You published <strong>Preventive Maintenance Manual v2.1</strong>',time:'5 days ago'}
   ]
 },
 'well-testing':{
@@ -957,32 +826,95 @@ const DASH_DATA = {
   contributors:[
     {name:'Yousef Al-Subaie',initials:'YS',title:'Test Engineer',role:'Editor',av:'av-blue'},
     {name:'Bandar Al-Shammari',initials:'BS',title:'Field Supervisor',role:'Editor',av:'av-orange'}
-  ],
-  published:30,
-  pending:[
-    {type:'SOP Update',title:'WT-SOP-004 Pressure Buildup Test — Revision 2',submitter:'Yousef Al-Subaie',when:'3 hours ago',size:'2.1 MB',preview:'Updates gauge deployment depths and recording intervals for high-permeability reservoirs following 2026 field optimisation findings.'},
-    {type:'Technical Alert',title:'ALERT-WT-002: Separator Pressure Rating Update — Verify All Units Before Deployment',submitter:'Bandar Al-Shammari',when:'Yesterday',size:'0.8 MB',preview:'Updated maximum allowable working pressure for portable separator units. All units must be re-rated and verified before the next deployment.'}
-  ],
-  pubDocs:[
-    {title:'WT-SOP-001 Pre-Test Safety Checklist',type:'sop',date:'May 2026',by:'T. Al-Rashidi'},
-    {title:'Well Testing Operations Manual v3.0',type:'manual',date:'Apr 2026',by:'Y. Al-Subaie'},
-    {title:'WT-POL-001 Well Testing Authorization Policy',type:'policy',date:'Mar 2026',by:'T. Al-Rashidi'},
-    {title:'ALERT-WT-001: H2S Risk in Unayzah Formation',type:'alert',date:'May 2026',by:'B. Al-Shammari'},
-    {title:'WT-SOP-003 DST Operations SOP',type:'sop',date:'Feb 2026',by:'Y. Al-Subaie'}
-  ],
-  activity:[
-    {dot:'dot-orange',text:'<strong>Yousef Al-Subaie</strong> submitted WT-SOP-004 Revision 2 for review',time:'3 hours ago'},
-    {dot:'dot-orange',text:'<strong>Bandar Al-Shammari</strong> submitted ALERT-WT-002',time:'Yesterday'},
-    {dot:'dot-green',text:'You approved <strong>WT-SOP-009 Data Acquisition SOP</strong>',time:'3 days ago'},
-    {dot:'dot-green',text:'You published <strong>Well Testing Operations Manual v3.0</strong>',time:'5 days ago'}
   ]
 }
 };
 
 // ── Init dashboard from URL param ──
 const dashParams = new URLSearchParams(window.location.search);
-const dashSegId = dashParams.get('id') || 'coiled-tubing';
-const dash = DASH_DATA[dashSegId] || DASH_DATA['coiled-tubing'];
+// No id means "my desk". For a role that holds one area that is their area;
+// for QMS, who holds all of them, it is wherever they were last working.
+const dashSegId = dashParams.get('id') ||
+  ((typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.area()) || 'coiled-tubing');
+/* ── Which area's desk this is ──────────────────────────────────────────
+   DASH_DATA was hand-written and covered twelve areas of the register's
+   twenty-six, and an area it did not cover silently fell through to Coiled
+   Tubing: you opened Legal and were shown someone else's documents under
+   Legal's name, which is the same fault segment.html had when an unknown id
+   fell through to Drilling.
+
+   Writing the other fourteen by hand would have meant four hundred more
+   lines of copy to drift out of date, so the entry is assembled instead:
+   the register owns the name and the counts, and DASH_DATA now supplies
+   only the things a register cannot know, which is who the people are.
+
+   Where nobody has been named, the desk says so. An invented controller
+   would read as an answer; "not yet named" is the truth and is a list QHSE
+   can work from.                                                        */
+function dashFor(id){
+  var L = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments) || {};
+  var info = L[id];
+  if (!info) {
+    return { unknown:true, name:'Area not found', owner:null, contributors:[],
+           published:0 };
+  }
+  var hand = DASH_DATA[id] || {};
+  var area = (typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.area(id) : { live:0 };
+  return {
+    unknown:      false,
+    name:         info.name || id,                 // the register owns the name
+    accountable:  info.splName || null,            // the role the standard names
+    owner:        hand.owner || null,              // a person, only if one is known
+    contributors: hand.contributors || [],
+    pending:      [],                              // the register's drafts are the queue
+    published:    area.live,
+    activity:     activityFrom(id)
+  };
+}
+
+/* An area with no hand-written feed gets a real one: what the register says
+   actually happened here, newest first. Better than an empty panel, and
+   better than invented names, because every line can be checked against a
+   document number. */
+function activityFrom(id){
+  if (typeof TAQA_STORE === 'undefined') return [];
+  var esc = function(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  var when = function(iso){
+    if (!iso) return 'Date not recorded';
+    var days = Math.round((Date.now() - new Date(iso)) / 86400000);
+    if (isNaN(days)) return 'Date not recorded';
+    if (days < 1)  return 'Today';
+    if (days < 30) return days + ' day' + (days===1?'':'s') + ' ago';
+    if (days < 365) { var m = Math.round(days/30); return m + ' month' + (m===1?'':'s') + ' ago'; }
+    var y = Math.round(days/365); return y + ' year' + (y===1?'':'s') + ' ago';
+  };
+  var rows = TAQA_STORE.all()
+    .filter(function(d){ return d.segment === id; })
+    .map(function(d){
+      var draft = d.status === 'draft';
+      var over  = (typeof TAQA_DOC !== 'undefined') && TAQA_DOC.overdue(d);
+      // An overdue row is dated by when its review fell due, not when it was
+      // issued, so "3 years ago" never sits beside a review that lapsed last month.
+      var at = draft ? d.submittedAt : over ? d.nextReviewDate : (d.issueDate || d.approvedDate);
+      return {
+        at: at || null,
+        dot: draft ? 'dot-blue' : over ? 'dot-orange' : 'dot-green',
+        text: draft
+          ? 'Awaiting ' + ((typeof TAQA_APPROVAL !== 'undefined' && TAQA_APPROVAL.waitingOn(d)) || 'approval') +
+            ': <strong>' + esc(d.docNumber || d.title) + '</strong>'
+          : over
+            ? 'Review overdue on <strong>' + esc(d.docNumber || d.title) + '</strong>'
+            : 'Issued <strong>' + esc(d.docNumber || d.title) + '</strong> revision ' + esc(d.revision || '1.0'),
+        time: over && at ? 'Due ' + when(at) : when(at)
+      };
+    })
+    .sort(function(a,b){ return new Date(b.at||0) - new Date(a.at||0); })
+    .slice(0, 6);
+  return rows.length ? rows
+    : [{ dot:'dot-green', text:'Nothing recorded against this area yet.', time:'' }];
+}
+const dash = dashFor(dashSegId);
 
 function animateCount(el, target, duration) {
   duration = duration || 650;
@@ -999,12 +931,13 @@ function animateCount(el, target, duration) {
 }
 
 function buildSimilarDocs(title, segId, limit) {
-  if (typeof TAQA_SEGMENTS === 'undefined' || !TAQA_SEGMENTS[segId]) return [];
-  const seg = TAQA_SEGMENTS[segId];
-  const allTitles = [
-    ...(seg.docs.sops||[]),...(seg.docs.manuals||[]),...(seg.docs.policies||[]),
-    ...(seg.docs.alerts||[]),...(seg.docs.lessons||[])
-  ].map(t => String(t).replace(/^⚠️\s*/,''));
+  // Was matching against TAQA_SEGMENTS[segId].docs, a hand-written list of
+  // fabricated titles left over from before the real register existed. A
+  // duplicate check run against fiction can miss a real duplicate and flag
+  // one that was never real, so this reads the actual live documents in
+  // the segment instead, the same source every other count on the page uses.
+  if (typeof TAQA_STORE === 'undefined') return [];
+  const allTitles = TAQA_STORE.rows('live', {segment: segId}).map(d => d.title);
   const stopW = new Set(['the','a','an','of','in','for','and','or','to','with','at','by','from','on','is','are','its','this','that','was','been']);
   function kw(s){return s.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(w=>w.length>2&&!stopW.has(w));}
   const wa = new Set(kw(title));
@@ -1017,64 +950,172 @@ function buildSimilarDocs(title, segId, limit) {
 }
 
 function initDashboard() {
-  document.title = dash.name + ' — Control Panel · TAQA Knowledge Hub';
-  document.getElementById('dash-seg-name').textContent = dash.name + ' Segment';
-  document.getElementById('dash-owner-avatar').textContent = dash.owner.initials;
-  document.getElementById('dash-owner-avatar').className = 'dash-user-avatar ' + dash.owner.av;
-  document.getElementById('dash-owner-name').textContent = dash.owner.name;
-  document.getElementById('dash-owner-role').textContent = 'Segment Controller · ' + dash.name;
+  var esc = function(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  if (dash.unknown) {
+    document.title = 'Area not found · TAQA Knowledge Hub';
+    var main = document.querySelector('.dash-main, main, .page-wrapper') || document.body;
+    main.innerHTML = '<div class="dash-unknown"><h2>No area with this identifier</h2>' +
+      '<p>The link points at an area the register does not hold, so there is no desk ' +
+      'to show. Opening someone else\'s segment under this name would be worse than ' +
+      'showing nothing.</p><a href="master-list.html">Open the Master List</a></div>';
+    return;
+  }
+  document.title = dash.name + ', Control Panel · TAQA Knowledge Hub';
+  // Not every area is a segment. QHSE is a function and the Centres of
+  // Excellence say what they are in their own names, so appending "Segment"
+  // to all twenty-six was wrong for fourteen of them.
+  document.getElementById('dash-seg-name').textContent =
+    dash.name + (TAQA_ROLE.areaTitle(dashSegId) === 'Segment Director' ? ' Segment' : '');
+  var av = document.getElementById('dash-owner-avatar'),
+      nm = document.getElementById('dash-owner-name'),
+      rl = document.getElementById('dash-owner-role');
+  if (dash.owner) {
+    av.textContent = dash.owner.initials;
+    av.className   = 'dash-user-avatar ' + dash.owner.av;
+    nm.textContent = dash.owner.name;
+    rl.textContent = 'Segment Controller · ' + dash.name;
+  } else {
+    // No name, so say no name. TQ-QHSE-S001 3.1 puts this on line management.
+    av.textContent = '?';
+    av.className   = 'dash-user-avatar av-unassigned';
+    nm.textContent = 'No document controller named';
+    // splName repeats the area name for some areas, so "Legal · Legal" is not
+    // worth printing twice.
+    rl.textContent = (dash.accountable && dash.accountable !== dash.name)
+      ? dash.accountable + ' · ' + dash.name : dash.name;
+  }
   document.getElementById('modal-seg-name').textContent = dash.name;
-
-  // Back link
-  document.getElementById('back-to-segment').href = 'segment.html?id=' + dashSegId;
 
   // Breadcrumb
   document.getElementById('dash-bc-seg').textContent = dash.name;
 
   // Stats
-  pendingCount = dash.pending.length;
-  const realPublished=(typeof TAQA_SEGMENTS!=='undefined'&&TAQA_SEGMENTS[dashSegId]&&TAQA_SEGMENTS[dashSegId].docs)
+  // Published used to be summed from segments-data.js, a second copy of the
+  // library that drifted from the register. Both figures now come from the
+  // store, so this dashboard agrees with the segment page it manages and a
+  // document uploaded a moment ago is already in the queue below.
+  const ST = (typeof TAQA_STORE !== 'undefined') ? TAQA_STORE : null;
+  const submitted = ST ? ST.rows('pending', { segment: dashSegId }) : [];
+  // Register drafts only. The count used to add hand-written example cards,
+  // so Drilling read 4 pending against one real draft, and QMS, who is never
+  // shown those cards, was counted them anyway.
+  pendingCount = submitted.length;
+  const realPublished = ST ? ST.area(dashSegId).live
+    : ((typeof TAQA_SEGMENTS!=='undefined'&&TAQA_SEGMENTS[dashSegId]&&TAQA_SEGMENTS[dashSegId].docs)
     ?Object.values(TAQA_SEGMENTS[dashSegId].docs).reduce((s,a)=>s+(Array.isArray(a)?a.length:0),0)
-    :dash.published;
+    :dash.published);
   animateCount(document.getElementById('stat-pending'), pendingCount, 500);
   animateCount(document.getElementById('stat-published'), realPublished, 800);
-  animateCount(document.getElementById('stat-contributors'), dash.contributors.length + 1, 650);
+  animateCount(document.getElementById('stat-contributors'), dash.contributors.length + (dash.owner ? 1 : 0), 650);
   document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
 
-  // Pending cards
+  // Pending cards. A document submitted through upload.html is a real draft in
+  // the register, so it queues here beside the sample ones and is approved the
+  // same way. Newest first, because that is the one the submitter is waiting on.
+  const TYPE_NAME = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.types) || {};
+  // Drafts that shipped in the register are awaiting approval just as much as
+  // one uploaded a minute ago, so both queue here and both publish for real.
+  // Which queue this is depends entirely on who is looking.
+  //
+  //   QMS               documents in this segment awaiting the conformance
+  //                     check, before the Director's name goes on them
+  //   Segment Director  documents QMS has checked, awaiting their final
+  //                     approval, which is what releases them
+  //   everyone else     no queue, because they hold neither step
+  //
+  // Each card asks the rules whether this person may act on that document now,
+  // so a button is never drawn that the store would refuse.
+  const MYROLE = TAQA_ROLE.current();
+  const CAP    = TAQA_ROLE.effective();
+  const STAGE  = CAP.countersign ? 'qms' : (CAP.approve ? 'director' : null);
+  const VERB   = STAGE === 'qms' ? 'Confirm' : 'Approve';
+
+  // This page is ONE area's desk, so the queue is that area's queue. It was
+  // filtered by what the viewer could approve and not by the area on screen,
+  // so a Drilling director opening Coiled Tubing's desk saw Drilling's
+  // documents under Coiled Tubing's name: the wrong-segment fault again.
+  const MINE = CAP.scope === 'all' || dashSegId === CAP.ownSegment;
+  const actionable = !STAGE ? []
+    : ST.rows(STAGE === 'qms' ? 'awaiting-qms' : 'awaiting-director', { segment: dashSegId })
+        .filter(d => STAGE === 'qms' ? TAQA_APPROVAL.canCountersign(d) : TAQA_APPROVAL.canApprove(d));
+
+  const submittedCards = actionable.slice().reverse().map(d => ({
+    type: (TYPE_NAME[d.docType] || {}).label || d.docType,
+    docId: d.docNumber,
+    title: d.title,
+    submitter: d.locallyAdded ? 'You' : (TAQA_DOC.owner(d) || 'Not recorded'),
+    when: d.submittedAt ? 'Just now' : 'In the register',
+    size: d.fileSize || '',
+    preview: STAGE === 'qms'
+      ? 'Check the number against 5.3, the revision and the dates. Confirming ' +
+        'sends it to ' + (TAQA_APPROVAL.approverFor(d) || 'the named approver') + ' for final approval.'
+      : 'Checked by QMS · ' + (d.countersignedBy || 'confirmed') +
+        '. Your approval as ' + (TAQA_APPROVAL.approverFor(d) || 'the named approver') +
+        ' is what publishes it.',
+    fromStore: true,
+    stage: STAGE
+  }));
+  // The queue is the register's drafts. Hand-written example cards used to be
+  // appended for a Director; they named documents the register does not hold
+  // and badged area Policies as Standards, which no area can issue.
+  const queue = submittedCards;
+
   const pendingList = document.getElementById('pending-list');
-  if (!dash.pending.length) {
-    pendingList.innerHTML = '<div class="empty-pending"><div class="empty-pending-icon">✓</div><h3>All caught up!</h3><p>No documents awaiting review in this segment.</p></div>';
+  if (!MINE) {
+    var waiting = ST.count('awaiting-director', { segment: dashSegId });
+    pendingList.innerHTML = '<div class="empty-pending"><div class="empty-pending-icon">\u25CF</div>' +
+      '<h3>Not your area</h3><p>You hold ' + esc(TAQA_ROLE.areaName(CAP.ownSegment)) +
+      '. ' + esc(dash.name) + ' has its own ' + esc(TAQA_ROLE.areaTitle(dashSegId).toLowerCase()) +
+      ', and ' + (waiting ? '<b>' + waiting + '</b> document' + (waiting===1?'':'s') +
+        ' here ' + (waiting===1?'is':'are') + ' waiting on them' : 'nothing here is waiting on them') +
+      '. You can read this desk, not sign at it.</p>' +
+      '<a href="dashboard.html?id=' + encodeURIComponent(CAP.ownSegment || '') +
+      '" style="display:inline-block;margin-top:14px;font-size:13px;font-weight:600;color:#fff;' +
+      'background:var(--primary);border-radius:8px;padding:9px 18px;text-decoration:none;">' +
+      'Back to your desk</a></div>';
+  } else if (!queue.length) {
+    pendingList.innerHTML = !STAGE
+      ? '<div class="empty-pending"><div class="empty-pending-icon">●</div><h3>Nothing here is yours</h3>' +
+        '<p>Checking a document for QMS is QMS\'s job, and giving it final approval is the ' +
+        'named approver\'s. As ' + TAQA_ROLES[MYROLE].label + ' you read the register, you do not sign it. ' +
+        'Switch the door in the top bar to see the other side.</p></div>'
+      : '<div class="empty-pending"><div class="empty-pending-icon">✓</div><h3>All caught up!</h3>' +
+        '<p>Nothing is waiting on your ' +
+        (STAGE === 'qms' ? 'conformance check' : 'final approval') + '.</p></div>';
   } else {
-    pendingList.innerHTML = dash.pending.map((p, i) => {
+    pendingList.innerHTML = queue.map((p, i) => {
       const simDocs = buildSimilarDocs(p.title, dashSegId, 3);
       const simPanel = simDocs.length ? `
         <div class="dup-sim-panel">
           <div class="dup-sim-hd"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Similar documents already in this segment</div>
-          ${simDocs.map(d=>`<div class="dup-sim-item"><div class="dup-sim-bar-wrap"><div class="dup-sim-bar" style="width:${Math.round(d.score*100)}%"></div></div><div class="dup-sim-title" title="${d.title}">${d.title}</div><span class="dup-sim-pct">${Math.round(d.score*100)}% match</span></div>`).join('')}
+          ${simDocs.map(d=>`<div class="dup-sim-item"><div class="dup-sim-bar-wrap"><div class="dup-sim-bar" style="width:${Math.round(d.score*100)}%"></div></div><div class="dup-sim-title" title="${esc(d.title)}">${esc(d.title)}</div><span class="dup-sim-pct">${Math.round(d.score*100)}% match</span></div>`).join('')}
         </div>` : '';
       const exactBanner = p.isExactDup ? `
         <div class="dup-exact-banner"><span class="dup-exact-badge">EXACT DUPLICATE</span><span class="dup-exact-txt">File fingerprint matches a document already published in this segment. Verify before approving.</span></div>` : '';
       const supersRow = p.supersedes ? `
-        <div class="supersedes-row"><span class="supersedes-label">Replaces →</span><span class="supersedes-doc-title" title="${p.supersedes}">${p.supersedes}</span></div>` : '';
+        <div class="supersedes-row"><span class="supersedes-label">Replaces →</span><span class="supersedes-doc-title" title="${esc(p.supersedes)}">${esc(p.supersedes)}</span></div>` : '';
+      // Every type reads the same calm way except an alert, which is an
+      // operational warning and keeps the warm ink.
+      const typeCls = 'pending-doc-type' + (/alert/i.test(p.type || '') ? ' type-alert' : '');
       const docTypeLabel = p.docId
-        ? `<div class="pending-doc-type">${p.type} &nbsp;<span style="font-family:monospace;font-size:9.5px;font-weight:600;opacity:0.7;">${p.docId}</span></div>`
-        : `<div class="pending-doc-type">${p.type}</div>`;
+        ? `<div class="${typeCls}">${esc(p.type)} &nbsp;<span style="font-family:monospace;font-size:9.5px;font-weight:600;">${esc(p.docId)}</span></div>`
+        : `<div class="${typeCls}">${esc(p.type)}</div>`;
       return `
       <div class="pending-card${p.isExactDup?' dup-flagged':''}" id="pcard-${i+1}">
         <div class="pending-card-top">
           <div class="pending-doc-info">
             ${docTypeLabel}
-            <div class="pending-doc-title">${p.title}</div>
-            <div class="pending-doc-meta">Submitted by <strong>${p.submitter}</strong> · ${p.when} · PDF · ${p.size}</div>
+            <div class="pending-doc-title">${esc(p.title)}</div>
+            <div class="pending-doc-meta">Submitted by <strong>${esc(p.submitter)}</strong> · ${esc(p.when)} · PDF · ${esc(p.size)}</div>
           </div>
           <span class="pending-status-badge badge-pending">Awaiting Review</span>
         </div>
         <div class="pending-doc-preview">${p.preview}</div>
         ${exactBanner}${supersRow}${simPanel}
         <div class="pending-actions">
-          <button class="btn-approve" onclick="approveDoc(${i+1})">✓ Approve</button>
-          <button class="btn-reject" onclick="rejectDoc(${i+1})">✕ Reject</button>
+          <button class="btn-approve" data-store-doc="${p.fromStore ? p.docId : ''}" data-stage="${p.stage||''}" onclick="approveDoc(${i+1})">✓ ${VERB}</button>
+          <button class="btn-reject" data-store-doc="${p.fromStore ? p.docId : ''}" data-stage="${p.stage||''}" data-doc-title="${esc(p.title||'')}" onclick="rejectDoc(${i+1})">✕ Reject</button>
           <button class="btn-preview-link">Preview Document</button>
           <span class="action-result" id="result-${i+1}"></span>
         </div>
@@ -1082,31 +1123,124 @@ function initDashboard() {
     }).join('');
   }
 
+  // ── Delegation ──────────────────────────────────────────────────────
+  // Shown only to a role that holds authority to hand on. Every refusal comes
+  // from TAQA_DELEGATION.grant(), so the reason on screen is the rule itself
+  // rather than a second copy of it written here.
+  (function(){
+    var box = document.getElementById('deleg-box');
+    if (!box || typeof TAQA_DELEGATION === 'undefined') return;
+    if (!CAP.delegate) return;                 // a delegate cannot re-delegate
+    box.hidden = false;
+
+    var form = document.getElementById('deleg-form'),
+        err  = document.getElementById('dg-err'),
+        list = document.getElementById('deleg-list');
+
+    // Default to a fortnight out, which is the common case and still expires.
+    var d14 = new Date(Date.now() + 14 * 86400000).toISOString().slice(0,10);
+    document.getElementById('dg-until').value = d14;
+    document.getElementById('dg-until').min = new Date().toISOString().slice(0,10);
+
+    document.getElementById('deleg-open').addEventListener('click', function(){
+      form.hidden = !form.hidden;
+      if (!form.hidden) document.getElementById('dg-to').focus();
+    });
+    document.getElementById('dg-cancel').addEventListener('click', function(){
+      form.hidden = true; err.hidden = true;
+    });
+
+    function paintList(){
+      var all = TAQA_DELEGATION.list().filter(function(x){ return !x.revokedAt; });
+      if (!all.length) {
+        list.innerHTML = '<div class="deleg-none">Nothing delegated. Your authority is yours alone.</div>';
+        return;
+      }
+      list.innerHTML = all.map(function(x){
+        var live = TAQA_DELEGATION.isActive(x),
+            acting = (TAQA_DELEGATION.actingAs() === x.id);
+        return '<div class="deleg-row">' +
+          '<div class="dr-main"><div class="dr-who">' + esc(x.to) +
+            (x.includesApproval ? '' : ' <span style="font-weight:400;opacity:.7">(no approval)</span>') +
+          '</div><div class="dr-meta">' + esc(x.segment || 'segment') +
+            (x.docTypes ? ', ' + x.docTypes.join(' and ') : ', every type') +
+            ' &middot; until ' + x.until + ' &middot; ' + esc(x.reason) +
+            (live ? '' : ' &middot; expired') + '</div></div>' +
+          '<div class="dr-act">' +
+            (live ? '<button type="button" class="dr-use" data-act="' + x.id + '">' +
+                      (acting ? 'Acting' : 'Act as this') + '</button>' : '') +
+            '<button type="button" data-rev="' + x.id + '">Revoke</button>' +
+          '</div></div>';
+      }).join('');
+    }
+    function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+    list.addEventListener('click', function(e){
+      var rev = e.target.closest('[data-rev]'), use = e.target.closest('[data-act]');
+      if (rev) { TAQA_DELEGATION.revoke(rev.dataset.rev); location.reload(); }
+      // Acting as the delegate is how the third door is walked through here.
+      if (use) { TAQA_DELEGATION.actAs(use.dataset.act); location.reload(); }
+    });
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var out = TAQA_DELEGATION.grant({
+        fromRole: TAQA_ROLE.current(),
+        fromName: (dash.owner && dash.owner.name) || TAQA_ROLES[TAQA_ROLE.current()].label,
+        to: document.getElementById('dg-to').value,
+        segment: CAP.ownSegment || dashSegId,
+        reason: document.getElementById('dg-reason').value,
+        until: document.getElementById('dg-until').value,
+        includesApproval: document.getElementById('dg-approval').checked
+      });
+      if (!out.ok) { err.textContent = out.error; err.hidden = false; return; }
+      err.hidden = true; form.hidden = true; form.reset();
+      document.getElementById('dg-until').value = d14;
+      document.getElementById('dg-approval').checked = true;
+      paintList();
+      showDashToast('Delegated to ' + out.delegation.to + ' until ' + out.delegation.until, '#00BBB6');
+    });
+
+    paintList();
+  })();
+
+  // The heading names the step, so the two queues are never mistaken.
+  (function(){
+    var t = document.getElementById('queue-title');
+    if (!t) return;
+    // "Your" is only true at your own desk.
+    t.textContent = !MINE ? 'Awaiting ' + TAQA_ROLE.areaTitle(dashSegId) + ' Approval'
+                  : STAGE === 'qms' ? 'Awaiting Your Countersignature'
+                  : STAGE === 'director' ? 'Awaiting Your Approval'
+                  : 'Approvals';
+  })();
+
   // Contributors
   const roleBadge = r => r==='Owner'?'crole-owner':r==='Editor'?'crole-editor':'crole-viewer';
   const avColors = ['av-teal','av-blue','av-orange','av-purple'];
   const ownerRow = `<div class="contributor-row">
-    <div class="contributor-avatar ${dash.owner.av}">${dash.owner.initials}</div>
-    <div class="contributor-info"><div class="contributor-name">${dash.owner.name}</div><div class="contributor-role">${dash.owner.title}</div></div>
+    <div class="contributor-avatar ${dash.owner ? dash.owner.av : 'av-unassigned'}">${dash.owner ? dash.owner.initials : '?'}</div>
+    <div class="contributor-info"><div class="contributor-name">${dash.owner ? dash.owner.name : 'No document controller named'}</div><div class="contributor-role">${dash.owner ? dash.owner.title : (dash.accountable || 'To be assigned by line management')}</div></div>
     <span class="contributor-role-badge crole-owner">Owner</span></div>`;
   const cRows = dash.contributors.map(c => `<div class="contributor-row">
     <div class="contributor-avatar ${c.av}">${c.initials}</div>
     <div class="contributor-info"><div class="contributor-name">${c.name}</div><div class="contributor-role">${c.title}</div></div>
     <span class="contributor-role-badge ${roleBadge(c.role)}">${c.role}</span></div>`).join('');
   const viewerRow = `<div class="contributor-row">
-    <div class="contributor-avatar" style="background:rgba(100,116,139,0.25);color:#64748b;font-size:11px;">★</div>
+    <div class="contributor-avatar" style="background:rgba(117,106,97,0.25);color:var(--text);font-size:11px;">★</div>
     <div class="contributor-info"><div class="contributor-name">All ${dash.name} Staff</div><div class="contributor-role">Read-only access</div></div>
     <span class="contributor-role-badge crole-viewer">Viewer</span></div>`;
   document.getElementById('contributors-list').innerHTML = ownerRow + cRows + viewerRow;
 
   // Activity
-  document.getElementById('activity-feed').innerHTML = dash.activity.map(a => `
+  document.getElementById('activity-feed').innerHTML = (dash.activity || []).map(a => `
     <div class="activity-item">
       <div class="activity-dot ${a.dot}"></div>
       <div><div class="activity-text">${a.text}</div><div class="activity-time">${a.time}</div></div>
     </div>`).join('');
 
-  // Published documents — show count and link to dedicated documents page
+  // Published documents, show count and link to dedicated documents page
   const pubCountEl = document.getElementById('pub-doc-count');
   const pubBigEl = document.getElementById('pub-docs-count-big');
   if (pubCountEl) pubCountEl.textContent = realPublished + ' documents';
@@ -1117,7 +1251,12 @@ function initDashboard() {
 
 initDashboard();
 
-function showToast(msg, color) {
+// Named distinctly: shared.js defines its own window.showToast(msg, type),
+// which loads after this script and would otherwise silently overwrite this
+// page's colored-dot version, so every call here ended up hitting the
+// generic toast with a hex color string passed as its class-keyword
+// argument, and the colored dot never rendered.
+function showDashToast(msg, color) {
   const t = document.getElementById('dash-toast');
   const dot = t.querySelector('.dash-toast-dot');
   document.getElementById('dash-toast-msg').textContent = msg;
@@ -1138,13 +1277,140 @@ function approveDoc(id) {
   actions.querySelector('.btn-reject').disabled = true;
   actions.querySelector('.btn-approve').style.opacity = '0.4';
   actions.querySelector('.btn-reject').style.opacity = '0.4';
-  result.textContent = '✓ Published to segment';
   result.className = 'action-result show approved-txt';
+  // Take the step this role actually holds, through the store, which checks the
+  // rules again and refuses if they do not hold. A dashboard must not be able to
+  // release a document by a route the rules never saw.
+  const btn = actions.querySelector('.btn-approve');
+  const storeDoc = btn.dataset.storeDoc, stage = btn.dataset.stage;
+  if (storeDoc && typeof TAQA_STORE !== 'undefined') {
+    const out = stage === 'qms' ? TAQA_STORE.countersign(storeDoc)
+                                : TAQA_STORE.approve(storeDoc);
+    if (!out || !out.ok) {
+      badge.className = 'pending-status-badge badge-pending';
+      badge.textContent = 'Awaiting Review';
+      card.classList.remove('approved');
+      result.textContent = '✕ ' + ((out && out.error) || 'Refused.');
+      result.className = 'action-result show';
+      return;
+    }
+    result.textContent = stage === 'qms'
+      ? '✓ Checked. Now with the Director for final approval'
+      : '✓ Approved and published to the segment';
+  }
   pendingCount = Math.max(0, pendingCount - 1);
   document.getElementById('stat-pending').textContent = pendingCount;
   document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
-  showToast('Document approved and published to segment', '#00BBB6');
+  showDashToast(stage === 'qms'
+    ? 'Checked, sent on for the Director\'s final approval'
+    : 'Document approved and published to segment', '#00BBB6');
   updateBellCount(-1);
+}
+
+// A reason is mandatory: the submitter has to know exactly what to fix
+// before resubmitting, and QMS needs a record of why a document was turned
+// back. Rejection only actually happens from the modal's confirm handler,
+// never here, so there is exactly one place that touches the store and the
+// counters, and cancelling the modal truly cancels the reject.
+let rejectTarget = null;
+let rejectOverlay = null, rejectInput = null, rejectConfirm = null, rejectCount = null, rejectDocName = null;
+
+function ensureRejectModal() {
+  if (rejectOverlay) return;
+  rejectOverlay = document.createElement('div');
+  rejectOverlay.className = 'reject-modal-overlay';
+  rejectOverlay.setAttribute('role', 'dialog');
+  rejectOverlay.setAttribute('aria-modal', 'true');
+  rejectOverlay.setAttribute('aria-labelledby', 'reject-modal-title');
+  rejectOverlay.innerHTML =
+    '<div class="reject-modal">' +
+      '<h3 id="reject-modal-title">Reject Document</h3>' +
+      '<p class="reject-modal-doc-name" id="reject-modal-doc-name"></p>' +
+      '<p>Provide a clear reason so the submitter knows exactly what to fix before resubmitting.</p>' +
+      '<textarea class="reject-reason-input" id="reject-reason-input" aria-label="Reason for rejection" ' +
+        'placeholder="e.g. Section 4.2 is incomplete, scope of application missing. Please revise and resubmit." ' +
+        'maxlength="500"></textarea>' +
+      '<div class="reject-char-hint"><span id="reject-char-count">0</span> / 500 characters (minimum 20 required)</div>' +
+      '<div class="reject-modal-actions">' +
+        '<button type="button" class="btn-reject-cancel" id="reject-modal-cancel">Cancel</button>' +
+        '<button type="button" class="btn-reject-confirm" id="reject-modal-confirm" disabled>Reject &amp; Notify</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(rejectOverlay);
+
+  rejectInput = document.getElementById('reject-reason-input');
+  rejectConfirm = document.getElementById('reject-modal-confirm');
+  rejectCount = document.getElementById('reject-char-count');
+  rejectDocName = document.getElementById('reject-modal-doc-name');
+
+  rejectInput.addEventListener('input', function () {
+    const len = this.value.trim().length;
+    rejectCount.textContent = this.value.length;
+    rejectConfirm.disabled = len < 20;
+    this.classList.toggle('error', len > 0 && len < 20);
+  });
+
+  function closeRejectModal() {
+    rejectOverlay.classList.remove('open');
+    rejectInput.value = '';
+    rejectCount.textContent = '0';
+    rejectConfirm.disabled = true;
+    rejectInput.classList.remove('error');
+    const openedBy = rejectTarget && rejectTarget.openedBy;
+    rejectTarget = null;
+    if (openedBy) openedBy.focus();
+  }
+
+  document.getElementById('reject-modal-cancel').addEventListener('click', closeRejectModal);
+  rejectOverlay.addEventListener('click', function (e) {
+    if (e.target === rejectOverlay) closeRejectModal();
+  });
+  rejectOverlay.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeRejectModal();
+  });
+
+  rejectConfirm.addEventListener('click', function () {
+    if (!rejectTarget) return;
+    const { id, card, badge, result, actions, storeDoc } = rejectTarget;
+    const reason = rejectInput.value.trim();
+    if (reason.length < 20) return;
+
+    if (storeDoc && typeof TAQA_STORE !== 'undefined') {
+      const out = TAQA_STORE.reject(storeDoc, reason);
+      if (!out || !out.ok) {
+        showDashToast('✕ ' + ((out && out.error) || 'Could not reject this document.'), '#FF8A94');
+        closeRejectModal();
+        return;
+      }
+    }
+
+    badge.className = 'pending-status-badge badge-rejected';
+    badge.textContent = 'Rejected';
+    card.classList.add('rejected');
+    actions.querySelector('.btn-approve').disabled = true;
+    actions.querySelector('.btn-reject').disabled = true;
+    actions.querySelector('.btn-approve').style.opacity = '0.4';
+    actions.querySelector('.btn-reject').style.opacity = '0.4';
+    result.textContent = '✕ Rejected, reason sent to submitter';
+    result.className = 'action-result show rejected-txt';
+
+    const reasonEl = document.createElement('div');
+    reasonEl.style.cssText = 'font-size:12px;color:var(--stop-ink,#C8102E);background:rgba(200,16,46,0.05);' +
+      'border:1px solid rgba(200,16,46,0.15);border-radius:8px;padding:8px 12px;margin-top:10px;line-height:1.5;';
+    const strongEl = document.createElement('strong');
+    strongEl.textContent = 'Rejection reason: ';
+    reasonEl.appendChild(strongEl);
+    reasonEl.appendChild(document.createTextNode(reason));
+    card.appendChild(reasonEl);
+
+    pendingCount = Math.max(0, pendingCount - 1);
+    document.getElementById('stat-pending').textContent = pendingCount;
+    document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
+    showDashToast('Document rejected, submitter will be notified', '#FF8A94');
+    updateBellCount(-1);
+
+    closeRejectModal();
+  });
 }
 
 function rejectDoc(id) {
@@ -1152,20 +1418,17 @@ function rejectDoc(id) {
   const badge = card.querySelector('.pending-status-badge');
   const result = document.getElementById('result-' + id);
   const actions = card.querySelector('.pending-actions');
-  badge.className = 'pending-status-badge badge-rejected';
-  badge.textContent = 'Rejected';
-  card.classList.add('rejected');
-  actions.querySelector('.btn-approve').disabled = true;
-  actions.querySelector('.btn-reject').disabled = true;
-  actions.querySelector('.btn-approve').style.opacity = '0.4';
-  actions.querySelector('.btn-reject').style.opacity = '0.4';
-  result.textContent = '✕ Returned to submitter';
-  result.className = 'action-result show rejected-txt';
-  pendingCount = Math.max(0, pendingCount - 1);
-  document.getElementById('stat-pending').textContent = pendingCount;
-  document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
-  showToast('Document rejected — submitter will be notified', '#ef4444');
-  updateBellCount(-1);
+  const btn = actions.querySelector('.btn-reject');
+  const title = btn.dataset.docTitle || card.querySelector('.pending-doc-title')?.textContent || 'this document';
+
+  ensureRejectModal();
+  rejectTarget = { id, card, badge, result, actions, storeDoc: btn.dataset.storeDoc, openedBy: btn };
+  rejectDocName.textContent = '"' + title + '"';
+  rejectInput.value = '';
+  rejectCount.textContent = '0';
+  rejectConfirm.disabled = true;
+  rejectOverlay.classList.add('open');
+  rejectInput.focus();
 }
 
 const ROLE_HINTS = {
@@ -1173,9 +1436,7 @@ const ROLE_HINTS = {
   Viewer: 'Can read documents only. No uploads.',
   Owner: 'Full control. Can approve documents and manage contributors.'
 };
-const AVATAR_COLORS = ['av-teal','av-blue','av-orange','av-purple',
-  'style="background:linear-gradient(135deg,#ec4899,#f472b6)"',
-  'style="background:linear-gradient(135deg,#10b981,#34d399)"'];
+const AVATAR_COLORS = ['av-teal','av-blue','av-orange','av-purple','av-deep','av-soft'];
 let avatarIdx = 0;
 
 function openAddContributor() {
@@ -1200,7 +1461,7 @@ function addContributor() {
   const name = document.getElementById('contrib-name').value.trim();
   const title = document.getElementById('contrib-title').value.trim();
   const role = document.getElementById('contrib-role').value;
-  if(!name) { document.getElementById('contrib-name').focus(); document.getElementById('contrib-name').style.borderColor='#ef4444'; return; }
+  if(!name) { document.getElementById('contrib-name').focus(); document.getElementById('contrib-name').style.borderColor='var(--stop-ink,#C8102E)'; return; }
   document.getElementById('contrib-name').style.borderColor='';
   const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().substring(0,2);
   const roleBadgeClass = {Editor:'crole-editor',Viewer:'crole-viewer',Owner:'crole-owner'}[role];
@@ -1222,25 +1483,17 @@ function addContributor() {
   list.insertBefore(newRow, list.lastElementChild);
   setTimeout(() => newRow.style.opacity = '1', 30);
   closeAddContributor();
-  showToast(name + ' added as ' + role, '#00BBB6');
+  showDashToast(name + ' added as ' + role, '#00BBB6');
 }
 
-function updateBellCount(delta) {
-  const n = Math.max(0, parseInt(localStorage.getItem('taqa-bell-count')||'0', 10) + delta);
-  localStorage.setItem('taqa-bell-count', n);
-  const b = document.getElementById('bell-badge');
-  if(b){b.textContent=n;b.style.display=n>0?'flex':'none';}
+// The bell counts the real queue (shared.js), so a decision just re-reads it.
+function updateBellCount() {
+  if (window.taqaSyncBell) window.taqaSyncBell();
 }
-// ── Dark Mode ──
-const MOON='M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
-const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
-function toggleDark(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme',next);}
-(function(){const s=localStorage.getItem('taqa-theme');if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
 </script>
 <script src="shared.js"></script>
-<script src="fixes.js"></script>
 <script>
-(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--border,rgba(0,0,0,0.08));background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:rgba(0,93,99,0.06);border-color:rgba(0,93,99,0.3);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();
+(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--border,rgba(0,0,0,0.08));background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:rgba(0,93,99,0.06);border-color:rgba(0,93,99,0.3);color:var(--primary-ink);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#C8102E;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-taqa-theme="dark"] .bell-badge{border-color:#002326;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();
 </script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
 </body>

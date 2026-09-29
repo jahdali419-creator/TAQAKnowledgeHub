@@ -148,7 +148,7 @@ Raised here rather than left for D&T review to surface. The four code-level item
 | CMP-04 | The site is publicly reachable with no sign-in | Anyone with the URL can browse it | Open, with D&T. Closed by DT-07. Until then the Hub must not hold real operational documents |
 | CMP-05 | GitHub Pages deployment runs alongside Azure | A second public copy outside TAQA hosting | Open, pending a decision. Retire the workflow at repository transfer (DT-03). Left running for now, as it may be the URL in current use |
 
-All eleven pages were loaded in a browser with network traffic recorded. The site now makes no requests to any third-party host. The Content-Security-Policy on every page was tightened to `'self'` only, so any future third-party call is blocked by the browser rather than merely absent from the code.
+All eleven pages were loaded in a browser with network traffic recorded. The site now makes no requests to any third-party host. The Content-Security-Policy on every page restricts `connect-src`, `img-src`, `font-src`, `worker-src` and `manifest-src` to `'self'`, so any third-party host is blocked by the browser rather than merely absent from the code. `script-src` and `style-src` still carry `'unsafe-inline'`, a known and accepted gap for this prototype stage (see the cybersecurity review pack, R-05).
 
 CMP-04 is the reason no real operational content has been loaded into the platform yet.
 

@@ -1,24 +1,39 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-taqa-theme="light">
 <head>
 <meta charset="UTF-8">
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Search — TAQA Knowledge Hub</title>
+<title>AI Search, TAQA Knowledge Hub</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#005D63">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Tech Hub">
+<meta name="apple-mobile-web-app-title" content="TechHub Platform">
 <link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="fonts/fonts.css">
 <noscript></noscript>
 <style>
 :root{
-  --primary:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
-  --dark:#f4f5f7;--glass:rgba(255,255,255,0.88);--glass-2:rgba(255,255,255,0.98);
+  --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
+  --dark:#F4F4F3;--inset:#EDEBE8;--glass:rgba(255,255,255,0.88);--glass-2:rgba(255,255,255,0.98);
   --glass-border:rgba(0,0,0,0.08);--glass-border-hover:rgba(0,93,99,0.35);
-  --text:#1a2235;--text-muted:#64748b;--gradient:#005D63; /* flat brand teal - no gradient */
+  --text:#1E1C1A;--text-muted:#524D48;--gradient:#005D63; /* flat brand teal - no gradient */
+  /* One faint teal wash for every document-type chip. The word in the chip
+     already names the type, so the six hues it used to run were a colour code
+     nobody had learnt. Alert is the exception and keeps the orange family. */
+  --brand-soft:rgba(0,93,99,.07);--alert-soft:rgba(253,105,29,.10);
+  /* Orange is legible as a fill long before it is legible as a glyph, so
+     warning TEXT runs through this darkened ink. */
+  --alert-ink:#A8431A;
 }
 *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
 @keyframes pageFadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
@@ -26,27 +41,6 @@ body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min
 #bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
 .page-wrapper{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
 
-/* ── Nav ── */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
-  display:flex;align-items:center;justify-content:space-between;
-  background:rgba(255,255,255,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  border-bottom:1px solid var(--glass-border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
-.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
-.nav-brand-icon{width:40px;height:40px;border-radius:11px;background:var(--gradient);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  position:relative;overflow:hidden;box-shadow:0 4px 18px rgba(0,93,99,0.38);}
-.nav-brand-icon::before{content:'';position:absolute;top:-10px;left:-6px;width:32px;height:32px;
-  background:rgba(255,255,255,0.13);border-radius:50%;pointer-events:none;}
-.nav-brand-text{font-family:'BwGradual','Urbanist',sans-serif;font-size:15px;}
-.nav-brand-name{font-weight:800;color:var(--primary);}
-.nav-brand-hub{font-weight:500;color:#64748b;}
-.nav-subtitle{font-size:11px;color:var(--text-muted);display:block;margin-top:-1px;}
-.nav-links{display:flex;gap:2px;list-style:none;}
-.nav-links a{padding:7px 15px;border-radius:6px;text-decoration:none;font-size:13.5px;font-weight:500;color:var(--text-muted);transition:background 0.2s,color 0.2s;position:relative;}
-.nav-links a:hover{background:#f0f1f3;color:var(--text);}
-.nav-links a.active{background:transparent;color:var(--primary);font-weight:600;}
-.nav-links a.active::after{content:'';position:absolute;bottom:3px;left:15px;right:15px;height:2px;background:var(--primary);border-radius:2px;}
-.nav-right{display:flex;gap:10px;}
 .btn{padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
   transition:all 0.25s;border:none;font-family:'Inter',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:7px;}
 .btn-primary{background:var(--gradient);color:#fff;}
@@ -73,7 +67,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   display:inline-flex;align-items:center;gap:9px;padding:6px 18px;margin-bottom:26px;
   background:linear-gradient(135deg,rgba(0,93,99,0.09),rgba(0,187,182,0.06));
   border:1px solid rgba(0,187,182,0.28);border-radius:50px;
-  font-size:11.5px;color:var(--primary-light);font-weight:500;letter-spacing:0.3px;
+  font-size:11.5px;color:var(--primary-ink);font-weight:500;letter-spacing:0.3px;
   box-shadow:0 2px 16px rgba(0,187,182,0.12);
   position:relative;z-index:1;
 }
@@ -84,13 +78,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .hub-title{
   font-family:'BwGradual','Urbanist',sans-serif;
   font-size:clamp(32px,5.5vw,56px);
-  font-weight:800;letter-spacing:-1.5px;line-height:1.08;
+  font-weight:800;letter-spacing:-1.5px;line-height:1.16;
   margin-bottom:18px;color:var(--text);
   position:relative;z-index:1;
 }
 .hub-title .grad{
-  background:var(--gradient);
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  color:var(--primary-ink);
 }
 .hub-sub{font-size:15px;color:var(--text-muted);line-height:1.7;max-width:460px;margin:0 auto 24px;position:relative;z-index:1;}
 
@@ -106,7 +99,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   backdrop-filter:blur(8px);
 }
 .stat-dot{width:6px;height:6px;border-radius:50%;background:var(--primary-light);flex-shrink:0;}
-.stat-sep{color:rgba(0,0,0,0.18);font-size:12px;}
+.stat-sep{color:#BEB8B2;font-size:12px;}
+html[data-taqa-theme="dark"] .stat-sep{color:#00484B;}
 
 /* ── Search Card ── */
 .search-card{
@@ -139,7 +133,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   resize:none;line-height:1.6;min-height:28px;max-height:180px;
   padding:0;
 }
-#query-input::placeholder{color:var(--text-muted);opacity:0.65;}
+#query-input::placeholder{color:var(--text-muted);}
 
 /* ── Send Button ── */
 .send-btn{
@@ -171,10 +165,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 }
 .filter-chip.active{
   background:rgba(0,93,99,0.1);border-color:rgba(0,187,182,0.3);
-  color:var(--primary);font-weight:600;
+  color:var(--primary-ink);font-weight:600;
 }
 .filter-chip:hover{border-color:var(--glass-border-hover);color:var(--text);}
-.char-count{font-size:10.5px;color:var(--text-muted);opacity:0.5;white-space:nowrap;flex-shrink:0;}
+.char-count{font-size:10.5px;color:var(--text-muted);white-space:nowrap;flex-shrink:0;}
 
 /* ── Suggested Prompts ── */
 .prompts-section{
@@ -192,7 +186,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   transition:all 0.22s;backdrop-filter:blur(8px);
 }
 .prompt-chip:hover{
-  border-color:rgba(0,187,182,0.35);color:var(--primary);
+  border-color:rgba(0,187,182,0.35);color:var(--primary-ink);
   background:rgba(0,187,182,0.05);transform:translateY(-1px);
   box-shadow:0 4px 12px rgba(0,0,0,0.06);
 }
@@ -253,7 +247,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
   font-size:14px;line-height:1.78;
   box-shadow:0 2px 12px rgba(0,0,0,0.05);
 }
-.msg-ai .bubble h4{font-family:'BwGradual','Urbanist',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;color:var(--primary);}
+.msg-ai .bubble h4{font-family:'BwGradual','Urbanist',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;color:var(--primary-ink);}
 .msg-ai .bubble p{margin-bottom:10px;color:var(--text-muted);}
 .msg-ai .bubble p:last-of-type{margin-bottom:0;}
 .msg-ai .bubble strong{color:var(--text);}
@@ -276,46 +270,42 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 48px;
 .source-card-seg{font-size:10.5px;color:var(--text-muted);}
 .source-card-type{font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:0.4px;}
 .source-card-arrow{font-size:14px;color:var(--text-muted);flex-shrink:0;transition:color 0.2s;}
-.source-card:hover .source-card-arrow{color:var(--primary-light);}
+.source-card:hover .source-card-arrow{color:var(--primary-ink);}
 
 /* ── Footer ── */
 footer{border-top:none;padding:0;background:transparent;position:relative;margin-top:auto;height:4px;}
 footer::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:#005D63;}
 .bg-blobs{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
 .bg-blob{position:absolute;border-radius:50%;filter:blur(100px);}
-.bg-blob-1{width:720px;height:720px;top:-220px;left:-200px;background:radial-gradient(circle,rgba(0,187,182,0.13) 0%,transparent 65%);animation:blob1 26s ease-in-out infinite;}
-.bg-blob-2{width:580px;height:580px;top:38%;right:-160px;background:radial-gradient(circle,rgba(0,93,99,0.10) 0%,transparent 65%);animation:blob2 32s ease-in-out infinite;}
-.bg-blob-3{width:460px;height:460px;bottom:-80px;left:28%;background:radial-gradient(circle,rgba(0,187,182,0.08) 0%,transparent 65%);animation:blob3 22s ease-in-out infinite;}
+.bg-blob-1{width:720px;height:720px;top:-220px;left:-200px;background:radial-gradient(circle,rgba(0,187,182,0.13) 0%,transparent 65%);}
+.bg-blob-2{width:580px;height:580px;top:38%;right:-160px;background:radial-gradient(circle,rgba(0,93,99,0.10) 0%,transparent 65%);}
+.bg-blob-3{width:460px;height:460px;bottom:-80px;left:28%;background:radial-gradient(circle,rgba(0,187,182,0.08) 0%,transparent 65%);}
 @keyframes blob1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(50px,-70px) scale(1.08);}}
 @keyframes blob2{0%,100%{transform:translate(0,0) scale(1);}40%{transform:translate(-60px,50px) scale(1.06);}80%{transform:translate(30px,-30px) scale(0.95);}}
 @keyframes blob3{0%,100%{transform:translate(0,0) scale(1);}60%{transform:translate(-40px,60px) scale(1.1);}}
 ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(0,93,99,0.28);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:rgba(0,93,99,0.5);}
-.nav-links{position:relative;}.nav-pill{position:absolute;top:50%;transform:translateY(-50%);height:34px;background:rgba(0,93,99,0.1);border-radius:8px;transition:left 0.28s cubic-bezier(.4,0,.2,1),width 0.28s cubic-bezier(.4,0,.2,1),opacity 0.2s;pointer-events:none;z-index:0;opacity:0;}
-.nav-links a.active::after{display:none!important;}
-.dark-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:border-color 0.2s,color 0.2s,background 0.2s;flex-shrink:0;padding:0;}
-.dark-toggle:hover{border-color:var(--primary);color:var(--primary);background:rgba(0,93,99,0.06);}
-html[data-theme="dark"]{--dark:#0e1824;--glass:rgba(25,38,58,0.88);--glass-border:rgba(255,255,255,0.07);--text:#dde4ef;--text-muted:#7e94ab;}
-html[data-theme="dark"] body{background:#0e1824;}
-html[data-theme="dark"] nav{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.06);}
-html[data-theme="dark"] .nav-brand-name{color:#dde4ef;}html[data-theme="dark"] .nav-brand-hub{color:#7e94ab;}
-html[data-theme="dark"] .nav-pill{background:rgba(0,187,182,0.12);}
-html[data-theme="dark"] .dark-toggle{border-color:rgba(255,255,255,0.1);color:#7e94ab;}
-html[data-theme="dark"] .search-card{background:rgba(25,38,58,0.95);border-color:rgba(255,255,255,0.08);}
-html[data-theme="dark"] #query-input{color:#dde4ef;}html[data-theme="dark"] #query-input::placeholder{color:#4d6070;}
-html[data-theme="dark"] .search-bottom-row{border-color:rgba(255,255,255,0.07);}
-html[data-theme="dark"] .filter-chip{border-color:rgba(255,255,255,0.1);color:#7e94ab;}
-html[data-theme="dark"] .filter-chip.active{background:rgba(0,93,99,0.2);border-color:rgba(0,187,182,0.3);color:#00BBB6;}
-html[data-theme="dark"] .stat-pill{background:rgba(25,38,58,0.8);border-color:rgba(255,255,255,0.07);}
-html[data-theme="dark"] .msg-ai{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] .results-area{background:transparent;}
-html[data-theme="dark"] .prompt-chip{background:rgba(25,38,58,0.8);border-color:rgba(255,255,255,0.09);color:#7e94ab;}
-html[data-theme="dark"] .prompt-chip:hover{background:rgba(0,93,99,0.15);border-color:rgba(0,187,182,0.25);color:#00BBB6;}
-html[data-theme="dark"] footer{background:#19263a;border-color:#243044;}
-html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2);}
-html[data-theme="dark"] .bg-blob-1{background:radial-gradient(circle,rgba(0,187,182,0.05) 0%,transparent 65%);}
-html[data-theme="dark"] .bg-blob-2{background:radial-gradient(circle,rgba(0,93,99,0.04) 0%,transparent 65%);}
-html[data-theme="dark"] .bg-blob-3{background:radial-gradient(circle,rgba(0,187,182,0.03) 0%,transparent 65%);}
-html[data-theme="dark"] .scroll-top-btn{background:rgba(14,24,36,0.92);border-color:rgba(255,255,255,0.1);}
+html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--dark:#001314;--inset:#002D30;--glass:rgba(0,45,48,0.88);
+  /* The answer bubble is painted with var(--glass-2) and this block never
+     restated it, so dark mode handed a white bubble dark-theme text. */
+  --glass-2:rgba(0,35,38,0.98);
+  --glass-border:rgba(255,255,255,0.07);--text:#C7DBDD;--text-muted:#8CB6B9;
+  --brand-soft:rgba(0,187,182,.10);--alert-soft:rgba(253,105,29,.16);--alert-ink:#FF9B5E;}
+html[data-taqa-theme="dark"] body{background:#001314;}
+html[data-taqa-theme="dark"] .search-card{background:rgba(0,45,48,0.95);border-color:rgba(255,255,255,0.08);}
+html[data-taqa-theme="dark"] #query-input{color:#C7DBDD;}html[data-taqa-theme="dark"] #query-input::placeholder{color:#619B9E;}
+html[data-taqa-theme="dark"] .search-bottom-row{border-color:rgba(255,255,255,0.07);}
+html[data-taqa-theme="dark"] .filter-chip{border-color:rgba(255,255,255,0.1);color:#619B9E;}
+html[data-taqa-theme="dark"] .filter-chip.active{background:rgba(0,93,99,0.2);border-color:rgba(0,187,182,0.3);color:#00BBB6;}
+html[data-taqa-theme="dark"] .stat-pill{background:rgba(0,45,48,0.8);border-color:rgba(255,255,255,0.07);}
+html[data-taqa-theme="dark"] .results-area{background:transparent;}
+html[data-taqa-theme="dark"] .prompt-chip{background:rgba(0,45,48,0.8);border-color:rgba(255,255,255,0.09);color:#619B9E;}
+html[data-taqa-theme="dark"] .prompt-chip:hover{background:rgba(0,93,99,0.15);border-color:rgba(0,187,182,0.25);color:#00BBB6;}
+html[data-taqa-theme="dark"] footer{background:#002326;border-color:#003A3D;}
+html[data-taqa-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2);}
+html[data-taqa-theme="dark"] .bg-blob-1{background:radial-gradient(circle,rgba(0,187,182,0.05) 0%,transparent 65%);}
+html[data-taqa-theme="dark"] .bg-blob-2{background:radial-gradient(circle,rgba(0,93,99,0.04) 0%,transparent 65%);}
+html[data-taqa-theme="dark"] .bg-blob-3{background:radial-gradient(circle,rgba(0,187,182,0.03) 0%,transparent 65%);}
+html[data-taqa-theme="dark"] .scroll-top-btn{background:rgba(0,35,38,0.92);border-color:rgba(255,255,255,0.1);}
 
 /* ── Typewriter cursor ── */
 .tw-cursor{display:inline-block;width:2px;height:1em;background:var(--primary-light);margin-left:2px;vertical-align:text-bottom;animation:twBlink 0.9s ease infinite;}
@@ -338,7 +328,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 .scroll-top-btn.stp-visible{opacity:1;transform:translateY(0);}
 .scroll-top-btn:hover{box-shadow:0 8px 28px rgba(0,93,99,0.3);transform:translateY(-3px)!important;}
 .scroll-top-btn svg{position:absolute;top:0;left:0;width:46px;height:46px;}
-.stp-arrow{font-size:13px;color:var(--primary);position:relative;z-index:1;font-weight:800;}
+.stp-arrow{font-size:13px;color:var(--primary-ink);position:relative;z-index:1;font-weight:800;}
 
 /* ── Hub Word Animations ── */
 @keyframes hubWordIn{from{opacity:0;transform:translateY(26px);}to{opacity:1;transform:translateY(0);}}
@@ -354,8 +344,6 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 .hw-8{animation-delay:1.38s;}
 
 @media(max-width:640px){
-  nav{padding:0 20px;}.nav-links{display:none;}
-  .nav-right .btn,.nav-right a.btn{display:none!important;}
   .search-hub{padding-top:90px;}
   .search-hub,.prompts-section,.results-section{padding-left:16px;padding-right:16px;}
   .hub-title{letter-spacing:-1px;font-size:clamp(26px,8vw,40px);}
@@ -406,6 +394,13 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 }
 .ir-item:last-of-type{border-bottom:none;}
 .ir-item:hover{background:rgba(0,187,182,0.05);}
+/* A draft or a document under review is in the index so its author can find
+   it, but it is not in force, and a search result that does not say so is
+   the same mistake as a register that does not say so. */
+.ir-state{display:inline-block;margin-inline-start:6px;padding:0 6px;border-radius:20px;
+  font-size:9px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;vertical-align:1px;}
+.ir-state-draft{background:rgba(0,118,168,.05);color:var(--info-ink,#0076A8);}
+.ir-state-under-review{background:rgba(255,184,28,.14);color:var(--warn-ink,#8A6200);}
 .ir-badge{
   flex-shrink:0;padding:2px 8px;border-radius:5px;
   font-size:10px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;
@@ -413,44 +408,151 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 }
 .ir-body{flex:1;min-width:0;}
 .ir-title{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ir-title mark{background:rgba(0,187,182,0.22);color:var(--primary);border-radius:2px;padding:0 1px;font-style:normal;}
+.ir-title mark{background:rgba(0,187,182,0.22);color:var(--primary-ink);border-radius:2px;padding:0 1px;font-style:normal;}
+/* Teal on a teal wash failed in dark; the wash alone marks the match there. */
+html[data-taqa-theme="dark"] .ir-title mark{color:var(--text);}
 .ir-seg{font-size:11px;color:var(--text-muted);margin-top:2px;}
 .ir-arrow{font-size:15px;color:var(--text-muted);flex-shrink:0;transition:color 0.15s;}
-.ir-item:hover .ir-arrow{color:var(--primary-light);}
+.ir-item:hover .ir-arrow{color:var(--primary-ink);}
 .ir-footer{
   padding:9px 16px;font-size:11.5px;color:var(--text-muted);
   text-align:center;border-top:1px solid rgba(0,0,0,0.06);
   background:rgba(0,0,0,0.015);
 }
-html[data-theme="dark"] .ir-panel{background:rgba(20,32,50,0.99);border-color:rgba(0,187,182,0.25);}
-html[data-theme="dark"] .ir-header{border-color:rgba(255,255,255,0.06);}
-html[data-theme="dark"] .ir-item{border-color:rgba(255,255,255,0.04);}
-html[data-theme="dark"] .ir-item:hover{background:rgba(0,187,182,0.07);}
-html[data-theme="dark"] .ir-title{color:#dde4ef;}
-html[data-theme="dark"] .ir-footer{background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.06);}
+html[data-taqa-theme="dark"] .ir-panel{background:rgba(0,45,48,0.99);border-color:rgba(0,187,182,0.25);}
+html[data-taqa-theme="dark"] .ir-header{border-color:rgba(255,255,255,0.06);}
+html[data-taqa-theme="dark"] .ir-item{border-color:rgba(255,255,255,0.04);}
+html[data-taqa-theme="dark"] .ir-item:hover{background:rgba(0,187,182,0.07);}
+html[data-taqa-theme="dark"] .ir-title{color:#C7DBDD;}
+html[data-taqa-theme="dark"] .ir-footer{background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.06);}
+
+/* Long option text ends in an ellipsis rather than being cut mid letter. */
+select { text-overflow:ellipsis; padding-inline-end:30px; }
+
+/* ── Filters Drawer / Panel ── */
+button.filter-chip{font-family:inherit;display:inline-flex;align-items:center;gap:6px;}
+.filters-badge{
+  background:var(--gradient);color:#fff;font-size:10px;font-weight:700;border-radius:50px;
+  padding:1px 6px;min-width:16px;line-height:1.5;text-align:center;display:inline-block;
+}
+.filters-scrim{
+  position:fixed;inset:0;background:rgba(0,0,0,0.38);z-index:650;
+  opacity:0;pointer-events:none;transition:opacity 0.25s;
+}
+.filters-scrim.open{opacity:1;pointer-events:auto;}
+.filters-drawer{
+  position:fixed;top:var(--nav-h,64px);left:0;height:calc(100dvh - var(--nav-h,64px));width:284px;max-width:86vw;
+  background:var(--glass-2);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  border-inline-end:1px solid var(--glass-border);
+  box-shadow:0 10px 40px rgba(0,0,0,0.18);
+  z-index:700;transform:translateX(-100%);
+  transition:transform 0.3s cubic-bezier(.4,0,.2,1);
+  overflow-y:auto;padding:20px 18px 24px;text-align:left;
+}
+.filters-drawer.open{transform:translateX(0);}
+.filters-drawer-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--glass-border);
+}
+.filters-drawer-title{
+  font-family:'BwGradual','Urbanist',sans-serif;font-weight:700;font-size:15px;
+  color:var(--text);display:flex;align-items:center;gap:8px;
+}
+.filters-close-btn{
+  width:28px;height:28px;border-radius:8px;border:1px solid var(--glass-border);
+  background:transparent;color:var(--text-muted);cursor:pointer;font-size:13px;
+  display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;
+}
+.filters-close-btn:hover{border-color:var(--glass-border-hover);color:var(--text);}
+.filters-group{margin-bottom:18px;}
+.filters-group label{
+  display:block;font-size:10.5px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:7px;
+}
+.filters-group select,.filters-group input[type="date"]{
+  width:100%;padding:9px 10px;border-radius:9px;border:1px solid var(--glass-border);
+  background:rgba(255,255,255,0.75);color:var(--text);font-size:13px;font-family:'Inter',sans-serif;
+  outline:none;transition:border-color 0.2s,box-shadow 0.2s;color-scheme:light;
+}
+.filters-group select:focus,.filters-group input[type="date"]:focus{
+  border-color:rgba(0,187,182,0.45);box-shadow:0 0 0 3px rgba(0,187,182,0.1);
+}
+.filters-date-row{display:flex;align-items:center;gap:7px;}
+.filters-date-row input{flex:1;min-width:0;}
+.filters-date-sep{font-size:11px;color:var(--text-muted);flex-shrink:0;}
+.filters-clear-btn{
+  width:100%;margin-top:2px;padding:9px;border-radius:9px;border:1px solid var(--glass-border);
+  background:transparent;color:var(--text-muted);font-size:12.5px;font-weight:600;cursor:pointer;
+  transition:all 0.2s;font-family:'Inter',sans-serif;
+}
+.filters-clear-btn:hover{border-color:rgba(0,187,182,0.35);color:var(--primary-ink);background:rgba(0,187,182,0.05);}
+@media(min-width:1300px){
+  .filters-drawer{
+    top:110px;left:24px;height:auto;max-height:calc(100vh - 140px);
+    border-radius:18px;border:1px solid var(--glass-border);border-inline-end:1px solid var(--glass-border);
+    transform:translateX(0);box-shadow:0 4px 28px rgba(0,0,0,0.08);
+  }
+  .filters-scrim{display:none;}
+  .filters-close-btn{display:none;}
+  #filters-trigger-btn{display:none;}
+}
+html[data-taqa-theme="dark"] .filters-drawer{background:rgba(0,35,38,0.98);border-color:rgba(255,255,255,0.08);}
+html[data-taqa-theme="dark"] .filters-drawer-head{border-color:rgba(255,255,255,0.07);}
+html[data-taqa-theme="dark"] .filters-close-btn{border-color:rgba(255,255,255,0.1);color:#619B9E;}
+html[data-taqa-theme="dark"] .filters-group select,html[data-taqa-theme="dark"] .filters-group input[type="date"]{
+  background:rgba(0,45,48,0.6);border-color:rgba(255,255,255,0.1);color:#C7DBDD;color-scheme:dark;
+}
+html[data-taqa-theme="dark"] .filters-clear-btn{border-color:rgba(255,255,255,0.1);color:#619B9E;}
+html[data-taqa-theme="dark"] .filters-clear-btn:hover{border-color:rgba(0,187,182,0.3);color:#00BBB6;background:rgba(0,93,99,0.15);}
+
+/* ── Real result / source cards (search results, honest empty state) ── */
+.source-card{cursor:pointer;}
+.result-note{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.empty-state-suggest{margin-top:2px;}
+.empty-state-suggest button{
+  background:none;border:none;padding:0;color:var(--primary-ink);font-weight:600;
+  font-size:inherit;font-family:inherit;cursor:pointer;text-decoration:underline;
+}
+
+/* shared.js paints the breadcrumb on var(--primary), which is a ground colour,
+   so on the dark canvas the current crumb sat at about 2.5 to 1. The leading
+   html raises specificity over the sheet shared.js appends after ours. */
+/* fixes.js gives the AI disclaimer an amber of its own that measures 4.42 on
+   the banner tint. Its dark rule is selector-heavy, so this one carries the
+   theme attribute and body to outrank it in both themes. */
+html[data-taqa-theme] body .ai-safety-banner{color:var(--alert-ink);background:var(--alert-soft);
+  border-color:rgba(253,105,29,.28);border-inline-start:3px solid #FD691D;}
 </style>
+<link rel="stylesheet" href="topbar.css">
 </head>
 <body>
 <div class="bg-blobs" aria-hidden="true"><div class="bg-blob bg-blob-1"></div><div class="bg-blob bg-blob-2"></div><div class="bg-blob bg-blob-3"></div></div>
 <canvas id="bg-canvas"></canvas>
 <div class="page-wrapper">
 
-<nav>
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
   <a href="index.html" class="nav-brand">
-    <span class="nav-brand-text"><span class="nav-brand-name">TAQA</span> <span class="nav-brand-hub">Knowledge Hub</span><span class="nav-subtitle" style="white-space:nowrap"><em style="color:#005D63; font-style:italic;">Tech Hub</em> <span style="color:#94a3b8;">(working name)</span></span></span>
+    <span class="nav-title"><span class="nav-title-brand">TAQA</span> <span class="nav-title-hub">Knowledge Hub</span></span>
+    <span class="nav-subtitle"><em>TechHub Platform</em></span>
   </a>
   <ul class="nav-links">
-    <div class="nav-pill" id="nav-pill"></div>
     <li><a href="index.html">Home</a></li>
-    <li><a href="ai-search.html" class="active">Document Search</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
+    <li><a href="ai-search.html" class="active" aria-current="page">Document Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
     <li><a href="glossary.html">Field Glossary</a></li>
-    <li><a href="upload.html">Upload</a></li>
     <li><a href="support-ticket.html">Ask Expert</a></li>
   </ul>
   <div class="nav-right">
-    <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode"><svg id="dark-icon" width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
-    <button class="bell-btn" id="nav-bell" onclick="location.href='dashboard.html'" title="Pending approvals" aria-label="Pending approvals"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge">3</span></button>
-    <a href="upload.html" class="btn btn-primary">+ Upload</a>
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
@@ -458,15 +560,15 @@ html[data-theme="dark"] .ir-footer{background:rgba(255,255,255,0.02);border-colo
 <div class="search-hub">
   <div class="hub-glow"></div>
 
-  <div style="font-size:10px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;color:var(--primary);margin-bottom:10px;position:relative;z-index:1;">Part of <em style="font-style:italic;color:#005D63;font-weight:700;">Tech Hub</em> <span style="opacity:0.7;font-style:normal;">(working name)</span></div>
+  <div style="font-size:10px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;color:var(--primary-ink);margin-bottom:10px;position:relative;z-index:1;">Part of <em style="font-style:italic;font-weight:700;background:linear-gradient(120deg, #005D63 20%, #00959C 80%);-webkit-background-clip:text;background-clip:text;color:transparent;">TechHub Platform</em></div>
   <div class="ai-badge hw hw-1"><span class="ai-spark">✦</span> AI-Powered Document Intelligence</div>
   <h1 class="hub-title"><span class="hw hw-2 hw-i">Ask</span> <span class="hw hw-3 hw-i">Anything</span> <span class="hw hw-4 hw-i">About</span><br><span class="hw hw-5 hw-i"><span class="grad">TAQA Operations</span></span></h1>
-  <p class="hub-sub hw hw-6">Answers sourced directly from 523 operational documents across all eleven TAQA business segments.</p>
+  <p class="hub-sub hw hw-6">Answers sourced from the register, every controlled document in every area.</p>
 
   <div class="stats-pills hw hw-7">
-    <div class="stat-pill"><span class="stat-dot"></span>523 Documents</div>
+    <div class="stat-pill"><span class="stat-dot"></span><span id="ai-doc-n">600</span> Documents</div>
     <span class="stat-sep">·</span>
-    <div class="stat-pill"><span class="stat-dot"></span>11 Segments</div>
+    <div class="stat-pill"><span class="stat-dot"></span><span id="ai-area-n">24</span> Areas</div>
     <span class="stat-sep">·</span>
     <div class="stat-pill"><span class="stat-dot"></span>SOPs · Manuals · Alerts</div>
   </div>
@@ -481,11 +583,15 @@ html[data-theme="dark"] .ir-footer{background:rgba(255,255,255,0.02);border-colo
       <div class="seg-filters">
         <span class="filter-label">Segment</span>
         <span class="filter-chip active" data-seg="all">All</span>
-        <span class="filter-chip" data-seg="drilling">Drilling</span>
-        <span class="filter-chip" data-seg="well-safety">Well Safety</span>
+        <span class="filter-chip" data-seg="drilling">Drilling Services</span>
+        <span class="filter-chip" data-seg="well-safety">Safety Services</span>
         <span class="filter-chip" data-seg="fracturing">Fracturing</span>
         <span class="filter-chip" data-seg="qhse">QHSE</span>
         <span class="filter-chip" data-seg="hr">HR</span>
+        <button type="button" class="filter-chip" id="filters-trigger-btn" onclick="toggleFilters()"
+          aria-haspopup="dialog" aria-expanded="false" aria-controls="filters-drawer">
+          Filters<span class="filters-badge" id="filters-badge-mini" style="display:none">0</span>
+        </button>
       </div>
       <span class="char-count" id="char-count">0 / 500</span>
     </div>
@@ -493,6 +599,42 @@ html[data-theme="dark"] .ir-footer{background:rgba(255,255,255,0.02);border-colo
   <!-- ── Instant Results (injected below search card) ── -->
   <div id="ir-panel" class="ir-panel" role="listbox" aria-label="Document matches"></div>
 </div>
+
+<!-- ── Filters Panel / Drawer ── -->
+<div class="filters-scrim" id="filters-scrim" onclick="closeFilters()"></div>
+<aside class="filters-drawer" id="filters-drawer" aria-label="Search filters" role="dialog" aria-modal="false">
+  <div class="filters-drawer-head">
+    <span class="filters-drawer-title">Filters<span class="filters-badge" id="filters-badge" style="display:none">0</span></span>
+    <button type="button" class="filters-close-btn" onclick="closeFilters()" aria-label="Close filters">✕</button>
+  </div>
+  <div class="filters-group">
+    <label for="f-segment">Area / Segment</label>
+    <select id="f-segment"></select>
+  </div>
+  <div class="filters-group">
+    <label for="f-status">Status</label>
+    <select id="f-status">
+      <option value="all">All Statuses</option>
+      <option value="current">Published</option>
+      <option value="under-review">Under Review</option>
+      <option value="draft">Draft</option>
+      <option value="overdue">Review Overdue</option>
+    </select>
+  </div>
+  <div class="filters-group">
+    <label for="f-type">Document Type</label>
+    <select id="f-type"></select>
+  </div>
+  <div class="filters-group">
+    <label id="f-date-label">Issued Date Range</label>
+    <div class="filters-date-row">
+      <input type="date" id="f-date-from" aria-label="Issued from">
+      <span class="filters-date-sep">to</span>
+      <input type="date" id="f-date-to" aria-label="Issued to">
+    </div>
+  </div>
+  <button type="button" class="filters-clear-btn" id="filters-clear-btn" onclick="clearAllFilters()">Clear all filters</button>
+</aside>
 
 <!-- ── Suggested Prompts ── -->
 <div class="prompts-section">
@@ -516,7 +658,7 @@ html[data-theme="dark"] .ir-footer{background:rgba(255,255,255,0.02);border-colo
   <div class="thinking-block" id="thinking-block">
     <div class="thinking-avatar">✦</div>
     <div>
-      <div class="thinking-label">Searching 523 documents...</div>
+      <div class="thinking-label">Searching the register...</div>
       <div class="thinking-dots">
         <div class="thinking-dot"></div>
         <div class="thinking-dot"></div>
@@ -575,178 +717,10 @@ function setPrompt(el) {
   input.focus();
 }
 
-// ── Segment Filters ──
-document.querySelectorAll('.filter-chip').forEach(chip => {
-  chip.addEventListener('click', () => {
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-  });
-});
-
-// ── Demo AI Responses ──
-const RESPONSES = {
-  'well shut-in': {
-    answer: `<h4>Well Shut-In Procedure</h4>
-    <p>According to <strong>WS-003 Well Shut-In Procedure</strong> and the <strong>Well Control Manual v6.0</strong>, the immediate shut-in sequence is:</p>
-    <p><strong>1. Detect the kick:</strong> Monitor for pit gain, flow while pumps are off, increased pump pressure, or increased rate of penetration.</p>
-    <p><strong>2. Pick up off bottom:</strong> Stop drilling, pick up to a safe position above the formation.</p>
-    <p><strong>3. Shut down pumps:</strong> Stop all circulation pumps immediately.</p>
-    <p><strong>4. Close the BOP:</strong> Per WS-004, a Hard Shut-In (direct BOP closure) is the preferred TAQA method.</p>
-    <p><strong>5. Record SICP and SIDPP:</strong> Wait for pressures to stabilize, record all readings on the kill sheet.</p>
-    <p><strong>6. Notify:</strong> Alert the Company Man, Well Site Leader, and QHSE immediately.</p>`,
-    sources: [
-      {title:'WS-003 Well Shut-In Procedure',seg:'Well Safety',type:'SOP'},
-      {title:'WS-004 Hard vs Soft Shut-In',seg:'Well Safety',type:'SOP'},
-      {title:'Well Control Manual v6.0',seg:'Drilling',type:'Manual'},
-      {title:'QHSE-016 Document Control',seg:'QHSE',type:'Policy'}
-    ]
-  },
-  'bop test': {
-    answer: `<h4>BOP Testing Requirements</h4>
-    <p>Per <strong>WS-001 Daily BOP Test SOP</strong> and <strong>ALERT-DRL-002</strong> (effective June 2026), BOP testing intervals at TAQA are:</p>
-    <p><strong>Pressure Tests:</strong> Every 14 days, or after each connection/nipple-up, or after any BOP repair.</p>
-    <p><strong>Function Tests:</strong> Every 7 days for all BOP functions including annulars, pipe rams, and blind rams.</p>
-    <p><strong>H2S Zones (updated):</strong> Inspection intervals reduced to 14 days per ALERT-INS-002.</p>
-    <p><strong>Test Pressure:</strong> Low pressure (200–300 psi), followed by high pressure (as per casing design — typically MAASP or 70% of burst).</p>
-    <p><strong>Documentation:</strong> All tests must be recorded in the BOP test log and reviewed by the Company Man.</p>`,
-    sources: [
-      {title:'WS-001 Daily BOP Test SOP',seg:'Well Safety',type:'SOP'},
-      {title:'DRL-022 End of Well Report SOP',seg:'Drilling',type:'SOP'},
-      {title:'ALERT-DRL-002',seg:'Drilling',type:'Alert'},
-      {title:'Well Control Manual v6.0',seg:'Drilling',type:'Manual'}
-    ]
-  },
-  'h2s': {
-    answer: `<h4>H2S Safety &amp; PPE Requirements</h4>
-    <p>Per <strong>WS-008 H2S Alarm Response SOP</strong> and the <strong>H2S Safety Manual</strong>, TAQA H2S requirements include:</p>
-    <p><strong>Detection Levels:</strong></p>
-    <p>• <strong>1 ppm:</strong> Warning alarm — monitor closely<br>• <strong>5 ppm:</strong> Personnel upwind, emergency response standby<br>• <strong>10 ppm:</strong> SCBA mandatory for all personnel near source<br>• <strong>20 ppm:</strong> Full evacuation of work area</p>
-    <p><strong>PPE Requirements:</strong> SCBA units must be worn when entering any area with confirmed H2S ≥10 ppm. All personnel must pass annual H2S Awareness Training.</p>
-    <p><strong>ALERT-DRL-004:</strong> H2S concentrations elevated in Shedgum area — updated PPE requirements are in effect immediately.</p>`,
-    sources: [
-      {title:'WS-008 H2S Alarm Response SOP',seg:'Well Safety',type:'SOP'},
-      {title:'H2S Safety Manual',seg:'QHSE',type:'Manual'},
-      {title:'ALERT-DRL-004',seg:'Drilling',type:'Alert'},
-      {title:'WS-011 H2S Safety SOP',seg:'Well Safety',type:'SOP'}
-    ]
-  },
-  'default': {
-    answer: `<h4>Search Results</h4>
-    <p>I found relevant information across multiple TAQA segments. Based on the 492 documents in the Knowledge Hub, here is a summary of the most relevant procedures and standards:</p>
-    <p>For operational procedures, refer to the relevant segment's <strong>Standard Operating Procedures (SOPs)</strong>. For equipment specifications, consult the <strong>Technical Manuals</strong>. For compliance requirements, review the <strong>Policies</strong> section.</p>
-    <p>To get more specific results, try narrowing your question or selecting a segment filter above. You can also browse documents directly by navigating to a segment page.</p>
-    <p><strong>Note:</strong> This is a demo interface. Full AI-powered search will be connected to the Claude API in the next phase, enabling real document Q&amp;A with citations.</p>`,
-    sources: [
-      {title:'Knowledge Hub Documentation',seg:'All Segments',type:'Manual'},
-      {title:'QHSE-016 Document Control SOP',seg:'QHSE',type:'SOP'}
-    ]
-  }
-};
-
-function getResponse(q) {
-  q = q.toLowerCase();
-  if (q.includes('shut') || q.includes('kick') || q.includes('well control')) return RESPONSES['well shut-in'];
-  if (q.includes('bop') || q.includes('blowout') || q.includes('preventer')) return RESPONSES['bop test'];
-  if (q.includes('h2s') || q.includes('hydrogen') || q.includes('sulfide') || q.includes('toxic')) return RESPONSES['h2s'];
-  return RESPONSES['default'];
-}
-
-// ── Typewriter for AI responses ──
-function typewriteHTML(el, html, speed, onDone) {
-  el.innerHTML = '';
-  let i = 0;
-  const cursor = document.createElement('span');
-  cursor.className = 'tw-cursor';
-  el.appendChild(cursor);
-  function step() {
-    if (i >= html.length) {
-      el.innerHTML = html;
-      if (onDone) onDone();
-      return;
-    }
-    if (html[i] === '<') {
-      const end = html.indexOf('>', i);
-      i = end !== -1 ? end + 1 : html.length;
-    } else {
-      i++;
-    }
-    el.innerHTML = html.substring(0, i) + '<span class="tw-cursor"></span>';
-    setTimeout(step, speed);
-  }
-  step();
-}
-
-function addMessage(type, content, sources) {
-  const log = document.getElementById('chat-log');
-  const welcome = log.querySelector('.welcome-state');
-  if (welcome) welcome.remove();
-
-  const div = document.createElement('div');
-  if (type === 'user') {
-    div.className = 'msg-user';
-    div.innerHTML = `<div class="bubble">${content}</div>`;
-    log.appendChild(div);
-    div.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  } else {
-    const typeColor = {SOP:'#3498DB',Manual:'#8E44AD',Policy:'#27AE60',Alert:'#E74C3C',default:'#00BBB6'};
-    const srcsHTML = sources && sources.length ? `<div class="sources-block">
-      <div class="sources-label">${sources.length} Source${sources.length>1?'s':''}</div>
-      <div class="sources-list">${sources.map(s=>`
-        <div class="source-card">
-          <div class="source-card-bar" style="background:${typeColor[s.type]||typeColor.default}"></div>
-          <div class="source-card-body">
-            <div class="source-card-title">${s.title}</div>
-            <div class="source-card-meta">
-              <span class="source-card-seg">${s.seg}</span>
-              <span class="source-card-type" style="background:${typeColor[s.type]||typeColor.default}22;border-color:${typeColor[s.type]||typeColor.default}33;color:${typeColor[s.type]||typeColor.default}">${s.type}</span>
-            </div>
-          </div>
-          <span class="source-card-arrow">›</span>
-        </div>`).join('')}
-      </div></div>` : '';
-    div.className = 'msg-ai';
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    div.innerHTML = '<div class="msg-ai-avatar">✦</div>';
-    div.appendChild(bubble);
-    log.appendChild(div);
-    div.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    typewriteHTML(bubble, content, 9, () => {
-      if (srcsHTML) {
-        const srcDiv = document.createElement('div');
-        srcDiv.innerHTML = srcsHTML;
-        srcDiv.style.cssText = 'opacity:0;transform:translateY(8px);transition:opacity 0.4s,transform 0.4s;';
-        bubble.appendChild(srcDiv);
-        setTimeout(() => { srcDiv.style.opacity='1'; srcDiv.style.transform='none'; }, 80);
-      }
-      div.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    });
-  }
-}
-
-function submitQuery() {
-  const q = input.value.trim();
-  if (!q) return;
-
-  addMessage('user', q);
-  input.value = '';
-  input.style.height = 'auto';
-  document.getElementById('char-count').textContent = '0 / 500';
-
-  const thinking = document.getElementById('thinking-block');
-  thinking.classList.add('active');
-  const btn = document.getElementById('send-btn');
-  btn.classList.add('loading');
-  btn.disabled = true;
-
-  setTimeout(() => {
-    thinking.classList.remove('active');
-    btn.classList.remove('loading');
-    btn.disabled = false;
-    const resp = getResponse(q);
-    addMessage('ai', resp.answer, resp.sources);
-  }, 1800 + Math.random() * 800);
-}
+// Segment quick-chips, the filters drawer and submitQuery() itself all need
+// the real register (TAQA_SEARCH_INDEX), which loads later in the page, so
+// that wiring lives in the "Real Document Search" script near the bottom of
+// the page rather than here.
 
 // ── Canvas ──
 const canvas = document.getElementById('bg-canvas');
@@ -757,7 +731,9 @@ resize();window.addEventListener('resize',resize);
 function initPts(){pts=[];let n=Math.floor(W*H/20000);
   for(let i=0;i<n;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,s:Math.random()*1.5+.3});}
 initPts();
-function draw(){ctx.fillStyle='#f4f5f7';ctx.fillRect(0,0,W,H);
+// The canvas is an opaque sheet over the body, so it has to carry the canvas
+// colour of whichever theme is live or it hands the dark page a white backdrop.
+function draw(){ctx.fillStyle=document.documentElement.getAttribute('data-taqa-theme')==='dark'?'#001314':'#F4F4F3';ctx.fillRect(0,0,W,H);
   const g=ctx.createRadialGradient(W*.5,H*.25,0,W*.5,H*.25,500);
   g.addColorStop(0,'rgba(0,93,99,0.05)');g.addColorStop(1,'transparent');
   ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
@@ -766,18 +742,9 @@ function draw(){ctx.fillStyle='#f4f5f7';ctx.fillRect(0,0,W,H);
     ctx.beginPath();ctx.arc(p.x,p.y,p.s,0,Math.PI*2);ctx.fillStyle='rgba(0,93,99,0.1)';ctx.fill();});
   requestAnimationFrame(draw);}
 draw();
-// ── Sliding Pill Nav ──
-const pill=document.getElementById('nav-pill'),navList=document.querySelector('.nav-links');
-function pillTo(el){const lr=navList.getBoundingClientRect(),ar=el.getBoundingClientRect();pill.style.left=(ar.left-lr.left)+'px';pill.style.width=ar.width+'px';pill.style.opacity='1';}
-function pillToActive(){const a=navList.querySelector('a.active');if(a)pillTo(a);else pill.style.opacity='0';}
-pillToActive();navList.querySelectorAll('a').forEach(a=>a.addEventListener('mouseenter',()=>pillTo(a)));navList.addEventListener('mouseleave',pillToActive);
-// ── Dark Mode ──
-const MOON='M7.5 1.5A6 6 0 1 0 13.5 7.5 4.5 4.5 0 0 1 7.5 1.5Z';
-const SUN='M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z';
-function toggleDark(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const next=isDark?'light':'dark';document.documentElement.setAttribute('data-theme',next);const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',next==='dark'?MOON:SUN);localStorage.setItem('taqa-theme',next);}
-(function(){const s=localStorage.getItem('taqa-theme');if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');const p=document.querySelector('#dark-icon path');if(p)p.setAttribute('d',MOON);}})();
 
-if (urlQ) setTimeout(submitQuery, 600);
+// A prefilled query needs submitQuery(), which is defined once the register
+// has loaded further down the page, so the actual search runs from there.
 
 // ── Scroll Progress Ring ──
 (function(){
@@ -803,69 +770,194 @@ document.addEventListener('click',function(e){
   setTimeout(()=>window.location.href=h,270);
 });
 </script>
+
+<script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script src="store.js"></script>
+<script>
+/* Two counts on this page were typed three times between them and said 523
+   and 492 on the same screen. They come from the register now. */
+(function(){
+  if (typeof TAQA_STORE === 'undefined') return;
+  // The area figure counted three families and left out Company Wide and the
+  // area still waiting on QHSE, so it said 24 while the master list said 26.
+  // Both now count every area that holds documents.
+  function paint(){
+    var n = TAQA_STORE.count('live');
+    var areas = Object.keys(TAQA_DOC_LOOKUPS.segments)
+      .filter(function(k){ return TAQA_STORE.area(k).live > 0; }).length;
+    var a = document.getElementById('ai-doc-n'); if (a) a.textContent = n;
+    var b = document.getElementById('ai-area-n'); if (b) b.textContent = areas;
+  }
+  TAQA_STORE.onChange(paint);
+})();
+</script>
 <script src="shared.js"></script>
 <script src="fixes.js"></script>
 <script src="search-index.js"></script>
 <script>
-// ── Instant Document Search ──
+// ── Real Document Search ──
+// Wires the free-text query, the type-ahead preview and the filters panel to
+// the actual register: TAQA_SEARCH_INDEX, built in search-index.js from
+// TAQA_STORE. Every result here is a row from the register and every link
+// opens that row's real viewer.html; nothing is invented.
 (function(){
+  // The label already names the type on a result card, so every badge takes
+  // the one teal wash; Alert stays orange because it is an operational
+  // warning, the colour the rest of the Hub gives an alert.
   var TYPE_CFG={
-    sop:{bg:'#dbeafe',color:'#1d4ed8',label:'SOP'},
-    manual:{bg:'#ede9fe',color:'#6d28d9',label:'Manual'},
-    policy:{bg:'#dcfce7',color:'#15803d',label:'Policy'},
-    alert:{bg:'#fee2e2',color:'#b91c1c',label:'Alert'},
-    lesson:{bg:'#fef3c7',color:'#b45309',label:'Lesson'},
-    software:{bg:'#d1fae5',color:'#065f46',label:'Software'}
+    sop:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
+    manual:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
+    standard:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
+    policy:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
+    alert:{bg:'var(--alert-soft)',color:'var(--alert-ink)'},
+    lesson:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
+    software:{bg:'var(--brand-soft)',color:'var(--primary-ink)'}
   };
-  var TAB_MAP={sop:'sops',manual:'manuals',policy:'policies',alert:'alerts',lesson:'lessons',software:'software'};
+  var TYPE_ORDER=['sop','manual','standard','policy','alert','lesson','software'];
+  // The badge text is the register's mark (WI, ST, POL, LL); the filter's
+  // Document Type list instead spells the type out, since a dropdown is read
+  // slower than a badge and "WI" alone means nothing there.
+  (function(){ var T=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.types)||{};
+    var fb={sop:'SOP',manual:'WI',standard:'ST',policy:'POL',alert:'ALT',lesson:'LL',software:'ZIP'};
+    TYPE_ORDER.forEach(function(k){
+      TYPE_CFG[k].label=(T[k]&&T[k].mark)||fb[k];
+      TYPE_CFG[k].fullLabel=(T[k]&&T[k].label)||k;
+    });
+  })();
 
-  function esc(s){return s.replace(/[&<>"']/g,function(c){{return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}})}
-
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function highlight(str,q){
     if(!q)return esc(str);
     var re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
     return esc(str).replace(re,'<mark>$1</mark>');
   }
+  // The one place a match becomes a link. Every card, in the type-ahead
+  // preview and in the full results below, opens the same real record.
+  function docHref(d){
+    return 'viewer.html?doc='+encodeURIComponent(d.n||'')+'&seg='+encodeURIComponent(d.s)+
+      '&type='+encodeURIComponent(d.tp)+'&title='+encodeURIComponent(d.t);
+  }
+  function statusNote(d){
+    if(!d.st||d.st==='current'||d.st==='asset')return '';
+    var label=d.st==='under-review'?'under review':d.st;
+    return ' <span class="ir-state ir-state-'+esc(d.st)+'">'+esc(label)+'</span>';
+  }
 
+  var FILTERS={segment:'all',status:'all',type:'all',dateFrom:'',dateTo:''};
+
+  var segSelect=document.getElementById('f-segment');
+  var typeSelect=document.getElementById('f-type');
+  var statusSelect=document.getElementById('f-status');
+  var dateFromInput=document.getElementById('f-date-from');
+  var dateToInput=document.getElementById('f-date-to');
+  var drawer=document.getElementById('filters-drawer');
+  var scrim=document.getElementById('filters-scrim');
+  var badgeMain=document.getElementById('filters-badge');
+  var badgeMini=document.getElementById('filters-badge-mini');
+  var triggerBtn=document.getElementById('filters-trigger-btn');
+
+  // Areas and types come from the register's own lookups, never a list typed
+  // by hand, so a new area or a renamed type appears here on its own.
+  (function populateSelects(){
+    var S=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.segments)||{};
+    var names=Object.keys(S).map(function(k){return{id:k,name:S[k].name||k};})
+      .sort(function(a,b){return a.name.localeCompare(b.name);});
+    if(segSelect){
+      var opts='<option value="all">All Areas</option>';
+      names.forEach(function(s){opts+='<option value="'+esc(s.id)+'">'+esc(s.name)+'</option>';});
+      segSelect.innerHTML=opts;
+    }
+    if(typeSelect){
+      var topts='<option value="all">All Types</option>';
+      TYPE_ORDER.forEach(function(t){topts+='<option value="'+t+'">'+esc(TYPE_CFG[t].fullLabel)+'</option>';});
+      typeSelect.innerHTML=topts;
+    }
+  })();
+
+  function activeFilterCount(){
+    var n=0;
+    if(FILTERS.segment!=='all')n++;
+    if(FILTERS.status!=='all')n++;
+    if(FILTERS.type!=='all')n++;
+    if(FILTERS.dateFrom)n++;
+    if(FILTERS.dateTo)n++;
+    return n;
+  }
+  function updateFilterBadge(){
+    var n=activeFilterCount();
+    [badgeMain,badgeMini].forEach(function(b){
+      if(!b)return;
+      b.textContent=n;
+      b.style.display=n?'inline-block':'none';
+    });
+  }
+
+  // Withdrawn documents (obsolete, superseded) never reach this array at all:
+  // search-index.js leaves them out, per TQ-QHSE-S001 4.6, so there is no
+  // "withdrawn" option here to filter by; a query never turns one up either.
+  function matchesFilters(d){
+    if(FILTERS.segment!=='all'&&d.s!==FILTERS.segment)return false;
+    if(FILTERS.type!=='all'&&d.tp!==FILTERS.type)return false;
+    if(FILTERS.status==='overdue'){ if(!d.ov)return false; }
+    else if(FILTERS.status!=='all'&&d.st!==FILTERS.status)return false;
+    if(FILTERS.dateFrom){ if(!d.iss||d.iss<FILTERS.dateFrom)return false; }
+    if(FILTERS.dateTo){ if(!d.iss||d.iss>FILTERS.dateTo)return false; }
+    return true;
+  }
+
+  // The one search. Filters narrow the register first (AND); free text then
+  // scores what is left: an exact title or document number outranks a
+  // start-of-title match, which outranks a substring, which outranks a hit
+  // that only lands in the segment name or the type.
+  function searchDocs(q){
+    if(!window.TAQA_SEARCH_INDEX)return [];
+    var ql=(q||'').trim().toLowerCase();
+    var pool=TAQA_SEARCH_INDEX.filter(matchesFilters);
+    if(!ql)return pool;
+    return pool.map(function(d){
+      var sc=0,tl=d.t.toLowerCase(),sl=d.sn.toLowerCase(),tp=d.tp.toLowerCase(),nl=(d.n||'').toLowerCase();
+      if(tl===ql)sc+=10;
+      else if(tl.indexOf(ql)===0)sc+=6;
+      else if(tl.indexOf(ql)>-1)sc+=4;
+      if(nl){
+        if(nl===ql)sc+=9;
+        else if(nl.indexOf(ql)===0)sc+=5;
+        else if(nl.indexOf(ql)>-1)sc+=3;
+      }
+      if(sl.indexOf(ql)>-1)sc+=2;
+      if(tp.indexOf(ql)>-1)sc+=1;
+      return{d:d,sc:sc};
+    }).filter(function(x){return x.sc>0;}).sort(function(a,b){return b.sc-a.sc;}).map(function(x){return x.d;});
+  }
+
+  // ── Type-ahead preview under the search box ──
   var panel=document.getElementById('ir-panel');
   var inp=document.getElementById('query-input');
   var timer=null;
 
-  function renderResults(q){
+  function renderPreview(q){
     if(!panel||!window.TAQA_SEARCH_INDEX)return;
     if(!q||q.length<2){panel.classList.remove('open');return;}
-    var ql=q.toLowerCase();
-    // Track search
     if(window.TAQA_Track)window.TAQA_Track('search',q);
-    // Scored: title exact(10) > title-start(6) > title-contains(4) > segment(2) > type(1)
-    var scored=TAQA_SEARCH_INDEX.map(function(d){
-      var sc=0,tl=d.t.toLowerCase(),sl=d.sn.toLowerCase(),tp=d.tp.toLowerCase();
-      if(tl===ql)sc+=10;
-      else if(tl.indexOf(ql)===0)sc+=6;
-      else if(tl.indexOf(ql)>-1)sc+=4;
-      if(sl.indexOf(ql)>-1)sc+=2;
-      if(tp.indexOf(ql)>-1)sc+=1;
-      return{d:d,sc:sc};
-    }).filter(function(x){return x.sc>0;}).sort(function(a,b){return b.sc-a.sc;});
-    var all=scored.map(function(x){return x.d;});
+    var all=searchDocs(q);
     var shown=all.slice(0,8);
     if(!shown.length){panel.classList.remove('open');return;}
     var html=
       '<div class="ir-header"><span>Document Matches</span><span>'+
       (all.length>8?'Top 8 of '+all.length:all.length+' found')+'</span></div>'+
       shown.map(function(d){
-        var c=TYPE_CFG[d.tp]||{bg:'#e2e8f0',color:'#475569',label:d.tp};
-        var href='segment.html?id='+d.s+'&tab='+(TAB_MAP[d.tp]||d.tp);
-        return '<a class="ir-item" href="'+href+'" role="option">'+
+        var c=TYPE_CFG[d.tp]||{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:d.tp};
+        return '<a class="ir-item" href="'+docHref(d)+'" role="option">'+
           '<span class="ir-badge" style="background:'+c.bg+';color:'+c.color+'">'+c.label+'</span>'+
           '<div class="ir-body">'+
             '<div class="ir-title">'+highlight(d.t,q)+'</div>'+
-            '<div class="ir-seg">'+esc(d.sn)+'</div>'+
+            '<div class="ir-seg">'+esc(d.sn)+statusNote(d)+'</div>'+
           '</div>'+
           '<span class="ir-arrow">›</span>'+
         '</a>';
       }).join('')+
-      '<div class="ir-footer">Press <strong>Enter</strong> to ask AI about this</div>';
+      '<div class="ir-footer">Press <strong>Enter</strong> to see all matching documents</div>';
     panel.innerHTML=html;
     panel.classList.add('open');
   }
@@ -874,7 +966,7 @@ document.addEventListener('click',function(e){
     inp.addEventListener('input',function(){
       clearTimeout(timer);
       var q=inp.value.trim();
-      timer=setTimeout(function(){renderResults(q);},150);
+      timer=setTimeout(function(){renderPreview(q);},150);
     });
     inp.addEventListener('keydown',function(e){
       if(e.key==='Escape'&&panel){panel.classList.remove('open');}
@@ -889,15 +981,176 @@ document.addEventListener('click',function(e){
     panel.classList.remove('open');
   });
 
-  // Hide panel when query is submitted
-  var origSubmit=window.submitQuery;
-  window.submitQuery=function(){
+  // ── Full results, shown below the search card once a search runs ──
+  var chatLog=document.getElementById('chat-log');
+  var welcomeHTML=chatLog?chatLog.innerHTML:'';
+  var RESULT_CAP=40;
+
+  function filterSummary(){
+    var bits=[];
+    if(FILTERS.segment!=='all'){
+      var S=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.segments)||{};
+      bits.push((S[FILTERS.segment]&&S[FILTERS.segment].name)||FILTERS.segment);
+    }
+    if(FILTERS.type!=='all')bits.push(TYPE_CFG[FILTERS.type]?TYPE_CFG[FILTERS.type].fullLabel:FILTERS.type);
+    if(FILTERS.status!=='all'){
+      var labels={current:'Published','under-review':'Under Review',draft:'Draft',overdue:'Review Overdue'};
+      bits.push(labels[FILTERS.status]||FILTERS.status);
+    }
+    if(FILTERS.dateFrom||FILTERS.dateTo)bits.push('issued '+(FILTERS.dateFrom||'any date')+' to '+(FILTERS.dateTo||'any date'));
+    return bits;
+  }
+
+  function resultCardHTML(d){
+    var c=TYPE_CFG[d.tp]||{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:d.tp};
+    var note='';
+    if(d.st&&d.st!=='current'&&d.st!=='asset'){
+      note=d.st==='under-review'?'Under review':d.st==='draft'?'Draft, not yet in force':esc(d.st);
+      if(d.ov)note+=' · review overdue';
+    } else if(d.ov){ note='Review overdue'; }
+    return '<a class="source-card" href="'+docHref(d)+'">'+
+      '<div class="source-card-bar" style="background:'+c.color+'"></div>'+
+      '<div class="source-card-body">'+
+        '<div class="source-card-title">'+esc(d.t)+'</div>'+
+        '<div class="source-card-meta">'+
+          '<span class="source-card-seg">'+esc(d.sn)+(d.n?' · '+esc(d.n):'')+'</span>'+
+          '<span class="source-card-type" style="background:'+c.bg+';border-color:'+c.bg+';color:'+c.color+'">'+c.label+'</span>'+
+        '</div>'+
+        (note?'<div class="result-note">'+note+'</div>':'')+
+      '</div>'+
+      '<span class="source-card-arrow">›</span>'+
+    '</a>';
+  }
+
+  function renderEmptyState(q){
+    var qText=q?' match "<strong>'+esc(q)+'</strong>"':' match the selected filters';
+    return '<div class="welcome-state">'+
+      '<div class="welcome-icon">⌕</div>'+
+      '<h3>No Documents Found</h3>'+
+      '<p>No documents in the register'+qText+'. Try a shorter search term, check the document number, or '+
+      '<span class="empty-state-suggest"><button type="button" onclick="clearAllFilters()">clear all filters</button></span>.</p>'+
+    '</div>';
+  }
+
+  function renderFullResults(q){
+    if(!chatLog)return;
+    if(!window.TAQA_SEARCH_INDEX){chatLog.innerHTML=welcomeHTML;return;}
+    var results=searchDocs(q);
+    if(!results.length){ chatLog.innerHTML=renderEmptyState(q); return; }
+    var shown=results.slice(0,RESULT_CAP);
+    var bits=filterSummary();
+    var qLine=q?'"'+esc(q)+'"':'the selected filters';
+    var filterLine=bits.length?' ('+bits.map(esc).join(', ')+')':'';
+    var userBubble=q?'<div class="msg-user"><div class="bubble">'+esc(q)+'</div></div>':'';
+    chatLog.innerHTML=userBubble+
+      '<div class="msg-ai"><div class="msg-ai-avatar">✦</div><div class="bubble">'+
+      '<h4>Search Results</h4>'+
+      '<p>'+results.length+' document'+(results.length===1?'':'s')+' in the register match '+qLine+filterLine+'.'+
+      (results.length>RESULT_CAP?' Showing the first '+RESULT_CAP+'; narrow the search or add a filter for fewer, more exact matches.':'')+'</p>'+
+      '<div class="sources-block">'+
+        '<div class="sources-label">'+results.length+' Document'+(results.length===1?'':'s')+'</div>'+
+        '<div class="sources-list">'+shown.map(resultCardHTML).join('')+'</div>'+
+      '</div>'+
+      '</div></div>';
+  }
+
+  window.submitQuery=function submitQuery(){
+    var q=inp?inp.value.trim():'';
+    if(!q&&activeFilterCount()===0)return;
     if(panel)panel.classList.remove('open');
-    if(origSubmit)origSubmit();
+    if(inp){ inp.value=''; inp.style.height='auto'; }
+    var cc=document.getElementById('char-count');
+    if(cc)cc.textContent='0 / 500';
+
+    var thinking=document.getElementById('thinking-block');
+    var btn=document.getElementById('send-btn');
+    if(thinking)thinking.classList.add('active');
+    if(btn){btn.classList.add('loading');btn.disabled=true;}
+
+    // A brief, real pause: this is a register lookup, not a generated answer,
+    // so it stays short rather than pretending to think something over.
+    setTimeout(function(){
+      if(thinking)thinking.classList.remove('active');
+      if(btn){btn.classList.remove('loading');btn.disabled=false;}
+      renderFullResults(q);
+      if(chatLog)chatLog.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }, 220);
   };
+
+  // ── Filters: quick segment chips, the panel's own controls, and the drawer ──
+  function syncSegmentChips(){
+    document.querySelectorAll('.seg-filters .filter-chip[data-seg]').forEach(function(c){
+      c.classList.toggle('active', c.getAttribute('data-seg')===FILTERS.segment);
+    });
+  }
+  window.setSegmentFilter=function(segId){
+    FILTERS.segment=segId;
+    if(segSelect)segSelect.value=segId;
+    syncSegmentChips();
+    handleFilterChange();
+  };
+  document.querySelectorAll('.seg-filters .filter-chip[data-seg]').forEach(function(chip){
+    chip.addEventListener('click',function(){ window.setSegmentFilter(chip.getAttribute('data-seg')); });
+  });
+
+  function handleFilterChange(){
+    updateFilterBadge();
+    var q=inp?inp.value.trim():'';
+    renderPreview(q);
+    if(q||activeFilterCount()>0){ renderFullResults(q); }
+    else if(chatLog){ chatLog.innerHTML=welcomeHTML; }
+  }
+
+  if(segSelect)segSelect.addEventListener('change',function(){FILTERS.segment=segSelect.value;syncSegmentChips();handleFilterChange();});
+  if(typeSelect)typeSelect.addEventListener('change',function(){FILTERS.type=typeSelect.value;handleFilterChange();});
+  if(statusSelect)statusSelect.addEventListener('change',function(){FILTERS.status=statusSelect.value;handleFilterChange();});
+  if(dateFromInput)dateFromInput.addEventListener('change',function(){FILTERS.dateFrom=dateFromInput.value;handleFilterChange();});
+  if(dateToInput)dateToInput.addEventListener('change',function(){FILTERS.dateTo=dateToInput.value;handleFilterChange();});
+
+  window.clearAllFilters=function(){
+    FILTERS={segment:'all',status:'all',type:'all',dateFrom:'',dateTo:''};
+    if(segSelect)segSelect.value='all';
+    if(typeSelect)typeSelect.value='all';
+    if(statusSelect)statusSelect.value='all';
+    if(dateFromInput)dateFromInput.value='';
+    if(dateToInput)dateToInput.value='';
+    syncSegmentChips();
+    updateFilterBadge();
+    var q=inp?inp.value.trim():'';
+    renderPreview(q);
+    if(q){ renderFullResults(q); }
+    else if(chatLog){ chatLog.innerHTML=welcomeHTML; }
+  };
+
+  window.openFilters=function(){
+    if(drawer)drawer.classList.add('open');
+    if(scrim)scrim.classList.add('open');
+    if(triggerBtn)triggerBtn.setAttribute('aria-expanded','true');
+  };
+  window.closeFilters=function(){
+    if(drawer)drawer.classList.remove('open');
+    if(scrim)scrim.classList.remove('open');
+    if(triggerBtn)triggerBtn.setAttribute('aria-expanded','false');
+  };
+  window.toggleFilters=function(){
+    if(drawer&&drawer.classList.contains('open'))window.closeFilters();
+    else window.openFilters();
+  };
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape')window.closeFilters();
+  });
+
+  syncSegmentChips();
+  updateFilterBadge();
+
+  // A prefilled query (?q=) can only run now that submitQuery is real.
+  if(typeof urlQ!=='undefined'&&urlQ){
+    if(inp)inp.value=urlQ;
+    setTimeout(window.submitQuery,300);
+  }
 })();
 </script>
-<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-theme="dark"] .bell-badge{border-color:#19263a;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);if(!localStorage.getItem('taqa-bell-count'))localStorage.setItem('taqa-bell-count','25');var n=parseInt(localStorage.getItem('taqa-bell-count')||'25',10);var badge=document.getElementById('bell-badge');if(badge){badge.textContent=n;badge.style.display=n>0?'flex':'none';}})();</script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary-ink);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#C8102E;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-taqa-theme="dark"] .bell-badge{border-color:#002326;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
 </body>
 </html>
