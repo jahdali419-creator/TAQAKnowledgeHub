@@ -16,8 +16,7 @@
   --tb-ink:#005D63;
   --tb-ink-2:#00959C;
   --tb-primary:#005D63;
-  --tb-subtitle-1:#756A61; /* "TechHub": neutral gray */
-  --tb-subtitle-2:#0076A8; /* "Platform": TAQA info blue, AA text contrast on white */
+  --tb-subtitle-ink:#756A61; /* "TechHub Platform": neutral gray */
   --tb-rule:rgba(117,106,97,0.13);
   --tb-hover:rgba(117,106,97,0.08);
   --tb-active:rgba(0,93,99,0.07);
@@ -33,8 +32,7 @@ html[data-taqa-theme="dark"]{
   --tb-ink:#00BBB6;
   --tb-ink-2:#7BEEE6;
   --tb-primary:#005D63;
-  --tb-subtitle-1:#8CB6B9; /* "TechHub": neutral gray, lightened for dark */
-  --tb-subtitle-2:#6BC5EE; /* "Platform": TAQA info blue, lightened for AA text contrast on dark */
+  --tb-subtitle-ink:#8CB6B9; /* "TechHub Platform": neutral gray, lightened for dark */
   --tb-rule:rgba(0,187,182,0.13);
   --tb-hover:rgba(0,187,182,0.07);
   --tb-active:rgba(0,187,182,0.10);
@@ -60,30 +58,36 @@ html[data-taqa-theme="dark"]{
 }
 #navbar *,#navbar *::before,#navbar *::after{box-sizing:border-box;}
 
-/* Brand lockup */
+/* Brand lockup: logo and "TechHub Platform" sit beside each other in one
+   row, not the logo over a second line under it. */
 #navbar .nav-brand{
-  display:flex; flex-direction:column; justify-content:center; gap:1px;
+  display:flex; flex-direction:row; align-items:center; gap:12px;
   flex-shrink:0; min-width:0; text-decoration:none; padding:4px 0;
   border-radius:8px; justify-self:start;
 }
-#navbar .nav-brand-row{ display:flex; align-items:center; gap:9px; }
-#navbar .nav-logo{ height:30px; width:auto; display:block; }
-html[data-taqa-theme="dark"] #navbar .nav-logo-light{ display:none; }
-html:not([data-taqa-theme="dark"]) #navbar .nav-logo-dark{ display:none; }
+#navbar .nav-logo{ height:40px; width:auto; display:block; }
+/* The reverse (white-text) logo is for a dark background, which is two
+   different conditions, not one: dark theme's own solid bar, and the
+   light-theme glass bar sitting on the dark hero photo. Default to the
+   normal logo and switch to reverse under either. */
+#navbar .nav-logo-dark{ display:none; }
+html[data-taqa-theme="dark"] #navbar .nav-logo-dark,
+#navbar.nav-on-hero .nav-logo-dark{ display:block; }
+html[data-taqa-theme="dark"] #navbar .nav-logo-light,
+#navbar.nav-on-hero .nav-logo-light{ display:none; }
 #navbar .nav-subtitle{
-  display:block; margin:0; font-size:11px; line-height:1.3; white-space:nowrap; color:var(--tb-light);
+  display:block; margin:0; font-size:13px; line-height:1.3; white-space:nowrap;
 }
-/* Two brand inks, not one gradient: TechHub in neutral gray, Platform in
-   TAQA's info blue. Dedicated custom properties (--tb-subtitle-1/2), not
-   --tb-ink: the on-hero state below redefines --tb-ink for links/icons/the
-   active state, and the subtitle's two colours are a permanent mark, not
-   something that should flatten to white along with the rest of the bar's
-   text. The on-hero state below still lightens both, since the plain
-   site-theme blue is tuned for a white bar and would lose contrast on a
-   dark photo. */
-#navbar .nav-subtitle em{ font-style:italic; font-weight:700; letter-spacing:-0.01em; }
-#navbar .nav-subtitle .tb-gray{ color:var(--tb-subtitle-1); }
-#navbar .nav-subtitle .tb-blue{ color:var(--tb-subtitle-2); }
+/* A dedicated custom property (--tb-subtitle-ink), not --tb-ink: the
+   on-hero state below redefines --tb-ink for links/icons/the active state,
+   and this is a permanent mark, not something that should flatten to white
+   along with the rest of the bar's text. The on-hero state still lightens
+   it, since the plain site-theme value is tuned for a white bar and would
+   lose contrast on a dark photo. */
+#navbar .nav-subtitle em{
+  font-style:italic; font-weight:700; letter-spacing:-0.01em;
+  color:var(--tb-subtitle-ink);
+}
 
 /* Links */
 #navbar .nav-links{
@@ -257,7 +261,7 @@ html[data-taqa-theme="dark"] #navbar .nav-cta{border-color:rgba(0,187,182,0.35);
 @media (max-width:360px){
   #navbar{padding:0 10px; gap:4px;}
   #navbar .nav-right{gap:0;}
-  #navbar .nav-title{font-size:13px;}
+  #navbar .nav-logo{height:32px;}
   #navbar .nav-subtitle{font-size:10px;}
   #navbar .nav-hamburger{margin-inline-end:0;}
 }
@@ -306,11 +310,10 @@ html[data-taqa-theme="dark"] #navbar .nav-cta{border-color:rgba(0,187,182,0.35);
   --tb-rule:rgba(255,255,255,0.34);
   --tb-hover:rgba(255,255,255,0.16);
   --tb-active:rgba(255,255,255,0.24);
-  /* The plain site-theme subtitle inks are a mid gray and a mid blue tuned
-     for a light bar; lightened here so "TechHub Platform" stays legible
-     over a photo instead of losing contrast against it. */
-  --tb-subtitle-1:rgba(255,255,255,0.78);
-  --tb-subtitle-2:#8ED2F0;
+  /* The plain site-theme subtitle ink is a mid gray tuned for a light bar;
+     lightened here so "TechHub Platform" stays legible over a photo
+     instead of losing contrast against it. */
+  --tb-subtitle-ink:rgba(255,255,255,0.78);
 }
 #navbar.nav-on-hero .nav-hamburger span{background:#FFFFFF;}
 #navbar.nav-on-hero .nav-brand,
