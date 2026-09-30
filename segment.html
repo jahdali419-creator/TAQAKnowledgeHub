@@ -354,39 +354,9 @@ html[data-taqa-theme="dark"] .docs-grid{
 .doc-more:active{background:var(--row-press);}
 .doc-more:focus-visible{outline:2px solid var(--primary-ink)!important;outline-offset:-2px!important;}
 
-/* ── Swipe-to-reveal quick actions (touch only) ──
-   Bookmark and QR code, the two shortcuts worth a swipe from the row's own
-   overflow menu. The surface that carries the row's normal content sits on
-   top of the actions panel and only turns opaque, and only shows the panel
-   at all, on a touch/coarse pointer: a mouse row never changes. */
-.swipe-actions{
-  position:absolute;inset-block:0;inset-inline-end:0;
-  display:none;align-items:stretch;
-}
-.swipe-act{
-  width:64px;border:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-  font-family:'Inter',sans-serif;font-size:10.5px;font-weight:600;color:#fff;cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-}
-.swipe-act svg{width:18px;height:18px;}
-.swipe-act.act-bm{background:var(--primary,#005D63);}
-.swipe-act.act-qr{background:var(--primary-light,#00BBB6);}
-.swipe-act:active{filter:brightness(0.92);}
-.swipe-surface{display:flex;align-items:center;flex:1;min-width:0;position:relative;}
-@media (hover:none),(pointer:coarse){
-  .doc-card{overflow:hidden;}
-  .swipe-actions{display:flex;}
-  .swipe-surface{
-    background:var(--row-paper);
-    touch-action:pan-y;
-    transition:transform 220ms var(--row-ease,cubic-bezier(0.23,1,0.32,1));
-  }
-  .swipe-surface.is-dragging{transition:none;}
-  /* The surface's own opaque paper would otherwise sit in front of the
-     row's tap-press tint and hide it. */
-  .doc-card:not(.is-asset):active .swipe-surface{background:var(--row-press);}
-}
-@media (prefers-reduced-motion:reduce){.swipe-surface{transition:none;}}
+/* The row's content: the link and its overflow menu, side by side. Bookmark
+   and QR code live in that menu (.doc-more). */
+.row-surface{display:flex;align-items:center;flex:1;min-width:0;position:relative;}
 
 /* A software asset is listed, not controlled, and opens nothing. */
 .doc-card.is-asset .doc-row-link{cursor:default;padding-inline-end:16px;}
@@ -1808,20 +1778,9 @@ function buildDocCard(title, type, idx) {
   const rev = rec && rec.revision ? '<span class="doc-rev">Rev ' + escHtml(rec.revision) + '</span>' : '';
   const read = isDocRead(title) ? '<span class="doc-read-badge">Read</span>' : '';
   const label = _p.title + (_p.num ? ', ' + _p.num : '');
-  // The two swipe shortcuts are the same Bookmark and QR actions the row's
-  // own overflow menu already offers, just reachable a swipe away on a
-  // phone. They carry tabindex="-1" and sit behind aria-hidden: a screen
-  // reader or keyboard user reaches the same two actions through .doc-more
-  // instead, so nothing here is a second, hidden route to the same control.
-  const swipeActions = `
-    <div class="swipe-actions" aria-hidden="true">
-      <button type="button" class="swipe-act act-bm" tabindex="-1" data-act="bm" data-title="${safeTitle}" data-type="${safeType}">${isBm ? ROW_MENU_ICONS.bmOn : ROW_MENU_ICONS.bm}${isBm ? 'Remove' : 'Bookmark'}</button>
-      <button type="button" class="swipe-act act-qr" tabindex="-1" data-act="qr">${ROW_MENU_ICONS.qr}QR code</button>
-    </div>`;
   return `
   <div class="doc-card${type==='alert'?' is-alert':''}${meta?' has-state':''}" data-title="${safeTitle}" data-type="${safeType}">
-    ${swipeActions}
-    <div class="swipe-surface">
+    <div class="row-surface">
     <a class="doc-row-link" href="${viewerHrefFor(title, safeType)}" onclick="var c=this.closest('.doc-card');saveRecent(c.dataset.title,c.dataset.type);markDocRead(c.dataset.title);if(window.TAQA_Track)window.TAQA_Track('open',c.dataset.title,{type:c.dataset.type,seg:'${segId}'})">
       <span class="doc-type-icon ${type}" aria-hidden="true">${_mark}</span>
       <span class="doc-body">
@@ -2502,90 +2461,6 @@ document.addEventListener('keydown', function(e){
   if (b && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) { e.preventDefault(); if (_rowMenuFrom !== b) { closeRowMenu(false); openRowMenu(b); } }
 });
 window.addEventListener('resize', function(){ closeRowMenu(false); });
-
-// ── Swipe-to-reveal quick actions (touch only) ──
-// Dragging a row left reveals Bookmark and QR code, the same two shortcuts
-// the row's own overflow menu already offers. A drag is only claimed once it
-// reads as clearly horizontal, so a vertical drag keeps scrolling the page
-// exactly as it always has; a mouse never sends the touch events this reads.
-(function(){
-  const REVEAL = 128;          // px: the two 64px actions
-  const OPEN_AT = REVEAL / 2;  // snap open once dragged past halfway
-  let dragCard = null, dragSurface = null, startX = 0, startY = 0, lastX = 0, axis = null, openCard = null;
-
-  function setOpen(card, open){
-    const s = card.querySelector('.swipe-surface');
-    if (!s) return;
-    s.style.transform = open ? 'translateX(-' + REVEAL + 'px)' : '';
-    card.classList.toggle('swipe-open', open);
-    if (open) openCard = card; else if (openCard === card) openCard = null;
-  }
-  function closeOpenCard(){ if (openCard) setOpen(openCard, false); }
-
-  document.addEventListener('touchstart', function(e){
-    const card = e.target.closest && e.target.closest('.doc-card');
-    if (!card || card.classList.contains('is-asset')) { closeOpenCard(); return; }
-    const surface = card.querySelector('.swipe-surface');
-    if (!surface) { closeOpenCard(); return; }
-    if (openCard && openCard !== card) closeOpenCard();
-    dragCard = card; dragSurface = surface;
-    startX = e.touches[0].clientX; startY = e.touches[0].clientY; lastX = 0; axis = null;
-    surface.classList.add('is-dragging');
-  }, {passive:true});
-
-  document.addEventListener('touchmove', function(e){
-    if (!dragCard) return;
-    const t = e.touches[0];
-    const mx = t.clientX - startX, my = t.clientY - startY;
-    if (axis === null && (Math.abs(mx) > 6 || Math.abs(my) > 6)) {
-      axis = Math.abs(mx) > Math.abs(my) ? 'x' : 'y';
-    }
-    if (axis !== 'x') return;                     // vertical drag: leave it to the page
-    e.preventDefault();                            // horizontal: this gesture is the row's
-    const base = dragCard.classList.contains('swipe-open') ? -REVEAL : 0;
-    lastX = Math.max(-REVEAL - 24, Math.min(24, base + mx));
-    dragSurface.style.transform = 'translateX(' + lastX + 'px)';
-  }, {passive:false});
-
-  function endDrag(){
-    if (!dragCard) return;
-    dragSurface.classList.remove('is-dragging');
-    if (axis === 'x') setOpen(dragCard, lastX <= -OPEN_AT);
-    dragCard = null; dragSurface = null; axis = null;
-  }
-  document.addEventListener('touchend', endDrag, {passive:true});
-  document.addEventListener('touchcancel', endDrag, {passive:true});
-
-  // A tap on the row link while it is swiped open closes the row instead of
-  // opening the document, the way a phone's own swipe rows behave. This has
-  // to run before the row-link's own onclick (which saves it to Recent and
-  // navigates), so it listens on the capture phase.
-  document.addEventListener('click', function(e){
-    const link = e.target.closest && e.target.closest('.doc-row-link');
-    if (!link) return;
-    const card = link.closest('.doc-card');
-    if (card && card.classList.contains('swipe-open')) {
-      e.preventDefault(); e.stopPropagation();
-      setOpen(card, false);
-    }
-  }, true);
-
-  document.addEventListener('click', function(e){
-    const act = e.target.closest && e.target.closest('.swipe-act');
-    if (act) {
-      const card = act.closest('.doc-card');
-      if (!card) return;
-      if (act.dataset.act === 'bm') toggleDocBm(act);
-      else if (act.dataset.act === 'qr') { _qrReturn = card.querySelector('.doc-more'); showDocQR(card.dataset.title, card.dataset.type); }
-      setOpen(card, false);
-      return;
-    }
-    const onCard = e.target.closest && e.target.closest('.doc-card');
-    if (openCard && onCard !== openCard) closeOpenCard();
-  });
-  window.addEventListener('resize', closeOpenCard);
-  document.addEventListener('scroll', closeOpenCard, {passive:true, capture:true});
-})();
 
 // The link a row opens, whole, so it can be pasted into a message.
 function copyRowLink(title, type){

@@ -409,81 +409,25 @@ test.describe('mobile responsiveness at 390px', () => {
   }
 });
 
-// ── Swipe-to-reveal gesture (touch only) ─────────────────────────────────
-// segment.html's swipe handler (see "Swipe-to-reveal quick actions" in
-// segment.html) listens for raw touchstart/touchmove/touchend on the
-// document, and only claims the gesture once a drag reads as clearly
-// horizontal. Playwright's high-level touch API (`page.touchscreen`) only
-// offers a single-point `tap()`, with no way to drive a multi-step drag
-// sequence, so a real finger-drag cannot be simulated through it, this is
-// a known Playwright limitation, not something this suite works around by
-// inventing gesture behaviour. What CAN be verified without faking hardware
-// is the handler's own logic: dispatching real TouchEvent/Touch objects
-// (supported by Chromium) at the DOM level exercises the exact same
-// listener a real drag would fire, so this test proves the swipe math
-// itself (REVEAL/OPEN_AT thresholds) rather than end-to-end touch input.
-test.describe('swipe-to-reveal (synthetic touch events; see limitation note above)', () => {
-  test('a rightward-claimed horizontal drag past the halfway point opens the row actions', async ({
-    page,
-    gotoApp,
-    setRole,
-    consoleErrors,
-  }) => {
+// ── Row actions: one place, the ••• menu ────────────────────────────────
+// Rows used to hide a Bookmark / QR panel behind a sideways swipe, and its
+// coloured blocks showed at the edge of rows on a phone. It was removed at
+// the owner's request: both actions live in the row's own ••• menu.
+test.describe('row actions', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+
+  test('no swipe panel is drawn, and the ••• menu still offers Bookmark and QR code', async ({ page, gotoApp, setRole, consoleErrors }) => {
     await gotoApp('/index.html');
-    await setRole('qms', 'coiled-tubing');
-    await gotoApp('/segment.html?id=coiled-tubing&tab=sops');
+    await setRole('qms', 'drilling');
+    await gotoApp('/segment.html?id=drilling&tab=sops');
     const card = page.locator('.doc-card:not(.is-asset)').first();
     await expect(card).toBeVisible();
-    const box = await card.boundingBox();
-    expect(box).toBeTruthy();
+    await expect(page.locator('.swipe-actions, .swipe-act')).toHaveCount(0);
 
-    const opened = await card.evaluate((el, box) => {
-      function touch(x, y) {
-        return new Touch({ identifier: 1, target: el, clientX: x, clientY: y });
-      }
-      const startX = box.x + box.width / 2, startY = box.y + box.height / 2;
-      el.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, cancelable: true, touches: [touch(startX, startY)] }));
-      // One long horizontal move: comfortably past REVEAL/2 (64px) with
-      // negligible vertical movement, so the handler's axis lock picks 'x'.
-      el.dispatchEvent(new TouchEvent('touchmove', { bubbles: true, cancelable: true, touches: [touch(startX - 140, startY)] }));
-      document.dispatchEvent(new TouchEvent('touchend', { bubbles: true, cancelable: true, changedTouches: [touch(startX - 140, startY)] }));
-      return el.classList.contains('swipe-open');
-    }, box);
-
-    expect(opened, 'row should report swipe-open after a >64px leftward drag').toBe(true);
-    // The two actions behind the row are the same Bookmark/QR shortcuts the
-    // row's own overflow menu offers, reachable without a swipe.
-    await expect(card.locator('.swipe-act.act-bm')).toBeAttached();
-    await expect(card.locator('.swipe-act.act-qr')).toBeAttached();
-    assertNoConsoleErrors(consoleErrors);
-  });
-
-  test('a short drag under the halfway point snaps back closed', async ({
-    page,
-    gotoApp,
-    setRole,
-    consoleErrors,
-  }) => {
-    await gotoApp('/index.html');
-    await setRole('qms', 'coiled-tubing');
-    await gotoApp('/segment.html?id=coiled-tubing&tab=sops');
-    const card = page.locator('.doc-card:not(.is-asset)').first();
-    await expect(card).toBeVisible();
-    const box = await card.boundingBox();
-
-    const opened = await card.evaluate((el, box) => {
-      function touch(x, y) {
-        return new Touch({ identifier: 1, target: el, clientX: x, clientY: y });
-      }
-      const startX = box.x + box.width / 2, startY = box.y + box.height / 2;
-      el.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, cancelable: true, touches: [touch(startX, startY)] }));
-      // Only 20px, well under the 64px open threshold.
-      el.dispatchEvent(new TouchEvent('touchmove', { bubbles: true, cancelable: true, touches: [touch(startX - 20, startY)] }));
-      document.dispatchEvent(new TouchEvent('touchend', { bubbles: true, cancelable: true, changedTouches: [touch(startX - 20, startY)] }));
-      return el.classList.contains('swipe-open');
-    }, box);
-
-    expect(opened, 'a drag short of the halfway point should not stay open').toBe(false);
+    await card.locator('.doc-more').click();
+    const menu = page.locator('#row-menu');
+    await expect(menu.locator('[data-act="bm"]')).toBeVisible();
+    await expect(menu.locator('[data-act="qr"]')).toBeVisible();
     assertNoConsoleErrors(consoleErrors);
   });
 });

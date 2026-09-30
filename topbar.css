@@ -7,7 +7,12 @@
    pages still carry, so the bar cannot drift from page to page again. */
 
 :root{
-  --nav-h:64px;
+  /* On an iPhone, a page drawn edge to edge (viewport-fit=cover, as the
+     viewer and the form are) starts under the status bar. The bar then grows
+     by that inset and keeps its content below the clock; on every other page
+     the inset is 0 and nothing changes. */
+  --nav-safe:env(safe-area-inset-top, 0px);
+  --nav-h:calc(64px + var(--nav-safe));
   --tb-paper:rgba(255,255,255,0.97);
   --tb-solid:#FFFFFF;
   --tb-text:#1E1C1A;
@@ -42,7 +47,7 @@ html[data-taqa-theme="dark"]{
 
 #navbar{
   position:fixed; top:0; inset-inline:0; z-index:1000;
-  height:var(--nav-h); margin:0; padding:0 max(32px, env(safe-area-inset-right)) 0 max(32px, env(safe-area-inset-left));
+  height:var(--nav-h); margin:0; padding:var(--nav-safe) max(32px, env(safe-area-inset-right)) 0 max(32px, env(safe-area-inset-left));
   /* A 3-column grid, not flex, is what actually centers .nav-links on the
      bar's full width: the brand and the right cluster get equal 1fr tracks,
      so the middle (auto-width) track sits truly in the middle regardless of
@@ -248,7 +253,7 @@ html[data-taqa-theme="dark"] #navbar .nav-cta{border-color:rgba(0,187,182,0.35);
 
 /* Phone and tablet: brand, bell, theme, menu. Everything else is in the menu. */
 @media (max-width:1180px){
-  #navbar{padding:0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); gap:8px;
+  #navbar{padding:var(--nav-safe) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); gap:8px;
     /* Two tracks, not three: with the links hidden, the three-track grid
        put the right cluster in the middle track, and on a phone the brand
        ran underneath the menu button. */
