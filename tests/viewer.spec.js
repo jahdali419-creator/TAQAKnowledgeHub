@@ -22,13 +22,13 @@ const BASE = computeBaseline();
 //   TQ-TWS-CTSS-SOP-003  superseded,           coiled-tubing, sop
 //   TQ-TWS-CTSS-SOP-012  obsolete,             coiled-tubing, sop
 //   TQ-TWS-CTSS-S005     draft,                coiled-tubing, standard
-//   TAQA-QHSE-P007       current,     policy,  company (segment = 'company')
+//   TQ-QHSE-P007         current,     policy,  company (segment = 'company')
 const DOC_CURRENT = { doc: 'TQ-TWS-CTSS-SOP-001', seg: 'coiled-tubing', type: 'sop', title: 'Pre-Job Safety Checklist' };
 const DOC_UNDER_REVIEW = { doc: 'TQ-TWS-CTSS-SOP-004', seg: 'coiled-tubing', type: 'sop', title: 'Emergency Disconnect Procedure' };
 const DOC_SUPERSEDED = { doc: 'TQ-TWS-CTSS-SOP-003', seg: 'coiled-tubing', type: 'sop', title: 'Well Entry Protocol' };
 const DOC_OBSOLETE = { doc: 'TQ-TWS-CTSS-SOP-012', seg: 'coiled-tubing', type: 'sop', title: 'Post-Job Reporting SOP' };
 const DOC_DRAFT = { doc: 'TQ-TWS-CTSS-S005', seg: 'coiled-tubing', type: 'standard', title: 'CT Asset Management Standard' };
-const DOC_COMPANY = { doc: 'TAQA-QHSE-P007', seg: 'company', type: 'policy', title: 'Quality, Health, Safety and Environment Policy' };
+const DOC_COMPANY = { doc: 'TQ-QHSE-P007', seg: 'company', type: 'policy', title: 'Quality, Health, Safety and Environment Policy' };
 const DOC_SOFTWARE = { seg: 'coiled-tubing', type: 'software', title: 'Orion CT Control System' }; // no docNumber in the register
 
 function urlFor(d, extra) {

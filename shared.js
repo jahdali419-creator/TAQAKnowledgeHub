@@ -809,11 +809,11 @@ window.showToast=function(msg,type){
   var panel=document.createElement('div');panel.className='bm-panel';panel.id='bm-panel';
   panel.setAttribute('role','dialog');panel.setAttribute('aria-label','Bookmarks');
   document.body.appendChild(panel);
-  var TC={sop:'rgba(0,93,99,0.10)',manual:'rgba(0,93,99,0.10)',standard:'rgba(0,93,99,0.10)',policy:'rgba(0,93,99,0.10)',lesson:'rgba(0,93,99,0.10)',alert:'rgba(253,105,29,0.12)',software:'rgba(0,93,99,0.10)'};
-  var TT={sop:'var(--primary-ink,#005D63)',manual:'var(--primary-ink,#005D63)',standard:'var(--primary-ink,#005D63)',policy:'var(--primary-ink,#005D63)',lesson:'var(--primary-ink,#005D63)',alert:'var(--alert-ink,#A8431A)',software:'var(--primary-ink,#005D63)'};
+  var TC={sop:'rgba(0,93,99,0.10)',form:'rgba(0,93,99,0.10)',manual:'rgba(0,93,99,0.10)',standard:'rgba(0,93,99,0.10)',policy:'rgba(0,93,99,0.10)',lesson:'rgba(0,93,99,0.10)',alert:'rgba(253,105,29,0.12)',software:'rgba(0,93,99,0.10)'};
+  var TT={sop:'var(--primary-ink,#005D63)',form:'var(--primary-ink,#005D63)',manual:'var(--primary-ink,#005D63)',standard:'var(--primary-ink,#005D63)',policy:'var(--primary-ink,#005D63)',lesson:'var(--primary-ink,#005D63)',alert:'var(--alert-ink,#A8431A)',software:'var(--primary-ink,#005D63)'};
   // The square's letters come from the register so this panel can never
   // disagree with the segment page about what a Standard is called.
-  var TS=(function(){var m={sop:'SOP',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT',software:'ZIP'};
+  var TS=(function(){var m={sop:'SOP',form:'FRM',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT',software:'ZIP'};
     var T=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.types)||{};
     Object.keys(T).forEach(function(k){if(T[k]&&T[k].mark)m[k]=T[k].mark;});return m;})();
   function updateBmBadge(){

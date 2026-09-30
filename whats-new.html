@@ -342,6 +342,8 @@ a.row:focus-visible{outline-offset:-3px;border-radius:0;}
           <tr role="row"><td role="cell"><span class="code was">WS-001</span><span class="arrow" aria-hidden="true">to</span></td><td role="cell"><span class="code">TQ-TWS-WSS-SOP-001</span></td><td role="cell"><span class="clash">Collision.</span> The Hub used WS for Well Safety. The standard assigns WS to Wireline Services.</td></tr>
           <tr role="row"><td role="cell"><span class="code was">CS-PROC-001</span><span class="arrow" aria-hidden="true">to</span></td><td role="cell"><span class="code">TQ-GRC-SOP-001</span></td><td role="cell"><span class="clash">Collision.</span> The Hub used CS for Cybersecurity. The standard assigns CS to Customer Service, and the entity is now Governance, Risk &amp; Compliance.</td></tr>
           <tr role="row"><td role="cell"><span class="code was">ALERT-CT-001</span><span class="arrow" aria-hidden="true">to</span></td><td role="cell"><span class="code">TQ-TWS-CTSS-ALT-001</span></td><td role="cell">Technical Alert is not a type defined in section 4, so no conformant code exists.</td></tr>
+          <tr role="row"><td role="cell"><span class="code was">TAQA-QHSE-P007</span><span class="arrow" aria-hidden="true">to</span></td><td role="cell"><span class="code">TQ-QHSE-P007</span></td><td role="cell">Policies take the TQ prefix, TQ-&lt;Function&gt;-PXXX, as in the standard's own example. The Cybersecurity policy is TQ-GRC-P010.</td></tr>
+          <tr role="row"><td role="cell"><span class="code was">TQ-QHSE-WI-001</span><span class="arrow" aria-hidden="true">to</span></td><td role="cell"><span class="code">TQ-QHSE-M001</span></td><td role="cell">A corporate function has manuals (M), not work instructions. Work instructions (WI) exist only inside a business unit.</td></tr>
         </tbody>
       </table>
     </section>
@@ -382,7 +384,7 @@ a.row:focus-visible{outline-offset:-3px;border-radius:0;}
         <li><a class="row" href="master-list.html?view=provisional">
           <span class="fig" data-n="prov"></span>
           <span class="rmain"><span class="rname">Cannot be numbered</span>
-            <span class="rdesc"><b data-n="grcName"></b> holds <span data-n="grc"></span> of them, and <b data-n="ldName"></b> has no assigned short form either, though it owns this platform. <b data-n="altName"></b> (<span data-n="alt"></span>) and <b data-n="llName"></b> (<span data-n="ll"></span>) are not types defined in section 4.</span></span>
+            <span class="rdesc"><b data-n="altName"></b> (<span data-n="alt"></span>) and <b data-n="llName"></b> (<span data-n="ll"></span>) have no code in TQ-QHSE-S001 yet. The rest sit in <span data-n="areaGaps"></span> areas the standard has not given a short form, <b data-n="ldName"></b> among them, though it owns this platform.</span></span>
           <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </a></li>
         <li><div class="row static">
@@ -457,8 +459,8 @@ a.row:focus-visible{outline-offset:-3px;border-radius:0;}
     set('prov', prov.length);
     set('ov', ov.length);
     set('ov180', ov180.length);
-    set('grcName', segName('cybersecurity'));
-    set('grc', provIn(function(d){ return d.segment === 'cybersecurity'; }));
+    set('areaGaps', Object.keys(prov.reduce(function(m, d){
+      var sg = L.segments[d.segment]; if (sg && sg.provisional) m[d.segment] = 1; return m; }, {})).length);
     set('ldName', segName('learning-center'));
     set('altName', typeLabel('alert'));
     set('alt', provIn(function(d){ return d.docType === 'alert'; }));

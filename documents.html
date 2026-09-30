@@ -422,7 +422,7 @@ function buildAllDocs(segId) {
   };
   // The register stores an area's own rules as standards; this page's table
   // has always called that column policy, so keep the key and relabel above.
-  const TYPE_KEY = { sop:'sop', manual:'manual', standard:'policy',
+  const TYPE_KEY = { sop:'sop',form:'sop', manual:'manual', standard:'policy',
                      policy:'policy', alert:'alert', lesson:'lesson' };
   const ORDER = { sop:0, manual:1, policy:2, alert:3, lesson:4 };
   // Everything in 'live' is status current, so the one thing left to tell
@@ -459,7 +459,7 @@ function getTypeLabels(segId) {
 }
 
 function renderPubTable(docs, tl) {
-  const tc = { sop:'pub-type-sop', manual:'pub-type-manual', policy:'pub-type-policy', alert:'pub-type-alert', lesson:'pub-type-lesson' };
+  const tc = { sop:'pub-type-sop',form:'pub-type-sop', manual:'pub-type-manual', policy:'pub-type-policy', alert:'pub-type-alert', lesson:'pub-type-lesson' };
   const ri = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>`;
   document.getElementById('pub-docs-body').innerHTML = docs.map(d =>
     `<tr data-type="${esc(d.type)}">
@@ -480,7 +480,7 @@ function renderPubTable(docs, tl) {
 }
 
 function initPubPills(tl) {
-  const pillMap = { sop:'pill-sop', manual:'pill-manual', policy:'pill-policy', alert:'pill-alert', lesson:'pill-lesson' };
+  const pillMap = { sop:'pill-sop',form:'pill-sop', manual:'pill-manual', policy:'pill-policy', alert:'pill-alert', lesson:'pill-lesson' };
   Object.keys(pillMap).forEach(k => {
     const pill = document.getElementById(pillMap[k]);
     if (!pill) return;
