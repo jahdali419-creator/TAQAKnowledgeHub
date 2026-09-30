@@ -79,7 +79,7 @@ test.describe('area short forms come from the TQ-QHSE-S001 5.3 tables', () => {
   const S001 = {
     'coiled-tubing': 'CTSS', 'well-testing': 'WTS', 'well-safety': 'WSS', inspection: 'WIS',
     drilling: 'DSS', cementing: 'CMT', slickline: 'SS', wireline: 'WS', 'marine-services': 'MS',
-    fracturing: 'FS', 'well-completions': 'WCS', 'tws-maintenance': 'MNT',
+    fracturing: 'FS', 'well-completions': 'WCS',
     qhse: 'QHSE', cybersecurity: 'GRC', finance: 'CFP', 'supply-chain': 'SC', hr: 'HR', it: 'IT', legal: 'LGL',
   };
 

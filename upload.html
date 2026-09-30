@@ -373,6 +373,10 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 }
 
 /* ── A policy is a different animal, so the form says so ── */
+.dept-row{display:flex;gap:10px;align-items:flex-start;margin:4px 0 14px;padding:12px 14px;border:1px solid var(--border,#C7DBDD);border-radius:10px;font-size:13px;line-height:1.5;color:var(--text-secondary,#524D48);cursor:pointer;}
+.dept-row[hidden]{display:none;}
+.dept-row input{margin-top:3px;width:18px;height:18px;accent-color:var(--primary,#005D63);flex-shrink:0;}
+.dept-row b{color:var(--text,#1E1C1A);}
 .policy-rules {
   margin:0 0 20px; padding:16px 18px; border-radius:14px;
   background:linear-gradient(135deg, rgba(0,93,99,0.09), rgba(0,187,182,0.045));
@@ -576,6 +580,13 @@ html[data-taqa-theme="dark"] .policy-rules {
             </select>
           </div>
         </div>
+        <!-- A segment's maintenance department files its documents under its own
+             tab, and its Maintenance Manager approves them (roles.js). Shown only
+             for an operational segment, and never for a policy. -->
+        <label class="dept-row" id="dept-row" hidden>
+          <input type="checkbox" id="dept-maint">
+          <span><b>Maintenance department document</b><br>Filed under this segment's Maintenance tab. The segment's Maintenance Manager approves it instead of the Segment Director.</span>
+        </label>
         <div class="policy-rules" id="policy-rules" hidden>
           <div class="pr-head">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3.6v5.1c0 4.6-3.2 8.2-8 9.3-4.8-1.1-8-4.7-8-9.3V6.6L12 3z"/><path d="M9 12l2 2 4-4"/></svg>
@@ -1101,6 +1112,24 @@ function submitUpload(e) {
 /* Everything the register would store, assembled from the form. A field the
    form cannot answer is left null rather than guessed, which is the honest
    way to hand a gap to the people building the back end. */
+/* The maintenance box applies to an operational segment's own documents only:
+   not a policy (company wide), not software, and not a function or centre,
+   which have no maintenance department in this model. */
+function deptApplies(){
+  var L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : null;
+  var seg = (document.getElementById('seg-select') || {}).value;
+  var type = (document.getElementById('doc-type-select') || {}).value;
+  return !!(L && seg && L.segments[seg] && L.segments[seg].group === 'segment' && type !== 'policy' && type !== 'software');
+}
+function deptMaintenance(){
+  var b = document.getElementById('dept-maint');
+  return !!(b && b.checked && deptApplies());
+}
+function syncDeptRow(){
+  var row = document.getElementById('dept-row');
+  if (row) row.hidden = !deptApplies();
+}
+
 function buildRecord(){
   const L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : {segments:{},types:{}};
   const typeKey = (document.getElementById('doc-type-select') || {}).value || null;
@@ -1137,6 +1166,7 @@ function buildRecord(){
     numberStatus:   (e.provisional || t.provisional || (!e.bu && e.group === 'segment')) ? 'provisional' : 'conformant',
     summary:        (document.getElementById('summary-main') || {}).value.trim() || null,
     audience:       (document.getElementById('audience-select') || {}).value || null,
+    department:     deptMaintenance() ? 'maintenance' : null,
     keywords:       ((document.getElementById('keywords-input') || {}).value || '')
                       .split(',').map(x => x.trim()).filter(Boolean),
     related:        (document.getElementById('related-input') || {}).value.trim() || null,
@@ -1172,10 +1202,8 @@ let isAutoFilling = false;
   // ── Areas: everything real, minus the company tier, which is not an area ──
   var segSel = document.getElementById('seg-select');
   if (segSel) {
-    // "company" is the policy tier, not an area. "tws-maintenance" is a holding
-    // pen: its documents reassign to the segment that owns the equipment, so
-    // nothing new should be filed into it.
-    var NOT_FILEABLE = ['company', 'tws-maintenance'];
+    // "company" is the policy tier, not an area.
+    var NOT_FILEABLE = ['company'];
     // Grouped by family rather than run together alphabetically, so twenty four
     // areas are something you can find your way around.
     var FAMILIES = [
@@ -1634,11 +1662,14 @@ function paintRecord(){
     ['Title', esc(document.getElementById('doc-title-input').value.trim()) || ',' ],
     ['Type', (t.label || typeKey || ',')+ D()],
     [isPolicy ? 'Scope' : 'Area', (e.name || ',') + (isPolicy ? ' ' + D() : '')],
+    ['Department', deptMaintenance() ? 'Maintenance' : 'Segment (general)'],
     ['Revision', (docStatus === 'revision' ? 'Supersedes ' +
         (document.getElementById('supersedes-select').value || 'a document not yet chosen')
       : 'Rev 1.0, first issue') + D()],
     ['Owner', (t.owner || ',') + D()],
-    ['Approver', (isPolicy ? 'Chief Executive Officer' : (t.approver || ',')) + D()],
+    ['Approver', (isPolicy ? 'Chief Executive Officer'
+        : deptMaintenance() ? 'Maintenance Manager, ' + esc(e.name || '')
+        : (t.approver || ',')) + D()],
     ['Review cycle', (t.reviewCycleMonths || 24) + ' months' + D()],
     ['Next review due', fmt(due) + D()],
     ['Retention', (t.retentionYears || 10) + ' years' + D() +
@@ -1699,6 +1730,16 @@ document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById(id);
     if (el) el.addEventListener('change', function(){ stepReady(2); });
   });
+  ['doc-type-select','seg-select'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('change', syncDeptRow);
+  });
+  // "Submit a maintenance document" on a segment's Maintenance tab links here
+  // with dept=maintenance, so the box is already ticked.
+  if (new URLSearchParams(location.search).get('dept') === 'maintenance') {
+    var dm = document.getElementById('dept-maint'); if (dm) dm.checked = true;
+  }
+  syncDeptRow();
   ['doc-title-input','summary-main','audience-select'].forEach(function(id){
     var el = document.getElementById(id);
     if (el) el.addEventListener('input', function(){ stepReady(3); });

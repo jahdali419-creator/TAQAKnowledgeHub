@@ -314,7 +314,9 @@
       countersignedDate: new Date().toISOString().slice(0, 10),
       countersignedAt: new Date().toISOString()
     });
-    return { ok: true, next: "the Director's final approval" };
+    // A maintenance department document goes to its Maintenance Manager.
+    return { ok: true, next: d.department === 'maintenance'
+      ? "the Maintenance Manager's final approval" : "the Director's final approval" };
   }
 
   /* Sends a draft back rather than releasing it, at whichever step refused

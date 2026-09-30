@@ -80,6 +80,26 @@ const TAQA_ROLES = {
     scope:        'own'
   },
 
+  maintenance: {
+    label: 'Maintenance Manager',
+    blurb: 'Heads a segment\'s maintenance department. Approves that department\'s documents, and only those: its maintenance procedures, manuals and checklists. The Segment Director keeps the segment\'s other documents. QMS still checks every one first.',
+    statuses:        ['current', 'under-review', 'superseded', 'obsolete', 'draft'],
+    classifications: ['internal', 'confidential'],
+    controlPanel: true,
+    export:       false,
+    registerView: false,
+    // Approval follows the department: a document the segment files as
+    // Maintenance is released by its Maintenance Manager, not its Director.
+    // See TAQA_APPROVAL.canApprove.
+    approve:      true,
+    countersign:  false,
+    delegate:     true,
+    editMetadata: true,
+    submit:       true,
+    scope:        'own',
+    department:   'maintenance'
+  },
+
   qms: {
     label: 'QMS / Document Controller',
     blurb: 'Custodian of the register. Countersigns what a Director has approved, checking the record and the numbering before release, and owns withdrawal, periodic review and the TQ-QHSE-F086 export. Does not give the technical sign-off on another function\'s procedure.',
@@ -119,7 +139,7 @@ const TAQA_ROLES = {
   }
 };
 
-const TAQA_ROLE_ORDER = ['employee', 'owner', 'qms', 'auditor'];
+const TAQA_ROLE_ORDER = ['employee', 'owner', 'maintenance', 'qms', 'auditor'];
 const TAQA_DEFAULT_ROLE = 'employee';
 // Only a starting point for the preview. The real value is an SSO claim.
 const TAQA_DEFAULT_AREA = 'coiled-tubing';
@@ -178,6 +198,11 @@ const TAQA_ROLE = {
   /* What the holder of an area is called. The three families do not share a
      job title, and calling the head of Legal a Segment Director reads as a
      mistake to anyone who works here. */
+  /* What the signed-in person is called in their area: the area's holder, or
+     its Maintenance Manager, who sits in the same area with a narrower hand. */
+  holderTitle(){
+    return TAQA_ROLE.current() === 'maintenance' ? 'Maintenance Manager' : TAQA_ROLE.areaTitle();
+  },
   areaTitle(id){
     var g = (typeof TAQA_DOC_LOOKUPS !== 'undefined' &&
              (TAQA_DOC_LOOKUPS.segments[id || TAQA_ROLE.area()] || {}).group) || 'segment';
@@ -319,6 +344,7 @@ const TAQA_APPROVAL = {
   // register. The back end resolves this to a person through Entra ID; here it
   // is the text the standard uses.
   approverFor(doc){
+    if (doc && doc.department === 'maintenance') return 'Maintenance Manager';
     const t = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.types[doc.docType]) || {};
     const a = (t.approver || '').trim();
     return (!a || a === ',') ? null : a;
@@ -343,6 +369,11 @@ const TAQA_APPROVAL = {
     if (cap.scope !== 'all' && doc.segment !== cap.ownSegment) return false;
     // A delegation may be narrowed to certain document types.
     if (cap.docTypes && cap.docTypes.indexOf(doc.docType) === -1) return false;
+    // Department: a maintenance document is its Maintenance Manager's to
+    // release, and nothing else is. A Director does not sign maintenance
+    // documents, and a Maintenance Manager signs nothing outside them.
+    // An 'all' scope (none holds approve today) is not narrowed.
+    if (cap.scope !== 'all' && (doc.department === 'maintenance') !== (cap.department === 'maintenance')) return false;
     return true;
   },
 
@@ -484,6 +515,7 @@ TAQA_ROLE.effective = function(roleKey){
     submit: !!base.submit,
     controlPanel: !!base.controlPanel, export: !!base.export,
     scope: base.scope,
+    department: base.department || null,
     ownSegment: base.scope === 'own' ? TAQA_ROLE.area() : null,
     docTypes: null, delegated: null
   };
@@ -501,6 +533,7 @@ TAQA_ROLE.effective = function(roleKey){
   cap.scope        = 'own';                 // a delegation is always scoped
   cap.ownSegment   = d.segment || null;
   cap.docTypes     = d.docTypes;
+  cap.department   = grantor.department || null;   // a delegate signs in the grantor's department
   cap.delegate     = false;                 // a delegate cannot re-delegate
   cap.delegated    = d;
   return cap;

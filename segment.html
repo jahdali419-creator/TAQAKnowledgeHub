@@ -760,6 +760,7 @@ html body{overflow-x:clip;}
 <div class="tabs-outer">
   <div class="tabs" id="tab-bar">
     <button class="tab-btn" data-tab="all">All <span class="tab-count" id="tc-all">,</span></button>
+    <button class="tab-btn" data-tab="maintenance">Maintenance <span class="tab-count" id="tc-maintenance">,</span></button>
     <button class="tab-btn" data-tab="policies">Standards <span class="tab-count" id="tc-policies">,</span></button>
     <button class="tab-btn active" data-tab="sops">SOPs <span class="tab-count" id="tc-sops">,</span></button>
     <button class="tab-btn" data-tab="manuals">Manuals <span class="tab-count" id="tc-manuals">,</span></button>
@@ -803,6 +804,15 @@ html body{overflow-x:clip;}
       <span class="doc-count-label">Showing <strong id="vis-manuals">,</strong> manuals</span>
     </div>
     <div class="docs-grid" id="list-manuals"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-maintenance">
+    <div class="doc-toolbar">
+      <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search maintenance documents..." oninput="filterDocs(this,'maintenance')"></div>
+      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'maintenance','default')">Default</button><button class="sort-btn" onclick="setSort(this,'maintenance','az')">A, Z</button><button class="sort-btn sort-overdue" onclick="setSort(this,'maintenance','overdue')" hidden>Overdue first</button></div>
+      <span class="doc-count-label">Showing <strong id="vis-maintenance">,</strong> maintenance documents</span>
+    </div>
+    <div class="docs-grid" id="list-maintenance"></div>
   </div>
 
   <div class="tab-panel" id="panel-forms">
@@ -1184,34 +1194,6 @@ const SEGMENTS = {
       software:['Oracle HRMS Integration Pack | v12.2 | Windows 10/11 | 156 MB']
     }
   },
-  'tws-maintenance': {
-    name:'TWS Maintenance', icon:'🔧', tag:'Maintenance',
-    desc:'Tool and equipment maintenance schedules, preventive maintenance programs, repair procedures, calibration, and technical specs.',
-    sops:14, manuals:11, policies:8, alerts:0, lessons:6, software:2,
-    docs:{
-      sops:['TWS-001 PM Schedule Execution SOP','TWS-002 Corrective Maintenance SOP','TWS-003 Calibration SOP',
-        'TWS-004 Tool Pre-Job Inspection SOP','TWS-005 Tool Post-Job Inspection SOP','TWS-006 Pressure Gauge Certification SOP',
-        'TWS-007 Motor Overhaul SOP','TWS-008 Hydraulic System Maintenance SOP','TWS-009 Electrical Inspection SOP',
-        'TWS-010 Valve Overhaul SOP','TWS-011 Workshop Safety SOP','TWS-012 Tool Storage SOP',
-        'TWS-013 Out-of-Service Equipment SOP','TWS-014 Return-to-Service Approval SOP'],
-      manuals:['Preventive Maintenance Manual v2.1','Workshop Operations Manual','Hydraulic Systems Manual',
-        'Electrical Maintenance Manual','Calibration Standards Manual','Tool Inspection Criteria Manual',
-        'Crane & Rigging Maintenance Manual','Motor & Pump Overhaul Manual','Pressure Equipment Manual',
-        'Workshop Equipment Manual','CMMS User Manual'],
-      policies:['Maintenance Authorization Policy','Calibration Frequency Policy','Out-of-Service Equipment Policy',
-        'Workshop Safety Policy','Third-Party Repair Policy','Spare Parts Management Policy',
-        'Tool Identification & Tagging Policy','Return-to-Service Policy'],
-      alerts:[],
-      lessons:['LL-TWS-001: In-field tool failure, PM gap identified and corrected',
-        'LL-TWS-002: Calibration drift not caught, revised frequency policy',
-        'LL-TWS-003: Hydraulic seal failure, new inspection criteria added',
-        'LL-TWS-004: Incorrect reassembly after overhaul, checklist improvement',
-        'LL-TWS-005: Motor bearing failure, vibration monitoring added',
-        'LL-TWS-006: Spare parts stockout, inventory management improvement'],
-      software:['SAP PM Integration Toolkit | v7.4 | Windows 10/11 | 312 MB',
-        'AssetTrak Maintenance Manager | v3.2 | Windows 10/11 | 178 MB']
-    }
-  },
   'well-testing': {
     name:'Well Testing', icon:'🧪', tag:'Production Testing',
     desc:'Well test design, pressure buildup analysis, surface testing equipment operations, multi-rate flow testing, and production optimization procedures.',
@@ -1472,14 +1454,17 @@ const SEGMENTS = {
   // TQ-QHSE-S001 does not place them under document control.
   Object.keys(L).forEach(function(id){
     var copy = SEGMENTS[id] || {};
-    var docs = { sops:[], manuals:[], forms:[], policies:[], alerts:[], lessons:[], software:[] };
+    var docs = { maintenance:[], sops:[], manuals:[], forms:[], policies:[], alerts:[], lessons:[], software:[] };
     var nStd = 0, nPol = 0;
     TAQA_STORE.all().forEach(function(d){
       if (d.segment !== id) return;
       var live = TAQA_STORE.isLive(d),
           asset = !TAQA_STORE.isControlled(d) && d.status !== 'obsolete';
       if (!live && !asset) return;
-      var k = BUCKET[d.docType];
+      // A segment's maintenance department files its procedures, manuals and
+      // forms under its own tab, whatever their type, approved by its
+      // Maintenance Manager (roles.js). Software is never a department's.
+      var k = (d.department === 'maintenance' && d.docType !== 'software') ? 'maintenance' : BUCKET[d.docType];
       if (!k) return;
       if (d.docType === 'standard') nStd++; else if (d.docType === 'policy') nPol++;
       docs[k].push(d.docNumber ? d.docNumber + '  ' + d.title : d.title);
@@ -1495,7 +1480,7 @@ const SEGMENTS = {
         ? Object.assign({}, copy.tabLabels || {}, { policies:'Policies' })
         : copy.tabLabels,
       contributors: copy.contributors || [],
-      sops:docs.sops.length, manuals:docs.manuals.length, forms:docs.forms.length, policies:docs.policies.length,
+      maintenance:docs.maintenance.length, sops:docs.sops.length, manuals:docs.manuals.length, forms:docs.forms.length, policies:docs.policies.length,
       alerts:docs.alerts.length, lessons:docs.lessons.length, software:docs.software.length,
       docs: docs
     };
@@ -1505,7 +1490,10 @@ const SEGMENTS = {
 // ── URL Params ──
 const params = new URLSearchParams(window.location.search);
 const segId = params.get('id') || 'drilling';
-const startTab = params.get('tab') || 'sops';
+// A Maintenance Manager comes here for their department's documents, so
+// that is the shelf the page opens on for them; everyone else starts on SOPs.
+const startTab = params.get('tab') ||
+  ((typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.current() === 'maintenance') ? 'maintenance' : 'sops');
 // An unknown id used to fall through to Drilling, so a bad link showed one
 // segment's documents under another segment's name. Fail visibly instead,
 // in the shape the rest of this page expects.
@@ -1513,9 +1501,9 @@ const SEG_KNOWN = !!SEGMENTS[segId];
 const seg = SEGMENTS[segId] || {
   name:'Area not found', icon:'\u25CB', tag:'',
   desc:'No area is called \u201c' + segId + '\u201d. The link may be mistyped or out of date.',
-  sops:0, manuals:0, forms:0, policies:0, alerts:0, lessons:0, software:0,
+  maintenance:0, sops:0, manuals:0, forms:0, policies:0, alerts:0, lessons:0, software:0,
   contributors:[],
-  docs:{ sops:[], manuals:[], forms:[], policies:[], alerts:[], lessons:[], software:[] }
+  docs:{ maintenance:[], sops:[], manuals:[], forms:[], policies:[], alerts:[], lessons:[], software:[] }
 };
 document.querySelector('.manage-btn').href = 'dashboard.html?id=' + segId;
 
@@ -1529,7 +1517,6 @@ const SEGMENT_IMAGES = {
   'inspection':      'taqa-hero-4.jpg',
   'well-safety':     'taqa-hero.webp',
   'qhse':            'taqa-hero-3.jpeg',
-  'tws-maintenance': 'taqa-hero-2.jpg',
   'hr':              'taqa-hero-4.jpg',
   'well-testing':    'taqa-hero-3.jpeg',
   'cybersecurity':   'taqa-hero.webp',
@@ -1596,6 +1583,7 @@ if (!SEG_KNOWN) document.documentElement.classList.add('seg-unknown');
 document.getElementById('tc-sops').textContent = seg.sops;
 document.getElementById('tc-manuals').textContent = seg.manuals;
 document.getElementById('tc-forms').textContent = seg.forms || 0;
+document.getElementById('tc-maintenance').textContent = seg.maintenance || 0;
 document.getElementById('tc-policies').textContent = seg.policies;
 document.getElementById('tc-alerts').textContent = seg.alerts;
 document.getElementById('tc-lessons').textContent = seg.lessons;
@@ -1622,6 +1610,8 @@ document.querySelectorAll('#tab-bar .tab-btn').forEach(function(btn){
   var raw = (btn.firstChild && btn.firstChild.nodeType === 3 ? btn.firstChild.textContent : btn.textContent)
     .trim().replace(/\s*\d+$/, '');
   var name = raw.split(/\s+/).map(function(w){ return /[A-Z].*[A-Z]/.test(w) ? w : w.toLowerCase(); }).join(' ');
+  // A department is not a kind of document: say what is in it.
+  if (t === 'maintenance') name = 'maintenance documents';
   if (name) inp.placeholder = 'Search ' + (t === 'all' ? 'all documents' : name) + '...';
   var cnt = document.querySelector('#panel-' + t + ' .doc-count-label');
   var tail = cnt && cnt.lastChild;
@@ -1635,7 +1625,7 @@ document.querySelectorAll('#tab-bar .tab-btn').forEach(function(btn){
 // in kind (a function has no SOPs for a well site). Software is not a
 // controlled document, so it only appears where there is some.
 var SEG_GROUP = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments[segId] || {}).group;
-var CORE_TABS = ['policies','sops','manuals','forms','alerts','lessons'];
+var CORE_TABS = ['maintenance','policies','sops','manuals','forms','alerts','lessons'];
 document.querySelectorAll('#tab-bar .tab-btn').forEach(function(btn){
   var t = btn.dataset.tab;
   if (!t || t === 'all' || (seg[t] || 0)) return;
@@ -1738,7 +1728,7 @@ function rowMeta(d){
 }
 function escHtml(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-const LIST_TYPE_MAP = {sops:'sop',manuals:'manual',forms:'form',policies:'standard',lessons:'lesson',alerts:'alert'};
+const LIST_TYPE_MAP = {maintenance:'sop',sops:'sop',manuals:'manual',forms:'form',policies:'standard',lessons:'lesson',alerts:'alert'};
 const MORE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>';
 // Same glass as the doc-search field itself, drawn larger for the empty state.
 const EMPTY_SEARCH_ICON = '<svg width="22" height="22" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
@@ -1862,6 +1852,8 @@ function _renderPage(type){
       ?`<div class="empty-state"><h3>Choose an area</h3><p>Every area is listed under Areas, in the menu at the top of this page.</p></div>`
       :st.isAlert
       ?`<div class="empty-state"><div class="empty-icon empty-mark">${e2(mark||'ALT')}</div><h3>No active alerts</h3><p>${e2(seg.name)} has no outstanding technical alerts.</p></div>`
+      :type==='maintenance'
+      ?`<div class="empty-state"><div class="empty-icon empty-mark">MNT</div><h3>No maintenance documents for ${e2(seg.name)} yet</h3><p>Procedures, manuals and checklists from the ${e2(seg.name)} maintenance department appear here once their Maintenance Manager approves them.</p>${mayUpload?'<a href="upload.html?seg='+encodeURIComponent(segId)+'&dept=maintenance" class="empty-state-upload">+ Submit a maintenance document</a>':''}</div>`
       :`<div class="empty-state">${mark?`<div class="empty-icon empty-mark">${e2(mark)}</div>`:''}<h3>No ${e2(noun)} issued for ${e2(seg.name)} yet</h3><p>When one is approved and released it will appear on this tab.</p>${mayUpload?'<a href="upload.html?seg='+encodeURIComponent(segId)+'" class="empty-state-upload">+ Submit a document</a>':''}</div>`;
     if(vis)vis.textContent='0';
     _renderPagination(type);
@@ -1901,6 +1893,7 @@ function renderList(type,items,isAlert){
 renderList('sops', seg.docs.sops, false);
 renderList('manuals', seg.docs.manuals, false);
 renderList('forms', seg.docs.forms || [], false);
+renderList('maintenance', seg.docs.maintenance || [], false);
 renderList('policies', seg.docs.policies, false);
 renderList('alerts', seg.docs.alerts, true);
 renderList('lessons', seg.docs.lessons, false);
@@ -2000,7 +1993,7 @@ function goPage(type,page){
 }
 
 // ── Tab Switching ──
-const TAB_LABELS = {policies:'Standards', sops:'SOPs', manuals:'Manuals', forms:'Forms & Checklists', alerts:'Alerts', lessons:'Lessons Learned', software:'Software & Tools'};
+const TAB_LABELS = {maintenance:'Maintenance', policies:'Standards', sops:'SOPs', manuals:'Manuals', forms:'Forms & Checklists', alerts:'Alerts', lessons:'Lessons Learned', software:'Software & Tools'};
 // ── Tab switching (All + individual) ──
 const _contentOuter = document.querySelector('.content-outer');
 
@@ -2019,6 +2012,7 @@ function openTab(name) {
     const allPanel = document.getElementById('panel-all');
     if (allPanel) allPanel.classList.add('active');
     const combined = [
+      ..._st('maintenance').all.map(t=>({title:t,type:'sop',bucket:'maintenance'})),
       ..._st('policies').all.map(t=>({title:t,type:'policy',bucket:'policies'})),
       ..._st('sops').all.map(t=>({title:t,type:'sop',bucket:'sops'})),
       ..._st('manuals').all.map(t=>({title:t,type:'manual',bucket:'manuals'})),
@@ -2064,6 +2058,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // Inject section headings (shown only in All mode via CSS)
 (function(){
   const cfg = {
+    maintenance:{pill:'MNT', cls:'sop',   title:'Maintenance'},
     sops:    {pill:'SOP', cls:'sop',      title:'Standard Operating Procedures'},
     manuals: {pill:'MNL', cls:'manual',   title:'Technical Manuals'},
     forms:   {pill:'FRM', cls:'form',     title:'Forms & Checklists'},
@@ -2084,7 +2079,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 // Update All tab total count after lists render
 setTimeout(() => {
-  const types = ['policies','sops','manuals','forms','alerts','lessons','software'];
+  const types = ['maintenance','policies','sops','manuals','forms','alerts','lessons','software'];
   const total = types.reduce((s, t) => s + (_st(t).all.length || 0), 0);
   const el = document.getElementById('tc-all');
   if (el) el.textContent = total;

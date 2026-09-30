@@ -271,33 +271,6 @@ const TAQA_SEGMENTS = {
       software:['Oracle HRMS Integration Pack | v12.2']
     }
   },
-  'tws-maintenance': {
-    name:'TWS Maintenance', icon:'🔧', tag:'Maintenance',
-    desc:'Tool and equipment maintenance schedules, preventive maintenance programs, repair procedures, calibration, and technical specs.',
-    sops:14, manuals:11, policies:8, alerts:0, lessons:6, software:2,
-    docs:{
-      sops:['TWS-001 PM Schedule Execution SOP','TWS-002 Corrective Maintenance SOP','TWS-003 Calibration SOP',
-        'TWS-004 Tool Pre-Job Inspection SOP','TWS-005 Tool Post-Job Inspection SOP','TWS-006 Pressure Gauge Certification SOP',
-        'TWS-007 Motor Overhaul SOP','TWS-008 Hydraulic System Maintenance SOP','TWS-009 Electrical Inspection SOP',
-        'TWS-010 Valve Overhaul SOP','TWS-011 Workshop Safety SOP','TWS-012 Tool Storage SOP',
-        'TWS-013 Out-of-Service Equipment SOP','TWS-014 Return-to-Service Approval SOP'],
-      manuals:['Preventive Maintenance Manual v2.1','Workshop Operations Manual','Hydraulic Systems Manual',
-        'Electrical Maintenance Manual','Calibration Standards Manual','Tool Inspection Criteria Manual',
-        'Crane & Rigging Maintenance Manual','Motor & Pump Overhaul Manual','Pressure Equipment Manual',
-        'Workshop Equipment Manual','CMMS User Manual'],
-      policies:['Maintenance Authorization Policy','Calibration Frequency Policy','Out-of-Service Equipment Policy',
-        'Workshop Safety Policy','Third-Party Repair Policy','Spare Parts Management Policy',
-        'Tool Identification & Tagging Policy','Return-to-Service Policy'],
-      alerts:[],
-      lessons:['LL-TWS-001: In-field tool failure, PM gap identified and corrected',
-        'LL-TWS-002: Calibration drift not caught, revised frequency policy',
-        'LL-TWS-003: Hydraulic seal failure, new inspection criteria added',
-        'LL-TWS-004: Incorrect reassembly after overhaul, checklist improvement',
-        'LL-TWS-005: Motor bearing failure, vibration monitoring added',
-        'LL-TWS-006: Spare parts stockout, inventory management improvement'],
-      software:['SAP PM Integration Toolkit | v7.4','AssetTrak Maintenance Manager | v3.2']
-    }
-  },
   'well-testing': {
     name:'Well Testing', icon:'🧪', tag:'Production Testing',
     desc:'Well test design, pressure buildup analysis, surface testing equipment operations, multi-rate flow testing, and production optimization procedures.',

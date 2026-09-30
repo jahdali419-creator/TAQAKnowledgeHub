@@ -9,8 +9,8 @@
 //  - The Areas dropdown (and the phone menu's Areas list) only ever render
 //    the register's "segment" / "function" / "product" groups (shared.js's
 //    FAM list). "Company Wide" is handled as its own row; areas whose org
-//    placement is still "Pending Reassignment" (group 'pending', e.g.
-//    tws-maintenance) are not linked from either at all. That is
+//    placement is still "Pending Reassignment" (group 'pending'; none at
+//    present) are not linked from either at all. That is
 //    deliberate (see shared.js's FAM and the door's own 5-group picker,
 //    which explicitly labels that 5th group "Pending Reassignment"), so
 //    the test asserts that real subset, not the full register.
