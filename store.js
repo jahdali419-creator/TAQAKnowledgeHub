@@ -315,7 +315,7 @@
       countersignedAt: new Date().toISOString()
     });
     // A maintenance department document goes to its Maintenance Manager.
-    return { ok: true, next: d.department === 'maintenance'
+    return { ok: true, next: (d.department === 'maintenance' || d.docType === 'bulletin')
       ? "the Maintenance Manager's final approval" : "the Director's final approval" };
   }
 

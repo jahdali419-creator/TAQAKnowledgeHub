@@ -106,6 +106,14 @@ body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);ove
   border-radius:50px;font-size:11px;color:var(--primary-light);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;}
 .seg-hero h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:36px;font-weight:800;color:#fff;
   letter-spacing:-0.8px;margin-bottom:10px;}
+.dept-switch{display:inline-flex;gap:2px;padding:3px;margin:2px 0 16px;border-radius:999px;
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);}
+.dept-switch[hidden]{display:none;}
+.dept-switch a{display:inline-flex;align-items:center;min-height:36px;padding:0 16px;border-radius:999px;
+  font-size:13px;font-weight:600;color:rgba(255,255,255,0.78);text-decoration:none;transition:background .15s,color .15s;}
+.dept-switch a:hover{color:#fff;background:rgba(255,255,255,0.08);}
+.dept-switch a[aria-current="page"]{background:#fff;color:#005D63;}
+.dept-switch a:focus-visible{outline:2px solid #00BBB6;outline-offset:2px;}
 .seg-hero-desc{font-size:15px;color:rgba(255,255,255,0.72);line-height:1.7;max-width:520px;margin-bottom:24px;}
 .seg-hero-meta{display:flex;gap:24px;flex-wrap:wrap;}
 .seg-meta-item{display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(255,255,255,0.58);}
@@ -729,6 +737,11 @@ html body{overflow-x:clip;}
       <div>
         <div class="seg-hero-tag" id="seg-tag">Segment</div>
         <h1 id="seg-name">Loading...</h1>
+        <!-- An operational segment has two departments with the same shelves:
+             Operations, and Maintenance, which adds Maintenance Bulletins. -->
+        <nav class="dept-switch" id="dept-switch" aria-label="Department" hidden>
+          <a id="dept-ops" href="#">Operations</a><a id="dept-mnt" href="#">Maintenance</a>
+        </nav>
         <p class="seg-hero-desc" id="seg-desc">Loading segment description...</p>
         <div class="seg-hero-meta">
           <div class="seg-meta-item"><strong id="seg-total">,</strong> Documents in Force</div>
@@ -760,11 +773,11 @@ html body{overflow-x:clip;}
 <div class="tabs-outer">
   <div class="tabs" id="tab-bar">
     <button class="tab-btn" data-tab="all">All <span class="tab-count" id="tc-all">,</span></button>
-    <button class="tab-btn" data-tab="maintenance">Maintenance <span class="tab-count" id="tc-maintenance">,</span></button>
     <button class="tab-btn" data-tab="policies">Standards <span class="tab-count" id="tc-policies">,</span></button>
     <button class="tab-btn active" data-tab="sops">SOPs <span class="tab-count" id="tc-sops">,</span></button>
     <button class="tab-btn" data-tab="manuals">Manuals <span class="tab-count" id="tc-manuals">,</span></button>
     <button class="tab-btn" data-tab="forms">Forms &amp; Checklists <span class="tab-count" id="tc-forms">,</span></button>
+    <button class="tab-btn" data-tab="bulletins">Bulletins <span class="tab-count" id="tc-bulletins">,</span></button>
     <button class="tab-btn" data-tab="alerts">Alerts <span class="tab-alert-count" id="tc-alerts">,</span><span class="alert-pulse-dot" id="alert-pulse-dot"></span></button>
     <button class="tab-btn" data-tab="lessons">Lessons Learned <span class="tab-count" id="tc-lessons">,</span></button>
     <button class="tab-btn" data-tab="software">Software <span class="tab-count" id="tc-software">,</span></button>
@@ -806,15 +819,6 @@ html body{overflow-x:clip;}
     <div class="docs-grid" id="list-manuals"></div>
   </div>
 
-  <div class="tab-panel" id="panel-maintenance">
-    <div class="doc-toolbar">
-      <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search maintenance documents..." oninput="filterDocs(this,'maintenance')"></div>
-      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'maintenance','default')">Default</button><button class="sort-btn" onclick="setSort(this,'maintenance','az')">A, Z</button><button class="sort-btn sort-overdue" onclick="setSort(this,'maintenance','overdue')" hidden>Overdue first</button></div>
-      <span class="doc-count-label">Showing <strong id="vis-maintenance">,</strong> maintenance documents</span>
-    </div>
-    <div class="docs-grid" id="list-maintenance"></div>
-  </div>
-
   <div class="tab-panel" id="panel-forms">
     <div class="doc-toolbar">
       <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search forms and checklists..." oninput="filterDocs(this,'forms')"></div>
@@ -822,6 +826,15 @@ html body{overflow-x:clip;}
       <span class="doc-count-label">Showing <strong id="vis-forms">,</strong> forms</span>
     </div>
     <div class="docs-grid" id="list-forms"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-bulletins">
+    <div class="doc-toolbar">
+      <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search bulletins..." oninput="filterDocs(this,'bulletins')"></div>
+      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'bulletins','default')">Default</button><button class="sort-btn" onclick="setSort(this,'bulletins','az')">A, Z</button><button class="sort-btn sort-overdue" onclick="setSort(this,'bulletins','overdue')" hidden>Overdue first</button></div>
+      <span class="doc-count-label">Showing <strong id="vis-bulletins">,</strong> bulletins</span>
+    </div>
+    <div class="docs-grid" id="list-bulletins"></div>
   </div>
 
   <div class="tab-panel" id="panel-policies">
@@ -1443,7 +1456,7 @@ const SEGMENTS = {
   // 'policy' was missing, so opening Company Wide as an area showed an empty
   // library and a total of zero against the register's twelve. An area issues
   // standards and the company issues policies; both belong in the same tab.
-  var BUCKET = { sop:'sops',form:'forms', manual:'manuals', standard:'policies', policy:'policies',
+  var BUCKET = { sop:'sops',form:'forms', bulletin:'bulletins', manual:'manuals', standard:'policies', policy:'policies',
                  alert:'alerts', lesson:'lessons', software:'software' };
   var L = TAQA_DOC_LOOKUPS.segments;
 
@@ -1454,18 +1467,20 @@ const SEGMENTS = {
   // TQ-QHSE-S001 does not place them under document control.
   Object.keys(L).forEach(function(id){
     var copy = SEGMENTS[id] || {};
-    var docs = { maintenance:[], sops:[], manuals:[], forms:[], policies:[], alerts:[], lessons:[], software:[] };
+    var docs = { sops:[], manuals:[], forms:[], bulletins:[], policies:[], alerts:[], lessons:[], software:[] };
+    // The segment's maintenance department keeps the same shelves, plus its
+    // bulletins. A bulletin is a maintenance document by definition.
+    var mdocs = { sops:[], manuals:[], forms:[], bulletins:[], policies:[], alerts:[], lessons:[], software:[] };
     var nStd = 0, nPol = 0;
     TAQA_STORE.all().forEach(function(d){
       if (d.segment !== id) return;
       var live = TAQA_STORE.isLive(d),
           asset = !TAQA_STORE.isControlled(d) && d.status !== 'obsolete';
       if (!live && !asset) return;
-      // A segment's maintenance department files its procedures, manuals and
-      // forms under its own tab, whatever their type, approved by its
-      // Maintenance Manager (roles.js). Software is never a department's.
-      var k = (d.department === 'maintenance' && d.docType !== 'software') ? 'maintenance' : BUCKET[d.docType];
+      var k = BUCKET[d.docType];
       if (!k) return;
+      var mnt = (d.department === 'maintenance' || d.docType === 'bulletin') && d.docType !== 'software';
+      if (mnt) { mdocs[k].push(d.docNumber ? d.docNumber + '  ' + d.title : d.title); return; }
       if (d.docType === 'standard') nStd++; else if (d.docType === 'policy') nPol++;
       docs[k].push(d.docNumber ? d.docNumber + '  ' + d.title : d.title);
     });
@@ -1480,9 +1495,11 @@ const SEGMENTS = {
         ? Object.assign({}, copy.tabLabels || {}, { policies:'Policies' })
         : copy.tabLabels,
       contributors: copy.contributors || [],
-      maintenance:docs.maintenance.length, sops:docs.sops.length, manuals:docs.manuals.length, forms:docs.forms.length, policies:docs.policies.length,
+      sops:docs.sops.length, manuals:docs.manuals.length, forms:docs.forms.length, bulletins:docs.bulletins.length, policies:docs.policies.length,
       alerts:docs.alerts.length, lessons:docs.lessons.length, software:docs.software.length,
-      docs: docs
+      docs: docs,
+      mnt: { sops:mdocs.sops.length, manuals:mdocs.manuals.length, forms:mdocs.forms.length, bulletins:mdocs.bulletins.length,
+             policies:mdocs.policies.length, alerts:mdocs.alerts.length, lessons:mdocs.lessons.length, software:0, docs: mdocs }
     };
   });
 })();
@@ -1490,10 +1507,14 @@ const SEGMENTS = {
 // ── URL Params ──
 const params = new URLSearchParams(window.location.search);
 const segId = params.get('id') || 'drilling';
-// A Maintenance Manager comes here for their department's documents, so
-// that is the shelf the page opens on for them; everyone else starts on SOPs.
-const startTab = params.get('tab') ||
-  ((typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.current() === 'maintenance') ? 'maintenance' : 'sops');
+const startTab = params.get('tab') || 'sops';
+// Which department's shelves to show. Only an operational segment has a
+// maintenance department. A Maintenance Manager opens on theirs.
+const IS_OPS_SEGMENT = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && (TAQA_DOC_LOOKUPS.segments[segId] || {}).group) === 'segment';
+const DEPT = !IS_OPS_SEGMENT ? 'operations'
+  : params.get('dept') === 'maintenance' ? 'maintenance'
+  : params.get('dept') === 'operations' ? 'operations'
+  : (typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.current() === 'maintenance') ? 'maintenance' : 'operations';
 // An unknown id used to fall through to Drilling, so a bad link showed one
 // segment's documents under another segment's name. Fail visibly instead,
 // in the shape the rest of this page expects.
@@ -1501,11 +1522,21 @@ const SEG_KNOWN = !!SEGMENTS[segId];
 const seg = SEGMENTS[segId] || {
   name:'Area not found', icon:'\u25CB', tag:'',
   desc:'No area is called \u201c' + segId + '\u201d. The link may be mistyped or out of date.',
-  maintenance:0, sops:0, manuals:0, forms:0, policies:0, alerts:0, lessons:0, software:0,
+  sops:0, manuals:0, forms:0, bulletins:0, policies:0, alerts:0, lessons:0, software:0,
   contributors:[],
-  docs:{ maintenance:[], sops:[], manuals:[], forms:[], policies:[], alerts:[], lessons:[], software:[] }
+  docs:{ sops:[], manuals:[], forms:[], bulletins:[], policies:[], alerts:[], lessons:[], software:[] }
 };
+if (DEPT === 'maintenance' && seg.mnt) Object.assign(seg, seg.mnt);
 document.querySelector('.manage-btn').href = 'dashboard.html?id=' + segId;
+(function(){
+  if (!IS_OPS_SEGMENT) return;
+  const sw = document.getElementById('dept-switch');
+  const href = d => { const u = new URL(location.href); u.searchParams.set('dept', d); u.searchParams.delete('page'); return u.pathname.split('/').pop() + u.search; };
+  const ops = document.getElementById('dept-ops'), mnt = document.getElementById('dept-mnt');
+  ops.href = href('operations'); mnt.href = href('maintenance');
+  (DEPT === 'maintenance' ? mnt : ops).setAttribute('aria-current', 'page');
+  sw.hidden = false;
+})();
 
 // ── Segment Hero Background ──
 const SEGMENT_IMAGES = {
@@ -1583,7 +1614,7 @@ if (!SEG_KNOWN) document.documentElement.classList.add('seg-unknown');
 document.getElementById('tc-sops').textContent = seg.sops;
 document.getElementById('tc-manuals').textContent = seg.manuals;
 document.getElementById('tc-forms').textContent = seg.forms || 0;
-document.getElementById('tc-maintenance').textContent = seg.maintenance || 0;
+document.getElementById('tc-bulletins').textContent = seg.bulletins || 0;
 document.getElementById('tc-policies').textContent = seg.policies;
 document.getElementById('tc-alerts').textContent = seg.alerts;
 document.getElementById('tc-lessons').textContent = seg.lessons;
@@ -1610,8 +1641,6 @@ document.querySelectorAll('#tab-bar .tab-btn').forEach(function(btn){
   var raw = (btn.firstChild && btn.firstChild.nodeType === 3 ? btn.firstChild.textContent : btn.textContent)
     .trim().replace(/\s*\d+$/, '');
   var name = raw.split(/\s+/).map(function(w){ return /[A-Z].*[A-Z]/.test(w) ? w : w.toLowerCase(); }).join(' ');
-  // A department is not a kind of document: say what is in it.
-  if (t === 'maintenance') name = 'maintenance documents';
   if (name) inp.placeholder = 'Search ' + (t === 'all' ? 'all documents' : name) + '...';
   var cnt = document.querySelector('#panel-' + t + ' .doc-count-label');
   var tail = cnt && cnt.lastChild;
@@ -1625,7 +1654,7 @@ document.querySelectorAll('#tab-bar .tab-btn').forEach(function(btn){
 // in kind (a function has no SOPs for a well site). Software is not a
 // controlled document, so it only appears where there is some.
 var SEG_GROUP = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments[segId] || {}).group;
-var CORE_TABS = ['maintenance','policies','sops','manuals','forms','alerts','lessons'];
+var CORE_TABS = ['policies','sops','manuals','forms','alerts','lessons'].concat(DEPT === 'maintenance' ? ['bulletins'] : []);
 document.querySelectorAll('#tab-bar .tab-btn').forEach(function(btn){
   var t = btn.dataset.tab;
   if (!t || t === 'all' || (seg[t] || 0)) return;
@@ -1728,7 +1757,7 @@ function rowMeta(d){
 }
 function escHtml(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-const LIST_TYPE_MAP = {maintenance:'sop',sops:'sop',manuals:'manual',forms:'form',policies:'standard',lessons:'lesson',alerts:'alert'};
+const LIST_TYPE_MAP = {bulletins:'bulletin',sops:'sop',manuals:'manual',forms:'form',policies:'standard',lessons:'lesson',alerts:'alert'};
 const MORE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>';
 // Same glass as the doc-search field itself, drawn larger for the empty state.
 const EMPTY_SEARCH_ICON = '<svg width="22" height="22" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
@@ -1852,8 +1881,8 @@ function _renderPage(type){
       ?`<div class="empty-state"><h3>Choose an area</h3><p>Every area is listed under Areas, in the menu at the top of this page.</p></div>`
       :st.isAlert
       ?`<div class="empty-state"><div class="empty-icon empty-mark">${e2(mark||'ALT')}</div><h3>No active alerts</h3><p>${e2(seg.name)} has no outstanding technical alerts.</p></div>`
-      :type==='maintenance'
-      ?`<div class="empty-state"><div class="empty-icon empty-mark">MNT</div><h3>No maintenance documents for ${e2(seg.name)} yet</h3><p>Procedures, manuals and checklists from the ${e2(seg.name)} maintenance department appear here once their Maintenance Manager approves them.</p>${mayUpload?'<a href="upload.html?seg='+encodeURIComponent(segId)+'&dept=maintenance" class="empty-state-upload">+ Submit a maintenance document</a>':''}</div>`
+      :DEPT==='maintenance'
+      ?`<div class="empty-state">${mark?`<div class="empty-icon empty-mark">${e2(mark)}</div>`:''}<h3>No maintenance ${e2(noun)} for ${e2(seg.name)} yet</h3><p>The ${e2(seg.name)} maintenance department's ${e2(noun)} appear here once its Maintenance Manager approves them.</p>${mayUpload?'<a href="upload.html?seg='+encodeURIComponent(segId)+'&dept=maintenance" class="empty-state-upload">+ Submit a maintenance document</a>':''}</div>`
       :`<div class="empty-state">${mark?`<div class="empty-icon empty-mark">${e2(mark)}</div>`:''}<h3>No ${e2(noun)} issued for ${e2(seg.name)} yet</h3><p>When one is approved and released it will appear on this tab.</p>${mayUpload?'<a href="upload.html?seg='+encodeURIComponent(segId)+'" class="empty-state-upload">+ Submit a document</a>':''}</div>`;
     if(vis)vis.textContent='0';
     _renderPagination(type);
@@ -1893,7 +1922,7 @@ function renderList(type,items,isAlert){
 renderList('sops', seg.docs.sops, false);
 renderList('manuals', seg.docs.manuals, false);
 renderList('forms', seg.docs.forms || [], false);
-renderList('maintenance', seg.docs.maintenance || [], false);
+renderList('bulletins', seg.docs.bulletins || [], false);
 renderList('policies', seg.docs.policies, false);
 renderList('alerts', seg.docs.alerts, true);
 renderList('lessons', seg.docs.lessons, false);
@@ -1993,7 +2022,7 @@ function goPage(type,page){
 }
 
 // ── Tab Switching ──
-const TAB_LABELS = {maintenance:'Maintenance', policies:'Standards', sops:'SOPs', manuals:'Manuals', forms:'Forms & Checklists', alerts:'Alerts', lessons:'Lessons Learned', software:'Software & Tools'};
+const TAB_LABELS = {bulletins:'Bulletins', policies:'Standards', sops:'SOPs', manuals:'Manuals', forms:'Forms & Checklists', alerts:'Alerts', lessons:'Lessons Learned', software:'Software & Tools'};
 // ── Tab switching (All + individual) ──
 const _contentOuter = document.querySelector('.content-outer');
 
@@ -2012,11 +2041,11 @@ function openTab(name) {
     const allPanel = document.getElementById('panel-all');
     if (allPanel) allPanel.classList.add('active');
     const combined = [
-      ..._st('maintenance').all.map(t=>({title:t,type:'sop',bucket:'maintenance'})),
       ..._st('policies').all.map(t=>({title:t,type:'policy',bucket:'policies'})),
       ..._st('sops').all.map(t=>({title:t,type:'sop',bucket:'sops'})),
       ..._st('manuals').all.map(t=>({title:t,type:'manual',bucket:'manuals'})),
       ..._st('forms').all.map(t=>({title:t,type:'form',bucket:'forms'})),
+      ..._st('bulletins').all.map(t=>({title:t,type:'bulletin',bucket:'bulletins'})),
       ..._st('alerts').all.map(t=>({title:t,type:'alert',isAlert:true,bucket:'alerts'})),
       ..._st('lessons').all.map(t=>({title:t,type:'lesson',bucket:'lessons'})),
       ..._st('software').all.map(t=>({title:t,type:'software',isSoftware:true,bucket:'software'})),
@@ -2058,10 +2087,10 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // Inject section headings (shown only in All mode via CSS)
 (function(){
   const cfg = {
-    maintenance:{pill:'MNT', cls:'sop',   title:'Maintenance'},
     sops:    {pill:'SOP', cls:'sop',      title:'Standard Operating Procedures'},
     manuals: {pill:'MNL', cls:'manual',   title:'Technical Manuals'},
     forms:   {pill:'FRM', cls:'form',     title:'Forms & Checklists'},
+    bulletins:{pill:'MB', cls:'sop',     title:'Maintenance Bulletins'},
     policies:{pill:'S',   cls:'policy',   title:'Standards'},
     alerts:  {pill:'ALT', cls:'alert',    title:'Technical Alerts'},
     lessons: {pill:'LSN', cls:'lesson',   title:'Lessons Learned'},
@@ -2079,7 +2108,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 // Update All tab total count after lists render
 setTimeout(() => {
-  const types = ['maintenance','policies','sops','manuals','forms','alerts','lessons','software'];
+  const types = ['policies','sops','manuals','forms','bulletins','alerts','lessons','software'];
   const total = types.reduce((s, t) => s + (_st(t).all.length || 0), 0);
   const el = document.getElementById('tc-all');
   if (el) el.textContent = total;

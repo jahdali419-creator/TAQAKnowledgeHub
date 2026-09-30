@@ -340,11 +340,17 @@ if (typeof module !== 'undefined' && module.exports)
 const TAQA_APPROVAL = {
   STAGES: ['qms', 'director'],
 
+  // A segment's maintenance department document: filed as Maintenance, or a
+  // Maintenance Bulletin, which is one by definition.
+  isMaintenance(doc){
+    return !!doc && (doc.department === 'maintenance' || doc.docType === 'bulletin');
+  },
+
   // Who is named as approver for this document's type, verbatim from the
   // register. The back end resolves this to a person through Entra ID; here it
   // is the text the standard uses.
   approverFor(doc){
-    if (doc && doc.department === 'maintenance') return 'Maintenance Manager';
+    if (TAQA_APPROVAL.isMaintenance(doc)) return 'Maintenance Manager';
     const t = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.types[doc.docType]) || {};
     const a = (t.approver || '').trim();
     return (!a || a === ',') ? null : a;
@@ -373,7 +379,7 @@ const TAQA_APPROVAL = {
     // release, and nothing else is. A Director does not sign maintenance
     // documents, and a Maintenance Manager signs nothing outside them.
     // An 'all' scope (none holds approve today) is not narrowed.
-    if (cap.scope !== 'all' && (doc.department === 'maintenance') !== (cap.department === 'maintenance')) return false;
+    if (cap.scope !== 'all' && TAQA_APPROVAL.isMaintenance(doc) !== (cap.department === 'maintenance')) return false;
     return true;
   },
 

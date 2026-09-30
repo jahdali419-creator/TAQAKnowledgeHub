@@ -1125,8 +1125,15 @@ function deptMaintenance(){
   var b = document.getElementById('dept-maint');
   return !!(b && b.checked && deptApplies());
 }
+/* A Maintenance Bulletin is a maintenance document by definition, so the box
+   is ticked and locked for it rather than left for the submitter to forget. */
 function syncDeptRow(){
-  var row = document.getElementById('dept-row');
+  var row = document.getElementById('dept-row'), box = document.getElementById('dept-maint');
+  var bulletin = (document.getElementById('doc-type-select') || {}).value === 'bulletin';
+  if (box) {
+    if (bulletin) { box.checked = true; box.disabled = true; }
+    else if (box.disabled) { box.disabled = false; }
+  }
   if (row) row.hidden = !deptApplies();
 }
 
@@ -1243,7 +1250,7 @@ let isAutoFilling = false;
 
   var typeSel = document.getElementById('doc-type-select');
   if (typeSel) {
-    var order = ['policy','standard','sop','manual','form','alert','lesson','software'];
+    var order = ['policy','standard','sop','manual','form','bulletin','alert','lesson','software'];
     typeSel.innerHTML = '<option value="" disabled selected>Select type</option>' +
       order.filter(function(t){
         if (!L.types[t]) return false;

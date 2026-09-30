@@ -341,6 +341,18 @@ const TAQA_DOC_LOOKUPS = {
       "provisional": false,
       "note": "TQ-QHSE-S001 5.3 row 06: TQ-<Function>-FXXX at company level, TQ-<BU>-<SPL>-FXXX in a business unit."
     },
+    "bulletin": {
+      "label": "Maintenance Bulletin",
+      "letter": "MB",
+      "mark": "MB",
+      "owner": "Segment Maintenance Department",
+      "approver": "Maintenance Manager",
+      "reviewCycleMonths": 12,
+      "controlled": true,
+      "retentionYears": 10,
+      "provisional": true,
+      "note": "TQ-QHSE-S001 has no code for Maintenance Bulletins yet, so they use MB until QHSE assigns one. The number may change then."
+    },
     "software": {
       "label": "Software / Tool",
       "letter": null,
