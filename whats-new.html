@@ -345,6 +345,7 @@ a.row:focus-visible{outline-offset:-3px;border-radius:0;}
           <tr role="row"><td role="cell"><span class="code was">TAQA-QHSE-P007</span><span class="arrow" aria-hidden="true">to</span></td><td role="cell"><span class="code">TQ-QHSE-P007</span></td><td role="cell">Policies take the TQ prefix, TQ-&lt;Function&gt;-PXXX, as in the standard's own example. The Cybersecurity policy is TQ-GRC-P010.</td></tr>
           <tr role="row"><td role="cell"><span class="code was">TQ-QHSE-WI-001</span><span class="arrow" aria-hidden="true">to</span></td><td role="cell"><span class="code">TQ-QHSE-M001</span></td><td role="cell">A corporate function has manuals (M), not work instructions. Work instructions (WI) exist only inside a business unit.</td></tr>
           <tr role="row"><td role="cell"><span class="code was">TQ-TWS-CTSS-SOP-001</span><span class="arrow" aria-hidden="true">to</span></td><td role="cell"><span class="code">TQ-TWS-CTSS-F001</span></td><td role="cell">A checklist is a Form (row 06), not a procedure. The Pre-Job Safety Checklist and three others moved to Forms &amp; Checklists.</td></tr>
+          <tr role="row"><td role="cell"><span class="code was">TQ-SLK-SOP-001</span><span class="arrow" aria-hidden="true">to</span></td><td role="cell"><span class="code">TQ-SS-SOP-001</span></td><td role="cell">Short forms follow the S001 tables: Slickline SS, Marine MS, Finance CFP, Supply Chain SC. Legal keeps LGL.</td></tr>
         </tbody>
       </table>
     </section>
@@ -385,7 +386,7 @@ a.row:focus-visible{outline-offset:-3px;border-radius:0;}
         <li><a class="row" href="master-list.html?view=provisional">
           <span class="fig" data-n="prov"></span>
           <span class="rmain"><span class="rname">Cannot be numbered</span>
-            <span class="rdesc"><b data-n="altName"></b> (<span data-n="alt"></span>) and <b data-n="llName"></b> (<span data-n="ll"></span>) have no code in TQ-QHSE-S001 yet. The rest sit in <span data-n="areaGaps"></span> areas the standard has not given a short form, <b data-n="ldName"></b> among them, though it owns this platform.</span></span>
+            <span class="rdesc"><b data-n="altName"></b> (<span data-n="alt"></span>) and <b data-n="llName"></b> (<span data-n="ll"></span>) have no code in TQ-QHSE-S001 yet. The rest sit in <span data-n="areaGaps"></span> areas the standard has not given a short form, <b data-n="ldName"></b> among them, though it owns this platform, and <span data-n="buGaps"></span> whose short form is assigned but whose business unit QHSE has not confirmed.</span></span>
           <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </a></li>
         <li><div class="row static">
@@ -462,6 +463,8 @@ a.row:focus-visible{outline-offset:-3px;border-radius:0;}
     set('ov180', ov180.length);
     set('areaGaps', Object.keys(prov.reduce(function(m, d){
       var sg = L.segments[d.segment]; if (sg && sg.provisional) m[d.segment] = 1; return m; }, {})).length);
+    set('buGaps', Object.keys(prov.reduce(function(m, d){
+      var sg = L.segments[d.segment]; if (sg && !sg.provisional && !sg.bu && sg.group === 'segment') m[d.segment] = 1; return m; }, {})).length);
     set('ldName', segName('learning-center'));
     set('altName', typeLabel('alert'));
     set('alt', provIn(function(d){ return d.docType === 'alert'; }));

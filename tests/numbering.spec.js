@@ -14,6 +14,7 @@ const { TAQA_MASTER_DOCS: DOCS, TAQA_DOC_LOOKUPS: L } = require('../documents-ma
 
 const ONE_LETTER = /^TQ-(?:(?:TWS|TDS|TWC|TWI|P&T)-)?[A-Z&]+-[SPMF](?:\d{3}|###)$/;
 const LONG_CODE = /^TQ-(?:(?:TWS|TDS|TWC|TWI|P&T)-)?[A-Z&]+-(?:SOP|WI|ALT|LL)-\d{3}$/;
+const numberedAll = () => DOCS.filter((d) => d.docNumber);
 const corporate = (d) => { const s = L.segments[d.segment]; return !s.bu && (s.group === 'function' || s.group === 'company'); };
 
 test.describe('the register follows the TQ-QHSE-S001 numbering table', () => {
@@ -72,6 +73,43 @@ test.describe('the register follows the TQ-QHSE-S001 numbering table', () => {
   });
 });
 
+test.describe('area short forms come from the TQ-QHSE-S001 5.3 tables', () => {
+  // Corporate Function, Service & Product Line and Support Function tables.
+  // Legal keeps LGL, its support-function code, by decision of the business.
+  const S001 = {
+    'coiled-tubing': 'CTSS', 'well-testing': 'WTS', 'well-safety': 'WSS', inspection: 'WIS',
+    drilling: 'DSS', cementing: 'CMT', slickline: 'SS', wireline: 'WS', 'marine-services': 'MS',
+    fracturing: 'FS', 'well-completions': 'WCS', 'tws-maintenance': 'MNT',
+    qhse: 'QHSE', cybersecurity: 'GRC', finance: 'CFP', 'supply-chain': 'SC', hr: 'HR', it: 'IT', legal: 'LGL',
+  };
+
+  test('every area the standard names uses its code and is no longer flagged for it', () => {
+    for (const [seg, code] of Object.entries(S001)) {
+      expect(L.segments[seg].spl, seg).toBe(code);
+      expect(L.segments[seg].provisional, seg).toBe(false);
+    }
+  });
+
+  test('no number still uses a code the standard does not define for that area', () => {
+    const retired = /^TQ-(?:[A-Z&]+-)?(?:SLK|MRS|FIN|SCM|VM)-/;
+    expect(numberedAll().filter((d) => retired.test(d.docNumber)).map((d) => d.docNumber)).toEqual([]);
+  });
+
+  test('renumbered documents keep their old numbers, and corporate functions are conformant', () => {
+    const moved = { 'TQ-SLK-SOP-001': 'TQ-SS-SOP-001', 'TQ-MRS-SOP-002': 'TQ-MS-SOP-002', 'TQ-MRS-F001': 'TQ-MS-F001',
+      'TQ-FIN-S001': 'TQ-CFP-S001', 'TQ-SCM-M003': 'TQ-SC-M003', 'TQ-SCM-WI-003': 'TQ-SC-M003' };
+    for (const [was, now] of Object.entries(moved)) {
+      const d = DOCS.find((x) => x.legacyId === was || (x.formerNumbers || []).includes(was));
+      expect(d && d.docNumber, was).toBe(now);
+    }
+    for (const seg of ['finance', 'it', 'supply-chain', 'legal'])
+      expect(DOCS.filter((d) => d.segment === seg).every((d) => d.numberStatus === 'conformant'), seg).toBe(true);
+    // A service line with no business unit confirmed stays flagged for that reason.
+    for (const seg of ['slickline', 'marine-services', 'well-completions'])
+      expect(DOCS.filter((d) => d.segment === seg).every((d) => d.numberStatus === 'provisional'), seg).toBe(true);
+  });
+});
+
 test.describe('the viewer', () => {
   test('an old policy link opens the renumbered policy under its new number', async ({ page, gotoApp }) => {
     await gotoApp('/index.html');
@@ -118,6 +156,14 @@ test.describe('upload numbers a new document by the table', () => {
     expect(r.id).toMatch(/^TQ-TWS-CTSS-WI-\d{3}$/);      // a business unit keeps WI
     r = await numberFor(page, 'coiled-tubing', 'sop');
     expect(r.id).toMatch(/^TQ-TWS-CTSS-SOP-\d{3}$/);
+
+    // Corporate functions and service lines take the S001 short forms.
+    r = await numberFor(page, 'finance', 'standard');
+    expect(r.id).toBe('TQ-CFP-S003');
+    await expect(r.status.locator('.id-ok')).toBeVisible();
+    r = await numberFor(page, 'slickline', 'sop');
+    expect(r.id).toBe('TQ-SS-SOP-003');                   // after SOP-001 and SOP-002
+    await expect(r.status).toContainText('business unit');
 
     // An alert has no code in the standard yet: a calm note, not a warning.
     r = await numberFor(page, 'cementing', 'alert');

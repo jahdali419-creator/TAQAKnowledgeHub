@@ -12,7 +12,7 @@ const MOVED = {
   'TQ-TWS-CTSS-SOP-001': 'TQ-TWS-CTSS-F001',
   'TQ-TDS-DSS-SOP-001': 'TQ-TDS-DSS-F001',
   'TQ-TWS-WTS-SOP-001': 'TQ-TWS-WTS-F001',
-  'TQ-MRS-SOP-001': 'TQ-MRS-F001',
+  'TQ-MRS-SOP-001': 'TQ-MS-F001',
 };
 
 async function start(page, gotoApp, setRole, clearAppState, role = 'employee', area = 'coiled-tubing') {
@@ -124,7 +124,9 @@ test.describe('form.html', () => {
   test('the old SOP number and the Arabic translation both open, the translation saying where its checks come from', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, setRole, clearAppState);
     await gotoApp('/form.html?doc=TQ-MRS-SOP-001');
-    await expect(page.locator('.docno')).toHaveText('TQ-MRS-F001');
+    await expect(page.locator('.docno')).toHaveText('TQ-MS-F001');
+    await gotoApp('/form.html?doc=TQ-MRS-F001');               // the pre-S001 Marine code
+    await expect(page.locator('.docno')).toHaveText('TQ-MS-F001');
 
     await gotoApp('/form.html?doc=TQ-TWS-CTSS-F001-AR');
     await expect(page.locator('.docno')).toHaveText('TQ-TWS-CTSS-F001-AR');

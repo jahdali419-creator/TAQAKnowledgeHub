@@ -95,7 +95,7 @@ const TAQA_FORMS = {
     signoff: ["Completed by", "Verified by (Test Supervisor)"]
   },
 
-  "TQ-MRS-F001": {
+  "TQ-MS-F001": {
     sample: true,
     jobFields: ["Vessel", "Port / location", "Date", "Master"],
     sections: [
