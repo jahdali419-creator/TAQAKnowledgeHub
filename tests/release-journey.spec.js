@@ -46,14 +46,15 @@ async function fileThroughUpload(page, gotoApp, title) {
 
 test.describe('one document, every role, through the UI', () => {
   test('Employee files -> QMS checks -> Director approves -> published -> Auditor sees the full signed trail', async ({
-    page, gotoApp, setRole, clearAppState, consoleErrors,
+    page, gotoApp, setRole, clearAppState, consoleErrors, topbar,
   }) => {
     const TITLE = 'E2E-ROLE-TEST-' + Date.now();
     await prime(page, gotoApp, clearAppState, setRole, 'employee');
 
     // Employee: the Upload action is there, and filing creates exactly one record.
     await gotoApp('/index.html');
-    await expect(page.locator('#navbar a.nav-cta.nav-up')).toBeVisible();
+    // In the bar on desktop, in the menu on a phone.
+    await expect(await topbar.upload()).toBeVisible();
     const nums = await fileThroughUpload(page, gotoApp, TITLE);
     expect(nums).toHaveLength(1);
     const N = nums[0];
@@ -194,6 +195,32 @@ test.describe('the register refuses writes a role does not hold, wherever they c
   });
 });
 
+test.describe('upload refuses what is not a document', () => {
+  // A 0-byte file used to be accepted, so an empty "procedure" could be
+  // filed and go to QMS and the Director.
+  test('an empty file, a disguised executable and an over-limit file are each refused with a reason', async ({ page, gotoApp, setRole, clearAppState }) => {
+    await prime(page, gotoApp, clearAppState, setRole, 'employee');
+    await gotoApp('/upload.html');
+    await page.setInputFiles('#file-input', { name: 'empty.pdf', mimeType: 'application/pdf', buffer: Buffer.alloc(0) });
+    await expect(page.locator('#toast-title')).toHaveText('File is empty');
+    await expect(page.locator('#go-2')).toBeDisabled();
+    await expect(page.locator('#file-list .file-item')).toHaveCount(0);
+
+    await page.setInputFiles('#file-input', { name: 'report.pdf.exe', mimeType: 'application/octet-stream', buffer: Buffer.from('MZ') });
+    await expect(page.locator('#toast-title')).toHaveText('File type not permitted');
+    await expect(page.locator('#go-2')).toBeDisabled();
+
+    // The 500 MB rule, checked without allocating 500 MB: the page reads File.size.
+    await page.evaluate(() => {
+      const f = new File(['x'], 'huge.pdf', { type: 'application/pdf' });
+      Object.defineProperty(f, 'size', { value: 501 * 1024 * 1024 });
+      addFiles([f]);
+    });
+    await expect(page.locator('#toast-title')).toHaveText('File too large');
+    await expect(page.locator('#go-2')).toBeDisabled();
+  });
+});
+
 test.describe('two tabs', () => {
   // A second QMS tab opened earlier held its own copy of the register, and
   // its next write put the first tab's confirmation back to "waiting on QMS".
@@ -290,6 +317,33 @@ test.describe('on a phone', () => {
     await gotoApp('/dashboard.html?id=' + SEG);
     const list = await page.locator('#pending-list').boundingBox();
     expect(Math.round(360 - (list.x + list.width))).toBe(Math.round(list.x));
+  });
+
+  // Below 1100px the register scrolls sideways, and its sticky header was
+  // pushed 64px down inside that box, over the first row: it covered the
+  // title and took the tap meant for the row.
+  test('the Master List header does not cover the first row, and tapping the row opens it', async ({ page, gotoApp, setRole, clearAppState }) => {
+    await prime(page, gotoApp, clearAppState, setRole, 'auditor');
+    await gotoApp('/master-list.html');
+    const head = await page.locator('thead').boundingBox();
+    const row = page.locator('#rows tr').first();
+    const first = await row.boundingBox();
+    expect(head.y + head.height).toBeLessThanOrEqual(first.y + 1);
+    await row.click();
+    await expect(page.locator('#dw')).toHaveClass(/open/);
+    const seg = await page.locator('#f-seg').boundingBox();
+    expect(seg.x + seg.width).toBeLessThanOrEqual(360);
+  });
+
+  // The answer bubble is a flex item that would not shrink below its longest
+  // word, so at 360px the result cards ran 29px off the screen.
+  test('search results stay inside the screen', async ({ page, gotoApp, setRole, clearAppState }) => {
+    await prime(page, gotoApp, clearAppState, setRole, 'employee');
+    await gotoApp('/ai-search.html?q=' + encodeURIComponent('Pre-Job Safety Checklist'));
+    const bubble = page.locator('.msg-ai .bubble').first();
+    await expect(bubble.locator('.source-card').first()).toBeVisible();
+    const b = await bubble.boundingBox();
+    expect(b.x + b.width).toBeLessThanOrEqual(360);
   });
 
   test('the install prompt waits for the welcome tour instead of covering it', async ({ page, gotoApp, clearAppState }) => {

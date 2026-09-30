@@ -492,6 +492,8 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
    title attribute for a hover or a screen reader. */
 .filter-bar select, #f-seg, #f-type, #f-status, #f-cls, #f-lang {
   text-overflow:ellipsis; padding-inline-end:30px;
+  /* A select is as wide as its longest option; on a phone that ran past the card. */
+  max-width:100%;
 }
 
 /* ── The site's top bar ──
@@ -501,6 +503,11 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
 .shell{padding-top:var(--nav-h,64px);}
 .side{top:var(--nav-h,64px);height:calc(100dvh - var(--nav-h,64px));}
 thead th{top:var(--nav-h,64px);}
+/* Below 1100px the table scrolls sideways in .scroll, which makes that box
+   the header's sticky container. The offset above then pushed the header
+   64px down inside it, on top of the first row, where it covered the title
+   and took the tap meant for the row. There it stays in normal flow. */
+@media(max-width:1100px){thead th{position:static;}}
 .scrim{z-index:1005;}
 .dw{z-index:1006;}
 @media(max-width:980px){.side{height:auto;}}

@@ -16,7 +16,7 @@
 // QMS) or it refuses at the door (see the inline script right after
 // roles.js loads), so every test signs in as 'qms', which can manage every
 // area regardless of which one is requested.
-const { test, expect, assertNoConsoleErrors } = require('./helpers/fixtures');
+const { test, expect, assertNoConsoleErrors, DESKTOP } = require('./helpers/fixtures');
 const { computeBaseline } = require('./helpers/baseline');
 
 const AREA = 'coiled-tubing';
@@ -163,30 +163,50 @@ test.describe('documents.html, sorting', () => {
     expect(types).toEqual([...sorted].reverse());
   });
 
-  test('sorting by Published orders rows chronologically, both directions', async ({
-    page,
-    gotoApp,
-    setRole,
-  }) => {
-    await openArea(gotoApp, setRole, AREA);
-    const dateCol = page.locator('th[data-col="date"]');
-    const MONTHS = { Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12 };
-    const toKey = (s) => {
-      const [m, y] = s.trim().split(' ');
-      return (parseInt(y, 10) || 0) * 12 + (MONTHS[m] || 0);
-    };
+  // documents.html hides the Published column below 641px on purpose ("the
+  // published date gives way; status is the column worth the space on a
+  // phone"), so sorting by it is a desktop behaviour, tested at desktop width.
+  test.describe('at desktop width', () => {
+    test.use(DESKTOP);
+    test('sorting by Published orders rows chronologically, both directions', async ({
+      page,
+      gotoApp,
+      setRole,
+    }) => {
+      await openArea(gotoApp, setRole, AREA);
+      const dateCol = page.locator('th[data-col="date"]');
+      const MONTHS = { Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12 };
+      const toKey = (s) => {
+        const [m, y] = s.trim().split(' ');
+        return (parseInt(y, 10) || 0) * 12 + (MONTHS[m] || 0);
+      };
 
-    await dateCol.click();
-    await expect(dateCol).toHaveClass(/sort-asc/);
-    let dates = await page.locator('#pub-docs-body .pub-table-date').allTextContents();
-    let keys = dates.map(toKey);
-    expect(keys).toEqual([...keys].sort((a, b) => a - b));
+      await dateCol.click();
+      await expect(dateCol).toHaveClass(/sort-asc/);
+      let dates = await page.locator('#pub-docs-body .pub-table-date').allTextContents();
+      let keys = dates.map(toKey);
+      expect(keys).toEqual([...keys].sort((a, b) => a - b));
 
-    await dateCol.click();
-    await expect(dateCol).toHaveClass(/sort-desc/);
-    dates = await page.locator('#pub-docs-body .pub-table-date').allTextContents();
-    keys = dates.map(toKey);
-    expect(keys).toEqual([...keys].sort((a, b) => b - a));
+      await dateCol.click();
+      await expect(dateCol).toHaveClass(/sort-desc/);
+      dates = await page.locator('#pub-docs-body .pub-table-date').allTextContents();
+      keys = dates.map(toKey);
+      expect(keys).toEqual([...keys].sort((a, b) => b - a));
+    });
+  });
+
+  test.describe('on a phone', () => {
+    test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    test('the Published column gives way to Status, and Status still sorts', async ({ page, gotoApp, setRole }) => {
+      await openArea(gotoApp, setRole, AREA);
+      await expect(page.locator('th[data-col="date"]')).toBeHidden();
+      const statusCol = page.locator('th[data-col="status"]');
+      await expect(statusCol).toBeVisible();
+      await statusCol.click();
+      await expect(statusCol).toHaveClass(/sort-asc/);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+      expect(overflow).toBeLessThanOrEqual(0);
+    });
   });
 
   test('sorting by Status orders rows by days late (current first when ascending)', async ({

@@ -1,5 +1,7 @@
 # TAQA Knowledge Hub, Frontend QA & Release Report
 
+> **Superseded counts.** The end-to-end role audit of 30 Sept 2026 (`RELEASE-QA-E2E.md`) re-ran the suite and found and fixed workflow, permission and phone-layout defects. Use its measured results, not the test counts below.
+
 Scope note, read this first: this is a **frontend prototype / functional
 specification**. Plain HTML/CSS/JS, no build step, no backend, no database,
 no real SharePoint, no real Entra ID/SSO, no real email/Teams notifications,

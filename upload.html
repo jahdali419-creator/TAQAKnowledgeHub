@@ -935,9 +935,13 @@ function addFiles(files) {
   let added = 0;
   const rejected = [];
   const oversized = [];
+  // A 0-byte file was accepted and could be filed, so a document with no
+  // content went to QMS and the Director as if it were a procedure.
+  const empty = [];
   files.forEach(f => {
     if (!ALLOWED_EXT.includes(extOf(f.name))) { rejected.push(f.name); return; }
     if (f.size > MAX_FILE_SIZE_BYTES) { oversized.push(f.name); return; }
+    if (f.size === 0) { empty.push(f.name); return; }
     if (selectedFiles.find(x => x.name === f.name)) return;
     selectedFiles.push(f);
     added++;
@@ -975,6 +979,11 @@ function addFiles(files) {
     showUploadToast('File too large',
       oversized.length + ' file' + (oversized.length > 1 ? 's exceed' : ' exceeds') +
       ' the 500 MB limit and ' + (oversized.length > 1 ? 'were' : 'was') + ' not added.', ICON_WARN);
+  }
+  if (empty.length) {
+    showUploadToast('File is empty',
+      (empty.length > 1 ? empty.length + ' files are' : '"' + (empty[0].length > 40 ? empty[0].slice(0, 40) + '…' : empty[0]) + '" is') +
+      ' 0 bytes and ' + (empty.length > 1 ? 'were' : 'was') + ' not added. Check the file saved properly and choose it again.', ICON_WARN);
   }
 
 }

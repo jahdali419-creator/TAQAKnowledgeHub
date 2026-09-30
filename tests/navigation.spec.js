@@ -29,7 +29,7 @@
 //    navigation this test makes (including the reload after
 //    clearAppState()/setRole()), so it is never testing around a popup
 //    it wasn't asked to test.
-const { test, expect, assertNoConsoleErrors } = require('./helpers/fixtures');
+const { test, expect, assertNoConsoleErrors, DESKTOP } = require('./helpers/fixtures');
 const { loadRegisterDetail } = require('./helpers/areaGroups');
 
 test.beforeEach(async ({ page }) => {
@@ -54,6 +54,10 @@ test.describe('Logo / brand link', () => {
 });
 
 test.describe('Areas dropdown', () => {
+  // Desktop bar widget: pinned to the width where it exists, in every
+  // project. The phone menu's equivalent is tested in "Mobile: hamburger menu".
+  test.use(DESKTOP);
+
   test('opens and closes via its button, toggling aria-expanded and the panel', async ({
     page,
     gotoApp,
@@ -120,12 +124,14 @@ test.describe('Primary nav links', () => {
   ];
 
   for (const { label, href } of CASES) {
-    test(`"${label}" points to ${href} and navigates there`, async ({ page, gotoApp, clearAppState }) => {
+    test(`"${label}" points to ${href} and navigates there`, async ({ page, gotoApp, clearAppState, topbar }) => {
       await gotoApp('/index.html');
       await clearAppState();
       await gotoApp('/index.html');
 
-      const link = page.locator('#navbar .nav-links > li > a', { hasText: label });
+      // The bar on desktop, the menu on a phone: whichever this width shows.
+      const link = await topbar.link(href);
+      await expect(link).toHaveText(label);
       await expect(link).toHaveAttribute('href', href);
       await link.click();
       await expect(page).toHaveURL(new RegExp(href.replace('.', '\\.') + '$'));
@@ -140,6 +146,7 @@ test.describe('Master List link (registerView roles only)', () => {
       await setRole(role, 'coiled-tubing');
       await gotoApp('/index.html');
       await expect(page.locator('#navbar .nav-links a[href="master-list.html"]')).toHaveCount(0);
+      await expect(page.locator('#nav-mobile-menu a[href="master-list.html"]')).toHaveCount(0);
     });
   }
 
@@ -149,12 +156,13 @@ test.describe('Master List link (registerView roles only)', () => {
       gotoApp,
       setRole,
       consoleErrors,
+      topbar,
     }) => {
       await gotoApp('/index.html');
       await setRole(role, 'coiled-tubing');
       await gotoApp('/index.html');
 
-      const link = page.locator('#navbar .nav-links a[href="master-list.html"]');
+      const link = await topbar.link('master-list.html');
       await expect(link).toBeVisible();
       await link.click();
       await expect(page).toHaveURL(/master-list\.html/);
@@ -191,11 +199,11 @@ test.describe('Upload link (roles that may submit)', () => {
   }
 
   for (const role of ['employee', 'owner', 'qms']) {
-    test(`is visible and points at upload.html for ${role}`, async ({ page, gotoApp, setRole }) => {
+    test(`is visible and points at upload.html for ${role}`, async ({ page, gotoApp, setRole, topbar }) => {
       await gotoApp('/index.html');
       await setRole(role, 'coiled-tubing');
       await gotoApp('/index.html');
-      const link = page.locator('#navbar a.nav-cta.nav-up');
+      const link = await topbar.upload();
       await expect(link).toBeVisible();
       await expect(link).toHaveAttribute('href', 'upload.html');
       await link.click();
@@ -240,6 +248,10 @@ test.describe('Approvals bell', () => {
 });
 
 test.describe('Bookmarks', () => {
+  // Desktop bar widget: pinned to the width where it exists, in every
+  // project. The phone menu's equivalent is tested in "Mobile: hamburger menu".
+  test.use(DESKTOP);
+
   test('the icon opens a bookmarks panel showing what was bookmarked', async ({
     page,
     gotoApp,
@@ -321,6 +333,10 @@ test.describe('Dark mode toggle', () => {
 });
 
 test.describe('The door (role / identity switcher)', () => {
+  // Desktop bar widget: pinned to the width where it exists, in every
+  // project. The phone menu's equivalent is tested in "Mobile: hamburger menu".
+  test.use(DESKTOP);
+
   test('changing role updates TAQA_ROLE.current() and its storage key', async ({
     page,
     gotoApp,
@@ -502,9 +518,103 @@ test.describe('Mobile: hamburger menu', () => {
     await expect(menu).toBeVisible();
     await expect(page.locator('.bell-menu')).toBeHidden();
   });
+  // Phone equivalents of the desktop-only widgets pinned to DESKTOP above.
+  test('the menu lists the same areas as the desktop Areas sheet: Company Wide plus every segment/function/product area', async ({
+    page,
+    gotoApp,
+    clearAppState,
+  }) => {
+    await gotoApp('/index.html');
+    await clearAppState();
+    await gotoApp('/index.html');
+    const { byGroup } = loadRegisterDetail();
+    const expectedIds = [
+      ...(byGroup.company || []),
+      ...(byGroup.segment || []),
+      ...(byGroup.function || []),
+      ...(byGroup.product || []),
+    ].sort();
+    await page.locator('#nav-hamburger').click();
+    const hrefs = await page
+      .locator('#nav-mobile-menu a[href*="segment.html?id="]')
+      .evaluateAll((as) => as.map((a) => new URLSearchParams(a.getAttribute('href').split('?')[1] || '').get('id')));
+    expect([...new Set(hrefs)].sort()).toEqual(expectedIds);
+    // A family opens to show its areas.
+    const fam = page.locator('#nav-mobile-menu details.mm-grp').first();
+    await fam.locator('summary').click();
+    await expect(fam.locator('.mm-list a').first()).toBeVisible();
+  });
+
+  test('Bookmarks in the menu opens the shared panel with what was saved, and Escape closes it', async ({
+    page,
+    gotoApp,
+    clearAppState,
+    topbar,
+  }) => {
+    await gotoApp('/index.html');
+    await clearAppState();
+    await gotoApp('/index.html');
+    await page.evaluate(() => {
+      window.TAQA_Bookmarks.add({ title: 'TQ-TWS-CTSS-SOP-001  Pre-Job Safety Checklist', type: 'sop', segId: 'coiled-tubing', segName: 'Coiled Tubing' });
+    });
+    await topbar.openBookmarks();
+    const panel = page.locator('#bm-panel');
+    await expect(panel.locator('.bm-t')).toHaveText('Pre-Job Safety Checklist');
+    await expect(page.locator('#nav-mobile-menu')).toBeHidden();
+    await page.keyboard.press('Escape');
+    await expect(panel).toBeHidden();
+  });
+
+  test('"Viewing as" in the menu changes role, and the area picker changes a Director\'s area', async ({
+    page,
+    gotoApp,
+    setRole,
+    topbar,
+  }) => {
+    await gotoApp('/index.html');
+    await setRole('employee', 'coiled-tubing');
+    await gotoApp('/index.html');
+    await topbar.switchRole('qms');
+    await expect.poll(() => page.evaluate(() => TAQA_ROLE.current()).catch(() => undefined), { timeout: 10000 }).toBe('qms');
+    await expect(page.locator('#nav-mobile-menu .mm-door button[data-role="qms"]')).toHaveAttribute('aria-pressed', 'true');
+
+    await topbar.switchRole('owner');
+    await topbar.openMenu();
+    const area = page.locator('#mm-area-sel');
+    await expect(area).toBeVisible();
+    await Promise.all([page.waitForEvent('load'), area.selectOption('fracturing')]);
+    await expect.poll(() => page.evaluate(() => TAQA_ROLE.area()).catch(() => undefined), { timeout: 10000 }).toBe('fracturing');
+  });
+
+  test('the menu button is reachable with Tab, shows a focus ring, opens with Enter and closes with Escape', async ({
+    page,
+    gotoApp,
+    clearAppState,
+  }) => {
+    await gotoApp('/index.html');
+    await clearAppState();
+    await gotoApp('/index.html');
+    const hb = page.locator('#nav-hamburger');
+    let reached = false;
+    for (let i = 0; i < 15 && !reached; i++) {
+      await page.keyboard.press('Tab');
+      reached = await hb.evaluate((el) => el === document.activeElement);
+    }
+    expect(reached).toBe(true);
+    expect(await hb.evaluate((el) => getComputedStyle(el).outlineStyle)).not.toBe('none');
+    await page.keyboard.press('Enter');
+    await expect(hb).toHaveAttribute('aria-expanded', 'true');
+    await page.keyboard.press('Escape');
+    await expect(hb).toHaveAttribute('aria-expanded', 'false');
+    await expect(hb).toBeFocused();
+  });
 });
 
 test.describe('Popovers are mutually exclusive on desktop, and Escape / click-outside close them with focus returning', () => {
+  // Desktop bar widget: pinned to the width where it exists, in every
+  // project. The phone menu's equivalent is tested in "Mobile: hamburger menu".
+  test.use(DESKTOP);
+
   test('opening Areas, then Bookmarks, then the door closes whichever was open before', async ({
     page,
     gotoApp,

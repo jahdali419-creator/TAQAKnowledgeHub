@@ -6,7 +6,7 @@
 // contrast auditing, see the note above the contrast test below.
 const fs = require('node:fs');
 const path = require('node:path');
-const { test, expect } = require('./helpers/fixtures');
+const { test, expect, DESKTOP } = require('./helpers/fixtures');
 
 const ROOT = path.resolve(__dirname, '..');
 
@@ -111,6 +111,10 @@ test.describe('landmarks and headings (spot-check)', () => {
 });
 
 test.describe('keyboard navigation', () => {
+  // The bar's own widgets; a phone's keyboard path through the menu button
+  // is tested in navigation.spec.js ("Mobile: hamburger menu").
+  test.use(DESKTOP);
+
   test('tabbing reaches real interactive elements in the primary nav', async ({
     page,
     gotoApp,

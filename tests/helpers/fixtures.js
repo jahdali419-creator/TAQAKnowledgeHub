@@ -90,6 +90,51 @@ exports.test = base.test.extend({
     await use(setRole);
   },
 
+  // The top bar as a person uses it at the current width. At 1180px and
+  // below topbar.css hides the bar's links, the door, Bookmarks and Upload
+  // (on purpose: "Everything else is in the menu"), and the phone menu
+  // carries each of them instead. Tests about what someone can reach go
+  // through this, so the mobile projects exercise the menu for real rather
+  // than timing out on controls a phone never shows.
+  topbar: async ({ page }, use) => {
+    const isPhone = () => page.locator('#nav-hamburger').isVisible();
+    const openMenu = async () => {
+      const menu = page.locator('#nav-mobile-menu');
+      if (!(await menu.evaluate((m) => m.classList.contains('open')))) await page.locator('#nav-hamburger').click();
+      await base.expect(menu).toHaveClass(/open/);
+    };
+    await use({
+      isPhone,
+      openMenu,
+      /** A primary link: the bar on desktop, the menu on a phone. */
+      async link(href) {
+        if (await isPhone()) { await openMenu(); return page.locator(`#nav-mobile-menu .mm-main a[href="${href}"]`); }
+        return page.locator(`#navbar .nav-links > li > a[href="${href}"]`);
+      },
+      /** The Upload action for roles that may file. */
+      async upload() {
+        if (await isPhone()) { await openMenu(); return page.locator('#nav-mobile-menu a.mm-up'); }
+        return page.locator('#navbar a.nav-cta.nav-up');
+      },
+      /** Opens the shared bookmarks panel from the bar's icon or the menu row. */
+      async openBookmarks() {
+        if (await isPhone()) { await openMenu(); await page.locator('#mm-bm').click(); }
+        else await page.locator('#nav-bm').click();
+        await base.expect(page.locator('#bm-panel')).toBeVisible();
+      },
+      /** Changes role the way a person does, then waits for the reload. */
+      async switchRole(role) {
+        if (await isPhone()) {
+          await openMenu();
+          await Promise.all([page.waitForEvent('load'), page.locator(`#nav-mobile-menu .mm-door button[data-role="${role}"]`).click()]);
+        } else {
+          await page.locator('#taqa-door .door-btn').click();
+          await Promise.all([page.waitForEvent('load'), page.locator(`#taqa-door .door-i[data-role="${role}"]`).click()]);
+        }
+      },
+    });
+  },
+
   clearAppState: async ({ page }, use) => {
     const clear = async () => {
       await page.evaluate(() => {
@@ -110,3 +155,9 @@ exports.expect = base.expect;
 exports.assertNoConsoleErrors = (consoleErrors) => {
   base.expect(consoleErrors, `Unexpected JS error(s):\n${consoleErrors.join('\n')}`).toEqual([]);
 };
+
+/** For tests of a desktop-only widget (the Areas dropdown, the door, the
+ *  bar's popovers): `test.use(DESKTOP)` runs them at the width where that
+ *  widget exists, in every project. Their phone equivalents are tested
+ *  separately in navigation.spec.js's "phone menu" block. */
+exports.DESKTOP = { viewport: { width: 1440, height: 900 }, isMobile: false, hasTouch: false };
