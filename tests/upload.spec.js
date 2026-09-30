@@ -373,8 +373,8 @@ test.describe('upload.html, record preview (paintRecord), cross-checked against 
     await expect(approverRow).toContainText('Chief Executive Officer');
 
     const numRow = page.locator('#rec-card .rec-row', { hasText: 'Document number' }).locator('.rec-v');
-    // TAQA-<Function>-P0XX, the corporate policy series (taqaRefId()).
-    await expect(numRow).toContainText(/^TAQA-[A-Z&]+-P\d{3}/);
+    // TQ-<Function>-PXXX, TQ-QHSE-S001 5.3 row 02 (taqaRefId()).
+    await expect(numRow).toContainText(/^TQ-[A-Z&]+-P\d{3}/);
   });
 });
 
