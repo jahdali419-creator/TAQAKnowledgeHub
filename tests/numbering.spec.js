@@ -75,11 +75,12 @@ test.describe('the register follows the TQ-QHSE-S001 numbering table', () => {
 
 test.describe('area short forms come from the TQ-QHSE-S001 5.3 tables', () => {
   // Corporate Function, Service & Product Line and Support Function tables.
+  // Legal keeps LGL, its support-function code, by decision of the business.
   const S001 = {
     'coiled-tubing': 'CTSS', 'well-testing': 'WTS', 'well-safety': 'WSS', inspection: 'WIS',
     drilling: 'DSS', cementing: 'CMT', slickline: 'SS', wireline: 'WS', 'marine-services': 'MS',
     fracturing: 'FS', 'well-completions': 'WCS', 'tws-maintenance': 'MNT',
-    qhse: 'QHSE', cybersecurity: 'GRC', finance: 'CFP', 'supply-chain': 'SC', hr: 'HR', it: 'IT', legal: 'VM',
+    qhse: 'QHSE', cybersecurity: 'GRC', finance: 'CFP', 'supply-chain': 'SC', hr: 'HR', it: 'IT', legal: 'LGL',
   };
 
   test('every area the standard names uses its code and is no longer flagged for it', () => {
@@ -90,13 +91,13 @@ test.describe('area short forms come from the TQ-QHSE-S001 5.3 tables', () => {
   });
 
   test('no number still uses a code the standard does not define for that area', () => {
-    const retired = /^TQ-(?:[A-Z&]+-)?(?:SLK|MRS|FIN|SCM|LGL)-/;
+    const retired = /^TQ-(?:[A-Z&]+-)?(?:SLK|MRS|FIN|SCM|VM)-/;
     expect(numberedAll().filter((d) => retired.test(d.docNumber)).map((d) => d.docNumber)).toEqual([]);
   });
 
   test('renumbered documents keep their old numbers, and corporate functions are conformant', () => {
     const moved = { 'TQ-SLK-SOP-001': 'TQ-SS-SOP-001', 'TQ-MRS-SOP-002': 'TQ-MS-SOP-002', 'TQ-MRS-F001': 'TQ-MS-F001',
-      'TQ-FIN-S001': 'TQ-CFP-S001', 'TQ-SCM-M003': 'TQ-SC-M003', 'TQ-SCM-WI-003': 'TQ-SC-M003', 'TQ-LGL-S001': 'TQ-VM-S001' };
+      'TQ-FIN-S001': 'TQ-CFP-S001', 'TQ-SCM-M003': 'TQ-SC-M003', 'TQ-SCM-WI-003': 'TQ-SC-M003' };
     for (const [was, now] of Object.entries(moved)) {
       const d = DOCS.find((x) => x.legacyId === was || (x.formerNumbers || []).includes(was));
       expect(d && d.docNumber, was).toBe(now);
