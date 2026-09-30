@@ -14,7 +14,7 @@ Every PASS below means I did the action and saw the result. Where I could not ve
 - The full journey with one document, Employee upload → QMS check → Director approval → published → Auditor review, at **1440×900**, **390×844** and **360×800**, each role acting in turn. No JS errors in any run.
 - Role permissions for Employee, QMS, Director and Auditor: every screen, including direct addresses, and every write attempted from the console (section 3).
 - Edge cases: empty file, `.pdf.exe`, 501 MB file, Director before the QMS check, double-click submit/confirm/approve, approve twice, refresh, back/forward, two tabs, reject without a reason, Director of another area.
-- Automated: SUITE_FINAL_PENDING
+- Automated, final code: **758 passed, 0 failed, 2 skipped, 0 flaky, of 760** (chromium 379/0/1, mobile-chrome 379/0/1). Section 6 has the details.
 
 ### Failed
 - **None open.** Every failure found during this audit was reproduced, fixed, covered by a regression test and re-verified in the browser. Section 7 lists all 24. The one earlier full-suite run with failures (33 on mobile-chrome) is explained in section 6: 31 failures were already on `main`, and 1 was a real phone bug that is now fixed.
@@ -22,6 +22,7 @@ Every PASS below means I did the action and saw the result. Where I could not ve
 ### Not tested, because the browser is not installed in this container
 - **Firefox, WebKit (Safari) and mobile-safari (iPhone 14).** `npx playwright test --project=firefox --project=webkit --project=mobile-safari` stops at launch: `Executable doesn't exist at /opt/pw-browsers/firefox-1495/…` and `…/webkit-2215/pw_run.sh`. No test in those projects ran.
 - Real phones. Phone results come from Chromium device emulation (`isMobile`, touch) at 390, 360 and 412 (Pixel 7).
+- Offline fallback for a never-visited page: `offline.spec.js:303` skipped itself in both projects because this sandbox's offline emulation cannot block the service worker's fetch.
 
 ### Architectural limitation: needs back-end enforcement
 - **Every rule runs in the visitor's browser. There is no server.** The fixes make the page and its register (`store.js`) refuse wrong-role actions wherever they come from inside the app. Someone who edits `localStorage` by hand can still change any record, publish anything and forge any signature. roles.js says so itself: "THIS IS A SPECIFICATION, NOT A SECURITY CONTROL". The Azure API must enforce submit, check, approve, withdraw and edit per role and area, and must take the signer from the signed-in identity. Until then this is a prototype, not a system of record.
@@ -37,7 +38,7 @@ Every PASS below means I did the action and saw the result. Where I could not ve
 | Permission / security | **PASS within the prototype's limits; not production-grade** (see the limitation above). Found and fixed: QMS could publish without the Director (B2); Employee and Auditor could withdraw or rename live documents (B3); stored XSS through the bell (B4); a stale tab undid another tab's step (B5). | 4 roles × 14 direct addresses; every write attempted as each role. |
 | Desktop UX (1440×900) | **PASS; LOW items open.** | Every role's screens reviewed; the misleading copy was fixed. |
 | Mobile UX (390×844, 360×800) | **PASS on the final code; LOW items open.** It failed at the start, with 10 layout defects listed in section 5, all fixed. | The whole workflow completed at both sizes; no horizontal page scroll on any screen. |
-| Automated regression | See section 6. | Chromium and mobile-chrome, full suite. |
+| Automated regression | **PASS: 758 passed, 0 failed, 2 skipped (environment guard), 760 total.** | Full suite, chromium and mobile-chrome, final code. Firefox/WebKit/mobile-safari not run (browsers not installed). |
 
 **Release recommendation.** Ready to merge and to demo as a front-end prototype. **Not release-ready as a system of record** until the Azure back end enforces the same rules (section 8).
 
@@ -170,7 +171,15 @@ All commands were run in this container, on this branch.
 ```
 npx playwright test --project=chromium --project=mobile-chrome --reporter=list
 ```
-SUITE_FINAL_TABLE
+Finished in 15.2 min with exit code 0. Local runs use `retries: 0` (the config retries only in CI), so nothing was retried and "flaky" is 0 by construction.
+
+| Project | Passed | Failed | Skipped | Flaky / retried | Total |
+|---|---|---|---|---|---|
+| chromium (Desktop Chrome, 1440×900) | 379 | 0 | 1 | 0 | 380 |
+| mobile-chrome (Pixel 7, 412×915) | 379 | 0 | 1 | 0 | 380 |
+| **Combined** | **758** | **0** | **2** | **0** | **760** |
+
+The skipped test is the same one in both projects: `offline.spec.js:303` "an entirely unvisited/uncached path falls back to offline.html". It is a runtime guard that predates this audit (commit `b0c6bab`). It skips itself only when this sandbox's `context.setOffline()` fails to block the service worker's own fetch. That is an environment limitation, not an app result, so offline fallback for an unvisited page is **not verified** here.
 
 **Projects that could not run:**
 ```
