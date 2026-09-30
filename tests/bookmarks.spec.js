@@ -52,8 +52,8 @@ const { test, expect } = require('./helpers/fixtures');
 // A real document from the register, same one smoke.spec.js already relies
 // on loading correctly.
 const VIEWER_URL =
-  '/viewer.html?doc=TQ-TWS-CTSS-SOP-001&seg=coiled-tubing&type=sop&title=Pre-Job%20Safety%20Checklist';
-const VIEWER_DOC_TITLE = 'Pre-Job Safety Checklist';
+  '/viewer.html?doc=TQ-TWS-CTSS-SOP-011&seg=coiled-tubing&type=sop&title=Logging%20While%20CT%20SOP';
+const VIEWER_DOC_TITLE = 'Logging While CT SOP';
 const SEGMENT_URL = '/segment.html?id=coiled-tubing';
 
 test.describe('bookmarks (topbar, shared.js, multi-page)', () => {

@@ -7,7 +7,7 @@ const { test, expect, assertNoConsoleErrors } = require('./helpers/fixtures');
 const PAGES = [
   'index.html',
   'segment.html?id=coiled-tubing',
-  'viewer.html?doc=TQ-TWS-CTSS-SOP-001&seg=coiled-tubing&type=sop&title=Pre-Job%20Safety%20Checklist',
+  'viewer.html?doc=TQ-TWS-CTSS-SOP-011&seg=coiled-tubing&type=sop&title=Logging%20While%20CT%20SOP',
   'documents.html?id=coiled-tubing',
   'master-list.html',
   'dashboard.html?id=coiled-tubing',

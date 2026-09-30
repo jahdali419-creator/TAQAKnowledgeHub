@@ -14,7 +14,7 @@ const PAGES = [
   { path: '/index.html', name: 'index' },
   { path: '/segment.html?id=coiled-tubing', name: 'segment' },
   {
-    path: '/viewer.html?doc=TQ-TWS-CTSS-SOP-001&seg=coiled-tubing&type=sop&title=Pre-Job%20Safety%20Checklist',
+    path: '/viewer.html?doc=TQ-TWS-CTSS-SOP-011&seg=coiled-tubing&type=sop&title=Logging%20While%20CT%20SOP',
     name: 'viewer',
   },
   { path: '/documents.html?id=coiled-tubing', name: 'documents' },

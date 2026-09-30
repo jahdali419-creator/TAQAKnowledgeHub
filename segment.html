@@ -154,7 +154,7 @@ html[data-taqa-theme="dark"] .tabs-outer{border-color:rgba(255,255,255,0.06);}
 .sh-pill{padding:3px 10px;border-radius:6px;font-size:10.5px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;flex-shrink:0;}
 /* The word in the pill already says which type it is, so the five hues it used
    to take are one calm treatment. Alert keeps the warning family. */
-.sh-pill.sop,.sh-pill.manual,.sh-pill.policy,.sh-pill.lesson,.sh-pill.software{
+.sh-pill.sop,.sh-pill.form,.sh-pill.manual,.sh-pill.policy,.sh-pill.lesson,.sh-pill.software{
   background:rgba(0,93,99,0.07);color:var(--primary-ink);border:1px solid rgba(0,93,99,0.12);}
 .sh-pill.alert{background:rgba(253,105,29,0.1);color:#A8431A;border:1px solid rgba(253,105,29,0.2);}
 .sh-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:18px;font-weight:700;color:var(--text);}
@@ -793,6 +793,7 @@ html body{overflow-x:clip;}
     <button class="tab-btn" data-tab="policies">Standards <span class="tab-count" id="tc-policies">,</span></button>
     <button class="tab-btn active" data-tab="sops">SOPs <span class="tab-count" id="tc-sops">,</span></button>
     <button class="tab-btn" data-tab="manuals">Manuals <span class="tab-count" id="tc-manuals">,</span></button>
+    <button class="tab-btn" data-tab="forms">Forms &amp; Checklists <span class="tab-count" id="tc-forms">,</span></button>
     <button class="tab-btn" data-tab="alerts">Alerts <span class="tab-alert-count" id="tc-alerts">,</span><span class="alert-pulse-dot" id="alert-pulse-dot"></span></button>
     <button class="tab-btn" data-tab="lessons">Lessons Learned <span class="tab-count" id="tc-lessons">,</span></button>
     <button class="tab-btn" data-tab="software">Software <span class="tab-count" id="tc-software">,</span></button>
@@ -832,6 +833,15 @@ html body{overflow-x:clip;}
       <span class="doc-count-label">Showing <strong id="vis-manuals">,</strong> manuals</span>
     </div>
     <div class="docs-grid" id="list-manuals"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-forms">
+    <div class="doc-toolbar">
+      <div class="doc-search"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.45"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input type="text" placeholder="Search forms and checklists..." oninput="filterDocs(this,'forms')"></div>
+      <div class="sort-row"><button class="sort-btn sort-on" onclick="setSort(this,'forms','default')">Default</button><button class="sort-btn" onclick="setSort(this,'forms','az')">A, Z</button><button class="sort-btn sort-overdue" onclick="setSort(this,'forms','overdue')" hidden>Overdue first</button></div>
+      <span class="doc-count-label">Showing <strong id="vis-forms">,</strong> forms</span>
+    </div>
+    <div class="docs-grid" id="list-forms"></div>
   </div>
 
   <div class="tab-panel" id="panel-policies">
@@ -1481,7 +1491,7 @@ const SEGMENTS = {
   // 'policy' was missing, so opening Company Wide as an area showed an empty
   // library and a total of zero against the register's twelve. An area issues
   // standards and the company issues policies; both belong in the same tab.
-  var BUCKET = { sop:'sops',form:'sops', manual:'manuals', standard:'policies', policy:'policies',
+  var BUCKET = { sop:'sops',form:'forms', manual:'manuals', standard:'policies', policy:'policies',
                  alert:'alerts', lesson:'lessons', software:'software' };
   var L = TAQA_DOC_LOOKUPS.segments;
 
@@ -1492,7 +1502,7 @@ const SEGMENTS = {
   // TQ-QHSE-S001 does not place them under document control.
   Object.keys(L).forEach(function(id){
     var copy = SEGMENTS[id] || {};
-    var docs = { sops:[], manuals:[], policies:[], alerts:[], lessons:[], software:[] };
+    var docs = { sops:[], manuals:[], forms:[], policies:[], alerts:[], lessons:[], software:[] };
     var nStd = 0, nPol = 0;
     TAQA_STORE.all().forEach(function(d){
       if (d.segment !== id) return;
@@ -1515,7 +1525,7 @@ const SEGMENTS = {
         ? Object.assign({}, copy.tabLabels || {}, { policies:'Policies' })
         : copy.tabLabels,
       contributors: copy.contributors || [],
-      sops:docs.sops.length, manuals:docs.manuals.length, policies:docs.policies.length,
+      sops:docs.sops.length, manuals:docs.manuals.length, forms:docs.forms.length, policies:docs.policies.length,
       alerts:docs.alerts.length, lessons:docs.lessons.length, software:docs.software.length,
       docs: docs
     };
@@ -1533,9 +1543,9 @@ const SEG_KNOWN = !!SEGMENTS[segId];
 const seg = SEGMENTS[segId] || {
   name:'Area not found', icon:'\u25CB', tag:'',
   desc:'No area is called \u201c' + segId + '\u201d. The link may be mistyped or out of date.',
-  sops:0, manuals:0, policies:0, alerts:0, lessons:0, software:0,
+  sops:0, manuals:0, forms:0, policies:0, alerts:0, lessons:0, software:0,
   contributors:[],
-  docs:{ sops:[], manuals:[], policies:[], alerts:[], lessons:[], software:[] }
+  docs:{ sops:[], manuals:[], forms:[], policies:[], alerts:[], lessons:[], software:[] }
 };
 document.querySelector('.manage-btn').href = 'dashboard.html?id=' + segId;
 
@@ -1568,7 +1578,7 @@ document.getElementById('seg-desc').textContent = seg.desc;
 // Software is an asset, not a controlled document (TQ-QHSE-S001 4.4), so it is
 // counted on its own tab and left out of this figure. Adding it in was why this
 // header read 39 while the register and documents.html both said 36.
-document.getElementById('seg-total').textContent = seg.sops + seg.manuals + seg.policies + seg.alerts + seg.lessons;
+document.getElementById('seg-total').textContent = seg.sops + seg.manuals + (seg.forms || 0) + seg.policies + seg.alerts + seg.lessons;
 document.getElementById('seg-alerts').textContent = seg.alerts || 'None';
 // An area that does not exist has no counts, no update date, nothing to
 // manage and no shelves to search, so none of that is drawn for it.
@@ -1615,6 +1625,7 @@ if (!SEG_KNOWN) document.documentElement.classList.add('seg-unknown');
 // them, once, beside the shelf they count.
 document.getElementById('tc-sops').textContent = seg.sops;
 document.getElementById('tc-manuals').textContent = seg.manuals;
+document.getElementById('tc-forms').textContent = seg.forms || 0;
 document.getElementById('tc-policies').textContent = seg.policies;
 document.getElementById('tc-alerts').textContent = seg.alerts;
 document.getElementById('tc-lessons').textContent = seg.lessons;
@@ -1654,7 +1665,7 @@ document.querySelectorAll('#tab-bar .tab-btn').forEach(function(btn){
 // in kind (a function has no SOPs for a well site). Software is not a
 // controlled document, so it only appears where there is some.
 var SEG_GROUP = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments[segId] || {}).group;
-var CORE_TABS = ['policies','sops','manuals','alerts','lessons'];
+var CORE_TABS = ['policies','sops','manuals','forms','alerts','lessons'];
 document.querySelectorAll('#tab-bar .tab-btn').forEach(function(btn){
   var t = btn.dataset.tab;
   if (!t || t === 'all' || (seg[t] || 0)) return;
@@ -1757,7 +1768,7 @@ function rowMeta(d){
 }
 function escHtml(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-const LIST_TYPE_MAP = {sops:'sop',manuals:'manual',policies:'standard',lessons:'lesson',alerts:'alert'};
+const LIST_TYPE_MAP = {sops:'sop',manuals:'manual',forms:'form',policies:'standard',lessons:'lesson',alerts:'alert'};
 const MORE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>';
 // Same glass as the doc-search field itself, drawn larger for the empty state.
 const EMPTY_SEARCH_ICON = '<svg width="22" height="22" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
@@ -1930,6 +1941,7 @@ function renderList(type,items,isAlert){
 
 renderList('sops', seg.docs.sops, false);
 renderList('manuals', seg.docs.manuals, false);
+renderList('forms', seg.docs.forms || [], false);
 renderList('policies', seg.docs.policies, false);
 renderList('alerts', seg.docs.alerts, true);
 renderList('lessons', seg.docs.lessons, false);
@@ -2029,7 +2041,7 @@ function goPage(type,page){
 }
 
 // ── Tab Switching ──
-const TAB_LABELS = {policies:'Standards', sops:'SOPs', manuals:'Manuals', alerts:'Alerts', lessons:'Lessons Learned', software:'Software & Tools'};
+const TAB_LABELS = {policies:'Standards', sops:'SOPs', manuals:'Manuals', forms:'Forms & Checklists', alerts:'Alerts', lessons:'Lessons Learned', software:'Software & Tools'};
 // ── Tab switching (All + individual) ──
 const _contentOuter = document.querySelector('.content-outer');
 
@@ -2051,6 +2063,7 @@ function openTab(name) {
       ..._st('policies').all.map(t=>({title:t,type:'policy',bucket:'policies'})),
       ..._st('sops').all.map(t=>({title:t,type:'sop',bucket:'sops'})),
       ..._st('manuals').all.map(t=>({title:t,type:'manual',bucket:'manuals'})),
+      ..._st('forms').all.map(t=>({title:t,type:'form',bucket:'forms'})),
       ..._st('alerts').all.map(t=>({title:t,type:'alert',isAlert:true,bucket:'alerts'})),
       ..._st('lessons').all.map(t=>({title:t,type:'lesson',bucket:'lessons'})),
       ..._st('software').all.map(t=>({title:t,type:'software',isSoftware:true,bucket:'software'})),
@@ -2094,6 +2107,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   const cfg = {
     sops:    {pill:'SOP', cls:'sop',      title:'Standard Operating Procedures'},
     manuals: {pill:'MNL', cls:'manual',   title:'Technical Manuals'},
+    forms:   {pill:'FRM', cls:'form',     title:'Forms & Checklists'},
     policies:{pill:'S',   cls:'policy',   title:'Standards'},
     alerts:  {pill:'ALT', cls:'alert',    title:'Technical Alerts'},
     lessons: {pill:'LSN', cls:'lesson',   title:'Lessons Learned'},
@@ -2111,7 +2125,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 // Update All tab total count after lists render
 setTimeout(() => {
-  const types = ['policies','sops','manuals','alerts','lessons','software'];
+  const types = ['policies','sops','manuals','forms','alerts','lessons','software'];
   const total = types.reduce((s, t) => s + (_st(t).all.length || 0), 0);
   const el = document.getElementById('tc-all');
   if (el) el.textContent = total;

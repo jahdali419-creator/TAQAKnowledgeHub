@@ -166,13 +166,13 @@ test.describe('master-list.html, auditor stays read-only', () => {
 
     // Even calling the JS directly (bypassing the hidden checkboxes) must
     // refuse: bulkAction() itself gates on canBulk().
-    const before = await page.evaluate(() => TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-001').status);
+    const before = await page.evaluate(() => TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-011').status);
     page.on('dialog', (d) => d.accept()); // would accept if a confirm somehow appeared
     await page.evaluate(() => {
-      selectedRows.add('TQ-TWS-CTSS-SOP-001');
+      selectedRows.add('TQ-TWS-CTSS-SOP-011');
       bulkAction('withdraw');
     });
-    const after = await page.evaluate(() => TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-001').status);
+    const after = await page.evaluate(() => TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-011').status);
     expect(after).toBe(before);
 
     assertNoConsoleErrors(consoleErrors);
