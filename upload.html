@@ -16,7 +16,7 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TechHub Platform">
-<link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <title>Upload Document, TAQA Knowledge Hub</title>
 <link rel="stylesheet" href="fonts/fonts.css">
@@ -306,6 +306,9 @@ html[data-taqa-theme="dark"] .scroll-top-btn{background:rgba(0,35,38,0.92);borde
 .doc-id-status{font-size:11.5px;margin-top:5px;display:flex;align-items:center;gap:5px;min-height:18px;}
 .id-ok{color:var(--primary-ink);}
 .id-warn{color:var(--alert-ink);}
+/* A number the standard cannot fully give yet (no code assigned by QHSE) is
+   not an error the person filing can fix, so it reads as information. */
+.id-note{color:var(--text-muted);}
 .id-err{color:var(--stop-ink);}
 .doc-status-toggle{display:flex;border:1px solid var(--glass-border);border-radius:10px;overflow:hidden;margin-bottom:0;}
 .status-btn{flex:1;padding:10px 14px;border:none;background:transparent;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;color:var(--text-muted);transition:all 0.2s;}
@@ -503,7 +506,7 @@ html[data-taqa-theme="dark"] .policy-rules {
   <div class="page-hero-content">
     <span class="page-hero-tag">Document Upload</span>
     <h1>Upload a Document</h1>
-    <p>Submit a standard, procedure, manual, technical alert or lesson learned. All documents go through an approval workflow before going live.</p>
+    <p>Submit a standard, procedure, manual, form or checklist, technical alert or lesson learned. All documents go through an approval workflow before going live.</p>
     <div style="margin-top:18px;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.62);">Part of <em style="font-style:italic;font-weight:700;text-transform:none;letter-spacing:0;background:linear-gradient(120deg, #00BBB6 15%, #EAFFFD 85%);-webkit-background-clip:text;background-clip:text;color:transparent;">TechHub Platform</em></div>
   </div>
 </div>
@@ -581,7 +584,7 @@ html[data-taqa-theme="dark"] .policy-rules {
           <ul class="pr-list">
             <li><b>No area owns it.</b> It is filed as Company Wide and binds every segment, function and center.</li>
             <li><b>The CEO approves it</b>, not an Operation Director.</li>
-            <li><b>It numbers as TAQA-&lt;Function&gt;-P0XX</b>, the corporate series, not the TQ series in 5.3.</li>
+            <li><b>It numbers as TQ-&lt;Function&gt;-PXXX</b>, for example TQ-QHSE-P007 (TQ-QHSE-S001 5.3, row 02).</li>
             <li><b>It is Internal and cannot be restricted.</b> TQ-QHSE-S001 5.5 says policies shall be accessible to all employees.</li>
             <li>Review cycle 24 months.</li>
           </ul>
@@ -1210,7 +1213,7 @@ let isAutoFilling = false;
 
   var typeSel = document.getElementById('doc-type-select');
   if (typeSel) {
-    var order = ['policy','standard','sop','manual','alert','lesson','software'];
+    var order = ['policy','standard','sop','manual','form','alert','lesson','software'];
     typeSel.innerHTML = '<option value="" disabled selected>Select type</option>' +
       order.filter(function(t){
         if (!L.types[t]) return false;
@@ -1264,23 +1267,33 @@ function taqaRefId(){
   var letter = L.types[type].letter;
 
   if (type === 'policy') {
+    // TQ-QHSE-S001 5.3 row 02: TQ-<Corporate Function>-PXXX (TQ-QHSE-P007).
+    // The register used TAQA-<Function>-P until Sept 2026; those numbers are
+    // still counted so a new policy never reuses a serial.
     var fn = (document.getElementById('policy-fn') || {}).value;
     if (!fn) return null;
     var used = D.filter(function(d){
-      return d.scope === 'company' && d.docNumber &&
-             d.docNumber.indexOf('TAQA-' + fn + '-P') === 0;
+      return d.docNumber && (d.docNumber.indexOf('TQ-' + fn + '-P') === 0 ||
+                             d.docNumber.indexOf('TAQA-' + fn + '-P') === 0 ||
+                             (d.legacyId && d.legacyId.indexOf('TAQA-' + fn + '-P') === 0));
     }).map(function(d){ return parseInt(d.docNumber.slice(-3), 10) || 0; });
     var nextP = (used.length ? Math.max.apply(null, used) : 0) + 1;
-    return { id:'TAQA-' + fn + '-P' + String(nextP).padStart(3,'0'),
-             note:'Corporate policy series. Not the scheme 5.3 sets out for other documents.' };
+    return { id:'TQ-' + fn + '-P' + String(nextP).padStart(3,'0'), note:'' };
   }
 
   var segId = (document.getElementById('seg-select') || {}).value;
   var e = segId && L.segments[segId];
   if (!e) return null;
-  if (!letter) return { id:'', note:'This type carries no letter in 5.3, so it takes no number.' };
+  if (!letter) return { id:'', note:'This type carries no code in TQ-QHSE-S001, so it takes no number.' };
+
+  // A corporate function has manuals (row 01, TQ-QHSE-M001), not work
+  // instructions: those exist only inside a business unit (row 05).
+  var corporate = !e.bu && (e.group === 'function' || e.group === 'company');
+  if (type === 'manual' && corporate && L.types.manual.letterCorporate) letter = L.types.manual.letterCorporate;
 
   var stem = 'TQ-' + (e.bu ? e.bu + '-' : '') + e.spl + '-' + letter;
+  // The table joins a one-letter code straight to the serial (S001, P007,
+  // M001, F023) and a longer one with a hyphen (SOP-001, WI-001).
   var sep  = (letter.length > 1) ? '-' : '';
   var re   = new RegExp('^' + stem.replace(/[.*+?^${}()|[\]\\&]/g, '\\$&') + sep + '(\\d+)$');
   var nums = D.map(function(d){
@@ -1289,12 +1302,12 @@ function taqaRefId(){
   var next = (nums.length ? Math.max.apply(null, nums) : 0) + 1;
 
   var why = [];
-  if (!e.bu) why.push('no business unit is assigned to ' + e.name);
-  if (e.provisional) why.push('"' + e.spl + '" is not a short form assigned in 5.3');
-  if (L.types[type].provisional) why.push('"' + letter + '" is not a type letter defined in section 4');
+  if (!e.bu && !corporate) why.push('no business unit is assigned to ' + e.name + ' yet');
+  if (e.provisional) why.push('"' + e.spl + '" is not yet a short form in TQ-QHSE-S001');
+  if (L.types[type].provisional) why.push('TQ-QHSE-S001 has no code for ' + L.types[type].label + 's yet, so this uses "' + letter + '" until QHSE assigns one');
 
   return { id: stem + sep + String(next).padStart(3,'0'),
-           note: why.length ? 'Provisional: ' + why.join(', ') + '.' : '' };
+           note: why.length ? 'Awaiting QHSE: ' + why.join('; ') + '. The number may change then.' : '' };
 }
 
 function autoFillRefId(){
@@ -1313,8 +1326,8 @@ function autoFillRefId(){
   refField.dataset.autofilled = 'auto';
   if (statusEl) {
     statusEl.innerHTML = r.note
-      ? '<span class="id-warn">' + r.note + '</span>'
-      : '<span class="id-ok">Follows 5.3. Edit if needed.</span>';
+      ? '<span class="id-note">' + esc(r.note) + '</span>'
+      : '<span class="id-ok">Follows TQ-QHSE-S001. Edit if needed.</span>';
   }
   isAutoFilling = false;
 }

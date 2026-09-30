@@ -263,11 +263,11 @@ test.describe('tabs switch to the right subset of documents', () => {
 // shown to roles that hold editMetadata or the register view (owner, qms,
 // auditor), never employee (seesComplianceState()).
 test.describe('amber pre-warning for a review due soon', () => {
-  // TQ-GEO-WI-003 "Technology Readiness Review", segment geothermal-coe
+  // TQ-GEO-M003 "Technology Readiness Review", segment geothermal-coe
   // (group 'function'), nextReviewDate 2026-10-16: a real register row whose
   // review is due within 30 days as of this suite's run, picked by querying
   // the actual register rather than inventing a date.
-  const DOC_NUM = 'TQ-GEO-WI-003';
+  const DOC_NUM = 'TQ-GEO-M003';
   const DOC_TITLE = 'Technology Readiness Review';
   const SEG = 'geothermal-coe';
 
@@ -294,7 +294,7 @@ test.describe('amber pre-warning for a review due soon', () => {
       const how = soon < 60 ? soon + (soon === 1 ? ' day' : ' days') : Math.floor(soon / 30.44) + ' months';
       return { amber: true, text: 'Review due soon, ' + how };
     }, DOC_NUM);
-    expect(expectation.amber, 'TQ-GEO-WI-003 should still be inside the 30-day due-soon window').toBe(true);
+    expect(expectation.amber, 'TQ-GEO-M003 should still be inside the 30-day due-soon window').toBe(true);
 
     const card = page.locator(`.doc-card[data-title^="${DOC_NUM}"]`).first();
     await expect(card).toBeVisible();

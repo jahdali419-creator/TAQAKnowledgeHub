@@ -18,7 +18,7 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TechHub Platform">
-<link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <title>Segment, TAQA Knowledge Hub</title>
 <link rel="stylesheet" href="fonts/fonts.css">
@@ -1481,7 +1481,7 @@ const SEGMENTS = {
   // 'policy' was missing, so opening Company Wide as an area showed an empty
   // library and a total of zero against the register's twelve. An area issues
   // standards and the company issues policies; both belong in the same tab.
-  var BUCKET = { sop:'sops', manual:'manuals', standard:'policies', policy:'policies',
+  var BUCKET = { sop:'sops',form:'sops', manual:'manuals', standard:'policies', policy:'policies',
                  alert:'alerts', lesson:'lessons', software:'software' };
   var L = TAQA_DOC_LOOKUPS.segments;
 
@@ -1791,7 +1791,7 @@ function buildDocCard(title, type, idx) {
       : '<span class="doc-new-badge">New</span>';
   })();
   const _T = (typeof TAQA_DOC_LOOKUPS!=='undefined' && TAQA_DOC_LOOKUPS.types[type]) || {};
-  const _mark = _T.mark || ({sop:'SOP',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT'})[type] || type.slice(0,3).toUpperCase();
+  const _mark = _T.mark || ({sop:'SOP',form:'FRM',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT'})[type] || type.slice(0,3).toUpperCase();
   const isBm = window.TAQA_Bookmarks ? window.TAQA_Bookmarks.has(title, segId) : false;
   const meta = rowMeta(rec);
   const rev = rec && rec.revision ? '<span class="doc-rev">Rev ' + escHtml(rec.revision) + '</span>' : '';
@@ -2243,8 +2243,8 @@ function draw(){ ctx.fillStyle=document.documentElement.getAttribute('data-taqa-
 draw();
 
 // ── Document Detail Modal ──
-const TYPE_LABELS = {sop:'SOP',manual:'Manual',policy:'Policy',lesson:'Lesson Learned',alert:'Alert'};
-const TYPE_COLORS = {sop:'var(--primary-ink)',manual:'var(--primary-ink)',policy:'var(--primary-ink)',lesson:'var(--primary-ink)',alert:'var(--accent)'};
+const TYPE_LABELS = {sop:'SOP',form:'Form',manual:'Manual',policy:'Policy',lesson:'Lesson Learned',alert:'Alert'};
+const TYPE_COLORS = {sop:'var(--primary-ink)',form:'var(--primary-ink)',manual:'var(--primary-ink)',policy:'var(--primary-ink)',lesson:'var(--primary-ink)',alert:'var(--accent)'};
 const SCOPES = {
   sop:'Applies to all field personnel, supervisors, and engineers involved in the specified operation. Must be reviewed before commencing any related activity.',
   manual:'For use by qualified equipment operators, engineers, and maintenance personnel. Serves as the primary technical reference for this system.',
@@ -2264,7 +2264,7 @@ function openDocModal(title, type) {
   const L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : {types:{},segments:{}};
   const T = L.types[type] || {};
   const label = T.label || TYPE_LABELS[type] || type;
-  const mark = T.mark || ({sop:'SOP',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT',software:'ZIP'})[type] || type.slice(0,3).toUpperCase();
+  const mark = T.mark || ({sop:'SOP',form:'FRM',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT',software:'ZIP'})[type] || type.slice(0,3).toUpperCase();
   const areaName = (rec && L.segments[rec.segment] && L.segments[rec.segment].name) || seg.name;
   const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const when = d => { const x = d ? new Date(d) : null; return (x && !isNaN(x)) ? MON[x.getMonth()] + ' ' + x.getFullYear() : 'Not recorded'; };
@@ -2344,7 +2344,7 @@ function loadRecent() {
   const cards = document.getElementById('recent-cards');
   if (!strip || !cards) return;
   cards.innerHTML = items.slice(0,3).map(i => {
-    const typeLabel = {sop:'SOP',manual:'Manual',standard:'Standard',policy:'Policy',lesson:'Lesson',alert:'Alert'}[i.type] || i.type;
+    const typeLabel = {sop:'SOP',form:'Form',manual:'Manual',standard:'Standard',policy:'Policy',lesson:'Lesson',alert:'Alert'}[i.type] || i.type;
     return `<div class="recent-card" onclick="openDocModal('${i.title.replace(/'/g,"&#39;")}','${i.type}')">
       <div class="recent-card-title">${i.title}</div>
       <div class="recent-card-meta">${typeLabel} · ${i.segName}</div>

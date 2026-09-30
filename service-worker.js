@@ -1,4 +1,4 @@
-const CACHE = 'taqa-hub-v77';
+const CACHE = 'taqa-hub-v78';
 
 // Detect base path automatically, works on GitHub Pages and Azure
 const BASE = self.location.pathname.replace('service-worker.js', '');
@@ -36,6 +36,9 @@ const CORE = [
   BASE + 'fonts/web/BwGradual-Bold.woff2',
   BASE + 'fonts/web/BwGradual-ExtraBold.woff2',
   BASE + 'icons/icon.svg',
+  BASE + 'icons/icon-192.png',
+  BASE + 'icons/icon-512.png',
+  BASE + 'icons/apple-touch-icon.png',
   BASE + 'offline.html'
 ];
 

@@ -19,7 +19,7 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TechHub Platform">
-<link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="fonts/fonts.css">
 <noscript></noscript>
@@ -814,12 +814,12 @@ const SEGS = (function(){
 
 // One tint for every type, and the accent kept for the one type that is a
 // warning. The type name is already written inside the chip.
-const TYPE_COLORS={sop:'rgba(0,93,99,0.08)',manual:'rgba(0,93,99,0.08)',standard:'rgba(0,93,99,0.08)',policy:'rgba(0,93,99,0.08)',lesson:'rgba(0,93,99,0.08)',alert:'rgba(253,105,29,0.10)',software:'rgba(0,93,99,0.08)'};
+const TYPE_COLORS={sop:'rgba(0,93,99,0.08)',form:'rgba(0,93,99,0.08)',manual:'rgba(0,93,99,0.08)',standard:'rgba(0,93,99,0.08)',policy:'rgba(0,93,99,0.08)',lesson:'rgba(0,93,99,0.08)',alert:'rgba(253,105,29,0.10)',software:'rgba(0,93,99,0.08)'};
 // The ink comes from a token rather than a hex because this icon sits on the
 // page ground in one place and on the printed white card in another, and the
 // two grounds need different inks.
-const TYPE_TC={sop:'var(--primary-ink)',manual:'var(--primary-ink)',standard:'var(--primary-ink)',policy:'var(--primary-ink)',lesson:'var(--primary-ink)',alert:'var(--alert-ink)',software:'var(--primary-ink)'};
-const TYPE_BC={sop:'rgba(0,93,99,0.22)',manual:'rgba(0,93,99,0.22)',standard:'rgba(0,93,99,0.22)',policy:'rgba(0,93,99,0.22)',lesson:'rgba(0,93,99,0.22)',alert:'rgba(253,105,29,0.28)',software:'rgba(0,93,99,0.22)'};
+const TYPE_TC={sop:'var(--primary-ink)',form:'var(--primary-ink)',manual:'var(--primary-ink)',standard:'var(--primary-ink)',policy:'var(--primary-ink)',lesson:'var(--primary-ink)',alert:'var(--alert-ink)',software:'var(--primary-ink)'};
+const TYPE_BC={sop:'rgba(0,93,99,0.22)',form:'rgba(0,93,99,0.22)',manual:'rgba(0,93,99,0.22)',standard:'rgba(0,93,99,0.22)',policy:'rgba(0,93,99,0.22)',lesson:'rgba(0,93,99,0.22)',alert:'rgba(253,105,29,0.28)',software:'rgba(0,93,99,0.22)'};
 const TYPE_LABELS = (function(){
   const out = {};
   if (typeof TAQA_DOC_LOOKUPS !== 'undefined')
@@ -926,7 +926,7 @@ document.getElementById('bc-title').textContent = docTitle.length > 50 ? docTitl
 // tab=standards and software to tab=softwares, neither of which exists.
 if (segId !== 'company') {
   document.getElementById('bc-seg').href = 'segment.html?id=' + segId + '&tab=' +
-    (({sop:'sops',manual:'manuals',standard:'policies',policy:'policies',alert:'alerts',lesson:'lessons',software:'software'})[docType] || 'all');
+    (({sop:'sops',form:'sops',manual:'manuals',standard:'policies',policy:'policies',alert:'alerts',lesson:'lessons',software:'software'})[docType] || 'all');
 }
 
 // Type icon
@@ -1476,12 +1476,12 @@ function renderRelated(){
   if(!related.length) return;
   // Same calm treatment as the header icon: the three letters say which type
   // this is, so only an alert keeps its accent.
-  var TC={sop:'rgba(0,93,99,0.10)',manual:'rgba(0,93,99,0.10)',policy:'rgba(0,93,99,0.10)',lesson:'rgba(0,93,99,0.10)',alert:'rgba(253,105,29,0.10)',software:'rgba(0,93,99,0.10)'};
-  var TT={sop:'var(--primary-ink)',manual:'var(--primary-ink)',policy:'var(--primary-ink)',lesson:'var(--primary-ink)',alert:'var(--alert-ink)',software:'var(--primary-ink)'};
+  var TC={sop:'rgba(0,93,99,0.10)',form:'rgba(0,93,99,0.10)',manual:'rgba(0,93,99,0.10)',policy:'rgba(0,93,99,0.10)',lesson:'rgba(0,93,99,0.10)',alert:'rgba(253,105,29,0.10)',software:'rgba(0,93,99,0.10)'};
+  var TT={sop:'var(--primary-ink)',form:'var(--primary-ink)',manual:'var(--primary-ink)',policy:'var(--primary-ink)',lesson:'var(--primary-ink)',alert:'var(--alert-ink)',software:'var(--primary-ink)'};
   // Marks from the register, so a related card can never call a type something
   // the segment page does not. This map used to say MNL and LSN where every
   // other page said WI and LL, and it had no entry for a Standard at all.
-  var TS=(function(){var m={sop:'SOP',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT',software:'ZIP'};
+  var TS=(function(){var m={sop:'SOP',form:'FRM',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT',software:'ZIP'};
     var T=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.types)||{};
     Object.keys(T).forEach(function(k){if(T[k]&&T[k].mark)m[k]=T[k].mark;});return m;})();
   var grid = document.getElementById('related-grid');
