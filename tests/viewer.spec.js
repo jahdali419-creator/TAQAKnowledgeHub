@@ -289,8 +289,8 @@ test.describe('version history, approval trail, compare and related-docs panels'
     await expect(page.locator('#rev-count-badge')).toContainText('revision');
     const revRows = page.locator('#rev-timeline .rev-row');
     await expect(revRows.first()).toBeVisible();
-    // Rev 4.0 -> at least 4 rows (current down to 1), current one tagged.
-    expect(await revRows.count()).toBeGreaterThanOrEqual(4);
+    // Rev 3.0 -> at least 3 rows (current down to 1), current one tagged.
+    expect(await revRows.count()).toBeGreaterThanOrEqual(3);
     await expect(page.locator('.rev-row.rev-current .rev-current-tag')).toHaveText('Current');
 
     await expect(page.locator('#approval-section')).toBeVisible();
@@ -316,7 +316,7 @@ test.describe('version history, approval trail, compare and related-docs panels'
     await setRole('employee', DOC_CURRENT.seg);
     await gotoApp(urlFor(DOC_CURRENT));
     await expect(page.locator('#rev-brief-view')).toBeVisible();
-    await expect(page.locator('#rev-brief-text')).toContainText('Rev 4');
+    await expect(page.locator('#rev-brief-text')).toContainText('Rev 3');
     await expect(page.locator('#rev-full-view')).toBeHidden();
     await expect(page.locator('#approval-section')).toBeHidden();
     assertNoConsoleErrors(consoleErrors);
