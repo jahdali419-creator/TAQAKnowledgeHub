@@ -113,7 +113,7 @@ test.describe('upload numbers a new document by the table', () => {
     r = await numberFor(page, 'qhse', 'form');
     expect(r.id).toBe('TQ-QHSE-F001');
     r = await numberFor(page, 'coiled-tubing', 'form');
-    expect(r.id).toBe('TQ-TWS-CTSS-F001');
+    expect(r.id).toBe('TQ-TWS-CTSS-F002');                // after the Pre-Job Safety Checklist, F001
     r = await numberFor(page, 'coiled-tubing', 'manual');
     expect(r.id).toMatch(/^TQ-TWS-CTSS-WI-\d{3}$/);      // a business unit keeps WI
     r = await numberFor(page, 'coiled-tubing', 'sop');

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en" data-taqa-theme="light">
+<head>
+<meta charset="UTF-8">
+<script>try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Form, TAQA Knowledge Hub</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#005D63">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TechHub Platform">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* ── A TAQA form, drawn from forms-data.js in the one template ──────────────
+   The template follows TAQA's own controlled documents (TQ-QHSE-S001 is one):
+   logo top left; a turquoise bar down the right edge and a dark teal bar
+   along the foot, each with its corner cut; the number in orange; and on
+   paper, "Valid at time of printing", "Page x of y" and the uncontrolled
+   notice. The sheet is paper, so it stays white in dark mode. */
+:root{
+  --teal:#005D63;--turq:#00BBB6;--orange:#FD691D;--orange-ink:#C44A0C;
+  --ink:#1E1C1A;--ink-2:#524D48;--ink-3:#756A61;--rule:#DBDBDB;--rule-2:#C9C4BF;
+  --page:#F4F4F3;--card:#FFFFFF;--warn-bg:#FFF6E0;--warn-ink:#8A6200;--stop-ink:#C8102E;--ok-ink:#00705F;
+  --bar-h:64px;
+}
+html[data-taqa-theme="dark"]{--page:#001314;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--page);color:var(--ink);min-height:100vh;}
+.wrap{max-width:920px;margin:0 auto;padding:calc(var(--bar-h) + 24px) 20px 64px;}
+.tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px;}
+.tools .sp{flex:1;}
+.btn{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--rule-2);
+  background:var(--card);color:var(--teal);font:600 13.5px/1 'Inter',system-ui,sans-serif;text-decoration:none;cursor:pointer;}
+.btn:hover{border-color:var(--teal);}
+.btn.primary{background:var(--teal);border-color:var(--teal);color:#fff;}
+.btn.primary:hover{background:#004A4F;}
+.btn[disabled]{opacity:.45;cursor:not-allowed;}
+.btn svg{width:15px;height:15px;}
+html[data-taqa-theme="dark"] .tools .btn:not(.primary){background:#002326;border-color:#00484B;color:#C7DBDD;}
+.note{border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:13.5px;line-height:1.55;}
+.note b{font-weight:700;}
+.note.sample{background:var(--warn-bg);color:var(--warn-ink);border:1px solid #F1D48A;}
+.note.stop{background:#FDECEE;color:var(--stop-ink);border:1px solid #F2B8C1;}
+.note.info{background:#E8F4F4;color:var(--teal);border:1px solid #BFE3E1;}
+
+/* The sheet */
+.sheet{position:relative;background:var(--card);color:var(--ink);border-radius:6px;overflow:hidden;
+  box-shadow:0 22px 44px -26px rgba(0,88,90,.28),0 0 0 1px rgba(117,106,97,.12);
+  padding:40px 64px 72px 48px;}
+.frame-r{position:absolute;top:0;right:0;width:22px;height:100%;background:var(--turq);
+  clip-path:polygon(100% 0,100% 100%,0 100%,0 22px);}
+.frame-b{position:absolute;left:0;bottom:0;width:100%;height:22px;background:var(--teal);
+  clip-path:polygon(22px 0,100% 0,100% 100%,0 100%);}
+.head{display:flex;gap:24px;align-items:flex-start;justify-content:space-between;padding-bottom:18px;border-bottom:2px solid var(--teal);}
+.head img{height:48px;width:auto;display:block;}
+.head-r{text-align:right;}
+.docno{color:var(--orange-ink);font:600 15px/1.2 'Inter',system-ui,sans-serif;letter-spacing:.02em;}
+.title{margin-top:6px;color:var(--teal);font:700 22px/1.2 'BwGradual','Urbanist',sans-serif;text-transform:uppercase;letter-spacing:.01em;}
+.meta{margin-top:6px;color:#008E8A;font-size:12.5px;}
+.status{margin-top:14px;font-size:12.5px;color:var(--ink-2);}
+.status b{color:var(--ok-ink);}
+h3{margin:26px 0 10px;color:var(--teal);font:700 15px/1.3 'BwGradual','Urbanist',sans-serif;}
+.job{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 20px;margin-top:18px;}
+.fld label{display:block;font-size:11.5px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;}
+.fld input{width:100%;min-height:40px;border:1px solid var(--rule-2);border-radius:8px;padding:0 10px;font:15px 'Inter',system-ui,sans-serif;color:var(--ink);background:#fff;}
+.fld input:focus,.rem:focus{outline:2px solid var(--turq);outline-offset:1px;border-color:var(--turq);}
+table.chk{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed;}
+table.chk th{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:8px 8px;border-bottom:1px solid var(--rule-2);background:#F7F7F6;}
+table.chk th.c{text-align:center;width:150px;}
+table.chk th.n{width:36px;}
+table.chk th.r{width:26%;}
+table.chk td{padding:8px 8px;border-bottom:1px solid var(--rule);vertical-align:middle;}
+td.n{color:var(--ink-3);font-variant-numeric:tabular-nums;}
+td.q{line-height:1.45;}
+.ans{display:flex;gap:4px;justify-content:center;}
+.ans button{min-width:44px;min-height:40px;border:1px solid var(--rule-2);border-radius:8px;background:#fff;color:var(--ink-2);
+  font:700 13px/1 'Inter',system-ui,sans-serif;cursor:pointer;}
+.ans button[aria-pressed="true"][data-v="yes"]{background:var(--ok-ink);border-color:var(--ok-ink);color:#fff;}
+.ans button[aria-pressed="true"][data-v="no"]{background:var(--orange-ink);border-color:var(--orange-ink);color:#fff;}
+.ans button[aria-pressed="true"][data-v="na"]{background:var(--ink-3);border-color:var(--ink-3);color:#fff;}
+.ans button:focus-visible{outline:2px solid var(--turq);outline-offset:1px;}
+.rem{width:100%;min-height:38px;border:1px solid var(--rule);border-radius:8px;padding:0 10px;font:13.5px 'Inter',system-ui,sans-serif;color:var(--ink);background:#fff;}
+.tally{margin-top:14px;font-size:13px;color:var(--ink-2);}
+.tally b{color:var(--teal);}
+.tally .x{color:var(--orange-ink);font-weight:700;}
+.sign{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 24px;margin-top:6px;}
+.sign .blk{border:1px solid var(--rule);border-radius:10px;padding:12px 14px;}
+.sign .who{font-weight:700;color:var(--teal);font-size:13.5px;margin-bottom:8px;}
+.sign .line{margin-top:10px;border-bottom:1px solid var(--ink-3);height:30px;position:relative;}
+.sign .line span{position:absolute;left:0;bottom:-18px;font-size:11px;color:var(--ink-3);}
+.ctl{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-top:34px;padding-top:12px;border-top:1px solid var(--rule);font-size:11.5px;color:var(--ink-3);line-height:1.5;}
+.ctl .v{color:#008E8A;}
+.ctl img{width:74px;height:74px;image-rendering:pixelated;}
+.unc{margin-top:10px;font-size:11px;color:var(--ink-3);}
+.wm{display:none;}
+.empty{padding:40px 0;text-align:center;color:var(--ink-2);}
+.empty h2{font:700 20px/1.3 'BwGradual','Urbanist',sans-serif;color:var(--teal);margin-bottom:8px;}
+
+@media (max-width:680px){
+  .wrap{padding:calc(var(--bar-h) + 14px) 12px 48px;}
+  .sheet{padding:24px 34px 48px 18px;}
+  .frame-r{width:12px;clip-path:polygon(100% 0,100% 100%,0 100%,0 12px);}
+  .frame-b{height:12px;clip-path:polygon(12px 0,100% 0,100% 100%,0 100%);}
+  .head{flex-direction:column;gap:12px;}
+  .head-r{text-align:left;}
+  .title{font-size:18px;}
+  .job,.sign{grid-template-columns:minmax(0,1fr);}
+  table.chk thead{display:none;}
+  table.chk,table.chk tbody,table.chk tr,table.chk td{display:block;width:100%;}
+  table.chk tr{border-bottom:1px solid var(--rule);padding:10px 0;}
+  table.chk td{border:0;padding:4px 0;}
+  td.n{display:none!important;}
+  .ans{justify-content:flex-start;}
+  .ans button{flex:1;min-height:44px;}
+}
+
+/* ── Paper: A4, the TAQA frame on every page ── */
+@page{size:A4;margin:22mm 20mm 24mm 16mm;}
+@media print{
+  html,body{background:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  #navbar,.nav-mobile-menu,.tools,.note.info,.no-print,#pwa-sheet,#pwa-overlay,.scroll-top-btn,#back-to-top{display:none!important;}
+  .wrap{padding:0;max-width:none;}
+  .sheet{box-shadow:none;border-radius:0;padding:0;overflow:visible;}
+  /* The frame is drawn in the page margins by pageBoxes(), so it repeats on
+     every sheet. A fixed element does not: Chromium clips it to the first
+     page's viewport. */
+  .frame-r,.frame-b{display:none;}
+  .wm{display:block;position:fixed;top:45%;left:50%;transform:translate(-50%,-50%) rotate(-32deg);white-space:nowrap;
+    font:600 40px/1 'Inter',system-ui,sans-serif;color:rgba(117,106,97,.18);letter-spacing:.06em;pointer-events:none;}
+  .fld input,.rem{border:0;border-bottom:1px solid var(--ink-3);border-radius:0;min-height:26px;padding:0 2px;}
+  .ans button{min-width:34px;min-height:26px;border-radius:4px;}
+  table.chk tr,.sign .blk{break-inside:avoid;}
+  .note.sample{border-radius:4px;}
+  body.blank .fld input,body.blank .rem{color:transparent;}
+  body.blank .ans button{background:#fff!important;color:var(--ink-3)!important;border-color:var(--rule-2)!important;}
+  body.blank .tally{display:none;}
+}
+</style>
+<link rel="stylesheet" href="topbar.css">
+</head>
+<body>
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+  <a href="index.html" class="nav-brand">
+    <img src="icons/taqa-logo.png" alt="TAQA" class="nav-logo nav-logo-light">
+    <img src="icons/taqa-logo-reverse.png" alt="TAQA" class="nav-logo nav-logo-dark">
+    <span class="nav-subtitle"><em>TechHub Platform</em></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
+    <li><a href="ai-search.html">Document Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
+  <div class="nav-right">
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<main class="wrap" id="main-content">
+  <div class="tools">
+    <a class="btn" id="back" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Back to the record</a>
+    <span class="sp"></span>
+    <button type="button" class="btn" id="clear">Clear answers</button>
+    <button type="button" class="btn" id="print-blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="6" y="14" width="12" height="7" rx="1"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/></svg>Print blank</button>
+    <button type="button" class="btn primary" id="print-filled"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10.5l5 5 5-5"/><path d="M5 20h14"/></svg>Print or save as PDF</button>
+  </div>
+  <div id="notes"></div>
+  <article class="sheet" id="sheet" aria-labelledby="f-title">
+    <div class="frame-r" aria-hidden="true"></div>
+    <div class="frame-b" aria-hidden="true"></div>
+    <div class="wm" aria-hidden="true">UNCONTROLLED WHEN PRINTED</div>
+    <div id="sheet-body"></div>
+  </article>
+</main>
+
+<script src="roles.js"></script>
+<script src="documents-master.js"></script>
+<script src="segments-data.js"></script>
+<script src="store.js"></script>
+<script src="forms-data.js"></script>
+<script src="qrcode.js"></script>
+<script src="qr.js"></script>
+<script>
+(function(){
+  var esc = function(v){ return String(v == null ? '' : v).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  var params = new URLSearchParams(location.search);
+  var num = params.get('doc') || '';
+  var rec = null;
+  if (num) {
+    rec = (typeof TAQA_STORE !== 'undefined' && TAQA_STORE.findDoc(num)) ||
+          (typeof TAQA_DOC !== 'undefined' && (TAQA_DOC.byNumber(num) || TAQA_DOC.byLegacy(num))) || null;
+  }
+  var notes = document.getElementById('notes'), body = document.getElementById('sheet-body');
+  var sheet = document.getElementById('sheet');
+  function note(kind, html){ notes.insertAdjacentHTML('beforeend', '<div class="note ' + kind + '">' + html + '</div>'); }
+  function stop(title, text){
+    document.querySelector('.tools').style.display = 'none';
+    sheet.querySelector('.wm').remove();
+    body.innerHTML = '<div class="empty"><h2>' + esc(title) + '</h2><p>' + text + '</p><p style="margin-top:16px"><a class="btn" href="ai-search.html">Search the documents</a></p></div>';
+  }
+  if (!rec || rec.docType !== 'form') { stop('Form not found', 'No form in the register has the number &ldquo;' + esc(num) + '&rdquo;. The link may be mistyped or out of date.'); return; }
+  num = rec.docNumber;
+  var role = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE.current() : null;
+  if (role && !TAQA_ROLE.canSee(rec, role)) {
+    stop('Not available to your role', 'This form is a ' + esc(rec.status) + ' record, which your role does not see. The approved revision appears here once it is released.');
+    return;
+  }
+  var seg = (TAQA_DOC_LOOKUPS.segments[rec.segment] || {}).name || rec.segment;
+  document.title = rec.title + ', TAQA Knowledge Hub';
+  document.getElementById('back').href = 'viewer.html?doc=' + encodeURIComponent(num) + '&seg=' + encodeURIComponent(rec.segment) + '&type=form';
+
+  // A translation without its own text shows its source's checks, and says so.
+  var content = TAQA_FORMS[num], fromSource = false;
+  if (!content && rec.translationOf && TAQA_FORMS[rec.translationOf]) { content = TAQA_FORMS[rec.translationOf]; fromSource = true; }
+
+  var usable = rec.status === 'current' || rec.status === 'under-review';
+  if (rec.status === 'obsolete' || rec.status === 'superseded') {
+    note('stop', '<b>Withdrawn. Do not use.</b> This form is ' + esc(rec.status) + ' and must not be filled in or printed. Open the record for its current replacement.');
+  } else if (rec.status === 'draft') {
+    note('stop', '<b>Draft. Not approved for use.</b> This form has not completed approval. It is shown for review only.');
+  }
+  if (content && content.sample) {
+    note('sample', '<b>Sample content.</b> These checks are placeholders that show the TAQA form template. The approved checklist replaces them before the form is used on a job.');
+  }
+  if (fromSource) note('info', 'The Arabic text of this form is not in the Hub yet, so this shows the checks from its English source, ' + esc(rec.translationOf) + '.');
+
+  var fmt = function(iso){
+    var d = iso ? new Date(iso) : null;
+    return d && !isNaN(d) ? d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'}) : 'Not recorded';
+  };
+  var liveUrl = location.origin + location.pathname.replace(/form\.html.*$/, '') + 'viewer.html?doc=' + encodeURIComponent(num) + '&seg=' + encodeURIComponent(rec.segment);
+  var qr = window.TAQA_QR ? window.TAQA_QR(liveUrl, 3) : '';
+  var statusText = { current:'Current, OK to use', 'under-review':'Current, under periodic review', draft:'Draft, not approved for use',
+                     obsolete:'Withdrawn, do not use', superseded:'Superseded, do not use' }[rec.status] || rec.status;
+
+  var h = '';
+  h += '<header class="head"><img src="icons/taqa-logo.png" alt="TAQA"><div class="head-r">' +
+       '<div class="docno">' + esc(num) + '</div>' +
+       '<h1 class="title" id="f-title">' + esc(rec.title) + '</h1>' +
+       '<div class="meta">Rev ' + esc(rec.revision || '1.0') + ' &middot; Issued ' + esc(fmt(rec.issueDate)) + ' &middot; ' + esc(seg) + '</div>' +
+       '</div></header>';
+  h += '<p class="status no-print">Status in the register: <b>' + esc(statusText) + '</b></p>';
+
+  if (!content) {
+    h += '<div class="empty"><h2>No checklist entered yet</h2><p>This form is in the register, but its checks have not been entered in the Hub. Open the record to download the file.</p></div>';
+    body.innerHTML = h;
+    document.getElementById('print-blank').disabled = true;
+    document.getElementById('print-filled').disabled = true;
+    document.getElementById('clear').disabled = true;
+    return;
+  }
+
+  // Answers are kept on this device only, until the form is printed or saved.
+  var KEY = 'taqa-form-fill-v1:' + num;
+  var saved = {}; try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { saved = {}; }
+  var save = function(){ try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {} };
+
+  h += '<section class="job" aria-label="Job details">' + (content.jobFields || []).map(function(f, i){
+    var id = 'job-' + i, type = /^date$/i.test(f) ? 'date' : 'text';
+    return '<div class="fld"><label for="' + id + '">' + esc(f) + '</label><input id="' + id + '" type="' + type + '" data-k="job:' + i + '" value="' + esc(saved['job:' + i] || '') + '"></div>';
+  }).join('') + '</section>';
+
+  var n = 0;
+  (content.sections || []).forEach(function(sec, si){
+    h += '<h3>' + (si + 1) + '. ' + esc(sec.title) + '</h3>';
+    h += '<table class="chk"><thead><tr><th class="n">No.</th><th>Check</th><th class="c">&#10003; / &#10007; / N/A</th><th class="r">Remarks</th></tr></thead><tbody>';
+    (sec.items || []).forEach(function(item, ii){
+      n++;
+      var k = 'q:' + si + ':' + ii, v = saved[k] || '';
+      var b = function(val, label, aria){ return '<button type="button" data-k="' + k + '" data-v="' + val + '" aria-pressed="' + (v === val) + '" aria-label="' + aria + '">' + label + '</button>'; };
+      h += '<tr><td class="n">' + (si + 1) + '.' + (ii + 1) + '</td><td class="q">' + esc(item) + '</td>' +
+           '<td><div class="ans" role="group" aria-label="Answer for check ' + (si + 1) + '.' + (ii + 1) + '">' +
+           b('yes', '&#10003;', 'Yes, done') + b('no', '&#10007;', 'No, not done') + b('na', 'N/A', 'Not applicable') + '</div></td>' +
+           '<td><input class="rem" aria-label="Remarks for check ' + (si + 1) + '.' + (ii + 1) + '" data-k="r:' + si + ':' + ii + '" value="' + esc(saved['r:' + si + ':' + ii] || '') + '"></td></tr>';
+    });
+    h += '</tbody></table>';
+  });
+  h += '<p class="tally" id="tally"></p>';
+
+  h += '<h3>Sign-off</h3><section class="sign">' + (content.signoff || []).map(function(who, i){
+    return '<div class="blk"><div class="who">' + esc(who) + '</div>' +
+      '<div class="fld"><label for="s-n-' + i + '">Name</label><input id="s-n-' + i + '" data-k="s:n:' + i + '" value="' + esc(saved['s:n:' + i] || '') + '"></div>' +
+      '<div class="fld" style="margin-top:8px"><label for="s-d-' + i + '">Date</label><input id="s-d-' + i + '" type="date" data-k="s:d:' + i + '" value="' + esc(saved['s:d:' + i] || '') + '"></div>' +
+      '<div class="line"><span>Signature</span></div></div>';
+  }).join('') + '</section>';
+
+  h += '<footer class="ctl"><div><div><span class="v">Rev ' + esc(rec.revision || '1.0') + '</span> &middot; ' + esc(fmt(rec.issueDate)) + ' &middot; ' + esc(num) + '</div>' +
+       '<div>Owner: ' + esc(TAQA_DOC.owner(rec)) + ' &middot; Approver: ' + esc(TAQA_DOC.approver(rec)) + '</div>' +
+       '<div class="unc">This document is uncontrolled when printed unless over stamped &ldquo;CONTROLLED DOCUMENT&rdquo;. Scan the code for the current revision.</div></div>' +
+       (qr ? '<img src="' + qr + '" alt="QR code to the current record of ' + esc(num) + '">' : '') + '</footer>';
+  body.innerHTML = h;
+
+  var total = n;
+  function tally(){
+    var done = 0, no = 0;
+    Object.keys(saved).forEach(function(k){ if (k.indexOf('q:') === 0 && saved[k]) { done++; if (saved[k] === 'no') no++; } });
+    document.getElementById('tally').innerHTML = '<b>' + done + ' of ' + total + '</b> checks answered' +
+      (no ? ' &middot; <span class="x">' + no + ' marked &#10007;, add a remark and stop the job if it is unsafe</span>' : '');
+  }
+  tally();
+  body.addEventListener('click', function(e){
+    var b = e.target.closest('.ans button'); if (!b) return;
+    var k = b.getAttribute('data-k'), v = b.getAttribute('data-v');
+    saved[k] = saved[k] === v ? '' : v;
+    b.parentNode.querySelectorAll('button').forEach(function(x){ x.setAttribute('aria-pressed', String(x.getAttribute('data-v') === saved[k])); });
+    save(); tally();
+  });
+  body.addEventListener('input', function(e){
+    var k = e.target.getAttribute && e.target.getAttribute('data-k'); if (!k) return;
+    saved[k] = e.target.value; save();
+  });
+  document.getElementById('clear').addEventListener('click', function(){
+    if (!confirm('Clear every answer on this form? This cannot be undone.')) return;
+    saved = {}; save(); location.reload();
+  });
+
+  // On paper: the number top right, and the footer TQ-QHSE-S001's own pages carry.
+  function pageBoxes(){
+    var stamp = new Date().toLocaleString('en-GB', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+    var q = function(s){ return '"' + String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; };
+    var st = document.getElementById('page-boxes') || document.head.appendChild(Object.assign(document.createElement('style'), {id:'page-boxes'}));
+    // The TAQA frame: a turquoise bar down the right edge with its top corner
+    // cut, and a dark teal bar along the foot with its left end cut.
+    var T = '#00BBB6', D = '#005D63';
+    var strip = 'linear-gradient(' + T + ',' + T + ') right/5mm 100% no-repeat';
+    var bar = 'linear-gradient(' + D + ',' + D + ') bottom/100% 5mm no-repeat';
+    var foot = 'padding-bottom:7mm;vertical-align:bottom;background:' + bar + ';';
+    st.textContent = '@page{' +
+      '@top-right-corner{content:"";background:linear-gradient(to top right,transparent 50%,' + T + ' 50%) right top/5mm 5mm no-repeat,linear-gradient(' + T + ',' + T + ') right bottom/5mm calc(100% - 5mm) no-repeat;}' +
+      '@right-middle{content:"";background:' + strip + ';}' +
+      '@bottom-right-corner{content:"";background:' + strip + ',' + bar + ';}' +
+      '@bottom-left-corner{content:"";background:linear-gradient(to top left,' + D + ' 50%,transparent 50%) right bottom/5mm 5mm no-repeat;}' +
+      '@top-right{content:' + q(num) + ';color:#C44A0C;font:600 9pt Inter,system-ui,sans-serif;}' +
+      '@bottom-left{content:' + q('Rev ' + (rec.revision || '1.0') + '  ' + fmt(rec.issueDate)) + ';color:#008E8A;font:8pt Inter,system-ui,sans-serif;' + foot + '}' +
+      '@bottom-center{content:' + q(rec.title) + ' "\\A" ' + q('Valid at time of printing - ' + stamp) + ';white-space:pre;color:#524D48;font:8pt Inter,system-ui,sans-serif;text-align:center;' + foot + '}' +
+      '@bottom-right{content:"Page " counter(page) " of " counter(pages);color:#C44A0C;font:600 8pt Inter,system-ui,sans-serif;text-align:right;' + foot + '}' +
+      '}';
+  }
+  // A date box prints its mm/dd/yyyy hint and a calendar icon. On paper it is a
+  // plain line: text while printing, back to a date picker afterwards.
+  window.addEventListener('beforeprint', function(){
+    pageBoxes();
+    document.querySelectorAll('input[type="date"]').forEach(function(i){ i.dataset.wasDate = '1'; i.type = 'text'; });
+  });
+  window.addEventListener('afterprint', function(){
+    document.querySelectorAll('input[data-was-date]').forEach(function(i){ i.type = 'date'; delete i.dataset.wasDate; });
+  });
+  pageBoxes();
+  var printAs = function(blank){
+    if (!usable) return;
+    document.body.classList.toggle('blank', !!blank);
+    pageBoxes();
+    window.print();
+    setTimeout(function(){ document.body.classList.remove('blank'); }, 400);
+  };
+  document.getElementById('print-blank').addEventListener('click', function(){ printAs(true); });
+  document.getElementById('print-filled').addEventListener('click', function(){ printAs(false); });
+  if (!usable) {
+    ['print-blank','print-filled'].forEach(function(id){ var b = document.getElementById(id); b.disabled = true; b.title = 'Only a current form can be printed.'; });
+  }
+})();
+</script>
+<script src="search-index.js"></script>
+<script src="shared.js"></script>
+</body>
+</html>

@@ -17,13 +17,13 @@ const BASE = computeBaseline();
 // Real register rows this suite exercises, picked by querying the register
 // itself (see the shell/node probes this suite was authored against), never
 // invented:
-//   TQ-TWS-CTSS-SOP-001  current,     rev 4.0, coiled-tubing, sop
+//   TQ-TWS-CTSS-SOP-011  current,     rev 3.0, coiled-tubing, sop
 //   TQ-TWS-CTSS-SOP-004  under-review,         coiled-tubing, sop
 //   TQ-TWS-CTSS-SOP-003  superseded,           coiled-tubing, sop
 //   TQ-TWS-CTSS-SOP-012  obsolete,             coiled-tubing, sop
 //   TQ-TWS-CTSS-S005     draft,                coiled-tubing, standard
 //   TQ-QHSE-P007         current,     policy,  company (segment = 'company')
-const DOC_CURRENT = { doc: 'TQ-TWS-CTSS-SOP-001', seg: 'coiled-tubing', type: 'sop', title: 'Pre-Job Safety Checklist' };
+const DOC_CURRENT = { doc: 'TQ-TWS-CTSS-SOP-011', seg: 'coiled-tubing', type: 'sop', title: 'Logging While CT SOP' };
 const DOC_UNDER_REVIEW = { doc: 'TQ-TWS-CTSS-SOP-004', seg: 'coiled-tubing', type: 'sop', title: 'Emergency Disconnect Procedure' };
 const DOC_SUPERSEDED = { doc: 'TQ-TWS-CTSS-SOP-003', seg: 'coiled-tubing', type: 'sop', title: 'Well Entry Protocol' };
 const DOC_OBSOLETE = { doc: 'TQ-TWS-CTSS-SOP-012', seg: 'coiled-tubing', type: 'sop', title: 'Post-Job Reporting SOP' };
@@ -149,7 +149,7 @@ test.describe('metadata for a known document', () => {
       .toMatch(new RegExp(DOC_CURRENT.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
     await expect(page.locator('#doc-badges')).toContainText(DOC_CURRENT.doc);
     await expect(page.locator('#meta-grid')).toContainText(DOC_CURRENT.doc);
-    await expect(page.locator('#meta-grid')).toContainText('Rev 4.0'); // register revision
+    await expect(page.locator('#meta-grid')).toContainText('Rev 3.0'); // register revision
     // Segment name lives in the badges row, not the control-record grid.
     await expect(page.locator('#doc-badges')).toContainText('Coiled Tubing');
     assertNoConsoleErrors(consoleErrors);
@@ -289,8 +289,8 @@ test.describe('version history, approval trail, compare and related-docs panels'
     await expect(page.locator('#rev-count-badge')).toContainText('revision');
     const revRows = page.locator('#rev-timeline .rev-row');
     await expect(revRows.first()).toBeVisible();
-    // Rev 4.0 -> at least 4 rows (current down to 1), current one tagged.
-    expect(await revRows.count()).toBeGreaterThanOrEqual(4);
+    // Rev 3.0 -> at least 3 rows (current down to 1), current one tagged.
+    expect(await revRows.count()).toBeGreaterThanOrEqual(3);
     await expect(page.locator('.rev-row.rev-current .rev-current-tag')).toHaveText('Current');
 
     await expect(page.locator('#approval-section')).toBeVisible();
@@ -316,7 +316,7 @@ test.describe('version history, approval trail, compare and related-docs panels'
     await setRole('employee', DOC_CURRENT.seg);
     await gotoApp(urlFor(DOC_CURRENT));
     await expect(page.locator('#rev-brief-view')).toBeVisible();
-    await expect(page.locator('#rev-brief-text')).toContainText('Rev 4');
+    await expect(page.locator('#rev-brief-text')).toContainText('Rev 3');
     await expect(page.locator('#rev-full-view')).toBeHidden();
     await expect(page.locator('#approval-section')).toBeHidden();
     assertNoConsoleErrors(consoleErrors);

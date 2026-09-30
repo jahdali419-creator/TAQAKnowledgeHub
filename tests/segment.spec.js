@@ -326,12 +326,12 @@ test.describe('amber pre-warning for a review due soon', () => {
     setRole,
     consoleErrors,
   }) => {
-    // TQ-TWS-CTSS-SOP-001, nextReviewDate 2027-07-20: far outside both the
+    // TQ-TWS-CTSS-SOP-011, nextReviewDate 2028-01-10: far outside both the
     // overdue and the 30-day due-soon windows.
     await gotoApp('/index.html');
     await setRole('qms', 'coiled-tubing');
     await gotoApp('/segment.html?id=coiled-tubing&tab=sops');
-    const card = page.locator('.doc-card[data-title^="TQ-TWS-CTSS-SOP-001"]').first();
+    const card = page.locator('.doc-card[data-title^="TQ-TWS-CTSS-SOP-011"]').first();
     await expect(card).toBeVisible();
     await expect(card.locator('.doc-review-soon')).toHaveCount(0);
     await expect(card.locator('.doc-review-late')).toHaveCount(0);
