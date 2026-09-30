@@ -47,7 +47,10 @@ test.describe('master-list.html, role gating (business rule, not a security boun
 });
 
 test.describe('master-list.html, bulk actions', () => {
-  test('selecting rows shows the bulk bar with an accurate count, and Approve selected applies to every selected row', async ({
+  // The bulk action is QMS's own step and only that. It used to call
+  // setStatus('current'), which put every selected draft in force with no
+  // Director and no approver's name on the record (release QA, Sept 2026).
+  test('Confirm selected does the QMS check on every selected draft and sends it to its Director, never straight to Current', async ({
     page,
     gotoApp,
     setRole,
@@ -55,34 +58,48 @@ test.describe('master-list.html, bulk actions', () => {
   }) => {
     await gotoApp('/index.html');
     await setRole('qms', 'coiled-tubing');
-    // The whole register has 15 draft documents (per computeBaseline()),
-    // which all fit on one page (PER_PAGE=20), so "select all on this page"
-    // selects every draft document in the register in one go.
+    // Every draft in the register fits on one page (PER_PAGE=20), so
+    // "select all on this page" selects every draft in one go.
     await gotoApp('/master-list.html?view=draft');
 
     const checkboxes = page.locator('#rows .row-chk');
     const rowCount = await checkboxes.count();
     expect(rowCount).toBeGreaterThan(0);
     const docNumbers = await checkboxes.evaluateAll((els) => els.map((e) => e.dataset.doc));
+    const waitingOnQms = await page.evaluate(
+      (nums) => nums.filter((n) => TAQA_APPROVAL.stageOf(TAQA_STORE.findDoc(n)) === 'qms'),
+      docNumbers
+    );
+    expect(waitingOnQms.length).toBeGreaterThan(0);
 
     await expect(page.locator('#bulk-bar')).toBeHidden();
     await page.locator('#sel-all').check();
     await expect(page.locator('#bulk-bar')).toBeVisible();
     await expect(page.locator('#bulk-count')).toHaveText(rowCount + ' documents selected');
+    await expect(page.locator('#bulk-approve')).toHaveText('Confirm selected (QMS check)');
 
-    page.once('dialog', (d) => d.accept());
+    let dialogText = '';
+    page.once('dialog', (d) => { dialogText = d.message(); d.accept(); });
     await page.locator('#bulk-approve').click();
 
-    await expect(page.locator('#toast')).toContainText('Approved ' + rowCount + ' document');
+    await expect(page.locator('#toast')).toContainText('Confirmed ' + waitingOnQms.length + ' document');
+    await expect(page.locator('#toast')).toContainText('on the Director');
+    expect(dialogText).toContain('not in force until the Director approves');
     await expect(page.locator('#bulk-bar')).toBeHidden();
-    // The draft quick-filter view now has nothing left in it.
-    await expect(page.locator('#empty')).toBeVisible();
 
-    const statuses = await page.evaluate(
-      (nums) => nums.map((n) => TAQA_STORE.findDoc(n).status),
-      docNumbers
+    const after = await page.evaluate(
+      (nums) => nums.map((n) => { const d = TAQA_STORE.findDoc(n); return { status: d.status, stage: d.approvalStage, by: d.countersignedBy, approvedBy: d.approvedBy || null }; }),
+      waitingOnQms
     );
-    expect(statuses.every((s) => s === 'current')).toBe(true);
+    for (const d of after) {
+      expect(d.status).toBe('draft');
+      expect(d.stage).toBe('director');
+      expect(d.by).toBeTruthy();
+      expect(d.approvedBy).toBeNull();
+    }
+    // Nothing selected went into force.
+    const statuses = await page.evaluate((nums) => nums.map((n) => TAQA_STORE.findDoc(n).status), docNumbers);
+    expect(statuses.includes('current')).toBe(false);
 
     assertNoConsoleErrors(consoleErrors);
   });

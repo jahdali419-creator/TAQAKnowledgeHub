@@ -83,6 +83,20 @@
     try { localStorage.setItem(OKEY, JSON.stringify(overrides())); } catch (e) {}
   }
 
+  /* Every write, and every check a write depends on, starts from what is in
+     storage now rather than what this tab read earlier. save() writes the whole
+     list back, so a tab left open on a stale copy used to overwrite another
+     tab's changes: QMS confirming one document in one tab and another in a
+     second tab erased the first confirmation. */
+  function fresh() { _added = null; _over = null; }
+  // Another tab wrote: drop the cached copy whether or not this page asked
+  // to be told (onChange() still repaints the pages that did).
+  try {
+    root.addEventListener('storage', function (e) {
+      if (e.key === KEY || e.key === OKEY || e.key === null) fresh();
+    });
+  } catch (e) {}
+
   function announce(detail) {
     try { root.dispatchEvent(new CustomEvent(EVT, { detail: detail || {} })); } catch (e) {}
   }
@@ -192,6 +206,10 @@
      shipped with the file.                                                */
   function add(rec) {
     if (!rec || !rec.title) return null;
+    // The same rule upload.html refuses at the door, checked again where the
+    // record is written, so no page can file on a role's behalf that it lacks.
+    if (typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.effective && !TAQA_ROLE.effective().submit) return null;
+    fresh();
     var row = {};
     for (var k in rec) if (Object.prototype.hasOwnProperty.call(rec, k)) row[k] = rec[k];
     row.status = row.status || 'draft';
@@ -199,6 +217,10 @@
     // conforms before the named approver's name ever goes on it.
     if (row.status === 'draft' && !row.approvalStage) row.approvalStage = 'qms';
     row.submittedAt = row.submittedAt || new Date().toISOString();
+    // Who filed it goes on the record at the moment of filing, the same way
+    // the two signatures do. It was a placeholder sentence, so neither QMS,
+    // the Director nor an auditor could tell who had submitted a document.
+    if (!row.submittedBy) row.submittedBy = actingName();
     row.locallyAdded = true;
     load().push(row);
     save();
@@ -211,6 +233,21 @@
      because in Azure that transition is the back end's to make.           */
   function setStatus(docNumber, status) {
     if (!docNumber) return null;
+    fresh();
+    // Putting a document in force is the Director's step and nobody else's.
+    // This used to write 'current' for whoever called it, so the Master List's
+    // bulk action let QMS release an Employee's draft with no Director and no
+    // name on the approval. Release now only happens through approve(), which
+    // checks the stage, the role and the area and records who signed.
+    if (status === 'current') {
+      var r = approve(docNumber);
+      return r.ok ? findDoc(docNumber) : null;
+    }
+    // Any other move (withdraw, supersede) belongs to whoever manages the
+    // document's area: its Director or QMS. An Employee or an auditor could
+    // withdraw a live procedure from the console before this check.
+    var cur = findDoc(docNumber);
+    if (!cur || !mayManage(cur)) return null;
     var today = new Date().toISOString().slice(0, 10);
     var hit = null;
     load().forEach(function (d) { if (d.docNumber === docNumber) hit = d; });
@@ -249,21 +286,24 @@
      already acted. See TAQA_APPROVAL's "Two-step release" comment in
      roles.js for why the order is this way round. */
   function approve(docNumber, signer) {
+    fresh();
     var d = findDoc(docNumber);
     if (!d) return { ok: false, error: 'No such document.' };
     if (typeof TAQA_APPROVAL === 'undefined') return { ok: false, error: 'Rules not loaded.' };
     if (!TAQA_APPROVAL.canApprove(d)) return { ok: false, error: 'You cannot approve this document.' };
-    var today = new Date().toISOString().slice(0, 10);
+    var now = new Date().toISOString(), today = now.slice(0, 10);
     patch(docNumber, {
       approvalStage: null, status: 'current',
       approvedBy: signer || actingName(),
       approvedDate: today,
+      approvedAt: now,
       issueDate: d.issueDate || today
     });
     return { ok: true, next: 'released' };
   }
 
   function countersign(docNumber, signer) {
+    fresh();
     var d = findDoc(docNumber);
     if (!d) return { ok: false, error: 'No such document.' };
     if (typeof TAQA_APPROVAL === 'undefined') return { ok: false, error: 'Rules not loaded.' };
@@ -271,7 +311,8 @@
     patch(docNumber, {
       approvalStage: 'director',
       countersignedBy: signer || actingName(),
-      countersignedDate: new Date().toISOString().slice(0, 10)
+      countersignedDate: new Date().toISOString().slice(0, 10),
+      countersignedAt: new Date().toISOString()
     });
     return { ok: true, next: "the Director's final approval" };
   }
@@ -281,6 +322,7 @@
      nothing to act on, and neither does anyone reading this later to see
      why a document never made it into the register. */
   function reject(docNumber, reason, signer) {
+    fresh();
     var d = findDoc(docNumber);
     if (!d) return { ok: false, error: 'No such document.' };
     if (typeof TAQA_APPROVAL === 'undefined') return { ok: false, error: 'Rules not loaded.' };
@@ -296,7 +338,8 @@
       rejectedAtStage: stage,
       rejectedBy: signer || actingName(),
       rejectedReason: reason.trim(),
-      rejectedDate: new Date().toISOString().slice(0, 10)
+      rejectedDate: new Date().toISOString().slice(0, 10),
+      rejectedAt: new Date().toISOString()
     });
     return { ok: true, next: 'returned to submitter' };
   }
@@ -312,9 +355,34 @@
     return (r && r.label) || 'Unknown';
   }
 
+  function mayManage(doc) {
+    if (typeof TAQA_ROLE === 'undefined' || !TAQA_ROLE.canManage) return false;
+    return TAQA_ROLE.canManage(doc.segment);
+  }
+
+  /* Fields only the release steps may write. A page editing a record's
+     details (title, summary, review date) never touches these, so nobody can
+     sign a document, or clear a rejection, by editing it. */
+  var LIFECYCLE = ['status', 'approvalStage', 'approvedBy', 'approvedDate', 'approvedAt',
+    'countersignedBy', 'countersignedDate', 'countersignedAt', 'rejected', 'rejectedAtStage',
+    'rejectedBy', 'rejectedReason', 'rejectedDate', 'rejectedAt', 'submittedBy', 'submittedAt'];
+
+  /* The patch other pages can call: the area's manager editing details only. */
+  function editFields(docNumber, fields) {
+    var d = findDoc(docNumber);
+    if (!d || !fields) return { ok: false, error: 'No such document.' };
+    if (!mayManage(d)) return { ok: false, error: 'You cannot edit this document.' };
+    for (var k in fields) if (LIFECYCLE.indexOf(k) !== -1)
+      return { ok: false, error: k + ' changes only through approval, countersignature or withdrawal.' };
+    patch(docNumber, fields);
+    return { ok: true };
+  }
+
   /* Field-level write, used by both steps. Locally added rows are edited in
-     place; shipped rows get an overlay entry, same as setStatus. */
+     place; shipped rows get an overlay entry, same as setStatus. Not exported:
+     every caller outside this file goes through a step that checks the role. */
   function patch(docNumber, fields) {
+    fresh();
     var local = null;
     load().forEach(function (d) { if (d.docNumber === docNumber) local = d; });
     if (local) {
@@ -330,9 +398,13 @@
   }
 
   function remove(docNumber) {
+    fresh();
+    var d = findDoc(docNumber);
+    if (!d || !mayManage(d)) return false;
     _added = load().filter(function (d) { return d.docNumber !== docNumber; });
     save();
     announce({ action: 'remove', docNumber: docNumber });
+    return true;
   }
 
   function reset() {
@@ -359,7 +431,7 @@
   root.TAQA_STORE = {
     all: all, rows: rows, count: count, area: area, areasIn: areasIn,
     add: add, setStatus: setStatus, remove: remove, reset: reset,
-    approve: approve, countersign: countersign, reject: reject, patch: patch,
+    approve: approve, countersign: countersign, reject: reject, patch: editFields,
     stageOf: stageOf, findDoc: findDoc, actingName: actingName,
     onChange: onChange, added: load,
     isControlled: isControlled, isLive: isLive,

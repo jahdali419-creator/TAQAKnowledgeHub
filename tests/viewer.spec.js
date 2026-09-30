@@ -239,7 +239,8 @@ test.describe('document statuses render distinctly, per the actual code paths', 
     await setRole('employee', DOC_DRAFT.seg);
     await gotoApp(urlFor(DOC_DRAFT));
     // roles.js: employee's `statuses` list has no 'draft', so TAQA_ROLE.canSee
-    // refuses it, the record is withheld, not merely marked.
+    // refuses it, the record is withheld, not merely marked. Someone else's
+    // draft keeps its title and status withheld too.
     await expect(page.locator('#lifecycle-banner .lcb-obsolete')).toContainText('Access restricted');
     await expect(page.locator('#meta-grid')).toContainText('Not available to your role');
     await expect(page.locator('#dl-btn')).toHaveAttribute('aria-disabled', 'true');

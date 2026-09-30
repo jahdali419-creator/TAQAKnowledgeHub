@@ -242,7 +242,10 @@ html[data-taqa-theme="dark"] .stat-sep{color:#00484B;}
   box-shadow:0 4px 12px rgba(0,93,99,0.25);
 }
 .msg-ai .bubble{
-  flex:1;background:var(--glass-2);border:1px solid var(--glass-border);
+  /* min-width:0 lets the answer shrink to the screen: without it a long
+     document number or title held it wider, and at 360px the result cards
+     ran 29px off the right edge. */
+  flex:1;min-width:0;overflow-wrap:anywhere;background:var(--glass-2);border:1px solid var(--glass-border);
   border-radius:4px 18px 18px 18px;padding:18px 20px;
   font-size:14px;line-height:1.78;
   box-shadow:0 2px 12px rgba(0,0,0,0.05);
@@ -530,7 +533,7 @@ html[data-taqa-theme] body .ai-safety-banner{color:var(--alert-ink);background:v
 <canvas id="bg-canvas"></canvas>
 <div class="page-wrapper">
 
-<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
   <a href="index.html" class="nav-brand">
     <img src="icons/taqa-logo.png" alt="TAQA" class="nav-logo nav-logo-light">
     <img src="icons/taqa-logo-reverse.png" alt="TAQA" class="nav-logo nav-logo-dark">

@@ -76,6 +76,7 @@ test.describe('bookmarks (topbar, shared.js, multi-page)', () => {
   });
 
   test('adding a bookmark from viewer.html appears in the shared panel, including when the panel is opened from a different page', async ({
+    topbar,
     page,
     gotoApp,
   }) => {
@@ -88,7 +89,7 @@ test.describe('bookmarks (topbar, shared.js, multi-page)', () => {
     await expect(bmBtn).toContainText('Bookmarked');
 
     await expect(page.locator('#bm-cnt')).toHaveText('1');
-    await page.locator('#nav-bm').click();
+    await topbar.openBookmarks();
     const panel = page.locator('#bm-panel');
     await expect(panel).toBeVisible();
     await expect(panel.locator('.bm-item')).toHaveCount(1);
@@ -99,13 +100,14 @@ test.describe('bookmarks (topbar, shared.js, multi-page)', () => {
     // steps, proving this is genuinely shared state, not a per-page copy.
     await gotoApp('/index.html');
     await expect(page.locator('#bm-cnt')).toHaveText('1');
-    await page.locator('#nav-bm').click();
+    await topbar.openBookmarks();
     const panelOnIndex = page.locator('#bm-panel');
     await expect(panelOnIndex.locator('.bm-item')).toHaveCount(1);
     await expect(panelOnIndex.locator('.bm-t')).toContainText(VIEWER_DOC_TITLE);
   });
 
   test('adding a bookmark from segment.html\'s row overflow menu also lands in the shared panel', async ({
+    topbar,
     page,
     gotoApp,
   }) => {
@@ -127,7 +129,7 @@ test.describe('bookmarks (topbar, shared.js, multi-page)', () => {
     await expect(flag).toHaveClass(/bm-on/);
 
     await expect(page.locator('#bm-cnt')).toHaveText('1');
-    await page.locator('#nav-bm').click();
+    await topbar.openBookmarks();
     const panel = page.locator('#bm-panel');
     await expect(panel.locator('.bm-item')).toHaveCount(1);
     // bm-t shows the title with any leading "NUMBER␣␣" stripped (shared.js
@@ -137,6 +139,7 @@ test.describe('bookmarks (topbar, shared.js, multi-page)', () => {
   });
 
   test('removing a bookmark from the panel clears it there, drops the badge to zero, and clears the originating page\'s own star', async ({
+    topbar,
     page,
     gotoApp,
   }) => {
@@ -147,7 +150,7 @@ test.describe('bookmarks (topbar, shared.js, multi-page)', () => {
     await expect(firstCard.locator('.bm-flag')).toHaveClass(/bm-on/);
     await expect(page.locator('#bm-cnt')).toHaveText('1');
 
-    await page.locator('#nav-bm').click();
+    await topbar.openBookmarks();
     const panel = page.locator('#bm-panel');
     await expect(panel.locator('.bm-item')).toHaveCount(1);
     await panel.locator('.bm-x').click();
@@ -171,6 +174,7 @@ test.describe('bookmarks (topbar, shared.js, multi-page)', () => {
   // clearing live when the same bookmark is removed from the panel. This
   // test documents that CURRENT behavior; it is not the intended UX.
   test('KNOWN BUG: removing a bookmark via the panel leaves viewer.html\'s own bookmark button stale until reload', async ({
+    topbar,
     page,
     gotoApp,
   }) => {
@@ -179,7 +183,7 @@ test.describe('bookmarks (topbar, shared.js, multi-page)', () => {
     await bmBtn.click();
     await expect(bmBtn).toHaveAttribute('aria-pressed', 'true');
 
-    await page.locator('#nav-bm').click();
+    await topbar.openBookmarks();
     const panel = page.locator('#bm-panel');
     await panel.locator('.bm-x').click();
     await expect(panel.locator('.bm-empty')).toBeVisible();
@@ -230,13 +234,14 @@ test.describe('bookmarks (topbar, shared.js, multi-page)', () => {
   });
 
   test('exporting bookmarks runs with no JS error and starts a download', async ({
+    topbar,
     page,
     gotoApp,
     consoleErrors,
   }) => {
     await gotoApp(VIEWER_URL);
     await page.locator('#bm-doc-btn').click();
-    await page.locator('#nav-bm').click();
+    await topbar.openBookmarks();
 
     const downloadPromise = page.waitForEvent('download', { timeout: 4000 }).catch(() => null);
     await page.locator('#bm-panel #bm-exp').click();

@@ -277,7 +277,9 @@ window.showToast=function(msg,type){
   var R=(typeof TAQA_ROLE!=='undefined')?TAQA_ROLE:null;
   var cap=null; try{ cap=R&&R.effective?R.effective():null; }catch(e){}
   var canRegister=false; try{ canRegister=!R||R.canRegister(); }catch(e){}
-  var canUpload=!!(cap&&cap.editMetadata);
+  // Upload is for any role that may file a document for approval (roles.js
+  // submit), not only the ones that manage an area.
+  var canUpload=!!(cap&&cap.submit);
   var p=location.pathname;
   var onPage=function(f){ return f==='index.html' ? (/\/$/.test(p)||/\/index\.html$/.test(p)) : p.indexOf('/'+f)>-1; };
   var esc=function(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
@@ -671,6 +673,13 @@ window.showToast=function(msg,type){
     localStorage.setItem(KEY,Date.now().toString());
   }
   function showSheet(){
+    // Not over the welcome tour. On a first visit to Home on a phone both
+    // opened together and the sheet covered the tour's Skip and Next, so a
+    // new user met two overlays and could not use either until closing one.
+    // Wait until the tour is finished, then offer the install.
+    var tourOn=false;
+    try{ tourOn=!!document.getElementById('tc-skip')&&!localStorage.getItem('taqa-tour-done'); }catch(e){}
+    if(tourOn){ setTimeout(showSheet,1500); return; }
     sheet.classList.add('pwa-open');
     overlay.classList.add('pwa-open');
   }
@@ -1497,6 +1506,11 @@ document.addEventListener('keydown',function(e){
       'font-family:inherit;font-size:12px;font-weight:700;color:var(--primary,#005D63);cursor:pointer;' +
       'text-decoration:none;}' +
     '.bell-foot:hover{background:rgba(0,93,99,.06);}' +
+    // On a phone the bell is well in from the edge, so a 300px panel hung
+    // from its end ran off the left of the screen and cut every title short.
+    // There it spans the screen under the bar instead.
+    '@media(max-width:640px){.bell-menu{position:fixed;top:calc(var(--nav-h,64px) + 8px);inset-inline:12px;width:auto;max-height:70vh;}' +
+      '.bell-i{padding:10px 12px;}.bell-foot{min-height:44px;}}' +
     'html[data-taqa-theme="dark"] .bell-menu{background:#002326;border-color:#003A3D;}' +
     'html[data-taqa-theme="dark"] .bell-i:hover,html[data-taqa-theme="dark"] .bell-foot:hover{background:rgba(0,187,182,.08);}';
   document.head.appendChild(css);
@@ -1581,8 +1595,12 @@ document.addEventListener('keydown',function(e){
     var pending = [];
     try {
       if (typeof TAQA_STORE !== 'undefined' && A) {
+        // Newest first: only the first few are drawn, and the one just filed
+        // is the one a signer is most likely opening the bell to find.
         pending = TAQA_STORE.all().filter(function(d){
           return A.canApprove(d) || A.canCountersign(d);
+        }).sort(function(a, b){
+          return String(b.submittedAt || '').localeCompare(String(a.submittedAt || ''));
         });
       }
     } catch(e){}
@@ -1620,9 +1638,13 @@ document.addEventListener('keydown',function(e){
         (pending.length
           ? pending.slice(0, SHOWN).map(function(d){
               var verb = A.canCountersign(d) ? 'conformance check' : 'final approval';
-              return '<a class="bell-i" href="viewer.html?doc=' + encodeURIComponent(d.docNumber) + '">' +
-                '<span class="bt">' + d.title + '</span>' +
-                '<span class="bd">' + d.docNumber + ' &middot; waiting for your ' + verb + '</span></a>';
+              // The title is whatever the submitter typed. It went into the
+              // signer's page unescaped, so a title carrying markup ran as
+              // script in the Director's browser the moment the bell was built.
+              // It opens the desk the signature is given from, not the viewer.
+              return '<a class="bell-i" href="dashboard.html?id=' + encodeURIComponent(d.segment || '') + '">' +
+                '<span class="bt">' + esc(d.title) + '</span>' +
+                '<span class="bd">' + esc(d.docNumber) + ' &middot; waiting for your ' + verb + '</span></a>';
             }).join('')
           : '<div class="bell-i" style="cursor:default;"><span class="bd">Nothing waiting right now.</span></div>') +
         (pending.length > SHOWN ? '<div class="bell-more">+ ' + (pending.length - SHOWN) + ' more in your queue</div>' : '')
