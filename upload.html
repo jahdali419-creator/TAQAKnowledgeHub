@@ -1132,7 +1132,9 @@ function buildRecord(){
     classification: 'internal',           // 5.5: a policy must stay accessible to all
     language:       'en',
     translationOf:  null,
-    numberStatus:   (e.provisional || t.provisional) ? 'provisional' : 'conformant',
+    // Same test the number generator states: a code S001 has not assigned, a
+    // type it has no letter for, or an area with no business unit confirmed.
+    numberStatus:   (e.provisional || t.provisional || (!e.bu && e.group === 'segment')) ? 'provisional' : 'conformant',
     summary:        (document.getElementById('summary-main') || {}).value.trim() || null,
     audience:       (document.getElementById('audience-select') || {}).value || null,
     keywords:       ((document.getElementById('keywords-input') || {}).value || '')

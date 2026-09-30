@@ -141,38 +141,38 @@ const TAQA_DOC_LOOKUPS = {
     "slickline": {
       "group": "segment",
       "name": "Slickline",
-      "spl": "SLK",
-      "splName": "Slickline",
+      "spl": "SS",
+      "splName": "Slickline Services",
       "bu": null,
-      "provisional": true,
-      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"SLK\" is provisional pending QHSE assignment."
+      "provisional": false,
+      "note": "TQ-QHSE-S001 5.3 assigns \"SS\" to Slickline Services (Service & Product Line 10). The standard does not say which business unit it sits under, so numbers read TQ-SS-... until QHSE confirms the business unit (TQ-<BU>-SS-...)."
     },
     "well-completions": {
       "group": "segment",
       "name": "Well Completions",
       "spl": "WCS",
-      "splName": "Well Completions",
+      "splName": "Well Completion Services",
       "bu": null,
-      "provisional": true,
-      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"WCS\" is provisional pending QHSE assignment."
+      "provisional": false,
+      "note": "TQ-QHSE-S001 5.3 assigns \"WCS\" to Well Completion Services (Service & Product Line 15). The standard does not say which business unit it sits under, so numbers read TQ-WCS-... until QHSE confirms the business unit (TQ-<BU>-WCS-...)."
     },
     "marine-services": {
       "group": "segment",
       "name": "Marine Services",
-      "spl": "MRS",
+      "spl": "MS",
       "splName": "Marine Services",
       "bu": null,
-      "provisional": true,
-      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"MRS\" is provisional pending QHSE assignment."
+      "provisional": false,
+      "note": "TQ-QHSE-S001 5.3 assigns \"MS\" to Marine Services (Service & Product Line 13). The standard does not say which business unit it sits under, so numbers read TQ-MS-... until QHSE confirms the business unit (TQ-<BU>-MS-...)."
     },
     "finance": {
       "group": "function",
       "name": "Finance",
-      "spl": "FIN",
-      "splName": "Finance",
+      "spl": "CFP",
+      "splName": "Corporate Finance & Planning",
       "bu": null,
-      "provisional": true,
-      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"FIN\" is provisional pending QHSE assignment."
+      "provisional": false,
+      "note": "TQ-QHSE-S001 5.3, corporate function 04: Corporate Finance & Planning, CFP. Inside a business unit, Finance as a support function is FNC."
     },
     "it": {
       "group": "function",
@@ -180,26 +180,26 @@ const TAQA_DOC_LOOKUPS = {
       "spl": "IT",
       "splName": "Information Technology",
       "bu": null,
-      "provisional": true,
-      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"IT\" is provisional pending QHSE assignment."
+      "provisional": false,
+      "note": "TQ-QHSE-S001 5.3, corporate function 09: Information Technology, IT."
     },
     "supply-chain": {
       "group": "function",
       "name": "Supply Chain",
-      "spl": "SCM",
+      "spl": "SC",
       "splName": "Supply Chain",
       "bu": null,
-      "provisional": true,
-      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"SCM\" is provisional pending QHSE assignment."
+      "provisional": false,
+      "note": "TQ-QHSE-S001 5.3, corporate function 05: Supply Chain, SC. Supply Chain as a support function inside a business unit is also SC."
     },
     "legal": {
       "group": "function",
       "name": "Legal",
-      "spl": "LGL",
-      "splName": "Legal",
+      "spl": "VM",
+      "splName": "Venture Management, Legal & Compliance",
       "bu": null,
-      "provisional": true,
-      "note": "No short form is assigned in TQ-QHSE-S001 5.3. \"LGL\" is provisional pending QHSE assignment."
+      "provisional": false,
+      "note": "TQ-QHSE-S001 5.3, corporate function 12: Venture Management, Legal & Compliance, VM. Inside a business unit, Legal as a support function is LGL."
     },
     "learning-center": {
       "group": "function",
@@ -938,27 +938,27 @@ const TAQA_MASTER_DOCS = [{"docNumber": "TQ-QHSE-P###", "legacyId": "TAQA-QHSE-P
 {"docNumber":"TQ-TWS-FS-SOP-006-AR","legacyId":"FRAC-006","title":"Treatment Execution SOP (النسخة العربية)","segment":"fracturing","docType":"sop","revision":"3.0","issueDate":"2026-02-12","approvedDate":"2026-01-12","nextReviewDate":"2028-02-12","reviewOverdue":false,"status":"current","supersedes":null,"supersededBy":null,"classification":"internal","language":"ar","translationOf":"TQ-TWS-FS-SOP-006","numberStatus":"conformant"},
 {"docNumber":"TQ-TWS-FS-SOP-007-AR","legacyId":"FRAC-007","title":"Emergency Shutdown Procedure (النسخة العربية)","segment":"fracturing","docType":"sop","revision":"3.0","issueDate":"2026-07-22","approvedDate":"2026-06-22","nextReviewDate":"2028-07-22","reviewOverdue":false,"status":"current","supersedes":null,"supersededBy":null,"classification":"internal","language":"ar","translationOf":"TQ-TWS-FS-SOP-007","numberStatus":"conformant"},
 {"docNumber":"TQ-TWS-FS-SOP-008-AR","legacyId":"FRAC-008","title":"Post-Job Flowback SOP (النسخة العربية)","segment":"fracturing","docType":"sop","revision":"3.0","issueDate":"2025-12-27","approvedDate":"2025-11-27","nextReviewDate":"2027-12-27","reviewOverdue":false,"status":"current","supersedes":null,"supersededBy":null,"classification":"internal","language":"ar","translationOf":"TQ-TWS-FS-SOP-008","numberStatus":"conformant"},
-{"docNumber": "TQ-SLK-SOP-001", "legacyId": null, "title": "Slickline Pressure Control Equipment Rig-Up", "segment": "slickline", "docType": "sop", "revision": "1.0", "issueDate": "2024-07-30", "approvedDate": "2024-07-07", "nextReviewDate": "2026-07-20", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-SLK-SOP-002", "legacyId": null, "title": "Wireline Valve Function Test", "segment": "slickline", "docType": "sop", "revision": "1.0", "issueDate": "2025-12-27", "approvedDate": "2025-11-09", "nextReviewDate": "2027-12-17", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-SLK-WI-003", "legacyId": null, "title": "Toolstring Make-Up and Inspection", "segment": "slickline", "docType": "manual", "revision": "1.0", "issueDate": "2024-05-06", "approvedDate": "2024-03-16", "nextReviewDate": "2027-04-21", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-SS-SOP-001", "legacyId": null, "title": "Slickline Pressure Control Equipment Rig-Up", "segment": "slickline", "docType": "sop", "revision": "1.0", "issueDate": "2024-07-30", "approvedDate": "2024-07-07", "nextReviewDate": "2026-07-20", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional", "formerNumbers": ["TQ-SLK-SOP-001"]},
+{"docNumber": "TQ-SS-SOP-002", "legacyId": null, "title": "Wireline Valve Function Test", "segment": "slickline", "docType": "sop", "revision": "1.0", "issueDate": "2025-12-27", "approvedDate": "2025-11-09", "nextReviewDate": "2027-12-17", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional", "formerNumbers": ["TQ-SLK-SOP-002"]},
+{"docNumber": "TQ-SS-WI-003", "legacyId": null, "title": "Toolstring Make-Up and Inspection", "segment": "slickline", "docType": "manual", "revision": "1.0", "issueDate": "2024-05-06", "approvedDate": "2024-03-16", "nextReviewDate": "2027-04-21", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional", "formerNumbers": ["TQ-SLK-WI-003"]},
 {"docNumber": "TQ-WCS-SOP-001", "legacyId": null, "title": "Completion String Running Procedure", "segment": "well-completions", "docType": "sop", "revision": "1.0", "issueDate": "2025-03-11", "approvedDate": "2025-02-23", "nextReviewDate": "2027-03-01", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
 {"docNumber": "TQ-WCS-SOP-002", "legacyId": null, "title": "Production Packer Setting and Testing", "segment": "well-completions", "docType": "sop", "revision": "1.0", "issueDate": "2023-12-18", "approvedDate": "2023-11-08", "nextReviewDate": "2025-12-07", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
 {"docNumber": "TQ-WCS-WI-003", "legacyId": null, "title": "Downhole Gauge Installation", "segment": "well-completions", "docType": "manual", "revision": "1.0", "issueDate": "2024-01-06", "approvedDate": "2023-12-20", "nextReviewDate": "2026-12-21", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-MRS-F001", "legacyId": null, "title": "Vessel Mobilisation Checklist", "segment": "marine-services", "docType": "form", "revision": "1.0", "issueDate": "2025-02-21", "approvedDate": "2024-12-29", "nextReviewDate": "2027-02-11", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional", "formerNumbers": ["TQ-MRS-SOP-001"]},
-{"docNumber": "TQ-MRS-SOP-002", "legacyId": null, "title": "Cargo Securing and Sea Fastening", "segment": "marine-services", "docType": "sop", "revision": "1.0", "issueDate": "2024-03-03", "approvedDate": "2024-02-15", "nextReviewDate": "2026-02-21", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-MRS-SOP-003", "legacyId": null, "title": "Man Overboard Response", "segment": "marine-services", "docType": "sop", "revision": "4.0", "issueDate": "2025-08-25", "approvedDate": "2025-07-24", "nextReviewDate": "2027-08-15", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-FIN-S001", "legacyId": null, "title": "Delegation of Authority Standard", "segment": "finance", "docType": "standard", "revision": "1.0", "issueDate": "2025-08-02", "approvedDate": "2025-06-15", "nextReviewDate": "2027-07-23", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-FIN-S002", "legacyId": null, "title": "Travel and Expense Standard", "segment": "finance", "docType": "standard", "revision": "2.0", "issueDate": "2024-08-31", "approvedDate": "2024-07-13", "nextReviewDate": "2026-08-21", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-FIN-SOP-003", "legacyId": null, "title": "Month-End Close Procedure", "segment": "finance", "docType": "sop", "revision": "2.0", "issueDate": "2025-10-25", "approvedDate": "2025-09-04", "nextReviewDate": "2027-10-15", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-IT-S001", "legacyId": null, "title": "Acceptable Use Standard", "segment": "it", "docType": "standard", "revision": "1.0", "issueDate": "2024-04-22", "approvedDate": "2024-04-02", "nextReviewDate": "2026-04-12", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-IT-SOP-002", "legacyId": null, "title": "IT Change Management Procedure", "segment": "it", "docType": "sop", "revision": "2.0", "issueDate": "2026-01-22", "approvedDate": "2025-11-30", "nextReviewDate": "2028-01-12", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-IT-SOP-003", "legacyId": null, "title": "Backup and Restore Procedure", "segment": "it", "docType": "sop", "revision": "3.0", "issueDate": "2023-08-12", "approvedDate": "2023-06-16", "nextReviewDate": "2025-08-01", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-SCM-S001", "legacyId": null, "title": "Supplier Qualification Standard", "segment": "supply-chain", "docType": "standard", "revision": "3.0", "issueDate": "2023-10-14", "approvedDate": "2023-08-24", "nextReviewDate": "2025-10-03", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-SCM-SOP-002", "legacyId": null, "title": "Purchase Requisition and Approval Procedure", "segment": "supply-chain", "docType": "sop", "revision": "2.0", "issueDate": "2024-09-18", "approvedDate": "2024-08-20", "nextReviewDate": "2026-09-08", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-SCM-M003", "legacyId": "TQ-SCM-WI-003", "title": "Goods Receipt and Inspection", "segment": "supply-chain", "docType": "manual", "revision": "3.0", "issueDate": "2025-12-08", "approvedDate": "2025-10-19", "nextReviewDate": "2028-11-22", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-LGL-S001", "legacyId": null, "title": "Contract Review and Approval Standard", "segment": "legal", "docType": "standard", "revision": "3.0", "issueDate": "2023-08-15", "approvedDate": "2023-07-11", "nextReviewDate": "2025-08-04", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-LGL-S002", "legacyId": null, "title": "Delegation of Signing Authority", "segment": "legal", "docType": "standard", "revision": "4.0", "issueDate": "2025-12-26", "approvedDate": "2025-12-05", "nextReviewDate": "2027-12-16", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
-{"docNumber": "TQ-LGL-SOP-003", "legacyId": null, "title": "Legal Hold Procedure", "segment": "legal", "docType": "sop", "revision": "2.0", "issueDate": "2025-06-21", "approvedDate": "2025-05-17", "nextReviewDate": "2027-06-11", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
+{"docNumber": "TQ-MS-F001", "legacyId": null, "title": "Vessel Mobilisation Checklist", "segment": "marine-services", "docType": "form", "revision": "1.0", "issueDate": "2025-02-21", "approvedDate": "2024-12-29", "nextReviewDate": "2027-02-11", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional", "formerNumbers": ["TQ-MRS-SOP-001", "TQ-MRS-F001"]},
+{"docNumber": "TQ-MS-SOP-002", "legacyId": null, "title": "Cargo Securing and Sea Fastening", "segment": "marine-services", "docType": "sop", "revision": "1.0", "issueDate": "2024-03-03", "approvedDate": "2024-02-15", "nextReviewDate": "2026-02-21", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional", "formerNumbers": ["TQ-MRS-SOP-002"]},
+{"docNumber": "TQ-MS-SOP-003", "legacyId": null, "title": "Man Overboard Response", "segment": "marine-services", "docType": "sop", "revision": "4.0", "issueDate": "2025-08-25", "approvedDate": "2025-07-24", "nextReviewDate": "2027-08-15", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional", "formerNumbers": ["TQ-MRS-SOP-003"]},
+{"docNumber": "TQ-CFP-S001", "legacyId": null, "title": "Delegation of Authority Standard", "segment": "finance", "docType": "standard", "revision": "1.0", "issueDate": "2025-08-02", "approvedDate": "2025-06-15", "nextReviewDate": "2027-07-23", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "conformant", "formerNumbers": ["TQ-FIN-S001"]},
+{"docNumber": "TQ-CFP-S002", "legacyId": null, "title": "Travel and Expense Standard", "segment": "finance", "docType": "standard", "revision": "2.0", "issueDate": "2024-08-31", "approvedDate": "2024-07-13", "nextReviewDate": "2026-08-21", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "conformant", "formerNumbers": ["TQ-FIN-S002"]},
+{"docNumber": "TQ-CFP-SOP-003", "legacyId": null, "title": "Month-End Close Procedure", "segment": "finance", "docType": "sop", "revision": "2.0", "issueDate": "2025-10-25", "approvedDate": "2025-09-04", "nextReviewDate": "2027-10-15", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "conformant", "formerNumbers": ["TQ-FIN-SOP-003"]},
+{"docNumber": "TQ-IT-S001", "legacyId": null, "title": "Acceptable Use Standard", "segment": "it", "docType": "standard", "revision": "1.0", "issueDate": "2024-04-22", "approvedDate": "2024-04-02", "nextReviewDate": "2026-04-12", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "conformant"},
+{"docNumber": "TQ-IT-SOP-002", "legacyId": null, "title": "IT Change Management Procedure", "segment": "it", "docType": "sop", "revision": "2.0", "issueDate": "2026-01-22", "approvedDate": "2025-11-30", "nextReviewDate": "2028-01-12", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "conformant"},
+{"docNumber": "TQ-IT-SOP-003", "legacyId": null, "title": "Backup and Restore Procedure", "segment": "it", "docType": "sop", "revision": "3.0", "issueDate": "2023-08-12", "approvedDate": "2023-06-16", "nextReviewDate": "2025-08-01", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "conformant"},
+{"docNumber": "TQ-SC-S001", "legacyId": null, "title": "Supplier Qualification Standard", "segment": "supply-chain", "docType": "standard", "revision": "3.0", "issueDate": "2023-10-14", "approvedDate": "2023-08-24", "nextReviewDate": "2025-10-03", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "conformant", "formerNumbers": ["TQ-SCM-S001"]},
+{"docNumber": "TQ-SC-SOP-002", "legacyId": null, "title": "Purchase Requisition and Approval Procedure", "segment": "supply-chain", "docType": "sop", "revision": "2.0", "issueDate": "2024-09-18", "approvedDate": "2024-08-20", "nextReviewDate": "2026-09-08", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "conformant", "formerNumbers": ["TQ-SCM-SOP-002"]},
+{"docNumber": "TQ-SC-M003", "legacyId": "TQ-SCM-WI-003", "title": "Goods Receipt and Inspection", "segment": "supply-chain", "docType": "manual", "revision": "3.0", "issueDate": "2025-12-08", "approvedDate": "2025-10-19", "nextReviewDate": "2028-11-22", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "conformant", "formerNumbers": ["TQ-SCM-M003"]},
+{"docNumber": "TQ-VM-S001", "legacyId": null, "title": "Contract Review and Approval Standard", "segment": "legal", "docType": "standard", "revision": "3.0", "issueDate": "2023-08-15", "approvedDate": "2023-07-11", "nextReviewDate": "2025-08-04", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "conformant", "formerNumbers": ["TQ-LGL-S001"]},
+{"docNumber": "TQ-VM-S002", "legacyId": null, "title": "Delegation of Signing Authority", "segment": "legal", "docType": "standard", "revision": "4.0", "issueDate": "2025-12-26", "approvedDate": "2025-12-05", "nextReviewDate": "2027-12-16", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "conformant", "formerNumbers": ["TQ-LGL-S002"]},
+{"docNumber": "TQ-VM-SOP-003", "legacyId": null, "title": "Legal Hold Procedure", "segment": "legal", "docType": "sop", "revision": "2.0", "issueDate": "2025-06-21", "approvedDate": "2025-05-17", "nextReviewDate": "2027-06-11", "reviewOverdue": false, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "conformant", "formerNumbers": ["TQ-LGL-SOP-003"]},
 {"docNumber": "TQ-LD-S001", "legacyId": null, "title": "Competency Assessment Standard", "segment": "learning-center", "docType": "standard", "revision": "1.0", "issueDate": "2023-08-27", "approvedDate": "2023-07-18", "nextReviewDate": "2025-08-16", "reviewOverdue": true, "status": "under-review", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
 {"docNumber": "TQ-LD-SOP-002", "legacyId": null, "title": "Training Needs Analysis Procedure", "segment": "learning-center", "docType": "sop", "revision": "4.0", "issueDate": "2024-08-20", "approvedDate": "2024-07-16", "nextReviewDate": "2026-08-10", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
 {"docNumber": "TQ-LD-SOP-003", "legacyId": null, "title": "Instructor Qualification Procedure", "segment": "learning-center", "docType": "sop", "revision": "3.0", "issueDate": "2023-11-02", "approvedDate": "2023-10-15", "nextReviewDate": "2025-10-22", "reviewOverdue": true, "status": "current", "supersedes": null, "supersededBy": null, "classification": "internal", "language": "en", "translationOf": null, "numberStatus": "provisional"},
@@ -1034,7 +1034,9 @@ const TAQA_DOC = {
   numberNote: d => {
     const n = []; const s = TAQA_DOC.seg(d), t = TAQA_DOC.type(d);
     if (d.numberNote) n.push(d.numberNote);
-    if (s.provisional && s.note) n.push(s.note);
+    // An area whose short form is assigned but whose business unit is not yet
+    // confirmed is flagged for that reason alone, and its note says so.
+    if ((s.provisional || (!s.bu && s.group === 'segment')) && s.note) n.push(s.note);
     if (t.provisional && t.note) n.push(t.note);
     return n.length ? n.join(' ') : null;
   },
