@@ -44,6 +44,12 @@ const TAQA_ROLES = {
     countersign:  false,   // register release
     delegate:     false,
     editMetadata: false,
+    // May file a document for approval. Filing is not authority: the draft
+    // carries none until QMS has checked it and the named approver has
+    // released it (API Q2 4.4.3 b), so anyone who writes a procedure may
+    // propose it. This is the business workflow: an employee submits, QMS
+    // checks, the Director approves.
+    submit:       true,
     scope:        'all'    // all segments
   },
 
@@ -65,6 +71,7 @@ const TAQA_ROLES = {
     countersign:  false,
     delegate:     true,
     editMetadata: true,
+    submit:       true,
     // Scoped to one area, but WHICH area is not a property of the role. Every
     // segment, function and centre has its own director, so the area belongs
     // to the person, not to the job title. It lived here as a single value,
@@ -89,6 +96,7 @@ const TAQA_ROLES = {
     countersign:  true,
     delegate:     false,
     editMetadata: true,
+    submit:       true,
     scope:        'all'
   },
 
@@ -104,6 +112,9 @@ const TAQA_ROLES = {
     countersign:  false,
     delegate:     false,
     editMetadata: false,
+    // Changes nothing, and that includes filing: an auditor who could add a
+    // draft to the register would be adding to the record they are auditing.
+    submit:       false,
     scope:        'all'
   }
 };
@@ -470,6 +481,7 @@ TAQA_ROLE.effective = function(roleKey){
   const cap = {
     approve: !!base.approve, countersign: !!base.countersign,
     delegate: !!base.delegate, editMetadata: !!base.editMetadata,
+    submit: !!base.submit,
     controlPanel: !!base.controlPanel, export: !!base.export,
     scope: base.scope,
     ownSegment: base.scope === 'own' ? TAQA_ROLE.area() : null,

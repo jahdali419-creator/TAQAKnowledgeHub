@@ -80,7 +80,7 @@ body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min
 
 /* ── Layout ── */
 .upload-layout{padding:16px 48px 80px;max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 320px;gap:28px;align-items:start;}
-@media(max-width:800px){.upload-layout{grid-template-columns:1fr;}}
+@media(max-width:800px){.upload-layout{grid-template-columns:minmax(0,1fr);}}
 
 /* ── Upload Form Card ── */
 .upload-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;padding:36px;backdrop-filter:blur(12px);}
@@ -204,6 +204,23 @@ body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min
 /* ── Sidebar ── */
 .sidebar{display:flex;flex-direction:column;gap:18px;}
 .info-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;padding:22px;backdrop-filter:blur(12px);}
+.subs-card{margin-top:24px;}
+.subs-card h2{font-family:'BwGradual','Urbanist',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin:0 0 2px;}
+.subs-sub{font-size:12.5px;color:var(--text-muted);margin:0 0 10px;line-height:1.5;}
+.subs-list{list-style:none;margin:0;padding:0;}
+.subs-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:12px 0;border-top:1px solid var(--glass-border);}
+.subs-row:first-child{border-top:0;}
+.subs-t{flex:1 1 220px;min-width:0;}
+.subs-t a{font-weight:600;font-size:14px;color:var(--text);text-decoration:none;overflow-wrap:anywhere;}
+.subs-t a:hover{color:var(--primary-ink);text-decoration:underline;}
+.subs-n{display:block;margin-top:2px;font-size:12px;color:var(--text-muted);}
+.subs-st{font-size:12px;font-weight:600;padding:6px 11px;border-radius:999px;white-space:nowrap;}
+.subs-st.st-wait{background:rgba(255,184,28,.16);color:#7A5600;}
+.subs-st.st-live{background:rgba(0,134,117,.12);color:#00705F;}
+.subs-st.st-back{background:rgba(200,16,46,.08);color:var(--stop-ink);}
+.subs-why{flex-basis:100%;font-size:12.5px;line-height:1.5;color:var(--stop-ink);}
+html[data-taqa-theme="dark"] .subs-st.st-wait{color:#FFB81C;}
+html[data-taqa-theme="dark"] .subs-st.st-live{color:#4FD1B5;}
 .info-card h3{font-family:'BwGradual','Urbanist',sans-serif;font-size:13.5px;font-weight:600;margin-bottom:14px;}
 .workflow-steps{display:flex;flex-direction:column;gap:0;}
 .wf-step{display:flex;gap:14px;align-items:flex-start;padding:10px 0;position:relative;}
@@ -299,6 +316,9 @@ html[data-taqa-theme="dark"] .scroll-top-btn{background:rgba(0,35,38,0.92);borde
 .hash-display{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(0,93,99,0.04);border:1px solid rgba(0,187,182,0.18);border-radius:8px;margin-top:10px;display:none;}
 .hash-display span{font-size:11px;color:var(--text-muted);white-space:nowrap;flex-shrink:0;}
 .hash-value{font-family:monospace;font-size:10px;color:var(--text);word-break:break-all;flex:1;}
+/* The rule above for every span in the box also matched the hash itself, so
+   64 unbroken characters pushed the upload card past a phone's edge. */
+.hash-display .hash-value{white-space:normal;flex-shrink:1;min-width:0;}
 .hash-status-ok{font-size:11px;font-weight:600;color:var(--primary-ink);white-space:nowrap;}
 .hash-status-dup{font-size:11px;font-weight:600;color:var(--stop-ink);white-space:nowrap;}
 html[data-taqa-theme="dark"] .dup-warn-panel{background:rgba(255,184,28,0.06);border-color:rgba(255,184,28,0.24);}
@@ -336,6 +356,12 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .dup-warn-item{flex-wrap:wrap;}
   .hash-display{flex-wrap:wrap;gap:6px;}
   .hash-value{word-break:break-all;}
+  /* Three labelled steps do not fit a phone: step 3 ran off the edge. Every
+     number stays, and only the step you are on keeps its name. */
+  .upload-steps-bar{padding:20px 20px 0;}
+  .ustep span{display:none;}
+  .ustep.active span{display:inline;}
+  .ustep-line{margin:0 8px;}
 }
 @media(max-width:480px){
   .upload-layout{padding-left:16px;padding-right:16px;}
@@ -444,7 +470,7 @@ html[data-taqa-theme="dark"] .policy-rules {
 <canvas id="bg-canvas"></canvas>
 <div class="page-wrapper">
 
-<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
   <a href="index.html" class="nav-brand">
     <img src="icons/taqa-logo.png" alt="TAQA" class="nav-logo nav-logo-light">
     <img src="icons/taqa-logo-reverse.png" alt="TAQA" class="nav-logo nav-logo-dark">
@@ -709,7 +735,7 @@ html[data-taqa-theme="dark"] .policy-rules {
         <span class="approval-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#00BBB6" stroke-width="1.5"/><path d="M8 7v5M8 5v.5" stroke="#00BBB6" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         <div class="approval-text">
           <strong>Approval Workflow</strong>
-          <small>Documents are reviewed by QMS, then approved by the authority the type names, before being published. You'll see it in your notifications bell here if it's approved or if changes are needed; email notifications arrive once this connects to Azure.</small>
+          <small>Documents are reviewed by QMS, then approved by the authority the type names, before being published. Its status (waiting on QMS, waiting on the Director, published, or returned with the reason) shows under <b>Your submissions</b> on this page, and the bell in the top bar tells you once it has been approved or returned; email notifications arrive once this connects to Azure.</small>
         </div>
       </div>
 
@@ -720,6 +746,16 @@ html[data-taqa-theme="dark"] .policy-rules {
       </div>
       </section>
     </form>
+
+    <!-- What this person has filed and where each one is now. Built from the
+         store and repainted on every change, including one made in another
+         tab, so the answer to "where has my document got to" is here rather
+         than behind a desk this role cannot open. -->
+    <section class="subs-card info-card" id="my-subs" hidden aria-labelledby="my-subs-h">
+      <h2 id="my-subs-h">Your submissions</h2>
+      <p class="subs-sub">Filed from this browser, newest first. In Azure this is every document filed under your sign-in.</p>
+      <ul class="subs-list" id="my-subs-list"></ul>
+    </section>
   </div>
 
   <!-- ── Sidebar ── -->
@@ -733,11 +769,11 @@ html[data-taqa-theme="dark"] .policy-rules {
         </div>
         <div class="wf-step">
           <div class="wf-dot pending">2</div>
-          <div class="wf-text"><strong>Review</strong><small>QMS checks the record and the numbering.</small></div>
+          <div class="wf-text"><strong>QMS check</strong><small>QMS checks the record and the numbering, or returns it with a reason.</small></div>
         </div>
         <div class="wf-step">
           <div class="wf-dot wait">3</div>
-          <div class="wf-text"><strong>Approve / Return</strong><small>Document is approved or returned with feedback.</small></div>
+          <div class="wf-text"><strong>Director approval</strong><small>The Director for the area approves it, or returns it with a reason.</small></div>
         </div>
         <div class="wf-step">
           <div class="wf-dot wait">4</div>
@@ -801,6 +837,18 @@ html[data-taqa-theme="dark"] .policy-rules {
 
 <script src="documents-master.js"></script>
 <script src="roles.js"></script>
+<script>
+/* Filing is for the roles that may submit (roles.js submit). Hiding the
+   Upload link was the only thing stopping an auditor, and the address can be
+   typed; this refuses at the door like the other role pages. In Azure it is
+   the API that declines the POST. */
+(function(){
+  if (typeof TAQA_ROLE === 'undefined') return;
+  if (TAQA_ROLE.effective().submit) return;
+  TAQA_ROLE.refuse('Filing documents is not part of this role',
+    'An auditor reviews the register and changes nothing in it, and that includes adding drafts to it.');
+})();
+</script>
 <script src="store.js"></script>
 <script src="segments-data.js"></script>
 <script>
@@ -988,7 +1036,10 @@ function submitUpload(e) {
   // to the register instead. It lands as a draft, per TQ-QHSE-S001 4.4, so
   // the register total and the pending queue move now and the in-force counts
   // move when QMS approves it. Every open page repaints off this one call.
-  if (typeof TAQA_STORE !== 'undefined') TAQA_STORE.add(rec);
+  if (typeof TAQA_STORE !== 'undefined' && !TAQA_STORE.add(rec)) {
+    showUploadToast('Not filed', 'Your role cannot file documents, so nothing was added to the register.', ICON_WARN);
+    return;
+  }
 
   setUploadStep(3);
   const ref = rec.docNumber;
@@ -1007,7 +1058,7 @@ function submitUpload(e) {
     refEl.id = 'upload-ref';
     refEl.textContent = ref;
     toastSub.appendChild(refEl);
-    toastSub.appendChild(document.createTextNode('. In the register now, in force once QMS approves.'));
+    toastSub.appendChild(document.createTextNode('. Next: QMS checks it, then the Director approves it. It is in force only after both. Track it under Your submissions below.'));
   }
   document.getElementById('toast-icon').innerHTML = ICON_OK;
   const toast = document.getElementById('toast');
@@ -1020,6 +1071,9 @@ function submitUpload(e) {
   selectedFiles = [];
   fileList.innerHTML = '';
   fileQueue.style.display = 'none';
+  // The fingerprint belonged to the file just filed. Left up, it said
+  // "Unique file" under a form asking for a file.
+  const hd = document.getElementById('hash-display'); if (hd) hd.style.display = 'none';
   const ref2 = document.getElementById('doc-ref-id');
   if (ref2) { ref2.value = ''; delete ref2.dataset.autofilled; }
   const chip = document.getElementById('numchip');
@@ -1075,7 +1129,9 @@ function buildRecord(){
     changeNote:     (document.getElementById('change-input') || {}).value.trim() || null,
     issuingFunction: isPolicy ? ((document.getElementById('policy-fn') || {}).value || null) : null,
     files:          selectedFiles.map(f => ({ name:f.name, size:f.size })),
-    submittedBy:    'from the signed-in identity, not typed on this form'
+    // Left for the store to stamp from the signed-in identity at filing time
+    // (TAQA_STORE.actingName()); in Azure the back end takes it from the token.
+    submittedBy:    null
   };
 }
 
@@ -1579,6 +1635,32 @@ function paintRecord(){
     '</b>. Your name, your email and the document owner come from your sign-in, ' +
     'so there is nothing here to type. In Azure these are Entra ID claims.';
 }
+
+// ── Your submissions ──
+function paintMySubmissions(){
+  var box = document.getElementById('my-subs'), list = document.getElementById('my-subs-list');
+  if (!box || !list || typeof TAQA_STORE === 'undefined') return;
+  var mine = TAQA_STORE.added().slice().reverse().slice(0, 20);
+  box.hidden = !mine.length;
+  if (!mine.length) return;
+  list.innerHTML = mine.map(function(d){
+    var stage = TAQA_STORE.stageOf(d), st, cls, why = '';
+    if (d.rejected) {
+      st = 'Returned'; cls = 'st-back';
+      why = '<span class="subs-why">Returned by ' + esc(d.rejectedBy || 'the reviewer') + ': \u201C' +
+            esc(d.rejectedReason || 'no reason recorded') + '\u201D. Revise it and file it again.</span>';
+    } else if (d.status === 'current') { st = 'Published'; cls = 'st-live'; }
+    else if (d.status === 'superseded' || d.status === 'obsolete') { st = 'Withdrawn'; cls = 'st-back'; }
+    else if (stage === 'director') { st = 'Waiting on the Director'; cls = 'st-wait'; }
+    else { st = 'Waiting on QMS check'; cls = 'st-wait'; }
+    var href = 'viewer.html?doc=' + encodeURIComponent(d.docNumber || '') + '&seg=' + encodeURIComponent(d.segment || '');
+    var when = d.submittedAt ? new Date(d.submittedAt).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'}) : '';
+    return '<li class="subs-row"><div class="subs-t"><a href="' + href + '">' + esc(d.title || d.docNumber) + '</a>' +
+           '<span class="subs-n">' + esc(d.docNumber || '') + (when ? ' \u00b7 filed ' + esc(when) : '') + '</span></div>' +
+           '<span class="subs-st ' + cls + '">' + st + '</span>' + why + '</li>';
+  }).join('');
+}
+if (typeof TAQA_STORE !== 'undefined') TAQA_STORE.onChange(paintMySubmissions);
 
 document.addEventListener('DOMContentLoaded', function(){
   paintStepBar();

@@ -390,7 +390,7 @@ test.describe('upload.html, approval workflow text', () => {
     );
   });
 
-  test('the sidebar workflow steps read Submit -> Review (QMS) -> Approve/Return -> Published', async ({
+  test('the sidebar workflow steps read Submit -> QMS check -> Director approval -> Published', async ({
     page,
     gotoApp,
     setRole,
@@ -398,9 +398,10 @@ test.describe('upload.html, approval workflow text', () => {
     await openUpload(gotoApp, setRole);
     const steps = page.locator('.info-card', { hasText: 'Approval Workflow' }).locator('.wf-step');
     await expect(steps).toHaveCount(4);
-    await expect(steps.nth(1)).toContainText('Review');
-    await expect(steps.nth(1)).toContainText('QMS checks the record and the numbering.');
-    await expect(steps.nth(2)).toContainText('Approve / Return');
+    await expect(steps.nth(1)).toContainText('QMS check');
+    await expect(steps.nth(1)).toContainText('QMS checks the record and the numbering');
+    // The step that puts a document in force is the Director's, and it says so.
+    await expect(steps.nth(2)).toContainText('Director approval');
   });
 });
 

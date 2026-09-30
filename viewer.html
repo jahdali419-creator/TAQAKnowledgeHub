@@ -582,7 +582,7 @@ html[data-taqa-theme="dark"] .cmp-col-current{background:rgba(0,187,182,0.13);}
 <div id="read-progress-bar" aria-hidden="true"></div>
 <div class="page-wrapper">
 
-<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
   <a href="index.html" class="nav-brand">
     <img src="icons/taqa-logo.png" alt="TAQA" class="nav-logo nav-logo-light">
     <img src="icons/taqa-logo-reverse.png" alt="TAQA" class="nav-logo nav-logo-dark">
@@ -794,6 +794,10 @@ html[data-taqa-theme="dark"] .cmp-col-current{background:rgba(0,187,182,0.13);}
 <script src="roles.js"></script>
 <script src="documents-master.js"></script>
 <script src="segments-data.js"></script>
+<!-- Before the page script, not after it: the record below is resolved
+     through the store, which is the only place that knows about a document
+     filed through upload.html or moved by QMS/Director approval. -->
+<script src="store.js"></script>
 <script>
 // Areas and type labels come from the register. The map that used to sit here
 // held twelve of twenty six entities under four retired names, so a document
@@ -881,13 +885,23 @@ function setMenuNote(text){
 
 const params = new URLSearchParams(location.search);
 const segId = (params.get('seg') || 'drilling').replace(/[^a-z0-9-]/g,'').slice(0,60) || 'drilling';
-const docTitle = decodeURIComponent(params.get('title') || 'Document').replace(/<[^>]*>/g,'').trim().slice(0,300) || 'Document';
+let docTitle = decodeURIComponent(params.get('title') || 'Document').replace(/<[^>]*>/g,'').trim().slice(0,300) || 'Document';
 const docId = decodeURIComponent(params.get('doc') || '').replace(/[^A-Za-z0-9-_&.]/g,'').slice(0,120);
 // The register says what a document is; the link only says what the page that
 // linked here thought it was. A CEO Policy reached through a link that said
 // type=standard used to be drawn as a Standard in the square, the print view
 // and the QR card while its owner and approver came from the register.
-const _typeRec = (docId && typeof TAQA_DOC !== 'undefined') ? (TAQA_DOC.byNumber(docId) || TAQA_DOC.byLegacy(docId)) : null;
+/* The store first: TAQA_DOC reads only the file the register shipped with, so
+   a document filed through upload.html, or one QMS and the Director have just
+   moved, was invisible here and the page told every role it had "no entry in
+   the register". The store is that file plus what has happened to it since. */
+function _liveRec(n){
+  if (!n) return null;
+  var hit = (typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(n) : null;
+  if (hit) return hit;
+  return (typeof TAQA_DOC !== 'undefined') ? (TAQA_DOC.byNumber(n) || TAQA_DOC.byLegacy(n)) : null;
+}
+const _typeRec = _liveRec(docId);
 const docType = (_typeRec && _typeRec.docType) || (params.get('type') || 'sop').replace(/[^a-z0-9-]/g,'').slice(0,20) || 'sop';
 const segInfo = SEGS[segId] || {name:'TAQA',tag:'Segment'};
 const typeColor = TYPE_COLORS[docType] || TYPE_COLORS.sop;
@@ -941,7 +955,7 @@ document.getElementById('doc-badges').innerHTML =
 const MD = (typeof TAQA_MASTER_DOCS !== 'undefined') ? TAQA_MASTER_DOCS : [];
 const MA = (typeof TAQA_DOC !== 'undefined') ? TAQA_DOC : null;
 const _bare = docTitle.replace(/^((?:TQ|TAQA)-[^\s]+|[A-Z][A-Z0-9]*-\d+)\s+/, '').trim();
-const _rec = MA ? (MA.byNumber(docId) || MA.byLegacy(docId) ||
+const _rec = MA ? (_liveRec(docId) ||
               MD.find(d => d.title === docTitle && d.segment === segId) ||
               MD.find(d => d.title === _bare && d.segment === segId) ||
               MD.find(d => d.title === _bare) || null) : null;
@@ -961,19 +975,55 @@ function cell(label, value, clause, extraCls){
 const _roleKey = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE.current() : null;
 const _denied = _rec && _roleKey && !TAQA_ROLE.canSee(_rec, _roleKey);
 
+/* The register names the document; a link's title= is only what the linking
+   page thought it was called, and a link without one left the page headed
+   "Document". A draft withheld from this role shows its title only to the
+   person who filed it (in the prototype, a draft filed from this browser;
+   in Azure, the signed-in submitter). Anyone else's draft, and a record
+   withheld for its classification, keep the title withheld. */
+const _ownDraft = !!(_rec && _rec.status === 'draft' && _rec.locallyAdded);
+if (_rec && _rec.title && (!_denied || _ownDraft) && _rec.title !== docTitle) {
+  docTitle = _rec.title;
+  document.title = docTitle + ', TAQA Knowledge Hub';
+  document.getElementById('doc-title').textContent = docTitle;
+  document.getElementById('bc-title').textContent = docTitle.length > 50 ? docTitle.slice(0,50)+'\u2026' : docTitle;
+}
+
 if (_denied) {
   const R = TAQA_ROLES[_roleKey];
   const reason = _rec.status === 'draft'
     ? 'This document is a draft. It has not completed approval, carries no authority, and is visible only to its owner and the QMS function. API Q2 4.4.3 b).'
     : 'This document is classified ' + String(_rec.classification).toUpperCase() +
       '. Your role (' + R.label + ') has access to ' + R.classifications.join(', ') + ' documents. ISO 9001 7.5.3.1 b).';
+  /* A draft is withheld because it carries no authority yet, not because the
+     reader may not know it exists. Whoever opens one is most often the person
+     who filed it, looking for where it has got to, so it says that: which
+     step it is waiting on, or who sent it back and why. */
+  const isDraft = _ownDraft;
+  const waiting = isDraft && typeof TAQA_APPROVAL !== 'undefined' ? TAQA_APPROVAL.waitingOn(_rec) : null;
+  const back = TAQA_ROLE.canRegister(_roleKey)
+    ? '<a href="master-list.html">Back to the register</a>'
+    : '<a href="ai-search.html">Search the documents</a>';
+  let head = 'Access restricted', body = reason + ' If you need it, request access through the QMS function.', stat = 'Not available to your role';
+  if (isDraft && _rec.rejected) {
+    head = 'Returned, not in force';
+    stat = 'Returned by ' + (_rec.rejectedBy || 'the reviewer');
+    body = 'Returned by ' + esc(_rec.rejectedBy || 'the reviewer') +
+      (_rec.rejectedDate ? ' on ' + esc(_fmt(_rec.rejectedDate)) : '') +
+      ': “' + esc(_rec.rejectedReason || 'no reason recorded') + '”. Revise it and file it again from Upload.';
+  } else if (isDraft) {
+    head = 'Submitted for approval, not in force yet';
+    stat = 'Draft · waiting on ' + (waiting || 'approval');
+    body = 'Filed' + (_rec.submittedAt ? ' ' + esc(_fmt(_rec.submittedAt)) : '') +
+      ' and now waiting on the <b>' + esc(waiting || 'next approval step') + '</b>. ' +
+      'It carries no authority until QMS has checked it and the named approver has released it (API Q2 4.4.3 b), so it cannot be opened or downloaded yet.';
+  }
   document.getElementById('meta-grid').innerHTML =
     cell('Document number', _rec.docNumber, 'TQ-QHSE-S001 5.3') +
-    cell('Status', 'Not available to your role', null, 'wide');
+    cell('Status', esc(stat), null, 'wide');
   document.getElementById('lifecycle-banner').innerHTML =
     '<div class="lcb lcb-obsolete"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
-    '<div><b>Access restricted</b><span class="n">' + reason +
-    ' If you need it, request access through the QMS function. <a href="master-list.html">Back to the register</a>.</span></div></div>';
+    '<div><b>' + head + '</b><span class="n">' + body + ' ' + back + '.</span></div></div>';
   ['dl-btn','pdf-dl-btn','pin-btn','qref-open-btn','print-btn','bm-doc-btn'].forEach(function(id){
     var el=document.getElementById(id); if(!el) return;
     el.style.opacity='0.45'; el.style.pointerEvents='none'; el.setAttribute('aria-disabled','true');
@@ -1290,15 +1340,34 @@ function renderApprovalTrail() {
   var iconOk = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
   var iconPending = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>';
   var rows = [];
-  if (stage === 'qms') {
+  // Date and time where the record holds a timestamp, date alone otherwise.
+  var _when = function (at, date) {
+    if (at) {
+      var d = new Date(at);
+      if (!isNaN(d)) return _fmt(at) + ', ' + d.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+    }
+    return _fmt(date);
+  };
+  // Filed through the workflow, so there is a submission to show. Shipped
+  // register rows predate it and carry neither field.
+  if (_rec.submittedBy || _rec.submittedAt) {
+    rows.push({icon: iconOk, pending: false, name: _rec.submittedBy || 'Not recorded', role: 'Submitted for approval', date: _when(_rec.submittedAt) || 'Not recorded'});
+  }
+  if (_rec.rejected) {
+    if (_rec.countersignedBy)
+      rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy, role: 'QMS conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Recorded'});
+    rows.push({icon: iconPending, pending: true, name: _rec.rejectedBy || 'Not recorded',
+      role: 'Returned at the ' + (_rec.rejectedAtStage === 'director' ? 'final approval' : 'QMS conformance check') + ': ' + (_rec.rejectedReason || 'no reason recorded'),
+      date: _when(_rec.rejectedAt, _rec.rejectedDate) || 'Not recorded'});
+  } else if (stage === 'qms') {
     rows.push({icon: iconPending, pending: true, name: 'Awaiting QMS conformance check', role: 'QMS / Document Controller', date: 'Not yet signed'});
     rows.push({icon: iconPending, pending: true, name: 'Awaiting final approval', role: approverRole, date: 'Not yet signed'});
   } else if (stage === 'director') {
-    rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy || 'QMS / Document Controller', role: 'QMS conformance check', date: _fmt(_rec.countersignedDate) || 'Recorded'});
+    rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy || 'QMS / Document Controller', role: 'QMS conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Recorded'});
     rows.push({icon: iconPending, pending: true, name: 'Awaiting final approval', role: approverRole, date: 'Not yet signed'});
   } else {
-    rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy || 'QMS / Document Controller', role: 'QMS conformance check', date: _fmt(_rec.countersignedDate) || 'Not recorded'});
-    rows.push({icon: iconOk, pending: false, name: _rec.approvedBy || approverRole, role: 'Final approval · ' + approverRole, date: _fmt(_rec.approvedDate) || 'Not recorded'});
+    rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy || 'QMS / Document Controller', role: 'QMS conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Not recorded'});
+    rows.push({icon: iconOk, pending: false, name: _rec.approvedBy || approverRole, role: 'Final approval · ' + approverRole, date: _when(_rec.approvedAt, _rec.approvedDate) || 'Not recorded'});
   }
   body.innerHTML = rows.map(function (r) {
     return '<div class="appr-row' + (r.pending ? ' pending' : '') + '">' +
@@ -1638,7 +1707,6 @@ document.addEventListener('click',function(e){
   setTimeout(()=>window.location.href=h,270);
 });
 </script>
-<script src="store.js"></script>
 <script src="search-index.js"></script>
 <script src="shared.js"></script>
 <script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>

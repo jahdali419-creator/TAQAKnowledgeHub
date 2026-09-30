@@ -176,17 +176,21 @@ test.describe('Master List link (registerView roles only)', () => {
   });
 });
 
-test.describe('Upload link (editMetadata roles only)', () => {
-  for (const role of ['employee', 'auditor']) {
+// The business workflow starts with an Employee filing a document, so every
+// role that may submit has the Upload action. Only the auditor, who changes
+// nothing in the register, is without it (roles.js `submit`).
+test.describe('Upload link (roles that may submit)', () => {
+  for (const role of ['auditor']) {
     test(`is not in the nav for ${role}`, async ({ page, gotoApp, setRole }) => {
       await gotoApp('/index.html');
       await setRole(role, 'coiled-tubing');
       await gotoApp('/index.html');
-      await expect(page.locator('#navbar a[href="upload.html"]')).toHaveCount(0);
+      await expect(page.locator('#navbar a.nav-cta.nav-up')).toBeHidden();
+      await expect(page.locator('#nav-mobile-menu a[href="upload.html"]')).toHaveCount(0);
     });
   }
 
-  for (const role of ['owner', 'qms']) {
+  for (const role of ['employee', 'owner', 'qms']) {
     test(`is visible and points at upload.html for ${role}`, async ({ page, gotoApp, setRole }) => {
       await gotoApp('/index.html');
       await setRole(role, 'coiled-tubing');

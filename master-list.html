@@ -509,7 +509,7 @@ thead th{top:var(--nav-h,64px);}
 <body>
 <a class="skip" href="#main">Skip to the register</a>
 
-<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
   <a href="index.html" class="nav-brand">
     <img src="icons/taqa-logo.png" alt="TAQA" class="nav-logo nav-logo-light">
     <img src="icons/taqa-logo-reverse.png" alt="TAQA" class="nav-logo nav-logo-dark">
@@ -699,7 +699,7 @@ thead th{top:var(--nav-h,64px);}
   <span id="bulk-count">0 documents selected</span>
   <div class="bulk-actions">
     <button type="button" class="btn btn-quiet" onclick="clearSelection()">Clear</button>
-    <button type="button" class="btn" id="bulk-approve" onclick="bulkAction('approve')">Approve selected</button>
+    <button type="button" class="btn" id="bulk-approve" onclick="bulkAction('approve')">Confirm selected (QMS check)</button>
     <button type="button" class="btn" id="bulk-withdraw" onclick="bulkAction('withdraw')">Withdraw selected</button>
   </div>
 </div>
@@ -1011,24 +1011,24 @@ function updateBulkBar(){
   document.getElementById('bulk-count').textContent=n+' document'+(n===1?'':'s')+' selected';
 }
 
-// Both actions call TAQA_STORE.setStatus(), the same call documents.html's
-// single Withdraw button makes (store.js: "what QMS approval and withdrawal
-// call"), so the register updates for every reader everywhere else in the
-// hub, not just in this table. A selected row that is not eligible, such as
-// a document already current or already withdrawn, is left untouched rather
-// than acted on or silently dropped, and the confirm dialog says so by name
-// before anything happens, the same honesty documents.html's own withdraw
-// confirm uses.
+// Withdraw calls TAQA_STORE.setStatus(), the same call documents.html's
+// single Withdraw button makes, so the register updates for every reader.
+// The other action is QMS's own step and only that: it confirms drafts that
+// are waiting on the QMS check and sends them to their Director. It used to
+// mark them Current directly, which put an Employee's draft in force with
+// no Director and no name on the approval. A selected row that is not
+// eligible is left untouched, and the confirm dialog says so by name before
+// anything happens, the same honesty documents.html's own withdraw confirm uses.
 function bulkAction(kind){
   if(!canBulk()||typeof TAQA_STORE==='undefined')return;
   const chosen=Array.from(selectedRows).map(n=>TAQA_STORE.findDoc(n)).filter(Boolean);
   const eligible=chosen.filter(kind==='approve'
-    ? d=>d.status==='draft'||d.status==='under-review'
+    ? d=>TAQA_APPROVAL.canCountersign(d)
     : d=>d.status!=='obsolete'&&d.status!=='superseded');
   const skipped=chosen.length-eligible.length;
   if(!eligible.length){
     toast(kind==='approve'
-      ? 'Nothing selected is waiting on approval. Already-current and withdrawn documents are left as they are.'
+      ? 'Nothing selected is waiting on the QMS check. Documents already with a Director, current or withdrawn are left as they are.'
       : 'Nothing selected can be withdrawn. It is already marked obsolete or superseded.');
     return;
   }
@@ -1039,19 +1039,23 @@ function bulkAction(kind){
   // agree with how many of those are being left alone.
   const skipNote=skipped
     ? ' '+skipped+' of the selected documents '+(skipped===1?'is':'are')+
-      ' already '+(kind==='approve'?'current or withdrawn':'withdrawn')+
+      ' '+(kind==='approve'?'not waiting on the QMS check':'already withdrawn')+
       ' and will be left as '+(skipped===1?'it is':'they are')+'.'
     : '';
   const msg=kind==='approve'
-    ? n+' document'+s+' will be approved and marked Current.'+skipNote+
-      ' This updates the register everywhere it is read. This cannot be undone from here.'
+    ? n+' document'+s+' will be confirmed as checked by QMS and sent to '+(n===1?'its':'their')+
+      ' Director for approval. '+(n===1?'It is':'They are')+' not in force until the Director approves.'+skipNote
     : n+' document'+s+' will be marked obsolete. Every reader will see "Withdrawn, do not use." '+
       (n===1?'It stays':'They stay')+' in the register, but '+(n===1?'leaves':'leave')+' the live list.'+skipNote;
   if(!confirm(msg))return;
-  eligible.forEach(d=>TAQA_STORE.setStatus(d.docNumber, kind==='approve'?'current':'obsolete'));
+  const done=eligible.filter(d=>kind==='approve'
+    ? TAQA_STORE.countersign(d.docNumber).ok
+    : !!TAQA_STORE.setStatus(d.docNumber,'obsolete')).length;
   selectedRows.clear();
   renderCuts(); render(); drawSummary();
-  toast((kind==='approve'?'Approved ':'Withdrew ')+n+' document'+s+'.');
+  toast(kind==='approve'
+    ? 'Confirmed '+done+' document'+(done===1?'':'s')+'. '+(done===1?'It now waits':'They now wait')+' on the Director.'
+    : 'Withdrew '+done+' document'+(done===1?'':'s')+'.');
 }
 
 let lastFocus=null;

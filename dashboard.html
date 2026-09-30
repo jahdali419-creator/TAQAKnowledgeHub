@@ -268,7 +268,7 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
 .dash-toast-dot{width:8px;height:8px;border-radius:50%;background:#00BBB6;flex-shrink:0;}
 
 @media(max-width:900px){
-  .dash-grid{grid-template-columns:1fr;}
+  .dash-grid{grid-template-columns:minmax(0,1fr);}
   .dash-hero-stats{display:none;}
   .dash-outer{padding:24px 20px 60px;}
   .dash-hero{padding:32px 20px;}
@@ -384,7 +384,7 @@ html[data-taqa-theme="dark"] .dash-unknown{background:#002326;border-color:#0048
 <div class="page-wrapper">
 
 <!-- ── Nav ── -->
-<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r==='owner'||r==='qms')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
   <a href="index.html" class="nav-brand">
     <img src="icons/taqa-logo.png" alt="TAQA" class="nav-logo nav-logo-light">
     <img src="icons/taqa-logo-reverse.png" alt="TAQA" class="nav-logo nav-logo-dark">
@@ -1027,6 +1027,15 @@ function initDashboard() {
   //
   // Each card asks the rules whether this person may act on that document now,
   // so a button is never drawn that the store would refuse.
+  function fmtWhen(iso) {
+    const d = new Date(iso);
+    if (isNaN(d)) return 'Date not recorded';
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) +
+      ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  }
+  function fmtBytes(n) {
+    return n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : (n / 1048576).toFixed(1) + ' MB';
+  }
   const MYROLE = TAQA_ROLE.current();
   const CAP    = TAQA_ROLE.effective();
   const STAGE  = CAP.countersign ? 'qms' : (CAP.approve ? 'director' : null);
@@ -1045,9 +1054,12 @@ function initDashboard() {
     type: (TYPE_NAME[d.docType] || {}).label || d.docType,
     docId: d.docNumber,
     title: d.title,
-    submitter: d.locallyAdded ? 'You' : (TAQA_DOC.owner(d) || 'Not recorded'),
-    when: d.submittedAt ? 'Just now' : 'In the register',
-    size: d.fileSize || '',
+    // Whoever filed it, from the record. It said "You" for every uploaded
+    // document, which told QMS and the Director that they had filed a
+    // document someone else had submitted.
+    submitter: d.submittedBy || TAQA_DOC.owner(d) || 'Not recorded',
+    when: d.submittedAt ? fmtWhen(d.submittedAt) : 'In the register',
+    file: (d.files && d.files[0]) ? d.files[0] : null,
     preview: STAGE === 'qms'
       ? 'Check the number against 5.3, the revision and the dates. Confirming ' +
         'sends it to ' + (TAQA_APPROVAL.approverFor(d) || 'the named approver') + ' for final approval.'
@@ -1108,7 +1120,7 @@ function initDashboard() {
           <div class="pending-doc-info">
             ${docTypeLabel}
             <div class="pending-doc-title">${esc(p.title)}</div>
-            <div class="pending-doc-meta">Submitted by <strong>${esc(p.submitter)}</strong> · ${esc(p.when)} · PDF · ${esc(p.size)}</div>
+            <div class="pending-doc-meta">Submitted by <strong>${esc(p.submitter)}</strong> · ${esc(p.when)}${p.file ? ' · ' + esc(p.file.name) + (p.file.size ? ' · ' + esc(fmtBytes(p.file.size)) : '') : ''}</div>
           </div>
           <span class="pending-status-badge badge-pending">Awaiting Review</span>
         </div>
@@ -1212,7 +1224,7 @@ function initDashboard() {
     if (!t) return;
     // "Your" is only true at your own desk.
     t.textContent = !MINE ? 'Awaiting ' + TAQA_ROLE.areaTitle(dashSegId) + ' Approval'
-                  : STAGE === 'qms' ? 'Awaiting Your Countersignature'
+                  : STAGE === 'qms' ? 'Awaiting Your QMS Check'
                   : STAGE === 'director' ? 'Awaiting Your Approval'
                   : 'Approvals';
   })();
