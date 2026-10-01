@@ -226,3 +226,47 @@ test.describe('glossary.html', () => {
     await expect(page.locator('#gl-list .gl-item').first()).toBeVisible();
   });
 });
+
+// Terms from the API glossary (V to Z) are whole words, not abbreviations.
+// They read as one name across the row, sort under their letter, are found
+// by search, and name the API document their definition comes from.
+test.describe('API glossary terms', () => {
+  test('a whole-word term is found by search, spans the row and cites its source', async ({ page, gotoApp, clearAppState, consoleErrors }) => {
+    await gotoApp('/glossary.html');
+    await clearAppState();
+    await gotoApp('/glossary.html');
+    await page.locator('#glossary-input').fill('Wellhead');
+    const row = page.locator('#gl-list .gl-item', { has: page.locator('.gl-word', { hasText: /^Wellhead$/ }) });
+    await expect(row).toHaveCount(1);
+    await expect(row.locator('.gl-full')).toHaveCount(0);
+    await row.locator('.gl-row').click();
+    await expect(row.locator('.gl-def')).toContainText('Christmas tree');
+    await expect(row.locator('.gl-note')).toContainText('Source: API RP 14B, Spec 6A');
+    await expect(row.locator('.gl-chip')).toHaveText('Production');
+    assertNoConsoleErrors(consoleErrors);
+  });
+
+  test('every API term has a definition, a known category and a source, and none repeats', async ({ page, gotoApp }) => {
+    await gotoApp('/glossary.html');
+    const bad = await page.evaluate(() => {
+      const api = allTerms.filter((t) => t.src);
+      const out = [];
+      if (api.length < 50) out.push('only ' + api.length + ' API terms');
+      const seen = new Set();
+      api.forEach((t) => {
+        if (!t.def || !CAT_LABELS[t.cat] || !t.abbr) out.push(t.abbr || '(no name)');
+        const k = t.abbr.toUpperCase();
+        if (seen.has(k)) out.push('duplicate ' + t.abbr); seen.add(k);
+      });
+      return out;
+    });
+    expect(bad).toEqual([]);
+  });
+
+  test('WOC is listed as an abbreviation for Waiting on Cement', async ({ page, gotoApp }) => {
+    await gotoApp('/glossary.html');
+    await page.locator('#glossary-input').fill('WOC');
+    const row = page.locator('#gl-list .gl-item', { has: page.locator('.gl-abbr', { hasText: /^WOC$/ }) });
+    await expect(row.locator('.gl-full')).toHaveText('Waiting on Cement');
+  });
+});

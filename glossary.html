@@ -224,6 +224,8 @@ html[data-taqa-theme="dark"] .gl-az-btn:disabled{color:rgba(0,187,182,0.28);}
 .gl-row:focus-visible{outline:2px solid var(--primary-ink)!important;outline-offset:-3px!important;}
 .gl-abbr{grid-area:abbr;font-family:'BwGradual','Urbanist',sans-serif;font-weight:700;font-size:16px;line-height:24px;
   letter-spacing:0.1px;color:var(--primary-ink);overflow-wrap:anywhere;}
+/* A whole-word term spans the abbreviation and meaning columns. */
+.gl-word{grid-column:1 / 3;}
 .gl-full{grid-area:full;font-family:'BwGradual','Urbanist',sans-serif;font-weight:300;font-size:16px;line-height:24px;color:var(--text);}
 .gl-snip{grid-area:snip;margin-top:2px;font-size:12.5px;line-height:1.45;color:var(--text-muted);
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
@@ -468,7 +470,7 @@ footer::before{content:'';position:absolute;top:0;inset-inline:0;height:3px;back
       <div class="glossary-search-bar">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.6"/><path d="m12.5 12.5 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         <label for="glossary-input" class="sr-only">Search the glossary</label>
-        <input type="search" id="glossary-input" placeholder="Type an abbreviation, e.g. BOP, ROP" autocomplete="off" spellcheck="false" enterkeyhint="search" aria-controls="gl-list">
+        <input type="search" id="glossary-input" placeholder="Type a term or abbreviation, e.g. BOP, Wellhead" autocomplete="off" spellcheck="false" enterkeyhint="search" aria-controls="gl-list">
         <button type="button" class="glossary-clear hidden" id="glossary-clear" onclick="clearSearch()" aria-label="Clear search"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
       </div>
     </div>
@@ -808,7 +810,63 @@ const BUILT_IN = [
   {abbr:'TLS',full:'Transport Layer Security',def:'The cryptographic protocol (successor to SSL) securing data in transit between clients and servers. TLS 1.3 is the current standard, encrypting all web, API, email, and file-transfer communications.',cat:'cybersecurity'},
   {abbr:'CIA',full:'Confidentiality, Integrity & Availability',def:'The three core principles of information security, Confidentiality (data accessible only to authorised parties), Integrity (data is accurate and unaltered), Availability (systems accessible when needed). Also called the CIA Triad.',cat:'cybersecurity'},
   {abbr:'CSIRT',full:'Computer Security Incident Response Team',def:'A designated team responsible for coordinating the organisation\'s response to cybersecurity incidents, detection, containment, eradication, recovery, and post-incident review to prevent recurrence.',cat:'cybersecurity'},
+  /* ── From the API glossary of oilfield terms (V to Z) ──
+     Whole-word terms, not abbreviations, so each carries `term` in place of
+     abbr/full. `src` names the API document the definition comes from. */
+  {term:'Viscosity',def:'A measure of a liquid\'s resistance to flow: how easily it pours or flows.',cat:'drilling',src:'ITOGP, WLOP'},
+  {term:'Visual Examination',def:'Examination of parts and equipment for visible defects in material and workmanship.',cat:'maintenance',src:'Spec 6A, Spec 16A'},
+  {term:'Volumetric Nondestructive Examination',def:'Examination for internal material defects by methods such as radiography or ultrasonic testing.',cat:'maintenance',src:'Spec 6A, Spec 16A'},
+  {term:'Volumetric Efficiency',def:'The actual delivered capacity of a pump, as a percentage of its calculated displacement.',cat:'maintenance',src:'Bul D10'},
+  {term:'Volatile Flammable Liquid',def:'A flammable liquid with a flash point below 100 °F (37.8 °C), or any flammable liquid above its flash point. Also a Class II combustible liquid above its flash point with a vapour pressure of no more than 40 psia (276 kPa) at 100 °F (38 °C).',cat:'safety',src:'RP 500B'},
+  {term:'Vug',def:'A natural cavity in a formation, formed when soluble minerals are leached out.',cat:'logging',src:'Bul 10C'},
+  {abbr:'WOC',full:'Waiting on Cement',def:'The time needed for the cement to set or harden in the wellbore before operations resume.',cat:'drilling',src:'Bul D20'},
+  {term:'Washout',def:'Excessive enlargement of the wellbore by the solvent or erosive action of the drilling fluid.',cat:'drilling',src:'Bul D20'},
+  {term:'Wall Cake',def:'The solids deposited on the wall of the hole as the liquid part of the drilling fluid or cement slurry filters into the formation. Also called filter cake.',cat:'drilling',src:'Bul 10C, Bul D11'},
+  {term:'Water-Base Drilling Fluid',def:'The common, conventional drilling fluid, in which water is the continuous phase and suspends the solids, whether or not oil is present.',cat:'drilling',src:'Bul D11'},
+  {term:'Water-Cement Ratio',def:'The ratio by weight of water to cement in a cement slurry. Abbreviated W/C.',cat:'drilling',src:'Bul 10C'},
+  {term:'Weight Material',def:'A high specific gravity material added to raise the density of a drilling fluid or cement slurry. Most commonly barite.',cat:'drilling',src:'Bul D11, Bul 10C'},
+  {term:'Water Block',def:'Reduced formation permeability caused by water invading the pores, either through clays swelling and shutting off the pores or through a capillary block from surface tension.',cat:'production',src:'Bul 10C, Bul D11'},
+  {term:'Water Coning',def:'The upward encroachment of water into a well, caused by the pressure drawdown from production.',cat:'production',src:'ITOGP'},
+  {term:'Water Flooding',def:'An enhanced recovery method in which water is injected into the reservoir to force additional oil out of the rock and into the producing wells.',cat:'production',src:'ITOGP'},
+  {term:'Weathered Crude',def:'Crude oil that has lost much of its entrained gas through evaporation during storage.',cat:'production',src:'ITOGP'},
+  {term:'Well Servicing',def:'Maintenance and repair work on a producing oil or gas well to keep or improve production from a formation already open, such as repairs to the pump, rods, gas lift valves, tubing or packers. Also refers to the people and companies who do this work.',cat:'production',src:'ITOGP, WLOP'},
+  {term:'Well Servicing Rig',def:'A rig assembled mainly for pulling or running tubulars or sucker rods: redrilling, completing, recompleting, workover, tubing pulling and abandonment.',cat:'production',src:'RP 54'},
+  {term:'Well Test',def:'Measurement of the oil, water or gas a well produces or takes on injection, over a set time and under set conditions, to predict its production or injection capability.',cat:'production',src:'WT'},
+  {term:'Well Test Rate',def:'The stabilized rate at which the well is currently produced on a routine basis.',cat:'production',src:'RP 14B'},
+  {term:'Water Drive',def:'A reservoir drive mechanism in which the expansion of the underlying water pushes oil into the wellbore.',cat:'logging',src:'ITOGP'},
+  {term:'Weight Indicator',def:'An instrument showing the weight suspended from a wireline or from the hook.',cat:'logging',src:'WLOP'},
+  {term:'Well Log',def:'A record of one or more physical properties of the formations against depth in a borehole. Each curve on the record is also called a log.',cat:'logging',src:'Bul 10C'},
+  {term:'Welding',def:'The fusion of materials, with or without added filler material.',cat:'maintenance',src:'Spec 6A, Spec 16A'},
+  {term:'Weld, Pressure-Containing',def:'A weld whose absence would reduce the pressure-containing integrity of the part. A non-pressure-containing weld is one whose absence would not.',cat:'maintenance',src:'Spec 6A, Spec 16A'},
+  {term:'Wellhead',def:'All the permanent equipment at the surface used to keep control of the well: the casing heads (lowermost and intermediate), the tubing head, the casing and tubing hangers, and the valves and fittings below the Christmas tree. Production lines connect to it, and the Christmas tree is installed on top of the tubing head.',cat:'production',src:'RP 14B, Spec 6A'},
+  {term:'Wet Gas',def:'Natural gas containing significant amounts of liquefiable hydrocarbons.',cat:'production',src:'ITOGP'},
+  {term:'Workover',def:'Remedial operations on a producing well to restore or increase production, such as washing out sand, acidizing, hydraulic fracturing or mechanical repair.',cat:'production',src:'Bul 10C, ITOGP'},
+  {term:'Workover Fluid',def:'Any type of fluid used in the workover operation of a well.',cat:'production',src:'Bul 10C, Bul D11'},
+  {term:'Wireline Retrievable Valve',def:'A gas lift valve mounted inside the tubing that can be installed and recovered by slickline (solid wireline) without pulling the tubing. It sits in a wireline retrievable mandrel, which is part of the tubing string.',cat:'production',src:'GL'},
+  {term:'Wireline Preventer',def:'A ram-type blowout preventer installed on top of the well or drill string as a precaution while running wireline. Its packing closes around the wire.',cat:'wellcontrol',src:'RP 53, WLOP'},
+  {term:'Working Pressure',def:'The maximum pressure at which an item of equipment is designed to be used, at a specified temperature. For an SSV or USV valve or actuator, it is the maximum internal pressure it is designed for.',cat:'wellcontrol',src:'RP 14H, Spec 14D, WLOP'},
+  {term:'Wireline Operations',def:'Operations performed in a wellbore with tools that are run and pulled on small-diameter slick, braided or electric wireline.',cat:'logging',src:'RP 57'},
+  {term:'Wireline Tools',def:'Tools lowered into and retrieved from the well on wireline, such as packers, swabs, gas lift valves and measuring devices.',cat:'logging',src:'ITOGP'},
+  {term:'Wireline Unit',def:'The truck or skid on which the wireline spool is mounted for downhole wireline work. Also called a wireline truck.',cat:'logging',src:'ITOGP'},
+  {term:'Wireline Cutting Tool',def:'A special tool, usually run on slickline, used to cut another wireline that is stuck in the well.',cat:'logging',src:'WLOP'},
+  {term:'Wireline Spear',def:'A fishing tool fitted with prongs, used to catch and recover wireline that has broken and been left in the well.',cat:'logging',src:'WLOP'},
+  {term:'Wireline Wiper',def:'A flexible rubber device that wipes mud, oil or other liquid off the wire as it is pulled out of the well.',cat:'logging',src:'WLOP'},
+  {term:'Wire Rope',def:'A rope of steel wires twisted into strands, which are laid helically around a central core. Sometimes called wireline or cable.',cat:'logging',src:'Spec 2C, WLOP'},
+  {term:'Zone',def:'A distinct interval of rock with one or more distinguishing characteristics, such as lithology, porosity or saturation. For example a shale zone, sand zone or pay zone.',cat:'logging',src:'ITOGP, RP 57'},
+  {term:'Whipstock',def:'A long, wedge-shaped steel tool set in the wellbore to deflect the bit at an angle, used for sidetracking and directional drilling.',cat:'drilling',src:'Bul 10C, Bul D20'},
+  {term:'Window',def:'A section of casing milled out to make an opening for a sidetrack or kick-off.',cat:'drilling',src:'Bul D20'},
+  {term:'Wildcat Well',def:'A well drilled in unproved or previously unexplored territory.',cat:'drilling',src:'Bul D11, ITOGP'},
+  {term:'Wetting Agent',def:'A substance that lowers the surface tension of a liquid, so it spreads over a surface or penetrates a material more easily.',cat:'drilling',src:'Bul D11, RP 5A5'},
+  {term:'Yield Point',def:'In drilling fluids, the resistance to initial flow: the stress needed to start the fluid moving. On a direct-indicating viscometer it is the 300 rpm reading minus the plastic viscosity, reported in lb/100 sq ft. Also called yield value.',cat:'drilling',src:'Bul D11, Bul 10C'},
+  {term:'Zinc Chloride',def:'A very soluble salt (ZnCl2) used to raise the density of water to more than double that of fresh water, normally added to a brine already saturated with calcium chloride. In a cement slurry it accelerates the thickening time.',cat:'drilling',src:'Bul D11, Bul 10C'},
+  {term:'Yield Strength',def:'The stress at which a material deforms plastically and will not return to its original dimensions when the load is released. API Spec 6A and 16A use the 0.2% offset yield strength measured to ASTM A370.',cat:'engineering',src:'Spec 6A, Spec 16A'},
+  {term:'Wet Method',def:'Magnetic particle inspection using ferromagnetic particles suspended in a liquid bath.',cat:'maintenance',src:'RP 5A5'},
+  {term:'Yoke Magnetization',def:'A magnetic field induced in a pipe, or part of a pipe, by an external C-shaped electromagnet (the yoke) carrying the magnetizing current. Used in magnetic particle inspection.',cat:'maintenance',src:'RP 5A5'},
+  {term:'Wicker',def:'A wire-like sliver of metal peeled from a thread or chamfer surface, which may stay attached at one end. Found during thread inspection. Also called a whisker.',cat:'maintenance',src:'Bul 5T1'},
 ];
+/* A whole-word term reads as one name across the row: it takes the
+   abbreviation's place for sorting, letters and search, with no expansion. */
+BUILT_IN.forEach(t => { if (t.term && !t.abbr) { t.abbr = t.term; t.full = ''; t.word = true; } });
 
 const CAT_LABELS = {
   drilling:'Drilling',wellcontrol:'Well Control',production:'Production',
@@ -917,9 +975,10 @@ function rowHTML(t, i, q) {
   if (others.length) {
     notes += `<span class="gl-note">Also: ${others.map(o => `<b>${esc(o.full)}</b> (${esc(CAT_LABELS[o.cat] || o.cat)})`).join(', ')}</span>`;
   }
+  if (t.src) notes += `<span class="gl-note">Source: API ${esc(t.src)}</span>`;
   return `<li class="gl-item${open ? ' is-open' : ''}" data-k="${esc(k)}">
     <h3 class="gl-h"><button type="button" class="gl-row" id="gr-${i}" aria-expanded="${open}" aria-controls="gp-${i}">
-      <span class="gl-line"><span class="gl-abbr">${hl(t.abbr, q)}</span> <span class="gl-full">${hl(t.full, q)}</span>${snip ? `<span class="gl-snip">${hl(snip, q)}</span>` : ''}</span>
+      <span class="gl-line">${t.word ? `<span class="gl-abbr gl-word">${hl(t.abbr, q)}</span>` : `<span class="gl-abbr">${hl(t.abbr, q)}</span> <span class="gl-full">${hl(t.full, q)}</span>`}${snip ? `<span class="gl-snip">${hl(snip, q)}</span>` : ''}</span>
       <span class="gl-chev" aria-hidden="true">${CHEV}</span>
     </button></h3>
     <div class="gl-panel" id="gp-${i}"><div class="gl-panel-in"><div class="gl-body">
