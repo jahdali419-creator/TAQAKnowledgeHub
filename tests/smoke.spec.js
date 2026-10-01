@@ -17,6 +17,7 @@ const PAGES = [
   'upload.html',
   'support-ticket.html',
   'whats-new.html',
+  'maintenance.html',
   'offline.html',
 ];
 

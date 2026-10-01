@@ -118,6 +118,7 @@ test.describe('Content-Security-Policy', () => {
     'upload.html',
     'support-ticket.html',
     'whats-new.html',
+    'maintenance.html',
     'analytics.html',
   ];
 

@@ -974,8 +974,10 @@ html[data-taqa-theme="dark"] .stats-strip-divider { background:#003A3D; }
 .doors-strip { background:var(--bg-white); border-bottom:1px solid var(--border); }
 .doors-strip-inner {
   max-width:1200px; margin:0 auto; padding:28px 48px;
-  display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
+  display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
 }
+/* Four doors fit one row on a desktop; two by two before they stack. */
+@media(max-width:1100px) { .doors-strip-inner { grid-template-columns:repeat(2,1fr); } }
 .door-card {
   display:flex; align-items:center; gap:14px;
   padding:18px; border-radius:var(--radius);
@@ -989,8 +991,8 @@ html[data-taqa-theme="dark"] .stats-strip-divider { background:#003A3D; }
   display:flex; align-items:center; justify-content:center;
 }
 .door-body { min-width:0; }
-.door-title { font-family:'BwGradual','Urbanist',sans-serif; font-size:14.5px; font-weight:700; color:var(--text); margin-bottom:2px; }
-.door-desc { font-size:12px; color:var(--text-muted); line-height:1.4; }
+.door-title { display:block; font-family:'BwGradual','Urbanist',sans-serif; font-size:14.5px; font-weight:700; color:var(--text); margin-bottom:2px; }
+.door-desc { display:block; font-size:12px; color:var(--text-muted); line-height:1.4; }
 html[data-taqa-theme="dark"] .door-icon { background:rgba(0,187,182,0.1); }
 
 
@@ -1536,6 +1538,7 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
       <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
     </li>
+    <li><a href="maintenance.html">Maintenance</a></li>
     <li><a href="ai-search.html">Document Search</a></li>
     <li class="nav-reg"><a href="master-list.html">Master List</a></li>
     <li><a href="glossary.html">Field Glossary</a></li>
@@ -1619,6 +1622,15 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
       <span class="door-body">
         <span class="door-title">Ask an Expert</span>
         <span class="door-desc">Get a direct answer from your segment's expert</span>
+      </span>
+    </a>
+    <a href="maintenance.html" class="door-card">
+      <span class="door-icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      </span>
+      <span class="door-body">
+        <span class="door-title">Maintenance</span>
+        <span class="door-desc">Each segment's maintenance shelves and bulletins</span>
       </span>
     </a>
     <a href="glossary.html" class="door-card">
@@ -2078,8 +2090,8 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
   var card=document.getElementById('tour-card');
   var backdrop=document.getElementById('tour-backdrop');
 
-  // The bar folds its links into the menu at 1180px (topbar.css), not 640px.
-  function isMob(){return window.matchMedia?window.matchMedia('(max-width:1180px)').matches:window.innerWidth<=1180;}
+  // The bar folds its links into the menu at 1280px (topbar.css), not 640px.
+  function isMob(){return window.matchMedia?window.matchMedia('(max-width:1280px)').matches:window.innerWidth<=1280;}
 
   function dots(){
     var d=document.getElementById('tc-dots');

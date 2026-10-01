@@ -496,7 +496,7 @@ test.describe('Mobile: hamburger menu', () => {
     setRole,
   }) => {
     // owner holds approve, so the bell is drawn even at this width (it is
-    // not in topbar.css's <=1180px hidden list, unlike Areas/door/nav-bm).
+    // not in topbar.css's <=1280px hidden list, unlike Areas/door/nav-bm).
     await gotoApp('/index.html');
     await setRole('owner', 'coiled-tubing');
     await gotoApp('/index.html');

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en" data-taqa-theme="light" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#005D63">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<title>Maintenance, TAQA Knowledge Hub</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* Maintenance. One place for every operational segment's maintenance
+   department: their shelves, segment by segment, and the Maintenance
+   Bulletins from all of them together. Set in the same calm language as
+   About this platform: white sheets on the canvas, hairlines between rows,
+   teal as the only accent. Every figure is read from the register. */
+:root{
+  --ink:#1E1C1A; --ink-2:#524D48; --ink-3:#756A61; --ink-4:#BEB8B2;
+  --paper:#FFFFFF; --canvas:#F4F4F3; --inset:#EDEBE8;
+  --lamina:rgba(117,106,97,.10);
+  --bedding:rgba(117,106,97,.13);
+  --sheet-shadow:0 1px 2px rgba(0,88,90,.04), 0 22px 44px -26px rgba(0,88,90,.22);
+  --primary:#005D63; --primary-ink:#005D63; --primary-hover:#004A4F;
+  --disc:rgba(0,93,99,.06); --disc-press:rgba(0,93,99,.11);
+  --scuff:rgba(0,93,99,.035);
+  --warn-ink:#8A6200; --ok-ink:#00705F;
+  --mono:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+  --read:'Inter',system-ui,sans-serif;
+  --head:'BwGradual','Urbanist',sans-serif;
+  --ease:cubic-bezier(.23,1,.32,1);
+  --gap:20px;
+}
+html[data-taqa-theme="dark"]{
+  --ink:#C7DBDD; --ink-2:#8CB6B9; --ink-3:#619B9E; --ink-4:#00484B;
+  --paper:#002326; --canvas:#001314; --inset:#002D30;
+  --lamina:rgba(0,187,182,.09);
+  --bedding:rgba(0,187,182,.13);
+  --sheet-shadow:0 22px 44px -26px rgba(0,0,0,.5);
+  --primary-ink:#00BBB6;
+  --disc:rgba(0,187,182,.08); --disc-press:rgba(0,187,182,.14);
+  --scuff:rgba(0,187,182,.05);
+  --warn-ink:#FFB81C; --ok-ink:#4FD1B5;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{overflow-x:clip;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+:root, html body{overflow-x:clip;}
+body{font-family:var(--read);background:var(--canvas);color:var(--ink-2);
+  font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+a{color:var(--primary-ink);text-decoration:none;}
+:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;border-radius:6px;}
+html #navbar{position:sticky;top:0;}
+
+.frame{max-width:880px;margin:0 auto;padding:44px 32px 88px;}
+
+/* ── Opening ── */
+.kicker{font:600 11px/1.3 var(--read);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px;}
+h1{font-family:var(--head);font-size:34px;font-weight:700;color:var(--ink);letter-spacing:-.02em;line-height:1.12;}
+.lede{font-size:15.5px;line-height:1.65;color:var(--ink-2);margin-top:14px;max-width:62ch;}
+
+/* Three figures in one ruled line, not three cards. */
+.tally{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:28px;
+  border-top:1px solid var(--bedding);border-bottom:1px solid var(--bedding);}
+.tally div{padding:16px 0 14px;}
+.tally div + div{padding-inline-start:20px;border-inline-start:1px solid var(--lamina);}
+.tally b{display:block;font:300 30px/1 var(--head);color:var(--ink);letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+.tally span{display:block;margin-top:7px;font-size:12.5px;color:var(--ink-3);}
+
+.acts{margin-top:22px;display:flex;flex-wrap:wrap;gap:10px;}
+
+/* Waiting on this person: the one line on the page that asks for action. */
+.ask{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:22px;padding:14px 16px;
+  border-radius:14px;background:var(--disc);color:var(--ink);font-size:14px;}
+.ask[hidden]{display:none;}
+.ask b{font-weight:700;font-variant-numeric:tabular-nums;}
+.ask span{flex:1;min-width:0;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;
+  border-radius:10px;background:var(--primary);color:#fff;font:600 13px/1 var(--read);white-space:nowrap;
+  transition:background-color 150ms var(--ease),transform 100ms var(--ease);}
+.btn:active{transform:scale(.97);}
+@media (hover:hover){.btn:hover{background:var(--primary-hover);}}
+html[data-taqa-theme="dark"] .btn{background:#00BBB6;color:#00292C;}
+.btn.quiet{background:transparent;color:var(--primary-ink);box-shadow:inset 0 0 0 1px var(--bedding);}
+@media (hover:hover){.btn.quiet:hover{background:var(--scuff);}}
+.btn[hidden]{display:none;}
+
+/* ── Sheets ── */
+.body{margin-top:36px;display:flex;flex-direction:column;gap:28px;}
+.sheet{background:var(--paper);border:1px solid var(--bedding);border-radius:20px;
+  box-shadow:var(--sheet-shadow);overflow:clip;scroll-margin-top:84px;}
+.sh-head{display:flex;align-items:flex-start;gap:16px;padding:22px var(--gap) 18px;}
+.sh-head > div{flex:1;min-width:0;}
+h2{font-family:var(--head);font-size:19px;font-weight:700;color:var(--ink);letter-spacing:-.01em;line-height:1.25;}
+.sh-sub{font-size:13.5px;line-height:1.6;color:var(--ink-2);margin-top:6px;max-width:64ch;}
+
+.rows{list-style:none;border-top:1px solid var(--lamina);}
+.rows > li + li{border-top:1px solid var(--lamina);}
+.row{display:grid;grid-template-columns:64px minmax(0,1fr) 30px;column-gap:16px;align-items:center;
+  min-height:64px;padding:16px var(--gap);color:inherit;
+  -webkit-tap-highlight-color:transparent;transition:background-color 140ms ease;}
+.fig{font:300 30px/1 var(--head);color:var(--ink);letter-spacing:-.02em;font-variant-numeric:tabular-nums;
+  align-self:start;padding-top:2px;}
+.fig.zero{color:var(--ink-3);opacity:.5;}
+.mark{display:inline-grid;place-items:center;min-width:36px;height:22px;padding:0 6px;border-radius:6px;
+  background:var(--disc);color:var(--primary-ink);font:600 11px/1 var(--read);letter-spacing:.04em;
+  justify-self:start;align-self:start;margin-top:2px;}
+.rmain{display:flex;flex-direction:column;gap:4px;min-width:0;}
+.rname{font:300 16.5px/1.3 var(--head);color:var(--ink);display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;}
+.mine{font:600 10.5px/1 var(--read);letter-spacing:.08em;text-transform:uppercase;color:var(--primary-ink);
+  padding:4px 7px;border-radius:999px;background:var(--disc);}
+.rmeta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-size:12.5px;color:var(--ink-3);}
+.rmeta .num{font-family:var(--mono);font-size:12px;color:var(--ink-2);overflow-wrap:anywhere;}
+.shelves{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--ink-3);}
+.shelves b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;}
+.chev{width:30px;height:30px;border-radius:50%;background:var(--disc);color:var(--primary-ink);
+  display:grid;place-items:center;transition:background-color 160ms ease;}
+.chev svg{width:16px;height:16px;transition:transform 200ms var(--ease);}
+[dir="rtl"] .chev svg{transform:scaleX(-1);}
+a.row:active{background:var(--scuff);}
+@media (hover:hover) and (pointer:fine){
+  a.row:hover{background:var(--scuff);}
+  a.row:hover .chev{background:var(--disc-press);}
+  a.row:hover .chev svg{transform:translateX(2px);}
+  [dir="rtl"] a.row:hover .chev svg{transform:scaleX(-1) translateX(2px);}
+}
+a.row:focus-visible{outline-offset:-3px;border-radius:0;}
+
+/* Nothing released yet: say so, say how it gets here, offer the way in. */
+.empty{border-top:1px solid var(--lamina);padding:26px var(--gap) 28px;display:flex;flex-direction:column;
+  align-items:flex-start;gap:12px;}
+.empty p{font-size:13.5px;line-height:1.65;color:var(--ink-2);max-width:60ch;}
+.empty p b{color:var(--ink);font-weight:600;}
+
+/* Who releases what: three steps on one line. */
+.flow{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--lamina);}
+.flow li{padding:16px var(--gap) 18px;font-size:13px;line-height:1.55;color:var(--ink-2);}
+.flow li + li{border-inline-start:1px solid var(--lamina);}
+.flow b{display:block;font:300 15.5px/1.3 var(--head);color:var(--ink);margin-bottom:4px;}
+.flow em{font-style:normal;font:600 11px/1 var(--read);letter-spacing:.12em;color:var(--ink-3);display:block;margin-bottom:8px;}
+
+.foot{margin-top:40px;padding-top:18px;border-top:1px solid var(--bedding);
+  display:flex;flex-wrap:wrap;align-items:center;gap:0 22px;font-size:13px;color:var(--ink-3);}
+.foot a{display:inline-flex;align-items:center;min-height:44px;font-weight:500;}
+.foot span{margin-inline-end:auto;}
+
+@media (max-width:640px){
+  :root{--gap:16px;}
+  .frame{padding:26px 16px 64px;}
+  h1{font-size:28px;}
+  .lede{font-size:15px;}
+  .tally b{font-size:26px;}
+  .tally div + div{padding-inline-start:14px;}
+  .body{margin-top:28px;gap:20px;}
+  .sheet{border-radius:18px;}
+  .sh-head{flex-direction:column;gap:12px;padding:18px var(--gap) 16px;}
+  h2{font-size:18px;}
+  .row{grid-template-columns:48px minmax(0,1fr) 30px;column-gap:12px;min-height:60px;padding:15px var(--gap);}
+  .fig{font-size:26px;}
+  .rname{font-size:16px;}
+  .flow{grid-template-columns:minmax(0,1fr);}
+  .flow li + li{border-inline-start:0;border-top:1px solid var(--lamina);}
+  .foot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px;}
+  .foot span{grid-column:1 / -1;padding-block:6px 2px;}
+}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{transition-duration:.01ms!important;animation:none!important;}}
+</style>
+<link rel="stylesheet" href="topbar.css">
+</head>
+<body>
+
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+  <a href="index.html" class="nav-brand">
+    <img src="icons/taqa-logo.png" alt="TAQA" class="nav-logo nav-logo-light">
+    <img src="icons/taqa-logo-reverse.png" alt="TAQA" class="nav-logo nav-logo-dark">
+    <span class="nav-subtitle"><em>TechHub Platform</em></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
+    <li><a href="maintenance.html" class="active" aria-current="page">Maintenance</a></li>
+    <li><a href="ai-search.html">Document Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
+  <div class="nav-right">
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<main class="frame" id="main-content">
+  <header class="intro">
+    <p class="kicker">Maintenance departments</p>
+    <h1>Maintenance</h1>
+    <p class="lede">Every operational segment has its own maintenance department. It keeps the same shelves as operations, with Maintenance Bulletins as well. QMS checks each document first. The segment's Maintenance Manager then releases it.</p>
+    <div class="tally" aria-label="Maintenance in figures">
+      <div><b id="n-segs">0</b><span>Segments</span></div>
+      <div><b id="n-docs">0</b><span>Maintenance documents</span></div>
+      <div><b id="n-mb">0</b><span>Maintenance Bulletins</span></div>
+    </div>
+    <p class="acts"><a class="btn quiet" id="ask-mnt" href="support-ticket.html?dept=maintenance">Ask a maintenance question</a></p>
+    <p class="ask" id="ask" hidden><span id="ask-line"></span><a class="btn" id="ask-go" href="dashboard.html">Review</a></p>
+  </header>
+
+  <div class="body">
+    <section class="sheet" id="bulletins" aria-labelledby="h-bulletins">
+      <div class="sh-head">
+        <div>
+          <h2 id="h-bulletins">Maintenance Bulletins</h2>
+          <p class="sh-sub">From every segment, newest first.</p>
+        </div>
+        <a class="btn quiet" id="file-mb" href="upload.html?type=bulletin&amp;dept=maintenance" hidden>File a bulletin</a>
+      </div>
+      <ul class="rows" id="mb-list"></ul>
+      <div class="empty" id="mb-empty" hidden>
+        <p><b>No Maintenance Bulletins have been released yet.</b> A bulletin is filed by a segment's maintenance department. QMS checks it, then the segment's Maintenance Manager releases it, and it shows here and on that segment's Bulletins shelf.</p>
+      </div>
+    </section>
+
+    <section class="sheet" id="segments" aria-labelledby="h-segments">
+      <div class="sh-head">
+        <div>
+          <h2 id="h-segments">By segment</h2>
+          <p class="sh-sub">Open a segment to see its maintenance shelves: Standards, SOPs, Manuals, Forms &amp; Checklists, Bulletins, Alerts and Lessons Learned.</p>
+        </div>
+      </div>
+      <ul class="rows" id="seg-list"></ul>
+    </section>
+
+    <section class="sheet" aria-labelledby="h-flow">
+      <div class="sh-head">
+        <div>
+          <h2 id="h-flow">How a maintenance document is released</h2>
+        </div>
+      </div>
+      <ol class="flow">
+        <li><em>1</em><b>Maintenance files it</b>On the upload page, with the Maintenance box ticked. A bulletin is always maintenance.</li>
+        <li><em>2</em><b>QMS checks it</b>The number, revision and dates, and anything it replaces.</li>
+        <li><em>3</em><b>The Maintenance Manager releases it</b>Only the segment's own Maintenance Manager. The segment Director does not sign maintenance documents.</li>
+      </ol>
+    </section>
+  </div>
+
+  <footer class="foot">
+    <span>Counts are read from the register.</span>
+    <a href="index.html">Home</a>
+    <a href="ai-search.html">Document Search</a>
+    <a href="glossary.html">Field Glossary</a>
+  </footer>
+</main>
+
+<script src="roles.js"></script>
+<script src="documents-master.js"></script>
+<script src="store.js"></script>
+<script src="shared.js"></script>
+<script>
+/* Painted from the register, and repainted when it or the role changes. */
+(function(){
+  if (typeof TAQA_STORE === 'undefined' || typeof TAQA_DOC_LOOKUPS === 'undefined') return;
+  var L = TAQA_DOC_LOOKUPS.segments, T = TAQA_DOC_LOOKUPS.types;
+  var esc = function(t){ return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  var CHEV = '<span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>';
+  // The segment page's shelves, in its order. Bulletins live only on the
+  // maintenance side.
+  var SHELVES = [['standard','Standards'],['sop','SOPs'],['manual','Manuals'],['form','Forms'],
+                 ['bulletin','Bulletins'],['alert','Alerts'],['lesson','Lessons']];
+  var isMaint = function(d){
+    var m = (typeof TAQA_APPROVAL !== 'undefined') ? TAQA_APPROVAL.isMaintenance(d)
+          : (d.department === 'maintenance' || d.docType === 'bulletin');
+    return m && d.docType !== 'software';
+  };
+  var ops = function(id){ return (L[id] || {}).group === 'segment'; };
+  var fmt = function(iso){
+    if (!iso) return '';
+    var d = new Date(iso + 'T00:00:00');
+    return isNaN(d) ? iso : d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  };
+
+  function paint(){
+    var mine = typeof TAQA_ROLE !== 'undefined' ? TAQA_ROLE.area() : null;
+    var cap = typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.effective ? TAQA_ROLE.effective() : {};
+    var docs = TAQA_STORE.rows('visible').filter(function(d){ return ops(d.segment) && isMaint(d); });
+
+    var ids = Object.keys(L).filter(ops).sort(function(a, b){
+      if (a === mine) return -1; if (b === mine) return 1;
+      return L[a].name.localeCompare(L[b].name);
+    });
+    document.getElementById('n-segs').textContent = ids.length;
+    document.getElementById('n-docs').textContent = docs.length;
+
+    // Bulletins, every segment together.
+    var mb = docs.filter(function(d){ return d.docType === 'bulletin'; })
+      .sort(function(a, b){ return String(b.issueDate || '').localeCompare(String(a.issueDate || '')); });
+    document.getElementById('n-mb').textContent = mb.length;
+    document.getElementById('mb-list').innerHTML = mb.map(function(d){
+      var href = 'viewer.html?doc=' + encodeURIComponent(d.docNumber) + '&seg=' + encodeURIComponent(d.segment) + '&type=bulletin';
+      return '<li><a class="row" href="' + href + '"><span class="mark">' + esc((T.bulletin || {}).mark || 'MB') + '</span>' +
+        '<span class="rmain"><span class="rname">' + esc(d.title) + '</span>' +
+        '<span class="rmeta"><span class="num">' + esc(d.docNumber) + '</span><span>' + esc(L[d.segment].name) + '</span>' +
+        (d.revision ? '<span>Rev ' + esc(d.revision) + '</span>' : '') +
+        (d.issueDate ? '<span>Issued ' + esc(fmt(d.issueDate)) + '</span>' : '') + '</span></span>' + CHEV + '</a></li>';
+    }).join('');
+    document.getElementById('mb-list').hidden = !mb.length;
+    document.getElementById('mb-empty').hidden = !!mb.length;
+
+    // Filing a bulletin, for anyone who may submit. From your own segment it
+    // arrives with the segment chosen.
+    var file = document.getElementById('file-mb');
+    file.hidden = !cap.submit;
+    file.href = 'upload.html?type=bulletin&dept=maintenance' + (ops(mine) ? '&seg=' + encodeURIComponent(mine) : '');
+    // Ask Expert, addressed to your segment's Maintenance Manager.
+    document.getElementById('ask-mnt').href = 'support-ticket.html?dept=maintenance' + (ops(mine) ? '&area=' + encodeURIComponent(mine) : '');
+
+    // One row per operational segment.
+    document.getElementById('seg-list').innerHTML = ids.map(function(id){
+      var own = docs.filter(function(d){ return d.segment === id; });
+      var by = {};
+      own.forEach(function(d){ by[d.docType] = (by[d.docType] || 0) + 1; });
+      var held = SHELVES.filter(function(s){ return by[s[0]]; })
+        .map(function(s){ return '<span><b>' + by[s[0]] + '</b> ' + s[1] + '</span>'; }).join('');
+      var href = 'segment.html?id=' + encodeURIComponent(id) + '&dept=maintenance';
+      return '<li><a class="row" href="' + href + '" data-seg="' + esc(id) + '">' +
+        '<span class="fig' + (own.length ? '' : ' zero') + '">' + own.length + '</span>' +
+        '<span class="rmain"><span class="rname">' + esc(L[id].name) + (id === mine ? '<span class="mine">Your segment</span>' : '') + '</span>' +
+        '<span class="shelves">' + (held || '<span>Nothing released yet</span>') + '</span></span>' + CHEV + '</a></li>';
+    }).join('');
+
+    // A Maintenance Manager is told what waits on them, and taken to it.
+    var ask = document.getElementById('ask');
+    var waiting = (typeof TAQA_APPROVAL !== 'undefined')
+      ? TAQA_STORE.rows('pending').filter(function(d){ return isMaint(d) && TAQA_APPROVAL.canApprove(d); }).length : 0;
+    ask.hidden = !waiting;
+    if (waiting) {
+      document.getElementById('ask-line').innerHTML = '<b>' + waiting + '</b> maintenance document' + (waiting === 1 ? ' is' : 's are') + ' waiting for your approval.';
+      document.getElementById('ask-go').href = 'dashboard.html?id=' + encodeURIComponent(mine);
+    }
+  }
+
+  paint();
+  TAQA_STORE.onChange(paint);
+  window.addEventListener('taqa:role-changed', paint);
+})();
+</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
+</body>
+</html>

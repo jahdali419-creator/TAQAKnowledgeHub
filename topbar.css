@@ -53,6 +53,10 @@ html[data-taqa-theme="dark"]{
      so the middle (auto-width) track sits truly in the middle regardless of
      how wide the brand lockup is, rather than just sitting to its right. */
   display:grid; grid-template-columns:1fr auto 1fr; align-items:center; column-gap:24px;
+  /* ...but never narrower than the brand or the right cluster. A bare 1fr
+     shrank below the "TechHub Platform" lockup when the links were long
+     (QMS carries the most), and the links ran over it. */
+  grid-template-columns:minmax(max-content,1fr) auto minmax(max-content,1fr);
   background:var(--tb-paper);
   -webkit-backdrop-filter:saturate(1.4) blur(18px); backdrop-filter:saturate(1.4) blur(18px);
   border:0; border-bottom:1px solid var(--tb-rule);
@@ -251,8 +255,15 @@ html[data-taqa-theme="dark"] #navbar .nav-cta{border-color:rgba(0,187,182,0.35);
   #navbar .door-cap-s + .door-cap{display:none;}
 }
 
+/* Just above the fold point, QMS carries the most links (Master List as
+   well as Maintenance), and at the normal spacing they ran into the brand. */
+@media (max-width:1400px){
+  #navbar{column-gap:10px;}
+  #navbar .nav-links > li > a,#navbar .nav-dropdown-btn{padding:0 8px;}
+}
+
 /* Phone and tablet: brand, bell, theme, menu. Everything else is in the menu. */
-@media (max-width:1180px){
+@media (max-width:1280px){
   #navbar{padding:var(--nav-safe) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); gap:8px;
     /* Two tracks, not three: with the links hidden, the three-track grid
        put the right cluster in the middle track, and on a phone the brand

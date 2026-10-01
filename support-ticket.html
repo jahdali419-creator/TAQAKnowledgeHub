@@ -167,6 +167,11 @@ details[open]>summary .chev svg{transform:rotate(180deg);}
 .urg-note-time{margin-inline-start:auto;font-size:12.5px;color:var(--text-light);white-space:nowrap;}
 .urg-note-time b{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;}
 
+/* ── Department: an operational segment's operations side or its
+   maintenance department, the same two-up control as Urgency ── */
+.urg.dept{grid-template-columns:repeat(2,1fr);margin-top:12px;}
+.dept-group[hidden]{display:none;}
+
 /* ── Photo evidence ── */
 .photo-drop{display:flex;align-items:center;gap:14px;padding:16px 18px;min-height:72px;border-radius:14px;cursor:pointer;
   border:1.5px dashed var(--hair-2);background:var(--inset-soft);transition:border-color 180ms var(--ease),background 180ms var(--ease);}
@@ -390,6 +395,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
       <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
     </li>
+    <li><a href="maintenance.html">Maintenance</a></li>
     <li><a href="ai-search.html">Document Search</a></li>
     <li class="nav-reg"><a href="master-list.html">Master List</a></li>
     <li><a href="glossary.html">Field Glossary</a></li>
@@ -432,6 +438,14 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
           <select class="form-select" id="ticket-area" required aria-describedby="area-hint">
             <option value="" disabled selected>Choose one</option>
           </select>
+          <!-- Only for an operational segment: its maintenance department
+               answers to the segment's Maintenance Manager. -->
+          <div class="dept-group" id="dept-group" hidden>
+            <div class="urg dept" role="radiogroup" aria-label="Department">
+              <label class="urg-opt sel" id="dept-ops-opt"><input type="radio" name="dept" value="operations" checked>Operations</label>
+              <label class="urg-opt" id="dept-mnt-opt"><input type="radio" name="dept" value="maintenance">Maintenance</label>
+            </div>
+          </div>
           <div class="ask-to" id="ask-to" aria-live="polite">
             <div class="ask-to-in" id="ask-to-in"></div>
           </div>
@@ -654,6 +668,11 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
         <li><button type="button" class="expert-item" data-areas="qhse">
           <span class="expert-av" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
           <span class="expert-info"><span class="expert-name">QHSE Expert</span><span class="expert-seg">Quality · HSE · Compliance</span></span>
+          <span class="expert-go" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l4 4-4 4"/></svg></span>
+        </button></li>
+        <li><button type="button" class="expert-item" data-areas="" data-dept="maintenance">
+          <span class="expert-av" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+          <span class="expert-info"><span class="expert-name">Segment Maintenance</span><span class="expert-seg">The Maintenance Manager of each operational segment</span></span>
           <span class="expert-go" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l4 4-4 4"/></svg></span>
         </button></li>
         <li><button type="button" class="expert-item" data-areas="*">
@@ -1001,12 +1020,28 @@ document.addEventListener('click',function(e){
   var sel = document.getElementById('ticket-area'),
       box = document.getElementById('ask-to'),
       inn = document.getElementById('ask-to-in'),
-      rows = [].slice.call(document.querySelectorAll('#expert-list .expert-item'));
+      rows = [].slice.call(document.querySelectorAll('#expert-list .expert-item')),
+      deptGroup = document.getElementById('dept-group'),
+      mntRow = document.querySelector('#expert-list .expert-item[data-dept="maintenance"]');
   if (!sel || !box || !rows.length) return;
   var S = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments) || {};
+  /* Every operational segment has a maintenance department. A question for
+     it goes to that segment's Maintenance Manager, not its experts. */
+  var isOps = function(id){ return !!(id && S[id] && S[id].group === 'segment'); };
+  function dept(){ var r = document.querySelector('input[name="dept"]:checked'); return r ? r.value : 'operations'; }
+  function setDept(v){
+    document.querySelectorAll('input[name="dept"]').forEach(function(r){ r.checked = (r.value === v); });
+    paint();
+  }
+  document.querySelectorAll('input[name="dept"]').forEach(function(r){
+    r.addEventListener('change', function(){ if (r.checked) paint(); });
+    r.parentNode.addEventListener('click', function(){ setDept(r.value); });
+  });
   function rowFor(id){
+    if (isOps(id) && dept() === 'maintenance' && mntRow) return mntRow;
     var hit = null, all = null;
     rows.forEach(function(r){
+      if (r.hasAttribute('data-dept')) return;
       var a = r.getAttribute('data-areas');
       if (a === '*') all = r; else if (a.split(' ').indexOf(id) !== -1) hit = r;
     });
@@ -1015,12 +1050,15 @@ document.addEventListener('click',function(e){
   function esc(t){ var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
   function paint(){
     var id = sel.value, r = id ? rowFor(id) : null;
+    if (deptGroup) deptGroup.hidden = !isOps(id);
+    document.querySelectorAll('input[name="dept"]').forEach(function(x){ x.parentNode.classList.toggle('sel', x.checked); });
     rows.forEach(function(x){ x.setAttribute('aria-current', x === r ? 'true' : 'false'); });
     if (!r) { box.classList.remove('show'); inn.innerHTML = ''; return; }
     var own = r.getAttribute('data-areas') !== '*',
         area = (S[id] && S[id].name) || sel.options[sel.selectedIndex].text,
         name = r.querySelector('.expert-name').textContent,
         seg = own ? r.querySelector('.expert-seg').textContent : 'No named expert for ' + area + '. Shared with all segment experts.';
+    if (r === mntRow) { name = area + ' Maintenance Manager'; seg = 'Maintenance department, ' + area; }
     inn.innerHTML = '<div class="ask-card">' + r.querySelector('.expert-av').outerHTML +
       '<span class="expert-info"><span class="ask-k">Your question goes to</span>' +
       '<span class="ask-n">' + esc(name) + '</span><span class="ask-s">' + esc(seg) + '</span></span></div>';
@@ -1050,7 +1088,15 @@ document.addEventListener('click',function(e){
       var a = r.getAttribute('data-areas');
       sel.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'center'});
       sel.focus({preventScroll:true});
-      if (a !== '*') { sel.value = a.split(' ')[0]; paint(); return; }
+      /* Segment Maintenance: the department is chosen; the area still has to
+         be an operational segment, so anything else is cleared and the list
+         opens to pick one. */
+      if (r === mntRow) {
+        if (!isOps(sel.value)) { sel.value = ''; setDept('maintenance'); try { if (sel.showPicker) sel.showPicker(); } catch (e) {} }
+        else setDept('maintenance');
+        return;
+      }
+      if (a !== '*') { sel.value = a.split(' ')[0]; setDept('operations'); return; }
       /* "All segment experts" means the area is not one of the named four, so
          a named area is cleared and the list opens to pick the right one. */
       var cur = sel.value ? rowFor(sel.value) : null;
@@ -1058,7 +1104,18 @@ document.addEventListener('click',function(e){
       try { if (sel.showPicker) sel.showPicker(); } catch (e) {}
     });
   });
-  paint();
+  /* Arriving from the Maintenance page (?dept=maintenance, with &area= for
+     your segment) the question is already addressed. A Maintenance Manager
+     asks from their own department and segment unless told otherwise. */
+  function arrive(){
+    var q = new URLSearchParams(location.search), want = q.get('area') || q.get('seg');
+    var role = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE.current() : null;
+    if (!want && role === 'maintenance') want = TAQA_ROLE.area();
+    if (want && sel.querySelector('option[value="' + want.replace(/[^a-z0-9-]/gi, '') + '"]')) sel.value = want;
+    if (q.get('dept') === 'maintenance' || (role === 'maintenance' && q.get('dept') !== 'operations')) setDept('maintenance');
+    else paint();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arrive); else arrive();
 
   /* The tips and response times sit open beside the form on a wide screen and
      fold to one line under it on a phone. */

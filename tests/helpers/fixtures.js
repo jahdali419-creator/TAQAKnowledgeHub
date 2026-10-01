@@ -90,7 +90,7 @@ exports.test = base.test.extend({
     await use(setRole);
   },
 
-  // The top bar as a person uses it at the current width. At 1180px and
+  // The top bar as a person uses it at the current width. At 1280px and
   // below topbar.css hides the bar's links, the door, Bookmarks and Upload
   // (on purpose: "Everything else is in the menu"), and the phone menu
   // carries each of them instead. Tests about what someone can reach go

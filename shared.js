@@ -441,7 +441,7 @@ window.showToast=function(msg,type){
   }
   if(menu){
     menu.setAttribute('aria-label','Menu');
-    var items=[{href:'index.html',label:'Home'},{href:'ai-search.html',label:'Document Search'}];
+    var items=[{href:'index.html',label:'Home'},{href:'maintenance.html',label:'Maintenance'},{href:'ai-search.html',label:'Document Search'}];
     if(canRegister) items.push({href:'master-list.html',label:'Master List'});
     items.push({href:'glossary.html',label:'Field Glossary'},{href:'support-ticket.html',label:'Ask Expert'});
     var html='<div class="mm-main">'+items.map(function(l){
@@ -802,7 +802,7 @@ window.showToast=function(msg,type){
     '.bm-x:hover{color:var(--stop-ink,#C8102E);background:var(--tb-hover,rgba(117,106,97,.08));}'+
     '.bm-empty{text-align:center;padding:30px 20px 34px;color:var(--tb-light,#756A61);font-size:13.5px;line-height:1.6;}'+
     '.bm-empty b{display:block;font-family:"BwGradual","Urbanist",sans-serif;font-size:15px;font-weight:700;color:var(--tb-text,#1E1C1A);margin-bottom:4px;}'+
-    '@media (max-width:1180px){.bm-clr{min-height:44px;padding:0 12px;}}'+
+    '@media (max-width:1280px){.bm-clr{min-height:44px;padding:0 12px;}}'+
     '@media (max-width:640px){.bm-panel{inset-inline:12px;width:auto;}}'+
     '@media (prefers-reduced-motion:reduce){.bm-panel{animation:none;}}';
   document.head.appendChild(s);
@@ -881,7 +881,7 @@ window.showToast=function(msg,type){
   function trigger(){ return document.getElementById('nav-bm'); }
   function place(from){
     // Hang the list under whatever opened it. On a phone it spans the width.
-    var wide=window.matchMedia&&window.matchMedia('(min-width:1181px)').matches;
+    var wide=window.matchMedia&&window.matchMedia('(min-width:1281px)').matches;
     var nav=document.getElementById('navbar')||document.querySelector('nav');
     var top=nav?Math.round(nav.getBoundingClientRect().bottom)+8:72;
     panel.style.top=top+'px';

@@ -21,12 +21,13 @@ const PAGES = [
   { path: '/ai-search.html', name: 'ai-search' },
   { path: '/dashboard.html?id=coiled-tubing', name: 'dashboard' },
   { path: '/upload.html', name: 'upload' },
+  { path: '/maintenance.html', name: 'maintenance' },
 ];
 
 // Pages that ship a real <h1> today (verified by reading the rendered DOM,
 // not just the static markup, since documents.html/dashboard.html build
 // most of their content from JS).
-const PAGES_WITH_H1 = ['index', 'segment', 'viewer', 'ai-search', 'upload'];
+const PAGES_WITH_H1 = ['index', 'segment', 'viewer', 'ai-search', 'upload', 'maintenance'];
 // documents.html and dashboard.html have no <h1> anywhere in their markup
 // or their rendered DOM (documents.html, dashboard.html, verified by
 // reading both files in full: no <h1> tag at all). Tracked below as a
