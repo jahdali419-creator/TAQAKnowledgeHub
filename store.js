@@ -209,6 +209,9 @@
     // The same rule upload.html refuses at the door, checked again where the
     // record is written, so no page can file on a role's behalf that it lacks.
     if (typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.effective && !TAQA_ROLE.effective().submit) return null;
+    // A Maintenance Bulletin belongs to an operational segment's maintenance
+    // team. Anywhere else nobody may approve it, so it is not filed at all.
+    if (rec.docType === 'bulletin' && (segs()[rec.segment] || {}).group !== 'segment') return null;
     fresh();
     var row = {};
     for (var k in rec) if (Object.prototype.hasOwnProperty.call(rec, k)) row[k] = rec[k];

@@ -1131,9 +1131,21 @@ function deptMaintenance(){
 }
 /* A Maintenance Bulletin is a maintenance document by definition, so the box
    is ticked and locked for it rather than left for the submitter to forget. */
+function isOperational(seg){
+  var L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : null;
+  return !!(L && seg && L.segments[seg] && L.segments[seg].group === 'segment');
+}
 function syncDeptRow(){
   var row = document.getElementById('dept-row'), box = document.getElementById('dept-maint');
   var bulletin = (document.getElementById('doc-type-select') || {}).value === 'bulletin';
+  // Bulletin chosen: only operational segments can be picked. A function or
+  // centre chosen: Maintenance Bulletin cannot be picked.
+  var segSel = document.getElementById('seg-select'), typeSel = document.getElementById('doc-type-select');
+  if (segSel) segSel.querySelectorAll('optgroup').forEach(function(g){
+    g.disabled = bulletin && !/Operational/.test(g.label);
+  });
+  var bOpt = typeSel && typeSel.querySelector('option[value="bulletin"]');
+  if (bOpt) bOpt.disabled = !!(segSel && segSel.value) && !isOperational(segSel.value);
   if (box) {
     if (bulletin) { box.checked = true; box.disabled = true; }
     else if (box.disabled) { box.disabled = false; }
@@ -1606,6 +1618,12 @@ function stepReady(n){
     if (!type)                  { say('hint-2', 'Choose a document type.'); return false; }
     if (isPolicy && !fn)        { say('hint-2', 'Choose the issuing function.'); return false; }
     if (!isPolicy && !seg)      { say('hint-2', 'Choose the area that owns it.'); return false; }
+    // A Maintenance Bulletin is the maintenance team's, and only an
+    // operational segment has one. Filed for a function or a centre it had
+    // no approver at all: their head may not sign maintenance documents.
+    if (type === 'bulletin' && !isOperational(seg)) {
+      say('hint-2', 'A Maintenance Bulletin is for the maintenance team of an operational segment. Choose an operational segment.'); return false;
+    }
     if (docStatus === 'revision' && !document.getElementById('supersedes-select').value) {
       say('hint-2', 'Choose the document this revision replaces.'); return false;
     }

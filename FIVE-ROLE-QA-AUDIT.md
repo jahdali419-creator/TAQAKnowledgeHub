@@ -6,6 +6,7 @@ Date: 1 October 2026. Branch `claude/inspiring-mayer-pm1350` (PR #21, not merged
 |---|---|
 | Code audited from scratch (baseline) | `1de6bbef5f63c369549b6412c8a0ece17764afba` |
 | Fixes and new tests from this audit | `e2e044b7a3a9876102cd4fe6fa1f9e13c381bb0b` (see section 6) |
+| D8, after the owner's decision | the commit after this report's first version |
 | This report | the commit that adds this file |
 
 > **This is a frontend-only prototype.** Every rule below runs in the visitor's browser (`roles.js`, `store.js`). A person who edits `localStorage` or uses the console can change any record, publish anything and forge any signature. Nothing here is production security. Roles come from a switcher, not a sign-in; records live in one browser; attachments are not stored. The Azure back end must enforce the same rules (section 11).
@@ -129,7 +130,7 @@ No uncaught page errors in any journey run.
 | Master List bulk Confirm on a maintenance SOP | confirm dialog and toast name the Maintenance Manager; stage `director` | PASS (**baseline FAIL**: "sent to its Director", D6) |
 | Home desk line, MM | "2 documents waiting on your sign-off in Coiled Tubing" (maintenance only) | PASS |
 | Home desk line, QMS | "N documents waiting on your QMS check." | PASS (**baseline FAIL**: "approved and waiting on your countersignature", D7) |
-| **Maintenance Bulletin filed for a corporate function (QHSE)** | Upload allows it; the record is maintenance by type; QMS says "Now with the Director"; **nobody real can approve it**: the QHSE Function Head is refused, only a "Maintenance Manager of QHSE" could | **FAIL, open (D8)** |
+| **Maintenance Bulletin filed for a corporate function (QHSE)** | On e2e044b: Upload allowed it and nobody real could approve it (the QHSE Function Head is refused). **Fixed afterwards per the owner's decision (D8):** Upload no longer offers it for a function, and the register refuses it | PASS after the D8 fix (covered by maintenance-manager.spec) |
 | Logout / login between stages | not testable: the prototype has no sign-in; switching role and reloading is the stand-in | N/A |
 
 ---
@@ -187,7 +188,7 @@ Phone navigation, per role: the ☰ menu carries Home, Document Search, Field Gl
 | D5 | MEDIUM | The delegate banner sat sticky at `top:0` **over** the fixed top bar and took the role door's clicks (desktop) and covered the logo | Banner fixed under the bar (`top: var(--nav-h)`, below the bar's z-index), like the offline bar | "the delegate banner leaves the top bar usable" |
 | D6 | LOW | Master List bulk Confirm said "sent to its Director" for maintenance documents | Names the Maintenance Manager, or both when mixed | "the Master List's bulk Confirm names the Maintenance Manager…" |
 | D7 | LOW | QMS home line: "approved and waiting on your countersignature" (QMS goes first) | "waiting on your QMS check"; button "Check" | "the QMS home line says the documents wait on its check…" |
-| D8 | **MEDIUM, OPEN** | A Maintenance Bulletin can be filed for a corporate function or centre, where there is no maintenance department. It becomes a maintenance document by type, and **no real person can approve it**: the Function Head is refused | **Not fixed: needs your decision** (section 9) | none yet (a test would pin a behaviour you have not chosen) |
+| D8 | MEDIUM | A Maintenance Bulletin could be filed for a corporate function or centre, where there is no maintenance department. It became a maintenance document by type, and **no real person could approve it**: the Function Head is refused | **Owner's decision (1 Oct): a Maintenance Bulletin is for the maintenance team of every operational segment.** Upload offers it only for operational segments and stops at step 2 with the reason otherwise; the register (`TAQA_STORE.add`) refuses one for any other area | "Maintenance Bulletins belong to operational segments" |
 
 Each regression test above **failed on 1de6bbe and passes on e2e044b**: on the unfixed code these seven tests failed in both projects (14 failures); after the fix the affected spec files ran 328 of 328 passing.
 
@@ -242,7 +243,7 @@ Exit code 0, 17.9 minutes. Local runs use `retries: 0`, so nothing was retried. 
 
 **CI** on the same commit (GitHub Actions, "Frontend regression tests", Chromium only): **443 passed, 0 failed, 1 skipped (444)**, for both the push run and the pull_request run ([run 36908235497](https://github.com/jahdali419-creator/TAQAKnowledgeHub/actions/runs/36908235497)). Before this audit CI ran 428 per project; the difference is the 16 test cases added (section 7).
 
-**Audit scripts (not part of the suite), fixed code:** journeys 46/46 checks passed at 1440×900 and 46/46 at 390×844 (baseline: 45/46 each, the failure being D1); edge cases 29/31 passed, the 2 failures being the open D8. No uncaught page error in any run.
+**Audit scripts (not part of the suite), fixed code:** journeys 46/46 checks passed at 1440×900 and 46/46 at 390×844 (baseline: 45/46 each, the failure being D1); edge cases 29/31 passed, the 2 failures being D8, which was then fixed per the owner's decision and is covered by a new test. No uncaught page error in any run.
 
 **Browsers actually run:** Chromium only (Desktop Chrome 1440×900, and Pixel 7 emulation for mobile-chrome). **Not run:** Firefox, WebKit, mobile-safari. Their browser binaries are not installed in this container (`Executable doesn't exist at /opt/pw-browsers/firefox-…`). CI also runs Chromium only.
 
@@ -252,7 +253,7 @@ Exit code 0, 17.9 minutes. Local runs use `retries: 0`, so nothing was retried. 
 
 | # | Type | Item | Recommendation |
 |---|---|---|---|
-| 1 | **Decision** | D8: Maintenance Bulletin offered for functions and centres, where it has no approver | Offer Maintenance Bulletin only for operational segments (the same rule as the maintenance box) |
+| 1 | **Decided, done** | D8: Maintenance Bulletin offered for functions and centres, where it has no approver | Owner: bulletins are for the maintenance team of every operational segment. Implemented and tested |
 | 2 | **Decision** | A Maintenance Manager can **withdraw and edit** Operations documents in their segment, and a Director can withdraw maintenance documents. `canManage` scopes by area, not department | If withdrawal should follow the approver, add the department check to `canManage` |
 | 3 | UX, LOW | The MM's desk header shows the segment owner's name and "Segment Controller" | Show "Maintenance Manager, <area>" on an MM's desk |
 | 4 | UX, LOW | The MM's desk counters (PENDING, REJECTED) count the whole segment, not the maintenance department | Count what the desk acts on |
@@ -295,4 +296,4 @@ Exit code 0, 17.9 minutes. Local runs use `retries: 0`, so nothing was retried. 
 6. **Persistent register and audit log**, including rejections and resubmissions, retained per TQ-QHSE-S001 / API Q2.
 7. **File storage** for attachments, with virus scanning and the same type and size rules as Upload.
 8. **Notifications** to the next approver (the Maintenance Manager or the Director) instead of the in-browser bell.
-9. A decision on D8 and on withdrawal scope (section 9) before the API encodes either.
+9. The bulletin rule (operational segments only) and a decision on withdrawal scope (section 9) encoded in the API.

@@ -238,6 +238,43 @@ test.describe('delegation from a Maintenance Manager', () => {
   });
 });
 
+// The owner's decision (1 Oct 2026): a Maintenance Bulletin is for the
+// maintenance team of an operational segment. Filed for a function or a
+// centre it had no approver at all, because their head may not sign
+// maintenance documents and they have no Maintenance Manager.
+test.describe('Maintenance Bulletins belong to operational segments', () => {
+  test('Upload will not file a bulletin for a function, and says why; the register refuses it too', async ({ page, gotoApp, setRole, clearAppState }) => {
+    await prime(page, gotoApp, clearAppState, setRole, 'employee');
+    await gotoApp('/upload.html');
+    await page.setInputFiles('#file-input', { name: 'b.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4\n%%EOF\n') });
+    await page.click('#go-2');
+    // A function chosen first: Maintenance Bulletin cannot be picked.
+    await page.selectOption('#seg-select', 'qhse');
+    await expect(page.locator('#doc-type-select option[value="bulletin"]')).toBeDisabled();
+    // An operational segment: it can, and then only operational segments can.
+    await page.selectOption('#seg-select', SEG);
+    await page.selectOption('#doc-type-select', 'bulletin');
+    await expect(page.locator('#seg-select optgroup[label="Corporate Functions"]')).toHaveJSProperty('disabled', true);
+    await expect(page.locator('#seg-select optgroup[label="Operational Segments"]')).toHaveJSProperty('disabled', false);
+
+    // A link that arrives with a function already chosen stops at step 2.
+    // (Cleared first: the page's draft auto-save would restore the choices above.)
+    await clearAppState();
+    await gotoApp('/upload.html?type=bulletin&seg=qhse');
+    await page.setInputFiles('#file-input', { name: 'b.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4\n%%EOF\n') });
+    await page.click('#go-2');
+    await page.click('#go-3');
+    await expect(page.locator('#hint-2')).toContainText('operational segment');
+    await expect(page.locator('#panel-3')).toBeHidden();
+
+    const filed = await page.evaluate(() => [
+      TAQA_STORE.add({ docNumber: 'TQ-QHSE-MB-901', title: 'Bulletin for QHSE', segment: 'qhse', docType: 'bulletin', classification: 'internal' }),
+      !!TAQA_STORE.add({ docNumber: 'TQ-TWS-CTSS-MB-902', title: 'Bulletin for CT', segment: 'coiled-tubing', docType: 'bulletin', classification: 'internal', department: 'maintenance' }),
+    ]);
+    expect(filed).toEqual([null, true]);
+  });
+});
+
 test.describe('wording follows the approver', () => {
   test('QMS confirming a Maintenance Bulletin filed without the department says it goes to the Maintenance Manager', async ({ page, gotoApp, setRole, clearAppState }) => {
     await prime(page, gotoApp, clearAppState, setRole, 'qms');
