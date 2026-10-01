@@ -59,6 +59,7 @@ Everything below lives in the browser today. A user with the developer console c
 | Notification bell computed in the browser | Notification service |
 | Trail reconstructed in the page | Append-only audit trail |
 | Demo names and activity, "Act as this" delegation button, `TAQA_STORE.reset()` | Real data / removal |
+| Field Glossary "Add term": published at once as a "Community" term, this browser only, no review | Proposal → Pending Review → category SME approves or rejects → shared glossary; QMS administers the register (`BUSINESS-RULES.md` §13) |
 
 Full list with classifications (UI only / business rule / data / security): **`AZURE-INTEGRATION-REQUIREMENTS.md` §4 and §9**.
 
@@ -78,7 +79,7 @@ flowchart TB
 ```
 
 ## 7. Business rules that must survive the migration
-Two-step release in that order (QMS first, then the final approver). Department split for final approval **and** for withdraw/edit: Operations documents to the area's Segment Director, maintenance documents (department `maintenance` or type Maintenance Bulletin) to the segment's Maintenance Manager; QMS manages every document but never approves. Area scoping. Maintenance Bulletins only for operational segments. Rejection needs a reason; resubmission is a new filing. Delegation expires (at most 90 days), never escalates, never re-delegates, stays in the grantor's department and area. Lifecycle and signature fields never change by editing. The Auditor changes nothing. **`BUSINESS-RULES.md`**, including §12, where the code and older documents disagree.
+Two-step release in that order (QMS first, then the final approver). Department split for final approval **and** for withdraw/edit: Operations documents to the area's Segment Director, maintenance documents (department `maintenance` or type Maintenance Bulletin) to the segment's Maintenance Manager; QMS manages every document but never approves. Area scoping. Maintenance Bulletins only for operational segments. Rejection needs a reason; resubmission is a new filing. Delegation expires (at most 90 days), never escalates, never re-delegates, stays in the grantor's department and area. Lifecycle and signature fields never change by editing. The Auditor changes nothing. Field Glossary terms are proposed, reviewed by the category's technical SME and only then shared; QMS administers the glossary register but is not automatically its technical approver (`BUSINESS-RULES.md` §13; not built in the prototype). **`BUSINESS-RULES.md`**, including §12, where the code and older documents disagree.
 
 ## 8. State at handover (measured 1 October 2026)
 
@@ -95,7 +96,7 @@ Two-step release in that order (QMS first, then the final approver). Department 
 
 ## 9. Known limitations and open decisions
 - **Not production security** until the API enforces the rules.
-- Open business decisions (owner and QHSE): who gives final approval for non-SOP types whose register approver is someone other than the area holder (`BUSINESS-RULES.md` §12 #1); whether releasing a revision supersedes the old one automatically (§12 #2); whether glossary terms, Ask Expert requests and analytics become shared server-side data; whether a person can hold several roles at once.
+- Open business decisions (owner and QHSE): who gives final approval for non-SOP types whose register approver is someone other than the area holder (`BUSINESS-RULES.md` §12 #1); whether releasing a revision supersedes the old one automatically (§12 #2); whether Ask Expert requests and analytics become shared server-side data (glossary contributions are **decided**: SME-reviewed, shared, `BUSINESS-RULES.md` §13; the category-to-SME mapping is for the business and IT to define); whether a person can hold several roles at once.
 - Open technical decisions (IT): API hosting (Functions, App Service, Container Apps), database, notification channel, built-in platform auth or MSAL, keeping GitHub Pages, packaging only app files for deployment, a proper 404 page.
 - Prototype data: `documents-master.js` holds 585 register entries reconstructed for the prototype; validate against SCORE / QHSE before any migration.
 - The BW Gradual font is commercial: confirm the web licence.
@@ -106,7 +107,7 @@ Two-step release in that order (QMS first, then the final approver). Department 
 3. Stand up DEV hosting under TAQA's tenant with the configuration pattern in §2 and CSP moved to headers.
 4. Build the API from `API-REQUIREMENTS.md`, rules first (approve, confirm, reject, withdraw, delegation) with optimistic concurrency, plus `GET /me`.
 5. Replace `store.js` / `roles.js` internals with API calls, keeping their function names so the pages change least; remove the role switcher.
-6. Add file storage, notifications and the audit trail.
+6. Add file storage, notifications and the audit trail, then the Field Glossary proposal and SME review workflow (`API-REQUIREMENTS.md` §7).
 7. Run `AZURE-UAT-CHECKLIST.md` with real accounts.
 
 ## 11. Document map
@@ -114,7 +115,7 @@ Two-step release in that order (QMS first, then the final approver). Department 
 | Document | Purpose |
 |---|---|
 | `HANDOVER-TO-IT.md` | This entry point |
-| `BUSINESS-RULES.md` | The authoritative rules, and code/document discrepancies |
+| `BUSINESS-RULES.md` | The authoritative rules, code/document discrepancies, and the target Field Glossary workflow (§13) |
 | `AZURE-INTEGRATION-REQUIREMENTS.md` | Architecture, configuration, Entra, frontend/backend boundary, files, notifications, hosting, PWA, error states, baselines |
 | `API-REQUIREMENTS.md` | Proposed API contract |
 | `DATA-MODEL.md` | Prototype objects, Azure entities, server-owned fields, concurrency |

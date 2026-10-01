@@ -73,10 +73,26 @@ Approved content is immutable: a change is a new revision with a new attachment.
 
 The API (or a worker) emits notifications on submit, QMS confirm, approve and reject, to the next actor and the submitter. Delivery channel (email, Teams) is IT's decision; a failed delivery must not undo the workflow step.
 
-## 7. Other
+## 7. Field Glossary contributions
+
+Target behaviour (owner's requirement, `BUSINESS-RULES.md` §13): a user proposes a term, it waits as `pending`, the category's technical SME / discipline owner approves or rejects it, and only approved terms are shared. Glossary administration (QMS) manages the register but is not automatically the technical approver. The prototype's immediate, per-browser "Community" term is **not** the target. Entity: `DATA-MODEL.md` (GlossaryTerm).
+
+| Method | Path | Actor | Rules |
+|---|---|---|---|
+| GET | `/glossary?category=&q=&page=` | any signed-in user | **Approved terms only** |
+| POST | `/glossary/terms` | any signed-in user | Body: term/abbreviation, fullName, definition, category, sourceReference?. Server sets `status=pending`, `submittedBy` (token), `submittedAt` (server clock). `201` with the proposal. Missing term, full name or definition `400`; unknown category `400`. A duplicate of an approved or pending term is flagged (`422`, or accepted with a duplicate warning, as the implementation decides) |
+| GET | `/glossary/terms/mine` | the submitter | Their own proposals and outcomes, including `rejectionReason` |
+| GET | `/glossary/review-queue` | technical SME / discipline owner | `pending` terms in the categories mapped to the actor; glossary administration sees all pending terms for oversight |
+| POST | `/glossary/terms/{id}/approve` | the SME mapped to the term's category | Stage `pending` only; `If-Match`. Sets `status=approved`, `reviewedBy`, `reviewedAt`. Not the category's SME `403`; not pending or stale `409`. Recommended: submitter may not approve their own proposal `403` |
+| POST | `/glossary/terms/{id}/reject` | the SME mapped to the term's category | `{reason}` required; `If-Match`. Sets `status=rejected`, `reviewedBy`, `reviewedAt`, `rejectionReason`. No reason `400`; not the SME `403`; not pending or stale `409` |
+| PATCH | `/glossary/terms/{id}` | glossary administration (QMS) | Administrative fields only: category correction, duplicate link. `status`, `submittedBy/At`, `reviewedBy/At` and `rejectionReason` are server-owned and refused (`422`). A change to an approved definition is a new proposal through review |
+| POST | `/glossary/terms/{id}/withdraw` | glossary administration (QMS) | `{reason}`; sets `status=withdrawn`; the term leaves the shared glossary. Removing a duplicate is a withdrawal that references the surviving term |
+
+Every write appends an audit event. Notify the category's SME on a new proposal and the submitter on approval or rejection; a failed notification must not undo the step.
+
+## 8. Other
 | Area | Endpoint | Note |
 |---|---|---|
 | Search | `GET /documents?q=` or a search service | Must apply the same visibility filter as `/documents` |
-| Glossary | `GET /glossary`, `POST /glossary/terms` | Only if the owner wants shared community terms (today they are per browser) |
 | Ask Expert | `POST /expert-requests` | Only if the owner wants it connected; today nothing is sent |
 | Analytics | tenant-approved telemetry | Today per browser only |

@@ -2,7 +2,7 @@
 
 **Not for now.** Mohammed and IT run this **after** Azure integration, in the UAT environment, with real Entra accounts. Each line passes only if it is observed, not assumed. Record the account used, the document number and the result.
 
-Test accounts needed (one real user each): Employee · QMS · Segment Director of area **A** · Segment Director of area **B** · Maintenance Manager of segment **A** · Maintenance Manager of segment **B** · Auditor · a delegate.
+Test accounts needed (one real user each): Employee · QMS · Segment Director of area **A** · Segment Director of area **B** · Maintenance Manager of segment **A** · Maintenance Manager of segment **B** · Auditor · a delegate · a glossary SME for category **X** (for example Drilling) · a glossary SME for a different category **Y**.
 
 ## 1. Sign-in and identity
 | # | Check | Pass |
@@ -78,3 +78,23 @@ Test accounts needed (one real user each): Employee · QMS · Segment Director o
 | P3 | **Session expiry**: leave a form open past expiry, submit; the user is asked to sign in again and does not lose the form | ☐ |
 | P4 | **Deployment update**: deploy a visible change; an open TechHub tab shows it after one reload; an installed PWA shows it after reopening | ☐ |
 | P5 | Edge and Firefox desktop smoke | ☐ |
+
+## 8. Field Glossary contributions (`BUSINESS-RULES.md` §13)
+The prototype adds a term immediately in one browser; that is **not** what is tested here.
+
+| # | Check | Expected | Pass |
+|---|---|---|---|
+| G1 | **Employee** proposes a term in category X with term, full name, definition and a source reference | Saved as **Pending Review**; the employee sees it under their proposals with that status | ☐ |
+| G2 | Another Employee searches and browses the glossary | The pending term is **not** shown | ☐ |
+| G3 | **SME of X** opens the review queue | The term is there with the real submitter's name and server time | ☐ |
+| G4 | **SME of X** approves it | Status **approved**; `reviewedBy` / `reviewedAt` recorded; the term now appears for every user in the shared glossary | ☐ |
+| G5 | A second proposal in X; **SME of X** rejects it with a reason | Status **rejected**; the submitter sees the reason; the term never appears in the shared glossary | ☐ |
+| G6 | Reject without a reason | Refused | ☐ |
+| G7 | **SME of Y**, an Employee and the Auditor try to approve or reject the X proposal (UI and direct API call) | 403 | ☐ |
+| G8 | **QMS / glossary administration** tries to approve a pending technical term in a category it is not mapped to as SME | 403 (QMS is not automatically the technical approver) | ☐ |
+| G9 | **QMS / glossary administration** corrects an approved term's category, removes a duplicate and withdraws an entry | Allowed; changes appear in the shared glossary; each is in the audit trail | ☐ |
+| G10 | Anyone other than glossary administration tries to recategorise or withdraw an approved term | 403 | ☐ |
+| G11 | A request that sets `status`, `submittedBy`, `reviewedBy`, `reviewedAt` or a timestamp directly | Refused, record unchanged | ☐ |
+| G12 | Two reviewers act on the same pending term at the same time | First succeeds, second gets a conflict | ☐ |
+| G13 | The SME of X is notified of the new proposal; the submitter is notified of approval and of rejection | Received | ☐ |
+| G14 | Editing `localStorage` in the browser cannot add a term to the shared glossary | Nothing changes for other users | ☐ |

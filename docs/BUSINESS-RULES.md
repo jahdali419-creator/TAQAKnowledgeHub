@@ -141,3 +141,38 @@ These fields change **only** through filing, check, approval, rejection and with
 | 3 | Stage name | Final-approval stage is called `director` for both workflows | — | Naming only; the API may rename it (`final`) |
 | 4 | Role descriptions | Fixed during the handover audit: the QMS and Director descriptions (shown on the Master List) said QMS countersigns after the Director | — | **Fixed** (wording only) |
 | 5 | August 2026 documents (`AZURE-MIGRATION-RAFA.md`, `PLATFORM-FUNCTIONAL-SPEC.md`, `DT-HANDOVER-PLAN.md`) | Two-step release, five personas, department rules | Describe a Power Automate approval flow and "approvals change only the screen" | Marked **historical**; this document supersedes them for rules |
+| 6 | Field Glossary contributions | Any user adds a term and it appears **immediately**, in this browser only, as a "Community" term. No review | Production requires a proposal → Pending Review → technical SME approval before a term is shared (§13) | **Target requirement set by the owner (1 Oct 2026)**; prototype behaviour is not the target |
+
+## 13. Field Glossary contributions (target production requirement)
+
+Owner's clarification, 1 October 2026. **Not implemented in the prototype**, and the prototype's behaviour must not be read as the target.
+
+**Prototype today:** Field Glossary's "Add term" form (abbreviation and full name required, definition and field optional) adds the term at once. It is stored in this browser only (`localStorage` `taqa_glossary_custom`), labelled "Community", with no review and nobody else sees it.
+
+**Production (Azure):**
+
+```mermaid
+flowchart LR
+  U[Employee / user proposes a term] --> P[Pending Review]
+  P --> R{Technical SME / discipline owner<br/>for the category}
+  R -- approve --> A[Approved: visible in the shared company glossary]
+  R -- reject with reason --> X[Rejected: submitter sees the reason]
+  A -- glossary administration --> W[Withdrawn]
+```
+
+1. **Propose.** Any signed-in user may propose a new term: term or abbreviation, full name, definition, category, and a source or reference where there is one. A proposal is saved as `pending` and is **not** visible in the shared glossary. The submitter can see their own proposals and their status.
+2. **Review.** The **relevant technical SME / discipline owner** for the term's category reviews it and validates the terminology and the definition. They **approve** or **reject**. A rejection records a reason, which the submitter sees.
+3. **Publish.** Only an `approved` term appears in the shared company glossary, for everyone.
+4. **SME mapping.** Which SME or discipline owner reviews which category (Drilling, Well Control, Production, Safety & HSE, Engineering, Logging & Reservoir, Commercial, Maintenance, Human Resources, Cybersecurity, Document Control, General) is **defined by the business / IT implementation**, not by this prototype.
+5. **QMS / Glossary administration.** Has company-wide administrative capability over the glossary register:
+   - identify and remove duplicates
+   - correct a term's category
+   - manage and withdraw entries (`withdrawn`)
+   - oversee the glossary register
+
+   QMS is **not** automatically the technical approver of every field definition. Technical approval belongs to the category's SME. If QMS also acts as an SME for a category (for example Document Control), that comes from the SME mapping, not from the QMS role.
+6. **Server-side.** Every step (propose, approve, reject, recategorise, withdraw) is enforced by the API from the signed-in identity, recorded with the actor and server time, and written to the audit trail.
+
+Recommended for the implementation to confirm with the owner: a submitter does not review their own proposal; a proposal that duplicates an approved term is flagged to the reviewer; a correction to an approved definition goes through the same review; the built-in terms that ship with the prototype are loaded as `approved` seed data (source "TechHub prototype seed"), with the owner deciding whether SMEs re-validate them.
+
+Entity: `DATA-MODEL.md` (GlossaryTerm). Endpoints: `API-REQUIREMENTS.md` §7. Acceptance: `AZURE-UAT-CHECKLIST.md` §8.

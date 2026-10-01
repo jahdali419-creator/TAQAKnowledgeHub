@@ -65,6 +65,8 @@ The final system must derive identity and permissions from **trusted server-side
 | Segment Director (Function Head, Centre Manager, Corporate Sponsor) | `<GROUP_OR_APP_ROLE_AREA_HOLDER>` | **which area(s)**: one group per area (`<GROUP_HOLDER_{AREA}>`) or an attribute |
 | Maintenance Manager | `<GROUP_OR_APP_ROLE_MAINTENANCE_MANAGER>` | **which operational segment(s)**; must be an operational segment |
 | External Auditor | `<GROUP_OR_APP_ROLE_AUDITOR>`, time-boxed per audit (for example access reviews / guest expiry) | audit window |
+| Glossary reviewer: technical SME / discipline owner (not one of the five document personas) | `<GROUP_GLOSSARY_SME_{CATEGORY}>` or an attribute | **which glossary categories**; mapping defined by the business / IT implementation (`BUSINESS-RULES.md` §13) |
+| Glossary administration | `<GROUP_OR_APP_ROLE_GLOSSARY_ADMIN>` (expected: QMS) | administrative only; not technical approval |
 
 After sign-in the frontend needs (`GET /me`): `userId`, `displayName`, `roles[]`, `areas[]` for scoped roles, department where relevant, active delegations the user may act under, and the capability flags. If a user holds more than one role, IT and the owner must decide whether TechHub asks which hat they are wearing or merges capabilities; the prototype assumes one role at a time.
 
@@ -98,6 +100,7 @@ Delegation must reference real users: the delegate signs in as themselves and th
 | Concurrency (stale tab) | `store.js` re-reads before writing | **B** (ETag / version, `DATA-MODEL.md` §3) |
 | Desk queues, counters, "Not your area" messages, hidden buttons, refusal pages | pages | **A** (convenience; the API must refuse regardless) |
 | Upload file type / size checks | `upload.html` | **A** in the browser, **D** at the API |
+| Glossary contributions: propose → pending → SME approve/reject → shared; admin recategorise/withdraw | `glossary.html` adds a "Community" term immediately, this browser only (**not** the target) | **B + C + D** (`BUSINESS-RULES.md` §13) |
 | Bookmarks, theme, pins, drafts, tour | `localStorage` | **A** |
 
 Nothing in `roles.js` or `store.js` is a security control. `roles.js` says so in its first lines; the cybersecurity review pack says so too.
@@ -116,7 +119,7 @@ The prototype records a file's name, size and a browser fingerprint; **the file 
 - Metadata: name, type, size, SHA-256, uploader, time, scan result. Every upload and controlled download is an audit event.
 
 ## 7. Notifications
-Today the bell is computed in the browser from the register; nothing is emailed or posted. Required: on submit → QMS; on QMS confirm → the area's Segment Director, or for a maintenance document the segment's Maintenance Manager (and any active delegate); on approve or reject → the submitter. Failed delivery must be retried or logged, never roll back the workflow step. Channel (email, Teams) is IT's choice.
+Today the bell is computed in the browser from the register; nothing is emailed or posted. Required: on submit → QMS; on QMS confirm → the area's Segment Director, or for a maintenance document the segment's Maintenance Manager (and any active delegate); on approve or reject → the submitter. Failed delivery must be retried or logged, never roll back the workflow step. Channel (email, Teams) is IT's choice. Field Glossary (`BUSINESS-RULES.md` §13): a new proposal → the category's SME; approval or rejection → the submitter.
 
 ## 8. Hosting and routing
 - **Measured:** every important page opened by direct URL and refreshed, at 1440 and 390 px: Home, segment (Operations and Maintenance side), Upload, approval desk (QMS, Director, Maintenance Manager), document page, Master List (QMS, Auditor), Search, Glossary, Ask Expert, Form, Analytics, About, offline page. **38 of 38 loaded, no 4xx asset requests, no script errors.**
@@ -141,6 +144,7 @@ Today the bell is computed in the browser from the register; nothing is emailed 
 | Demo people and activity (owner and contributor names, sample activity) | `dashboard.html` `DASH_DATA`, `segments-data.js` | Real data from the directory or remove |
 | Register shipped as a 259 KB script | `documents-master.js` | API; keep only as seed data for migration |
 | Ask Expert shows a reference number but sends nothing ("once this connects to a ticketing system") | `support-ticket.html` | Connect or relabel |
+| "Add term" publishes a glossary term at once as "Community", in this browser only, with no review | `glossary.html` `submitTerm` | Proposal with SME review (`BUSINESS-RULES.md` §13; `API-REQUIREMENTS.md` §7). Relabel the form "Propose a term" when connected |
 | Analytics count this browser only | `analytics.html` | Tenant telemetry |
 | Document preview "Preview not connected" | `viewer.html` | File storage |
 | `console.info('[upload] record to POST', rec)` | `upload.html` | Keep as integration aid or remove |

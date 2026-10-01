@@ -16,7 +16,7 @@ What the frontend holds today, where, and what each object should become. No dat
 | Current role and area | `localStorage` `taqa-demo-role`, `taqa-demo-area` (the role switcher) | **Entra ID claims / group mapping, never the browser** |
 | Notification read-state | `localStorage` `taqa-ack-outcomes-v1`, `taqa-read-docs` | Database (per user) |
 | File fingerprints for duplicate warnings | `localStorage` `taqa-doc-hashes` | Computed and stored server-side with the file |
-| Custom glossary terms | `localStorage` `taqa_glossary_custom` | Database if the owner wants shared terms (decision) |
+| Custom glossary terms ("Community", added immediately, no review) | `localStorage` `taqa_glossary_custom` | Database: **GlossaryTerm** with a review workflow (§2; `BUSINESS-RULES.md` §13). The prototype's immediate add is not the target |
 | Usage analytics | `localStorage` `taqa-analytics` (this browser only) | Tenant-approved telemetry (decision) |
 | Per-user conveniences: bookmarks, theme, pins, form drafts, tour/install flags, recent docs, error log | `localStorage` `taqa-bookmarks`, `taqa-theme-v3`, `taqa-pins`, `taqa-draft-*`, `taqa-tour-done`, `taqa-install-dismissed`, `taqa-recent-docs`, `taqa-errors`, `taqa-last-sync`, `taqa-strata-bed` | May stay in the browser (not records), or move to a user-preferences store |
 | Area page content (contributors, descriptions, sample activity) | `segments-data.js`, `DASH_DATA` in `dashboard.html` | Demo fixtures: replace with real data or remove (see `AZURE-INTEGRATION-REQUIREMENTS.md` §9) |
@@ -79,9 +79,32 @@ The prototype stores signers as **role labels** ("Segment Director"); production
 ### Notification
 `{ id, recipient (user ref), kind: awaiting_check|awaiting_approval|approved|returned, docNumber, createdAt, readAt? }`. The prototype derives these in the browser from the register (`shared.js` bell).
 
+### GlossaryTerm
+Target requirement (`BUSINESS-RULES.md` §13); not implemented in the prototype. One row per proposed term.
+
+| Field | Type | Owner | Notes |
+|---|---|---|---|
+| `id` | string | server | |
+| `term` | string | submitter | Term or abbreviation (prototype field `abbr`) |
+| `fullName` | string | submitter | Prototype `full` |
+| `definition` | string | submitter | Prototype `def`; validated by the SME |
+| `category` | category key | submitter, correctable by glossary administration | `drilling`, `wellcontrol`, `production`, `safety`, `engineering`, `logging`, `commercial`, `maintenance`, `general`, `doccontrol`, `hr`, `cybersecurity`. The prototype's `custom` ("Community") is not a production category |
+| `sourceReference` | string? | submitter | Source or reference, if applicable (standard, manual, document number) |
+| `submittedBy` | user ref | **server** (token) | |
+| `submittedAt` | datetime | **server** (clock) | |
+| `status` | `pending` / `approved` / `rejected` / `withdrawn` | **server** (transition) | Only `approved` is visible in the shared glossary |
+| `reviewedBy` | user ref? | **server** (token) | The technical SME / discipline owner who approved or rejected |
+| `reviewedAt` | datetime? | **server** (clock) | |
+| `rejectionReason` | string? | reviewer, via reject | Required on reject |
+| `duplicateOf` | id? | glossary administration | Optional: links a removed duplicate to the surviving term |
+| `withdrawnBy`, `withdrawnAt`, `withdrawalReason` | | **server** / glossary administration | Optional, for the `withdrawn` transition |
+| version token | | server | Optimistic concurrency, as for documents (§3) |
+
+The SME-to-category mapping is configuration owned by the business / IT implementation (for example an Entra group per category). Every transition is an audit event.
+
 ## 3. Concurrency
 
 Two people load the same draft and both act. Only the first valid transition may succeed; the second must get a **conflict**, not overwrite it.
 - Every document carries a version token (ETag, row version or equivalent). Every write sends the token it read (`If-Match`). The API applies the transition only if the token and the expected stage still match, atomically, and returns **409 Conflict** (or 412) otherwise.
 - The prototype approximates this by re-reading storage before each write and re-checking the stage (`store.js` `fresh()`), so a stale tab is refused ("You cannot approve this document."). That is a single-browser safeguard, not a substitute.
-- Delegation revoke/grant and withdrawal need the same protection.
+- Delegation revoke/grant and withdrawal need the same protection, and so do glossary review transitions (two SMEs acting on the same pending term).
