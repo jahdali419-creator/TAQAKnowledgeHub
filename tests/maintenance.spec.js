@@ -10,7 +10,7 @@ const { test, expect } = require('./helpers/fixtures');
 const { TAQA_MASTER_DOCS: DOCS, TAQA_DOC_LOOKUPS: L } = require('../documents-master.js');
 
 const SEGMENTS = Object.keys(L.segments).filter((k) => L.segments[k].group === 'segment');
-const SHELVES = ['policies', 'sops', 'manuals', 'forms', 'bulletins', 'alerts', 'lessons'];
+const SHELVES = ['policies', 'sops', 'manuals', 'forms', 'bulletins', 'alerts', 'lessons', 'software'];
 
 async function start(page, gotoApp, setRole, clearAppState, role = 'employee', area = 'coiled-tubing') {
   await gotoApp('/index.html');
@@ -124,6 +124,39 @@ test.describe('approval', () => {
     expect(await page.evaluate((n) => TAQA_APPROVAL.canApprove(TAQA_STORE.findDoc(n)), dn)).toBe(false);
     await setRole('owner', 'coiled-tubing');
     expect(await page.evaluate((n) => TAQA_APPROVAL.canApprove(TAQA_STORE.findDoc(n)), dn)).toBe(true);
+  });
+});
+
+test.describe('software', () => {
+  test('software filed by maintenance is on the Maintenance shelf only; untagged software stays on Operations', async ({ page, gotoApp, setRole, clearAppState }) => {
+    await start(page, gotoApp, setRole, clearAppState, 'qms');
+    await page.evaluate(() => {
+      TAQA_STORE.add({ docNumber: 'MNT-SW-01', title: 'Injector Diagnostic Tool', segment: 'coiled-tubing', docType: 'software',
+        classification: 'internal', revision: '1.0', department: 'maintenance', status: 'asset' });
+    });
+    await gotoApp('/segment.html?id=coiled-tubing&dept=maintenance&tab=software');
+    await expect(page.locator('#panel-software')).toContainText('Injector Diagnostic Tool');
+    await gotoApp('/segment.html?id=coiled-tubing&dept=operations');
+    await expect(page.locator('#panel-software')).not.toContainText('Injector Diagnostic Tool');
+  });
+
+  test('an empty maintenance Software shelf says so and uploads as maintenance software', async ({ page, gotoApp, setRole, clearAppState }) => {
+    await start(page, gotoApp, setRole, clearAppState, 'qms');
+    await gotoApp('/segment.html?id=drilling&dept=maintenance&tab=software');
+    await expect(page.locator('#panel-software .empty-state h3')).toHaveText('No maintenance software for Drilling Services yet');
+    await expect(page.locator('#panel-software a.empty-state-upload')).toHaveAttribute('href', 'upload.html?type=software&seg=drilling&dept=maintenance');
+  });
+
+  test('the maintenance box is offered for software', async ({ page, gotoApp, setRole, clearAppState }) => {
+    await start(page, gotoApp, setRole, clearAppState, 'qms');
+    await gotoApp('/upload.html?seg=coiled-tubing&dept=maintenance');
+    await page.setInputFiles('#file-input', { name: 'tool.zip', mimeType: 'application/zip', buffer: Buffer.from('PK') });
+    await page.click('#go-2');
+    await page.selectOption('#doc-type-select', 'software');
+    await page.selectOption('#seg-select', 'coiled-tubing');
+    await expect(page.locator('#dept-row')).toBeVisible();
+    await expect(page.locator('#dept-maint')).toBeChecked();
+    expect(await page.evaluate(() => buildRecord().department)).toBe('maintenance');
   });
 });
 

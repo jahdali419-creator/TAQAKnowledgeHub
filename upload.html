@@ -1112,14 +1112,14 @@ function submitUpload(e) {
 /* Everything the register would store, assembled from the form. A field the
    form cannot answer is left null rather than guessed, which is the honest
    way to hand a gap to the people building the back end. */
-/* The maintenance box applies to an operational segment's own documents only:
-   not a policy (company wide), not software, and not a function or centre,
+/* The maintenance box applies to an operational segment's own documents and
+   software: not a policy (company wide), and not a function or centre,
    which have no maintenance department in this model. */
 function deptApplies(){
   var L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : null;
   var seg = (document.getElementById('seg-select') || {}).value;
   var type = (document.getElementById('doc-type-select') || {}).value;
-  return !!(L && seg && L.segments[seg] && L.segments[seg].group === 'segment' && type !== 'policy' && type !== 'software');
+  return !!(L && seg && L.segments[seg] && L.segments[seg].group === 'segment' && type !== 'policy');
 }
 function deptMaintenance(){
   var b = document.getElementById('dept-maint');

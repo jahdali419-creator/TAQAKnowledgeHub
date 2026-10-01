@@ -1479,7 +1479,9 @@ const SEGMENTS = {
       if (!live && !asset) return;
       var k = BUCKET[d.docType];
       if (!k) return;
-      var mnt = (d.department === 'maintenance' || d.docType === 'bulletin') && d.docType !== 'software';
+      // Software filed by maintenance (diagnostic tools, calibration programs)
+      // sits on the maintenance side with the rest of its library.
+      var mnt = d.department === 'maintenance' || d.docType === 'bulletin';
       if (mnt) { mdocs[k].push(d.docNumber ? d.docNumber + '  ' + d.title : d.title); return; }
       if (d.docType === 'standard') nStd++; else if (d.docType === 'policy') nPol++;
       docs[k].push(d.docNumber ? d.docNumber + '  ' + d.title : d.title);
@@ -1499,7 +1501,7 @@ const SEGMENTS = {
       alerts:docs.alerts.length, lessons:docs.lessons.length, software:docs.software.length,
       docs: docs,
       mnt: { sops:mdocs.sops.length, manuals:mdocs.manuals.length, forms:mdocs.forms.length, bulletins:mdocs.bulletins.length,
-             policies:mdocs.policies.length, alerts:mdocs.alerts.length, lessons:mdocs.lessons.length, software:0, docs: mdocs }
+             policies:mdocs.policies.length, alerts:mdocs.alerts.length, lessons:mdocs.lessons.length, software:mdocs.software.length, docs: mdocs }
     };
   });
 })();
@@ -1651,10 +1653,11 @@ document.querySelectorAll('#tab-bar .tab-btn').forEach(function(btn){
 // supervisor moving from Drilling to Slickline finds the same shelves in the
 // same place, and an empty shelf says so rather than vanishing. Functions and
 // centres keep only the tabs they use, because their libraries are different
-// in kind (a function has no SOPs for a well site). Software is not a
-// controlled document, so it only appears where there is some.
+// in kind (a function has no SOPs for a well site). On the operations side
+// Software only appears where there is some; every maintenance side has it.
 var SEG_GROUP = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments[segId] || {}).group;
-var CORE_TABS = ['policies','sops','manuals','forms','alerts','lessons'].concat(DEPT === 'maintenance' ? ['bulletins'] : []);
+// Every maintenance department also keeps a Software shelf, even when empty.
+var CORE_TABS = ['policies','sops','manuals','forms','alerts','lessons'].concat(DEPT === 'maintenance' ? ['bulletins','software'] : []);
 document.querySelectorAll('#tab-bar .tab-btn').forEach(function(btn){
   var t = btn.dataset.tab;
   if (!t || t === 'all' || (seg[t] || 0)) return;
@@ -1962,7 +1965,12 @@ function renderSoftware(items){
   if(el)el.innerHTML=SKEL+SKEL;
   setTimeout(()=>{
     if(!items||items.length===0){
-      if(el)el.innerHTML=`<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,187,182,0.2);font-family:'BwGradual','Urbanist',sans-serif;">ZIP</div><h3>No software uploaded yet</h3><p>Upload installer packages or tools relevant to this segment.</p><a href="upload.html" class="empty-state-upload">+ Upload Software</a></div>`;
+      // On a maintenance side the shelf is the department's own, and the
+      // upload arrives with the segment, the type and Maintenance chosen.
+      const mntSw=DEPT==='maintenance', sq=encodeURIComponent(segId);
+      if(el)el.innerHTML=`<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,187,182,0.2);font-family:'BwGradual','Urbanist',sans-serif;">ZIP</div>`+
+        (mntSw?`<h3>No maintenance software for ${escHtml(seg.name)} yet</h3><p>Tools and programs the ${escHtml(seg.name)} maintenance department uses appear here once they are uploaded.</p><a href="upload.html?type=software&seg=${sq}&dept=maintenance" class="empty-state-upload">+ Upload maintenance software</a>`
+              :`<h3>No software uploaded yet</h3><p>Upload installer packages or tools relevant to this segment.</p><a href="upload.html?type=software&seg=${sq}" class="empty-state-upload">+ Upload Software</a>`)+`</div>`;
       if(vis)vis.textContent='0';return;
     }
     _renderPage('software');
