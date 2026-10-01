@@ -1116,6 +1116,10 @@ document.addEventListener('click',function(e){
     else paint();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arrive); else arrive();
+  /* On a reload or Back the browser puts the last area back after this has
+     run, without a change event, so the department and the card stayed
+     hidden under a chosen area. Paint again once it has. */
+  window.addEventListener('pageshow', function(){ setTimeout(paint, 0); });
 
   /* The tips and response times sit open beside the form on a wide screen and
      fold to one line under it on a phone. */

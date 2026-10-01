@@ -1019,10 +1019,19 @@ document.addEventListener('keydown',function(e){
     return document.querySelectorAll('input:not([type=file]):not([type=submit]):not([type=button]),select,textarea');
   }
 
+  /* A group of radios shares one name, so it is saved once, as the value of
+     the one that is checked, and restored by checking that one. Saving each
+     radio's value under the shared name used to write the last radio's value
+     into every radio on restore: Urgency read "low" four times, and the Ask
+     Expert department read "maintenance" twice. */
   function saveDraft(){
     var data={};
     getFields().forEach(function(f){
-      if(f.id || f.name) data[f.id||f.name]=f.value;
+      var k=f.id||f.name;
+      if(!k) return;
+      if(f.type==='radio'){ k=f.name||k; if(f.checked) data[k]=f.value; else if(!(k in data)) data[k]=''; return; }
+      if(f.type==='checkbox'){ data[k]=f.checked?'1':''; return; }
+      data[k]=f.value;
     });
     try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(e){}
   }
@@ -1031,10 +1040,22 @@ document.addEventListener('keydown',function(e){
     var raw; try{ raw=localStorage.getItem(KEY); }catch(e){ return; }
     if(!raw) return;
     var data; try{ data=JSON.parse(raw); }catch(e){ return; }
+    var changed=[];
     getFields().forEach(function(f){
+      if(f.type==='radio'){
+        var v=data[f.name||f.id];
+        if(v && f.value===v && !f.checked){ f.checked=true; changed.push(f); }
+        return;
+      }
       var k=f.id||f.name;
-      if(k && data[k] != null && data[k] !== '') f.value=data[k];
+      if(!k || data[k]==null || data[k]==='') return;
+      if(f.type==='checkbox'){ if(!f.checked){ f.checked=true; changed.push(f); } return; }
+      if(f.value!==data[k]){ f.value=data[k]; changed.push(f); }
     });
+    // Ask Expert draws who answers from the area and the department; tell it
+    // they changed, as if the person had chosen them, so the card and the
+    // Operations | Maintenance choice match what was put back.
+    if(isTicket) changed.forEach(function(f){ f.dispatchEvent(new Event('change',{bubbles:true})); });
     if(Object.keys(data).some(function(k){return data[k]!=='';})){
       if(window.showToast) window.showToast('Draft restored','info');
     }

@@ -151,6 +151,24 @@ test.describe('Ask Expert', () => {
     await expect(page.locator('#ask-to-in .ask-n')).not.toContainText('Maintenance');
   });
 
+  test('the saved draft brings back the area and department, and every button keeps its own value', async ({ page, gotoApp, setRole, clearAppState }) => {
+    await start(page, gotoApp, setRole, clearAppState);
+    await gotoApp('/support-ticket.html');
+    await page.selectOption('#ticket-area', 'coiled-tubing');
+    await page.locator('#dept-mnt-opt').click();
+    await page.locator('#pill-high').click();
+    await page.reload();
+
+    await expect(page.locator('#ticket-area')).toHaveValue('coiled-tubing');
+    await expect(page.locator('#dept-group')).toBeVisible();
+    await expect(page.locator('#dept-mnt-opt input')).toBeChecked();
+    await expect(page.locator('#ask-to-in .ask-n')).toHaveText('Coiled Tubing Maintenance Manager');
+    // The draft used to write the last radio's value into all of them.
+    expect(await page.$$eval('input[name="dept"]', (rs) => rs.map((r) => r.value))).toEqual(['operations', 'maintenance']);
+    expect(await page.$$eval('input[name="priority"]', (rs) => rs.map((r) => r.value))).toEqual(['critical', 'high', 'medium', 'low']);
+    await expect(page.locator('#pill-high input')).toBeChecked();
+  });
+
   test('the Maintenance page sends you there already addressed', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, setRole, clearAppState, 'employee', 'drilling');
     await gotoApp('/maintenance.html');
