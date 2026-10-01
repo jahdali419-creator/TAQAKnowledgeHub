@@ -1,0 +1,219 @@
+[
+  {
+    "id": "E-R1",
+    "step": "Employee files a maintenance manual from a Maintenance tab link (?dept=maintenance)",
+    "expected": "box pre-ticked; department=maintenance",
+    "actual": "box={\"checked\":true,\"disabled\":false} dept=maintenance TQ-TWS-CTSS-WI-010",
+    "result": "PASS"
+  },
+  {
+    "id": "E-R2",
+    "step": "MM rejects at the final step (reason < 20 chars blocked; double-click confirm)",
+    "expected": "rejected once, at stage director, by Maintenance Manager",
+    "actual": "shortBlocked=true rejected=true stage=director by=Maintenance Manager status=draft",
+    "result": "PASS"
+  },
+  {
+    "id": "E-R2",
+    "step": "Refresh the MM desk",
+    "expected": "rejected document is gone from the queue",
+    "actual": "cards=0",
+    "result": "PASS"
+  },
+  {
+    "id": "E-R3",
+    "step": "Employee sees the return and reason in \"Your submissions\"",
+    "expected": "Returned by Maintenance Manager with the reason",
+    "actual": "AUDIT-REJ-202610011752 TQ-TWS-CTSS-WI-010 · filed 01 Oct 2026 Returned Returned by Maintenance Manager: “Torque values in section 5 do not match the OEM manual. Please revise.”. Revise it and file it again.",
+    "result": "PASS"
+  },
+  {
+    "id": "E-R3",
+    "step": "Viewer banner for the returned draft",
+    "expected": "Returned by … reason … file it again",
+    "actual": "Returned, not in force Returned by Maintenance Manager on 01 Oct 2026: “Torque values in section 5 do not match the OEM manual. Please revise.”. Revise it and file it again from Upload. Search the documents.",
+    "result": "PASS"
+  },
+  {
+    "id": "E-R4",
+    "step": "Resubmission: revised document filed again",
+    "expected": "new record waits on QMS; the returned one stays out of every queue",
+    "actual": "new=TQ-TWS-CTSS-WI-011 stage=qms; old stage=null; QMS cards with that title=1",
+    "result": "PASS"
+  },
+  {
+    "id": "E-R4",
+    "step": "console: QMS tries to countersign/approve the returned draft",
+    "expected": "refused",
+    "actual": "[{\"ok\":false,\"error\":\"You cannot countersign this document.\"},{\"ok\":false,\"error\":\"You cannot approve this document.\"}]",
+    "result": "PASS"
+  },
+  {
+    "id": "E-R5",
+    "step": "QMS rejects a maintenance document at its own step",
+    "expected": "rejectedAtStage=qms; the MM never sees it",
+    "actual": "stage=qms by=QMS / Document Controller",
+    "result": "PASS"
+  },
+  {
+    "id": "E-T1",
+    "step": "Same MM desk in two tabs: approve in A, then in stale B",
+    "expected": "B refused; A's approval stands",
+    "actual": "B=\"✕ You cannot approve this document.\" approvedAt unchanged=true",
+    "result": "PASS"
+  },
+  {
+    "id": "E-D1",
+    "step": "MM grants a delegation from the desk",
+    "expected": "created; fromRole=maintenance; fromName names the MM, not the Director",
+    "actual": "box=true fromRole=maintenance fromName=\"Mohammed Jahdali\" segment=coiled-tubing approval=true",
+    "result": "FAIL"
+  },
+  {
+    "id": "E-D2",
+    "step": "\"Act as this\" (the delegate)",
+    "expected": "orange banner names the grantor",
+    "actual": "Delegate for Mohammed Jahdali until 2026-10-15 Stop",
+    "result": "PASS"
+  },
+  {
+    "id": "E-D3",
+    "step": "Delegate desk",
+    "expected": "maintenance document yes, Operations document no",
+    "actual": "maint cards=1 ops cards=0",
+    "result": "PASS"
+  },
+  {
+    "id": "E-D3",
+    "step": "Delegate approves the maintenance SOP",
+    "expected": "approvedBy \"<delegate> (delegate for <grantor>)\"",
+    "actual": "Deputy Maint Engineer (delegate for Mohammed Jahdali)",
+    "result": "PASS"
+  },
+  {
+    "id": "E-D3",
+    "step": "Grantor named in the signature",
+    "expected": "the Maintenance Manager",
+    "actual": "Deputy Maint Engineer (delegate for Mohammed Jahdali)",
+    "result": "FAIL"
+  },
+  {
+    "id": "E-D4",
+    "step": "console: delegate approve() on the Operations SOP",
+    "expected": "refused (delegation is in the MM's department)",
+    "actual": "{\"ok\":false,\"error\":\"You cannot approve this document.\"}",
+    "result": "PASS"
+  },
+  {
+    "id": "E-D4",
+    "step": "Delegate re-delegating",
+    "expected": "not allowed (delegate=false; box hidden)",
+    "actual": "delegate=false box=false",
+    "result": "PASS"
+  },
+  {
+    "id": "E-D5",
+    "step": "Role door clickable while acting as a delegate (desktop)",
+    "expected": "clickable",
+    "actual": "clickable=false; element on top of the door=deleg-bar",
+    "result": "FAIL"
+  },
+  {
+    "id": "E-D5",
+    "step": "Switch role MM -> Director while acting",
+    "expected": "delegation dropped, no banner",
+    "actual": "{\"acting\":null,\"banner\":false}",
+    "result": "PASS"
+  },
+  {
+    "id": "E-D6",
+    "step": "Director desk: is the MM's delegation listed (and revocable) there?",
+    "expected": "not listed: it is not the Director's grant",
+    "actual": "listed=true revoke buttons=1",
+    "result": "FAIL"
+  },
+  {
+    "id": "E-D7",
+    "step": "Expired delegation",
+    "expected": "marked expired, no \"Act as this\", current() null",
+    "actual": "text=\"Expired Deputy coiled-tubing, every type · until 2020-01-05 · old · expired Revoke\" act=0 current=null",
+    "result": "PASS"
+  },
+  {
+    "id": "E-D8",
+    "step": "Area switch while acting",
+    "expected": "delegation dropped",
+    "actual": "acting=null",
+    "result": "PASS"
+  },
+  {
+    "id": "E-D9",
+    "step": "Director's delegate: what can they approve?",
+    "expected": "Operations documents only",
+    "actual": "[[\"TQ-TWS-CTSS-SOP-015\",false,true]]",
+    "result": "PASS"
+  },
+  {
+    "id": "E-F1",
+    "step": "Upload offers Maintenance Bulletin for a function (QHSE)",
+    "expected": "not offered, or routed to a real approver",
+    "actual": "filed TQ-QHSE-MB-001; maintenance row shown=false; dept=null; isMaintenance=true; approver=Maintenance Manager",
+    "result": "FAIL"
+  },
+  {
+    "id": "E-F2",
+    "step": "Who can release a bulletin filed for QHSE?",
+    "expected": "the QHSE Function Head, or nobody should be able to file it",
+    "actual": "QMS message=\"✓ Checked. Now with the Director for final approval\"; canApprove={\"owner@qhse\":false,\"maintenance@qhse\":true,\"maintenance@coiled-tubing\":false}",
+    "result": "FAIL"
+  },
+  {
+    "id": "E-L1",
+    "step": "Bulletin with department=null (identified by type only): QMS desk wording",
+    "expected": "card and result both name the Maintenance Manager",
+    "actual": "preview=\"Check the number against 5.3, the revision and the dates. Confirming sends it to Maintenance Manager for final approval.\" result=\"✓ Checked. Now with the Director for final approval\"",
+    "result": "FAIL"
+  },
+  {
+    "id": "E-L2",
+    "step": "Untagged bulletin reaches the MM desk",
+    "expected": "1 card",
+    "actual": "cards=1",
+    "result": "PASS"
+  },
+  {
+    "id": "E-L3",
+    "step": "Viewer \"Approval authority\" for the untagged bulletin",
+    "expected": "Maintenance Manager",
+    "actual": "Maintenance Manager",
+    "result": "PASS"
+  },
+  {
+    "id": "E-B1",
+    "step": "Master List bulk \"Confirm\" on a maintenance SOP: wording",
+    "expected": "says it goes to the Maintenance Manager",
+    "actual": "row found=true; confirm=\"1 document will be confirmed as checked by QMS and sent to its Director for approval. It is not in force until the Director approves.\"; toast=\"Confirmed 1 document. It now waits on the Director.\"; stage=director",
+    "result": "FAIL"
+  },
+  {
+    "id": "E-H1",
+    "step": "Home desk line for the MM",
+    "expected": "counts only maintenance documents waiting",
+    "actual": "MAINTENANCE MANAGER 2 documents waiting on your sign-off in Coiled Tubing, and 7 past review there. Approve",
+    "result": "FAIL"
+  },
+  {
+    "id": "E-H2",
+    "step": "Home desk line for QMS",
+    "expected": "QMS checks first: no \"approved and waiting on your countersignature\"",
+    "actual": "QMS / DOCUMENT CONTROLLER 12 documents approved and waiting on your countersignature. Countersign",
+    "result": "FAIL"
+  },
+  {
+    "id": "E-ERR",
+    "step": "Uncaught page errors during the run",
+    "expected": "0",
+    "actual": "0",
+    "result": "PASS"
+  }
+]

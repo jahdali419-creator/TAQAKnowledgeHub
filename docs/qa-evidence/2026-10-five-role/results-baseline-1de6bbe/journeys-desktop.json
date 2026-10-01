@@ -1,0 +1,324 @@
+[
+  {
+    "id": "D-O1",
+    "step": "Employee: role via the door",
+    "expected": "employee",
+    "actual": "employee",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O1",
+    "step": "Employee files an Operations SOP through Upload (box left unticked)",
+    "expected": "1 record, toast names QMS then Director",
+    "actual": "1 record TQ-TWS-CTSS-SOP-013; maintenance box shown=true; toast=\"Queued as TQ-TWS-CTSS-SOP-013. Next: QMS checks it, then the Director approves it. It is in force only after both. Track it under Your submissions below.\"",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O1",
+    "step": "Record after filing",
+    "expected": "draft / qms / Employee / not maintenance",
+    "actual": "draft/qms/Employee/maint=false/approver=Relevant Operation Director",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O2",
+    "step": "Director desk before QMS check (wrong stage)",
+    "expected": "no card for it",
+    "actual": "cards=0",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O3",
+    "step": "QMS desk shows it",
+    "expected": "1 card, \"Submitted by Employee\"",
+    "actual": "heading=\"Awaiting Your QMS Check\" cards=1",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O3",
+    "step": "QMS clicks Confirm",
+    "expected": "stage=director, message names the Director",
+    "actual": "\"✓ Checked. Now with the Director for final approval\" stage=director by=QMS / Document Controller",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O4",
+    "step": "Maintenance Manager (same segment) desk",
+    "expected": "no card for an Operations SOP",
+    "actual": "refused=false cards=0 heading=\"Awaiting Your Approval\"",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O4",
+    "step": "console: Maintenance Manager calls approve() on the Operations SOP",
+    "expected": "refused",
+    "actual": "{\"ok\":false,\"error\":\"You cannot approve this document.\"}",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O4",
+    "step": "console: Maintenance Manager calls reject() on it",
+    "expected": "refused",
+    "actual": "{\"ok\":false,\"error\":\"You cannot reject this document.\"}",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O5",
+    "step": "Director desk",
+    "expected": "1 card",
+    "actual": "heading=\"Awaiting Your Approval\" cards=1",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O5",
+    "step": "Director double-clicks Approve",
+    "expected": "current, approvedBy Segment Director, once",
+    "actual": "current by=Segment Director at=2026-10-01T17:27:23.080Z",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O5",
+    "step": "console: approve again",
+    "expected": "refused, approvedAt unchanged",
+    "actual": "{\"ok\":false,\"error\":\"You cannot approve this document.\"}",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O5",
+    "step": "Refresh the desk",
+    "expected": "card gone",
+    "actual": "cards=0",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O5",
+    "step": "Back to the desk, then Forward",
+    "expected": "no stale card on Back",
+    "actual": "cards on Back=0, Forward url=/viewer.html?doc=TQ-TWS-CTSS-SOP-013&seg=coiled-tubing",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O6",
+    "step": "Published: Employee sees it on Operations shelf only",
+    "expected": "Operations yes, Maintenance no",
+    "actual": "ops=true mnt=false",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O6",
+    "step": "Viewer as Employee",
+    "expected": "Current, OK to use",
+    "actual": "Current, OK to use",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O7",
+    "step": "Auditor opens the Master List and finds it",
+    "expected": "opens; row present",
+    "actual": "refused=false found=true",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O7",
+    "step": "Auditor reads the trail",
+    "expected": "Employee, QMS, Segment Director",
+    "actual": "Employee Submitted for approval 01 Oct 2026, 17:26 QMS / Document Controller QMS conformance check 01 Oct 2026, 17:26 Segment Director Final approval · Relevant Operation Director 01 Oct 2026, 17:27",
+    "result": "PASS"
+  },
+  {
+    "id": "D-O7",
+    "step": "console: Auditor withdraw/edit/file",
+    "expected": "all refused",
+    "actual": "[null,false,null]",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M1",
+    "step": "Employee files a Maintenance SOP (ticks \"Maintenance department document\")",
+    "expected": "1 record, department=maintenance",
+    "actual": "1 TQ-TWS-CTSS-SOP-014 dept=maintenance box={\"checked\":false,\"disabled\":false} toast=\"Queued as TQ-TWS-CTSS-SOP-014. Next: QMS checks it, then the Director approves it. It is in force only after both. Track it under Your submissions below.\"",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M1",
+    "step": "Upload toast for a maintenance document",
+    "expected": "names the Maintenance Manager as final approver",
+    "actual": "Queued as TQ-TWS-CTSS-SOP-014. Next: QMS checks it, then the Director approves it. It is in force only after both. Track it under Your submissions below.",
+    "result": "FAIL"
+  },
+  {
+    "id": "D-M1",
+    "step": "\"Your submissions\" line",
+    "expected": "Waiting on QMS check",
+    "actual": "AUDIT-MNT-desktop-202610011725 TQ-TWS-CTSS-SOP-014 · filed 01 Oct 2026 Waiting on QMS check",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M1",
+    "step": "Record after filing",
+    "expected": "draft/qms, approver Maintenance Manager",
+    "actual": "draft/qms/approver=Maintenance Manager",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M2",
+    "step": "Maintenance Manager desk before QMS (wrong stage)",
+    "expected": "no card",
+    "actual": "cards=0 heading=\"Awaiting Your Approval\"",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M2",
+    "step": "console: MM approve() before QMS",
+    "expected": "refused",
+    "actual": "{\"ok\":false,\"error\":\"You cannot approve this document.\"}",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M3",
+    "step": "QMS desk card",
+    "expected": "says it goes to the Maintenance Manager",
+    "actual": "Check the number against 5.3, the revision and the dates. Confirming sends it to Maintenance Manager for final approval.",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M3",
+    "step": "QMS Confirm",
+    "expected": "stage=director, message names the Maintenance Manager",
+    "actual": "\"✓ Checked. Now with the Maintenance Manager for final approval\" stage=director waitingOn=Maintenance Manager",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M4",
+    "step": "Segment Director (same segment) desk",
+    "expected": "no card for a maintenance SOP",
+    "actual": "cards=0",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M4",
+    "step": "console: Director approve()/reject() on it",
+    "expected": "both refused",
+    "actual": "[{\"ok\":false,\"error\":\"You cannot approve this document.\"},{\"ok\":false,\"error\":\"You cannot reject this document.\"}]",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M5",
+    "step": "Drilling Maintenance Manager opens Coiled Tubing desk by URL (wrong segment)",
+    "expected": "refused",
+    "actual": "refused=true",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M5",
+    "step": "console: Drilling MM approve()",
+    "expected": "refused",
+    "actual": "{\"ok\":false,\"error\":\"You cannot approve this document.\"}",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M6",
+    "step": "MM switches area to Coiled Tubing from the Drilling desk",
+    "expected": "lands on the Coiled Tubing desk",
+    "actual": "/dashboard.html?id=coiled-tubing",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M6",
+    "step": "Coiled Tubing MM desk",
+    "expected": "1 card, heading Awaiting Your Approval",
+    "actual": "cards=1 heading=\"Awaiting Your Approval\"",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M6",
+    "step": "Card wording for the MM",
+    "expected": "your approval as Maintenance Manager",
+    "actual": "Checked by QMS · QMS / Document Controller. Your approval as Maintenance Manager is what publishes it.",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M7",
+    "step": "MM double-clicks Approve",
+    "expected": "current, approvedBy Maintenance Manager",
+    "actual": "current by=Maintenance Manager",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M7",
+    "step": "Refresh",
+    "expected": "card gone",
+    "actual": "cards=0",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M8",
+    "step": "Published: shelf",
+    "expected": "Maintenance yes, Operations no",
+    "actual": "mnt=true ops=false",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M8",
+    "step": "Viewer breadcrumb returns to the Maintenance side",
+    "expected": "dept=maintenance in the link",
+    "actual": "yes",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M8",
+    "step": "Viewer as Employee",
+    "expected": "Current; Approval authority = Maintenance Manager",
+    "actual": "Current, OK to use; authority=\"Maintenance Manager\"",
+    "result": "PASS"
+  },
+  {
+    "id": "D-M9",
+    "step": "Auditor reads the maintenance trail",
+    "expected": "Employee, QMS, Maintenance Manager (not Director)",
+    "actual": "Employee Submitted for approval 01 Oct 2026, 17:28 QMS / Document Controller QMS conformance check 01 Oct 2026, 17:28 Maintenance Manager Final approval · Maintenance Manager 01 Oct 2026, 17:29",
+    "result": "PASS"
+  },
+  {
+    "id": "D-B1",
+    "step": "Employee files a Maintenance Bulletin",
+    "expected": "box ticked and locked; number …-MB-…; department=maintenance",
+    "actual": "TQ-TWS-CTSS-MB-001 box={\"checked\":true,\"disabled\":true} dept=maintenance",
+    "result": "PASS"
+  },
+  {
+    "id": "D-B2",
+    "step": "QMS Confirm on the bulletin",
+    "expected": "names the Maintenance Manager",
+    "actual": "✓ Checked. Now with the Maintenance Manager for final approval",
+    "result": "PASS"
+  },
+  {
+    "id": "D-B3",
+    "step": "Director: bulletin",
+    "expected": "no card; approve() refused",
+    "actual": "cards=0 {\"ok\":false,\"error\":\"You cannot approve this document.\"}",
+    "result": "PASS"
+  },
+  {
+    "id": "D-B4",
+    "step": "MM approves the bulletin from the desk",
+    "expected": "current, approvedBy Maintenance Manager",
+    "actual": "current Maintenance Manager",
+    "result": "PASS"
+  },
+  {
+    "id": "D-B4",
+    "step": "Bulletins shelf",
+    "expected": "shows it (lands on the Maintenance side)",
+    "actual": "found=true url=/segment.html?id=coiled-tubing&tab=bulletins",
+    "result": "PASS"
+  },
+  {
+    "id": "D-ERR",
+    "step": "Uncaught page errors during the run",
+    "expected": "0",
+    "actual": "0",
+    "result": "PASS"
+  }
+]
