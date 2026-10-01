@@ -148,8 +148,11 @@ test.describe('Area cards ("Explore by Discipline")', () => {
   });
 });
 
-test.describe('Recently visited strip', () => {
-  test('renders when taqa-recent has entries, anchored right before the area cards', async ({
+test.describe('Recently visited', () => {
+  // Removed at the owner's request: the home page shows no Recently visited
+  // strip, even for someone with an old list saved, and opening an area no
+  // longer records one.
+  test('never shows, even with an old list saved, and visiting an area records nothing', async ({
     page,
     gotoApp,
     clearAppState,
@@ -158,56 +161,15 @@ test.describe('Recently visited strip', () => {
     await gotoApp('/index.html');
     await clearAppState();
     await page.evaluate(() => {
-      localStorage.setItem(
-        'taqa-recent',
-        JSON.stringify([{ id: 'coiled-tubing', name: 'Coiled Tubing', tag: 'Operations' }])
-      );
+      localStorage.setItem('taqa-recent', JSON.stringify([{ id: 'coiled-tubing', name: 'Coiled Tubing', tag: 'Operations' }]));
     });
     await gotoApp('/index.html');
-
-    const strip = page.locator('.rv-strip');
-    await expect(strip).toBeVisible();
-    const chip = strip.locator('a.rv-chip');
-    await expect(chip).toHaveAttribute('href', 'segment.html?id=coiled-tubing');
-    await expect(chip).toContainText('Coiled Tubing');
-
-    // The fix this locks in: the strip is inserted immediately before
-    // #segments (index.html's real anchor), not a stale #band-seg id that
-    // no longer exists on the page.
-    const anchoredBeforeSegments = await page.evaluate(() => {
-      const s = document.querySelector('.rv-strip');
-      const segments = document.getElementById('segments');
-      return !!s && !!segments && s.nextElementSibling === segments;
-    });
-    expect(anchoredBeforeSegments).toBe(true);
-
-    assertNoConsoleErrors(consoleErrors);
-  });
-
-  test('renders nothing and throws no errors when taqa-recent is absent', async ({
-    page,
-    gotoApp,
-    clearAppState,
-    consoleErrors,
-  }) => {
-    await gotoApp('/index.html');
-    await clearAppState();
-    await gotoApp('/index.html');
     await expect(page.locator('.rv-strip')).toHaveCount(0);
-    assertNoConsoleErrors(consoleErrors);
-  });
+    await expect(page.getByText('Recently visited', { exact: false })).toHaveCount(0);
 
-  test('renders nothing and throws no errors when taqa-recent is an empty array', async ({
-    page,
-    gotoApp,
-    clearAppState,
-    consoleErrors,
-  }) => {
-    await gotoApp('/index.html');
-    await clearAppState();
-    await page.evaluate(() => localStorage.setItem('taqa-recent', '[]'));
-    await gotoApp('/index.html');
-    await expect(page.locator('.rv-strip')).toHaveCount(0);
+    await page.evaluate(() => localStorage.removeItem('taqa-recent'));
+    await gotoApp('/segment.html?id=drilling');
+    expect(await page.evaluate(() => localStorage.getItem('taqa-recent'))).toBeNull();
     assertNoConsoleErrors(consoleErrors);
   });
 });
