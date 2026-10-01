@@ -362,7 +362,8 @@
 
   function mayManage(doc) {
     if (typeof TAQA_ROLE === 'undefined' || !TAQA_ROLE.canManage) return false;
-    return TAQA_ROLE.canManage(doc.segment);
+    // The whole record: canManage checks its department as well as its area.
+    return TAQA_ROLE.canManage(doc);
   }
 
   /* Fields only the release steps may write. A page editing a record's

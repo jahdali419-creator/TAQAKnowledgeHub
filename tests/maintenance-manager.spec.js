@@ -310,3 +310,180 @@ test.describe('wording follows the approver', () => {
     await expect(page.locator('#desk')).not.toContainText('approved and waiting');
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────
+// The owner's decisions of 1 October 2026, after the five-role audit.
+// ─────────────────────────────────────────────────────────────────────────
+
+// Published documents in Coiled Tubing, released the way the desks do it.
+async function published(page, setRole) {
+  const docs = {
+    ops: { docNumber: 'TQ-TWS-CTSS-SOP-971', title: 'Managed ops SOP' },
+    mnt: { docNumber: 'TQ-TWS-CTSS-SOP-972', title: 'Managed maint SOP', department: 'maintenance' },
+    mb:  { docNumber: 'TQ-TWS-CTSS-MB-973', title: 'Managed bulletin', docType: 'bulletin', department: 'maintenance' },
+  };
+  for (const d of Object.values(docs)) await checkedDraft(page, setRole, d.docNumber, d);
+  await setRole('owner', SEG);
+  expect((await page.evaluate(() => TAQA_STORE.approve('TQ-TWS-CTSS-SOP-971'))).ok).toBe(true);
+  await setRole('maintenance', SEG);
+  expect(await page.evaluate(() => ['TQ-TWS-CTSS-SOP-972', 'TQ-TWS-CTSS-MB-973'].map((n) => TAQA_STORE.approve(n).ok))).toEqual([true, true]);
+  return docs;
+}
+
+test.describe('managing a document follows its department as well as its area', () => {
+  test('who may withdraw or edit: QMS every document; the area\'s Director its Operations documents; the area\'s Maintenance Manager its maintenance documents; nobody else', async ({ page, gotoApp, setRole, clearAppState }) => {
+    await prime(page, gotoApp, clearAppState, setRole, 'employee');
+    await published(page, setRole);
+    const may = async (role, area) => {
+      await setRole(role, area);
+      return page.evaluate(() => ['TQ-TWS-CTSS-SOP-971', 'TQ-TWS-CTSS-SOP-972', 'TQ-TWS-CTSS-MB-973']
+        .map((n) => TAQA_ROLE.canManage(TAQA_STORE.findDoc(n))));
+    };
+    //                                              ops    maint  bulletin
+    expect(await may('qms', SEG)).toEqual(            [true, true, true]);
+    expect(await may('owner', SEG)).toEqual(          [true, false, false]);
+    expect(await may('maintenance', SEG)).toEqual(    [false, true, true]);
+    expect(await may('owner', 'drilling')).toEqual(   [false, false, false]);
+    expect(await may('maintenance', 'drilling')).toEqual([false, false, false]);
+    expect(await may('employee', SEG)).toEqual(       [false, false, false]);
+    expect(await may('auditor', SEG)).toEqual(        [false, false, false]);
+
+    // The store enforces it, whatever the page shows.
+    await setRole('maintenance', SEG);
+    expect(await page.evaluate(() => [
+      TAQA_STORE.patch('TQ-TWS-CTSS-SOP-971', { summary: 'x' }).ok,   // ops: not theirs
+      !!TAQA_STORE.setStatus('TQ-TWS-CTSS-SOP-971', 'obsolete'),
+      TAQA_STORE.patch('TQ-TWS-CTSS-SOP-972', { summary: 'Reviewed' }).ok,
+    ])).toEqual([false, false, true]);
+    await setRole('owner', SEG);
+    expect(await page.evaluate(() => [
+      TAQA_STORE.patch('TQ-TWS-CTSS-SOP-972', { summary: 'x' }).ok,   // maintenance: not theirs
+      !!TAQA_STORE.setStatus('TQ-TWS-CTSS-SOP-972', 'obsolete'),
+      !!TAQA_STORE.setStatus('TQ-TWS-CTSS-SOP-971', 'obsolete'),
+    ])).toEqual([false, false, true]);
+    await setRole('maintenance', SEG);
+    expect(!!(await page.evaluate(() => TAQA_STORE.setStatus('TQ-TWS-CTSS-SOP-972', 'obsolete')))).toBe(true);
+    await setRole('qms', SEG);
+    expect(!!(await page.evaluate(() => TAQA_STORE.setStatus('TQ-TWS-CTSS-MB-973', 'obsolete')))).toBe(true);
+  });
+
+  test('lifecycle and signature fields stay protected for every manager', async ({ page, gotoApp, setRole, clearAppState }) => {
+    await prime(page, gotoApp, clearAppState, setRole, 'employee');
+    await published(page, setRole);
+    for (const [role, n] of [['maintenance', 'TQ-TWS-CTSS-SOP-972'], ['owner', 'TQ-TWS-CTSS-SOP-971'], ['qms', 'TQ-TWS-CTSS-SOP-972']]) {
+      await setRole(role, SEG);
+      const out = await page.evaluate((x) => ['status', 'approvedBy', 'approvedAt', 'countersignedBy', 'rejected', 'submittedBy']
+        .map((k) => TAQA_STORE.patch(x, { [k]: 'forged' }).ok), n);
+      expect(out, role).toEqual([false, false, false, false, false, false]);
+    }
+    expect(await page.evaluate(() => TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-972').approvedBy)).toBe('Maintenance Manager');
+  });
+
+  test('the published list shows each manager the documents they manage, with Withdraw on those only', async ({ page, gotoApp, setRole, clearAppState }) => {
+    await prime(page, gotoApp, clearAppState, setRole, 'employee');
+    await published(page, setRole);
+    const rows = async (role) => {
+      await setRole(role, SEG);
+      await gotoApp('/documents.html?id=' + SEG);
+      return page.locator('#pub-docs-body .pdt-num').allTextContents();
+    };
+    const mm = await rows('maintenance');
+    expect(mm.sort()).toEqual(['TQ-TWS-CTSS-MB-973', 'TQ-TWS-CTSS-SOP-972']);
+    await expect(page.locator('#docs-seg-sub')).toContainText('Maintenance department documents you manage');
+    const dir = await rows('owner');
+    expect(dir).toContain('TQ-TWS-CTSS-SOP-971');
+    expect(dir).not.toContain('TQ-TWS-CTSS-SOP-972');
+    expect(dir).not.toContain('TQ-TWS-CTSS-MB-973');
+    const qms = await rows('qms');
+    expect(qms).toEqual(expect.arrayContaining(['TQ-TWS-CTSS-SOP-971', 'TQ-TWS-CTSS-SOP-972', 'TQ-TWS-CTSS-MB-973']));
+  });
+});
+
+test.describe('the Maintenance Manager\'s desk and area', () => {
+  test('the desk header names the Maintenance Manager and the area, not the Director', async ({ page, gotoApp, setRole, clearAppState }) => {
+    await prime(page, gotoApp, clearAppState, setRole, 'maintenance', SEG);
+    await gotoApp('/dashboard.html?id=' + SEG);
+    await expect(page.locator('#dash-owner-name')).toHaveText('Maintenance Manager, Coiled Tubing');
+    const hero = page.locator('.dash-user-pill');
+    await expect(hero).not.toContainText('Segment Controller');
+    await expect(hero).not.toContainText('Mohammed Jahdali');
+    // The Director's desk still names its owner.
+    await setRole('owner', SEG);
+    await gotoApp('/dashboard.html?id=' + SEG);
+    await expect(page.locator('#dash-owner-role')).toContainText('Segment Controller');
+  });
+
+  test('the desk counters count only what the Maintenance Manager can act on', async ({ page, gotoApp, setRole, clearAppState }) => {
+    await prime(page, gotoApp, clearAppState, setRole, 'employee');
+    await published(page, setRole);
+    await checkedDraft(page, setRole, 'TQ-TWS-CTSS-SOP-974', { title: 'Waiting maint', department: 'maintenance' });
+    await checkedDraft(page, setRole, 'TQ-TWS-CTSS-SOP-975', { title: 'Waiting ops' });
+    await checkedDraft(page, setRole, 'TQ-TWS-CTSS-SOP-976', { title: 'Returned maint', department: 'maintenance' });
+    await checkedDraft(page, setRole, 'TQ-TWS-CTSS-SOP-977', { title: 'Returned ops' });
+    await setRole('maintenance', SEG);
+    expect((await page.evaluate(() => TAQA_STORE.reject('TQ-TWS-CTSS-SOP-976', 'Returned for the counter test, maintenance.'))).ok).toBe(true);
+    await setRole('owner', SEG);
+    expect((await page.evaluate(() => TAQA_STORE.reject('TQ-TWS-CTSS-SOP-977', 'Returned for the counter test, operations.'))).ok).toBe(true);
+
+    await setRole('maintenance', SEG);
+    await gotoApp('/dashboard.html?id=' + SEG);
+    // One maintenance document waiting; one maintenance document returned;
+    // the two maintenance documents published above, nothing of Operations'.
+    await expect(page.locator('#stat-pending')).toHaveText('1');
+    await expect(page.locator('#stat-rejected')).toHaveText('1');
+    await expect(page.locator('#stat-published')).toHaveText('2');
+    await expect(page.locator('#pub-docs-count-big')).toHaveText('2');
+  });
+
+  test('the area picker offers a Maintenance Manager operational segments only', async ({ page, gotoApp, setRole, clearAppState, topbar }) => {
+    await prime(page, gotoApp, clearAppState, setRole, 'maintenance', SEG);
+    await gotoApp('/index.html');
+    const sel = (await topbar.isPhone()) ? '#mm-area-sel' : '#door-area-sel';
+    const groups = await page.locator(sel + ' optgroup').evaluateAll((gs) => gs.map((g) => g.label));
+    expect(groups).toEqual(['Operational Segments']);
+    expect(await page.locator(sel + ' option[value="qhse"]').count()).toBe(0);
+    // Nor can it be set some other way.
+    expect(await page.evaluate(() => { TAQA_ROLE.setArea('qhse'); return TAQA_ROLE.area(); })).toBe(SEG);
+    // A Director still holds functions and centres.
+    await setRole('owner', SEG);
+    await gotoApp('/index.html');
+    expect(await page.locator(sel + ' optgroup').count()).toBeGreaterThan(1);
+  });
+
+  test('a segment\'s Maintenance side is badged Maintenance, its Operations side keeps its category', async ({ page, gotoApp, setRole, clearAppState }) => {
+    await prime(page, gotoApp, clearAppState, setRole, 'employee');
+    await gotoApp('/segment.html?id=' + SEG + '&dept=maintenance');
+    await expect(page.locator('#seg-tag')).toHaveText('Maintenance');
+    await gotoApp('/segment.html?id=' + SEG);
+    await expect(page.locator('#seg-tag')).toHaveText('Operations');
+    await gotoApp('/segment.html?id=drilling&dept=maintenance');
+    await expect(page.locator('#seg-tag')).toHaveText('Maintenance');
+  });
+});
+
+test.describe('Upload names the real final approver', () => {
+  async function fileAs(page, gotoApp, { type, seg, fn, title }) {
+    await gotoApp('/upload.html');
+    await page.setInputFiles('#file-input', { name: 'w.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4\n%%EOF\n') });
+    await page.click('#go-2');
+    await page.selectOption('#doc-type-select', type);
+    if (seg) await page.selectOption('#seg-select', seg);
+    if (fn) await page.selectOption('#policy-fn', { index: 1 });
+    await page.click('#go-3');
+    await page.fill('#doc-title-input', title);
+    await page.fill('#summary-main', 'Approver wording regression document.');
+    await page.selectOption('#audience-select', { index: 1 });
+    await page.click('#go-4');
+    await page.click('#submit-btn');
+    await expect(page.locator('#toast-title')).toHaveText('Submitted for review');
+    return page.locator('#toast-sub').textContent();
+  }
+
+  test('the confirmation names the type\'s own approver: CEO for a policy, the register\'s approver otherwise, never a generic Director', async ({ page, gotoApp, setRole, clearAppState }) => {
+    await prime(page, gotoApp, clearAppState, setRole, 'qms');
+    expect(await fileAs(page, gotoApp, { type: 'policy', fn: true, title: 'Wording policy' })).toContain('then the CEO approves it');
+    expect(await fileAs(page, gotoApp, { type: 'manual', seg: SEG, title: 'Wording manual' })).toContain('then the Subject Matter Expert approves it');
+    expect(await fileAs(page, gotoApp, { type: 'lesson', seg: SEG, title: 'Wording lesson' })).toContain('then the QHSE Manager approves it');
+    expect(await fileAs(page, gotoApp, { type: 'bulletin', seg: SEG, title: 'Wording bulletin' })).toContain('then the Maintenance Manager approves it');
+  });
+});

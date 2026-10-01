@@ -1562,6 +1562,12 @@ document.title = seg.name + ', TAQA Knowledge Hub';
 document.getElementById('breadcrumb-name').textContent = seg.name;
 document.getElementById('seg-tag').textContent = seg.tag;
 document.getElementById('seg-tag').hidden = !seg.tag;
+// On the Maintenance side the badge names the department, not the
+// segment's Operations category.
+if (DEPT === 'maintenance' && IS_OPS_SEGMENT) {
+  document.getElementById('seg-tag').textContent = 'Maintenance';
+  document.getElementById('seg-tag').hidden = false;
+}
 document.getElementById('seg-name').textContent = seg.name;
 document.getElementById('seg-desc').textContent = seg.desc;
 // Software is an asset, not a controlled document (TQ-QHSE-S001 4.4), so it is

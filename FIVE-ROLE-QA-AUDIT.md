@@ -6,7 +6,8 @@ Date: 1 October 2026. Branch `claude/inspiring-mayer-pm1350` (PR #21, not merged
 |---|---|
 | Code audited from scratch (baseline) | `1de6bbef5f63c369549b6412c8a0ece17764afba` |
 | Fixes and new tests from this audit | `e2e044b7a3a9876102cd4fe6fa1f9e13c381bb0b` (see section 6) |
-| D8, after the owner's decision | the commit after this report's first version |
+| D8, after the owner's first decision | `110efed` |
+| Owner's decisions of 1 Oct (management by department, UX fixes) | section 13 |
 | This report | the commit that adds this file |
 
 > **This is a frontend-only prototype.** Every rule below runs in the visitor's browser (`roles.js`, `store.js`). A person who edits `localStorage` or uses the console can change any record, publish anything and forge any signature. Nothing here is production security. Roles come from a switcher, not a sign-in; records live in one browser; attachments are not stored. The Azure back end must enforce the same rules (section 11).
@@ -25,7 +26,9 @@ Earlier evidence was not trusted. `QA-RELEASE-REPORT.md` and `RELEASE-QA-E2E.md`
 
 ---
 
-## 2. Business rules, as the current code defines them
+## 2. Business rules, as the code defined them at the baseline
+
+> Sections 2 to 8 record the **original audit** of `1de6bbe` and the fixes in `e2e044b`, unchanged. The owner's later decisions changed two rules (Maintenance Bulletin scope, and who may withdraw or edit a document); they are in **section 13**, with their own evidence.
 
 ### The five personas (`TAQA_ROLE_ORDER`)
 
@@ -251,15 +254,17 @@ Exit code 0, 17.9 minutes. Local runs use `retries: 0`, so nothing was retried. 
 
 ## 9. Open UX issues and decisions for the owner
 
+> **Status after the owner's decisions of 1 Oct 2026:** items 1 to 7 are decided and done (section 13). Item 8 stays as accepted.
+
 | # | Type | Item | Recommendation |
 |---|---|---|---|
 | 1 | **Decided, done** | D8: Maintenance Bulletin offered for functions and centres, where it has no approver | Owner: bulletins are for the maintenance team of every operational segment. Implemented and tested |
-| 2 | **Decision** | A Maintenance Manager can **withdraw and edit** Operations documents in their segment, and a Director can withdraw maintenance documents. `canManage` scopes by area, not department | If withdrawal should follow the approver, add the department check to `canManage` |
-| 3 | UX, LOW | The MM's desk header shows the segment owner's name and "Segment Controller" | Show "Maintenance Manager, <area>" on an MM's desk |
-| 4 | UX, LOW | The MM's desk counters (PENDING, REJECTED) count the whole segment, not the maintenance department | Count what the desk acts on |
-| 5 | UX, LOW | The area picker lets a Maintenance Manager pick a function or centre, which has no maintenance department | Offer operational segments only to the MM |
-| 6 | UX, LOW | On a segment's Maintenance side the hero badge still reads the segment's category (for example "OPERATIONS") | Show "MAINTENANCE" on that side |
-| 7 | UX, LOW | The upload toast says "the Director" for a policy, whose approver is the CEO | Name the type's approver |
+| 2 | **Decided, done (section 13)** | A Maintenance Manager can **withdraw and edit** Operations documents in their segment, and a Director can withdraw maintenance documents. `canManage` scopes by area, not department | If withdrawal should follow the approver, add the department check to `canManage` |
+| 3 | UX, LOW, **done (section 13)** | The MM's desk header shows the segment owner's name and "Segment Controller" | Show "Maintenance Manager, <area>" on an MM's desk |
+| 4 | UX, LOW, **done (section 13)** | The MM's desk counters (PENDING, REJECTED) count the whole segment, not the maintenance department | Count what the desk acts on |
+| 5 | UX, LOW, **done (section 13)** | The area picker lets a Maintenance Manager pick a function or centre, which has no maintenance department | Offer operational segments only to the MM |
+| 6 | UX, LOW, **done (section 13)** | On a segment's Maintenance side the hero badge still reads the segment's category (for example "OPERATIONS") | Show "MAINTENANCE" on that side |
+| 7 | UX, LOW, **done (section 13)** | The upload toast says "the Director" for a policy, whose approver is the CEO | Name the type's approver |
 | 8 | UX, LOW | While acting as a delegate, the banner now covers the top 34 px of page content under the bar (the same as the offline bar) | Acceptable; or add top padding while it shows |
 
 ---
@@ -296,4 +301,63 @@ Exit code 0, 17.9 minutes. Local runs use `retries: 0`, so nothing was retried. 
 6. **Persistent register and audit log**, including rejections and resubmissions, retained per TQ-QHSE-S001 / API Q2.
 7. **File storage** for attachments, with virus scanning and the same type and size rules as Upload.
 8. **Notifications** to the next approver (the Maintenance Manager or the Director) instead of the in-browser bell.
-9. The bulletin rule (operational segments only) and a decision on withdrawal scope (section 9) encoded in the API.
+9. The owner's rules of section 13 encoded in the API: bulletins only for operational segments, management by department as well as area, lifecycle fields never edited, a Maintenance Manager holding an operational segment only. Recorded as requirements in `docs/FRONTEND-API-CONTRACT.md` §3.1.
+
+---
+
+## 13. After the owner's decisions (1 October 2026)
+
+The owner approved two decisions and five UX fixes after reading sections 1 to 12. Nothing above was rewritten: the baseline matrix in section 5 is what `1de6bbe` did. This section is what the code does now.
+
+### 13.1 Decision 1: Maintenance Bulletins only for operational segments (D8, **resolved**)
+
+- Upload: once an area other than an operational segment is chosen, the Maintenance Bulletin type is disabled. Once Bulletin is chosen, only Operational Segments can be picked. A link that arrives with a function chosen (`?type=bulletin&seg=qhse`) stops at step 2: "A Maintenance Bulletin is for the maintenance team of an operational segment."
+- Register: `TAQA_STORE.add` refuses a bulletin for any area that is not an operational segment, so a forged or console submission files nothing.
+- Recorded for the API in `docs/FRONTEND-API-CONTRACT.md` §3.1.
+- Commit `110efed`. Test: "Maintenance Bulletins belong to operational segments", which runs in chromium (desktop) and mobile-chrome (phone).
+
+### 13.2 Decision 2: withdraw and edit follow department as well as area
+
+`TAQA_ROLE.canManage(doc)` now checks the document's department as well as its area. `TAQA_STORE.setStatus` (withdraw), `patch` (edit details) and `remove` all ask it with the whole record. The published list (`documents.html`) shows each manager the documents they manage, so Withdraw appears only where it works. The desk itself (`canManage(areaId)`) is still opened by area.
+
+| Manage (withdraw / edit details) | Employee | QMS | Segment Director | Maintenance Manager | Auditor |
+|---|---|---|---|---|---|
+| Operations document, own area | REFUSED | ALLOWED | ALLOWED | **REFUSED** (was ALLOWED) | REFUSED |
+| Maintenance SOP, own area | REFUSED | ALLOWED | **REFUSED** (was ALLOWED) | ALLOWED | REFUSED |
+| Maintenance Bulletin, own area | REFUSED | ALLOWED | **REFUSED** (was ALLOWED) | ALLOWED | REFUSED |
+| Either, another area | REFUSED | ALLOWED | REFUSED | REFUSED | REFUSED |
+| Lifecycle or signature field, by editing | REFUSED | REFUSED | REFUSED | REFUSED | REFUSED |
+
+QMS's global document control is unchanged. Lifecycle fields are protected exactly as before: editing `status`, `approvedBy`, `approvedAt`, `countersignedBy`, `rejected` or `submittedBy` is refused for every manager. A content change to a published document remains a new controlled revision through Upload ("Revision / Update", which names the document it replaces), never a rewrite of its approval history.
+
+### 13.3 UX fixes
+
+| # | Fix | Where |
+|---|---|---|
+| 1 | A Maintenance Manager's desk header reads **"Maintenance Manager, <area>"** with "Maintenance department · <area>"; it no longer shows the Director's name or "Segment Controller" | dashboard.html |
+| 2 | A Maintenance Manager's desk counters count what they can act on: **Pending** = maintenance documents waiting on their approval; **Published** = maintenance documents in force in their area; **Rejected** = maintenance documents returned. The Rejected figure was a hard-coded "1" on every desk; it is now counted from the register for every role | dashboard.html |
+| 3 | The area picker offers a Maintenance Manager **Operational Segments only**, in the door and in the phone menu. `TAQA_ROLE.setArea` refuses a function or centre for that role, and `area()` falls back to the default segment if one was stored before | shared.js, roles.js |
+| 4 | A segment's **Maintenance** side is badged **"Maintenance"**; the Operations side keeps its category (for example "Operations") | segment.html |
+| 5 | The Upload confirmation names the **real final approver** for the type: the CEO for a policy, the Maintenance Manager for a maintenance document or bulletin, otherwise the approver the register names (for example "Relevant Operation Director" for an SOP, "Subject Matter Expert" for a manual, "QHSE Manager" for a lesson). It never says a generic "Director" | upload.html |
+
+### 13.4 Tests added for these changes
+
+All in `tests/maintenance-manager.spec.js`; each runs in chromium and mobile-chrome.
+
+| Test | Proves | On `110efed` (before) |
+|---|---|---|
+| Maintenance Bulletins belong to operational segments | D1 in Upload (both pickers, the step-2 stop) and in the register | (added with the fix) |
+| who may withdraw or edit … nobody else | the management matrix above, for all five roles and another area's holders, at the store | **failed** |
+| lifecycle and signature fields stay protected for every manager | six lifecycle fields refused for MM, Director and QMS | passed (unchanged behaviour, pinned) |
+| the published list shows each manager the documents they manage | documents.html per role | **failed** |
+| the desk header names the Maintenance Manager and the area | UX 1 | **failed** |
+| the desk counters count only what the Maintenance Manager can act on | UX 2 | **failed** |
+| the area picker offers a Maintenance Manager operational segments only | UX 3, door on desktop, menu on a phone | **failed** |
+| a segment's Maintenance side is badged Maintenance | UX 4 | **failed** |
+| the confirmation names the type's own approver | UX 5: policy, manual, lesson, bulletin | **failed** |
+
+One existing assertion was **outdated by the decision**, not broken by a bug: `release-journey.spec.js` expected the SOP toast to say "then the Director approves it". It now expects "then the Relevant Operation Director approves it", the approver the register names for an SOP.
+
+### 13.5 Results
+
+RESULTS_13

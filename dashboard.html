@@ -448,7 +448,7 @@ html[data-taqa-theme="dark"] .dash-unknown{background:#002326;border-color:#0048
         <div class="dash-hero-stat-label">Contributors</div>
       </div>
       <div class="dash-hero-stat">
-        <span class="dash-hero-stat-num">1</span>
+        <span class="dash-hero-stat-num" id="stat-rejected">0</span>
         <div class="dash-hero-stat-label">Rejected</div>
       </div>
     </div>
@@ -972,7 +972,17 @@ function initDashboard() {
   var av = document.getElementById('dash-owner-avatar'),
       nm = document.getElementById('dash-owner-name'),
       rl = document.getElementById('dash-owner-role');
-  if (dash.owner) {
+  // A Maintenance Manager's desk is theirs, not the segment owner's: name
+  // the role and the area rather than the Director.
+  const MM_DESK = TAQA_ROLE.current() === 'maintenance';
+  if (MM_DESK) {
+    av.textContent = 'MM';
+    av.className   = 'dash-user-avatar av-teal';
+    nm.textContent = 'Maintenance Manager, ' + dash.name;
+    rl.textContent = 'Maintenance department · ' + dash.name;
+    document.getElementById('dash-seg-sub').textContent =
+      'You are managing the maintenance department\'s documents for this segment.';
+  } else if (dash.owner) {
     av.textContent = dash.owner.initials;
     av.className   = 'dash-user-avatar ' + dash.owner.av;
     nm.textContent = dash.owner.name;
@@ -1003,12 +1013,23 @@ function initDashboard() {
   // so Drilling read 4 pending against one real draft, and QMS, who is never
   // shown those cards, was counted them anyway.
   pendingCount = submitted.length;
-  const realPublished = ST ? ST.area(dashSegId).live
+  // A Maintenance Manager's counters are the documents they can act on:
+  // maintenance documents waiting on their approval, the maintenance
+  // documents in force that they manage, and the maintenance ones returned.
+  // The whole segment's figures belong to the Director's desk.
+  const MNT = d => typeof TAQA_APPROVAL !== 'undefined' && TAQA_APPROVAL.isMaintenance(d);
+  if (MM_DESK && ST) pendingCount = ST.rows('awaiting-director', { segment: dashSegId })
+    .filter(d => TAQA_APPROVAL.canApprove(d)).length;
+  const rejectedCount = ST ? ST.rows('pending', { segment: dashSegId })
+    .filter(d => d.rejected && (!MM_DESK || MNT(d))).length : 0;
+  const realPublished = (MM_DESK && ST) ? ST.rows('live', { segment: dashSegId }).filter(MNT).length
+    : ST ? ST.area(dashSegId).live
     : ((typeof TAQA_SEGMENTS!=='undefined'&&TAQA_SEGMENTS[dashSegId]&&TAQA_SEGMENTS[dashSegId].docs)
     ?Object.values(TAQA_SEGMENTS[dashSegId].docs).reduce((s,a)=>s+(Array.isArray(a)?a.length:0),0)
     :dash.published);
   animateCount(document.getElementById('stat-pending'), pendingCount, 500);
   animateCount(document.getElementById('stat-published'), realPublished, 800);
+  animateCount(document.getElementById('stat-rejected'), rejectedCount, 500);
   animateCount(document.getElementById('stat-contributors'), dash.contributors.length + (dash.owner ? 1 : 0), 650);
   document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
 
@@ -1264,6 +1285,10 @@ function initDashboard() {
   const pubBigEl = document.getElementById('pub-docs-count-big');
   if (pubCountEl) pubCountEl.textContent = realPublished + ' documents';
   if (pubBigEl) animateCount(pubBigEl, realPublished, 800);
+  if (MM_DESK) {
+    const sub = document.querySelector('.pub-docs-link-sub');
+    if (sub) sub.textContent = 'maintenance documents in force that you manage';
+  }
   const viewBtn = document.getElementById('view-docs-btn');
   if (viewBtn) viewBtn.href = 'documents.html?id=' + dashSegId;
 }

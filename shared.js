@@ -1282,6 +1282,8 @@ document.addEventListener('keydown',function(e){
     var S = TAQA_DOC_LOOKUPS.segments, here = TAQA_ROLE.area();
     var FAM = [['segment','Operational Segments'], ['function','Corporate Functions'],
                ['product','Products & Technology'], ['company','Company Wide']];
+    // Only an operational segment has a maintenance department to head.
+    if (k === 'maintenance') FAM = FAM.slice(0, 1);
     var opts = FAM.map(function (f) {
       var ids = Object.keys(S).filter(function (x) { return S[x].group === f[0]; })
                   .sort(function (a, b) { return S[a].name.localeCompare(S[b].name); });

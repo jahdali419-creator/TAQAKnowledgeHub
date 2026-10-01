@@ -79,8 +79,8 @@ the record above (no state), safe to reimplement server-side verbatim from
 ## 3. TAQA_ROLE / TAQA_APPROVAL / TAQA_DELEGATION — identity and authorization (`roles.js`)
 
 This is the part every page's "Preview only. Azure uses Entra ID." note is
-about. Four roles exist: `employee`, `owner` (Segment Director), `qms`,
-`auditor`. Today `TAQA_ROLE.set(role)` just writes a `localStorage` key and
+about. Five roles exist: `employee`, `owner` (Segment Director),
+`maintenance` (Maintenance Manager), `qms`, `auditor`. Today `TAQA_ROLE.set(role)` just writes a `localStorage` key and
 reloads the page — there is no server checking anything, which is the whole
 reason the door pill carries that disclaimer.
 
@@ -91,8 +91,16 @@ reason the door pill carries that disclaimer.
 | `TAQA_ROLE.effective(roleKey)` → `{approve, countersign, delegate, editMetadata, controlPanel, export, scope, ownSegment}` | The capability set a real authorization layer derives from the token's role/group claims. **Every one of these flags is checked in front-end JS only today** — a determined user can flip them in devtools. Every corresponding backend write (`setStatus`, `approve`, `countersign`, `patch`) must re-check the equivalent server-side; the front-end check is UX only |
 | `TAQA_ROLE.canSee(doc, roleKey)` | Row-level read authorization — must be enforced server-side (an employee's `GET /documents` should never even return withdrawn/restricted rows they cannot see, not just hide them client-side) |
 | `TAQA_ROLE.canManage(areaId)` | Whether the signed-in user may act as an area's desk (its queue, contributors, published list) |
+| `TAQA_ROLE.canManage(doc)` | Whether the signed-in user may **withdraw** a document or **edit its details**: `PATCH /documents/{docNumber}` and `PATCH …/status` must enforce it. QMS: any document in any area. Otherwise the document's area must be the caller's **and** its department must be: an Operations document is its area's Segment Director's, a maintenance document (department `maintenance`, or type Maintenance Bulletin) is its area's Maintenance Manager's. Another area's Director or Maintenance Manager manages neither. The same split as final approval |
 | `TAQA_APPROVAL.canApprove(doc, roleKey)` / `canCountersign(doc, roleKey)` / `TAQA_STORE.reject(doc, reason)` | The exact rule a `POST /documents/{docNumber}/approve`, `/countersign` or `/reject` endpoint must enforce. **Order matters and was changed this round**: QMS checks conformance first (`countersign`, despite the name — it is a gate, not a co-signature after the fact), then the named approver (Segment Director for an SOP/Standard) gives final approval, and that is what releases the document. Either step can instead reject with a required reason, which sends the draft back to whoever submitted it |
 | `TAQA_DELEGATION.current()` / `.actAs()` | "Acting as" is fully client-side today (a note in the code says so explicitly: "the prototype has no signed-in identity, so acting as a delegate is a..."). A real delegation needs a real record of who granted it, to whom, until when, and with what scope — an audit trail, not a `localStorage` key |
+
+### 3.1 Rules the API must enforce, decided by the owner (1 Oct 2026)
+
+1. **Maintenance Bulletins exist only for operational segments.** `POST /documents` must refuse `docType: bulletin` for any area whose group is not `segment` (corporate functions, centres, company). Those areas have no Maintenance Manager, so a bulletin there would have no valid final approver. The front end refuses it in Upload and in `TAQA_STORE.add`.
+2. **Document management follows department as well as area** (`canManage(doc)` above). QMS's global document control is unchanged.
+3. **Lifecycle and signature fields never change by editing.** `status`, `approvalStage`, every `*By` / `*At` / `*Date` of submission, check, approval and rejection, and `rejected` change only through submit, countersign, approve, reject and withdraw. An edit that names one is refused (`TAQA_STORE.patch`). A content change to a published document is a **new controlled revision** that goes through the same release steps; approval history is never rewritten.
+4. **A Maintenance Manager holds an operational segment only** (`TAQA_ROLE.holds`). The identity claim that maps a person to a Maintenance Manager role must name an operational segment.
 
 **The one rule that matters most for the handoff:** nothing in `roles.js`
 is a security boundary today. It exists so the UI can be walked through and

@@ -58,7 +58,9 @@ test.describe('one document, every role, through the UI', () => {
     const nums = await fileThroughUpload(page, gotoApp, TITLE);
     expect(nums).toHaveLength(1);
     const N = nums[0];
-    await expect(page.locator('#toast-sub')).toContainText('QMS checks it, then the Director approves it');
+    // The toast names the approver the register defines for an SOP (owner's
+    // decision, 1 Oct 2026: never a generic "Director").
+    await expect(page.locator('#toast-sub')).toContainText('QMS checks it, then the Relevant Operation Director approves it');
     await expect(page.locator('#toast-sub')).toContainText('in force only after both');
     const filed = await page.evaluate((n) => TAQA_STORE.findDoc(n), N);
     expect(filed.status).toBe('draft');

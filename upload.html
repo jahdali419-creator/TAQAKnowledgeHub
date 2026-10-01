@@ -1081,10 +1081,13 @@ function submitUpload(e) {
     refEl.id = 'upload-ref';
     refEl.textContent = ref;
     toastSub.appendChild(refEl);
-    // A maintenance department document is released by its Maintenance
-    // Manager, not the Director (TAQA_APPROVAL.isMaintenance), so say so.
-    var nextSigner = (typeof TAQA_APPROVAL !== 'undefined' && TAQA_APPROVAL.isMaintenance(rec))
-      ? 'the Maintenance Manager' : 'the Director';
+    // Name the final approval authority the register defines for this
+    // record: the Maintenance Manager for a maintenance document, the CEO
+    // for a policy, otherwise the approver named on the document type
+    // (TAQA_APPROVAL.approverFor). It said "the Director" for all of them.
+    var approver = rec.docType === 'policy' ? 'CEO'
+      : (typeof TAQA_APPROVAL !== 'undefined' && TAQA_APPROVAL.approverFor(rec)) || null;
+    var nextSigner = approver ? 'the ' + approver : 'the named approver';
     toastSub.appendChild(document.createTextNode('. Next: QMS checks it, then ' + nextSigner + ' approves it. It is in force only after both. Track it under Your submissions below.'));
   }
   document.getElementById('toast-icon').innerHTML = ICON_OK;

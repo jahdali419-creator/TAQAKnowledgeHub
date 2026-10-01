@@ -430,7 +430,11 @@ function buildAllDocs(segId) {
   // rows apart by is whether the review behind them is still on time. That
   // is what a controller scanning this list is actually looking for, more
   // than who the owner role is (API Q2 4.4.3 c)).
+  // Only documents this person may withdraw: QMS sees every one; a Director
+  // the area's Operations documents; a Maintenance Manager its maintenance
+  // documents (TAQA_ROLE.canManage with the record).
   return TAQA_STORE.rows('live', { segment: segId })
+    .filter(d => typeof TAQA_ROLE === 'undefined' || TAQA_ROLE.canManage(d))
     .map(d => {
       const due = d.nextReviewDate ? new Date(d.nextReviewDate) : null;
       const late = due && !isNaN(due) ? Math.floor((Date.now() - due) / 86400000) : null;
@@ -630,7 +634,12 @@ function initDocPage() {
 
   document.title = segName + ', Published Documents · TAQA Knowledge Hub';
   document.getElementById('docs-seg-name').textContent = segName + ', Published Documents';
-  document.getElementById('docs-seg-sub').textContent = 'Complete document library for the ' + segName + ' segment';
+  document.getElementById('docs-seg-sub').textContent =
+    (typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.current() === 'maintenance')
+      ? 'Maintenance department documents you manage for ' + segName
+      : (typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.current() === 'owner')
+        ? 'Operations documents you manage for ' + segName
+        : 'Complete document library for the ' + segName + ' segment';
   document.getElementById('bc-seg-link').textContent = segName;
   document.getElementById('bc-seg-link').href = 'segment.html?id=' + docSegId;
   document.getElementById('bc-dash-link').href = 'dashboard.html?id=' + docSegId;
