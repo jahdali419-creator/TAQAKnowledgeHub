@@ -55,19 +55,19 @@ test.describe('TAQA_ROLES permission matrix', () => {
     });
   }
 
-  test('exactly these four roles exist, no more and no fewer', async ({ page, gotoApp }) => {
+  test('exactly these five roles exist, no more and no fewer', async ({ page, gotoApp }) => {
     await gotoApp('/index.html');
     const keys = await page.evaluate(() => Object.keys(TAQA_ROLES).sort());
-    expect(keys).toEqual(['auditor', 'employee', 'owner', 'qms']);
+    expect(keys).toEqual(['auditor', 'employee', 'maintenance', 'owner', 'qms']);
   });
 
-  test('TAQA_ROLE_ORDER lists the same four roles and the default role is employee', async ({ page, gotoApp }) => {
+  test('TAQA_ROLE_ORDER lists the same five roles and the default role is employee', async ({ page, gotoApp }) => {
     await gotoApp('/index.html');
     const info = await page.evaluate(() => ({
       order: TAQA_ROLE_ORDER.slice().sort(),
       def: TAQA_DEFAULT_ROLE,
     }));
-    expect(info.order).toEqual(['auditor', 'employee', 'owner', 'qms']);
+    expect(info.order).toEqual(['auditor', 'employee', 'maintenance', 'owner', 'qms']);
     expect(info.def).toBe('employee');
   });
 });

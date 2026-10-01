@@ -5,7 +5,7 @@
 //     company / pending), shared.js's Areas dropdown and index.html's three
 //     "Explore by Discipline" beds only ever render the segment/function/
 //     product groups; "company" (Company Wide) and "pending" (areas waiting
-//     on an org decision, e.g. TWS Maintenance) are deliberately handled
+//     on an org decision; none at present) are deliberately handled
 //     elsewhere or not linked from primary nav at all. Tests that assert a
 //     card/list COUNT need this breakdown to avoid asserting against the
 //     wrong subset of computeBaseline().areaCount.

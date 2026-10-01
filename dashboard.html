@@ -812,15 +812,6 @@ const DASH_DATA = {
     {name:'Sara Al-Shehri',initials:'SS',title:'Talent Acquisition Lead',role:'Editor',av:'av-blue'}
   ]
 },
-'tws-maintenance':{
-  name:'TWS Maintenance',
-  owner:{name:'Fahad Al-Amri',initials:'FA',title:'Maintenance & Workshop Lead',av:'av-blue'},
-  contributors:[
-    {name:'Khaled Al-Otaibi',initials:'KO',title:'Maintenance Technician',role:'Editor',av:'av-orange'},
-    {name:'Rashid Al-Ghamdi',initials:'RG',title:'Hydraulics Specialist',role:'Editor',av:'av-purple'},
-    {name:'Hamoud Al-Shamrani',initials:'HS',title:'Workshop Supervisor',role:'Viewer',av:'av-teal'}
-  ]
-},
 'well-testing':{
   name:'Well Testing',
   owner:{name:'Tariq Al-Rashidi',initials:'TR',title:'Well Testing Lead',av:'av-teal'},
@@ -1316,15 +1307,17 @@ function approveDoc(id) {
       result.className = 'action-result show';
       return;
     }
+    const _mnt = (TAQA_STORE.findDoc(storeDoc) || {}).department === 'maintenance';
     result.textContent = stage === 'qms'
-      ? '✓ Checked. Now with the Director for final approval'
+      ? '✓ Checked. Now with the ' + (_mnt ? 'Maintenance Manager' : 'Director') + ' for final approval'
       : '✓ Approved and published to the segment';
   }
   pendingCount = Math.max(0, pendingCount - 1);
   setCount(document.getElementById('stat-pending'), pendingCount);
   document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
+  const _mntT = storeDoc && typeof TAQA_STORE !== 'undefined' && (TAQA_STORE.findDoc(storeDoc) || {}).department === 'maintenance';
   showDashToast(stage === 'qms'
-    ? 'Checked, sent on for the Director\'s final approval'
+    ? 'Checked, sent on for the ' + (_mntT ? 'Maintenance Manager' : 'Director') + '\'s final approval'
     : 'Document approved and published to segment', '#00BBB6');
   updateBellCount(-1);
 }

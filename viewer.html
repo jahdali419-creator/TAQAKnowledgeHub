@@ -926,7 +926,18 @@ document.getElementById('bc-title').textContent = docTitle.length > 50 ? docTitl
 // tab=standards and software to tab=softwares, neither of which exists.
 if (segId !== 'company') {
   document.getElementById('bc-seg').href = 'segment.html?id=' + segId + '&tab=' +
-    (({sop:'sops',form:'forms',manual:'manuals',standard:'policies',policy:'policies',alert:'alerts',lesson:'lessons',software:'software'})[docType] || 'all');
+    (({sop:'sops',form:'forms',bulletin:'bulletins',manual:'manuals',standard:'policies',policy:'policies',alert:'alerts',lesson:'lessons',software:'software'})[docType] || 'all');
+}
+
+// A maintenance department document lives on its segment's Maintenance side,
+// so that is where the breadcrumb goes back to. Read once the record is known.
+function _maintBack(){
+  try {
+    if (segId === 'company' || typeof _rec === 'undefined' || !_rec ||
+        (_rec.department !== 'maintenance' && _rec.docType !== 'bulletin')) return;
+    const bc = document.getElementById('bc-seg');
+    bc.href = bc.getAttribute('href') + '&dept=maintenance';
+  } catch (e) {}
 }
 
 // Type icon
@@ -959,6 +970,7 @@ const _rec = MA ? (_liveRec(docId) ||
               MD.find(d => d.title === docTitle && d.segment === segId) ||
               MD.find(d => d.title === _bare && d.segment === segId) ||
               MD.find(d => d.title === _bare) || null) : null;
+_maintBack();
 
 const _narrow = window.matchMedia('(max-width:768px)');
 const _fmt = v => v ? new Date(v).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : null;

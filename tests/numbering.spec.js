@@ -13,7 +13,7 @@ const { test, expect } = require('./helpers/fixtures');
 const { TAQA_MASTER_DOCS: DOCS, TAQA_DOC_LOOKUPS: L } = require('../documents-master.js');
 
 const ONE_LETTER = /^TQ-(?:(?:TWS|TDS|TWC|TWI|P&T)-)?[A-Z&]+-[SPMF](?:\d{3}|###)$/;
-const LONG_CODE = /^TQ-(?:(?:TWS|TDS|TWC|TWI|P&T)-)?[A-Z&]+-(?:SOP|WI|ALT|LL)-\d{3}$/;
+const LONG_CODE = /^TQ-(?:(?:TWS|TDS|TWC|TWI|P&T)-)?[A-Z&]+-(?:SOP|WI|ALT|LL|MB)-\d{3}$/;
 const numberedAll = () => DOCS.filter((d) => d.docNumber);
 const corporate = (d) => { const s = L.segments[d.segment]; return !s.bu && (s.group === 'function' || s.group === 'company'); };
 
@@ -79,7 +79,7 @@ test.describe('area short forms come from the TQ-QHSE-S001 5.3 tables', () => {
   const S001 = {
     'coiled-tubing': 'CTSS', 'well-testing': 'WTS', 'well-safety': 'WSS', inspection: 'WIS',
     drilling: 'DSS', cementing: 'CMT', slickline: 'SS', wireline: 'WS', 'marine-services': 'MS',
-    fracturing: 'FS', 'well-completions': 'WCS', 'tws-maintenance': 'MNT',
+    fracturing: 'FS', 'well-completions': 'WCS',
     qhse: 'QHSE', cybersecurity: 'GRC', finance: 'CFP', 'supply-chain': 'SC', hr: 'HR', it: 'IT', legal: 'LGL',
   };
 

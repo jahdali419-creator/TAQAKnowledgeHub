@@ -1077,6 +1077,7 @@ document.addEventListener('keydown',function(e){
   var DESK = {
     employee: { short:'Employee',  name:'Employee',         line:'Read the register' },
     owner:    { short:'Director',  name:'Segment Director', line:'Approve your segment' },
+    maintenance:{ short:'Maintenance', name:'Maintenance Manager', line:'Approve your maintenance' },
     qms:      { short:'QMS',       name:'QMS',              line:'Countersign and release' },
     auditor:  { short:'Auditor',   name:'Auditor',          line:'Read only, everything' }
   };
@@ -1090,7 +1091,7 @@ document.addEventListener('keydown',function(e){
     '.door-btn:hover{border-color:var(--primary,#005D63);color:var(--primary,#005D63);}' +
     '.door-dot{width:7px;height:7px;border-radius:50%;background:var(--primary,#005D63);flex-shrink:0;}' +
     '.door-dot.d-employee{background:#6E9294;}.door-dot.d-owner{background:#00585A;}' +
-    '.door-dot.d-qms{background:#00BFB2;}.door-dot.d-auditor{background:#9AA7A7;}' +
+    '.door-dot.d-qms{background:#00BFB2;}.door-dot.d-auditor{background:#9AA7A7;}.door-dot.d-maintenance{background:#3D7A7E;}' +
     '.door-cap,.door-cap-s{white-space:nowrap;}.door-cap-s{display:none;}' +
     '@media(max-width:760px){.door-cap{display:none;}.door-btn{padding:0 9px;}}' +
     '.door-menu{position:absolute;top:calc(100% + 8px);inset-inline-end:0;z-index:3000;width:236px;' +
@@ -1157,7 +1158,7 @@ document.addEventListener('keydown',function(e){
     btn.setAttribute('aria-expanded', 'false');
     // "Director" on its own does not say which of the twenty-six.
     btn.title = scoped
-      ? TAQA_ROLE.areaTitle() + ', ' + TAQA_ROLE.areaName()
+      ? TAQA_ROLE.holderTitle() + ', ' + TAQA_ROLE.areaName()
       : 'You are viewing as: ' + TAQA_ROLES[k].label;
     btn.setAttribute('aria-label', btn.title + '. Change view');
     // Two captions: the area name where the bar has room, and the short role
@@ -1259,8 +1260,7 @@ document.addEventListener('keydown',function(e){
     if (typeof TAQA_DOC_LOOKUPS === 'undefined') return '';
     var S = TAQA_DOC_LOOKUPS.segments, here = TAQA_ROLE.area();
     var FAM = [['segment','Operational Segments'], ['function','Corporate Functions'],
-               ['product','Products & Technology'], ['company','Company Wide'],
-               ['pending','Pending Reassignment']];
+               ['product','Products & Technology'], ['company','Company Wide']];
     var opts = FAM.map(function (f) {
       var ids = Object.keys(S).filter(function (x) { return S[x].group === f[0]; })
                   .sort(function (a, b) { return S[a].name.localeCompare(S[b].name); });
@@ -1274,7 +1274,7 @@ document.addEventListener('keydown',function(e){
   function areaField(k, id) {
     var opts = areaPicker(k);
     if (!opts) return '';
-    return '<label for="' + id + '">' + TAQA_ROLE.areaTitle() + ' of</label>' +
+    return '<label for="' + id + '">' + TAQA_ROLE.holderTitle() + ' of</label>' +
            '<select id="' + id + '">' + opts + '</select>';
   }
 
