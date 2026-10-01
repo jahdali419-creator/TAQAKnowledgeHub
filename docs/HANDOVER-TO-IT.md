@@ -86,7 +86,7 @@ Two-step release in that order (QMS first, then the final approver). Department 
 |---|---|
 | Fresh checkout | Clone, `npm ci` (empty cache), serve, Playwright install and tests all work using only the repository and public registries |
 | Secrets | **None found.** No keys, tokens, passwords, connection strings or certificates in tracked files. The only email is the product owner's work address in document contact lines |
-| Automated tests | See the final report in PR #21 and `TESTING.md`; Chromium desktop and mobile green |
+| Automated tests | Full suite (`npm test`, 906 tests): chromium desktop **451 passed, 1 failed, 1 skipped**; mobile-chrome **452 passed, 0 failed, 1 skipped**; 18.9 min. The one failure was a **flaky test** (the dialog's delayed autofocus raced the test's typing), fixed in the test and re-run green (dashboard spec 34/34). The skip is the environment-guarded offline test |
 | Engines | Chromium desktop and mobile: full suite. Firefox and WebKit: both workflows pass when driven directly; the test fixtures are Chromium-only (`TESTING.md`) |
 | Direct URLs / refresh | 38 of 38 page loads correct at desktop and phone width |
 | Service worker | A new deployment reaches online users on their next reload; old caches are deleted |
