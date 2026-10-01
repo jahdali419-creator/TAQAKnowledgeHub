@@ -1,0 +1,196 @@
+/* TechHub design system.
+   One set of tokens and a few components every page can share, so the
+   product reads as one thing instead of fourteen pages that each define
+   their own teal. Everything here is prefixed th- and adds to what a page
+   already has; nothing in this file restyles an existing class.
+
+   Direction: premium industrial technology. Warm grey grounds from TAQA's
+   Monument Gray, one teal family, one signature accent taken from the TAQA
+   logo's chamfered shapes, BW Gradual for anything that names a thing and
+   Inter for anything you read. Colour carries meaning, not decoration. */
+
+:root{
+  /* ── Brand ── */
+  --th-teal-950:#00191B;
+  --th-teal-900:#00292C;
+  --th-teal-800:#003A3D;
+  --th-teal-700:#005D63;   /* TAQA teal: primary actions, selected states */
+  --th-teal-600:#00757C;
+  --th-teal-400:#00BBB6;   /* TechHub accent: on dark grounds, highlights */
+  --th-teal-200:#9FE3DF;
+  --th-teal-tint:rgba(0,93,99,.07);
+  --th-teal-tint-2:rgba(0,93,99,.12);
+  --th-flare:#FF6720;      /* TAQA orange: the signature mark only */
+
+  /* ── Neutrals (Monument Gray, warm) ── */
+  --th-ink:#1E1C1A;
+  --th-ink-2:#4A4540;
+  --th-ink-3:#6E655D;      /* metadata: 5.4:1 on paper */
+  --th-ink-4:#B9B2AB;      /* hairline chrome only, never text */
+  --th-paper:#FFFFFF;
+  --th-canvas:#F5F5F3;
+  --th-inset:#EEECE9;
+  --th-line:rgba(117,106,97,.13);
+  --th-line-strong:rgba(117,106,97,.24);
+
+  /* ── States ── */
+  --th-ok:#00705F;
+  --th-warn:#8A6200;
+  --th-stop:#C8102E;
+  --th-info:#0076A8;
+  --th-mark:rgba(0,187,182,.22);   /* search highlight */
+
+  /* ── Type ── */
+  --th-font-display:'BwGradual','Urbanist',system-ui,sans-serif;
+  --th-font-text:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --th-fs-hero:clamp(32px,4.4vw,54px);
+  --th-fs-h1:clamp(28px,3.2vw,38px);
+  --th-fs-h2:22px;
+  --th-fs-h3:17px;
+  --th-fs-body:15px;
+  --th-fs-small:13px;
+  --th-fs-micro:11px;
+  --th-track-tight:-0.025em;
+
+  /* ── Space (4px base) ── */
+  --th-s1:4px; --th-s2:8px; --th-s3:12px; --th-s4:16px; --th-s5:20px;
+  --th-s6:24px; --th-s8:32px; --th-s10:40px; --th-s14:56px; --th-s18:72px;
+
+  /* ── Shape ── */
+  --th-r-sm:8px; --th-r-md:12px; --th-r-lg:16px; --th-r-xl:22px; --th-r-pill:999px;
+
+  /* ── Depth: one family, tinted to the teal ── */
+  --th-shadow-1:0 1px 2px rgba(0,41,44,.06);
+  --th-shadow-2:0 1px 2px rgba(0,41,44,.05),0 10px 28px -14px rgba(0,41,44,.22);
+  --th-shadow-3:0 2px 6px rgba(0,41,44,.06),0 28px 56px -24px rgba(0,41,44,.34);
+
+  /* ── Motion ── */
+  --th-ease:cubic-bezier(.23,1,.32,1);
+  --th-dur-1:150ms; --th-dur-2:200ms; --th-dur-3:250ms;
+
+  /* ── Focus ── */
+  --th-focus:0 0 0 3px rgba(0,187,182,.45);
+}
+html[data-taqa-theme="dark"]{
+  --th-ink:#D3E4E5;
+  --th-ink-2:#9DC0C2;
+  --th-ink-3:#77A5A8;
+  --th-ink-4:#1C4A4D;
+  --th-paper:#002326;
+  --th-canvas:#001416;
+  --th-inset:#002D30;
+  --th-line:rgba(0,187,182,.12);
+  --th-line-strong:rgba(0,187,182,.24);
+  --th-teal-tint:rgba(0,187,182,.09);
+  --th-teal-tint-2:rgba(0,187,182,.16);
+  --th-ok:#4FD1B5; --th-warn:#FFB81C; --th-stop:#FF8A94; --th-info:#6BC5EE;
+  --th-mark:rgba(0,187,182,.28);
+  --th-shadow-1:0 1px 2px rgba(0,0,0,.3);
+  --th-shadow-2:0 0 0 1px rgba(0,187,182,.08),0 12px 30px -14px rgba(0,0,0,.6);
+  --th-shadow-3:0 0 0 1px rgba(0,187,182,.10),0 28px 56px -22px rgba(0,0,0,.7);
+}
+
+/* ── Signature mark ──
+   Two chamfered bars, the shapes of the TAQA logo turned into a small
+   repeatable motif: the teal bar is TechHub, the orange tip is TAQA. Used
+   in the header lockup and in eyebrows, nowhere louder than that. */
+.th-sig{display:inline-block;position:relative;width:14px;height:12px;flex-shrink:0;vertical-align:middle;}
+.th-sig::before,.th-sig::after{content:"";position:absolute;bottom:0;width:5px;border-radius:1px;
+  transform:skewX(-18deg);}
+.th-sig::before{left:1px;height:8px;background:var(--th-teal-400);}
+.th-sig::after{left:7px;height:12px;background:var(--th-teal-700);
+  box-shadow:inset 0 3px 0 var(--th-flare);}
+html[data-taqa-theme="dark"] .th-sig::after{background:var(--th-teal-400);}
+.th-sig.on-dark::after{background:var(--th-teal-400);}
+
+/* ── Eyebrow ── */
+.th-eyebrow{display:inline-flex;align-items:center;gap:8px;margin:0;
+  font:600 var(--th-fs-micro)/1.2 var(--th-font-text);letter-spacing:.16em;text-transform:uppercase;
+  color:var(--th-teal-700);}
+html[data-taqa-theme="dark"] .th-eyebrow,.th-eyebrow.on-dark{color:var(--th-teal-200);}
+
+/* ── Buttons ── */
+.th-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;
+  border-radius:var(--th-r-md);border:1px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap;
+  font:600 14px/1 var(--th-font-display);letter-spacing:.005em;
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color var(--th-dur-1) var(--th-ease),border-color var(--th-dur-1) var(--th-ease),
+             color var(--th-dur-1) var(--th-ease),transform 100ms var(--th-ease),box-shadow var(--th-dur-1) var(--th-ease);}
+.th-btn:active{transform:scale(.98);}
+.th-btn:focus-visible{outline:none;box-shadow:var(--th-focus);}
+.th-btn svg{width:16px;height:16px;flex-shrink:0;}
+.th-btn--primary{background:var(--th-teal-700);color:#fff;}
+@media (hover:hover){.th-btn--primary:hover{background:var(--th-teal-800);}}
+html[data-taqa-theme="dark"] .th-btn--primary{background:var(--th-teal-400);color:var(--th-teal-950);}
+@media (hover:hover){html[data-taqa-theme="dark"] .th-btn--primary:hover{background:var(--th-teal-200);}}
+.th-btn--quiet{background:var(--th-paper);color:var(--th-teal-700);border-color:var(--th-line-strong);}
+@media (hover:hover){.th-btn--quiet:hover{border-color:var(--th-teal-700);background:var(--th-teal-tint);}}
+html[data-taqa-theme="dark"] .th-btn--quiet{color:var(--th-teal-400);}
+/* On a photograph or a dark band. */
+.th-btn--on-dark{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.28);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);}
+@media (hover:hover){.th-btn--on-dark:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.5);}}
+
+/* ── Chips (filters) ──
+   Light by default, filled teal when chosen. aria-pressed carries the state. */
+.th-chip{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:0 14px;border-radius:var(--th-r-pill);
+  border:1px solid transparent;background:var(--th-inset);color:var(--th-ink-2);cursor:pointer;white-space:nowrap;
+  font:500 13.5px/1 var(--th-font-display);-webkit-tap-highlight-color:transparent;
+  transition:background-color var(--th-dur-1) var(--th-ease),color var(--th-dur-1) var(--th-ease),border-color var(--th-dur-1) var(--th-ease);}
+.th-chip .th-chip-n{font:500 11.5px/1 var(--th-font-text);color:var(--th-ink-3);font-variant-numeric:tabular-nums;}
+@media (hover:hover){.th-chip:hover{background:var(--th-teal-tint-2);color:var(--th-ink);}}
+.th-chip[aria-pressed="true"]{background:var(--th-teal-700);color:#fff;}
+.th-chip[aria-pressed="true"] .th-chip-n{color:rgba(255,255,255,.72);}
+html[data-taqa-theme="dark"] .th-chip[aria-pressed="true"]{background:var(--th-teal-400);color:var(--th-teal-950);}
+html[data-taqa-theme="dark"] .th-chip[aria-pressed="true"] .th-chip-n{color:rgba(0,25,27,.7);}
+.th-chip:focus-visible{outline:none;box-shadow:var(--th-focus);}
+
+/* ── Technical line pattern ──
+   Faint survey lines for dark heroes: the texture of a well log, not a
+   gradient. Sits over the photo, under the words. */
+.th-lines{position:absolute;inset:0;pointer-events:none;
+  background-image:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.045) 0 1px,transparent 1px 88px),
+    linear-gradient(180deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:auto,100% 44px;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 35%,#000 70%,transparent 100%);
+          mask-image:linear-gradient(180deg,transparent 0%,#000 35%,#000 70%,transparent 100%);}
+
+/* ── Drawer / bottom sheet ──
+   A side drawer on a wide screen, a sheet that rises from the bottom on a
+   phone. The scrim and panel are always in the DOM; [data-open] shows them. */
+.th-scrim{position:fixed;inset:0;z-index:4000;background:rgba(0,25,27,.42);opacity:0;visibility:hidden;
+  transition:opacity var(--th-dur-3) var(--th-ease),visibility 0s linear var(--th-dur-3);}
+.th-drawer{position:fixed;z-index:4001;top:0;bottom:0;inset-inline-end:0;width:min(440px,100%);
+  display:flex;flex-direction:column;background:var(--th-paper);box-shadow:var(--th-shadow-3);
+  transform:translateX(102%);visibility:hidden;
+  transition:transform var(--th-dur-3) var(--th-ease),visibility 0s linear var(--th-dur-3);}
+[dir="rtl"] .th-drawer{transform:translateX(-102%);}
+.th-drawer[data-open],.th-scrim[data-open]{visibility:visible;transition-delay:0s;}
+.th-scrim[data-open]{opacity:1;}
+.th-drawer[data-open]{transform:none;}
+.th-drawer-head{display:flex;align-items:flex-start;gap:12px;padding:22px 22px 14px;border-bottom:1px solid var(--th-line);}
+.th-drawer-head h2{flex:1;margin:0;font:700 20px/1.25 var(--th-font-display);letter-spacing:-.01em;color:var(--th-ink);}
+.th-drawer-head p{margin:6px 0 0;font:400 13.5px/1.55 var(--th-font-text);color:var(--th-ink-3);}
+.th-drawer-x{width:40px;height:40px;flex-shrink:0;border-radius:50%;border:0;background:var(--th-inset);color:var(--th-ink-2);
+  display:grid;place-items:center;cursor:pointer;transition:background-color var(--th-dur-1) var(--th-ease);}
+.th-drawer-x:hover{background:var(--th-teal-tint-2);}
+.th-drawer-x:focus-visible{outline:none;box-shadow:var(--th-focus);}
+.th-drawer-x svg{width:16px;height:16px;}
+.th-drawer-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:18px 22px 22px;}
+.th-grab{display:none;}
+@media (max-width:640px){
+  .th-drawer{top:auto;inset-inline:0;width:auto;max-height:calc(100dvh - 48px);
+    border-radius:var(--th-r-xl) var(--th-r-xl) 0 0;transform:translateY(104%);
+    padding-bottom:env(safe-area-inset-bottom,0px);}
+  [dir="rtl"] .th-drawer{transform:translateY(104%);}
+  .th-drawer[data-open]{transform:none;}
+  .th-grab{display:block;width:40px;height:4px;border-radius:2px;background:var(--th-ink-4);margin:10px auto 0;}
+  .th-drawer-head{padding:12px 18px 12px;}
+  .th-drawer-body{padding:16px 18px 20px;}
+}
+html.th-lock,html.th-lock body{overflow:hidden!important;}
+
+@media (prefers-reduced-motion: reduce){
+  .th-btn,.th-chip,.th-scrim,.th-drawer,.th-drawer-x{transition-duration:.01ms!important;}
+}

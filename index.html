@@ -1019,7 +1019,7 @@ html[data-taqa-theme="dark"] .desk-who{background:rgba(0,187,182,0.12);}
 }
 .section-hl-title {
   font-family:'BwGradual','Urbanist',sans-serif; font-size:clamp(20px,2.2vw,26px);
-  font-weight:700; color:var(--text); letter-spacing:-0.4px; font-style:italic;
+  font-weight:700; color:var(--text); letter-spacing:-0.02em;
 }
 html[data-taqa-theme="dark"] .section-hl-title { color:var(--text); }
 
@@ -1399,10 +1399,8 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
   pointer-events:none;
 }
 .sidebar-brand-card-name {
-  font-family:'BwGradual','Urbanist',sans-serif; font-size:22px; font-weight:700; font-style:italic;
-  letter-spacing:-0.3px; display:block; margin-bottom:4px;
-  background:linear-gradient(120deg, #00BBB6 15%, #EAFFFD 85%);
-  -webkit-background-clip:text; background-clip:text; color:transparent;
+  font-family:'BwGradual','Urbanist',sans-serif; font-size:22px; font-weight:700;
+  letter-spacing:-0.02em; display:block; margin-bottom:4px; color:#FFFFFF;
 }
 @media (prefers-contrast:more){
   .sidebar-brand-card-name{background:none; -webkit-text-fill-color:unset; color:var(--primary-light);}
@@ -1485,7 +1483,89 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
   .hero-search-btn svg { display:block; }
 }
 
+
+/* ═════ TechHub redesign: home ═════
+   A shorter hero that says what TechHub is, the search as its one action,
+   and the three ways in lifted onto the edge of the band so they are seen
+   on the first screen of a laptop and just under the search on a phone. */
+.hero-wrap { min-height:clamp(540px, 76dvh, 700px); }
+.hw-6 { animation-delay:0.46s; }
+.hero-bg-layer { animation:none; filter:grayscale(.25); }
+.hero-lines { z-index:2; }
+.hero { padding-block:calc(var(--nav-h, 64px) + 40px) 104px; }
+.hero-eyebrow { margin-bottom:18px; }
+.hero h1 { font-family:var(--th-font-display); font-size:var(--th-fs-hero); line-height:1.04;
+  letter-spacing:var(--th-track-tight); margin-bottom:14px; }
+.hero h1 span { color:var(--th-teal-400); }
+.hero-sub { margin:0 0 30px; font:400 18px/1.5 var(--th-font-text); color:rgba(255,255,255,.78); }
+a.hero-label { display:inline-flex; align-items:center; gap:6px; margin:18px 0 0;
+  font:600 13px/1.3 var(--th-font-text); color:var(--th-teal-200); border-bottom:0; padding-bottom:0; letter-spacing:0; }
+a.hero-label .hero-label-k { color:rgba(255,255,255,.62); font-weight:500; }
+a.hero-label svg { width:13px; height:13px; }
+a.hero-label:hover { color:#fff; text-decoration:underline; text-underline-offset:3px; }
+
+.doors-strip { background:transparent; border:0; position:relative; z-index:4; margin-top:-72px; }
+.doors-strip-inner { padding:0 48px 8px; gap:20px; }
+.door-card { position:relative; flex-direction:column; align-items:flex-start; gap:18px; padding:24px 24px 22px;
+  background:var(--th-paper); border:1px solid var(--th-line); border-radius:var(--th-r-lg); box-shadow:var(--th-shadow-2);
+  transition:transform var(--th-dur-2) var(--th-ease), box-shadow var(--th-dur-2) var(--th-ease), border-color var(--th-dur-2) var(--th-ease); }
+.door-card:hover { transform:translateY(-3px); box-shadow:var(--th-shadow-3); border-color:rgba(0,93,99,.35); }
+.door-card:active { transform:translateY(-1px); }
+.door-card:focus-visible { outline:none !important; box-shadow:var(--th-focus), var(--th-shadow-2); }
+.door-icon { width:44px; height:44px; border-radius:12px; background:var(--th-teal-tint); color:var(--th-teal-700); }
+html[data-taqa-theme="dark"] .door-icon { color:var(--th-teal-400); }
+.door-kicker { display:block; margin-bottom:6px; font:600 11px/1.2 var(--th-font-text); letter-spacing:.14em; text-transform:uppercase; color:var(--th-teal-700); }
+html[data-taqa-theme="dark"] .door-kicker { color:var(--th-teal-400); }
+.door-title { font-size:20px; letter-spacing:-.01em; margin-bottom:6px; color:var(--th-ink); }
+.door-desc { font-size:14px; line-height:1.55; color:var(--th-ink-2); }
+.door-go { position:absolute; top:22px; inset-inline-end:22px; width:32px; height:32px; border-radius:50%;
+  display:grid; place-items:center; background:var(--th-inset); color:var(--th-teal-700);
+  transition:background-color var(--th-dur-2) var(--th-ease), color var(--th-dur-2) var(--th-ease), transform var(--th-dur-2) var(--th-ease); }
+.door-go svg { width:16px; height:16px; }
+[dir="rtl"] .door-go svg { transform:scaleX(-1); }
+.door-card:hover .door-go { background:var(--th-teal-700); color:#fff; transform:translateX(2px); }
+html[data-taqa-theme="dark"] .door-go { color:var(--th-teal-400); }
+html[data-taqa-theme="dark"] .door-card:hover .door-go { background:var(--th-teal-400); color:var(--th-teal-950); }
+
+.stats-strip { background:transparent; border-bottom:0; margin-top:20px; }
+html[data-taqa-theme="dark"] .stats-strip { background:transparent; }
+.stats-strip-num { font-family:var(--th-font-display); }
+
+@media (max-width:1024px) {
+  .hero-wrap { min-height:0; }
+  .hero { padding-block:calc(var(--nav-h, 64px) + 56px) 112px; }
+}
+/* A tablet keeps the three ways in side by side. */
+@media (min-width:641px) and (max-width:1024px) {
+  .doors-strip-inner { grid-template-columns:repeat(3,1fr); padding:0 24px 8px; gap:14px; }
+  .door-card { padding:20px 18px 18px; gap:14px; }
+  .door-title { font-size:18px; }
+  .door-go { top:16px; inset-inline-end:16px; width:28px; height:28px; }
+}
+@media (max-width:360px) {
+  a.hero-label .hero-label-k { display:none; }
+}
+@media (max-width:640px) {
+  .hero-wrap { min-height:0; }
+  .hero { padding-block:calc(var(--nav-h, 64px) + 28px) 76px; }
+  .hero h1 { font-size:34px; }
+  .hero-sub { font-size:16px; margin-bottom:22px; }
+  a.hero-label { min-height:44px; margin-top:6px; }
+  .doors-strip { margin-top:-52px; }
+  .doors-strip-inner { padding:0 16px 4px; gap:10px; }
+  /* On a phone each way in is one row: icon, words, arrow. */
+  .door-card { flex-direction:row; align-items:center; gap:14px; padding:16px 16px; }
+  .door-go { position:static; flex-shrink:0; margin-inline-start:auto; width:30px; height:30px; }
+  .door-title { font-size:17px; margin-bottom:3px; }
+  .door-desc { font-size:13px; }
+  .door-kicker { font-size:10px; margin-bottom:4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .door-card, .door-go { transition:none; }
+  .door-card:hover { transform:none; }
+}
 </style>
+<link rel="stylesheet" href="techhub.css">
 <link rel="stylesheet" href="topbar.css">
 </head>
 <body>
@@ -1503,7 +1583,7 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
   <a href="index.html" class="nav-brand">
     <img src="icons/taqa-logo.png" alt="TAQA" class="nav-logo nav-logo-light">
     <img src="icons/taqa-logo-reverse.png" alt="TAQA" class="nav-logo nav-logo-dark">
-    <span class="nav-subtitle"><em>TechHub Platform</em></span>
+    <span class="nav-subtitle"><span class="th-sig" aria-hidden="true"></span><em>TechHub</em></span>
   </a>
   <ul class="nav-links">
     <li><a href="index.html" class="active" aria-current="page">Home</a></li>
@@ -1532,16 +1612,19 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
 <div class="hero-wrap">
   <div class="hero-bg-layer" id="hero-layer-a" style="background-image:url('taqa-hero.webp')"></div>
   <div class="hero-overlay"></div>
+  <div class="th-lines hero-lines" aria-hidden="true"></div>
 
 <div class="hero">
   <div class="hero-left">
-<a class="hero-label hw hw-1" href="https://engage.cloud.microsoft/main/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyMTA0NzY4NjgyOTQyNDY0In0/all" target="_blank" rel="noopener noreferrer" aria-label="#BetterTogether@TAQA, opens the initiative community in Viva Engage">#BetterTogether@TAQA</a>
-<h1><span class="hw hw-2 hw-i hero-h1-lead">Knowledge Is&nbsp;</span><span class="hw hw-3 hw-i">Better Together.</span><br><span class="hw hw-4 hw-i hero-h1-sub">Every Answer, Within Reach.</span></h1>
+<p class="th-eyebrow on-dark hero-eyebrow hw hw-1"><span class="th-sig on-dark" aria-hidden="true"></span>TechHub</p>
+<h1><span class="hw hw-2 hw-i hero-h1-lead">Field knowledge.&nbsp;</span><span class="hw hw-3 hw-i">One place.</span></h1>
+<p class="hero-sub hw hw-4">Find knowledge. Ask experts. Work smarter.</p>
     <form class="hero-search hw hw-5" id="hero-search" action="ai-search.html" method="get" role="search" aria-label="Search the register">
       <svg class="hero-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
       <input type="search" id="hero-search-input" name="q" placeholder="Search documents, procedures, manuals" autocomplete="off" enterkeyhint="search" aria-label="Search documents, procedures and manuals">
       <button type="submit" class="btn btn-primary hero-search-btn" id="hero-search-btn"><span>Search</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
     </form>
+    <a class="hero-label hw hw-6" href="https://engage.cloud.microsoft/main/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyMTA0NzY4NjgyOTQyNDY0In0/all" target="_blank" rel="noopener noreferrer" aria-label="#BetterTogether@TAQA, opens the initiative community in Viva Engage"><span class="hero-label-k">Join the conversation</span> #BetterTogether@TAQA<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
   </div>
   <div class="hero-right">
     <div class="hero-stats-panel hw hw-8">
@@ -1583,27 +1666,33 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       </span>
       <span class="door-body">
+        <span class="door-kicker">Discover knowledge</span>
         <span class="door-title">Browse by Area</span>
-        <span class="door-desc">Find documents by segment, function or center</span>
+        <span class="door-desc">Procedures, manuals and standards for every segment, function and center.</span>
       </span>
+      <span class="door-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
     </a>
     <a href="support-ticket.html" class="door-card">
       <span class="door-icon" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/></svg>
       </span>
       <span class="door-body">
+        <span class="door-kicker">Ask people</span>
         <span class="door-title">Ask an Expert</span>
-        <span class="door-desc">Get a direct answer from your segment's expert</span>
+        <span class="door-desc">Send a field problem to the right expert and get a direct answer.</span>
       </span>
+      <span class="door-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
     </a>
     <a href="glossary.html" class="door-card">
       <span class="door-icon" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       </span>
       <span class="door-body">
+        <span class="door-kicker">Understand field language</span>
         <span class="door-title">Field Glossary</span>
-        <span class="door-desc">Look up any oilfield abbreviation or term</span>
+        <span class="door-desc">Look up any oilfield abbreviation, term or definition.</span>
       </span>
+      <span class="door-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
     </a>
   </div>
 </div>
@@ -1683,7 +1772,7 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
         <!-- Tools -->
         <div class="section-headline" style="margin-bottom:14px;">
           <span class="section-hl-tag">Tools &amp; Services</span>
-          <h2 class="section-hl-title" style="font-size:13.5px; white-space:nowrap; letter-spacing:-0.2px;">Find it fast. Use it. Every time.</h2>
+          <h2 class="section-hl-title" style="font-size:15px; white-space:nowrap; letter-spacing:-0.01em;">Find it fast. Use it often.</h2>
         </div>
         <div class="sidebar-tools">
 
@@ -1723,7 +1812,7 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
 
         <!-- Brand Card -->
         <div class="sidebar-brand-card reveal reveal-delay-3">
-          <span class="sidebar-brand-card-name">TechHub Platform</span>
+          <span class="sidebar-brand-card-name">TechHub</span>
           <p class="sidebar-brand-card-tagline">Your single source of truth for all TAQA operations. Every document. Every discipline. One platform.</p>
           <span class="sidebar-brand-card-credit">Built by <span>TAQA LEARNING CENTER</span></span>
         </div>
@@ -1752,7 +1841,7 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
 <footer>
   <div class="footer-inner">
     <div>
-      <div class="footer-brand">TAQA Knowledge Hub &nbsp;·&nbsp; <em style="font-style:italic; font-weight:700; background:linear-gradient(120deg, #005D63 20%, #00959C 80%); -webkit-background-clip:text; background-clip:text; color:transparent;">TechHub Platform</em></div>
+      <div class="footer-brand">TAQA Knowledge Hub &nbsp;·&nbsp; <em style="font-style:normal; font-weight:700; color:var(--primary-ink);">TechHub</em></div>
       <div class="footer-copy">© 2026 TAQA, Industrialization &amp; Energy Services Company. All rights reserved.</div>
       <div class="footer-credit">Built by <span style="color:var(--primary-ink); font-weight:600;">TAQA LEARNING CENTER</span></div>
     </div>
