@@ -31,7 +31,6 @@ const PAGES = [
   { path: '/ai-search.html', name: 'ai-search' },
   { path: '/dashboard.html?id=coiled-tubing', name: 'dashboard' },
   { path: '/upload.html', name: 'upload' },
-  { path: '/maintenance.html', name: 'maintenance' },
 ];
 
 // Spot-checked at the SE and large sizes too, in addition to every page at

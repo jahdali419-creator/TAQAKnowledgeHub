@@ -23,7 +23,6 @@ const CORE = [
   BASE + 'master-list.html',
   BASE + 'dashboard.html',
   BASE + 'whats-new.html',
-  BASE + 'maintenance.html',
   BASE + 'documents.html',
   BASE + 'search-index.js',
   BASE + 'ai-search.html',

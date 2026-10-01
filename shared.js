@@ -441,7 +441,7 @@ window.showToast=function(msg,type){
   }
   if(menu){
     menu.setAttribute('aria-label','Menu');
-    var items=[{href:'index.html',label:'Home'},{href:'maintenance.html',label:'Maintenance'},{href:'ai-search.html',label:'Document Search'}];
+    var items=[{href:'index.html',label:'Home'},{href:'ai-search.html',label:'Document Search'}];
     if(canRegister) items.push({href:'master-list.html',label:'Master List'});
     items.push({href:'glossary.html',label:'Field Glossary'},{href:'support-ticket.html',label:'Ask Expert'});
     var html='<div class="mm-main">'+items.map(function(l){
