@@ -1,5 +1,7 @@
 # What the platform does
 
+> **Historical (August 2026).** Written before the two-step release workflow, the five personas and the Azure API approach. Kept as background. For current rules and integration requirements start at `docs/HANDOVER-TO-IT.md`; where this document differs, the handover package wins.
+
 TAQA Knowledge Hub, functional description
 Prepared by Mohammed Al-Jahdali, TAQA Learning Center
 4 August 2026

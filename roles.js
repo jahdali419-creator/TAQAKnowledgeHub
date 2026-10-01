@@ -55,7 +55,9 @@ const TAQA_ROLES = {
 
   owner: {
     label: 'Segment Director',
-    blurb: 'Holds a segment. Approves the documents the register names them approver for, which is SOPs and Standards in their own area, and may delegate that authority for a fixed period. Release still needs the QMS countersignature.',
+    // Wording only: QMS checks first and the Director's approval releases
+    // (TAQA_APPROVAL), so the description says it in that order.
+    blurb: 'Holds a segment. Gives final approval to its Operations documents once QMS has checked them, and that approval is what publishes them. May delegate the authority for a fixed period.',
     statuses:        ['current', 'under-review', 'superseded', 'obsolete', 'draft'],
     classifications: ['internal', 'confidential'],
     controlPanel: true,
@@ -102,7 +104,7 @@ const TAQA_ROLES = {
 
   qms: {
     label: 'QMS / Document Controller',
-    blurb: 'Custodian of the register. Countersigns what a Director has approved, checking the record and the numbering before release, and owns withdrawal, periodic review and the TQ-QHSE-F086 export. Does not give the technical sign-off on another function\'s procedure.',
+    blurb: 'Custodian of the register. Checks every document first, the record, the numbering and the revision, before its Segment Director or Maintenance Manager gives final approval. Owns withdrawal, periodic review and the TQ-QHSE-F086 export. Does not give the technical sign-off on another function\'s procedure.',
     statuses:        ['current', 'under-review', 'superseded', 'obsolete', 'draft'],
     classifications: ['internal', 'confidential', 'restricted'],
     controlPanel: true,

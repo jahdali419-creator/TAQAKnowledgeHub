@@ -5,22 +5,68 @@ dependencies. Playwright and a small static file server are the only
 dev-time tools, and they exist solely to test the app; nothing here changes
 how the site itself runs in production.
 
+## From a fresh checkout (verified 1 Oct 2026)
+
+Requirements: Git, Node.js 18 or later (verified on Node 22, npm 10), internet
+access to the npm registry and Playwright's browser download. Nothing else:
+no global packages, no environment variables, no files outside the repository.
+
+```
+git clone <repository-url> techhub && cd techhub
+npm ci                                   # exact versions from package-lock.json
+npx playwright install --with-deps chromium   # browser + OS libraries (Linux needs sudo for --with-deps)
+npm run serve                            # http://127.0.0.1:4173 , any static server works
+npx playwright test --project=chromium --project=mobile-chrome
+```
+
+- **Configure:** nothing is needed to run the prototype. Per-environment
+  values for the Azure build are described in
+  `docs/AZURE-INTEGRATION-REQUIREMENTS.md` §2 (template:
+  `config/techhub.config.example.js`).
+- **Build:** there is no build step. The deployable artefact is the static
+  files themselves: the `.html` pages, `*.js`, `*.css`, `manifest.json`,
+  `service-worker.js`, `staticwebapp.config.json`, `offline.html`, `fonts/`,
+  `icons/` and the hero images. `docs/`, `tests/`, `config/*.example.js` and the
+  npm/Playwright files are not part of the app.
+- The Playwright config uses a pre-installed Chromium at
+  `/opt/pw-browsers/chromium` **only if that path exists** (it does in the
+  cloud environment this was built in), otherwise Playwright's own download.
+  Override with `PLAYWRIGHT_CHROMIUM_PATH`. Port: `TAQA_TEST_PORT` (default 4173).
+- **Port 4173 must be free (or serving this checkout).** Locally Playwright
+  reuses any server already listening on the test port
+  (`reuseExistingServer`), so a server left running from another copy of the
+  repository makes tests run against the wrong files (seen during the handover
+  audit as service-worker cache tests failing against an older build). Stop
+  other servers or set `TAQA_TEST_PORT`.
+- On a small machine use `--workers=2`: the full two-project run is 906 tests
+  and takes about 18 minutes.
+
 ## Quick start
 
 ```
-npm install
-npx playwright install        # first time only, downloads browser binaries
+npm ci
+npx playwright install chromium   # first time only, downloads browser binaries
 npm test
 ```
 
-`npm test` starts a local static server, runs the full suite against it on
-Chromium, and shuts the server down again. That's the whole loop.
+`npm test` starts a local static server, runs the full suite on the two
+supported projects (`chromium` desktop and `mobile-chrome`), and shuts the
+server down again. `npm run test:all-engines` adds Firefox, WebKit and
+mobile-safari (see Engines below). CI runs Chromium only
+(`.github/workflows/tests.yml`).
+
+## Engines
+
+| Project | Status (1 Oct 2026) |
+|---|---|
+| `chromium`, `mobile-chrome` | Full suite green; CI runs `chromium` |
+| `firefox`, `webkit`, `mobile-safari` | The **app** passes both workflows when driven directly in Firefox and WebKit. The **test suite** fails in setup on these engines: its fixtures touch `localStorage` and navigate in a way only Chromium tolerates ("navigation interrupted", "The operation is insecure"). Make `tests/helpers/fixtures.js` cross-engine before adding these projects to CI. |
 
 ## Other useful commands
 
 ```
 npm run test:ui          # Playwright's interactive UI mode, for debugging
-npm run test:chromium    # Chromium only (same as `npm test`)
+npm run test:chromium    # Chromium desktop only (what CI runs)
 npm run test:firefox     # requires `npx playwright install firefox`
 npm run test:webkit      # requires `npx playwright install webkit`
 npm run test:mobile      # Pixel 7 + iPhone 14 device emulation profiles (iPhone needs WebKit installed)
@@ -43,8 +89,8 @@ Document Controller (`qms`) and External Auditor (`auditor`).
 `roles.spec.js` pins each one's exact capabilities, including `submit` and
 `department`. A test that loops over roles should include `maintenance`
 wherever the rule it checks applies to it. Reports written for four roles
-(`QA-RELEASE-REPORT.md`, `RELEASE-QA-E2E.md`) are marked stale; the current
-evidence is `FIVE-ROLE-QA-AUDIT.md`.
+(`docs/QA/QA-RELEASE-REPORT.md`, `docs/QA/RELEASE-QA-E2E.md`) are marked stale;
+the current evidence is `docs/QA/FIVE-ROLE-QA-AUDIT.md`.
 
 ## What's covered
 

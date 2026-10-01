@@ -1,6 +1,6 @@
 # Five-role audit evidence, 1 October 2026
 
-Supports `FIVE-ROLE-QA-AUDIT.md` in the repository root.
+Supports `docs/QA/FIVE-ROLE-QA-AUDIT.md`.
 
 | Folder | What it holds |
 |---|---|

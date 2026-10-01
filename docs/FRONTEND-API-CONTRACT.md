@@ -1,5 +1,7 @@
 # Frontend API contract
 
+> **Current endpoint contract: `docs/API-REQUIREMENTS.md`.** This file stays as the map from each prototype JavaScript function to its future endpoint; rules: `docs/BUSINESS-RULES.md`.
+
 What the browser code actually calls today, as a reference for whoever wires
 it to Azure. This is not the plan (see `AZURE-MIGRATION-RAFA.md` for that,
 and `HUB-DOCUMENT-CONTROL-SPEC.md` for the document schema's reasoning) — it

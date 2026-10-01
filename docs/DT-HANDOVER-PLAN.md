@@ -1,5 +1,7 @@
 # TAQA Knowledge Hub: D&T handover and integration plan
 
+> **Historical (August 2026).** Written before the two-step release workflow, the five personas and the Azure API approach. Kept as background. For current rules and integration requirements start at `docs/HANDOVER-TO-IT.md`; where this document differs, the handover package wins.
+
 Prepared by Mohammed Al-Jahdali, Maintenance Instructor Lead, TAQA Learning Center
 For D&T Demand (Mashael Al Muhanna, Rafa Al Zahrani) and D&T Corporate (Hilal Al Malki)
 Sponsor: Ahmed Al Mubarak, TAQA Well Solutions
