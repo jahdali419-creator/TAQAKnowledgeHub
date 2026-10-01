@@ -802,7 +802,7 @@ window.showToast=function(msg,type){
     '.bm-x:hover{color:var(--stop-ink,#C8102E);background:var(--tb-hover,rgba(117,106,97,.08));}'+
     '.bm-empty{text-align:center;padding:30px 20px 34px;color:var(--tb-light,#756A61);font-size:13.5px;line-height:1.6;}'+
     '.bm-empty b{display:block;font-family:"BwGradual","Urbanist",sans-serif;font-size:15px;font-weight:700;color:var(--tb-text,#1E1C1A);margin-bottom:4px;}'+
-    '@media (max-width:1180px){.bm-clr{min-height:44px;padding:0 12px;}}'+
+    '@media (max-width:1280px){.bm-clr{min-height:44px;padding:0 12px;}}'+
     '@media (max-width:640px){.bm-panel{inset-inline:12px;width:auto;}}'+
     '@media (prefers-reduced-motion:reduce){.bm-panel{animation:none;}}';
   document.head.appendChild(s);
@@ -881,7 +881,7 @@ window.showToast=function(msg,type){
   function trigger(){ return document.getElementById('nav-bm'); }
   function place(from){
     // Hang the list under whatever opened it. On a phone it spans the width.
-    var wide=window.matchMedia&&window.matchMedia('(min-width:1181px)').matches;
+    var wide=window.matchMedia&&window.matchMedia('(min-width:1281px)').matches;
     var nav=document.getElementById('navbar')||document.querySelector('nav');
     var top=nav?Math.round(nav.getBoundingClientRect().bottom)+8:72;
     panel.style.top=top+'px';
@@ -1019,10 +1019,19 @@ document.addEventListener('keydown',function(e){
     return document.querySelectorAll('input:not([type=file]):not([type=submit]):not([type=button]),select,textarea');
   }
 
+  /* A group of radios shares one name, so it is saved once, as the value of
+     the one that is checked, and restored by checking that one. Saving each
+     radio's value under the shared name used to write the last radio's value
+     into every radio on restore: Urgency read "low" four times, and the Ask
+     Expert department read "maintenance" twice. */
   function saveDraft(){
     var data={};
     getFields().forEach(function(f){
-      if(f.id || f.name) data[f.id||f.name]=f.value;
+      var k=f.id||f.name;
+      if(!k) return;
+      if(f.type==='radio'){ k=f.name||k; if(f.checked) data[k]=f.value; else if(!(k in data)) data[k]=''; return; }
+      if(f.type==='checkbox'){ data[k]=f.checked?'1':''; return; }
+      data[k]=f.value;
     });
     try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(e){}
   }
@@ -1031,10 +1040,22 @@ document.addEventListener('keydown',function(e){
     var raw; try{ raw=localStorage.getItem(KEY); }catch(e){ return; }
     if(!raw) return;
     var data; try{ data=JSON.parse(raw); }catch(e){ return; }
+    var changed=[];
     getFields().forEach(function(f){
+      if(f.type==='radio'){
+        var v=data[f.name||f.id];
+        if(v && f.value===v && !f.checked){ f.checked=true; changed.push(f); }
+        return;
+      }
       var k=f.id||f.name;
-      if(k && data[k] != null && data[k] !== '') f.value=data[k];
+      if(!k || data[k]==null || data[k]==='') return;
+      if(f.type==='checkbox'){ if(!f.checked){ f.checked=true; changed.push(f); } return; }
+      if(f.value!==data[k]){ f.value=data[k]; changed.push(f); }
     });
+    // Ask Expert draws who answers from the area and the department; tell it
+    // they changed, as if the person had chosen them, so the card and the
+    // Operations | Maintenance choice match what was put back.
+    if(isTicket) changed.forEach(function(f){ f.dispatchEvent(new Event('change',{bubbles:true})); });
     if(Object.keys(data).some(function(k){return data[k]!=='';})){
       if(window.showToast) window.showToast('Draft restored','info');
     }

@@ -1726,6 +1726,13 @@ if (typeof TAQA_STORE !== 'undefined') TAQA_STORE.onChange(paintMySubmissions);
 
 document.addEventListener('DOMContentLoaded', function(){
   paintStepBar();
+  // The Maintenance page's "File a bulletin" arrives with the type chosen.
+  var wantType = (new URLSearchParams(location.search).get('type') || '').replace(/[^a-z]/g,'');
+  var ts = document.getElementById('doc-type-select');
+  if (wantType && ts && ts.querySelector('option[value="' + wantType + '"]')) {
+    ts.value = wantType;
+    onTypeChange(wantType);
+  }
   // Arriving from an area's empty tab, that area is already chosen.
   var want = new URLSearchParams(location.search).get('seg');
   var ss = document.getElementById('seg-select');

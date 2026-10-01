@@ -989,8 +989,8 @@ html[data-taqa-theme="dark"] .stats-strip-divider { background:#003A3D; }
   display:flex; align-items:center; justify-content:center;
 }
 .door-body { min-width:0; }
-.door-title { font-family:'BwGradual','Urbanist',sans-serif; font-size:14.5px; font-weight:700; color:var(--text); margin-bottom:2px; }
-.door-desc { font-size:12px; color:var(--text-muted); line-height:1.4; }
+.door-title { display:block; font-family:'BwGradual','Urbanist',sans-serif; font-size:14.5px; font-weight:700; color:var(--text); margin-bottom:2px; }
+.door-desc { display:block; font-size:12px; color:var(--text-muted); line-height:1.4; }
 html[data-taqa-theme="dark"] .door-icon { background:rgba(0,187,182,0.1); }
 
 
@@ -1011,31 +1011,6 @@ html[data-taqa-theme="dark"] .desk{background:#002326;border-color:#003A3D;}
    disappears behind the line, so the role is tinted in the dark teal instead. */
 html[data-taqa-theme="dark"] .desk-who{background:rgba(0,187,182,0.12);}
 @media(max-width:640px){.desk{padding:12px 20px;}.desk-line{flex:1 1 100%;order:3;}}
-/* ── Continue Reading Strip ── */
-.continue-strip{background:var(--bg-white);border-bottom:1px solid var(--border);padding:12px 48px;}
-.continue-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
-.continue-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--primary-ink);flex-shrink:0;}
-.continue-card{display:flex;align-items:center;gap:12px;padding:8px 16px;background:rgba(0,93,99,0.04);border:1px solid rgba(0,93,99,0.15);border-radius:8px;text-decoration:none;transition:border-color 0.2s,background 0.2s;flex:1;min-width:0;max-width:480px;}
-.continue-card:hover{border-color:rgba(0,93,99,0.3);background:rgba(0,93,99,0.08);}
-.continue-icon{width:32px;height:32px;border-radius:7px;background:rgba(0,93,99,0.12);color:var(--primary-ink);font-size:9px;font-weight:700;font-family:'BwGradual','Urbanist',sans-serif;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.continue-info{flex:1;min-width:0;}
-.continue-title{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.continue-meta{font-size:11px;color:var(--text-muted);margin-top:1px;}
-.continue-arr{font-size:14px;color:var(--primary-ink);flex-shrink:0;}
-html[data-taqa-theme="dark"] .continue-strip{background:#002326;border-color:#003A3D;}
-html[data-taqa-theme="dark"] .continue-card{background:rgba(0,187,182,0.04);border-color:rgba(0,187,182,0.15);}
-html[data-taqa-theme="dark"] .continue-card:hover{background:rgba(0,187,182,0.08);}
-html[data-taqa-theme="dark"] .continue-icon{background:rgba(0,187,182,0.12);color:#00BBB6;}
-/* An alert keeps the orange family here as it does on every card. */
-.continue-icon.is-alert{background:rgba(253,105,29,0.12);color:var(--alert-ink,#A8431A);}
-html[data-taqa-theme="dark"] .continue-icon.is-alert{background:rgba(253,105,29,0.16);color:var(--alert-ink,#FF9B5E);}
-@media(max-width:640px){
-  .continue-strip{padding:10px 20px;}
-  .continue-inner{gap:10px;}
-  .continue-card{max-width:100%;flex:1;}
-  .continue-lbl{display:none;}
-}
-
 /* ── Section Headline ── */
 .section-headline { margin-bottom:20px; }
 .section-hl-tag {
@@ -1670,21 +1645,6 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
   </div>
 </div>
 
-<!-- ── Continue Reading ── -->
-<div class="continue-strip reveal" id="continue-strip" style="display:none">
-  <div class="continue-inner">
-    <span class="continue-lbl">Continue Reading</span>
-    <a class="continue-card" id="continue-card" href="#">
-      <div class="continue-icon" id="continue-icon">DOC</div>
-      <div class="continue-info">
-        <div class="continue-title" id="continue-title"></div>
-        <div class="continue-meta" id="continue-meta"></div>
-      </div>
-      <span class="continue-arr">→</span>
-    </a>
-  </div>
-</div>
-
 <!-- ── Main Two-Panel Layout ── -->
 <div class="main-wrapper" id="segments">
   <div class="main-inner">
@@ -1946,37 +1906,6 @@ document.addEventListener('click',function(e){
   if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(strip,anchor);
 })();
 </script>
-<script>
-// ── Continue Reading ──
-// Runs once the page has parsed, because the register it reads the type
-// marks and area names from loads further down.
-document.addEventListener('DOMContentLoaded', function(){
-  try {
-    var events = JSON.parse(localStorage.getItem('taqa-analytics') || '[]');
-    var lastOpen = null;
-    for(var i = events.length-1; i >= 0; i--){
-      if(events[i].e === 'open'){ lastOpen = events[i]; break; }
-    }
-    if(!lastOpen) return;
-    var type = (lastOpen.x && lastOpen.x.type) || 'sop';
-    var seg  = (lastOpen.x && lastOpen.x.seg)  || '';
-    // The type mark and the area name both come from the register, like every
-    // other page: this map said MNL and LSN, had no Standard at all, and the
-    // name was rebuilt from the URL, so centres came out as "Pt Drilling Coe".
-    var TY = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.types) || {};
-    var labels = {sop:'SOP',form:'FRM',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT',software:'ZIP'};
-    Object.keys(TY).forEach(function(k){ if (TY[k] && TY[k].mark) labels[k] = TY[k].mark; });
-    var SG = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments) || {};
-    var segName = seg ? ((SG[seg] && SG[seg].name) || seg.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();})) : 'Document';
-    document.getElementById('continue-title').textContent = lastOpen.k;
-    document.getElementById('continue-meta').textContent  = segName + ' · ' + (labels[type] || 'DOC');
-    document.getElementById('continue-icon').textContent  = labels[type] || 'DOC';
-    document.getElementById('continue-icon').classList.toggle('is-alert', type === 'alert');
-    document.getElementById('continue-card').href = 'viewer.html?seg=' + (seg||'') + '&type=' + type + '&title=' + encodeURIComponent(lastOpen.k);
-    document.getElementById('continue-strip').style.display = '';
-  } catch(e) {}
-});
-</script>
 <!-- ── First-Time Tour ── -->
 <div id="tour-backdrop"></div>
 <div id="tour-spot"></div>
@@ -2078,8 +2007,8 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
   var card=document.getElementById('tour-card');
   var backdrop=document.getElementById('tour-backdrop');
 
-  // The bar folds its links into the menu at 1180px (topbar.css), not 640px.
-  function isMob(){return window.matchMedia?window.matchMedia('(max-width:1180px)').matches:window.innerWidth<=1180;}
+  // The bar folds its links into the menu at 1280px (topbar.css), not 640px.
+  function isMob(){return window.matchMedia?window.matchMedia('(max-width:1280px)').matches:window.innerWidth<=1280;}
 
   function dots(){
     var d=document.getElementById('tc-dots');
