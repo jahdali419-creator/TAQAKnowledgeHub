@@ -200,7 +200,7 @@ window.showToast=function(msg,type){
     '<tr><td><span class="sc-key">Esc</span></td><td>Close modals · dismiss overlay</td></tr>'+
     '<tr><td><span class="sc-key">Tab</span></td><td>Navigate interactive elements</td></tr>'+
     '</table>'+
-    '<p class="sc-hint">TechHub · Field knowledge. One place.</p>'+
+    '<p class="sc-hint">TechHub · Knowledge Is Better Together.</p>'+
     '</div>';
   document.body.appendChild(ov);
   document.getElementById('sc-close').onclick=function(){ov.classList.remove('open');};

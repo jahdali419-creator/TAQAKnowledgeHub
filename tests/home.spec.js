@@ -37,7 +37,7 @@ test.describe('Hero', () => {
     await gotoApp('/index.html');
 
     await expect(page.locator('.hero h1')).toBeVisible();
-    await expect(page.locator('.hero h1')).toContainText('Field knowledge');
+    await expect(page.locator('.hero h1')).toContainText('Knowledge Is Better Together');
     await expect(page.locator('#hero-search-input')).toBeVisible();
     await expect(page.locator('#hero-search-btn')).toBeVisible();
   });
