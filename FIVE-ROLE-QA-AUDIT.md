@@ -360,4 +360,30 @@ One existing assertion was **outdated by the decision**, not broken by a bug: `r
 
 ### 13.5 Results
 
-RESULTS_13
+Code: `b2a1aebe4797f252f803e9dfe7f93e5dc3cec78b`.
+
+- **Affected spec files first** (roles, release-journey, documents, dashboard, approval-workflow, maintenance, maintenance-ask-expert, maintenance-manager, navigation, master-list, upload, segment), chromium + mobile-chrome: **486 passed, 0 failed**.
+- **Full suite**, `npx playwright test --project=chromium --project=mobile-chrome --workers=2`, 18.1 minutes, exit code 0:
+
+| Project | Passed | Failed | Skipped | Flaky | Total |
+|---|---|---|---|---|---|
+| chromium (desktop, 1440×900) | 452 | 0 | 1 | 0 | 453 |
+| mobile-chrome (Pixel 7) | 452 | 0 | 1 | 0 | 453 |
+| **Combined** | **904** | **0** | **2** | **0** | **906** |
+
+The 2 skips are the same environment-guarded offline test (section 11). The suite grew from 444 to 453 per project: the bulletin test plus the eight above.
+
+- **CI** (GitHub Actions, Chromium) on the same commit: **452 passed, 0 failed, 1 skipped** ([run 36917915933](https://github.com/jahdali419-creator/TAQAKnowledgeHub/actions/runs/36917915933)).
+
+**Failures met on the way, classified before any change:**
+- `release-journey.spec.js` SOP toast wording: **outdated test** (the owner's decision changed the wording on purpose). The assertion was updated; nothing was weakened.
+- The first affected-files run was killed with exit 137 when this session's worker process restarted: **environment issue**. It was re-run once with two workers, without changing code, and passed.
+- No application bug, no flaky test.
+
+### 13.6 Still open
+
+- **Not production security.** Every rule here runs in the browser; the Azure API must enforce the same rules (`docs/FRONTEND-API-CONTRACT.md` §3.1, section 12).
+- Firefox, WebKit and real devices not run (not installed in this container).
+- The Azure Static Web Apps preview job fails on the staging-environment quota; not a required check, not this code.
+- Item 8 of section 9 (delegate banner covers 34 px of page content under the bar) is accepted as is.
+- The Director's desk counters still count the whole segment, maintenance documents included. Not part of this decision; say if the Director's desk should count Operations only.
