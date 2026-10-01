@@ -2,7 +2,7 @@
 
 **Not for now.** Mohammed and IT run this **after** Azure integration, in the UAT environment, with real Entra accounts. Each line passes only if it is observed, not assumed. Record the account used, the document number and the result.
 
-Test accounts needed (one real user each): Employee who is a member of segment **A, Operations** · Employee who is a member of segment **A, Maintenance** · Employee who is a member of segment **B** · two spare employee accounts with no membership (**P** and **Q**) · QMS · Segment Director of area **A** · Segment Director of area **B** · Maintenance Manager of segment **A** · Maintenance Manager of segment **B** · Auditor · a delegate · a glossary SME for category **X** (for example Drilling) · a glossary SME for a different category **Y**.
+Test accounts needed (one real user each): Employee who is a member of segment **A, Operations** · Employee who is a member of segment **A, Maintenance** · Employee who is a member of segment **B** · two spare employee accounts with no membership (**P** and **Q**) · an employee with **no** operational-segment membership (**N**) · QMS · Segment Director of area **A** · Segment Director of area **B** · Maintenance Manager of segment **A** · Maintenance Manager of segment **B** · Auditor · a delegate · a glossary SME for category **X** (for example Drilling) · a glossary SME for a different category **Y**.
 
 ## 1. Sign-in and identity
 | # | Check | Pass |
@@ -136,3 +136,31 @@ The prototype's "Add Contributor" (typed name, Editor / Viewer / Owner) is **not
 | SM18 | **P** (A, Operations) and **Q** (A, Maintenance) after being added | Both still Employees: can file documents and track their submissions; cannot QMS-check, approve, delegate or manage members. Q is **not** a Maintenance Manager and cannot approve maintenance documents; P is **not** a Segment Director | ☐ |
 | SM19 | Director of A removes P; Maintenance Manager of A removes Q | Their segment-A access ends (unless another membership grants it); audit entries recorded | ☐ |
 | SM20 | If IT implemented automatic assignment: an employee whose authoritative attributes say segment A, Maintenance signs in for the first time | Member of A, Maintenance automatically; source recorded as automatic | ☐ |
+
+**Visibility without membership, role holders, filing**
+
+| # | Check | Expected | Pass |
+|---|---|---|---|
+| SM21 | Employee **N** (no membership) browses Home, Search and the area lists, and opens a segment-A document by URL | Sees every Corporate Function, every Center of Excellence and Company Wide; **no** operational segment; the segment-A document is not found | ☐ |
+| SM22 | **Segment Director of A** and **Maintenance Manager of A** (no other membership) browse and search | Each sees segment A, every Corporate Function, every Center of Excellence and Company Wide; **not** segment B | ☐ |
+| SM23 | **QMS** and **Auditor** browse and search | Every area, as their roles require | ☐ |
+| SM24 | Employee (A, Operations) files a document into segment A, a Corporate Function and Company Wide | Accepted | ☐ |
+| SM25 | The same Employee tries to file into segment B: through the UI, by editing the URL, the area id, JavaScript or `localStorage`, and by a direct API call with `area=B` | Refused (403); nothing created | ☐ |
+
+**Additional membership (approved exception)**
+
+| # | Check | Expected | Pass |
+|---|---|---|---|
+| SM26 | **Segment Director of B** adds Employee (A, Operations) as an **additional** Operations member of B with a reason and an expiry date | Stored with Entra id, segment B, Operations, assigned by, server time, reason, expiry, type additional; the employee now sees and can file into B | ☐ |
+| SM27 | The same request without a reason | Refused | ☐ |
+| SM28 | After the additional membership is added | The employee is still an Employee: cannot QMS-check, approve or delegate in A or B, and is not Segment Director, Maintenance Manager or QMS | ☐ |
+| SM29 | The expiry date passes (or is set to the past in UAT) | The additional membership ends automatically; segment B disappears and filing into B is refused; the record is kept as ended / expired | ☐ |
+| SM30 | **Maintenance Manager of B** tries to add an additional **Operations** member of B; **Director of A** tries to add an additional member of B | 403 | ☐ |
+
+**One department per segment; transfers**
+
+| # | Check | Expected | Pass |
+|---|---|---|---|
+| SM31 | Maintenance Manager of A tries to add Employee (A, Operations) as a Maintenance member of A as well | Refused; the person keeps one department in A | ☐ |
+| SM32 | An authorised user transfers Employee (A, Operations) to **A, Maintenance** with a reason | The person is now A, Maintenance; the old A, Operations record is kept as *transferred*, linked to the new one, with who, when and the reason | ☐ |
+| SM33 | A transfer without a reason, or by someone not allowed to manage the destination department | Refused | ☐ |

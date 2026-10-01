@@ -91,7 +91,9 @@ A document is a maintenance document if **either**:
 ## 5. Area restrictions
 - A Director or Maintenance Manager acts only in the one area they hold. Another area's desk and published list refuse them; approval, rejection, withdrawal and edit refuse them.
 - QMS and Auditor are not area-scoped (the Auditor only reads).
-- **Target:** an Employee's reading is scoped by **segment membership** (§14): their own operational segment(s), every Corporate Function, every Center of Excellence and Company Wide, and no other operational segment. *The prototype does not scope Employees.*
+- **Target:** an Employee's reading is scoped by **segment membership** (§14): their own operational segment(s), every Corporate Function, every Center of Excellence and Company Wide, and no other operational segment. An employee with no membership sees no operational segment. *The prototype does not scope Employees.*
+- **Target:** a Segment Director or Maintenance Manager reads the operational segment they hold, every Corporate Function, every Center of Excellence and Company Wide; holding a role gives **no** visibility of other operational segments (each needs an explicit membership, §14.2).
+- **Target:** an Employee files only into areas they are authorised to see, enforced by the API (§14.3).
 - Drafts: a scoped role sees drafts of its own area only.
 
 ## 6. Department restrictions (owner's decision, 1 Oct 2026)
@@ -214,25 +216,28 @@ Both people above belong to Coiled Tubing Maintenance; they have different autho
 
 Department membership primarily determines **team administration** (who manages the member, §14.5) and any department-specific experience or routing (for example landing on the segment's Maintenance side). It does **not** itself grant approval authority.
 
-### 14.2 What a member sees
-An employee assigned to an operational segment (for example **Coiled Tubing**), in **either** department, sees:
-- that operational segment (both its Operations and Maintenance sides)
-- every Corporate Function
-- every Center of Excellence
-- Company Wide
+### 14.2 What each person sees
 
-They do **not** automatically see other operational segments (for example Drilling or Wireline) unless they are explicitly assigned there under an approved business rule.
+| Person | Sees |
+|---|---|
+| Employee with a membership (either department) | Their member segment(s), both Operations and Maintenance sides; every Corporate Function; every Center of Excellence; Company Wide |
+| Employee with **no** operational-segment membership | Every Corporate Function; every Center of Excellence; Company Wide. **No operational segment** until an explicit membership is added |
+| Segment Director / Maintenance Manager | The operational segment they hold / manage; every Corporate Function; every Center of Excellence; Company Wide; plus any segment where they hold an explicit additional membership |
+| QMS / authorised administration | Every area, as their role requires |
+| External Auditor | Every area, as their role requires (read only) |
+
+Holding a role (Segment Director, Maintenance Manager) does **not** automatically give visibility of other operational segments; any other segment needs an explicit additional membership (§14.8). Nobody sees an operational segment because of a URL, a link or a search result alone.
 
 ### 14.3 What a normal member can and cannot do
 A segment member is still an **Employee**, whichever department. They can:
 - view their assigned operational segment, the Corporate Functions, the Centers of Excellence and Company Wide
-- submit / upload documents through the normal controlled workflow (QMS check, then final approval)
+- submit / upload documents through the normal controlled workflow (QMS check, then final approval), **only into areas they are authorised to see** (§14.2)
 - track their own submissions
 
 They cannot:
 - perform the QMS check, give final approval, or delegate approval authority
 - manage segment membership
-- reach another operational segment by changing a URL or a request
+- reach or file into another operational segment by changing a URL, an area id, JavaScript, `localStorage` or an API payload; the API decides filing scope from stored membership
 - assign roles to themselves or to anyone else
 
 Because every Employee can already submit documents, the prototype's **"Editor = can upload documents" is redundant and is not carried into the Azure permission model**. There is no Editor, Viewer or Owner in membership. If the business later needs a special Editor capability, it must have a real, separately defined purpose beyond normal document upload. A read-only membership, if ever needed, is an **optional future exception**, not part of the normal Add Member process.
@@ -278,12 +283,36 @@ Preferred target: authoritative company data says the employee belongs to Coiled
 ### 14.7 Server enforcement
 Membership is enforced by the Azure API, never by the browser. An employee assigned to Coiled Tubing must **not** obtain Drilling access by changing the URL, modifying JavaScript, editing `localStorage`, changing an area id in an API request, or calling the API directly. The API calculates the user's visible operational areas from the authenticated user's **stored membership**; Corporate Functions, Centers of Excellence and Company Wide remain visible as in §14.2. Lists, search, document pages, attachments, notifications and the submit endpoint all apply the same rule. Membership management checks the manager's segment **and** department on every add and remove.
 
-### 14.8 Open decisions for the owner
-Decided in the 1 October clarifications: the Maintenance Manager manages Maintenance members of their own segment; Company Wide is visible to every member.
+### 14.8 Primary and additional segment membership
+- The normal model is **one primary operational segment** per employee (from the authoritative source where available, otherwise Add Member).
+- An **additional** segment membership is allowed **only as an approved exception**. Each one records:
+  - the employee's immutable Entra id
+  - segment
+  - department
+  - who assigned it
+  - assigned date and time (server)
+  - **reason** (required)
+  - optional **expiry date** where the assignment is temporary; at expiry it ends automatically and its visibility stops
+- The **receiving department authority** manages it: the Segment Director for an Operations membership, the Maintenance Manager for a Maintenance membership (each in their own segment), QMS / authorised administration company-wide. Recording it with a reason is the approval.
+- An additional membership **only expands visibility and filing scope**. It does **not** grant Segment Director, Maintenance Manager, QMS or any other authority.
 
-Still open:
-1. **Employees with no operational segment** (for example corporate-function staff): recommended to see Corporate Functions, Centers of Excellence and Company Wide only, until assigned; confirm.
-2. **Directors and Maintenance Managers:** recommended that they see the segment they hold plus what their own membership gives; whether they also read other operational segments, confirm.
-3. **Filing:** recommended that an Employee may file only into areas they can see; confirm.
-4. **More than one operational segment:** what "approved business rule" allows a person to be a member of several segments, and who approves it.
-5. **Both departments in one segment:** recommended one department per person per segment (a move is remove + add by the two managers, or QMS); confirm.
+### 14.9 One department per person per segment; transfers
+- Normally an employee has **exactly one** department membership within a segment: Operations **or** Maintenance. Both are never created by default; a second, different-department membership in the same segment is refused.
+- A move between departments (or of the primary segment) is an **audited transfer**, not a delete and re-add that loses history. The previous membership is closed as *transferred* and a new one is opened linked to it; both rows are kept, with who made the change, when, and the reason.
+
+  Example: Mohammed Jahdali, Coiled Tubing / Operations → transferred to Coiled Tubing / Maintenance, by ‹manager›, ‹date and time›, reason ‹…›.
+- Not built in the prototype.
+
+### 14.10 Decisions
+All segment-membership decisions are closed (owner, 1 October 2026):
+1. Maintenance Manager manages Maintenance members of their own segment (§14.5).
+2. Company Wide is visible to everyone (§14.2).
+3. No membership: Corporate Functions, Centers of Excellence and Company Wide only (§14.2).
+4. Directors and Maintenance Managers: their held segment plus Corporate Functions, Centers of Excellence and Company Wide; other segments only by explicit membership (§14.2).
+5. Filing only into areas the person is authorised to see, server enforced (§14.3).
+6. One primary segment; additional memberships as approved exceptions with reason and optional expiry (§14.8).
+7. One department per person per segment; changes are audited transfers (§14.9).
+
+Implementation details for IT to settle with the owner (they do not change the rules above):
+- **Delegates:** a delegate who is not a member of the grantor's segment needs to see the documents they are asked to approve. Recommended: an active delegation gives read access to the grantor's segment, limited to the delegated work and the delegation period, and no membership.
+- **Who performs a transfer:** recommended: QMS / authorised administration, or the **receiving** department authority, with the sending authority notified. A transfer between segments follows the same pattern.

@@ -89,15 +89,22 @@ Target requirement (`BUSINESS-RULES.md` §14); not implemented in the prototype.
 | `userId` | Entra object id | **server** (resolved from the directory) | Immutable identity; the key. Never the email or display name alone |
 | `segmentId` | area id | **server**, from the authorised manager's context | Operational segment (`group = segment`) only; never taken from a free field in the request |
 | `department` | `operations` / `maintenance` | **server**, from the authorised manager's context | Director → `operations`, Maintenance Manager → `maintenance`, QMS / authorised administration → either. Determines who administers the member and department-specific routing; grants no authority |
+| `membershipType` | `primary` / `additional` | **server** | `primary` if the person has no active primary; otherwise `additional` (an approved exception, `BUSINESS-RULES.md` §14.8) |
+| `reason` | string | manager | **Required** for `additional` and for every transfer |
+| `expiresOn` | date? | manager | Optional, for a temporary additional membership; the server ends it automatically |
 | `source` | `automatic` / `manual` | server | Automatic from an authoritative attribute if IT confirms one (§14.6); manual from Add Member |
 | `sourceAttribute` | string? | server | Which authoritative attribute produced an automatic membership |
-| `status` | `active` / `removed` | server (transition) | |
+| `status` | `active` / `ended` | server (transition) | Rows are never deleted; history is kept |
+| `endedReason` | `removed` / `transferred` / `expired` | server | |
+| `transferredFromId` | id? | server | On a transfer, links the new membership to the one it replaced (for example Coiled Tubing / Operations → Coiled Tubing / Maintenance) |
 | `addedBy`, `addedAt` | user ref, datetime | **server** (token, clock) | System for automatic |
-| `removedBy`, `removedAt`, `removalReason` | | **server** / manager | |
+| `endedBy`, `endedAt`, `endedNote` | | **server** / manager | Who closed it, when, and the reason given |
 | `displayName`, `email`, `jobTitle` | string | directory (cached) | Display only, refreshed from Entra; not identity |
 | version token | | server | Concurrency (§3) |
 
-Visible areas for a user = operational segments with an `active` membership in either department (plus any held by role, per `BUSINESS-RULES.md` §14.8 #2) + every Corporate Function + every Center of Excellence + Company Wide. Uniqueness: one active row per `userId` + `segmentId` (recommended, §14.8 #5).
+Visible areas for a user = operational segments with an `active` membership in either department + the segment held by role for a Segment Director or Maintenance Manager + every Corporate Function + every Center of Excellence + Company Wide; QMS and Auditor see every area (`BUSINESS-RULES.md` §14.2). A person with no membership and no held segment sees no operational segment. Filing scope = visible areas.
+
+Constraints: at most one **active primary** per `userId`; at most one active row per `userId` + `segmentId` (one department per segment, §14.9); a department or segment change is a transfer (close + open, linked), never an update in place.
 
 ### GlossaryTerm
 Target requirement (`BUSINESS-RULES.md` §13); not implemented in the prototype. One row per proposed term.
