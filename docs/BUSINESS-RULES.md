@@ -10,7 +10,7 @@ The authoritative statement of how documents move through TechHub, for the team 
 
 | Persona | Code key | Scope | In one sentence |
 |---|---|---|---|
-| Employee | `employee` | **target:** their operational segment(s) by membership, plus every Corporate Function and Center of Excellence, read (§14). *Prototype: every area* | Reads current documents, files new ones, sees what happened to their own submissions. |
+| Employee | `employee` | **target:** their operational segment(s) by membership, plus every Corporate Function, Center of Excellence and Company Wide, read (§14). *Prototype: every area* | Reads current documents, files new ones, sees what happened to their own submissions. |
 | QMS / Document Controller | `qms` | every area | Checks every submitted document first, owns the register, withdrawal, periodic review and the F086 export. Never gives final approval. |
 | Segment Director (also Function Head, Centre Manager, Corporate Sponsor, by area family) | `owner` | **one** area | Gives final approval to that area's **Operations** (non-maintenance) documents and manages them. |
 | Maintenance Manager | `maintenance` | **one operational segment** | Gives final approval to that segment's **maintenance** documents and manages them. |
@@ -81,7 +81,7 @@ A document is a maintenance document if **either**:
 - Opens their own segment's desk (header "Maintenance Manager, ‹area›"; counters count maintenance documents only) and published list (maintenance documents only); refused elsewhere. Lands on the segment's Maintenance side.
 
 ### Employee
-- Files documents. Reads current documents in the areas they can see: **target** their own operational segment(s) by membership plus every Corporate Function and Center of Excellence (§14); *the prototype shows every area*. Sees their own drafts' title and status ("Waiting on QMS check", "Returned by …: ‹reason›"); someone else's draft shows "Access restricted".
+- Files documents. Reads current documents in the areas they can see: **target** their own operational segment(s) by membership plus every Corporate Function, Center of Excellence and Company Wide (§14); *the prototype shows every area*. Sees their own drafts' title and status ("Waiting on QMS check", "Returned by …: ‹reason›"); someone else's draft shows "Access restricted".
 - No desk, no Master List, no Analytics or About, no withdraw, no edit.
 
 ### External Auditor
@@ -91,7 +91,7 @@ A document is a maintenance document if **either**:
 ## 5. Area restrictions
 - A Director or Maintenance Manager acts only in the one area they hold. Another area's desk and published list refuse them; approval, rejection, withdrawal and edit refuse them.
 - QMS and Auditor are not area-scoped (the Auditor only reads).
-- **Target:** an Employee's reading is scoped by **segment membership** (§14): their own operational segment(s), every Corporate Function and every Center of Excellence, and no other operational segment. *The prototype does not scope Employees.*
+- **Target:** an Employee's reading is scoped by **segment membership** (§14): their own operational segment(s), every Corporate Function, every Center of Excellence and Company Wide, and no other operational segment. *The prototype does not scope Employees.*
 - Drafts: a scoped role sees drafts of its own area only.
 
 ## 6. Department restrictions (owner's decision, 1 Oct 2026)
@@ -144,7 +144,7 @@ These fields change **only** through filing, check, approval, rejection and with
 | 4 | Role descriptions | Fixed during the handover audit: the QMS and Director descriptions (shown on the Master List) said QMS countersigns after the Director | — | **Fixed** (wording only) |
 | 5 | August 2026 documents (`AZURE-MIGRATION-RAFA.md`, `PLATFORM-FUNCTIONAL-SPEC.md`, `DT-HANDOVER-PLAN.md`) | Two-step release, five personas, department rules | Describe a Power Automate approval flow and "approvals change only the screen" | Marked **historical**; this document supersedes them for rules |
 | 6 | Field Glossary contributions | Any user adds a term and it appears **immediately**, in this browser only, as a "Community" term. No review | Production requires a proposal → Pending Review → technical SME approval before a term is shared (§13) | **Target requirement set by the owner (1 Oct 2026)**; prototype behaviour is not the target |
-| 7 | Segment Contributors / Add Contributor | The area desk (Director, Maintenance Manager, QMS) has "Segment Contributors" and "+ Add Contributor": free-text name and job title, a role of **Editor / Viewer / Owner**, demo names, kept for the browser session only. It grants nothing. Every Employee sees every area | Production uses **Segment Members / Add Member**: membership only, resolved from Entra ID by email, no role choice; Employees see only their own operational segment(s) plus Corporate Functions and Centers of Excellence (§14) | **Target requirement set by the owner (1 Oct 2026)**; the prototype UI was not renamed |
+| 7 | Segment Contributors / Add Contributor | The area desk (Director, Maintenance Manager, QMS) has "Segment Contributors" and "+ Add Contributor": free-text name and job title, a role of **Editor / Viewer / Owner**, demo names, kept for the browser session only. It grants nothing. Every Employee sees every area | Production uses **Segment Members / Add Member**: membership (segment + Operations or Maintenance department) only, resolved from Entra ID by email, no role choice; the Director manages Operations members, the Maintenance Manager Maintenance members, QMS all; Employees see only their own operational segment(s) plus Corporate Functions, Centers of Excellence and Company Wide (§14) | **Target requirement set by the owner (1 Oct 2026)**; the prototype UI was not renamed |
 
 ## 13. Field Glossary contributions (target production requirement)
 
@@ -182,30 +182,50 @@ Entity: `DATA-MODEL.md` (GlossaryTerm). Endpoints: `API-REQUIREMENTS.md` §7. Ac
 
 ## 14. Segment membership (target production requirement)
 
-Owner's clarification, 1 October 2026. **Not implemented in the prototype.** For Azure, the concept is called **Segment Members** and **Add Member**, replacing the prototype's "Segment Contributors" and "Add Contributor". Membership is organisational belonging and access, not a content-contributor permission.
+Owner's clarifications, 1 October 2026 (the second one, on departments and the Maintenance Manager, replaces the first where they differ). **Not implemented in the prototype.** For Azure, the concept is called **Segment Members** and **Add Member**, replacing the prototype's "Segment Contributors" and "Add Contributor". Membership is organisational belonging and access, not a content-contributor permission.
 
-### 14.1 Membership and role are separate
+### 14.1 Membership has two dimensions; role is separate
+
+A membership is **operational segment + department**:
+
+1. **Operational segment**, for example Coiled Tubing.
+2. **Department / team** within that segment: **Operations** or **Maintenance**.
+
+Example:
+
+| | |
+|---|---|
+| Employee | `Mohammed.jahdali@tq.com` |
+| Segment | Coiled Tubing |
+| Department | Maintenance |
+| Role | Employee |
 
 | | Membership | Role |
 |---|---|---|
-| Answers | Which operational segment does this employee belong to, and therefore see? | What authority does this person have? |
-| Example | Mohammed Jahdali → Coiled Tubing member | Mohammed Jahdali → Employee |
-| Example | Ali Example → Coiled Tubing member | Ali Example → Maintenance Manager |
+| Answers | Which operational segment and team does this employee belong to, and therefore see? | What authority does this person have? |
+| Example | Mohammed Jahdali → Coiled Tubing, Maintenance | Mohammed Jahdali → Employee |
+| Example | Ali Example → Coiled Tubing, Maintenance | Ali Example → Maintenance Manager |
 | Comes from | An authoritative company source if one exists (§14.6), otherwise Add Member | Trusted Entra ID / server-side role mapping only (`AZURE-INTEGRATION-REQUIREMENTS.md` §3) |
 
-Both people above belong to Coiled Tubing; they have different authority. **Add Member never grants a role.** QMS / Document Controller, Segment Director, Maintenance Manager and External Auditor cannot be assigned from Add Member, and "Owner" can never be assigned from it.
+Both people above belong to Coiled Tubing Maintenance; they have different authority. **Membership never grants a role:**
+- Adding someone as Coiled Tubing + **Maintenance** does **not** make them Maintenance Manager.
+- Adding someone as Coiled Tubing + **Operations** does **not** make them Segment Director.
+- QMS / Document Controller, Segment Director, Maintenance Manager and External Auditor come only from trusted Entra / server-side role mapping and cannot be assigned from Add Member. "Owner" can never be assigned from it.
+
+Department membership primarily determines **team administration** (who manages the member, §14.5) and any department-specific experience or routing (for example landing on the segment's Maintenance side). It does **not** itself grant approval authority.
 
 ### 14.2 What a member sees
-An employee assigned to an operational segment (for example **Coiled Tubing**) sees:
-- that operational segment
+An employee assigned to an operational segment (for example **Coiled Tubing**), in **either** department, sees:
+- that operational segment (both its Operations and Maintenance sides)
 - every Corporate Function
 - every Center of Excellence
+- Company Wide
 
-They do **not** see other operational segments (for example Drilling or Wireline) unless they are explicitly assigned there under an approved business rule.
+They do **not** automatically see other operational segments (for example Drilling or Wireline) unless they are explicitly assigned there under an approved business rule.
 
 ### 14.3 What a normal member can and cannot do
-A segment member is still an **Employee**. They can:
-- view their assigned operational segment, the Corporate Functions and the Centers of Excellence
+A segment member is still an **Employee**, whichever department. They can:
+- view their assigned operational segment, the Corporate Functions, the Centers of Excellence and Company Wide
 - submit / upload documents through the normal controlled workflow (QMS check, then final approval)
 - track their own submissions
 
@@ -218,7 +238,11 @@ They cannot:
 Because every Employee can already submit documents, the prototype's **"Editor = can upload documents" is redundant and is not carried into the Azure permission model**. There is no Editor, Viewer or Owner in membership. If the business later needs a special Editor capability, it must have a real, separately defined purpose beyond normal document upload. A read-only membership, if ever needed, is an **optional future exception**, not part of the normal Add Member process.
 
 ### 14.4 Add Member (production)
-1. The person adding enters **only the corporate employee email**, for example `Mohammed.jahdali@tq.com`. No name, job title, initials or other free-text identity, and **no Editor / Viewer / Owner choice**.
+Add Member is **contextual**:
+- from an Operations management context: **"Add Operations Member"**
+- from a Maintenance management context: **"Add Maintenance Member"**
+
+1. The person adding enters **only the corporate employee email**, for example `Mohammed.jahdali@tq.com`. No name, job title, initials or other free-text identity, **no Editor / Viewer / Owner choice**, and no segment or department field to edit.
 2. The server queries Microsoft Entra ID / the company directory and resolves: the **immutable user / object id**, display name, corporate email, job title if available, and account status.
 3. The person adding sees the resolved employee before confirming, for example:
 
@@ -226,35 +250,40 @@ Because every Employee can already submit documents, the prototype's **"Editor =
    > Mohammed.jahdali@tq.com
    > ‹Job title if available›
    >
-   > [Add to Coiled Tubing]
+   > [Add to Coiled Tubing Maintenance]
 
-4. On confirmation the server stores the membership against the **immutable Entra identity**, not the email or display name alone. A disabled or unknown account is refused. Name, email and title are display data refreshed from the directory.
+4. On confirmation the **server assigns the segment and department from the authorised manager's context** and stores the membership against the **immutable Entra identity**, not the email or display name alone. A disabled or unknown account is refused. Name, email and title are display data refreshed from the directory.
+5. The manager **cannot change the request** to place someone outside their permitted segment or department; the API checks the target segment and department against the manager's own authority on every call.
 
 Adding a member creates segment membership only. Removing a member removes that segment's visibility for them (unless another membership or source still grants it).
 
-### 14.5 Who can see and use Add Member
-| Persona | Add / remove members |
-|---|---|
-| Employee | **No.** Add Member is hidden completely |
-| External Auditor | **No.** Hidden completely |
-| Segment Director | **Yes**, for their own operational segment only |
-| QMS / authorised administration | **Yes**, across segments |
-| Maintenance Manager | **Open business decision** (§14.8). *The prototype currently shows Add Contributor on the Maintenance Manager's desk because it is the area desk; that is not a decision* |
+### 14.5 Who manages membership
+| Persona | View members | Add / remove members |
+|---|---|---|
+| Segment Director | Own segment, both departments | **Operations** members of own segment only. Cannot add or remove Maintenance members |
+| Maintenance Manager | Own segment, both departments | **Maintenance** members of own segment only. Cannot add or remove Operations members |
+| QMS / authorised administration | All segments and departments | All segments and departments |
+| Employee | No | **No.** Add Member is hidden completely |
+| External Auditor | No | **No.** Hidden completely |
+
+This mirrors the document rules: the Segment Director manages the segment's Operations side, the Maintenance Manager its Maintenance side (§6). A delegate does not gain membership management unless the owner later decides otherwise.
 
 ### 14.6 Automatic assignment (preferred, to be verified by IT)
-IT should first investigate whether operational-segment membership can be **derived automatically** from an authoritative company source, for example Entra organisational attributes, the HR system, business unit, department, organisational unit, cost centre, or another authoritative employee attribute.
+IT should first investigate whether operational-segment **and department** membership can be **derived automatically** from an authoritative company source, for example Entra organisational attributes, the HR system, business unit, department, organisational unit, cost centre, or another authoritative employee attribute.
 
-Preferred target: authoritative company data says the employee belongs to Coiled Tubing → TechHub assigns Coiled Tubing membership automatically. Add Member is then used only for exceptions, corrections, and cases where the authoritative source does not provide enough information.
+Preferred target: authoritative company data says the employee belongs to Coiled Tubing Maintenance → TechHub assigns that membership automatically. Add Member is then used only for exceptions, corrections, and cases where the authoritative source does not provide enough information.
 
 **Do not assume such an attribute exists today.** IT must verify it. Each membership records its source (automatic or manual) so an automatic membership is not silently overwritten by a manual one, and vice versa.
 
 ### 14.7 Server enforcement
-Membership is enforced by the Azure API, never by the browser. An employee assigned to Coiled Tubing must **not** obtain Drilling access by changing the URL, modifying JavaScript, editing `localStorage`, changing an area id in an API request, or calling the API directly. The API calculates the user's visible operational areas from the authenticated user's **stored membership**; Corporate Functions and Centers of Excellence remain visible as in §14.2. Lists, search, document pages, attachments, notifications and the submit endpoint all apply the same rule.
+Membership is enforced by the Azure API, never by the browser. An employee assigned to Coiled Tubing must **not** obtain Drilling access by changing the URL, modifying JavaScript, editing `localStorage`, changing an area id in an API request, or calling the API directly. The API calculates the user's visible operational areas from the authenticated user's **stored membership**; Corporate Functions, Centers of Excellence and Company Wide remain visible as in §14.2. Lists, search, document pages, attachments, notifications and the submit endpoint all apply the same rule. Membership management checks the manager's segment **and** department on every add and remove.
 
 ### 14.8 Open decisions for the owner
-1. **Maintenance Manager and membership:** may a Maintenance Manager add / remove members of their own segment? Not agreed; record and confirm.
-2. **Company Wide** area (company policies and standards for everyone): recommended visible to every employee; confirm.
-3. **Employees with no operational segment** (for example corporate-function staff): recommended to see Corporate Functions, Centers of Excellence and Company Wide only, until assigned; confirm.
-4. **Directors and Maintenance Managers:** recommended that they see the area they hold plus what their own membership gives; whether they also read other operational segments, confirm.
-5. **Filing:** recommended that an Employee may file only into areas they can see; confirm.
-6. **More than one operational segment:** what "approved business rule" allows a person to be a member of several segments, and who approves it.
+Decided in the 1 October clarifications: the Maintenance Manager manages Maintenance members of their own segment; Company Wide is visible to every member.
+
+Still open:
+1. **Employees with no operational segment** (for example corporate-function staff): recommended to see Corporate Functions, Centers of Excellence and Company Wide only, until assigned; confirm.
+2. **Directors and Maintenance Managers:** recommended that they see the segment they hold plus what their own membership gives; whether they also read other operational segments, confirm.
+3. **Filing:** recommended that an Employee may file only into areas they can see; confirm.
+4. **More than one operational segment:** what "approved business rule" allows a person to be a member of several segments, and who approves it.
+5. **Both departments in one segment:** recommended one department per person per segment (a move is remove + add by the two managers, or QMS); confirm.

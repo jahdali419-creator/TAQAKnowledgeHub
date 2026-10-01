@@ -20,7 +20,7 @@ What the frontend holds today, where, and what each object should become. No dat
 | Usage analytics | `localStorage` `taqa-analytics` (this browser only) | Tenant-approved telemetry (decision) |
 | Per-user conveniences: bookmarks, theme, pins, form drafts, tour/install flags, recent docs, error log | `localStorage` `taqa-bookmarks`, `taqa-theme-v3`, `taqa-pins`, `taqa-draft-*`, `taqa-tour-done`, `taqa-install-dismissed`, `taqa-recent-docs`, `taqa-errors`, `taqa-last-sync`, `taqa-strata-bed` | May stay in the browser (not records), or move to a user-preferences store |
 | Area page content (contributors, descriptions, sample activity) | `segments-data.js`, `DASH_DATA` in `dashboard.html` | Demo fixtures: replace with real data or remove (see `AZURE-INTEGRATION-REQUIREMENTS.md` §9). The "Segment Contributors" list becomes **SegmentMembership** (§2) |
-| Segment membership (who belongs to which operational segment) | **Not held.** The "Add Contributor" form adds a typed name, title and Editor/Viewer/Owner badge to the page for the session only; it grants nothing | Database: **SegmentMembership** (§2; `BUSINESS-RULES.md` §14), automatic from an authoritative source where IT confirms one |
+| Segment membership (who belongs to which operational segment and department) | **Not held.** The "Add Contributor" form adds a typed name, title and Editor/Viewer/Owner badge to the page for the session only; it grants nothing | Database: **SegmentMembership** (§2; `BUSINESS-RULES.md` §14), automatic from an authoritative source where IT confirms one |
 | Attachments | **Not stored.** Only name and size are recorded | Azure file storage (`AZURE-INTEGRATION-REQUIREMENTS.md` §6) |
 | Ask Expert tickets | **Not stored or sent** (a reference number is shown locally) | Ticketing system or API (decision) |
 
@@ -81,13 +81,14 @@ The prototype stores signers as **role labels** ("Segment Director"); production
 `{ id, recipient (user ref), kind: awaiting_check|awaiting_approval|approved|returned, docNumber, createdAt, readAt? }`. The prototype derives these in the browser from the register (`shared.js` bell).
 
 ### SegmentMembership
-Target requirement (`BUSINESS-RULES.md` §14); not implemented in the prototype. Organisational membership only: **no role, permission level, Editor, Viewer or Owner field.**
+Target requirement (`BUSINESS-RULES.md` §14); not implemented in the prototype. Organisational membership only, with two dimensions: **operational segment + department**. **No role, permission level, Editor, Viewer or Owner field**; a `maintenance` membership does not make anyone Maintenance Manager, an `operations` membership does not make anyone Segment Director.
 
 | Field | Type | Owner | Notes |
 |---|---|---|---|
 | `id` | string | server | |
 | `userId` | Entra object id | **server** (resolved from the directory) | Immutable identity; the key. Never the email or display name alone |
-| `segmentId` | area id | manager, validated | Operational segment (`group = segment`) only |
+| `segmentId` | area id | **server**, from the authorised manager's context | Operational segment (`group = segment`) only; never taken from a free field in the request |
+| `department` | `operations` / `maintenance` | **server**, from the authorised manager's context | Director → `operations`, Maintenance Manager → `maintenance`, QMS / authorised administration → either. Determines who administers the member and department-specific routing; grants no authority |
 | `source` | `automatic` / `manual` | server | Automatic from an authoritative attribute if IT confirms one (§14.6); manual from Add Member |
 | `sourceAttribute` | string? | server | Which authoritative attribute produced an automatic membership |
 | `status` | `active` / `removed` | server (transition) | |
@@ -96,7 +97,7 @@ Target requirement (`BUSINESS-RULES.md` §14); not implemented in the prototype.
 | `displayName`, `email`, `jobTitle` | string | directory (cached) | Display only, refreshed from Entra; not identity |
 | version token | | server | Concurrency (§3) |
 
-Visible areas for a user = operational segments with an `active` membership (plus any held by role, per the owner's decision) + every Corporate Function + every Center of Excellence (+ Company Wide, per §14.8 #2).
+Visible areas for a user = operational segments with an `active` membership in either department (plus any held by role, per `BUSINESS-RULES.md` §14.8 #2) + every Corporate Function + every Center of Excellence + Company Wide. Uniqueness: one active row per `userId` + `segmentId` (recommended, §14.8 #5).
 
 ### GlossaryTerm
 Target requirement (`BUSINESS-RULES.md` §13); not implemented in the prototype. One row per proposed term.

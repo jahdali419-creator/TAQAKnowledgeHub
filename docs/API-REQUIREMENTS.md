@@ -13,8 +13,8 @@ A starting contract for the Azure team, derived from what the frontend does toda
 
 | Method | Path | Purpose | Notes |
 |---|---|---|---|
-| GET | `/me` | Current user context | `{userId, displayName, roles[], areas[], memberships[], visibleAreas[], department?, activeDelegations[], capabilities{submit, countersign, approve, delegate, manage, manageMembers, registerView, export}}`. `areas[]` are areas held by role; `memberships[]` are operational segments the user belongs to (`BUSINESS-RULES.md` §14); `visibleAreas[]` is computed by the server. The frontend uses this instead of `TAQA_ROLE` / `localStorage` |
-| GET | `/areas` | Areas with group, names, short forms | Replaces `TAQA_DOC_LOOKUPS.segments`. Returns only the operational segments the actor may see, plus all Corporate Functions and Centers of Excellence |
+| GET | `/me` | Current user context | `{userId, displayName, roles[], areas[], memberships[], visibleAreas[], department?, activeDelegations[], capabilities{submit, countersign, approve, delegate, manage, manageMembers, registerView, export}}`. `areas[]` are areas held by role; `memberships[]` are `{segmentId, department}` pairs the user belongs to (`BUSINESS-RULES.md` §14); `capabilities.manageMembers` lists the segment + department pairs the actor may administer; `visibleAreas[]` is computed by the server. The frontend uses this instead of `TAQA_ROLE` / `localStorage` |
+| GET | `/areas` | Areas with group, names, short forms | Replaces `TAQA_DOC_LOOKUPS.segments`. Returns only the operational segments the actor may see, plus all Corporate Functions, Centers of Excellence and Company Wide |
 | GET | `/document-types` | Types with approver text, review cycle, retention | Replaces `TAQA_DOC_LOOKUPS.types` |
 
 ## 2. Reading documents
@@ -34,7 +34,7 @@ A starting contract for the Azure team, derived from what the frontend does toda
 
 | Operation | Endpoint | Actor / role | Area | Department | Stage required | Request | Result | Refused when |
 |---|---|---|---|---|---|---|---|---|
-| **Submit** | `POST /documents` | any role with `submit` (not Auditor) | any fileable area (target: an area the actor can see; `BUSINESS-RULES.md` §14.8 #5) | maintenance only in an operational segment; bulletin ⇒ maintenance and operational segment only | — | title, summary, area, type, department, audience, supersedes?, attachment ids | `201`, record with server-allocated `docNumber`, `status=draft`, `approvalStage=qms`, `submittedBy/At` | Auditor `403`; bulletin for a function/centre `422`; missing fields `400`; attachment not scanned/allowed `422` |
+| **Submit** | `POST /documents` | any role with `submit` (not Auditor) | any fileable area (target: an area the actor can see; `BUSINESS-RULES.md` §14.8 #3) | maintenance only in an operational segment; bulletin ⇒ maintenance and operational segment only | — | title, summary, area, type, department, audience, supersedes?, attachment ids | `201`, record with server-allocated `docNumber`, `status=draft`, `approvalStage=qms`, `submittedBy/At` | Auditor `403`; bulletin for a function/centre `422`; missing fields `400`; attachment not scanned/allowed `422` |
 | **QMS check** | `POST /documents/{n}/qms-confirm` | QMS | any | any | `qms` | `If-Match` | `approvalStage=director`, `countersignedBy/At` | not QMS `403`; stage ≠ `qms` or rejected `409`; stale `409` |
 | **Final approval** | `POST /documents/{n}/approve` | Segment Director or Maintenance Manager (or their active delegate with approval) | **actor's own area** | Director: non-maintenance only; Maintenance Manager: maintenance only; delegate: grantor's department and listed types | `director` | `If-Match` | `status=current`, `approvalStage=null`, `approvedBy/At`, `issueDate` | wrong role/area/department/type `403`; stage ≠ `director` `409`; stale `409`; already approved `409` |
 | **Reject** | `POST /documents/{n}/reject` | whoever may act at the current stage | as above | as above | `qms` or `director` | `{reason}` (non-empty; UI requires ≥ 20 chars), `If-Match` | `rejected=true`, `rejectedAtStage`, `rejectedBy/At`, `rejectedReason`, stage `null` | no reason `400`; not the stage's actor `403`; wrong stage / stale `409` |
@@ -96,13 +96,24 @@ Target requirement (`BUSINESS-RULES.md` §14), not built in the prototype. Repla
 
 | Method | Path | Actor | Rules |
 |---|---|---|---|
-| GET | `/areas/{segmentId}/members` | Segment Director of that segment; QMS / authorised administration; Maintenance Manager **pending decision** (§14.8 #1) | Operational segments only. Employee and Auditor `403` |
-| GET | `/directory/lookup?email=` | same as above | Server queries Entra ID / the directory and returns `{userId (immutable object id), displayName, email, jobTitle?, accountEnabled}` for the confirmation step. Not found `404`. Least-privilege directory permission chosen by IT. No free-text identity is accepted anywhere |
-| POST | `/areas/{segmentId}/members` | same as above, for a segment they may manage | Body: `{email}` or `{userId}` from the lookup. The server **re-resolves** the identity, refuses a disabled account (`422`) or an unknown one (`404`), refuses a non-operational area (`422`) and a duplicate (`409`), and stores the immutable `userId` with `source=manual`, `addedBy` (token), `addedAt` (server clock). Any `role`, `name`, `title` or permission field in the body is refused (`400`) |
-| DELETE | `/areas/{segmentId}/members/{userId}` | same as above | `{reason}`. Ends the membership (`removedBy/At`); visibility of that segment ends immediately. An automatic membership is corrected at its source or overridden by a recorded exception, as IT designs (§14.6) |
-| — | automatic assignment job | system | If IT confirms an authoritative attribute (§14.6), a sync creates and ends `source=automatic` memberships. Not assumed to exist |
+Membership is **segment + department** (`operations` / `maintenance`). Who may manage it (`BUSINESS-RULES.md` §14.5):
 
-Every change is an audit event. A Segment Director acting on another segment, an Employee or the Auditor gets `403`.
+| Actor | View | Add / remove |
+|---|---|---|
+| Segment Director | own segment, both departments | `operations` of own segment only |
+| Maintenance Manager | own segment, both departments | `maintenance` of own segment only |
+| QMS / authorised administration | all | all |
+| Employee, Auditor | — `403` | — `403` |
+
+| Method | Path | Actor | Rules |
+|---|---|---|---|
+| GET | `/areas/{segmentId}/members?department=` | Director or Maintenance Manager of that segment; QMS / authorised administration | Operational segments only; both departments listed. Employee and Auditor `403` |
+| GET | `/directory/lookup?email=` | any actor allowed to add in at least one segment/department | Server queries Entra ID / the directory and returns `{userId (immutable object id), displayName, email, jobTitle?, accountEnabled}` for the confirmation step. Not found `404`. Least-privilege directory permission chosen by IT. No free-text identity is accepted anywhere |
+| POST | `/areas/{segmentId}/members/{department}` | Director (`operations`, own segment), Maintenance Manager (`maintenance`, own segment), QMS / authorised administration (any) | "Add Operations Member" / "Add Maintenance Member". Body: `{email}` or `{userId}` from the lookup, **nothing else**. The segment and department come from the authorised context (path) and are **checked against the actor's own authority** on every call: a Director posting to `maintenance`, a Maintenance Manager posting to `operations`, or either posting to another segment gets `403`. The server **re-resolves** the identity, refuses a disabled account (`422`) or an unknown one (`404`), refuses a non-operational area (`422`) and a duplicate (`409`), and stores the immutable `userId`, `segmentId`, `department`, `source=manual`, `addedBy` (token), `addedAt` (server clock). Any `role`, `name`, `title`, `segment`, `department` or permission field in the body is refused (`400`) |
+| DELETE | `/areas/{segmentId}/members/{department}/{userId}` | same as POST | `{reason}`. Ends the membership (`removedBy/At`); visibility of that segment ends immediately unless another membership grants it. An automatic membership is corrected at its source or overridden by a recorded exception, as IT designs (§14.6) |
+| — | automatic assignment job | system | If IT confirms an authoritative attribute (§14.6), a sync creates and ends `source=automatic` memberships with segment and department. Not assumed to exist |
+
+Every change is an audit event. A membership never creates or changes a role: adding someone to `maintenance` does not make them Maintenance Manager; adding someone to `operations` does not make them Segment Director.
 
 ## 9. Other
 | Area | Endpoint | Note |
