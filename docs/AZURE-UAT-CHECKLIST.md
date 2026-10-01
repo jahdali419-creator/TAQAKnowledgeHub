@@ -2,7 +2,7 @@
 
 **Not for now.** Mohammed and IT run this **after** Azure integration, in the UAT environment, with real Entra accounts. Each line passes only if it is observed, not assumed. Record the account used, the document number and the result.
 
-Test accounts needed (one real user each): Employee · QMS · Segment Director of area **A** · Segment Director of area **B** · Maintenance Manager of segment **A** · Maintenance Manager of segment **B** · Auditor · a delegate · a glossary SME for category **X** (for example Drilling) · a glossary SME for a different category **Y**.
+Test accounts needed (one real user each): Employee who is a **member of segment A** · Employee who is a member of segment **B** · QMS · Segment Director of area **A** · Segment Director of area **B** · Maintenance Manager of segment **A** · Maintenance Manager of segment **B** · Auditor · a delegate · a glossary SME for category **X** (for example Drilling) · a glossary SME for a different category **Y**.
 
 ## 1. Sign-in and identity
 | # | Check | Pass |
@@ -20,7 +20,7 @@ Test accounts needed (one real user each): Employee · QMS · Segment Director o
 | O1 | **Employee** files an SOP for area A with a PDF; it shows "Waiting on QMS check" | ☐ |
 | O2 | **QMS** sees it on the desk with the real submitter's name and time; Confirm moves it to final approval | ☐ |
 | O3 | **Segment Director of A** sees it; Approve publishes it ("Current, OK to use") | ☐ |
-| O4 | **Employee** finds it in area A's Operations shelf and Search, not on the Maintenance side; downloads the real file | ☐ |
+| O4 | **Employee (member of A)** finds it in area A's Operations shelf and Search, not on the Maintenance side; downloads the real file | ☐ |
 | O5 | **Auditor** sees it in the Master List; the trail shows submitter, QMS checker and Director **by name** with server times | ☐ |
 
 ## 3. Maintenance journey (segment A)
@@ -98,3 +98,24 @@ The prototype adds a term immediately in one browser; that is **not** what is te
 | G12 | Two reviewers act on the same pending term at the same time | First succeeds, second gets a conflict | ☐ |
 | G13 | The SME of X is notified of the new proposal; the submitter is notified of approval and of rejection | Received | ☐ |
 | G14 | Editing `localStorage` in the browser cannot add a term to the shared glossary | Nothing changes for other users | ☐ |
+
+## 9. Segment membership (`BUSINESS-RULES.md` §14)
+The prototype's "Add Contributor" (typed name, Editor / Viewer / Owner) is **not** what is tested here. A and B are operational segments.
+
+| # | Check | Expected | Pass |
+|---|---|---|---|
+| SM1 | **Employee (member of A)** browses Home, Search and the area lists | Sees segment A, every Corporate Function and every Center of Excellence; does **not** see segment B or any other operational segment | ☐ |
+| SM2 | The same Employee opens a segment-B area page and a segment-B document **by URL**, by QR link and by search | Not found / no content | ☐ |
+| SM3 | The same Employee calls the API directly with `area=B`, edits JavaScript or `localStorage`, or changes an area id in a request | No segment-B data returned | ☐ |
+| SM4 | **Employee** and **Auditor** look for Add Member on every page, desktop and phone | Not shown anywhere; direct API calls to add / remove members return 403 | ☐ |
+| SM5 | **Segment Director of A** opens Add Member | Asks **only** for a corporate email; no name, title, initials, Editor / Viewer / Owner or any role field | ☐ |
+| SM6 | Director of A enters the Employee-B account's email | The resolved person (display name, email, job title if available) is shown **before** confirming; the button reads "Add to ‹segment A›" | ☐ |
+| SM7 | Director of A confirms | Membership stored against the Entra object id (check the record), with added-by and server time; the person now sees segment A after re-sign-in or refresh | ☐ |
+| SM8 | Add Member with an unknown email, a disabled account, or a person already a member | Refused with a clear message | ☐ |
+| SM9 | A request to Add Member that includes a role, "Owner", a name or a title | Refused; no role changes | ☐ |
+| SM10 | The added member's authority | Still an Employee: can file documents and track their submissions; cannot QMS-check, approve, delegate or manage members | ☐ |
+| SM11 | Director of A tries to add or remove members of segment B | 403 | ☐ |
+| SM12 | **QMS / authorised administration** adds and removes members in A and B | Allowed; each change is in the audit trail | ☐ |
+| SM13 | Director of A removes the member | Their segment-A access ends (unless another membership grants it); audit entry recorded | ☐ |
+| SM14 | **Maintenance Manager of A** and Add Member | Behaves as the owner decided (`BUSINESS-RULES.md` §14.8 #1) | ☐ |
+| SM15 | If IT implemented automatic assignment: an employee whose authoritative attribute says segment A signs in for the first time | Member of A automatically; source recorded as automatic | ☐ |

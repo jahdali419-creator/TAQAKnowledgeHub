@@ -13,16 +13,16 @@ A starting contract for the Azure team, derived from what the frontend does toda
 
 | Method | Path | Purpose | Notes |
 |---|---|---|---|
-| GET | `/me` | Current user context | `{userId, displayName, roles[], areas[], department?, activeDelegations[], capabilities{submit, countersign, approve, delegate, manage, registerView, export}}`. The frontend uses this instead of `TAQA_ROLE` / `localStorage` |
-| GET | `/areas` | Areas with group, names, short forms | Replaces `TAQA_DOC_LOOKUPS.segments` |
+| GET | `/me` | Current user context | `{userId, displayName, roles[], areas[], memberships[], visibleAreas[], department?, activeDelegations[], capabilities{submit, countersign, approve, delegate, manage, manageMembers, registerView, export}}`. `areas[]` are areas held by role; `memberships[]` are operational segments the user belongs to (`BUSINESS-RULES.md` §14); `visibleAreas[]` is computed by the server. The frontend uses this instead of `TAQA_ROLE` / `localStorage` |
+| GET | `/areas` | Areas with group, names, short forms | Replaces `TAQA_DOC_LOOKUPS.segments`. Returns only the operational segments the actor may see, plus all Corporate Functions and Centers of Excellence |
 | GET | `/document-types` | Types with approver text, review cycle, retention | Replaces `TAQA_DOC_LOOKUPS.types` |
 
 ## 2. Reading documents
 
 | Method | Path | Purpose | Authorization |
 |---|---|---|---|
-| GET | `/documents?area=&type=&status=&department=&q=&page=` | Area libraries, published lists, search | Return **only** rows the actor may see (`canSee`): status and classification by role; drafts only to QMS, Auditor, the area's Director/Maintenance Manager, and the submitter |
-| GET | `/documents/{docNumber}` | Document page | Same rule; a hidden document is `404` |
+| GET | `/documents?area=&type=&status=&department=&q=&page=` | Area libraries, published lists, search | Return **only** rows the actor may see (`canSee`): status and classification by role; drafts only to QMS, Auditor, the area's Director/Maintenance Manager, and the submitter; **and only areas in the actor's `visibleAreas`** from stored membership (`BUSINESS-RULES.md` §14). An `area` outside it returns nothing (`404`), never another segment's rows |
+| GET | `/documents/{docNumber}` | Document page | Same rule, including membership; a hidden document is `404` |
 | GET | `/documents/{docNumber}/trail` | Approval / audit trail for one document | Anyone who may see the document; full detail to QMS and Auditor |
 | GET | `/documents/{docNumber}/revisions` | Version history | As above |
 | GET | `/register?…` | Master List (all revisions incl. withdrawn) | QMS, Auditor only |
@@ -34,7 +34,7 @@ A starting contract for the Azure team, derived from what the frontend does toda
 
 | Operation | Endpoint | Actor / role | Area | Department | Stage required | Request | Result | Refused when |
 |---|---|---|---|---|---|---|---|---|
-| **Submit** | `POST /documents` | any role with `submit` (not Auditor) | any fileable area | maintenance only in an operational segment; bulletin ⇒ maintenance and operational segment only | — | title, summary, area, type, department, audience, supersedes?, attachment ids | `201`, record with server-allocated `docNumber`, `status=draft`, `approvalStage=qms`, `submittedBy/At` | Auditor `403`; bulletin for a function/centre `422`; missing fields `400`; attachment not scanned/allowed `422` |
+| **Submit** | `POST /documents` | any role with `submit` (not Auditor) | any fileable area (target: an area the actor can see; `BUSINESS-RULES.md` §14.8 #5) | maintenance only in an operational segment; bulletin ⇒ maintenance and operational segment only | — | title, summary, area, type, department, audience, supersedes?, attachment ids | `201`, record with server-allocated `docNumber`, `status=draft`, `approvalStage=qms`, `submittedBy/At` | Auditor `403`; bulletin for a function/centre `422`; missing fields `400`; attachment not scanned/allowed `422` |
 | **QMS check** | `POST /documents/{n}/qms-confirm` | QMS | any | any | `qms` | `If-Match` | `approvalStage=director`, `countersignedBy/At` | not QMS `403`; stage ≠ `qms` or rejected `409`; stale `409` |
 | **Final approval** | `POST /documents/{n}/approve` | Segment Director or Maintenance Manager (or their active delegate with approval) | **actor's own area** | Director: non-maintenance only; Maintenance Manager: maintenance only; delegate: grantor's department and listed types | `director` | `If-Match` | `status=current`, `approvalStage=null`, `approvedBy/At`, `issueDate` | wrong role/area/department/type `403`; stage ≠ `director` `409`; stale `409`; already approved `409` |
 | **Reject** | `POST /documents/{n}/reject` | whoever may act at the current stage | as above | as above | `qms` or `director` | `{reason}` (non-empty; UI requires ≥ 20 chars), `If-Match` | `rejected=true`, `rejectedAtStage`, `rejectedBy/At`, `rejectedReason`, stage `null` | no reason `400`; not the stage's actor `403`; wrong stage / stale `409` |
@@ -90,7 +90,21 @@ Target behaviour (owner's requirement, `BUSINESS-RULES.md` §13): a user propose
 
 Every write appends an audit event. Notify the category's SME on a new proposal and the submitter on approval or rejection; a failed notification must not undo the step.
 
-## 8. Other
+## 8. Segment membership
+
+Target requirement (`BUSINESS-RULES.md` §14), not built in the prototype. Replaces the prototype's "Segment Contributors / Add Contributor". **Membership only; no endpoint here assigns or changes a role.** Entity: `DATA-MODEL.md` (SegmentMembership).
+
+| Method | Path | Actor | Rules |
+|---|---|---|---|
+| GET | `/areas/{segmentId}/members` | Segment Director of that segment; QMS / authorised administration; Maintenance Manager **pending decision** (§14.8 #1) | Operational segments only. Employee and Auditor `403` |
+| GET | `/directory/lookup?email=` | same as above | Server queries Entra ID / the directory and returns `{userId (immutable object id), displayName, email, jobTitle?, accountEnabled}` for the confirmation step. Not found `404`. Least-privilege directory permission chosen by IT. No free-text identity is accepted anywhere |
+| POST | `/areas/{segmentId}/members` | same as above, for a segment they may manage | Body: `{email}` or `{userId}` from the lookup. The server **re-resolves** the identity, refuses a disabled account (`422`) or an unknown one (`404`), refuses a non-operational area (`422`) and a duplicate (`409`), and stores the immutable `userId` with `source=manual`, `addedBy` (token), `addedAt` (server clock). Any `role`, `name`, `title` or permission field in the body is refused (`400`) |
+| DELETE | `/areas/{segmentId}/members/{userId}` | same as above | `{reason}`. Ends the membership (`removedBy/At`); visibility of that segment ends immediately. An automatic membership is corrected at its source or overridden by a recorded exception, as IT designs (§14.6) |
+| — | automatic assignment job | system | If IT confirms an authoritative attribute (§14.6), a sync creates and ends `source=automatic` memberships. Not assumed to exist |
+
+Every change is an audit event. A Segment Director acting on another segment, an Employee or the Auditor gets `403`.
+
+## 9. Other
 | Area | Endpoint | Note |
 |---|---|---|
 | Search | `GET /documents?q=` or a search service | Must apply the same visibility filter as `/documents` |

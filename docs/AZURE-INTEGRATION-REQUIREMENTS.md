@@ -68,7 +68,13 @@ The final system must derive identity and permissions from **trusted server-side
 | Glossary reviewer: technical SME / discipline owner (not one of the five document personas) | `<GROUP_GLOSSARY_SME_{CATEGORY}>` or an attribute | **which glossary categories**; mapping defined by the business / IT implementation (`BUSINESS-RULES.md` §13) |
 | Glossary administration | `<GROUP_OR_APP_ROLE_GLOSSARY_ADMIN>` (expected: QMS) | administrative only; not technical approval |
 
-After sign-in the frontend needs (`GET /me`): `userId`, `displayName`, `roles[]`, `areas[]` for scoped roles, department where relevant, active delegations the user may act under, and the capability flags. If a user holds more than one role, IT and the owner must decide whether TechHub asks which hat they are wearing or merges capabilities; the prototype assumes one role at a time.
+After sign-in the frontend needs (`GET /me`): `userId`, `displayName`, `roles[]`, `areas[]` for scoped roles, `memberships[]` and the server-computed `visibleAreas[]`, department where relevant, active delegations the user may act under, and the capability flags. If a user holds more than one role, IT and the owner must decide whether TechHub asks which hat they are wearing or merges capabilities; the prototype assumes one role at a time.
+
+**Segment membership is separate from role** (`BUSINESS-RULES.md` §14). Roles above come from Entra groups / app roles; membership says which operational segment an employee belongs to and therefore sees (their segment, every Corporate Function, every Center of Excellence). For Azure:
+- **Investigate first** whether membership can be derived automatically from an authoritative source: Entra organisational attributes (department, company, office, extension attributes), the HR system, business unit, organisational unit, cost centre or another authoritative attribute. **Do not assume one exists**; verify it with HR / Entra owners. If one does, assign membership automatically and keep Add Member for exceptions and corrections.
+- **Add Member** (production name for the prototype's "Add Contributor") takes only a corporate email, resolves the person in Entra ID / the directory (immutable object id, display name, email, job title, account status), shows them for confirmation, and stores the object id. No name / title / initials typing and no Editor / Viewer / Owner choice. Directory lookup needs a least-privilege Microsoft Graph permission chosen by IT.
+- Hidden from Employee and Auditor; available to the Segment Director (own segment) and QMS / authorised administration (all segments); Maintenance Manager is an open decision (`BUSINESS-RULES.md` §14.8).
+- The API computes visible areas from stored membership on every request; nothing the browser sends can widen it.
 
 Delegation must reference real users: the delegate signs in as themselves and the API applies the delegation to them. The prototype's "Act as this" button is a stand-in and must not ship.
 
@@ -79,6 +85,7 @@ Delegation must reference real users: the delegate signs in as themselves and th
 | Rule or data | Prototype location | Class |
 |---|---|---|
 | Who the user is; role; area | `roles.js` `TAQA_ROLE.current/area`, `localStorage` | **D** |
+| Which operational segments a user sees (segment membership) | **Not in the prototype**: every Employee sees every area; "Add Contributor" (`dashboard.html`) only draws a typed name for the session | **B + C + D** (`BUSINESS-RULES.md` §14; API filters every read by stored membership) |
 | Role capabilities (submit, countersign, approve, delegate, manage, register view, export) | `roles.js` `TAQA_ROLES` | **D** (+B) |
 | Can this user see this document (status, classification, drafts) | `TAQA_ROLE.canSee` | **D** (filter server-side, return 404) |
 | QMS check only at stage `qms` | `TAQA_APPROVAL.canCountersign`, `store.countersign` | **B + D** |
@@ -145,6 +152,8 @@ Today the bell is computed in the browser from the register; nothing is emailed 
 | Register shipped as a 259 KB script | `documents-master.js` | API; keep only as seed data for migration |
 | Ask Expert shows a reference number but sends nothing ("once this connects to a ticketing system") | `support-ticket.html` | Connect or relabel |
 | "Add term" publishes a glossary term at once as "Community", in this browser only, with no review | `glossary.html` `submitTerm` | Proposal with SME review (`BUSINESS-RULES.md` §13; `API-REQUIREMENTS.md` §7). Relabel the form "Propose a term" when connected |
+| "Segment Contributors" / "+ Add Contributor": typed name, job title and an **Editor / Viewer / Owner** role, demo names, session only, grants nothing | `dashboard.html` (`openAddContributor`, `addContributor`, `DASH_DATA`) | **Segment Members / Add Member** by email lookup in Entra ID, membership only, no role choice (`BUSINESS-RULES.md` §14; `API-REQUIREMENTS.md` §8). Remove the role dropdown; Owner is never assignable |
+| Every Employee sees every operational segment | all area pages, search | Membership-scoped visibility enforced by the API (`BUSINESS-RULES.md` §14.2, §14.7) |
 | Analytics count this browser only | `analytics.html` | Tenant telemetry |
 | Document preview "Preview not connected" | `viewer.html` | File storage |
 | `console.info('[upload] record to POST', rec)` | `upload.html` | Keep as integration aid or remove |

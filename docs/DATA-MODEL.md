@@ -19,7 +19,8 @@ What the frontend holds today, where, and what each object should become. No dat
 | Custom glossary terms ("Community", added immediately, no review) | `localStorage` `taqa_glossary_custom` | Database: **GlossaryTerm** with a review workflow (§2; `BUSINESS-RULES.md` §13). The prototype's immediate add is not the target |
 | Usage analytics | `localStorage` `taqa-analytics` (this browser only) | Tenant-approved telemetry (decision) |
 | Per-user conveniences: bookmarks, theme, pins, form drafts, tour/install flags, recent docs, error log | `localStorage` `taqa-bookmarks`, `taqa-theme-v3`, `taqa-pins`, `taqa-draft-*`, `taqa-tour-done`, `taqa-install-dismissed`, `taqa-recent-docs`, `taqa-errors`, `taqa-last-sync`, `taqa-strata-bed` | May stay in the browser (not records), or move to a user-preferences store |
-| Area page content (contributors, descriptions, sample activity) | `segments-data.js`, `DASH_DATA` in `dashboard.html` | Demo fixtures: replace with real data or remove (see `AZURE-INTEGRATION-REQUIREMENTS.md` §9) |
+| Area page content (contributors, descriptions, sample activity) | `segments-data.js`, `DASH_DATA` in `dashboard.html` | Demo fixtures: replace with real data or remove (see `AZURE-INTEGRATION-REQUIREMENTS.md` §9). The "Segment Contributors" list becomes **SegmentMembership** (§2) |
+| Segment membership (who belongs to which operational segment) | **Not held.** The "Add Contributor" form adds a typed name, title and Editor/Viewer/Owner badge to the page for the session only; it grants nothing | Database: **SegmentMembership** (§2; `BUSINESS-RULES.md` §14), automatic from an authoritative source where IT confirms one |
 | Attachments | **Not stored.** Only name and size are recorded | Azure file storage (`AZURE-INTEGRATION-REQUIREMENTS.md` §6) |
 | Ask Expert tickets | **Not stored or sent** (a reference number is shown locally) | Ticketing system or API (decision) |
 
@@ -59,7 +60,7 @@ The prototype stores signers as **role labels** ("Segment Director"); production
 `{ id, at, actor, action, target (docNumber / delegation id / file id), detail, correlationId, clientIp? }`. Append-only. Covers every write above plus reads where policy needs them (for example controlled-document downloads). The prototype's trail (`viewer.html`) and analytics log are reconstructed from record fields in one browser; they are not an audit log.
 
 ### Area
-`{ id, name, group: segment|function|product|company, spl (short form), bu, hasMaintenanceDepartment (= group == segment) }` from `TAQA_DOC_LOOKUPS.segments`.
+`{ id, name, group: segment|function|product|company, spl (short form), bu, hasMaintenanceDepartment (= group == segment) }` from `TAQA_DOC_LOOKUPS.segments`. `segment` = operational segment (11), `function` = Corporate Function (10), `product` = Center of Excellence (3, shown as "Products & Technology" in the prototype), `company` = Company Wide. Membership applies to `segment` areas only.
 
 ### Department
 `operations` (implicit, the default) or `maintenance`. Only operational segments have a maintenance department.
@@ -68,7 +69,7 @@ The prototype stores signers as **role labels** ("Segment Director"); production
 `{ key, label, letter, owner, approver (register text), reviewCycleMonths, retentionYears, controlled, provisional }` from `TAQA_DOC_LOOKUPS.types`. See `BUSINESS-RULES.md` §12 #1 on the `approver` text.
 
 ### User identity reference
-`{ userId (Entra object id), displayName, email?, roles[], areas[] (for scoped roles), department? }`, derived from Entra ID at sign-in (`AZURE-INTEGRATION-REQUIREMENTS.md` §3). Records store the user id; display names are looked up.
+`{ userId (Entra object id), displayName, email?, jobTitle?, accountEnabled, roles[], areas[] (held by role, for scoped roles), department? }`, derived from Entra ID at sign-in (`AZURE-INTEGRATION-REQUIREMENTS.md` §3). Records store the user id; display names are looked up. Roles never come from SegmentMembership.
 
 ### Delegation
 `{ id, grantor (user ref), grantorRole, delegate (user ref), area, department (from the grantor), docTypes[]?, includesApproval, from, until (≤ 90 days), reason, createdAt, revokedAt?, revokedBy? }`. The prototype stores the delegate as a typed name; production must reference a real user.
@@ -78,6 +79,24 @@ The prototype stores signers as **role labels** ("Segment Director"); production
 
 ### Notification
 `{ id, recipient (user ref), kind: awaiting_check|awaiting_approval|approved|returned, docNumber, createdAt, readAt? }`. The prototype derives these in the browser from the register (`shared.js` bell).
+
+### SegmentMembership
+Target requirement (`BUSINESS-RULES.md` §14); not implemented in the prototype. Organisational membership only: **no role, permission level, Editor, Viewer or Owner field.**
+
+| Field | Type | Owner | Notes |
+|---|---|---|---|
+| `id` | string | server | |
+| `userId` | Entra object id | **server** (resolved from the directory) | Immutable identity; the key. Never the email or display name alone |
+| `segmentId` | area id | manager, validated | Operational segment (`group = segment`) only |
+| `source` | `automatic` / `manual` | server | Automatic from an authoritative attribute if IT confirms one (§14.6); manual from Add Member |
+| `sourceAttribute` | string? | server | Which authoritative attribute produced an automatic membership |
+| `status` | `active` / `removed` | server (transition) | |
+| `addedBy`, `addedAt` | user ref, datetime | **server** (token, clock) | System for automatic |
+| `removedBy`, `removedAt`, `removalReason` | | **server** / manager | |
+| `displayName`, `email`, `jobTitle` | string | directory (cached) | Display only, refreshed from Entra; not identity |
+| version token | | server | Concurrency (§3) |
+
+Visible areas for a user = operational segments with an `active` membership (plus any held by role, per the owner's decision) + every Corporate Function + every Center of Excellence (+ Company Wide, per §14.8 #2).
 
 ### GlossaryTerm
 Target requirement (`BUSINESS-RULES.md` §13); not implemented in the prototype. One row per proposed term.
