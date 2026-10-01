@@ -1081,7 +1081,11 @@ function submitUpload(e) {
     refEl.id = 'upload-ref';
     refEl.textContent = ref;
     toastSub.appendChild(refEl);
-    toastSub.appendChild(document.createTextNode('. Next: QMS checks it, then the Director approves it. It is in force only after both. Track it under Your submissions below.'));
+    // A maintenance department document is released by its Maintenance
+    // Manager, not the Director (TAQA_APPROVAL.isMaintenance), so say so.
+    var nextSigner = (typeof TAQA_APPROVAL !== 'undefined' && TAQA_APPROVAL.isMaintenance(rec))
+      ? 'the Maintenance Manager' : 'the Director';
+    toastSub.appendChild(document.createTextNode('. Next: QMS checks it, then ' + nextSigner + ' approves it. It is in force only after both. Track it under Your submissions below.'));
   }
   document.getElementById('toast-icon').innerHTML = ICON_OK;
   const toast = document.getElementById('toast');

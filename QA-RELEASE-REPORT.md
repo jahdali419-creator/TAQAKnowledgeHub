@@ -1,5 +1,7 @@
 # TAQA Knowledge Hub, Frontend QA & Release Report
 
+> **STALE: four-role evidence (re-audited 1 Oct 2026).** Its "Role Coverage" section says "All four roles"; the app now has five, including the **Maintenance Manager**. Its test counts (357) and its role statements are history, not current evidence. Current evidence: `FIVE-ROLE-QA-AUDIT.md`.
+>
 > **Superseded counts.** The end-to-end role audit of 30 Sept 2026 (`RELEASE-QA-E2E.md`) re-ran the suite and found and fixed workflow, permission and phone-layout defects. Use its measured results, not the test counts below.
 
 Scope note, read this first: this is a **frontend prototype / functional
@@ -141,6 +143,8 @@ where offline emulation reaches the service worker correctly.
 | offline.html | PASS |
 
 ## Role Coverage
+
+> **STALE.** Written for four roles. The fifth, the Maintenance Manager, is not covered here; see `FIVE-ROLE-QA-AUDIT.md`.
 
 All four roles from `roles.js`'s `TAQA_ROLES` exercised directly (not
 assumed): **Employee** (read-only register access), **Segment Director**

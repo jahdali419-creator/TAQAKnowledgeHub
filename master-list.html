@@ -1050,9 +1050,13 @@ function bulkAction(kind){
       ' '+(kind==='approve'?'not waiting on the QMS check':'already withdrawn')+
       ' and will be left as '+(skipped===1?'it is':'they are')+'.'
     : '';
+  // Who approves next follows the document: a maintenance department
+  // document goes to its Maintenance Manager, anything else to its Director.
+  const nM=eligible.filter(d=>TAQA_APPROVAL.isMaintenance(d)).length;
+  const who=nM===0?'Director':nM===n?'Maintenance Manager':'Director, or Maintenance Manager for a maintenance document,';
   const msg=kind==='approve'
     ? n+' document'+s+' will be confirmed as checked by QMS and sent to '+(n===1?'its':'their')+
-      ' Director for approval. '+(n===1?'It is':'They are')+' not in force until the Director approves.'+skipNote
+      ' '+who+' for approval. '+(n===1?'It is':'They are')+' not in force until '+(nM===0?'the Director':nM===n?'the Maintenance Manager':'that approver')+' approves.'+skipNote
     : n+' document'+s+' will be marked obsolete. Every reader will see "Withdrawn, do not use." '+
       (n===1?'It stays':'They stay')+' in the register, but '+(n===1?'leaves':'leave')+' the live list.'+skipNote;
   if(!confirm(msg))return;
@@ -1062,7 +1066,7 @@ function bulkAction(kind){
   selectedRows.clear();
   renderCuts(); render(); drawSummary();
   toast(kind==='approve'
-    ? 'Confirmed '+done+' document'+(done===1?'':'s')+'. '+(done===1?'It now waits':'They now wait')+' on the Director.'
+    ? 'Confirmed '+done+' document'+(done===1?'':'s')+'. '+(done===1?'It now waits':'They now wait')+' on the '+(nM===0?'Director':nM===n?'Maintenance Manager':'named approver')+'.'
     : 'Withdrew '+done+' document'+(done===1?'':'s')+'.');
 }
 

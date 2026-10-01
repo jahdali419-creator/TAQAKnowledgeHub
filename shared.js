@@ -1148,7 +1148,7 @@ document.addEventListener('keydown',function(e){
     'html[data-taqa-theme="dark"] .door-i:hover{background:rgba(0,187,182,.08);}' +
     'html[data-taqa-theme="dark"] .door-btn{border-color:#003A3D;color:#C7DBDD;}' +
     /* Acting as a delegate is never quiet. */
-    '.deleg-bar{position:sticky;top:0;z-index:2500;display:flex;align-items:center;gap:10px;' +
+    '.deleg-bar{position:fixed;top:var(--nav-h,64px);inset-inline:0;z-index:999;display:flex;align-items:center;gap:10px;' +
       'padding:8px 18px;background:#FD691D;color:#fff;font-size:12.5px;font-weight:600;}' +
     '.deleg-bar b{font-weight:800;}' +
     '.deleg-bar .db-end{margin-inline-start:auto;display:flex;gap:8px;align-items:center;}' +

@@ -23,7 +23,7 @@ npm run test:ui          # Playwright's interactive UI mode, for debugging
 npm run test:chromium    # Chromium only (same as `npm test`)
 npm run test:firefox     # requires `npx playwright install firefox`
 npm run test:webkit      # requires `npx playwright install webkit`
-npm run test:mobile      # Pixel 7 + iPhone 14 device emulation profiles
+npm run test:mobile      # Pixel 7 + iPhone 14 device emulation profiles (iPhone needs WebKit installed)
 npm run test:report      # reopen the last HTML report
 npm run serve            # just run the static server, e.g. to poke around by hand
 ```
@@ -35,6 +35,17 @@ npx playwright test tests/dashboard.spec.js
 npx playwright test -g "reject requires a reason"
 ```
 
+## Roles under test
+
+There are **five** personas in `roles.js` (`TAQA_ROLE_ORDER`): Employee,
+Segment Director (`owner`), Maintenance Manager (`maintenance`), QMS /
+Document Controller (`qms`) and External Auditor (`auditor`).
+`roles.spec.js` pins each one's exact capabilities, including `submit` and
+`department`. A test that loops over roles should include `maintenance`
+wherever the rule it checks applies to it. Reports written for four roles
+(`QA-RELEASE-REPORT.md`, `RELEASE-QA-E2E.md`) are marked stale; the current
+evidence is `FIVE-ROLE-QA-AUDIT.md`.
+
 ## What's covered
 
 Each file under `tests/` maps to one page or one cross-cutting concern:
@@ -43,7 +54,7 @@ Each file under `tests/` maps to one page or one cross-cutting concern:
 |---|---|
 | `smoke.spec.js` | every page loads with no thrown JS error, has a real `<title>` |
 | `navigation.spec.js` | the shared topbar: areas dropdown, role/area switcher, bookmarks, dark mode, mobile menu, popover behavior |
-| `home.spec.js` | index.html: hero/search, area cards, recently-visited, real counts |
+| `home.spec.js` | index.html: hero/search, the three ways in, real counts, the TechHub header name |
 | `segment.spec.js` | segment.html: per-area document library, tabs, counts, amber pre-warning |
 | `viewer.spec.js` | viewer.html: document metadata, statuses, version history, QR, print, breadcrumb |
 | `documents.spec.js` | documents.html: published-documents table, sorting, withdraw, XSS escaping |
@@ -51,6 +62,12 @@ Each file under `tests/` maps to one page or one cross-cutting concern:
 | `search.spec.js` | ai-search.html: keyword search, filters, safety disclaimer |
 | `dashboard.spec.js` | dashboard.html: the approval desk UI, toasts, contributors |
 | `approval-workflow.spec.js` | the real two-step QMS-then-approver release flow, end to end |
+| `release-journey.spec.js` | one Operations document through Employee, QMS, Director and Auditor by UI; register write refusals; two tabs; phone layout |
+| `maintenance.spec.js` | the Operations / Maintenance switch, shelves, maintenance approval rule at the store, bulletins, maintenance software, the upload box |
+| `maintenance-manager.spec.js` | the Maintenance Manager through the pages: page access, the maintenance journey through the desks, returning a document, delegation, wording |
+| `maintenance-ask-expert.spec.js` | Ask Expert routing to Operations or Maintenance; no Maintenance page or Continue Reading |
+| `forms.spec.js` | the Forms & Checklists shelf and the TAQA form template |
+| `numbering.spec.js` | TQ-QHSE-S001 5.3 numbering from upload |
 | `roles.spec.js` | the role/permission matrix and delegation logic, independent of any page |
 | `upload.spec.js` | upload.html: the submission wizard, file-type/size security checks |
 | `support-ticket.spec.js` | support-ticket.html: form validation, photo annotation, ticket refs |

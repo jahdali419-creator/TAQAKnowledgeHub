@@ -1165,7 +1165,10 @@ function initDashboard() {
     });
 
     function paintList(){
-      var all = TAQA_DELEGATION.list().filter(function(x){ return !x.revokedAt; });
+      var mineSeg = CAP.ownSegment || dashSegId, me = TAQA_ROLE.current();
+      var all = TAQA_DELEGATION.list().filter(function(x){
+        return !x.revokedAt && x.fromRole === me && (x.segment || mineSeg) === mineSeg;
+      });
       if (!all.length) {
         list.innerHTML = '<div class="deleg-none">Nothing delegated. Your authority is yours alone.</div>';
         return;
@@ -1201,7 +1204,9 @@ function initDashboard() {
       e.preventDefault();
       var out = TAQA_DELEGATION.grant({
         fromRole: TAQA_ROLE.current(),
-        fromName: (dash.owner && dash.owner.name) || TAQA_ROLES[TAQA_ROLE.current()].label,
+        fromName: TAQA_ROLE.current() === 'maintenance'
+          ? TAQA_ROLE.holderTitle() + ', ' + TAQA_ROLE.areaName(CAP.ownSegment || dashSegId)
+          : (dash.owner && dash.owner.name) || TAQA_ROLES[TAQA_ROLE.current()].label,
         to: document.getElementById('dg-to').value,
         segment: CAP.ownSegment || dashSegId,
         reason: document.getElementById('dg-reason').value,
@@ -1308,7 +1313,7 @@ function approveDoc(id) {
       result.className = 'action-result show';
       return;
     }
-    const _mnt = (TAQA_STORE.findDoc(storeDoc) || {}).department === 'maintenance';
+    const _mnt = TAQA_APPROVAL.isMaintenance(TAQA_STORE.findDoc(storeDoc));
     result.textContent = stage === 'qms'
       ? '✓ Checked. Now with the ' + (_mnt ? 'Maintenance Manager' : 'Director') + ' for final approval'
       : '✓ Approved and published to the segment';
@@ -1316,7 +1321,7 @@ function approveDoc(id) {
   pendingCount = Math.max(0, pendingCount - 1);
   setCount(document.getElementById('stat-pending'), pendingCount);
   document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
-  const _mntT = storeDoc && typeof TAQA_STORE !== 'undefined' && (TAQA_STORE.findDoc(storeDoc) || {}).department === 'maintenance';
+  const _mntT = storeDoc && typeof TAQA_STORE !== 'undefined' && TAQA_APPROVAL.isMaintenance(TAQA_STORE.findDoc(storeDoc));
   showDashToast(stage === 'qms'
     ? 'Checked, sent on for the ' + (_mntT ? 'Maintenance Manager' : 'Director') + '\'s final approval'
     : 'Document approved and published to segment', '#00BBB6');

@@ -19,22 +19,31 @@ const EXPECTED_ROLES = {
   employee: {
     controlPanel: false, export: false, registerView: false,
     approve: false, countersign: false, delegate: false,
-    editMetadata: false, scope: 'all',
+    editMetadata: false, submit: true, scope: 'all', department: null,
   },
   owner: {
     controlPanel: true, export: false, registerView: false,
     approve: true, countersign: false, delegate: true,
-    editMetadata: true, scope: 'own',
+    editMetadata: true, submit: true, scope: 'own', department: null,
+  },
+  // The fifth persona: a segment's Maintenance Manager. Same powers as the
+  // Director, narrowed to the maintenance department by `department`, which
+  // TAQA_APPROVAL.canApprove reads. It had no entry here, so an edit to its
+  // capabilities would have passed unnoticed.
+  maintenance: {
+    controlPanel: true, export: false, registerView: false,
+    approve: true, countersign: false, delegate: true,
+    editMetadata: true, submit: true, scope: 'own', department: 'maintenance',
   },
   qms: {
     controlPanel: true, export: true, registerView: true,
     approve: false, countersign: true, delegate: false,
-    editMetadata: true, scope: 'all',
+    editMetadata: true, submit: true, scope: 'all', department: null,
   },
   auditor: {
     controlPanel: true, export: true, registerView: true,
     approve: false, countersign: false, delegate: false,
-    editMetadata: false, scope: 'all',
+    editMetadata: false, submit: false, scope: 'all', department: null,
   },
 };
 
@@ -47,7 +56,8 @@ test.describe('TAQA_ROLES permission matrix', () => {
         return {
           controlPanel: d.controlPanel, export: d.export, registerView: d.registerView,
           approve: d.approve, countersign: d.countersign, delegate: d.delegate,
-          editMetadata: d.editMetadata, scope: d.scope,
+          editMetadata: d.editMetadata, submit: d.submit, scope: d.scope,
+          department: d.department || null,
         };
       }, role);
       expect(actual).toEqual(expected);
