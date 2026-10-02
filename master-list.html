@@ -14,11 +14,13 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#005D63">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="TechHub Platform">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-<title>Master Document List, TAQA Knowledge Hub</title>
+<meta name="apple-mobile-web-app-title" content="RISE">
+<link rel="apple-touch-icon" href="icons/rise-apple-touch-icon.png">
+<link rel="icon" href="icons/rise-favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="icons/rise-favicon-16.png" type="image/png" sizes="16x16">
+<title>Master Document List, RISE</title>
 <link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="techhub.css">
 <link rel="stylesheet" href="topbar.css">
 <style>
 /* TAQA identity. Brand hues exactly as specified; the neutral ramp is built
@@ -518,9 +520,8 @@ thead th{top:var(--nav-h,64px);}
 
 <nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
   <a href="index.html" class="nav-brand">
-    <img src="icons/taqa-logo.png" alt="TAQA" class="nav-logo nav-logo-light">
-    <img src="icons/taqa-logo-reverse.png" alt="TAQA" class="nav-logo nav-logo-dark">
-    <span class="nav-subtitle"><em>TechHub Platform</em></span>
+    <img src="assets/brand/rise-lockup-header.png" alt="RISE" class="nav-logo nav-logo-light" width="320" height="120">
+    <img src="assets/brand/rise-lockup-header-reverse.png" alt="RISE" class="nav-logo nav-logo-dark" width="320" height="120">
   </a>
   <ul class="nav-links">
     <li><a href="index.html">Home</a></li>
@@ -1049,9 +1050,13 @@ function bulkAction(kind){
       ' '+(kind==='approve'?'not waiting on the QMS check':'already withdrawn')+
       ' and will be left as '+(skipped===1?'it is':'they are')+'.'
     : '';
+  // Who approves next follows the document: a maintenance department
+  // document goes to its Maintenance Manager, anything else to its Director.
+  const nM=eligible.filter(d=>TAQA_APPROVAL.isMaintenance(d)).length;
+  const who=nM===0?'Director':nM===n?'Maintenance Manager':'Director, or Maintenance Manager for a maintenance document,';
   const msg=kind==='approve'
     ? n+' document'+s+' will be confirmed as checked by QMS and sent to '+(n===1?'its':'their')+
-      ' Director for approval. '+(n===1?'It is':'They are')+' not in force until the Director approves.'+skipNote
+      ' '+who+' for approval. '+(n===1?'It is':'They are')+' not in force until '+(nM===0?'the Director':nM===n?'the Maintenance Manager':'that approver')+' approves.'+skipNote
     : n+' document'+s+' will be marked obsolete. Every reader will see "Withdrawn, do not use." '+
       (n===1?'It stays':'They stay')+' in the register, but '+(n===1?'leaves':'leave')+' the live list.'+skipNote;
   if(!confirm(msg))return;
@@ -1061,7 +1066,7 @@ function bulkAction(kind){
   selectedRows.clear();
   renderCuts(); render(); drawSummary();
   toast(kind==='approve'
-    ? 'Confirmed '+done+' document'+(done===1?'':'s')+'. '+(done===1?'It now waits':'They now wait')+' on the Director.'
+    ? 'Confirmed '+done+' document'+(done===1?'':'s')+'. '+(done===1?'It now waits':'They now wait')+' on the '+(nM===0?'Director':nM===n?'Maintenance Manager':'named approver')+'.'
     : 'Withdrew '+done+' document'+(done===1?'':'s')+'.');
 }
 

@@ -39,6 +39,10 @@ test.describe('Contributors', () => {
     const before = await page.locator('#contributors-list .contributor-row').count();
     await page.getByRole('button', { name: '+ Add Contributor' }).click();
     await expect(page.locator('#add-contributor-modal')).toHaveClass(/open/);
+    // The dialog moves focus to Name 100 ms after opening. Typing before that
+    // lands raced it: under load "QA Engineer" ended up in Name. Let the
+    // page's own focus settle first, as a person necessarily does.
+    await expect(page.locator('#contrib-name')).toBeFocused();
 
     await page.fill('#contrib-name', 'Regression Test Person');
     await page.fill('#contrib-title', 'QA Engineer');

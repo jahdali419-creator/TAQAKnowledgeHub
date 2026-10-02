@@ -1,5 +1,7 @@
 # TAQA Knowledge Hub: cybersecurity review pack
 
+> **Historical (August 2026).** Written before the two-step release workflow, the five personas and the Azure API approach. Kept as background. For current rules and integration requirements start at `docs/HANDOVER-TO-IT.md`; where this document differs, the handover package wins.
+
 Prepared by Mohammed Al-Jahdali, TAQA Learning Center, for TAQA Cybersecurity
 4 August 2026. Assessed commit: `main` @ 65248c8
 Classification: Internal Use

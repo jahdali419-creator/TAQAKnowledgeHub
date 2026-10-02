@@ -55,7 +55,9 @@ const TAQA_ROLES = {
 
   owner: {
     label: 'Segment Director',
-    blurb: 'Holds a segment. Approves the documents the register names them approver for, which is SOPs and Standards in their own area, and may delegate that authority for a fixed period. Release still needs the QMS countersignature.',
+    // Wording only: QMS checks first and the Director's approval releases
+    // (TAQA_APPROVAL), so the description says it in that order.
+    blurb: 'Holds a segment. Gives final approval to its Operations documents once QMS has checked them, and that approval is what publishes them. May delegate the authority for a fixed period.',
     statuses:        ['current', 'under-review', 'superseded', 'obsolete', 'draft'],
     classifications: ['internal', 'confidential'],
     controlPanel: true,
@@ -102,7 +104,7 @@ const TAQA_ROLES = {
 
   qms: {
     label: 'QMS / Document Controller',
-    blurb: 'Custodian of the register. Countersigns what a Director has approved, checking the record and the numbering before release, and owns withdrawal, periodic review and the TQ-QHSE-F086 export. Does not give the technical sign-off on another function\'s procedure.',
+    blurb: 'Custodian of the register. Checks every document first, the record, the numbering and the revision, before its Segment Director or Maintenance Manager gives final approval. Owns withdrawal, periodic review and the TQ-QHSE-F086 export. Does not give the technical sign-off on another function\'s procedure.',
     statuses:        ['current', 'under-review', 'superseded', 'obsolete', 'draft'],
     classifications: ['internal', 'confidential', 'restricted'],
     controlPanel: true,
@@ -183,11 +185,21 @@ const TAQA_ROLE = {
   area(){
     var a = null;
     try { a = localStorage.getItem('taqa-demo-area'); } catch(e){}
-    if (a && typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments[a]) return a;
+    if (a && typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments[a] &&
+        TAQA_ROLE.holds(a)) return a;
     return TAQA_DEFAULT_AREA;
+  },
+  /* Can the signed-in role hold this area at all? A Maintenance Manager
+     heads an operational segment's maintenance department, and only
+     operational segments have one: not a function, a centre or the company. */
+  holds(a, roleKey){
+    if ((roleKey || TAQA_ROLE.current()) !== 'maintenance') return true;
+    var s = (typeof TAQA_DOC_LOOKUPS !== 'undefined') && TAQA_DOC_LOOKUPS.segments[a];
+    return !s || s.group === 'segment';
   },
   setArea(a){
     if (typeof TAQA_DOC_LOOKUPS !== 'undefined' && !TAQA_DOC_LOOKUPS.segments[a]) return;
+    if (!TAQA_ROLE.holds(a)) return;
     try { localStorage.setItem('taqa-demo-area', a); } catch(e){}
     // Holding a different area is being a different person, so a delegation
     // granted to you in the old one does not come with you.
@@ -297,13 +309,31 @@ TAQA_ROLE.refuse = function(title, why){
   if (window.stop) window.stop();
 };
 
-/* May this person manage an area's desk: its queue, contributors and
-   published list? The holder of that area, or QMS for every area. An
-   auditor reads the register instead; an employee has no desk. */
-TAQA_ROLE.canManage = function(areaId){
+/* May this person manage an area's desk, or one of its documents?
+
+     canManage(areaId)  the desk: its queue, contributors and published list.
+                        The holder of that area, or QMS for every area.
+     canManage(doc)     one document: withdraw it or edit its details. The
+                        area must be theirs AND the department must be: an
+                        Operations document is its Segment Director's, a
+                        maintenance document (TAQA_APPROVAL.isMaintenance) its
+                        Maintenance Manager's. The same split as approval, so
+                        nobody withdraws what they could never have released.
+                        QMS keeps every document in every area.
+
+   An auditor reads the register instead; an employee has no desk. Lifecycle
+   fields (status, stage, signatures) never change by editing; see
+   TAQA_STORE.patch. */
+TAQA_ROLE.canManage = function(target){
   var cap = TAQA_ROLE.effective();
   if (!cap.editMetadata) return false;
-  return cap.scope === 'all' || !areaId || areaId === cap.ownSegment;
+  if (cap.scope === 'all') return true;
+  var doc = (target && typeof target === 'object') ? target : null;
+  var areaId = doc ? doc.segment : target;
+  if (areaId && areaId !== cap.ownSegment) return false;
+  if (doc && typeof TAQA_APPROVAL !== 'undefined' &&
+      TAQA_APPROVAL.isMaintenance(doc) !== (cap.department === 'maintenance')) return false;
+  return true;
 };
 
 if (typeof module !== 'undefined' && module.exports)

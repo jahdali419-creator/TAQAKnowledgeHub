@@ -46,6 +46,9 @@ test.describe('the register', () => {
 
 test.describe('the Operations | Maintenance switch', () => {
   test('every operational segment has it, and its Maintenance side carries every shelf plus Bulletins', async ({ page, gotoApp, setRole, clearAppState }) => {
+    // Eleven page loads in one test: the default 30 s ran out under a busy
+    // 4-worker run (flaky, not a defect). Same checks, more time.
+    test.setTimeout(90_000);
     await start(page, gotoApp, setRole, clearAppState, 'qms');
     for (const id of SEGMENTS) {
       await gotoApp('/segment.html?id=' + id + '&dept=maintenance&tab=sops');

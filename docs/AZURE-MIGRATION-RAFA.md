@@ -1,5 +1,7 @@
 # Azure migration plan
 
+> **Historical (August 2026).** Written before the two-step release workflow, the five personas and the Azure API approach. Kept as background. For current rules and integration requirements start at `docs/HANDOVER-TO-IT.md`; where this document differs, the handover package wins.
+
 TAQA Knowledge Hub, migration onto TAQA Azure and Microsoft 365
 For Rafa Al Zahrani, D&T, Azure migration owner
 From Mohammed Al-Jahdali, TAQA Learning Center

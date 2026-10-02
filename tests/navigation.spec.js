@@ -140,7 +140,7 @@ test.describe('Primary nav links', () => {
 });
 
 test.describe('Master List link (registerView roles only)', () => {
-  for (const role of ['employee', 'owner']) {
+  for (const role of ['employee', 'owner', 'maintenance']) {
     test(`is not in the nav for ${role}`, async ({ page, gotoApp, setRole }) => {
       await gotoApp('/index.html');
       await setRole(role, 'coiled-tubing');
@@ -198,7 +198,7 @@ test.describe('Upload link (roles that may submit)', () => {
     });
   }
 
-  for (const role of ['employee', 'owner', 'qms']) {
+  for (const role of ['employee', 'owner', 'maintenance', 'qms']) {
     test(`is visible and points at upload.html for ${role}`, async ({ page, gotoApp, setRole, topbar }) => {
       await gotoApp('/index.html');
       await setRole(role, 'coiled-tubing');

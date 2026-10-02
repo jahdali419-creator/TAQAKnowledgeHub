@@ -5,25 +5,71 @@ dependencies. Playwright and a small static file server are the only
 dev-time tools, and they exist solely to test the app; nothing here changes
 how the site itself runs in production.
 
+## From a fresh checkout (verified 1 Oct 2026)
+
+Requirements: Git, Node.js 18 or later (verified on Node 22, npm 10), internet
+access to the npm registry and Playwright's browser download. Nothing else:
+no global packages, no environment variables, no files outside the repository.
+
+```
+git clone <repository-url> techhub && cd techhub
+npm ci                                   # exact versions from package-lock.json
+npx playwright install --with-deps chromium   # browser + OS libraries (Linux needs sudo for --with-deps)
+npm run serve                            # http://127.0.0.1:4173 , any static server works
+npx playwright test --project=chromium --project=mobile-chrome
+```
+
+- **Configure:** nothing is needed to run the prototype. Per-environment
+  values for the Azure build are described in
+  `docs/AZURE-INTEGRATION-REQUIREMENTS.md` §2 (template:
+  `config/techhub.config.example.js`).
+- **Build:** there is no build step. The deployable artefact is the static
+  files themselves: the `.html` pages, `*.js`, `*.css`, `manifest.json`,
+  `service-worker.js`, `staticwebapp.config.json`, `offline.html`, `fonts/`,
+  `icons/` and the hero images. `docs/`, `tests/`, `config/*.example.js` and the
+  npm/Playwright files are not part of the app.
+- The Playwright config uses a pre-installed Chromium at
+  `/opt/pw-browsers/chromium` **only if that path exists** (it does in the
+  cloud environment this was built in), otherwise Playwright's own download.
+  Override with `PLAYWRIGHT_CHROMIUM_PATH`. Port: `TAQA_TEST_PORT` (default 4173).
+- **Port 4173 must be free (or serving this checkout).** Locally Playwright
+  reuses any server already listening on the test port
+  (`reuseExistingServer`), so a server left running from another copy of the
+  repository makes tests run against the wrong files (seen during the handover
+  audit as service-worker cache tests failing against an older build). Stop
+  other servers or set `TAQA_TEST_PORT`.
+- On a small machine use `--workers=2`: the full two-project run is 906 tests
+  and takes about 18 minutes.
+
 ## Quick start
 
 ```
-npm install
-npx playwright install        # first time only, downloads browser binaries
+npm ci
+npx playwright install chromium   # first time only, downloads browser binaries
 npm test
 ```
 
-`npm test` starts a local static server, runs the full suite against it on
-Chromium, and shuts the server down again. That's the whole loop.
+`npm test` starts a local static server, runs the full suite on the two
+supported projects (`chromium` desktop and `mobile-chrome`), and shuts the
+server down again. `npm run test:all-engines` adds Firefox, WebKit and
+mobile-safari (see Engines below). CI runs Chromium only
+(`.github/workflows/tests.yml`).
+
+## Engines
+
+| Project | Status (1 Oct 2026) |
+|---|---|
+| `chromium`, `mobile-chrome` | Full suite green; CI runs `chromium` |
+| `firefox`, `webkit`, `mobile-safari` | The **app** passes both workflows when driven directly in Firefox and WebKit. The **test suite** fails in setup on these engines: its fixtures touch `localStorage` and navigate in a way only Chromium tolerates ("navigation interrupted", "The operation is insecure"). Make `tests/helpers/fixtures.js` cross-engine before adding these projects to CI. |
 
 ## Other useful commands
 
 ```
 npm run test:ui          # Playwright's interactive UI mode, for debugging
-npm run test:chromium    # Chromium only (same as `npm test`)
+npm run test:chromium    # Chromium desktop only (what CI runs)
 npm run test:firefox     # requires `npx playwright install firefox`
 npm run test:webkit      # requires `npx playwright install webkit`
-npm run test:mobile      # Pixel 7 + iPhone 14 device emulation profiles
+npm run test:mobile      # Pixel 7 + iPhone 14 device emulation profiles (iPhone needs WebKit installed)
 npm run test:report      # reopen the last HTML report
 npm run serve            # just run the static server, e.g. to poke around by hand
 ```
@@ -35,6 +81,17 @@ npx playwright test tests/dashboard.spec.js
 npx playwright test -g "reject requires a reason"
 ```
 
+## Roles under test
+
+There are **five** personas in `roles.js` (`TAQA_ROLE_ORDER`): Employee,
+Segment Director (`owner`), Maintenance Manager (`maintenance`), QMS /
+Document Controller (`qms`) and External Auditor (`auditor`).
+`roles.spec.js` pins each one's exact capabilities, including `submit` and
+`department`. A test that loops over roles should include `maintenance`
+wherever the rule it checks applies to it. Reports written for four roles
+(`docs/QA/QA-RELEASE-REPORT.md`, `docs/QA/RELEASE-QA-E2E.md`) are marked stale;
+the current evidence is `docs/QA/FIVE-ROLE-QA-AUDIT.md`.
+
 ## What's covered
 
 Each file under `tests/` maps to one page or one cross-cutting concern:
@@ -43,7 +100,8 @@ Each file under `tests/` maps to one page or one cross-cutting concern:
 |---|---|
 | `smoke.spec.js` | every page loads with no thrown JS error, has a real `<title>` |
 | `navigation.spec.js` | the shared topbar: areas dropdown, role/area switcher, bookmarks, dark mode, mobile menu, popover behavior |
-| `home.spec.js` | index.html: hero/search, area cards, recently-visited, real counts |
+| `home.spec.js` | index.html: hero/search, the three ways in, real counts, the RISE logo in the bar |
+| `brand.spec.js` | RISE branding: the logo in the bar on eight key pages, light and dark, desktop and phone (full-colour logo on light bars, reverse logo on dark bars and the hero with no plate, switching on scroll; loads, undistorted, clear of the controls); favicon, Apple touch, manifest icons and names |
 | `segment.spec.js` | segment.html: per-area document library, tabs, counts, amber pre-warning |
 | `viewer.spec.js` | viewer.html: document metadata, statuses, version history, QR, print, breadcrumb |
 | `documents.spec.js` | documents.html: published-documents table, sorting, withdraw, XSS escaping |
@@ -51,6 +109,12 @@ Each file under `tests/` maps to one page or one cross-cutting concern:
 | `search.spec.js` | ai-search.html: keyword search, filters, safety disclaimer |
 | `dashboard.spec.js` | dashboard.html: the approval desk UI, toasts, contributors |
 | `approval-workflow.spec.js` | the real two-step QMS-then-approver release flow, end to end |
+| `release-journey.spec.js` | one Operations document through Employee, QMS, Director and Auditor by UI; register write refusals; two tabs; phone layout |
+| `maintenance.spec.js` | the Operations / Maintenance switch, shelves, maintenance approval rule at the store, bulletins, maintenance software, the upload box |
+| `maintenance-manager.spec.js` | the Maintenance Manager through the pages: page access, the maintenance journey through the desks, returning a document, delegation, wording |
+| `maintenance-ask-expert.spec.js` | Ask Expert routing to Operations or Maintenance; no Maintenance page or Continue Reading |
+| `forms.spec.js` | the Forms & Checklists shelf and the TAQA form template |
+| `numbering.spec.js` | TQ-QHSE-S001 5.3 numbering from upload |
 | `roles.spec.js` | the role/permission matrix and delegation logic, independent of any page |
 | `upload.spec.js` | upload.html: the submission wizard, file-type/size security checks |
 | `support-ticket.spec.js` | support-ticket.html: form validation, photo annotation, ticket refs |

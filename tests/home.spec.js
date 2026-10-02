@@ -37,7 +37,7 @@ test.describe('Hero', () => {
     await gotoApp('/index.html');
 
     await expect(page.locator('.hero h1')).toBeVisible();
-    await expect(page.locator('.hero h1')).toContainText('Knowledge Is');
+    await expect(page.locator('.hero h1')).toContainText('Knowledge Is Better Together');
     await expect(page.locator('#hero-search-input')).toBeVisible();
     await expect(page.locator('#hero-search-btn')).toBeVisible();
   });
@@ -271,5 +271,29 @@ test.describe('Homepage counts come from the register, not a hardcoded number', 
     expect(await rowTarget('Business Segments')).toBe(String(segN));
     expect(await rowTarget('Active Technical Alerts')).toBe(String(liveAlertCount));
     expect(await rowTarget('Awaiting QMS Approval')).toBe(String(baseline.draftCount));
+  });
+});
+
+
+// The redesign: the RISE logo in the bar (tests/brand.spec.js covers it
+// across pages), and the three ways in (and only three) lifted onto the
+// hero, each saying what it is for.
+test.describe('Home redesign', () => {
+  test('the bar carries the RISE logo, not the old TAQA + TechHub lockup', async ({ page, gotoApp }) => {
+    await gotoApp('/index.html');
+    await expect(page.locator('#navbar .nav-brand img:visible')).toHaveAttribute('alt', 'RISE');
+    await expect(page.locator('#navbar .nav-subtitle')).toHaveCount(0);
+  });
+
+  test('the three ways in carry a purpose and nothing else joins them', async ({ page, gotoApp, clearAppState }) => {
+    await gotoApp('/index.html');
+    await clearAppState();
+    await gotoApp('/index.html');
+    const doors = page.locator('.doors-strip .door-card');
+    await expect(doors).toHaveCount(3);
+    await expect(doors.locator('.door-kicker')).toHaveText(['Discover knowledge', 'Ask people', 'Understand field language']);
+    await expect(doors.nth(0)).toHaveAttribute('href', '#segments');
+    await expect(doors.nth(1)).toHaveAttribute('href', 'support-ticket.html');
+    await expect(doors.nth(2)).toHaveAttribute('href', 'glossary.html');
   });
 });

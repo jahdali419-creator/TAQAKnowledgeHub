@@ -270,3 +270,45 @@ test.describe('API glossary terms', () => {
     await expect(row.locator('.gl-full')).toHaveText('Waiting on Cement');
   });
 });
+
+// The redesign moved "Add a term" out of a permanent side column into a
+// dialog: a drawer on a wide screen, a bottom sheet on a phone. Searching
+// shows no form; asking for one opens it, traps focus, and gives focus back.
+test.describe('Add a term dialog', () => {
+  test('is closed until asked for, opens from the hero, traps focus and closes on Escape', async ({ page, gotoApp, clearAppState, consoleErrors }) => {
+    await gotoApp('/glossary.html');
+    await clearAppState();
+    await gotoApp('/glossary.html');
+    const dialog = page.locator('#sb-add[role="dialog"]');
+    await expect(page.locator('#sf-abbr')).toBeHidden();
+    await expect(page.locator('.glossary-sidebar')).toHaveCount(0);
+
+    const opener = page.locator('.gh-add');
+    await opener.click();
+    await expect(dialog).toHaveAttribute('data-open', '');
+    await expect(page.locator('#sf-abbr')).toBeFocused();
+    await expect(opener).toHaveAttribute('aria-expanded', 'true');
+    expect(await page.evaluate(() => !!document.querySelector('.glossary-layout').closest('[inert]'))).toBe(true);
+
+    await page.keyboard.press('Shift+Tab');
+    await expect(page.locator('#sb-add .th-drawer-x')).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(dialog).not.toHaveAttribute('data-open', '');
+    await expect(opener).toBeFocused();
+    expect(await page.evaluate(() => !!document.querySelector('.glossary-layout').closest('[inert]'))).toBe(false);
+    assertNoConsoleErrors(consoleErrors);
+  });
+
+  test('a term added from the results bar closes the dialog and shows the term', async ({ page, gotoApp, clearAppState }) => {
+    await gotoApp('/glossary.html');
+    await clearAppState();
+    await gotoApp('/glossary.html');
+    await page.locator('.gl-add-link').click();
+    await page.locator('#sf-abbr').fill('ZZQT');
+    await page.locator('#sf-full').fill('Redesign Check Term');
+    await page.locator('#sb-add .btn-submit').click();
+    await expect(page.locator('#sb-add')).not.toHaveAttribute('data-open', '');
+    await expect(page.locator('.gl-item[data-k="ZZQT|custom|Redesign Check Term"]')).toBeVisible();
+    await expect(page.locator('#stat-community')).toContainText('1 added by the community');
+  });
+});

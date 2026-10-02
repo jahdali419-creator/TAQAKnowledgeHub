@@ -15,10 +15,11 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 <meta name="theme-color" content="#005D63">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="TechHub Platform">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-<title>Published Documents, TAQA Knowledge Hub</title>
+<meta name="apple-mobile-web-app-title" content="RISE">
+<link rel="apple-touch-icon" href="icons/rise-apple-touch-icon.png">
+<link rel="icon" href="icons/rise-favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="icons/rise-favicon-16.png" type="image/png" sizes="16x16">
+<title>Published Documents, RISE</title>
 <link rel="stylesheet" href="fonts/fonts.css">
 <noscript></noscript>
 <style>
@@ -267,6 +268,7 @@ html[data-taqa-theme="dark"] .pub-table-footer{border-color:#003A3D;background:r
   .pub-table td,.pub-table th{padding:10px 9px;}
 }
 </style>
+<link rel="stylesheet" href="techhub.css">
 <link rel="stylesheet" href="topbar.css">
 </head>
 <body>
@@ -275,9 +277,8 @@ html[data-taqa-theme="dark"] .pub-table-footer{border-color:#003A3D;background:r
 <!-- Nav -->
 <nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
   <a href="index.html" class="nav-brand">
-    <img src="icons/taqa-logo.png" alt="TAQA" class="nav-logo nav-logo-light">
-    <img src="icons/taqa-logo-reverse.png" alt="TAQA" class="nav-logo nav-logo-dark">
-    <span class="nav-subtitle"><em>TechHub Platform</em></span>
+    <img src="assets/brand/rise-lockup-header.png" alt="RISE" class="nav-logo nav-logo-light" width="320" height="120">
+    <img src="assets/brand/rise-lockup-header-reverse.png" alt="RISE" class="nav-logo nav-logo-dark" width="320" height="120">
   </a>
   <ul class="nav-links">
     <li><a href="index.html">Home</a></li>
@@ -429,7 +430,11 @@ function buildAllDocs(segId) {
   // rows apart by is whether the review behind them is still on time. That
   // is what a controller scanning this list is actually looking for, more
   // than who the owner role is (API Q2 4.4.3 c)).
+  // Only documents this person may withdraw: QMS sees every one; a Director
+  // the area's Operations documents; a Maintenance Manager its maintenance
+  // documents (TAQA_ROLE.canManage with the record).
   return TAQA_STORE.rows('live', { segment: segId })
+    .filter(d => typeof TAQA_ROLE === 'undefined' || TAQA_ROLE.canManage(d))
     .map(d => {
       const due = d.nextReviewDate ? new Date(d.nextReviewDate) : null;
       const late = due && !isNaN(due) ? Math.floor((Date.now() - due) / 86400000) : null;
@@ -627,9 +632,14 @@ function initDocPage() {
   const segName = seg ? seg.name : docSegId.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
   const tl = getTypeLabels(docSegId);
 
-  document.title = segName + ', Published Documents · TAQA Knowledge Hub';
+  document.title = segName + ', Published Documents · RISE';
   document.getElementById('docs-seg-name').textContent = segName + ', Published Documents';
-  document.getElementById('docs-seg-sub').textContent = 'Complete document library for the ' + segName + ' segment';
+  document.getElementById('docs-seg-sub').textContent =
+    (typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.current() === 'maintenance')
+      ? 'Maintenance department documents you manage for ' + segName
+      : (typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.current() === 'owner')
+        ? 'Operations documents you manage for ' + segName
+        : 'Complete document library for the ' + segName + ' segment';
   document.getElementById('bc-seg-link').textContent = segName;
   document.getElementById('bc-seg-link').href = 'segment.html?id=' + docSegId;
   document.getElementById('bc-dash-link').href = 'dashboard.html?id=' + docSegId;

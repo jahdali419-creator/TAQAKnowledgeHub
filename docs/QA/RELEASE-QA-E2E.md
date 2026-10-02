@@ -1,5 +1,7 @@
 # TAQA Knowledge Hub: End-to-End Role Journey, Release QA
 
+> **STALE: four-role evidence (re-audited 1 Oct 2026).** This report tested four personas: Employee, QMS, Segment Director and Auditor. The app now has **five**: the **Maintenance Manager** was added, with its own approval path for maintenance department documents and Maintenance Bulletins. The journey, the permission matrix (section 3), the direct-address table and the test totals below (760 tests, commit base `9ca5e4e`) **do not describe the current design and must not be cited as current evidence**. The current evidence is `FIVE-ROLE-QA-AUDIT.md`. The defect history in section 7 stays valid as history.
+
 Date of testing: 30 September 2026. Code under test: branch `claude/inspiring-mayer-pm1350`, based on `main` at `9ca5e4e`, plus the fixes listed in section 7.
 
 **Method.** I ran the app in a real browser: Chromium through Playwright, with the service worker blocked and one persistent browser profile shared by every role, so one "database" carried the document from role to role. Roles were switched the way a person does it: the role door in the top bar on desktop, the "Viewing as" buttons in the ☰ menu on a phone. Every workflow action (upload, QMS check, Director approval, reject dialog) was done by clicking the page. The register was never written directly to make a step pass. Direct store calls appear in this report only where I was trying to break a rule, the way someone with the browser console open could.
@@ -46,6 +48,8 @@ Every PASS below means I did the action and saw the result. Where I could not ve
 
 ## 2. End-to-end role journey
 
+> **STALE.** One journey (Operations) only. The Maintenance journey (Employee → QMS → Maintenance Manager → Published → Auditor) did not exist when this was written; see `FIVE-ROLE-QA-AUDIT.md`, section 3.
+
 Final desktop run on the final code: title **`E2E-ROLE-TEST-20260930071446`**, number **`TQ-TWS-CTSS-SOP-013`**, Coiled Tubing, SOP, file `e2e-test.pdf` (45 B), fresh browser profile. Phone runs: `E2E-ROLE-TEST-M390-20260930071741` and `E2E-ROLE-TEST-M360-20260930072140`, with the same results at every stage.
 
 | # | Stage and action performed | Expected | Actual (final code) | Result | Evidence | Defects found here |
@@ -79,6 +83,8 @@ Final desktop run on the final code: title **`E2E-ROLE-TEST-20260930071446`**, n
 ---
 
 ## 3. Role permission matrix
+
+> **STALE.** Four roles only; the Maintenance Manager column is missing. See the five-role matrix in `FIVE-ROLE-QA-AUDIT.md`, section 5.
 
 Verified by acting in the browser as each role on the final code. "Refused" means the page replaces itself with a refusal, or the register returns an error or `null`. A hidden button was never counted as protection.
 
@@ -164,6 +170,8 @@ Tested at **390×844** and **360×800** (Chromium device emulation, touch), plus
 ---
 
 ## 6. Automated test evidence
+
+> **STALE.** These totals were measured on 30 Sept 2026, before the Maintenance Manager, the Maintenance side of each segment, Forms & Checklists and the TechHub redesign. Current totals are in `FIVE-ROLE-QA-AUDIT.md`, section 8.
 
 All commands were run in this container, on this branch.
 

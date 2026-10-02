@@ -200,7 +200,7 @@ window.showToast=function(msg,type){
     '<tr><td><span class="sc-key">Esc</span></td><td>Close modals · dismiss overlay</td></tr>'+
     '<tr><td><span class="sc-key">Tab</span></td><td>Navigate interactive elements</td></tr>'+
     '</table>'+
-    '<p class="sc-hint">Part of <em style="color:#00BBB6;font-style:italic;">TechHub Platform</em></p>'+
+    '<p class="sc-hint">RISE · Knowledge Is Better Together.</p>'+
     '</div>';
   document.body.appendChild(ov);
   document.getElementById('sc-close').onclick=function(){ov.classList.remove('open');};
@@ -410,7 +410,7 @@ window.showToast=function(msg,type){
     '.nav-mobile-menu .mm-door{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:2px 0 0;}'+
     '.nav-mobile-menu .mm-door button{display:flex;align-items:center;gap:9px;min-height:48px;padding:0 12px;border-radius:12px;'+
       'border:1px solid var(--tb-rule,rgba(117,106,97,.13));background:transparent;color:var(--tb-text,#1E1C1A);'+
-      'font:500 14px/1.2 "Inter",system-ui,sans-serif;cursor:pointer;text-align:start;}'+
+      'font:500 14px/1.2 "BwGradual","Urbanist",sans-serif;cursor:pointer;text-align:start;}'+
     '.nav-mobile-menu .mm-door button[aria-pressed="true"]{border-color:var(--tb-ink,#005D63);color:var(--tb-ink,#005D63);font-weight:600;background:var(--tb-active,rgba(0,93,99,.07));}'+
     '.nav-mobile-menu .mm-door-area{margin-top:10px;}'+
     '.nav-mobile-menu .mm-door-area label{display:block;font:500 12.5px/1.3 "Inter",system-ui,sans-serif;color:var(--tb-light,#756A61);margin:0 4px 6px;}'+
@@ -623,7 +623,7 @@ window.showToast=function(msg,type){
     '<div class="pwa-handle"></div>'+
     '<div class="pwa-row">'+APP_ICON+
       '<div class="pwa-text-block">'+
-        '<div class="pwa-title">Install TechHub Platform</div>'+
+        '<div class="pwa-title">Install RISE</div>'+
         '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
       '</div>'+
     '</div>'+
@@ -639,7 +639,7 @@ window.showToast=function(msg,type){
     '<div class="pwa-handle"></div>'+
     '<div class="pwa-row">'+APP_ICON+
       '<div class="pwa-text-block">'+
-        '<div class="pwa-title">Install TechHub Platform</div>'+
+        '<div class="pwa-title">Install RISE</div>'+
         '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
       '</div>'+
     '</div>'+
@@ -656,7 +656,7 @@ window.showToast=function(msg,type){
     '<div class="pwa-handle"></div>'+
     '<div class="pwa-row">'+APP_ICON+
       '<div class="pwa-text-block">'+
-        '<div class="pwa-title">Install TechHub Platform</div>'+
+        '<div class="pwa-title">Install RISE</div>'+
         '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
       '</div>'+
     '</div>'+
@@ -867,7 +867,7 @@ window.showToast=function(msg,type){
       }
       if(e.target.id==='bm-exp'){
         var its=window.TAQA_Bookmarks.getAll();
-        var lines=['TAQA Knowledge Hub, Bookmarks','Exported: '+new Date().toLocaleDateString(),''];
+        var lines=['RISE, Bookmarks','Exported: '+new Date().toLocaleDateString(),''];
         its.forEach(function(it,i){lines.push((i+1)+'. '+it.title+' | '+(it.segName||'')+' | '+(it.type||'').toUpperCase());});
         try{
           var blob=new Blob([lines.join('\n')],{type:'text/plain'});
@@ -1108,7 +1108,7 @@ document.addEventListener('keydown',function(e){
     '.door-wrap{position:relative;flex-shrink:0;}' +
     '.door-btn{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 11px;' +
       'border-radius:9px;border:1px solid var(--border,#C7DBDD);background:transparent;cursor:pointer;' +
-      'font-family:inherit;font-size:12.5px;font-weight:600;color:var(--text,#1E1C1A);transition:all .2s;}' +
+      "font-family:'BwGradual','Urbanist',sans-serif;font-size:12.5px;font-weight:600;color:var(--text,#1E1C1A);transition:all .2s;}" +
     '.door-btn:hover{border-color:var(--primary,#005D63);color:var(--primary,#005D63);}' +
     '.door-dot{width:7px;height:7px;border-radius:50%;background:var(--primary,#005D63);flex-shrink:0;}' +
     '.door-dot.d-employee{background:#6E9294;}.door-dot.d-owner{background:#00585A;}' +
@@ -1117,7 +1117,7 @@ document.addEventListener('keydown',function(e){
     '@media(max-width:760px){.door-cap{display:none;}.door-btn{padding:0 9px;}}' +
     '.door-menu{position:absolute;top:calc(100% + 8px);inset-inline-end:0;z-index:3000;width:236px;' +
       'background:var(--bg-white,#fff);border:1px solid var(--border,#C7DBDD);border-radius:13px;' +
-      'box-shadow:0 14px 40px rgba(0,88,90,.15);padding:6px;display:none;}' +
+      "box-shadow:0 14px 40px rgba(0,88,90,.15);padding:6px;display:none;font-family:'BwGradual','Urbanist',sans-serif;}" +
     '.door-menu.open{display:block;}' +
     '.door-hd{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;' +
       'color:var(--text-light,#756A61);padding:7px 10px 6px;}' +
@@ -1148,7 +1148,7 @@ document.addEventListener('keydown',function(e){
     'html[data-taqa-theme="dark"] .door-i:hover{background:rgba(0,187,182,.08);}' +
     'html[data-taqa-theme="dark"] .door-btn{border-color:#003A3D;color:#C7DBDD;}' +
     /* Acting as a delegate is never quiet. */
-    '.deleg-bar{position:sticky;top:0;z-index:2500;display:flex;align-items:center;gap:10px;' +
+    '.deleg-bar{position:fixed;top:var(--nav-h,64px);inset-inline:0;z-index:999;display:flex;align-items:center;gap:10px;' +
       'padding:8px 18px;background:#FD691D;color:#fff;font-size:12.5px;font-weight:600;}' +
     '.deleg-bar b{font-weight:800;}' +
     '.deleg-bar .db-end{margin-inline-start:auto;display:flex;gap:8px;align-items:center;}' +
@@ -1282,6 +1282,8 @@ document.addEventListener('keydown',function(e){
     var S = TAQA_DOC_LOOKUPS.segments, here = TAQA_ROLE.area();
     var FAM = [['segment','Operational Segments'], ['function','Corporate Functions'],
                ['product','Products & Technology'], ['company','Company Wide']];
+    // Only an operational segment has a maintenance department to head.
+    if (k === 'maintenance') FAM = FAM.slice(0, 1);
     var opts = FAM.map(function (f) {
       var ids = Object.keys(S).filter(function (x) { return S[x].group === f[0]; })
                   .sort(function (a, b) { return S[a].name.localeCompare(S[b].name); });

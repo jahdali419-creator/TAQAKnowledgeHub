@@ -27,7 +27,7 @@ test.describe('master-list.html, role gating (business rule, not a security boun
     });
   }
 
-  for (const role of ['employee', 'owner']) {
+  for (const role of ['employee', 'owner', 'maintenance']) {
     test(`${role} (no registerView) is refused, told why, and offered another way to work`, async ({
       page,
       gotoApp,
