@@ -5,6 +5,7 @@
 | | |
 |---|---|
 | Product owner | Mohammed Al-Jahdali, TAQA Learning Center |
+| Product name | **RISE** ("WHAT WE KNOW."), replacing the earlier "TechHub" / "TAQA Knowledge Hub" names (2 Oct 2026). Brand files: `assets/brand/` (`rise-logo.png` is the supplied source; the header and card images and `icons/rise-*` app icons are exact crops / resizes of it). The documents below still say "TechHub" for the product in places; read it as RISE |
 | Repository branch at handover | `claude/inspiring-mayer-pm1350`, PR #21 (merge to `main` is the owner's decision) |
 | Status | **Frontend prototype, ready for integration.** Not production. No back end, no sign-in, no real storage |
 | Audit date | 1 October 2026 |

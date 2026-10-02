@@ -275,12 +275,14 @@ test.describe('Homepage counts come from the register, not a hardcoded number', 
 });
 
 
-// The redesign: the TechHub lockup in the bar, and the three ways in
-// (and only three) lifted onto the hero, each saying what it is for.
-test.describe('TechHub redesign', () => {
-  test('the bar names TechHub beside the TAQA logo', async ({ page, gotoApp }) => {
+// The redesign: the RISE logo in the bar (tests/brand.spec.js covers it
+// across pages), and the three ways in (and only three) lifted onto the
+// hero, each saying what it is for.
+test.describe('Home redesign', () => {
+  test('the bar carries the RISE logo, not the old TAQA + TechHub lockup', async ({ page, gotoApp }) => {
     await gotoApp('/index.html');
-    await expect(page.locator('#navbar .nav-subtitle')).toHaveText('TechHub');
+    await expect(page.locator('#navbar .nav-brand img')).toHaveAttribute('alt', 'RISE');
+    await expect(page.locator('#navbar .nav-subtitle')).toHaveCount(0);
   });
 
   test('the three ways in carry a purpose and nothing else joins them', async ({ page, gotoApp, clearAppState }) => {

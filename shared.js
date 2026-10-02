@@ -200,7 +200,7 @@ window.showToast=function(msg,type){
     '<tr><td><span class="sc-key">Esc</span></td><td>Close modals · dismiss overlay</td></tr>'+
     '<tr><td><span class="sc-key">Tab</span></td><td>Navigate interactive elements</td></tr>'+
     '</table>'+
-    '<p class="sc-hint">TechHub · Knowledge Is Better Together.</p>'+
+    '<p class="sc-hint">RISE · Knowledge Is Better Together.</p>'+
     '</div>';
   document.body.appendChild(ov);
   document.getElementById('sc-close').onclick=function(){ov.classList.remove('open');};
@@ -623,7 +623,7 @@ window.showToast=function(msg,type){
     '<div class="pwa-handle"></div>'+
     '<div class="pwa-row">'+APP_ICON+
       '<div class="pwa-text-block">'+
-        '<div class="pwa-title">Install TechHub</div>'+
+        '<div class="pwa-title">Install RISE</div>'+
         '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
       '</div>'+
     '</div>'+
@@ -639,7 +639,7 @@ window.showToast=function(msg,type){
     '<div class="pwa-handle"></div>'+
     '<div class="pwa-row">'+APP_ICON+
       '<div class="pwa-text-block">'+
-        '<div class="pwa-title">Install TechHub</div>'+
+        '<div class="pwa-title">Install RISE</div>'+
         '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
       '</div>'+
     '</div>'+
@@ -656,7 +656,7 @@ window.showToast=function(msg,type){
     '<div class="pwa-handle"></div>'+
     '<div class="pwa-row">'+APP_ICON+
       '<div class="pwa-text-block">'+
-        '<div class="pwa-title">Install TechHub</div>'+
+        '<div class="pwa-title">Install RISE</div>'+
         '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
       '</div>'+
     '</div>'+
@@ -867,7 +867,7 @@ window.showToast=function(msg,type){
       }
       if(e.target.id==='bm-exp'){
         var its=window.TAQA_Bookmarks.getAll();
-        var lines=['TAQA Knowledge Hub, Bookmarks','Exported: '+new Date().toLocaleDateString(),''];
+        var lines=['RISE, Bookmarks','Exported: '+new Date().toLocaleDateString(),''];
         its.forEach(function(it,i){lines.push((i+1)+'. '+it.title+' | '+(it.segName||'')+' | '+(it.type||'').toUpperCase());});
         try{
           var blob=new Blob([lines.join('\n')],{type:'text/plain'});

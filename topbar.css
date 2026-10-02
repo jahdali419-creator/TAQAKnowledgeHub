@@ -21,7 +21,6 @@
   --tb-ink:#005D63;
   --tb-ink-2:#00959C;
   --tb-primary:#005D63;
-  --tb-subtitle-ink:#1E1C1A; /* "TechHub": the product name, in ink */
   --tb-rule:rgba(117,106,97,0.13);
   --tb-hover:rgba(117,106,97,0.08);
   --tb-active:rgba(0,93,99,0.07);
@@ -37,7 +36,6 @@ html[data-taqa-theme="dark"]{
   --tb-ink:#00BBB6;
   --tb-ink-2:#7BEEE6;
   --tb-primary:#005D63;
-  --tb-subtitle-ink:#E6F2F2; /* "TechHub" on the dark bar */
   --tb-rule:rgba(0,187,182,0.13);
   --tb-hover:rgba(0,187,182,0.07);
   --tb-active:rgba(0,187,182,0.10);
@@ -54,7 +52,7 @@ html[data-taqa-theme="dark"]{
      how wide the brand lockup is, rather than just sitting to its right. */
   display:grid; grid-template-columns:1fr auto 1fr; align-items:center; column-gap:24px;
   /* ...but never narrower than the brand or the right cluster. A bare 1fr
-     shrank below the "TechHub Platform" lockup when the links were long
+     shrank below the RISE logo when the links were long
      (QMS carries the most), and the links ran over it. */
   grid-template-columns:minmax(max-content,1fr) auto minmax(max-content,1fr);
   background:var(--tb-paper);
@@ -67,40 +65,19 @@ html[data-taqa-theme="dark"]{
 }
 #navbar *,#navbar *::before,#navbar *::after{box-sizing:border-box;}
 
-/* Brand lockup: logo and "TechHub Platform" sit beside each other in one
-   row, not the logo over a second line under it. */
+/* Brand: the supplied RISE logo (symbol and wordmark; the "WHAT WE KNOW."
+   line is left to larger placements, where it stays legible). It is one
+   full-colour image: on the dark theme's bar and on the glass bar over the
+   hero photo it sits on a light plate rather than being recoloured. */
 #navbar .nav-brand{
-  display:flex; flex-direction:row; align-items:center; gap:12px;
+  display:flex; align-items:center;
   flex-shrink:0; min-width:0; text-decoration:none; padding:4px 0;
   border-radius:8px; justify-self:start;
 }
-#navbar .nav-logo{ height:40px; width:auto; display:block; }
-/* The reverse (white-text) logo is for a dark background, which is two
-   different conditions, not one: dark theme's own solid bar, and the
-   light-theme glass bar sitting on the dark hero photo. Default to the
-   normal logo and switch to reverse under either. */
-#navbar .nav-logo-dark{ display:none; }
-html[data-taqa-theme="dark"] #navbar .nav-logo-dark,
-#navbar.nav-on-hero .nav-logo-dark{ display:block; }
-html[data-taqa-theme="dark"] #navbar .nav-logo-light,
-#navbar.nav-on-hero .nav-logo-light{ display:none; }
-/* The TechHub lockup: a hairline after the TAQA logo, the signature mark,
-   then the product name, upright and confident. It reads as a TAQA product,
-   not a second logo, and keeps the bar at its height. */
-#navbar .nav-subtitle{
-  display:flex; align-items:center; gap:8px; margin:0; white-space:nowrap;
-  padding-inline-start:13px; border-inline-start:1px solid var(--tb-rule);
-  height:26px; line-height:1;
-}
-/* A dedicated custom property (--tb-subtitle-ink), not --tb-ink: the
-   on-hero state below redefines --tb-ink for links/icons/the active state,
-   and this is a permanent mark, not something that should flatten to white
-   along with the rest of the bar's text. The on-hero state still lightens
-   it, since the plain site-theme value is tuned for a white bar and would
-   lose contrast on a dark photo. */
-#navbar .nav-subtitle em{
-  font-style:normal; font:700 18px/1 'BwGradual','Urbanist',sans-serif; letter-spacing:-0.02em;
-  color:var(--tb-subtitle-ink);
+#navbar .nav-logo{ height:40px; width:auto; max-width:100%; display:block; object-fit:contain; }
+html[data-taqa-theme="dark"] #navbar .nav-logo,
+#navbar.nav-on-hero .nav-logo{
+  height:44px; padding:5px 10px; background:#FFFFFF; border-radius:8px;
 }
 
 /* Links */
@@ -275,7 +252,6 @@ html[data-taqa-theme="dark"] #navbar .nav-cta{border-color:rgba(0,187,182,0.35);
        ran underneath the menu button. */
     grid-template-columns:minmax(0,1fr) auto;}
   #navbar .nav-brand{min-width:0; max-width:100%;}
-  #navbar .nav-subtitle{min-width:0; overflow:hidden; text-overflow:ellipsis;}
   #navbar .nav-links,#navbar .door-wrap,#navbar #nav-bm,#navbar .nav-cta,#navbar .nav-sep{display:none!important;}
   /* Hidden links report themselves hidden, for anything (the home tour)
      that asks a link rather than its list. */
@@ -285,19 +261,19 @@ html[data-taqa-theme="dark"] #navbar .nav-cta{border-color:rgba(0,187,182,0.35);
   #navbar .nav-icon,#navbar .dark-toggle,#navbar .bell-btn{width:44px; height:44px; min-width:44px!important; min-height:44px!important;}
   #navbar .bell-badge{top:6px; inset-inline-end:5px;}
 }
-/* A phone: the lockup stays side by side, just smaller, so it fits beside
-   the bell, theme and menu buttons without either one covering the other. */
+/* A phone: the logo is smaller, so it fits beside the bell, theme and
+   menu buttons without either one covering the other. */
 @media (max-width:480px){
-  #navbar .nav-brand{gap:8px;}
-  #navbar .nav-logo{height:32px;}
-  #navbar .nav-subtitle{padding-inline-start:9px; gap:6px; height:22px;}
-  #navbar .nav-subtitle em{font-size:15.5px;}
+  #navbar .nav-logo{height:34px;}
+  html[data-taqa-theme="dark"] #navbar .nav-logo,
+  #navbar.nav-on-hero .nav-logo{height:38px; padding:4px 8px;}
 }
 @media (max-width:360px){
   #navbar{padding:0 10px; gap:4px;}
   #navbar .nav-right{gap:0;}
-  #navbar .nav-logo{height:32px;}
-  #navbar .nav-subtitle em{font-size:14px;}
+  #navbar .nav-logo{height:30px;}
+  html[data-taqa-theme="dark"] #navbar .nav-logo,
+  #navbar.nav-on-hero .nav-logo{height:34px; padding:4px 7px;}
   #navbar .nav-hamburger{margin-inline-end:0;}
 }
 
@@ -345,10 +321,6 @@ html[data-taqa-theme="dark"] #navbar .nav-cta{border-color:rgba(0,187,182,0.35);
   --tb-rule:rgba(255,255,255,0.34);
   --tb-hover:rgba(255,255,255,0.16);
   --tb-active:rgba(255,255,255,0.24);
-  /* The plain site-theme subtitle ink is a mid gray tuned for a light bar;
-     lightened here so "TechHub Platform" stays legible over a photo
-     instead of losing contrast against it. */
-  --tb-subtitle-ink:#FFFFFF;
 }
 #navbar.nav-on-hero .nav-hamburger span{background:#FFFFFF;}
 #navbar.nav-on-hero .nav-brand,
