@@ -281,7 +281,7 @@ test.describe('Homepage counts come from the register, not a hardcoded number', 
 test.describe('Home redesign', () => {
   test('the bar carries the RISE logo, not the old TAQA + TechHub lockup', async ({ page, gotoApp }) => {
     await gotoApp('/index.html');
-    await expect(page.locator('#navbar .nav-brand img')).toHaveAttribute('alt', 'RISE');
+    await expect(page.locator('#navbar .nav-brand img:visible')).toHaveAttribute('alt', 'RISE');
     await expect(page.locator('#navbar .nav-subtitle')).toHaveCount(0);
   });
 

@@ -2,9 +2,11 @@
 // dark, desktop and phone; the symbol-only icons for favicon, Apple touch
 // and the PWA; and nothing left of the old TAQA + TechHub lockup.
 //
-// The logo is an image (assets/brand/), never text or CSS. These tests
-// check it loads, is not distorted, and never collides with the bar's
-// controls.
+// The logo is an image (assets/brand/), never text or CSS. A light bar shows
+// the full-colour logo; a dark bar (dark theme, or the glass bar over the
+// home hero) shows the reverse logo. Both sit on a transparent ground, with
+// no plate. These tests check the right one shows, loads, is not distorted,
+// and never collides with the bar's controls.
 
 const { test, expect } = require('./helpers/fixtures');
 
@@ -19,7 +21,14 @@ const PAGES = [
   { name: 'Master List', path: '/master-list.html', role: 'qms' },
   { name: 'Ask Expert', path: '/support-ticket.html' },
 ];
-const LOGO_RATIO = 320 / 120; // rise-lockup-header.png
+const LOGO_RATIO = 320 / 120; // rise-lockup-header(-reverse).png
+const LIGHT = 'assets/brand/rise-lockup-header.png';
+const REVERSE = 'assets/brand/rise-lockup-header-reverse.png';
+const VISIBLE = '#navbar .nav-brand img:visible';
+const loaded = (page) => page.waitForFunction(() => {
+  const i = [...document.querySelectorAll('#navbar .nav-brand img')].find((x) => x.offsetParent !== null);
+  return i && i.complete && i.naturalWidth > 0;
+});
 
 async function open(page, gotoApp, setRole, p, theme) {
   await gotoApp('/index.html');
@@ -30,7 +39,8 @@ async function open(page, gotoApp, setRole, p, theme) {
 
 async function logoReport(page) {
   return page.evaluate(() => {
-    const img = document.querySelector('#navbar .nav-brand img');
+    const imgs = [...document.querySelectorAll('#navbar .nav-brand img')].filter((x) => x.offsetParent !== null);
+    const img = imgs[0];
     const r = img.getBoundingClientRect();
     const boxes = [...document.querySelectorAll('#navbar .nav-right > *, #navbar .nav-hamburger, #navbar .nav-links')]
       .filter((el) => { const s = getComputedStyle(el); const b = el.getBoundingClientRect(); return s.display !== 'none' && s.visibility !== 'hidden' && b.width > 0 && b.height > 0; })
@@ -43,7 +53,8 @@ async function logoReport(page) {
       src: img.getAttribute('src'), alt: img.alt, complete: img.complete, natural: img.naturalWidth,
       ratio: (r.width - padX) / (r.height - padY), overlap, left: r.left, right: r.right,
       viewport: window.innerWidth, scrollW: document.documentElement.scrollWidth,
-      plate: cs.backgroundColor,
+      plate: cs.backgroundColor, visibleCount: imgs.length,
+      onHero: document.getElementById('navbar').classList.contains('nav-on-hero'),
     };
   });
 }
@@ -54,21 +65,22 @@ test.describe('RISE logo in the bar', () => {
       test(`${p.name}, ${theme}: the RISE logo loads, undistorted, clear of the controls`, async ({ page, gotoApp, setRole }) => {
         await open(page, gotoApp, setRole, p, theme);
         const nav = page.locator('#navbar');
-        await expect(nav.locator('.nav-brand img')).toHaveCount(1);
-        await expect(nav.locator('.nav-brand img')).toBeVisible();
+        await expect(nav.locator('.nav-brand img')).toHaveCount(2);
+        await expect(page.locator(VISIBLE)).toHaveCount(1);
         await expect(nav.locator('.nav-subtitle')).toHaveCount(0);
         await expect(nav.locator('img[src*="taqa-logo"]')).toHaveCount(0);
-        await page.waitForFunction(() => { const i = document.querySelector('#navbar .nav-brand img'); return i && i.complete && i.naturalWidth > 0; });
+        await loaded(page);
         const r = await logoReport(page);
-        expect(r.src).toBe('assets/brand/rise-lockup-header.png');
+        // Dark theme or the glass bar over the hero: reverse; otherwise full colour.
+        expect(r.src).toBe(theme === 'dark' || r.onHero ? REVERSE : LIGHT);
         expect(r.alt).toBe('RISE');
         expect(Math.abs(r.ratio - LOGO_RATIO)).toBeLessThan(0.05);
         expect(r.overlap).toBe(false);
         expect(r.left).toBeGreaterThanOrEqual(0);
         expect(r.right).toBeLessThanOrEqual(r.viewport);
         expect(r.scrollW).toBeLessThanOrEqual(r.viewport);
-        // Dark bar: the full-colour logo sits on a light plate, not recoloured.
-        if (theme === 'dark') expect(r.plate).toBe('rgb(255, 255, 255)');
+        // Transparent ground in every state: no plate behind the logo.
+        expect(r.plate).toBe('rgba(0, 0, 0, 0)');
       });
     }
   }
@@ -77,7 +89,7 @@ test.describe('RISE logo in the bar', () => {
     for (const width of [360, 320]) {
       await page.setViewportSize({ width, height: 700 });
       await open(page, gotoApp, setRole, { path: '/dashboard.html?id=' + SEG, role: 'owner' }, 'light');
-      await page.waitForFunction(() => { const i = document.querySelector('#navbar .nav-brand img'); return i && i.complete && i.naturalWidth > 0; });
+      await loaded(page);
       const r = await logoReport(page);
       expect(r.overlap, `overlap at ${width}px`).toBe(false);
       expect(r.right).toBeLessThanOrEqual(width);
@@ -85,12 +97,49 @@ test.describe('RISE logo in the bar', () => {
     }
   });
 
-  test('over the home hero photo the logo sits on a light plate', async ({ page, gotoApp, setRole }) => {
+  test('home: reverse logo over the hero, full-colour logo once the bar turns light on scroll', async ({ page, gotoApp, setRole }) => {
     await open(page, gotoApp, setRole, { path: '/index.html' }, 'light');
     await expect(page.locator('#navbar')).toHaveClass(/nav-on-hero/);
-    const r = await logoReport(page);
-    expect(r.plate).toBe('rgb(255, 255, 255)');
+    await loaded(page);
+    let r = await logoReport(page);
+    expect(r.src).toBe(REVERSE);
+    expect(r.plate).toBe('rgba(0, 0, 0, 0)');
     expect(r.overlap).toBe(false);
+    await page.evaluate(() => window.scrollTo(0, 1400));
+    await expect(page.locator('#navbar')).not.toHaveClass(/nav-on-hero/);
+    await loaded(page);
+    r = await logoReport(page);
+    expect(r.src).toBe(LIGHT);
+    expect(r.visibleCount).toBe(1);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(page.locator('#navbar')).toHaveClass(/nav-on-hero/);
+    expect((await logoReport(page)).src).toBe(REVERSE);
+  });
+
+  test('the reverse logo keeps the orange and cyan exactly and turns only the dark teal white', async ({ page, gotoApp }) => {
+    // Pixel check on the shipped header files: the same orange and cyan sample
+    // points in both, and the RISE "R" dark teal in one and white in the other.
+    await gotoApp('/index.html');
+    const px = await page.evaluate(async (files) => {
+      const read = (src) => new Promise((res, rej) => {
+        const im = new Image();
+        im.onload = () => {
+          const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight;
+          const g = c.getContext('2d'); g.drawImage(im, 0, 0);
+          const at = (x, y) => [...g.getImageData(x, y, 1, 1).data];
+          res({ orange: at(26, 13), cyan: at(87, 34), letter: at(107, 84) });
+        };
+        im.onerror = rej; im.src = src;
+      });
+      return { light: await read(files[0]), rev: await read(files[1]) };
+    }, [LIGHT, REVERSE]);
+    const close = (a, b) => a.slice(0, 3).every((v, i) => Math.abs(v - b[i]) <= 3);
+    expect(close(px.light.orange, px.rev.orange), JSON.stringify(px)).toBe(true);
+    expect(close(px.light.cyan, px.rev.cyan), JSON.stringify(px)).toBe(true);
+    expect(px.light.orange[0]).toBeGreaterThan(200);
+    expect(px.light.cyan[2]).toBeGreaterThan(150);
+    expect(px.light.letter.slice(0, 3).reduce((a, b) => a + b)).toBeLessThan(200);
+    expect(Math.min(...px.rev.letter.slice(0, 3))).toBeGreaterThan(235);
   });
 
   test('the home brand card shows the full RISE logo with WHAT WE KNOW.', async ({ page, gotoApp }) => {
@@ -113,7 +162,7 @@ test.describe('RISE icons and names', () => {
     expect(manifest.name).toBe('RISE: What We Know');
     expect(manifest.short_name).toBe('RISE');
     const files = ['icons/rise-favicon-16.png', 'icons/rise-favicon-32.png', 'icons/rise-apple-touch-icon.png',
-      'assets/brand/rise-lockup-header.png', 'assets/brand/rise-logo-640.png']
+      'assets/brand/rise-lockup-header.png', 'assets/brand/rise-lockup-header-reverse.png', 'assets/brand/rise-logo-640.png']
       .concat(manifest.icons.map((i) => i.src));
     for (const f of files) {
       const res = await request.get('/' + f);

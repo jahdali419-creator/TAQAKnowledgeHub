@@ -65,20 +65,23 @@ html[data-taqa-theme="dark"]{
 }
 #navbar *,#navbar *::before,#navbar *::after{box-sizing:border-box;}
 
-/* Brand: the supplied RISE logo (symbol and wordmark; the "WHAT WE KNOW."
-   line is left to larger placements, where it stays legible). It is one
-   full-colour image: on the dark theme's bar and on the glass bar over the
-   hero photo it sits on a light plate rather than being recoloured. */
+/* Brand: the RISE logo (symbol and wordmark; the "WHAT WE KNOW." line is
+   left to larger placements, where it stays legible). Two images, both on a
+   transparent ground: the full-colour logo on a light bar, and the reverse
+   (white wordmark and stem, orange and cyan unchanged) on a dark bar, which
+   is two conditions: the dark theme, and the glass bar over the hero photo.
+   The home page drops .nav-on-hero on scroll, so the logo switches back. */
 #navbar .nav-brand{
   display:flex; align-items:center;
   flex-shrink:0; min-width:0; text-decoration:none; padding:4px 0;
   border-radius:8px; justify-self:start;
 }
 #navbar .nav-logo{ height:40px; width:auto; max-width:100%; display:block; object-fit:contain; }
-html[data-taqa-theme="dark"] #navbar .nav-logo,
-#navbar.nav-on-hero .nav-logo{
-  height:44px; padding:5px 10px; background:#FFFFFF; border-radius:8px;
-}
+#navbar .nav-logo-dark{ display:none; }
+html[data-taqa-theme="dark"] #navbar .nav-logo-dark,
+#navbar.nav-on-hero .nav-logo-dark{ display:block; }
+html[data-taqa-theme="dark"] #navbar .nav-logo-light,
+#navbar.nav-on-hero .nav-logo-light{ display:none; }
 
 /* Links */
 #navbar .nav-links{
@@ -265,15 +268,11 @@ html[data-taqa-theme="dark"] #navbar .nav-cta{border-color:rgba(0,187,182,0.35);
    menu buttons without either one covering the other. */
 @media (max-width:480px){
   #navbar .nav-logo{height:34px;}
-  html[data-taqa-theme="dark"] #navbar .nav-logo,
-  #navbar.nav-on-hero .nav-logo{height:38px; padding:4px 8px;}
 }
 @media (max-width:360px){
   #navbar{padding:0 10px; gap:4px;}
   #navbar .nav-right{gap:0;}
   #navbar .nav-logo{height:30px;}
-  html[data-taqa-theme="dark"] #navbar .nav-logo,
-  #navbar.nav-on-hero .nav-logo{height:34px; padding:4px 7px;}
   #navbar .nav-hamburger{margin-inline-end:0;}
 }
 

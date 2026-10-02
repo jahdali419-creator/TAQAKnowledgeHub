@@ -101,7 +101,7 @@ Each file under `tests/` maps to one page or one cross-cutting concern:
 | `smoke.spec.js` | every page loads with no thrown JS error, has a real `<title>` |
 | `navigation.spec.js` | the shared topbar: areas dropdown, role/area switcher, bookmarks, dark mode, mobile menu, popover behavior |
 | `home.spec.js` | index.html: hero/search, the three ways in, real counts, the RISE logo in the bar |
-| `brand.spec.js` | RISE branding: the logo in the bar on eight key pages, light and dark, desktop and phone (loads, undistorted, clear of the controls, light plate on dark bars); favicon, Apple touch, manifest icons and names |
+| `brand.spec.js` | RISE branding: the logo in the bar on eight key pages, light and dark, desktop and phone (full-colour logo on light bars, reverse logo on dark bars and the hero with no plate, switching on scroll; loads, undistorted, clear of the controls); favicon, Apple touch, manifest icons and names |
 | `segment.spec.js` | segment.html: per-area document library, tabs, counts, amber pre-warning |
 | `viewer.spec.js` | viewer.html: document metadata, statuses, version history, QR, print, breadcrumb |
 | `documents.spec.js` | documents.html: published-documents table, sorting, withdraw, XSS escaping |
