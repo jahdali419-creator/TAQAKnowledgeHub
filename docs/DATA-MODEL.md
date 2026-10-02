@@ -72,7 +72,7 @@ The prototype stores signers as **role labels** ("Segment Director"); production
 `{ userId (Entra object id), displayName, email?, jobTitle?, accountEnabled, roles[], areas[] (held by role, for scoped roles), department? }`, derived from Entra ID at sign-in (`AZURE-INTEGRATION-REQUIREMENTS.md` §3). Records store the user id; display names are looked up. Roles never come from SegmentMembership.
 
 ### Delegation
-`{ id, grantor (user ref), grantorRole, delegate (user ref), area, department (from the grantor), docTypes[]?, includesApproval, from, until (≤ 90 days), reason, createdAt, revokedAt?, revokedBy? }`. The prototype stores the delegate as a typed name; production must reference a real user.
+`{ id, grantor (user ref), grantorRole, delegate (user ref), area, department (from the grantor), docTypes[]?, includesApproval, from, until (≤ 90 days), reason, createdAt, revokedAt?, revokedBy? }`. The prototype stores the delegate as a typed name; production must reference a real user. A delegation **never** creates or changes a SegmentMembership; the delegate's temporary access (the delegated queue and its documents, the allowed actions, only between `from` and `until` and until `revokedAt`) is computed from the active delegation on each request (`BUSINESS-RULES.md` §14.10).
 
 ### Attachment
 `{ id, docNumber, revision, fileName, contentType, size, sha256, storageKey, uploadedBy, uploadedAt, scanStatus, immutableAfterApproval }`.
@@ -97,6 +97,8 @@ Target requirement (`BUSINESS-RULES.md` §14); not implemented in the prototype.
 | `status` | `active` / `ended` | server (transition) | Rows are never deleted; history is kept |
 | `endedReason` | `removed` / `transferred` / `expired` | server | |
 | `transferredFromId` | id? | server | On a transfer, links the new membership to the one it replaced (for example Coiled Tubing / Operations → Coiled Tubing / Maintenance) |
+| `transferredBy`, `transferredAt` | user ref, datetime | **server** (token, clock) | Always QMS / authorised administration (`BUSINESS-RULES.md` §14.9) |
+| `transferRequestedBy`, `transferConfirmedBy` | user ref? | server | The Director or Maintenance Manager who requested or confirmed the transfer, if the business process uses that step |
 | `addedBy`, `addedAt` | user ref, datetime | **server** (token, clock) | System for automatic |
 | `endedBy`, `endedAt`, `endedNote` | | **server** / manager | Who closed it, when, and the reason given |
 | `displayName`, `email`, `jobTitle` | string | directory (cached) | Display only, refreshed from Entra; not identity |
@@ -104,7 +106,7 @@ Target requirement (`BUSINESS-RULES.md` §14); not implemented in the prototype.
 
 Visible areas for a user = operational segments with an `active` membership in either department + the segment held by role for a Segment Director or Maintenance Manager + every Corporate Function + every Center of Excellence + Company Wide; QMS and Auditor see every area (`BUSINESS-RULES.md` §14.2). A person with no membership and no held segment sees no operational segment. Filing scope = visible areas.
 
-Constraints: at most one **active primary** per `userId`; at most one active row per `userId` + `segmentId` (one department per segment, §14.9); a department or segment change is a transfer (close + open, linked), never an update in place.
+Constraints: at most one **active primary** per `userId`; at most one active row per `userId` + `segmentId` (one department per segment, §14.9); a department or segment change is a transfer (close + open, linked) performed by QMS / authorised administration, never an update in place; both department managers are notified.
 
 ### GlossaryTerm
 Target requirement (`BUSINESS-RULES.md` §13); not implemented in the prototype. One row per proposed term.

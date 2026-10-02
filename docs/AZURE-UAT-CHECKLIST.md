@@ -55,6 +55,10 @@ Test accounts needed (one real user each): Employee who is a member of segment *
 | D2 | The record shows "‹delegate› (delegate for Maintenance Manager, A)" with the delegation reference | ☐ |
 | D3 | A delegation longer than 90 days, or with no reason or end date, is refused | ☐ |
 | D4 | The grantor revokes it; the delegate can no longer approve immediately | ☐ |
+| D5 | The delegate in D1 is **not** a member of segment A. During the delegation they see the delegated queue and can open and act on the documents in it | ☐ |
+| D6 | The same delegate does **not** see segment A's library, A's search results or other A documents outside the delegated queue, and cannot file into A | ☐ |
+| D7 | The delegate's Segment Membership is unchanged before, during and after the delegation (check the membership records) | ☐ |
+| D8 | When the delegation expires (or is revoked), the delegate immediately loses the queue and the documents in it, including by direct URL and API call | ☐ |
 
 ## 6. Files, audit, notifications
 | # | Check | Pass |
@@ -162,5 +166,8 @@ The prototype's "Add Contributor" (typed name, Editor / Viewer / Owner) is **not
 | # | Check | Expected | Pass |
 |---|---|---|---|
 | SM31 | Maintenance Manager of A tries to add Employee (A, Operations) as a Maintenance member of A as well | Refused; the person keeps one department in A | ☐ |
-| SM32 | An authorised user transfers Employee (A, Operations) to **A, Maintenance** with a reason | The person is now A, Maintenance; the old A, Operations record is kept as *transferred*, linked to the new one, with who, when and the reason | ☐ |
-| SM33 | A transfer without a reason, or by someone not allowed to manage the destination department | Refused | ☐ |
+| SM32 | **Maintenance Manager of A** requests (or confirms) the transfer of Employee (A, Operations) to **A, Maintenance** with a reason, if the business process uses that step | Request recorded; membership unchanged until QMS performs it | ☐ |
+| SM33 | **QMS / authorised administration** performs the transfer with a reason | The person is now A, Maintenance; the old A, Operations record is kept as *transferred* and linked to the new one, with who performed it, when, the reason and the request / confirmation | ☐ |
+| SM34 | After SM33 | **Both** the Segment Director of A and the Maintenance Manager of A are notified | ☐ |
+| SM35 | **Director of A** tries to transfer a Maintenance member of A to Operations; **Maintenance Manager of A** tries to transfer an Operations member to Maintenance (UI and direct API call) | Refused (403); nobody is moved out of another department | ☐ |
+| SM36 | A transfer without a reason | Refused | ☐ |

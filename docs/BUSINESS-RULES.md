@@ -125,6 +125,7 @@ Final approval follows exactly the same split.
 - A delegate **cannot re-delegate**.
 - The signature records the delegate: "‹delegate› (delegate for ‹grantor›)".
 - Each desk lists and revokes only the delegations its own holder granted for that area.
+- A delegation never creates or changes Segment Membership. A delegate outside the grantor's segment sees only the delegated queue and its documents, only while the delegation is valid (§14.10).
 - Switching role or area drops any delegation being acted under. *(Prototype: "Act as this" stands in for the delegate signing in.)*
 
 ## 10. Lifecycle-field protection
@@ -298,21 +299,35 @@ Membership is enforced by the Azure API, never by the browser. An employee assig
 
 ### 14.9 One department per person per segment; transfers
 - Normally an employee has **exactly one** department membership within a segment: Operations **or** Maintenance. Both are never created by default; a second, different-department membership in the same segment is refused.
-- A move between departments (or of the primary segment) is an **audited transfer**, not a delete and re-add that loses history. The previous membership is closed as *transferred* and a new one is opened linked to it; both rows are kept, with who made the change, when, and the reason.
+- A move between Operations and Maintenance affects two departmental authorities, so it is an **audited transfer**:
+  - **QMS / authorised administration performs** the transfer.
+  - The relevant Operations or Maintenance manager (Segment Director or Maintenance Manager of that segment) may **request or confirm** it, according to the final business process.
+  - **Both** the old and the new department managers are **notified**.
+  - The old membership is closed as *transferred* and **stays in history**; the new membership is **linked** to it.
+  - The record keeps **who performed** the transfer, **when**, and the **reason** (and who requested or confirmed it, if anyone).
+- A department manager can **never** silently move an employee out of another department: a Director cannot transfer a Maintenance member and a Maintenance Manager cannot transfer an Operations member; their own add / remove rights (§14.5) do not include transfers.
+- A change of primary segment follows the same transfer rule.
 
-  Example: Mohammed Jahdali, Coiled Tubing / Operations → transferred to Coiled Tubing / Maintenance, by ‹manager›, ‹date and time›, reason ‹…›.
+  Example: Mohammed Jahdali, Coiled Tubing / Operations → transferred to Coiled Tubing / Maintenance; requested by the Maintenance Manager of Coiled Tubing; performed by QMS on ‹date and time›; reason ‹…›; Segment Director and Maintenance Manager of Coiled Tubing notified.
 - Not built in the prototype.
 
-### 14.10 Decisions
-All segment-membership decisions are closed (owner, 1 October 2026):
+### 14.10 Delegation outside the grantor's segment
+A valid delegation (§9) may temporarily let a delegate work on documents outside their normal segment membership.
+- It **does not create or change any Segment Membership.**
+- The delegate gets only the **minimum access** the delegated work needs: the documents / queue the delegation covers (the grantor's area, department and listed document types), the actions the delegation allows, and only during its validity period.
+- It does **not** expose the whole operational segment when the work can be scoped more narrowly: the delegate sees the delegated queue and the documents in it, not the segment's library.
+- When the delegation expires or is revoked, the temporary access **ends automatically**.
+- The server enforces all of this; nothing the browser sends can widen it.
+
+### 14.11 Decisions
+**There are no remaining Segment Membership business decisions** (owner, 1–2 October 2026):
 1. Maintenance Manager manages Maintenance members of their own segment (§14.5).
 2. Company Wide is visible to everyone (§14.2).
 3. No membership: Corporate Functions, Centers of Excellence and Company Wide only (§14.2).
 4. Directors and Maintenance Managers: their held segment plus Corporate Functions, Centers of Excellence and Company Wide; other segments only by explicit membership (§14.2).
 5. Filing only into areas the person is authorised to see, server enforced (§14.3).
 6. One primary segment; additional memberships as approved exceptions with reason and optional expiry (§14.8).
-7. One department per person per segment; changes are audited transfers (§14.9).
+7. One department per person per segment; department changes are audited transfers performed by QMS / authorised administration, requested or confirmed by the department manager, both managers notified (§14.9).
+8. A delegate outside the grantor's segment gets only the delegated queue, actions and period, with no membership (§14.10).
 
-Implementation details for IT to settle with the owner (they do not change the rules above):
-- **Delegates:** a delegate who is not a member of the grantor's segment needs to see the documents they are asked to approve. Recommended: an active delegation gives read access to the grantor's segment, limited to the delegated work and the delegation period, and no membership.
-- **Who performs a transfer:** recommended: QMS / authorised administration, or the **receiving** department authority, with the sending authority notified. A transfer between segments follows the same pattern.
+What remains for IT is implementation: for example how a manager's transfer request or confirmation is captured (a request record, a ticket or an approval step), which is part of the "final business process" and does not change these rules.
