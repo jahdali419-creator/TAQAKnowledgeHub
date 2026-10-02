@@ -142,27 +142,43 @@ test.describe('RISE logo in the bar', () => {
     expect(Math.min(...px.rev.letter.slice(0, 3))).toBeGreaterThan(235);
   });
 
-  test('the home brand card shows the full RISE logo with WHAT WE KNOW.', async ({ page, gotoApp }) => {
+  test('the home brand card shows the full reverse RISE logo straight on the card, no plate', async ({ page, gotoApp }) => {
     await gotoApp('/index.html');
     const img = page.locator('.sidebar-brand-card-name img');
-    await expect(img).toHaveAttribute('src', 'assets/brand/rise-logo-640.png');
+    await expect(img).toHaveAttribute('src', 'assets/brand/rise-logo-reverse-640.png');
     await img.scrollIntoViewIfNeeded();
     await page.waitForFunction(() => { const i = document.querySelector('.sidebar-brand-card-name img'); return i && i.complete && i.naturalWidth > 0; });
+    const look = await img.evaluate((el) => {
+      const cs = getComputedStyle(el), r = el.getBoundingClientRect();
+      return { bg: cs.backgroundColor, pad: cs.padding, ratio: r.width / r.height };
+    });
+    expect(look.bg).toBe('rgba(0, 0, 0, 0)');
+    expect(look.pad).toBe('0px');
+    expect(Math.abs(look.ratio - 637 / 264)).toBeLessThan(0.03);
+    // The file itself is transparent around the artwork (no baked-in box).
+    const corner = await page.evaluate(async () => {
+      const im = new Image(); im.src = 'assets/brand/rise-logo-reverse-640.png'; await im.decode();
+      const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight;
+      const g = c.getContext('2d'); g.drawImage(im, 0, 0);
+      return [g.getImageData(c.width - 2, 2, 1, 1).data[3], g.getImageData(2, c.height - 2, 1, 1).data[3]];
+    });
+    expect(corner).toEqual([0, 0]);
   });
 });
 
 test.describe('RISE icons and names', () => {
   test('favicon, Apple touch icon and manifest use the RISE symbol and name', async ({ page, gotoApp, request }) => {
     await gotoApp('/index.html');
-    await expect(page).toHaveTitle('RISE: What We Know');
+    await expect(page).toHaveTitle('RISE — What We Know');
     await expect(page.locator('link[rel="icon"][href="icons/rise-favicon-32.png"]')).toHaveCount(1);
     await expect(page.locator('link[rel="icon"][href$=".svg"]')).toHaveCount(0);
     await expect(page.locator('meta[name="apple-mobile-web-app-title"]')).toHaveAttribute('content', 'RISE');
+    await expect(page.locator('meta[name="application-name"]')).toHaveAttribute('content', 'RISE');
     const manifest = await (await request.get('/manifest.json')).json();
-    expect(manifest.name).toBe('RISE: What We Know');
+    expect(manifest.name).toBe('RISE — What We Know');
     expect(manifest.short_name).toBe('RISE');
     const files = ['icons/rise-favicon-16.png', 'icons/rise-favicon-32.png', 'icons/rise-apple-touch-icon.png',
-      'assets/brand/rise-lockup-header.png', 'assets/brand/rise-lockup-header-reverse.png', 'assets/brand/rise-logo-640.png']
+      'assets/brand/rise-lockup-header.png', 'assets/brand/rise-lockup-header-reverse.png', 'assets/brand/rise-logo-reverse-640.png']
       .concat(manifest.icons.map((i) => i.src));
     for (const f of files) {
       const res = await request.get('/' + f);
@@ -178,6 +194,7 @@ test.describe('RISE icons and names', () => {
       const t = await page.title();
       expect(t, p.path).not.toMatch(/TechHub|TAQA Knowledge Hub/);
       expect(await page.locator('#navbar').innerText(), p.path).not.toMatch(/TechHub/);
+      expect(await page.content(), p.path).not.toMatch(/TechHub Platform/);
     }
   });
 });
