@@ -1176,7 +1176,7 @@ function bulkConfirmRun(){
     // A refusal for a document that changed since the preview says what it
     // is now, not just that it was refused.
     const why=!ok&&d&&!TAQA_APPROVAL.canCountersign(d)&&TAQA_APPROVAL.stageOf(d)!=='qms'?whyNotQms(d):((r&&r.error)||'');
-    return {num,d,ok,msg:ok?'Confirmed. Now waiting on '+r.next+'.':'Not confirmed. '+why};
+    return {num,d,ok,next:ok?r.next:null,msg:ok?'Confirmed. Now waiting on '+r.next+'.':'Not confirmed. '+why};
   });
   bulkPending=[];
   const ok=results.filter(r=>r.ok).length, bad=results.length-ok;
@@ -1197,8 +1197,11 @@ function bulkConfirmRun(){
   document.getElementById('bulk-dlg-cancel').focus();
   selectedRows.clear();
   renderCuts(); render(); drawSummary();
+  // Name the next step when every confirmed document shares it.
+  const nexts=Array.from(new Set(results.filter(r=>r.ok).map(r=>r.next)));
   toast(bad?ok+' confirmed, '+bad+' not confirmed. See the list for each document.'
-    :'Confirmed '+ok+' document'+(ok===1?'':'s')+'. '+(ok===1?'It now waits':'They now wait')+' on the named approver.');
+    :'Confirmed '+ok+' document'+(ok===1?'':'s')+'. '+(ok===1?'It now waits':'They now wait')+' on '+
+      (nexts.length===1?nexts[0]:'its named approver')+'.');
 }
 function bulkDlgClose(){
   const dlg=document.getElementById('bulk-dlg');

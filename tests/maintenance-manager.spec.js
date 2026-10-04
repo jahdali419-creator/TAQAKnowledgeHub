@@ -293,11 +293,13 @@ test.describe('wording follows the approver', () => {
     await setRole('qms', SEG);
     await gotoApp('/master-list.html');
     await page.fill('#q', 'TQ-TWS-CTSS-SOP-960');
-    const msg = new Promise((res) => page.once('dialog', (d) => { res(d.message()); d.accept(); }));
     await page.locator('input.row-chk[data-doc="TQ-TWS-CTSS-SOP-960"]').check();
     await page.click('#bulk-approve');
-    // defect: it said "sent to its Director for approval".
-    expect(await msg).toContain('Maintenance Manager');
+    // defect: it said "sent to its Director for approval". The preview names
+    // the next approver per document (qms-queue.spec.js covers the rest).
+    await expect(page.locator('#bq-in .bq-i', { hasText: 'Bulk maint' })).toContainText('next: Maintenance Manager');
+    await page.click('#bulk-dlg-go');
+    await expect(page.locator('#bq-results .bq-res')).toContainText("the Maintenance Manager's final approval");
     await expect(page.locator('#toast')).toContainText('Maintenance Manager');
     expect(await page.evaluate(() => TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-960').approvalStage)).toBe('director');
   });
