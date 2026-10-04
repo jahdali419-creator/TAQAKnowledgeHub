@@ -118,6 +118,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .pending-doc-preview{font-size:12.5px;color:var(--text-muted);line-height:1.6;
   background:var(--inset);border-radius:8px;padding:10px 14px;margin-bottom:14px;border:1px solid var(--border);}
 .pending-actions{display:flex;gap:8px;align-items:center;}
+.qms-wb-note{margin:-6px 0 14px;font-size:12.5px;line-height:1.5;color:var(--text-muted);}
+.qms-wb-note a{color:var(--primary-ink);font-weight:600;}
 .btn-approve{background:rgba(0,187,182,0.1);border:1px solid rgba(0,187,182,0.3);color:var(--primary-ink);
   padding:7px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;
   font-family:'Inter',sans-serif;transition:all 0.2s;}
@@ -468,6 +470,7 @@ html[data-taqa-theme="dark"] .dash-unknown{background:#002326;border-color:#0048
         <div class="section-hd-title" id="queue-title">Pending Approvals</div>
         <span class="section-hd-count" id="pending-count">3 documents</span>
       </div>
+      <p class="qms-wb-note" id="qms-wb-note" hidden></p>
 
       <!-- Delegation. Only a role that holds authority can hand any of it on. -->
       <div id="deleg-box" hidden>
@@ -1255,6 +1258,16 @@ function initDashboard() {
                   : STAGE === 'qms' ? 'Awaiting Your QMS Check'
                   : STAGE === 'director' ? 'Awaiting Your Approval'
                   : 'Approvals';
+    // QMS checks every area. This desk is one area's slice of that queue,
+    // so say so and point at the whole of it.
+    var note = document.getElementById('qms-wb-note');
+    if (note && STAGE === 'qms') {
+      var all = ST ? ST.rows('awaiting-qms').filter(function(d){ return TAQA_APPROVAL.canCountersign(d); }).length : 0;
+      var name = String(dash.name || '').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; });
+      note.innerHTML = 'This desk shows ' + name + ' only. <a href="master-list.html?view=qms">Open the QMS Workbench</a>' +
+        ' for everything waiting on QMS, from every area' + (all ? ' (' + all + ')' : '') + '.';
+      note.hidden = false;
+    }
   })();
 
   // Contributors

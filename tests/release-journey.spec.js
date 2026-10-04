@@ -255,8 +255,10 @@ test.describe('the bell', () => {
     await expect(first).toContainText('<img src=x');
     expect(await page.evaluate(() => window.__bellXss)).toBeUndefined();
     expect(await page.locator('.bell-menu img').count()).toBe(0);
-    // Newest first, and it opens the desk where it can be acted on.
-    await expect(first).toHaveAttribute('href', 'dashboard.html?id=' + SEG);
+    // Newest first, and it opens where it can be acted on: for QMS, that
+    // document's check in the QMS Workbench.
+    const num = await page.evaluate((t) => TAQA_STORE.all().find((d) => d.title === t).docNumber, payload);
+    await expect(first).toHaveAttribute('href', 'master-list.html?view=qms&doc=' + encodeURIComponent(num));
     assertNoConsoleErrors(consoleErrors);
   });
 });

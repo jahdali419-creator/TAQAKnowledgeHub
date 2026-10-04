@@ -1698,7 +1698,12 @@ document.addEventListener('keydown',function(e){
               // It opens the desk the signature is given from, not the viewer.
               // Where it is from and when, because QMS's bell spans every area
               // and a bare title does not say whose document it is.
-              return '<a class="bell-i" href="dashboard.html?id=' + encodeURIComponent(d.segment || '') + '">' +
+              // For QMS that is the Workbench, open on this document; for a
+              // Director or a Maintenance Manager it is their area's desk.
+              var href = (A.canCountersign(d) && qmsQueue())
+                ? QMS_QUEUE + '&doc=' + encodeURIComponent(d.docNumber || '')
+                : 'dashboard.html?id=' + encodeURIComponent(d.segment || '');
+              return '<a class="bell-i" href="' + href + '">' +
                 '<span class="bt">' + esc(d.title) + '</span>' +
                 '<span class="bd">' + esc(d.docNumber) + ' &middot; ' + esc(where(d)) + '</span>' +
                 '<span class="bs">Waiting for your ' + verb + ' &middot; ' + esc(when(d.submittedAt)) + '</span></a>';
