@@ -847,8 +847,8 @@ const LABEL={current:'Current','under-review':'Review due',draft:'Draft',superse
 
 const fs=document.getElementById('f-seg'), ft=document.getElementById('f-type');
 Object.keys(L.segments).sort((a,b)=>L.segments[a].name.localeCompare(L.segments[b].name))
-  .forEach(k=>fs.insertAdjacentHTML('beforeend',`<option value="${k}">${esc(L.segments[k].name)}</option>`));
-Object.keys(L.types).forEach(k=>ft.insertAdjacentHTML('beforeend',`<option value="${k}">${esc(L.types[k].label)}</option>`));
+  .forEach(k=>fs.insertAdjacentHTML('beforeend',`<option value="${esc(k)}">${esc(L.segments[k].name)}</option>`));
+Object.keys(L.types).forEach(k=>ft.insertAdjacentHTML('beforeend',`<option value="${esc(k)}">${esc(L.types[k].label)}</option>`));
 
 let quick='controlled', page=1, selected=null;
 const PER_PAGE=20;
@@ -1048,7 +1048,7 @@ function render(){
       <td><span class="dat">${esc(d.revision||'n/a')}</span></td>
       <td><span class="dat${d.issueDate?'':' nil'}">${fmt(d.issueDate)||'Not recorded'}</span></td>
       <td>${due(d)}</td>
-      <td><span class="mark m-${d.status.replace('under-review','review')}">${LABEL[d.status]||d.status}</span></td>
+      <td><span class="mark m-${esc(String(d.status).replace('under-review','review'))}">${esc(LABEL[d.status]||d.status)}</span></td>
       <td><span class="cls${d.classification==='restricted'?' hi':''}">${esc(d.classification||'')}</span></td>
     </tr>`}).join('');
   lastSlice=slice;
@@ -1276,11 +1276,11 @@ function openDoc(d){
     dwRow('Owner',esc(A.owner(d)),'API Q2 4.4.3 a, role')+
     dwRow('Approval authority',esc(A.approver(d)),'API Q2 4.4.3 a, role')+
     '<div class="dw-s">Review, protection, retention</div>'+
-    dwRow('Review cycle',A.cycle(d)?A.cycle(d)+' months':null,'API Q2 4.4.3 c')+
+    dwRow('Review cycle',A.cycle(d)?esc(A.cycle(d))+' months':null,'API Q2 4.4.3 c')+
     dwRow('Review due',gone?'Not applicable':fmt(d.nextReviewDate),null,true)+
     dwRow('Classification',esc((d.classification||'').toUpperCase()),'ISO 9001 7.5.3.1 b')+
-    dwRow('Retention',A.retention(d)?A.retention(d)+' years':null,'API Q2 4.5')+
-    dwRow('Status',LABEL[d.status]||d.status,'API Q2 4.4.3');
+    dwRow('Retention',A.retention(d)?esc(A.retention(d))+' years':null,'API Q2 4.5')+
+    dwRow('Status',esc(LABEL[d.status]||d.status),'API Q2 4.4.3');
   const url=A.scoreUrl(d), open='viewer.html?doc='+encodeURIComponent(d.docNumber||'')+'&seg='+encodeURIComponent(d.segment)+'&type='+encodeURIComponent(d.docType)+'&title='+encodeURIComponent(d.title);
   document.getElementById('dw-foot').classList.remove('wb');
   document.getElementById('dw-foot').innerHTML=

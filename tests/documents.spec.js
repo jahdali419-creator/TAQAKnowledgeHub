@@ -238,43 +238,41 @@ test.describe('documents.html, review-overdue status', () => {
     page,
     gotoApp,
     setRole,
+    seedRegister,
     consoleErrors,
   }) => {
     await gotoApp('/index.html');
     await setRole('qms', AREA);
-    // Seed two locally-stored documents through the real TAQA_STORE.add()
-    // API (the same call upload.html's submit flow makes), one with a review
+    // Seed two published documents into the register (add() files only a
+    // draft now, PI-09), one with a review
     // date safely in the past and one safely in the future, so we control
     // the exact "late" value documents.html's own late = floor((now-due)/day)
     // calculation should produce, per the code read in documents.html.
     const pastDays = 10;
     const past = new Date(Date.now() - pastDays * 86400000).toISOString().slice(0, 10);
     const future = new Date(Date.now() + 400 * 86400000).toISOString().slice(0, 10);
-    await page.evaluate(
-      ({ past, future }) => {
-        TAQA_STORE.add({
-          docNumber: 'TEST-OVERDUE-001',
-          title: 'Regression Overdue Test Document',
-          segment: 'coiled-tubing',
-          docType: 'sop',
-          status: 'current',
-          issueDate: past,
-          nextReviewDate: past,
-          classification: 'internal',
-        });
-        TAQA_STORE.add({
-          docNumber: 'TEST-CURRENT-001',
-          title: 'Regression Current Test Document',
-          segment: 'coiled-tubing',
-          docType: 'sop',
-          status: 'current',
-          issueDate: future,
-          nextReviewDate: future,
-          classification: 'internal',
-        });
+    await seedRegister([
+      {
+        docNumber: 'TEST-OVERDUE-001',
+        title: 'Regression Overdue Test Document',
+        segment: 'coiled-tubing',
+        docType: 'sop',
+        status: 'current',
+        issueDate: past,
+        nextReviewDate: past,
+        classification: 'internal',
       },
-      { past, future }
-    );
+      {
+        docNumber: 'TEST-CURRENT-001',
+        title: 'Regression Current Test Document',
+        segment: 'coiled-tubing',
+        docType: 'sop',
+        status: 'current',
+        issueDate: future,
+        nextReviewDate: future,
+        classification: 'internal',
+      },
+    ]);
     await gotoApp('/documents.html?id=' + AREA);
 
     const overdueRow = page.locator('#pub-docs-body tr', { hasText: 'Regression Overdue Test Document' });
@@ -298,6 +296,7 @@ test.describe('documents.html, security regression (stored XSS)', () => {
     page,
     gotoApp,
     setRole,
+    seedRegister,
     consoleErrors,
   }) => {
     await gotoApp('/index.html');
@@ -313,20 +312,18 @@ test.describe('documents.html, security regression (stored XSS)', () => {
     });
 
     const maliciousTitle = '"><img src=x onerror=alert(1)>';
-    // Go through the real, page-accessible store API (the same add() that
-    // upload.html's submit handler calls), not a direct DOM/localStorage hack.
-    await page.evaluate((title) => {
-      TAQA_STORE.add({
+    // Seeded into the register as a published record: add() files only a
+    // draft now (PI-09), and a published title is what every reader sees.
+    await seedRegister([{
         docNumber: 'TEST-XSS-001',
-        title,
+        title: maliciousTitle,
         segment: 'coiled-tubing',
         docType: 'sop',
         status: 'current',
         issueDate: '2026-01-01',
         nextReviewDate: '2028-01-01',
         classification: 'internal',
-      });
-    }, maliciousTitle);
+      }]);
     await gotoApp('/documents.html?id=' + AREA);
 
     // No live <img> element anywhere in the table body: if esc() were removed
@@ -358,12 +355,12 @@ test.describe('documents.html, withdraw', () => {
     page,
     gotoApp,
     setRole,
+    seedRegister,
     consoleErrors,
   }) => {
     await gotoApp('/index.html');
     await setRole('qms', AREA);
-    await page.evaluate(() => {
-      TAQA_STORE.add({
+    await seedRegister([{
         docNumber: 'TEST-WITHDRAW-001',
         title: 'Regression Withdraw Test Document',
         segment: 'coiled-tubing',
@@ -372,8 +369,7 @@ test.describe('documents.html, withdraw', () => {
         issueDate: '2026-01-01',
         nextReviewDate: '2028-01-01',
         classification: 'internal',
-      });
-    });
+      }]);
     await gotoApp('/documents.html?id=' + AREA);
 
     const row = page.locator('#pub-docs-body tr', { hasText: 'Regression Withdraw Test Document' });

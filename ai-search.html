@@ -954,9 +954,9 @@ document.addEventListener('click',function(e){
       '<div class="ir-header"><span>Document Matches</span><span>'+
       (all.length>8?'Top 8 of '+all.length:all.length+' found')+'</span></div>'+
       shown.map(function(d){
-        var c=TYPE_CFG[d.tp]||{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:d.tp};
+        var c=Object.prototype.hasOwnProperty.call(TYPE_CFG,d.tp)?TYPE_CFG[d.tp]:{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:d.tp};
         return '<a class="ir-item" href="'+docHref(d)+'" role="option">'+
-          '<span class="ir-badge" style="background:'+c.bg+';color:'+c.color+'">'+c.label+'</span>'+
+          '<span class="ir-badge" style="background:'+c.bg+';color:'+c.color+'">'+esc(c.label)+'</span>'+
           '<div class="ir-body">'+
             '<div class="ir-title">'+highlight(d.t,q)+'</div>'+
             '<div class="ir-seg">'+esc(d.sn)+statusNote(d)+'</div>'+
@@ -1009,7 +1009,7 @@ document.addEventListener('click',function(e){
   }
 
   function resultCardHTML(d){
-    var c=TYPE_CFG[d.tp]||{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:d.tp};
+    var c=Object.prototype.hasOwnProperty.call(TYPE_CFG,d.tp)?TYPE_CFG[d.tp]:{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:d.tp};
     var note='';
     if(d.st&&d.st!=='current'&&d.st!=='asset'){
       note=d.st==='under-review'?'Under review':d.st==='draft'?'Draft, not yet in force':esc(d.st);
@@ -1021,7 +1021,7 @@ document.addEventListener('click',function(e){
         '<div class="source-card-title">'+esc(d.t)+'</div>'+
         '<div class="source-card-meta">'+
           '<span class="source-card-seg">'+esc(d.sn)+(d.n?' · '+esc(d.n):'')+'</span>'+
-          '<span class="source-card-type" style="background:'+c.bg+';border-color:'+c.bg+';color:'+c.color+'">'+c.label+'</span>'+
+          '<span class="source-card-type" style="background:'+c.bg+';border-color:'+c.bg+';color:'+c.color+'">'+esc(c.label)+'</span>'+
         '</div>'+
         (note?'<div class="result-note">'+note+'</div>':'')+
       '</div>'+

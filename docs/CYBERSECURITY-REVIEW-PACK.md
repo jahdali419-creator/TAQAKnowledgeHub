@@ -141,7 +141,7 @@ There are no real documents in the platform. Document titles are reference metad
 |---|---|---|
 | Content-Security-Policy | In place, with a known exception | Enforced on every page via `<meta>`, `default-src 'self'`. `script-src` and `style-src` still carry `'unsafe-inline'` (see R-05); every other directive is `'self'`-only, so a third party host is still blocked |
 | Transport security | In place | HTTPS only. `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN` and `Referrer-Policy` are configured in `staticwebapp.config.json` for the Azure deployment |
-| Output encoding | In place | All user-controlled values are HTML-escaped before display. Added 3 August 2026 after a confirmed cross-site scripting finding, covered in section 7 |
+| Output encoding | In place, re-swept October 2026 | User-controlled, register, lookup and browser-stored values are HTML-escaped (or written as text nodes) before display. Added 3 August 2026 after a confirmed cross-site scripting finding; a full sweep in October 2026 (PI-05) found and closed further stored script injection through document titles, numbers, revisions, types and stored delegation and analytics values, covered in section 7 and by `tests/integrity-p1.spec.js` |
 | File type restriction | In place | A code-level allow-list, not the HTML `accept` attribute. `.exe` and `.msi` are refused, including double extensions such as `trick.pdf.exe`. Verified through the drag-and-drop bypass path |
 | Secret management | In place for current scope | No secrets exist in the platform. Every commit in the repository history was scanned and no hardcoded credentials were found. Deployment tokens are held in GitHub's encrypted secret store and referenced by name only |
 | Dependency management | In place | No package manager and no dependency tree |
@@ -268,6 +268,8 @@ Rated for the platform as it exists today, and again for after the SharePoint in
 | R-08 | Historical personal data transfer. The removed sign-up form transmitted names and work email addresses to a Google-hosted endpoint outside the TAQA tenant | Medium | n/a | Code path removed 3 August 2026. Cybersecurity to decide whether any PDPL notification obligation arises |
 | R-09 | The platform was built outside IT governance, on a personal GitHub account and a personal Azure trial subscription | Medium | High | Being resolved. The handover to D&T transfers the repository, the hosting and the ownership |
 | R-10 | No server-side audit trail of who accessed which document | Low | High | Not yet possible, as there is no server. Arrives with SharePoint and Azure logging |
+| R-14 | Authority is decided in the browser. Delegation, the two release steps, status moves and editable fields are now enforced by `roles.js` / `store.js` (PI-04, PI-09), but anyone can bypass them from the console | Low | Critical if copied | Open by design for the prototype. **PRODUCTION CONTROL REQUIRED**: the API enforces `BUSINESS-RULES.md` §9, §10 and §15 from the Entra identity |
+| R-15 | Segregation of duties between filer and approver is undecided (PI-31) | Low | Medium | Open business decision (`BUSINESS-RULES.md` §12 row 8) |
 
 ### Findings already closed
 
@@ -277,6 +279,7 @@ Rated for the platform as it exists today, and again for after the SharePoint in
 | Executable file types accepted for upload | Low today, high after integration | 3 August 2026. Code-level allow-list, verified through the bypass path |
 | A function-name collision was silently suppressing upload warnings, so a refused file would have failed with no message to the user | Medium | 3 August 2026 |
 | Four external service dependencies | Medium | 3 August 2026. Verified by network recording |
+| Stored script injection through register text (PI-05). A document title such as `Pump "><img src=x onerror=…>` ran script in the Upload Supersedes list and Related IDs line, the segment page's tab search and Recently Viewed, and other register, lookup and stored values ran in the viewer, the Director desk, the Master List, the delegation banner, Home, AI search and Analytics. Confirmed in a browser for each | High after integration (script in an approver's session can approve or withdraw in their name) | October 2026. Every sink escaped or rebuilt as text nodes; inline script strings replaced with `data-` attributes. Regression tests plant the payloads and assert nothing ran. R-05 (`'unsafe-inline'`) still stands and is the production backstop |
 
 ---
 

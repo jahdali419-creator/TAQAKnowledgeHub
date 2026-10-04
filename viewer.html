@@ -861,8 +861,9 @@ function docControlLine(ref, opts){
         : null;
   if (!d) return '';
   var bits = [];
-  if (d.revision && !(opts && opts.noRev)) bits.push('Rev ' + d.revision);
-  if (d.classification) bits.push(d.classification.charAt(0).toUpperCase() + d.classification.slice(1));
+  // Register fields, and this line is written into innerHTML: escaped (PI-05).
+  if (d.revision && !(opts && opts.noRev)) bits.push('Rev ' + esc(d.revision));
+  if (d.classification) { var cls = String(d.classification); bits.push(esc(cls.charAt(0).toUpperCase() + cls.slice(1))); }
   var withdrawn = d.status === 'obsolete' || d.status === 'superseded';
   var due = (!withdrawn && d.nextReviewDate) ? new Date(d.nextReviewDate) : null;
   if (withdrawn) bits.push('Withdrawn');
@@ -956,10 +957,11 @@ document.getElementById('doc-title').textContent = docTitle;
 // Badges
 // A document number can hold an ampersand, TQ-P&T-WIC-S001, so it is escaped
 // before it goes anywhere near innerHTML.
-function esc(v){ return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+// Quotes too, so it is safe in an attribute as well as in text (PI-05).
+function esc(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 document.getElementById('doc-badges').innerHTML =
-  '<span class="badge seg">' + segInfo.name + '</span>' +
-  (segInfo.tag && segInfo.tag !== segInfo.name ? '<span class="badge seg">' + segInfo.tag + '</span>' : '') +
+  '<span class="badge seg">' + esc(segInfo.name) + '</span>' +
+  (segInfo.tag && segInfo.tag !== segInfo.name ? '<span class="badge seg">' + esc(segInfo.tag) + '</span>' : '') +
   (docId ? '<span class="badge docid">Document ID: ' + esc(docId) + '</span>' : '');
 
 // Document control block.
@@ -1008,8 +1010,8 @@ if (_denied) {
   const R = TAQA_ROLES[_roleKey];
   const reason = _rec.status === 'draft'
     ? 'This document is a draft. It has not completed approval, carries no authority, and is visible only to its owner and the QMS function. API Q2 4.4.3 b).'
-    : 'This document is classified ' + String(_rec.classification).toUpperCase() +
-      '. Your role (' + R.label + ') has access to ' + R.classifications.join(', ') + ' documents. ISO 9001 7.5.3.1 b).';
+    : 'This document is classified ' + esc(String(_rec.classification).toUpperCase()) +
+      '. Your role (' + esc(R.label) + ') has access to ' + esc(R.classifications.join(', ')) + ' documents. ISO 9001 7.5.3.1 b).';
   /* A draft is withheld because it carries no authority yet, not because the
      reader may not know it exists. Whoever opens one is most often the person
      who filed it, looking for where it has got to, so it says that: which
@@ -1034,7 +1036,7 @@ if (_denied) {
       'It carries no authority until QMS has checked it and the named approver has released it (API Q2 4.4.3 b), so it cannot be opened or downloaded yet.';
   }
   document.getElementById('meta-grid').innerHTML =
-    cell('Document number', _rec.docNumber, 'TQ-QHSE-S001 5.3') +
+    cell('Document number', _rec.docNumber ? esc(_rec.docNumber) : null, 'TQ-QHSE-S001 5.3') +
     cell('Status', esc(stat), null, 'wide');
   document.getElementById('lifecycle-banner').innerHTML =
     '<div class="lcb lcb-obsolete"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
@@ -1060,18 +1062,20 @@ if (_denied) {
         : null);
   const score = MA.scoreUrl(_rec);
   const C = {
-    num:   cell('Document number', _rec.docNumber, 'TQ-QHSE-S001 5.3'),
-    rev:   cell('Revision',        _rec.revision ? 'Rev ' + _rec.revision : null, 'API Q2 4.4.3 d)'),
+    // cell() writes its value as HTML, so every register or lookup value is
+    // escaped here; only the markup this page builds (due, score) is not (PI-05).
+    num:   cell('Document number', _rec.docNumber ? esc(_rec.docNumber) : null, 'TQ-QHSE-S001 5.3'),
+    rev:   cell('Revision',        _rec.revision ? 'Rev ' + esc(_rec.revision) : null, 'API Q2 4.4.3 d)'),
     iss:   cell('Issued',          _fmt(_rec.issueDate), 'API Q2 4.4.3 d)'),
     appd:  cell('Approved',        _fmt(_rec.approvedDate), 'API Q2 4.4.3 b)'),
-    own:   cell('Document owner',  t.owner, 'API Q2 4.4.3 a) · role'),
-    appr:  cell('Approval authority', MA.approver(_rec), 'API Q2 4.4.3 a) · role'),
+    own:   cell('Document owner',  t.owner ? esc(t.owner) : null, 'API Q2 4.4.3 a) · role'),
+    appr:  cell('Approval authority', MA.approver(_rec) ? esc(MA.approver(_rec)) : null, 'API Q2 4.4.3 a) · role'),
     next:  cell('Next review',     due, 'API Q2 4.4.3 c)'),
-    cyc:   cell('Review cycle',    MA.cycle(_rec) ? MA.cycle(_rec) + ' months' : null, 'API Q2 4.4.3 c)'),
-    cls:   cell('Classification',  _rec.classification ? _rec.classification.toUpperCase() : null, 'ISO 9001 7.5.3.1 b)'),
-    ret:   cell('Retention',       MA.retention(_rec) ? MA.retention(_rec) + ' years' : null, 'API Q2 4.5'),
+    cyc:   cell('Review cycle',    MA.cycle(_rec) ? esc(MA.cycle(_rec)) + ' months' : null, 'API Q2 4.4.3 c)'),
+    cls:   cell('Classification',  _rec.classification ? esc(String(_rec.classification).toUpperCase()) : null, 'ISO 9001 7.5.3.1 b)'),
+    ret:   cell('Retention',       MA.retention(_rec) ? esc(MA.retention(_rec)) + ' years' : null, 'API Q2 4.5'),
     lang:  cell('Language',        _rec.language === 'ar' ? 'العربية' : 'English', 'API Q2 4.4.3'),
-    score: cell('Master copy',     score ? '<a href="' + score + '" rel="noopener">Open in SCORE</a>' : null, 'System of record')
+    score: cell('Master copy',     score ? '<a href="' + esc(score) + '" rel="noopener">Open in SCORE</a>' : null, 'System of record')
   };
   const pick = keys => keys.map(k => C[k]).join('');
   const fullRecord = pick(['num','rev','iss','appd','own','appr','next','cyc','cls','ret','lang','score']);
@@ -1429,7 +1433,7 @@ document.getElementById('pdf-toolbar-label').textContent = docTitle + '.pdf';
 })();
 
 // Share: the link and its QR code live in the Share popover.
-let docUrl = location.origin + location.pathname.replace(/viewer\.html.*/,'') + 'viewer.html?seg=' + segId + '&type=' + docType + '&title=' + encodeURIComponent(docTitle);
+let docUrl = location.origin + location.pathname.replace(/viewer\.html.*/,'') + 'viewer.html?seg=' + encodeURIComponent(segId) + '&type=' + encodeURIComponent(docType) + '&title=' + encodeURIComponent(docTitle);
 if (docId) docUrl += '&doc=' + encodeURIComponent(docId);
 document.getElementById('qr-img').src = window.TAQA_QR ? window.TAQA_QR(docUrl, 4) : '';
 document.getElementById('share-url').textContent = docUrl;
@@ -1514,10 +1518,11 @@ function renderRelated(){
   var grid = document.getElementById('related-grid');
   var section = document.getElementById('related-section');
   grid.innerHTML = related.map(function(d){
-    var href = 'viewer.html?seg='+d.s+'&type='+d.tp+'&title='+encodeURIComponent(d.t)+
+    var href = 'viewer.html?seg='+encodeURIComponent(d.s)+'&type='+encodeURIComponent(d.tp)+'&title='+encodeURIComponent(d.t)+
       (d.n?'&doc='+encodeURIComponent(d.n):'');
-    return '<a class="related-card" href="'+href+'">'+
-      '<div class="related-icon" style="background:'+(TC[d.tp]||TC.sop)+';color:'+(TT[d.tp]||TT.sop)+'">'+(TS[d.tp]||'DOC')+'</div>'+
+    var own=Object.prototype.hasOwnProperty.call(TC,d.tp);
+    return '<a class="related-card" href="'+esc(href)+'">'+
+      '<div class="related-icon" style="background:'+(own?TC[d.tp]:TC.sop)+';color:'+((own&&TT[d.tp])||TT.sop)+'">'+esc((Object.prototype.hasOwnProperty.call(TS,d.tp)&&TS[d.tp])||'DOC')+'</div>'+
       '<div class="related-title">'+esc(d.t)+'</div>'+
       '<span class="related-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></a>';
   }).join('');
@@ -1582,14 +1587,15 @@ function showQuickRef() {
   // Meta chips from the Master Document List, never fabricated.
   // This card is printable, so it carries the identification a controlled copy
   // needs plus the uncontrolled-when-printed caveat. API Q2 4.4.3 e) f).
-  var chip = function(l,v){ return '<div class="qref-meta-chip"><strong>' + l + '</strong>' + (v || 'Not recorded') + '</div>'; };
+  // Every value is register or lookup text: escaped here, once (PI-05).
+  var chip = function(l,v){ return '<div class="qref-meta-chip"><strong>' + l + '</strong>' + (v ? esc(v) : 'Not recorded') + '</div>'; };
   document.getElementById('qref-meta-row').innerHTML = _rec
     ? chip('Document no.', _rec.docNumber) +
       chip('Revision', _rec.revision ? 'Rev ' + _rec.revision : null) +
       chip('Issued', _fmt(_rec.issueDate)) +
       chip('Status', _rec.status === 'current' ? 'Current'
-                   : _rec.status.charAt(0).toUpperCase() + _rec.status.slice(1).replace('-',' ')) +
-      chip('Classification', _rec.classification ? _rec.classification.toUpperCase() : null) +
+                   : String(_rec.status).charAt(0).toUpperCase() + String(_rec.status).slice(1).replace('-',' ')) +
+      chip('Classification', _rec.classification ? String(_rec.classification).toUpperCase() : null) +
       chip('Segment', segInfo.tag)
     : chip('Document no.', docId || null) + chip('Revision', null) +
       chip('Issued', null) + chip('Segment', segInfo.tag);
@@ -1609,7 +1615,7 @@ function showQuickRef() {
       ? 'This revision is due for review on ' + _fmt(_rec.nextReviewDate) + '. '
       : '') +
     'Verify the current revision in SCORE before use.' +
-    (_rec && MA.scoreUrl(_rec) ? ' \u00b7 ' + _rec.docNumber : '');
+    (_rec && MA.scoreUrl(_rec) ? ' \u00b7 ' + esc(_rec.docNumber) : '');
 
   // Last synced in toolbar
   var syncTs = null;

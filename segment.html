@@ -1677,7 +1677,7 @@ if(seg.contributors && seg.contributors.length){
   const row = document.getElementById('seg-contributors-row');
   const el = document.getElementById('seg-contributors');
   if(row && el){
-    el.innerHTML = seg.contributors.map(c=>`<span style="white-space:nowrap">${c.name} <span style="color:rgba(255,255,255,0.72);font-weight:400">${c.role}</span></span>`).join('<span style="color:rgba(255,255,255,0.55);margin:0 6px">·</span>');
+    el.innerHTML = seg.contributors.map(c=>`<span style="white-space:nowrap">${escHtml(c.name)} <span style="color:rgba(255,255,255,0.72);font-weight:400">${escHtml(c.role)}</span></span>`).join('<span style="color:rgba(255,255,255,0.55);margin:0 6px">·</span>');
     row.style.display = '';
   }
 }
@@ -1694,8 +1694,9 @@ function docControlLine(num){
   var d = (num && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(num) : null;
   if (!d) return '';
   var bits = [];
-  if (d.revision) bits.push('Rev ' + d.revision);
-  if (d.classification) bits.push(d.classification.charAt(0).toUpperCase() + d.classification.slice(1));
+  // Register fields, written into innerHTML by the modal: escaped (PI-05).
+  if (d.revision) bits.push('Rev ' + escHtml(d.revision));
+  if (d.classification) { var cls = String(d.classification); bits.push(escHtml(cls.charAt(0).toUpperCase() + cls.slice(1))); }
   var due = d.nextReviewDate ? new Date(d.nextReviewDate) : null;
   if (due && !isNaN(due)) {
     var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -1774,7 +1775,7 @@ const EMPTY_SEARCH_ICON = '<svg width="22" height="22" viewBox="0 0 14 14" fill=
 
 function viewerHrefFor(entry, type){
   const p = splitEntry(entry);
-  return `viewer.html?seg=${segId}&type=${type}` +
+  return `viewer.html?seg=${encodeURIComponent(segId)}&type=${encodeURIComponent(type)}` +
     `&title=${encodeURIComponent(p.title)}` +
     (p.num ? `&doc=${encodeURIComponent(p.num)}` : '');
 }
@@ -1785,12 +1786,15 @@ function buildDocCard(title, type, idx) {
   // The register record says what the document is.
   const _p = splitEntry(title);
   const rec = (_p.num && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(_p.num) : null;
-  if (rec && rec.docType) type = rec.docType;
+  // Only a type the register knows: a record's docType is other people's
+  // text and goes into classes, attributes and links (PI-05).
+  if (rec && rec.docType && typeof TAQA_DOC_LOOKUPS !== 'undefined' &&
+      Object.prototype.hasOwnProperty.call(TAQA_DOC_LOOKUPS.types, rec.docType)) type = rec.docType;
   // Titles go into data attributes, never into JavaScript source. The parser
   // decodes &#39; back to an apostrophe before the handler compiles, so
   // "Manager's Guide to HR Processes" used to break its own View and QR.
   const safeTitle = title.replace(/&/g,'&amp;').replace(/'/g,"&#39;").replace(/"/g,"&quot;").replace(/</g,'&lt;');
-  const safeType = type;
+  const safeType = escHtml(type);
   const newBadge = (function(){
     if (!rec || !rec.issueDate) return '';
     var days = (Date.now() - new Date(rec.issueDate)) / 86400000;
@@ -1801,17 +1805,17 @@ function buildDocCard(title, type, idx) {
       : '<span class="doc-new-badge">New</span>';
   })();
   const _T = (typeof TAQA_DOC_LOOKUPS!=='undefined' && TAQA_DOC_LOOKUPS.types[type]) || {};
-  const _mark = _T.mark || ({sop:'SOP',form:'FRM',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT'})[type] || type.slice(0,3).toUpperCase();
+  const _mark = escHtml(_T.mark || ({sop:'SOP',form:'FRM',manual:'WI',standard:'ST',policy:'POL',lesson:'LL',alert:'ALT'})[type] || String(type).slice(0,3).toUpperCase());
   const isBm = window.TAQA_Bookmarks ? window.TAQA_Bookmarks.has(title, segId) : false;
   const meta = rowMeta(rec);
   const rev = rec && rec.revision ? '<span class="doc-rev">Rev ' + escHtml(rec.revision) + '</span>' : '';
   const read = isDocRead(title) ? '<span class="doc-read-badge">Read</span>' : '';
   const label = _p.title + (_p.num ? ', ' + _p.num : '');
   return `
-  <div class="doc-card${type==='alert'?' is-alert':''}${meta?' has-state':''}" data-title="${safeTitle}" data-type="${safeType}">
+  <div class="doc-card${type==='alert'?' is-alert':''}${meta?' has-state':''}" data-title="${safeTitle}" data-type="${safeType}" data-seg="${escHtml(segId)}">
     <div class="row-surface">
-    <a class="doc-row-link" href="${viewerHrefFor(title, safeType)}" onclick="var c=this.closest('.doc-card');saveRecent(c.dataset.title,c.dataset.type);markDocRead(c.dataset.title);if(window.TAQA_Track)window.TAQA_Track('open',c.dataset.title,{type:c.dataset.type,seg:'${segId}'})">
-      <span class="doc-type-icon ${type}" aria-hidden="true">${_mark}</span>
+    <a class="doc-row-link" href="${viewerHrefFor(title, safeType)}" onclick="var c=this.closest('.doc-card');saveRecent(c.dataset.title,c.dataset.type);markDocRead(c.dataset.title);if(window.TAQA_Track)window.TAQA_Track('open',c.dataset.title,{type:c.dataset.type,seg:c.dataset.seg})">
+      <span class="doc-type-icon ${safeType}" aria-hidden="true">${_mark}</span>
       <span class="doc-body">
         <span class="doc-eyebrow">${_p.num?`<span class="doc-num">${escHtml(_p.num)}</span>`:''}${rev}${newBadge}<span class="bm-btn bm-flag${isBm?' bm-on':''}" data-title="${safeTitle}" data-type="${safeType}" role="img" aria-label="Bookmarked" title="Bookmarked">★</span>${read}</span>
         <span class="doc-info-title">${escHtml(_p.title)}</span>
@@ -2213,8 +2217,16 @@ function filterDocs(input,type){
       _renderPage(type);
       if(q){
         const safeQ=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+        // Built as nodes. This used to read the escaped title back out as
+        // text and write it in as HTML, so a title with markup in it ran
+        // as soon as someone searched the tab (PI-05).
+        const re=new RegExp('('+safeQ+')','gi');
         document.querySelectorAll('#list-'+type+' .doc-info-title').forEach(t=>{
-          t.innerHTML=t.textContent.replace(new RegExp('('+safeQ+')','gi'),'<mark class="search-hl">$1</mark>');
+          const parts=t.textContent.split(re);
+          t.replaceChildren(...parts.map((p,i)=>{
+            if(i%2){const m=document.createElement('mark');m.className='search-hl';m.textContent=p;return m;}
+            return document.createTextNode(p);
+          }));
         });
       }
     },150);
@@ -2272,7 +2284,10 @@ const SCOPES = {
 function openDocModal(title, type) {
   const _e = splitEntry(title);
   const rec = (_e.num && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(_e.num) : null;
-  if (rec && rec.docType) type = rec.docType;
+  // Only a type the register knows: a record's docType is other people's
+  // text and goes into classes, attributes and links (PI-05).
+  if (rec && rec.docType && typeof TAQA_DOC_LOOKUPS !== 'undefined' &&
+      Object.prototype.hasOwnProperty.call(TAQA_DOC_LOOKUPS.types, rec.docType)) type = rec.docType;
   const L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : {types:{},segments:{}};
   const T = L.types[type] || {};
   const label = T.label || TYPE_LABELS[type] || type;
@@ -2293,7 +2308,7 @@ function openDocModal(title, type) {
     <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Revision</div><div class="doc-modal-meta-val">${esc(rec && rec.revision ? 'Rev ' + rec.revision : 'Not recorded')}</div></div>
     <div class="doc-modal-meta-cell"><div class="doc-modal-meta-label">Issued</div><div class="doc-modal-meta-val">${esc(when(rec && rec.issueDate))}</div></div>
   `;
-  document.getElementById('dm-badges').innerHTML = `<span class="doc-type-badge ${type}">${esc(label)}</span>`;
+  document.getElementById('dm-badges').innerHTML = `<span class="doc-type-badge ${escHtml(type)}">${esc(label)}</span>`;
   document.getElementById('doc-modal-overlay').classList.add('open');
   document.getElementById('doc-modal-panel').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -2355,13 +2370,24 @@ function loadRecent() {
   const strip = document.getElementById('recent-strip');
   const cards = document.getElementById('recent-cards');
   if (!strip || !cards) return;
+  // Titles here are register text kept in this browser: escaped, and passed
+  // to the modal through data attributes, never through JavaScript source.
+  // The &#39; escape did nothing (the parser decodes it before the handler
+  // compiles), so a title could both inject markup and run code (PI-05).
   cards.innerHTML = items.slice(0,3).map(i => {
     const typeLabel = {sop:'SOP',form:'Form',manual:'Manual',standard:'Standard',policy:'Policy',lesson:'Lesson',alert:'Alert'}[i.type] || i.type;
-    return `<div class="recent-card" onclick="openDocModal('${i.title.replace(/'/g,"&#39;")}','${i.type}')">
-      <div class="recent-card-title">${i.title}</div>
-      <div class="recent-card-meta">${typeLabel} · ${i.segName}</div>
+    return `<div class="recent-card" data-title="${escHtml(i.title)}" data-type="${escHtml(i.type)}">
+      <div class="recent-card-title">${escHtml(i.title)}</div>
+      <div class="recent-card-meta">${escHtml(typeLabel)} · ${escHtml(i.segName)}</div>
     </div>`;
   }).join('');
+  if (!cards.dataset.wired) {
+    cards.dataset.wired = '1';
+    cards.addEventListener('click', e => {
+      const c = e.target.closest('.recent-card');
+      if (c) openDocModal(c.dataset.title, c.dataset.type);
+    });
+  }
   strip.style.display = 'block';
 }
 loadRecent();

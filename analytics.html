@@ -260,15 +260,19 @@ function getEvents() {
   try { return JSON.parse(localStorage.getItem('taqa-analytics') || '[]'); } catch(e) { return []; }
 }
 
+// Search text, page names and document titles kept in this browser: escaped
+// for text and attributes before they reach innerHTML (PI-05).
+function anEsc(t){ return String(t==null?'':t).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 function buildBars(entries, maxShown) {
   if (!entries.length) return '<div class="an-empty">No data yet.</div>';
   const maxCount = entries[0][1];
   return entries.slice(0, maxShown).map(([label, count]) => {
     const pct = maxCount > 0 ? Math.round((count / maxCount) * 100) : 0;
     return `<div class="bar-row">
-      <div class="bar-label" title="${label}">${label}</div>
+      <div class="bar-label" title="${anEsc(label)}">${anEsc(label)}</div>
       <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-      <div class="bar-count">${count}</div>
+      <div class="bar-count">${anEsc(count)}</div>
     </div>`;
   }).join('');
 }
@@ -316,9 +320,9 @@ function renderAnalytics() {
     const dotClass = {view:'view', open:'open', search:'search'};
     document.getElementById('activity-list').innerHTML = '<div class="activity-list">' +
       recent.map(ev => `<div class="activity-item">
-        <div class="activity-dot ${dotClass[ev.e]||'view'}"></div>
-        <div class="activity-text"><strong>${typeLabel[ev.e]||ev.e}:</strong> ${ev.k}</div>
-        <div class="activity-time">${timeSince(ev.t)}</div>
+        <div class="activity-dot ${Object.prototype.hasOwnProperty.call(dotClass,ev.e)?dotClass[ev.e]:'view'}"></div>
+        <div class="activity-text"><strong>${anEsc(Object.prototype.hasOwnProperty.call(typeLabel,ev.e)?typeLabel[ev.e]:ev.e)}:</strong> ${anEsc(ev.k)}</div>
+        <div class="activity-time">${anEsc(timeSince(ev.t))}</div>
       </div>`).join('') + '</div>';
   }
 
@@ -338,7 +342,10 @@ function exportCSV() {
     rows.push([ev.e, ev.k, ev.x ? JSON.stringify(ev.x) : '', new Date(ev.t).toISOString()]);
   });
   var csv = rows.map(function(r){
-    return r.map(function(c){ return '"'+(c||'').toString().replace(/"/g,'""')+'"'; }).join(',');
+    // A cell starting = + - @ is a formula to a spreadsheet: prefixed with '
+    // so it opens as text.
+    return r.map(function(c){ var v=(c||'').toString(); if(/^[=+\-@\t\r]/.test(v)) v="'"+v;
+      return '"'+v.replace(/"/g,'""')+'"'; }).join(',');
   }).join('\n');
   try {
     var blob = new Blob([csv], {type:'text/csv'});

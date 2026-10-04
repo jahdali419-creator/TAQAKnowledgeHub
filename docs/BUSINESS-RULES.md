@@ -65,7 +65,7 @@ A document is a maintenance document if **either**:
 - **Check** (stage `qms` → `director`): any document in any area. Records `countersignedBy/At`.
 - **Reject** at the QMS stage, with a reason.
 - **Withdraw** and **edit details** of any document in any area.
-- **Never** gives final approval, including when acting under someone's delegation (delegations apply only to the role that holds them).
+- **Never** gives final approval, including when acting under someone's delegation (delegations apply only to the role that holds them). Acting under a delegation, QMS has the delegation's authority only, which never includes the QMS check (§9).
 - Opens every desk, the Master List, Analytics and About; exports F086; bulk-confirms drafts at stage `qms` from the Master List (bulk confirm never publishes).
 - **QMS's queue is company-wide.** The bell lists every document at stage `qms` from every area, each with its number, area (and Operations or Maintenance for an operational segment), what it is waiting for and when it was submitted. "Open your queue" and "+N more" open the Master List's **Waiting on QMS** view, which holds all of them. A Director's and a Maintenance Manager's queue stays their own area's desk.
 - **QMS Workbench.** The Waiting on QMS view is where QMS works its queue. Opening a document there (or from a bell item, Home's "Check", or the link on any area desk) shows a check panel: number, type, area and department, revision, file, who submitted it and when, classification, next approver, and a warning when the same title is already in that area. QMS confirms or rejects from the panel (reject needs a reason of at least 20 characters) and steps to the next document. The panel calls the same register actions as the desks, which re-check the rules for that document; an auditor or any other role opening the same document sees the read-only record.
@@ -110,7 +110,7 @@ Final approval follows exactly the same split.
 
 ## 7. Rejection and resubmission
 - Rejection is allowed only to whoever may act at the current stage (QMS at `qms`, the right final approver at `director`).
-- A reason is **required**. The store refuses an empty reason; the desk requires at least 20 characters.
+- A reason of at least **20 characters** is required. The store refuses a shorter one, the same as the desk and the Workbench (PI-09).
 - A rejected document keeps `status = draft`, gets `rejected = true`, `rejectedAtStage`, `rejectedBy/At/Date`, `rejectedReason`, and leaves both queues. It can never be checked or approved afterwards.
 - The submitter sees "Returned by ‹role›: ‹reason›" in Upload's "Your submissions" and on the document page.
 - **One file is one document.** Upload takes one controlled document at a time; selecting several files is refused with "Upload one controlled document at a time. Bulk upload will be supported separately." Several files are never bundled into one record. Real bulk upload (each file its own record, number and approval) is a separate, server-side feature not yet built.
@@ -127,6 +127,8 @@ Final approval follows exactly the same split.
 - **Must expire**: an end date is required and the span may not exceed **90 days**. An expired or revoked delegation stops working on its own.
 - **No escalation**: a delegation can only pass on authority the grantor holds; a delegate signs **in the grantor's department** (a Director's delegate can never approve maintenance documents, a Maintenance Manager's delegate nothing else) and only in the grantor's area, narrowed further to the listed document types if any.
 - A delegate **cannot re-delegate**.
+- **A delegation replaces authority, it does not add to it** (PI-04). While someone acts under a delegation they hold exactly what it grants: final approval only if `includesApproval` is set **and** the grantor holds approval; **never** the QMS check; withdraw / edit only as the grantor could, in the grantor's area and department. Their own role's approve, check and management powers do not apply while acting. A role that performs the QMS check never gives final approval, delegated or not.
+- **Only the holder grants, only the grantor revokes** (PI-09). The grantor is the signed-in person and the area is the one they hold; a request naming another role or area is refused. A delegation is revoked only by the person who granted it, signed in as themselves (not while acting under it).
 - The signature records the delegate: "‹delegate› (delegate for ‹grantor›)".
 - Each desk lists and revokes only the delegations its own holder granted for that area.
 - A delegation never creates or changes Segment Membership. A delegate outside the grantor's segment sees only the delegated queue and its documents, only while the delegation is valid (§14.10).
@@ -134,6 +136,14 @@ Final approval follows exactly the same split.
 
 ## 10. Lifecycle-field protection
 These fields change **only** through filing, check, approval, rejection and withdrawal, never by editing a record's details: `status`, `approvalStage`, `approvedBy`, `approvedDate`, `approvedAt`, `countersignedBy`, `countersignedDate`, `countersignedAt`, `rejected`, `rejectedAtStage`, `rejectedBy`, `rejectedReason`, `rejectedDate`, `rejectedAt`, `submittedBy`, `submittedAt`. An edit that names any of them is refused, for every role including QMS.
+
+Added by the Priority 1 integrity remediation (PI-09), each enforced by `store.js` and each a **server rule** for production:
+- **Filing** always creates `status = draft` at stage `qms`. Any lifecycle field the caller sends is ignored, and `submittedBy` / `submittedAt` are stamped from the signed-in identity and the clock. Filing is also refused for: a Policy from anyone but QMS (as Upload already offered), more than one file (§7), and a maintenance department document outside an operational segment (§3).
+- **Status moves** are an allow-list: withdraw (`obsolete`) from any status except `obsolete`; `superseded` only from `current` or `under-review`; `current` only through final approval. Nothing else, and nothing out of `obsolete`. A draft cannot be made `under-review`, and a current document cannot be sent back to draft.
+- **Editing details** may change only `title`, `summary`, `keywords`, `audience`, `related`, `changeNote`, `nextReviewDate`, `reviewOverdue`, `language`. Number, area, department, type, revision, files, what it supersedes, classification and scope are identity or authority and change only by filing a new controlled revision.
+- **Signatures** carry the signed-in identity only. No call accepts a signer name.
+- **Whoever performed the QMS check on a document cannot give it final approval** (two people, never one; PI-04).
+- No page can wipe the register (the prototype's `reset()` is no longer exported).
 
 ## 11. Reading rules (visibility)
 - Withdrawn documents stay **visible** with a "do not use" banner (an old printed QR code must land somewhere), but cannot be downloaded, printed or pinned.
@@ -152,6 +162,7 @@ These fields change **only** through filing, check, approval, rejection and with
 | 5 | August 2026 documents (`AZURE-MIGRATION-RAFA.md`, `PLATFORM-FUNCTIONAL-SPEC.md`, `DT-HANDOVER-PLAN.md`) | Two-step release, five personas, department rules | Describe a Power Automate approval flow and "approvals change only the screen" | Marked **historical**; this document supersedes them for rules |
 | 6 | Field Glossary contributions | Any user adds a term and it appears **immediately**, in this browser only, as a "Community" term. No review | Production requires a proposal → Pending Review → technical SME approval before a term is shared (§13) | **Target requirement set by the owner (1 Oct 2026)**; prototype behaviour is not the target |
 | 7 | Segment Contributors / Add Contributor | The area desk (Director, Maintenance Manager, QMS) has "Segment Contributors" and "+ Add Contributor": free-text name and job title, a role of **Editor / Viewer / Owner**, demo names, kept for the browser session only. It grants nothing. Every Employee sees every area | Production uses **Segment Members / Add Member**: membership (segment + Operations or Maintenance department) only, resolved from Entra ID by email, no role choice; the Director manages Operations members, the Maintenance Manager Maintenance members, QMS all; Employees see only their own operational segment(s) plus Corporate Functions, Centers of Excellence and Company Wide (§14) | **Target requirement set by the owner (1 Oct 2026)**; the prototype UI was not renamed |
+| 8 | Filer approving their own document (PI-31) | Nothing stops the person who filed a document from checking it (QMS) or approving it (Director, Maintenance Manager), as long as they hold that step. The checker and the approver are now refused as the same person (§10) | Silent | **Open business decision.** Recommended rule: the filer may not perform either release step on their own filing. Not enforced in the prototype until the owner decides. **PRODUCTION CONTROL REQUIRED** either way, because only the server knows who the filer really is |
 
 ## 13. Field Glossary contributions (target production requirement)
 
@@ -335,3 +346,15 @@ A valid delegation (§9) may temporarily let a delegate work on documents outsid
 8. A delegate outside the grantor's segment gets only the delegated queue, actions and period, with no membership (§14.10).
 
 What remains for IT is implementation: for example how a manager's transfer request or confirmation is captured (a request record, a ticket or an approval step), which is part of the "final business process" and does not change these rules.
+
+
+## 15. Priority 1 integrity controls: prototype fix and production control
+
+From the product-integrity audit (`docs/QA/PRODUCT-INTEGRITY-AUDIT.md`), October 2026. Every rule below is now enforced in the browser so the prototype behaves correctly, and **none of it is security** while it runs in the browser: anyone can edit `localStorage` or call a function from the console. Each rule marked **PRODUCTION CONTROL REQUIRED** must be enforced by the API from the signed-in Entra identity, with the browser's check kept only as convenience.
+
+| Finding | What was wrong | Prototype now | Production |
+|---|---|---|---|
+| PI-05 | Document titles, numbers, revisions, types, lookup values and stored delegation / analytics text were written into the page as HTML in several places, so markup in them ran as script in another user's session | Every such value is escaped, built as text nodes, or passed through `data-` attributes instead of script source (Upload, segment page, viewer, desks, Master List, bell, banner, Home, AI search, Analytics, support ticket, form CSS) | **BOTH.** The API validates and stores text as text; the hosting sends a strict Content-Security-Policy without `'unsafe-inline'` (Cybersecurity R-05) |
+| PI-04 | Acting under a delegation added its powers to the actor's own role, so a delegate without approval still approved, and QMS acting under a Director's delegation could check and approve the same document | A delegation replaces authority (§9); the checker cannot approve (§10) | **PRODUCTION CONTROL REQUIRED.** Delegations are records evaluated server-side; the approve endpoint refuses the identity that performed the check |
+| PI-09 | The register functions trusted the caller: status, signatures and filer on filing; any status move; any field on edit; a signer name; a grantor role and area; reset | §9 and §10 above | **PRODUCTION CONTROL REQUIRED.** The API takes identity and time from the token and server clock, and enforces the same allow-lists |
+| PI-31 | The filer can check or approve their own filing | Not enforced (§12 row 8) | **Open business decision**, then **PRODUCTION CONTROL REQUIRED** |

@@ -195,6 +195,7 @@ test.describe('TAQA_DELEGATION contract', () => {
     await gotoApp('/index.html');
     await clearAppState();
     for (const role of ['qms', 'employee', 'auditor']) {
+      await page.evaluate((role) => TAQA_ROLE.set(role), role);
       const out = await page.evaluate((role) => TAQA_DELEGATION.grant({
         fromRole: role, to: 'X', reason: 'test',
         until: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
@@ -213,6 +214,7 @@ test.describe('TAQA_DELEGATION contract', () => {
   test('grant() requires a recipient, a reason and an expiry', async ({ page, gotoApp, clearAppState }) => {
     await gotoApp('/index.html');
     await clearAppState();
+    await page.evaluate(() => TAQA_ROLE.set('owner'));
     let out = await page.evaluate(() => TAQA_DELEGATION.grant({ fromRole: 'owner' }));
     expect(out.error).toBe('Name the person receiving it.');
 
@@ -229,6 +231,7 @@ test.describe('TAQA_DELEGATION contract', () => {
   test('grant() refuses an end date before the start, and a span over the 90-day maximum, but allows exactly 90', async ({ page, gotoApp, clearAppState }) => {
     await gotoApp('/index.html');
     await clearAppState();
+    await page.evaluate(() => TAQA_ROLE.set('owner'));
     const iso = (d) => d.toISOString().slice(0, 10);
     const today = new Date();
 
@@ -248,6 +251,7 @@ test.describe('TAQA_DELEGATION contract', () => {
   test('EDGE CASE: grant() can produce an already-expired delegation, it validates the span, not that it lies in the future', async ({ page, gotoApp, clearAppState }) => {
     await gotoApp('/index.html');
     await clearAppState();
+    await page.evaluate(() => TAQA_ROLE.set('owner'));
     const out = await page.evaluate(() => TAQA_DELEGATION.grant({
       fromRole: 'owner', to: 'X', reason: 'r', from: '2020-01-01', until: '2020-01-05',
     }));
@@ -259,6 +263,7 @@ test.describe('TAQA_DELEGATION contract', () => {
   test('EDGE CASE: grant() allows delegating to yourself, the prototype has no identity to check that against', async ({ page, gotoApp, clearAppState }) => {
     await gotoApp('/index.html');
     await clearAppState();
+    await page.evaluate(() => TAQA_ROLE.set('owner'));
     const out = await page.evaluate(() => TAQA_DELEGATION.grant({
       fromRole: 'owner', fromName: 'Mohammed Jahdali', to: 'Mohammed Jahdali', reason: 'Covering myself while out',
       until: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
@@ -270,6 +275,7 @@ test.describe('TAQA_DELEGATION contract', () => {
   test('grant() refuses to hand over approval the grantor does not hold ("no escalation")', async ({ page, gotoApp, clearAppState }) => {
     await gotoApp('/index.html');
     await clearAppState();
+    await page.evaluate(() => TAQA_ROLE.set('owner'));
     // Only 'owner' can delegate at all today, and it always holds approve,
     // so this guard cannot be triggered through the real role matrix as it
     // stands. It is exercised here by temporarily removing approve from the
@@ -301,6 +307,7 @@ test.describe('TAQA_DELEGATION contract', () => {
   test('revoke() marks a live delegation revoked; isActive() then reads false and it drops out of active()', async ({ page, gotoApp, clearAppState }) => {
     await gotoApp('/index.html');
     await clearAppState();
+    await page.evaluate(() => TAQA_ROLE.set('owner'));
     const grant = await page.evaluate(() => TAQA_DELEGATION.grant({
       fromRole: 'owner', to: 'X', reason: 'r',
       until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
@@ -335,7 +342,12 @@ test.describe('TAQA_DELEGATION contract', () => {
     await page.evaluate((id) => TAQA_DELEGATION.actAs(id), grant.delegation.id);
     expect(await page.evaluate(() => TAQA_DELEGATION.current())).not.toBeNull();
 
-    await page.evaluate((id) => TAQA_DELEGATION.revoke(id), grant.delegation.id);
+    // Whoever is acting under it is the delegate, and a delegate cannot
+    // revoke it (PI-09): only the grantor, signed in as themselves, can.
+    expect((await page.evaluate((id) => TAQA_DELEGATION.revoke(id), grant.delegation.id)).ok).toBe(false);
+    await page.evaluate(() => TAQA_DELEGATION.actAs(null));
+    expect((await page.evaluate((id) => TAQA_DELEGATION.revoke(id), grant.delegation.id)).ok).toBe(true);
+    await page.evaluate((id) => TAQA_DELEGATION.actAs(id), grant.delegation.id);
     expect(await page.evaluate(() => TAQA_DELEGATION.current())).toBeNull();
   });
 
@@ -370,10 +382,12 @@ test.describe('TAQA_DELEGATION contract', () => {
     expect(cap.delegate).toBe(false);
     expect(cap.scope).toBe('own');
     expect(cap.ownSegment).toBe('coiled-tubing');
-    // owner already holds approve natively, so this specifically checks the
-    // delegated grant's own includesApproval flag is honoured, not just that
-    // the base role's capability leaks through regardless.
-    expect(cap.approve).toBe(true); // owner's own base approve, unaffected either way here
+    // Acting under a delegation without approval, approve is false even
+    // though the Director's own role holds it: the delegation replaces the
+    // role's authority rather than adding to it (PI-04). This test used to
+    // assert true here and so pinned the escalation.
+    expect(cap.approve).toBe(false);
+    expect(cap.countersign).toBe(false);
 
     await page.evaluate((id) => TAQA_DELEGATION.revoke(id), noApprovalGrant.delegation.id);
     await page.evaluate(() => TAQA_DELEGATION.actAs(null));
