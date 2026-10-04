@@ -989,7 +989,7 @@ const TAQA_DOC = {
                                    : (TAQA_DOC.type(d).approver || ','),
   retention:  d => TAQA_DOC.type(d).retentionYears,
   cycle:      d => TAQA_DOC.type(d).reviewCycleMonths,
-  scoreUrl:   d => d.docNumber ? 'https://score.taqa.com.sa/library/' + d.docNumber : null,
+  scoreUrl:   d => d.docNumber ? 'https://score.taqa.com.sa/library/' + encodeURIComponent(d.docNumber) : null,
   // API Q2 4.4.3 c): days until the periodic review falls due (negative means overdue)
   reviewDays: d => d.nextReviewDate
                    ? Math.round((new Date(d.nextReviewDate) - new Date()) / 86400000) : null,

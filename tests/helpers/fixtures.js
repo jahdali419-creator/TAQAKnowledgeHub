@@ -146,6 +146,26 @@ exports.test = base.test.extend({
     };
     await use(clear);
   },
+
+  // Puts records into the register as if the back end already held them,
+  // in whatever state the test needs (a current document, an asset, a
+  // hostile value). TAQA_STORE.add() files only a draft at the QMS check and
+  // ignores lifecycle fields (PI-09), so a test that needs a published
+  // record seeds the register's storage, the same way the shipped register
+  // arrives, rather than forging one through the filing API.
+  seedRegister: async ({ page }, use) => {
+    const seed = async (rows) => {
+      await page.evaluate((rows) => {
+        const KEY = 'taqa-uploads-v1';
+        let cur = [];
+        try { cur = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) {}
+        rows.forEach((r) => cur.push(Object.assign({ status: 'current', classification: 'internal', revision: '1.0', locallyAdded: true }, r)));
+        localStorage.setItem(KEY, JSON.stringify(cur));
+        try { window.dispatchEvent(new StorageEvent('storage', { key: KEY })); } catch (e) {}
+      }, rows);
+    };
+    await use(seed);
+  },
 });
 
 exports.expect = base.expect;

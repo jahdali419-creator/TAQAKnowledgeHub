@@ -334,7 +334,9 @@ td.q{line-height:1.45;}
   // On paper: the number top right, and the footer TQ-QHSE-S001's own pages carry.
   function pageBoxes(){
     var stamp = new Date().toLocaleString('en-GB', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
-    var q = function(s){ return '"' + String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; };
+    // A CSS string: backslash, quote and line breaks are escaped as CSS hex
+    // escapes, so a title cannot close the string and start a rule (PI-05).
+    var q = function(s){ return '"' + String(s).replace(/[\\"\n\r\f]/g, function(c){ return '\\' + c.charCodeAt(0).toString(16) + ' '; }) + '"'; };
     var st = document.getElementById('page-boxes') || document.head.appendChild(Object.assign(document.createElement('style'), {id:'page-boxes'}));
     // The TAQA frame: a turquoise bar down the right edge with its top corner
     // cut, and a dark teal bar along the foot with its left end cut.

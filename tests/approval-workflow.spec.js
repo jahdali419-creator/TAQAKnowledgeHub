@@ -104,6 +104,8 @@ test.describe('3. QMS countersigns -> moves to the named approver\'s queue', () 
     const docNumber = await addDraft(page, { docType: 'sop', segment: 'coiled-tubing' });
 
     await setRole('qms', 'coiled-tubing');
+    // A second argument used to be written as the signature (PI-09). It is
+    // ignored now: the signature is always the signed-in identity.
     const out = await page.evaluate((dn) => TAQA_STORE.countersign(dn, 'QMS Tester'), docNumber);
     expect(out).toEqual({ ok: true, next: "the Director's final approval" });
 
@@ -116,7 +118,7 @@ test.describe('3. QMS countersigns -> moves to the named approver\'s queue', () 
       };
     }, docNumber);
     expect(after.approvalStage).toBe('director');
-    expect(after.countersignedBy).toBe('QMS Tester');
+    expect(after.countersignedBy).toBe('QMS / Document Controller');
     expect(after.stageOf).toBe('director');
     expect(after.approverFor).toBe('Relevant Operation Director'); // verbatim, documents-master.js
     expect(after.waitingOn).toBe('Relevant Operation Director');
@@ -191,13 +193,14 @@ test.describe('4-5. The Director/final-approver step', () => {
     }));
 
     await setRole('owner', 'coiled-tubing');
+    // A caller-chosen signer is ignored (PI-09).
     const out = await page.evaluate((dn) => TAQA_STORE.approve(dn, 'Director Tester'), docNumber);
     expect(out).toEqual({ ok: true, next: 'released' });
 
     const doc = await page.evaluate((dn) => TAQA_STORE.findDoc(dn), docNumber);
     expect(doc.status).toBe('current');
     expect(doc.approvalStage).toBeNull();
-    expect(doc.approvedBy).toBe('Director Tester');
+    expect(doc.approvedBy).toBe('Segment Director');
     expect(doc.approvedDate).toBeTruthy();
     expect(doc.issueDate).toBeTruthy();
 
@@ -354,11 +357,10 @@ test.describe('6-7. REGRESSION: the reject-reason modal (fixed today)', () => {
     expect(can).toEqual({ countersign: false, approve: false, stageOf: null });
   });
 
-  test('the store\'s own reason requirement is looser than the modal\'s: TAQA_STORE.reject() itself only requires a non-empty reason', async ({ page, gotoApp, setRole, clearAppState }) => {
-    // Documents that the 20-char minimum is dashboard.html's own UI rule
-    // (today's fix), layered on top of store.js's looser floor, not
-    // enforced by the store itself. Calling the store directly with a short
-    // but non-empty reason succeeds; calling it with an empty one refuses.
+  test('the store enforces the same 20-character reason floor as every page (PI-09)', async ({ page, gotoApp, setRole, clearAppState }) => {
+    // The store used to accept any non-empty reason, so a console call could
+    // return a document with "x" as its reason. It now refuses what the
+    // desks and the Workbench refuse, and leaves the document untouched.
     await gotoApp('/index.html');
     await clearAppState();
     const docNumber = await addDraft(page, { segment: 'coiled-tubing' });
@@ -368,7 +370,12 @@ test.describe('6-7. REGRESSION: the reject-reason modal (fixed today)', () => {
     expect(emptyOut).toEqual({ ok: false, error: 'A reason is required.' });
 
     const shortOut = await page.evaluate((dn) => TAQA_STORE.reject(dn, 'too short'), docNumber);
-    expect(shortOut.ok).toBe(true);
+    expect(shortOut).toEqual({ ok: false, error: 'Give a reason of at least 20 characters.' });
+    const still = await page.evaluate((dn) => { const d = TAQA_STORE.findDoc(dn); return [!!d.rejected, TAQA_APPROVAL.stageOf(d)]; }, docNumber);
+    expect(still).toEqual([false, 'qms']);
+
+    const okOut = await page.evaluate((dn) => TAQA_STORE.reject(dn, 'Twenty characters ok.'), docNumber);
+    expect(okOut.ok).toBe(true);
   });
 });
 
@@ -421,12 +428,26 @@ test.describe('8. Delegation in the workflow', () => {
     }));
     await page.evaluate((id) => TAQA_DELEGATION.actAs(id), grant.delegation.id);
 
-    // owner's own base role already holds approve natively, so canApprove is
-    // still true here regardless of the grant's includesApproval flag; what
-    // this demonstrates is that the delegation's own contribution is
-    // correctly withheld (see roles.spec.js's effective() delegation test
-    // for a check isolating the delegated contribution itself).
+    // Acting under it, the authority is the delegation's alone (PI-04). This
+    // used to add to the Director's own approve, so the delegate still
+    // released documents. The forbidden action itself is refused, and the
+    // document is untouched.
     const cap = await page.evaluate(() => TAQA_ROLE.effective());
     expect(cap.delegated.includesApproval).toBe(false);
+    expect(cap.approve).toBe(false);
+    const out = await page.evaluate((dn) => TAQA_STORE.approve(dn), docNumber);
+    expect(out).toEqual({ ok: false, error: 'You cannot approve this document.' });
+    const rj = await page.evaluate((dn) => TAQA_STORE.reject(dn, 'A delegate without approval tries this.'), docNumber);
+    expect(rj.ok).toBe(false);
+    const after = await page.evaluate((dn) => { const d = TAQA_STORE.findDoc(dn); return [d.status, d.approvalStage, d.approvedBy || null]; }, docNumber);
+    expect(after).toEqual(['draft', 'director', null]);
+
+    // And the desk offers no Approve to press.
+    await gotoApp('/dashboard.html?id=coiled-tubing');
+    await expect(page.locator(`[data-store-doc="${docNumber}"]`)).toHaveCount(0);
+
+    // Stopping acting restores the Director's own authority.
+    await page.evaluate(() => TAQA_DELEGATION.actAs(null));
+    expect((await page.evaluate((dn) => TAQA_STORE.approve(dn), docNumber)).ok).toBe(true);
   });
 });

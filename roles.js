@@ -410,6 +410,12 @@ const TAQA_APPROVAL = {
     // documents, and a Maintenance Manager signs nothing outside them.
     // An 'all' scope (none holds approve today) is not narrowed.
     if (cap.scope !== 'all' && TAQA_APPROVAL.isMaintenance(doc) !== (cap.department === 'maintenance')) return false;
+    // Two people, never one: whoever performed the QMS check on this document
+    // may not also give it final approval. In the prototype the name is the
+    // only identity there is; in production it is the Entra object id (PI-04).
+    if ((!roleKey || roleKey === TAQA_ROLE.current()) && doc.countersignedBy &&
+        typeof TAQA_STORE !== 'undefined' && TAQA_STORE.actingName &&
+        doc.countersignedBy === TAQA_STORE.actingName()) return false;
     return true;
   },
 
@@ -474,9 +480,24 @@ const TAQA_DELEGATION = {
      a delegation was not created instead of discovering later that it does
      less than they intended. */
   grant(g){
-    const grantor = TAQA_ROLES[g.fromRole || 'owner'];
+    g = g || {};
+    const me = TAQA_ROLE.current();
+    const fromRole = g.fromRole || me;
+    const grantor = TAQA_ROLES[fromRole];
     if (!grantor)            return { ok:false, error:'Unknown granting role.' };
-    if (!grantor.delegate)   return { ok:false, error:'This role cannot delegate.' };
+    // The grantor is whoever is signed in, never a role or area the caller
+    // names: an Employee could grant itself a Director's approval from the
+    // console by passing fromRole 'owner' (PI-09). In production the grantor
+    // is the token's subject and nothing in the request can change it.
+    if (fromRole !== me)     return { ok:false, error:'You can only delegate your own authority.' };
+    if (!grantor.delegate || !TAQA_ROLE.effective().delegate)
+                             return { ok:false, error:'This role cannot delegate.' };
+    const myArea = TAQA_ROLE.area();
+    if (g.segment && g.segment !== myArea)
+                             return { ok:false, error:'You can only delegate in the area you hold.' };
+    if (g.docTypes && (!Array.isArray(g.docTypes) || g.docTypes.some(function(t){
+          return typeof TAQA_DOC_LOOKUPS !== 'undefined' && !Object.prototype.hasOwnProperty.call(TAQA_DOC_LOOKUPS.types, t); })))
+                             return { ok:false, error:'Unknown document type.' };
     if (!g.to || !String(g.to).trim())
                              return { ok:false, error:'Name the person receiving it.' };
     if (!g.reason || !String(g.reason).trim())
@@ -497,9 +518,9 @@ const TAQA_DELEGATION = {
     const row = {
       id: 'DEL-' + Date.now().toString(36).toUpperCase(),
       to: String(g.to).trim(),
-      fromRole: g.fromRole || 'owner',
-      fromName: g.fromName || TAQA_ROLES[g.fromRole || 'owner'].label,
-      segment: g.segment || TAQA_ROLE.area() || null,
+      fromRole: fromRole,
+      fromName: g.fromName || grantor.label,
+      segment: myArea || null,
       docTypes: (g.docTypes && g.docTypes.length) ? g.docTypes.slice() : null,  // null means every type the grantor holds
       includesApproval: !!g.includesApproval,
       from: from.toISOString().slice(0,10),
@@ -512,10 +533,16 @@ const TAQA_DELEGATION = {
     return { ok:true, delegation: row };
   },
 
+  /* Only the holder who granted it, in that area, may revoke it (BUSINESS-RULES
+     §9: each desk revokes only what its own holder granted). It used to revoke
+     for anyone who knew the id (PI-09). */
   revoke(id){
     const all = TAQA_DELEGATION._read();
     const hit = all.find(d => d.id === id);
     if (!hit) return { ok:false, error:'No such delegation.' };
+    if (hit.fromRole !== TAQA_ROLE.current() || !TAQA_ROLE.effective().delegate ||
+        (hit.segment || null) !== (TAQA_ROLE.area() || null))
+      return { ok:false, error:'Only the person who granted this delegation can revoke it.' };
     hit.revokedAt = new Date().toISOString();
     TAQA_DELEGATION._write(all);
     return { ok:true };
@@ -541,8 +568,8 @@ const TAQA_DELEGATION = {
 };
 
 /* effective() is what every permission check should ask, rather than reading
-   TAQA_ROLES directly: it is the role's own capabilities, widened by an active
-   delegation and never beyond what the grantor holds. */
+   TAQA_ROLES directly: the role's own capabilities, or, while acting under an
+   active delegation, the delegation's, never beyond what the grantor holds. */
 TAQA_ROLE.effective = function(roleKey){
   const base = TAQA_ROLE.def(roleKey) || TAQA_ROLES[TAQA_DEFAULT_ROLE];
   const cap = {
@@ -563,9 +590,22 @@ TAQA_ROLE.effective = function(roleKey){
   const d = TAQA_DELEGATION.current();
   if (!d) return cap;
   const grantor = TAQA_ROLES[d.fromRole] || {};
-  cap.approve      = cap.approve      || (!!d.includesApproval && !!grantor.approve);
-  cap.editMetadata = cap.editMetadata || !!grantor.editMetadata;
-  cap.controlPanel = cap.controlPanel || !!grantor.controlPanel;
+  // Acting under a delegation, the authority is the delegation's and nothing
+  // else. It used to be added to the role's own (cap.approve || …), so a
+  // Director acting under a delegation granted WITHOUT approval still saw
+  // Approve and released documents as the delegate, and QMS acting under a
+  // Director's delegation could check a document and then approve it too:
+  // both release steps in one pair of hands (PI-04).
+  //   approve      only if the delegation includes it and the grantor holds it,
+  //                and never for a role that performs the QMS check: QMS never
+  //                gives final approval, delegation included (BUSINESS-RULES §4)
+  //   countersign  never: the QMS check is not delegable, and a delegate is
+  //                someone signing in another person's place
+  //   manage       only what the grantor could, in the grantor's area
+  cap.approve      = !!d.includesApproval && !!grantor.approve && !base.countersign;
+  cap.countersign  = false;
+  cap.editMetadata = !!grantor.editMetadata;
+  cap.controlPanel = !!grantor.controlPanel;
   cap.scope        = 'own';                 // a delegation is always scoped
   cap.ownSegment   = d.segment || null;
   cap.docTypes     = d.docTypes;

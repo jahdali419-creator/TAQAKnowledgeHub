@@ -95,6 +95,13 @@ Delegation must reference real users: the delegate signs in as themselves and th
 | Reject: stage actor, reason required | `store.reject` | **B + D** |
 | Withdraw / edit: area + department; QMS global | `TAQA_ROLE.canManage(doc)`, `store.setStatus/patch/remove` | **B + D** |
 | Lifecycle-field protection | `store.patch` (`LIFECYCLE` list) | **D** |
+| Filing always draft at `qms`, filer stamped from identity; policy QMS-only, one file, maintenance only in operational segments (PI-09) | `store.add` | **B + D** |
+| Status transitions allow-list (PI-09) | `store.setStatus` (`MOVES`) | **B + D** |
+| Editable fields allow-list (PI-09) | `store.patch` (`EDITABLE`) | **B + D** |
+| Delegation replaces authority; grant by holder in own area; revoke by grantor (PI-04, PI-09) | `TAQA_ROLE.effective`, `TAQA_DELEGATION.grant/revoke` | **B + D** |
+| The QMS checker cannot give final approval to the same document (PI-04) | `TAQA_APPROVAL.canApprove` | **B + D** |
+| Filer checking or approving their own filing (PI-31) | not enforced; open owner decision | **B + D** once decided |
+| Register and lookup text rendered as text, never markup (PI-05) | escaping in every page | **A** in the browser, **D** at the API (validation) and hosting (CSP without `'unsafe-inline'`) |
 | Maintenance classification (department or bulletin) | `TAQA_APPROVAL.isMaintenance` | **B** |
 | Bulletins only for operational segments | `upload.html`, `store.add` | **B** |
 | Maintenance Manager holds operational segments only | `TAQA_ROLE.holds` | **B** (identity mapping) |

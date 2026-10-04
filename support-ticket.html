@@ -1007,7 +1007,7 @@ document.addEventListener('click',function(e){
       var ids = Object.keys(S).filter(function(k){ return S[k].group === f[0]; })
         .sort(function(a,b){ return S[a].name.localeCompare(S[b].name); });
       return ids.length ? '<optgroup label="' + f[1] + '">' + ids.map(function(k){
-        return '<option value="' + k + '">' + S[k].name + '</option>';
+        return '<option value="' + String(k).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}) + '">' + String(S[k].name).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}) + '</option>';
       }).join('') + '</optgroup>' : '';
     }).join('');
 })();

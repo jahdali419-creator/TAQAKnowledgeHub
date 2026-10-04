@@ -2501,9 +2501,9 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
       var where = TAQA_ROLE.areaName(seg);
       txt = (n ? '<b>' + n + '</b> document' + (n===1?'':'s') + ' waiting on your sign-off'
                : 'Nothing waiting on your sign-off') +
-            ' in <b>' + where + '</b>' +
+            ' in <b>' + String(where).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}) + '</b>' +
             (over ? ', and <b>' + over + '</b> past review there.' : '.');
-      href = 'dashboard.html?id=' + (seg || '');
+      href = 'dashboard.html?id=' + encodeURIComponent(seg || '');
       cta = n ? 'Approve' : 'Open your segment';
     } else if (k === 'auditor') {
       txt = 'Read only across <b>' + TAQA_STORE.count('register') +

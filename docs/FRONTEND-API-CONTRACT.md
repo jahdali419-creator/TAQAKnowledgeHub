@@ -64,11 +64,13 @@ only ever has the role text.
 | `TAQA_STORE.rows(pop, filter)` | `GET /documents?population=<pop>&segment=<filter.segment>&docType=<filter.docType>` — `pop` is one of `register`, `controlled`, `live`, `pending`, `awaiting-director`, `awaiting-qms`, `visible` |
 | `TAQA_STORE.count(pop, filter)` | Same query, count only. Client-side today; Azure should support a `?count=true` or return `X-Total-Count` rather than have the client page through everything |
 | `TAQA_STORE.findDoc(docNumber)` | `GET /documents/{docNumber}` |
-| `TAQA_STORE.add(rec)` | `POST /documents` (draft creation, from `upload.html`) |
-| `TAQA_STORE.patch(docNumber, fields)` | `PATCH /documents/{docNumber}` |
-| `TAQA_STORE.setStatus(docNumber, status)` | `PATCH /documents/{docNumber}/status` — this is the one call every withdraw/approve/bulk-action button in the UI ultimately makes today |
-| `TAQA_STORE.approve(docNumber, signer)` | `POST /documents/{docNumber}/approve` — must be rejected server-side unless the caller's Entra token satisfies `TAQA_APPROVAL.canApprove` for that document (see §3); the front end's check is a UI convenience only, never a security boundary |
-| `TAQA_STORE.countersign(docNumber, signer)` | `POST /documents/{docNumber}/countersign` — same rule, checked against `canCountersign` |
+| `TAQA_STORE.add(rec)` | `POST /documents` (draft creation, from `upload.html`). Always creates `status: draft` at stage `qms`; every lifecycle field in the request is ignored and `submittedBy` / `submittedAt` come from the token and the server clock. Refuses a Policy from anyone but QMS, more than one file, and a maintenance department outside an operational segment (`BUSINESS-RULES.md` §10) |
+| `TAQA_STORE.patch(docNumber, fields)` | `PATCH /documents/{docNumber}`. Allow-list only: `title`, `summary`, `keywords`, `audience`, `related`, `changeNote`, `nextReviewDate`, `reviewOverdue`, `language`. Anything else (number, area, department, type, revision, files, supersedes, classification, any lifecycle field) is refused |
+| `TAQA_STORE.setStatus(docNumber, status)` | `PATCH /documents/{docNumber}/status` — what withdraw calls. Allowed moves only: `obsolete` from anything not already withdrawn, `superseded` from `current` / `under-review`; `current` only through approve. Everything else is refused |
+| `TAQA_STORE.approve(docNumber)` | `POST /documents/{docNumber}/approve` — must be rejected server-side unless the caller's Entra token satisfies `TAQA_APPROVAL.canApprove` for that document (see §3); the front end's check is a UI convenience only, never a security boundary. There is no signer parameter: the signature is the caller's identity. Refused for whoever performed the QMS check on the same document |
+| `TAQA_STORE.countersign(docNumber)` | `POST /documents/{docNumber}/countersign` — same rule, checked against `canCountersign`; no signer parameter |
+| `TAQA_STORE.reject(docNumber, reason)` | `POST /documents/{docNumber}/reject` — reason of at least 20 characters; no signer parameter |
+| ~~`TAQA_STORE.reset()`~~ | Removed from the API (PI-09). No endpoint may wipe the register |
 | `TAQA_STORE.remove(docNumber)` | Not exposed in any UI today; document lifecycle goes through `status`, not deletion |
 | `TAQA_STORE.onChange(fn)` | Real time updates. Today it is a `CustomEvent` on `window` (`taqa:register-changed`) fired after any local write, which is how the bell badge and dashboard counters stay live without a reload. A real backend needs an equivalent push (websocket, SignalR, or a poll) so two open tabs/devices do not disagree |
 
@@ -95,6 +97,7 @@ reason the door pill carries that disclaimer.
 | `TAQA_ROLE.canManage(areaId)` | Whether the signed-in user may act as an area's desk (its queue, contributors, published list) |
 | `TAQA_ROLE.canManage(doc)` | Whether the signed-in user may **withdraw** a document or **edit its details**: `PATCH /documents/{docNumber}` and `PATCH …/status` must enforce it. QMS: any document in any area. Otherwise the document's area must be the caller's **and** its department must be: an Operations document is its area's Segment Director's, a maintenance document (department `maintenance`, or type Maintenance Bulletin) is its area's Maintenance Manager's. Another area's Director or Maintenance Manager manages neither. The same split as final approval |
 | `TAQA_APPROVAL.canApprove(doc, roleKey)` / `canCountersign(doc, roleKey)` / `TAQA_STORE.reject(doc, reason)` | The exact rule a `POST /documents/{docNumber}/approve`, `/countersign` or `/reject` endpoint must enforce. **Order matters and was changed this round**: QMS checks conformance first (`countersign`, despite the name — it is a gate, not a co-signature after the fact), then the named approver (Segment Director for an SOP/Standard) gives final approval, and that is what releases the document. Either step can instead reject with a required reason, which sends the draft back to whoever submitted it |
+| `TAQA_DELEGATION.grant(g)` / `.revoke(id)` | `POST /delegations`, `DELETE /delegations/{id}`. The grantor is the caller and the area is the one they hold; a request naming another role or area is refused. Only the grantor, not acting under a delegation, may revoke |
 | `TAQA_DELEGATION.current()` / `.actAs()` | "Acting as" is fully client-side today (a note in the code says so explicitly: "the prototype has no signed-in identity, so acting as a delegate is a..."). A real delegation needs a real record of who granted it, to whom, until when, and with what scope — an audit trail, not a `localStorage` key |
 
 ### 3.1 Rules the API must enforce, decided by the owner (1 Oct 2026)
@@ -103,6 +106,14 @@ reason the door pill carries that disclaimer.
 2. **Document management follows department as well as area** (`canManage(doc)` above). QMS's global document control is unchanged.
 3. **Lifecycle and signature fields never change by editing.** `status`, `approvalStage`, every `*By` / `*At` / `*Date` of submission, check, approval and rejection, and `rejected` change only through submit, countersign, approve, reject and withdraw. An edit that names one is refused (`TAQA_STORE.patch`). A content change to a published document is a **new controlled revision** that goes through the same release steps; approval history is never rewritten.
 4. **A Maintenance Manager holds an operational segment only** (`TAQA_ROLE.holds`). The identity claim that maps a person to a Maintenance Manager role must name an operational segment.
+
+### 3.2 Rules added by the Priority 1 integrity remediation (October 2026). PRODUCTION CONTROL REQUIRED
+
+5. **A delegation replaces authority** (PI-04). Acting under a delegation, the caller holds approve only if the delegation includes it and the grantor holds it, never the QMS check, and management only as the grantor. A role that performs the QMS check never approves, delegated or not.
+6. **The checker is not the approver.** `approve` is refused for the identity recorded as `countersignedBy` on that document.
+7. **Filing, status moves, editable fields and signatures** follow the allow-lists in §2 and `BUSINESS-RULES.md` §10 (PI-09).
+8. **Every text field is text** (PI-05). The API stores and returns titles, numbers, revisions, types and lookup values as data; the client escapes them on output; the hosting sends a CSP that does not allow inline script.
+9. **Open:** whether the filer may check or approve their own filing (PI-31, `BUSINESS-RULES.md` §12 row 8).
 
 **The one rule that matters most for the handoff:** nothing in `roles.js`
 is a security boundary today. It exists so the UI can be walked through and

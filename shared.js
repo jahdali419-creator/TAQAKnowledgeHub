@@ -1,3 +1,13 @@
+// Escapes text for HTML element content and for single- or double-quoted
+// attributes. Anything from the register, a lookup table or this browser's
+// storage is other people's text and goes through this before innerHTML
+// (PI-05). In production it also comes through the API, so it stays escaped.
+function taqaEsc(v){
+  return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
 // ── JS error tracking (stores last 50 errors in localStorage) ──
 (function(){
   var KEY='taqa-errors';
@@ -840,13 +850,14 @@ window.showToast=function(msg,type){
       '</div></div>'+
       '<div class="bm-list">'+
       items.map(function(it){
-        var bg=TC[it.type]||TC.sop,tc=TT[it.type]||TT.sop,lbl=TS[it.type]||'DOC';
+        var own=Object.prototype.hasOwnProperty.call(TC,it.type);
+        var bg=own?TC[it.type]:TC.sop,tc=(own&&TT[it.type])||TT.sop,lbl=(own&&TS[it.type])||'DOC';
         var bare=bmBare(it.title), num=bmNum(it.title);
         var esc=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
         return '<a class="bm-item" href="viewer.html?seg='+encodeURIComponent(it.segId)+'&type='+encodeURIComponent(it.type||'')+'&title='+encodeURIComponent(bare)+(num?'&doc='+encodeURIComponent(num):'')+'">'+
-          '<div class="bm-ico" style="background:'+bg+';color:'+tc+'">'+lbl+'</div>'+
-          '<div class="bm-inf"><div class="bm-t">'+esc(bare)+'</div><div class="bm-m">'+esc(it.segName)+' · '+lbl+'</div></div>'+
-          '<button class="bm-x" data-t="'+it.title.replace(/"/g,'&quot;')+'" data-s="'+it.segId+'" title="Remove">×</button>'+
+          '<div class="bm-ico" style="background:'+bg+';color:'+tc+'">'+taqaEsc(lbl)+'</div>'+
+          '<div class="bm-inf"><div class="bm-t">'+esc(bare)+'</div><div class="bm-m">'+esc(it.segName)+' · '+taqaEsc(lbl)+'</div></div>'+
+          '<button class="bm-x" data-t="'+taqaEsc(it.title)+'" data-s="'+taqaEsc(it.segId)+'" title="Remove">×</button>'+
         '</a>';
       }).join('')+'</div>';
   }
@@ -1187,7 +1198,7 @@ document.addEventListener('keydown',function(e){
     btn.innerHTML = '<span class="door-dot d-' + k + '"></span>' +
                     (scoped ? '<span class="door-cap-s">' + d.short + '</span>' : '') +
                     '<span class="door-cap">' +
-                      (scoped ? TAQA_ROLE.areaName() : d.short) + '</span>';
+                      (scoped ? taqaEsc(TAQA_ROLE.areaName()) : d.short) + '</span>';
 
     var menu = document.createElement('div');
     menu.className = 'door-menu';
@@ -1289,8 +1300,8 @@ document.addEventListener('keydown',function(e){
                   .sort(function (a, b) { return S[a].name.localeCompare(S[b].name); });
       if (!ids.length) return '';
       return '<optgroup label="' + f[1] + '">' + ids.map(function (x) {
-        return '<option value="' + x + '"' + (x === here ? ' selected' : '') + '>' +
-               S[x].name + '</option>'; }).join('') + '</optgroup>';
+        return '<option value="' + taqaEsc(x) + '"' + (x === here ? ' selected' : '') + '>' +
+               taqaEsc(S[x].name) + '</option>'; }).join('') + '</optgroup>';
     }).join('');
     return opts;
   }
@@ -1307,7 +1318,7 @@ document.addEventListener('keydown',function(e){
     if (!d) return;
     var bar = document.createElement('div');
     bar.className = 'deleg-bar';
-    bar.innerHTML = '<span>Delegate for <b>' + d.fromName + '</b> until <b>' + d.until + '</b>' +
+    bar.innerHTML = '<span>Delegate for <b>' + taqaEsc(d.fromName) + '</b> until <b>' + taqaEsc(d.until) + '</b>' +
       (d.includesApproval ? '' : ', without approval') + '</span>' +
       '<span class="db-end"><button type="button" id="deleg-stop">Stop</button></span>';
     document.body.insertBefore(bar, document.body.firstChild);

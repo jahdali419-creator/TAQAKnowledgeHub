@@ -729,6 +729,10 @@ html[data-taqa-theme="dark"] .dash-unknown{background:#002326;border-color:#0048
 <script src="store.js"></script>
 <script src="segments-data.js"></script>
 <script>
+// Escapes text for HTML and for either kind of quoted attribute. Register,
+// delegation and lookup values are other people's text (PI-05).
+function dEsc(t){ return String(t==null?'':t).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 let pendingCount = 0;
 
 // ── Per-Segment Dashboard Data ──
@@ -899,7 +903,7 @@ function activityFrom(id){
         at: at || null,
         dot: draft ? 'dot-blue' : over ? 'dot-orange' : 'dot-green',
         text: draft
-          ? 'Awaiting ' + ((typeof TAQA_APPROVAL !== 'undefined' && TAQA_APPROVAL.waitingOn(d)) || 'approval') +
+          ? 'Awaiting ' + dEsc((typeof TAQA_APPROVAL !== 'undefined' && TAQA_APPROVAL.waitingOn(d)) || 'approval') +
             ': <strong>' + esc(d.docNumber || d.title) + '</strong>'
           : over
             ? 'Review overdue on <strong>' + esc(d.docNumber || d.title) + '</strong>'
@@ -1089,9 +1093,9 @@ function initDashboard() {
     file: (d.files && d.files[0]) ? d.files[0] : null,
     preview: STAGE === 'qms'
       ? 'Check the number against 5.3, the revision and the dates. Confirming ' +
-        'sends it to ' + (TAQA_APPROVAL.approverFor(d) || 'the named approver') + ' for final approval.'
-      : 'Checked by QMS · ' + (d.countersignedBy || 'confirmed') +
-        '. Your approval as ' + (TAQA_APPROVAL.approverFor(d) || 'the named approver') +
+        'sends it to ' + dEsc(TAQA_APPROVAL.approverFor(d) || 'the named approver') + ' for final approval.'
+      : 'Checked by QMS · ' + dEsc(d.countersignedBy || 'confirmed') +
+        '. Your approval as ' + dEsc(TAQA_APPROVAL.approverFor(d) || 'the named approver') +
         ' is what publishes it.',
     fromStore: true,
     stage: STAGE
@@ -1154,8 +1158,8 @@ function initDashboard() {
         <div class="pending-doc-preview">${p.preview}</div>
         ${exactBanner}${supersRow}${simPanel}
         <div class="pending-actions">
-          <button class="btn-approve" data-store-doc="${p.fromStore ? p.docId : ''}" data-stage="${p.stage||''}" onclick="approveDoc(${i+1})">✓ ${VERB}</button>
-          <button class="btn-reject" data-store-doc="${p.fromStore ? p.docId : ''}" data-stage="${p.stage||''}" data-doc-title="${esc(p.title||'')}" onclick="rejectDoc(${i+1})">✕ Reject</button>
+          <button class="btn-approve" data-store-doc="${p.fromStore ? dEsc(p.docId) : ''}" data-stage="${dEsc(p.stage||'')}" onclick="approveDoc(${i+1})">✓ ${VERB}</button>
+          <button class="btn-reject" data-store-doc="${p.fromStore ? dEsc(p.docId) : ''}" data-stage="${dEsc(p.stage||'')}" data-doc-title="${esc(p.title||'')}" onclick="rejectDoc(${i+1})">✕ Reject</button>
           <button class="btn-preview-link">Preview Document</button>
           <span class="action-result" id="result-${i+1}"></span>
         </div>
@@ -1206,13 +1210,13 @@ function initDashboard() {
           '<div class="dr-main"><div class="dr-who">' + esc(x.to) +
             (x.includesApproval ? '' : ' <span style="font-weight:400;opacity:.7">(no approval)</span>') +
           '</div><div class="dr-meta">' + esc(x.segment || 'segment') +
-            (x.docTypes ? ', ' + x.docTypes.join(' and ') : ', every type') +
-            ' &middot; until ' + x.until + ' &middot; ' + esc(x.reason) +
+            (x.docTypes ? ', ' + dEsc([].concat(x.docTypes).join(' and ')) : ', every type') +
+            ' &middot; until ' + dEsc(x.until) + ' &middot; ' + esc(x.reason) +
             (live ? '' : ' &middot; expired') + '</div></div>' +
           '<div class="dr-act">' +
-            (live ? '<button type="button" class="dr-use" data-act="' + x.id + '">' +
+            (live ? '<button type="button" class="dr-use" data-act="' + dEsc(x.id) + '">' +
                       (acting ? 'Acting' : 'Act as this') + '</button>' : '') +
-            '<button type="button" data-rev="' + x.id + '">Revoke</button>' +
+            '<button type="button" data-rev="' + dEsc(x.id) + '">Revoke</button>' +
           '</div></div>';
       }).join('');
     }
@@ -1275,16 +1279,16 @@ function initDashboard() {
   const roleBadge = r => r==='Owner'?'crole-owner':r==='Editor'?'crole-editor':'crole-viewer';
   const avColors = ['av-teal','av-blue','av-orange','av-purple'];
   const ownerRow = `<div class="contributor-row">
-    <div class="contributor-avatar ${dash.owner ? dash.owner.av : 'av-unassigned'}">${dash.owner ? dash.owner.initials : '?'}</div>
-    <div class="contributor-info"><div class="contributor-name">${dash.owner ? dash.owner.name : 'No document controller named'}</div><div class="contributor-role">${dash.owner ? dash.owner.title : (dash.accountable || 'To be assigned by line management')}</div></div>
+    <div class="contributor-avatar ${dash.owner ? dEsc(dash.owner.av) : 'av-unassigned'}">${dash.owner ? dEsc(dash.owner.initials) : '?'}</div>
+    <div class="contributor-info"><div class="contributor-name">${dash.owner ? dEsc(dash.owner.name) : 'No document controller named'}</div><div class="contributor-role">${dEsc(dash.owner ? dash.owner.title : (dash.accountable || 'To be assigned by line management'))}</div></div>
     <span class="contributor-role-badge crole-owner">Owner</span></div>`;
   const cRows = dash.contributors.map(c => `<div class="contributor-row">
-    <div class="contributor-avatar ${c.av}">${c.initials}</div>
-    <div class="contributor-info"><div class="contributor-name">${c.name}</div><div class="contributor-role">${c.title}</div></div>
-    <span class="contributor-role-badge ${roleBadge(c.role)}">${c.role}</span></div>`).join('');
+    <div class="contributor-avatar ${dEsc(c.av)}">${dEsc(c.initials)}</div>
+    <div class="contributor-info"><div class="contributor-name">${dEsc(c.name)}</div><div class="contributor-role">${dEsc(c.title)}</div></div>
+    <span class="contributor-role-badge ${roleBadge(c.role)}">${dEsc(c.role)}</span></div>`).join('');
   const viewerRow = `<div class="contributor-row">
     <div class="contributor-avatar" style="background:rgba(117,106,97,0.25);color:var(--text);font-size:11px;">★</div>
-    <div class="contributor-info"><div class="contributor-name">All ${dash.name} Staff</div><div class="contributor-role">Read-only access</div></div>
+    <div class="contributor-info"><div class="contributor-name">All ${dEsc(dash.name)} Staff</div><div class="contributor-role">Read-only access</div></div>
     <span class="contributor-role-badge crole-viewer">Viewer</span></div>`;
   document.getElementById('contributors-list').innerHTML = ownerRow + cRows + viewerRow;
 
@@ -1526,6 +1530,7 @@ function addContributor() {
   document.getElementById('contrib-name').style.borderColor='';
   const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().substring(0,2);
   const roleBadgeClass = {Editor:'crole-editor',Viewer:'crole-viewer',Owner:'crole-owner'}[role];
+  if (!roleBadgeClass) return;
   const avColors = ['av-teal','av-blue','av-orange','av-purple'];
   const avClass = avColors[avatarIdx % avColors.length];
   avatarIdx++;
@@ -1535,12 +1540,12 @@ function addContributor() {
   newRow.style.opacity = '0';
   newRow.style.transition = 'opacity 0.3s';
   newRow.innerHTML = `
-    <div class="contributor-avatar ${avClass}">${initials}</div>
+    <div class="contributor-avatar ${avClass}">${dEsc(initials)}</div>
     <div class="contributor-info">
-      <div class="contributor-name">${name}</div>
-      <div class="contributor-role">${title || 'Segment Contributor'}</div>
+      <div class="contributor-name">${dEsc(name)}</div>
+      <div class="contributor-role">${dEsc(title || 'Segment Contributor')}</div>
     </div>
-    <span class="contributor-role-badge ${roleBadgeClass}">${role}</span>`;
+    <span class="contributor-role-badge ${roleBadgeClass}">${dEsc(role)}</span>`;
   list.insertBefore(newRow, list.lastElementChild);
   setTimeout(() => newRow.style.opacity = '1', 30);
   closeAddContributor();
