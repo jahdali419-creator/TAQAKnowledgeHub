@@ -273,7 +273,7 @@ test.describe('PI-09: the register refuses forged lifecycle, identity and author
     ]);
     expect(out).toEqual([null, null, null]);
     await setRole('qms', SEG);
-    expect(await page.evaluate(() => !!TAQA_STORE.add({ title: 'Policy', segment: 'company', docType: 'policy' }))).toBe(true);
+    expect(await page.evaluate(() => !!TAQA_STORE.add({ docNumber: 'TQ-QHSE-P901', title: 'Policy', segment: 'company', docType: 'policy' }))).toBe(true);
   });
 
   test('setStatus() moves only along the allowed transitions', async ({ page, gotoApp, setRole, clearAppState, seedRegister }) => {

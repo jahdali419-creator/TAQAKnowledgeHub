@@ -2421,7 +2421,9 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
       return '<a class="ch-row" href="viewer.html?seg=company&type=' +
                encodeURIComponent(d.docType || 'policy') +
                '&title=' + encodeURIComponent(d.title) +
-               (d.numberStatus === 'provisional' ? '' : '&doc=' + encodeURIComponent(d.docNumber)) + '">' +
+               // Always the number, provisional or not: it is what identifies the
+               // document, and a title-only link could not see a withdrawal (PI-03).
+               (d.docNumber ? '&doc=' + encodeURIComponent(d.docNumber) : '') + '">' +
                '<span class="ch-name">' + esc(d.title) + '</span>' +
              '</a>';
     }).join('') + '</div>' +

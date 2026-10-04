@@ -764,21 +764,36 @@ window.showToast=function(msg,type){
   // compared with the number stripped off the front.
   function bmBare(t){ return String(t||'').replace(/^\S+\s{2,}/,''); }
   function bmNum(t){ var m=String(t||'').match(/^(\S+)\s{2,}/); return m?m[1]:''; }
-  function bmSame(i,title,segId){ return i.segId===segId && bmBare(i.title)===bmBare(title); }
+  /* A bookmark names its document by number, which is what identifies it;
+     the title is only what it was called (PI-03). Bookmarks saved before
+     this carried a title only, and still match by area and title. */
+  function bmResolve(bare,segId){
+    if(typeof TAQA_STORE==='undefined'||!bare) return '';
+    var hits=TAQA_STORE.all().filter(function(d){return d.segment===segId&&d.title===bare&&d.docNumber;});
+    var live=hits.filter(function(d){return d.status==='current'||d.status==='under-review';});
+    var d=live[0]||hits[0]; return d?d.docNumber:'';
+  }
+  function bmNumOf(i){ return (i && (i.num || bmNum(i.title))) || ''; }
+  function bmSame(i,title,segId,num){
+    var a=bmNumOf(i), b=num||bmNum(title);
+    if(a&&b) return a===b;
+    return i.segId===segId && bmBare(i.title)===bmBare(title);
+  }
   window.TAQA_Bookmarks={
     add:function(item){
-      var a=load().filter(function(i){return!bmSame(i,item.title,item.segId);});
+      item.num=item.num||bmNum(item.title)||'';
+      var a=load().filter(function(i){return!bmSame(i,item.title,item.segId,item.num);});
       item.ts=Date.now();a.unshift(item);save(a.slice(0,50));
     },
-    remove:function(title,segId){
-      save(load().filter(function(i){return!bmSame(i,title,segId);}));
+    remove:function(title,segId,num){
+      save(load().filter(function(i){return!bmSame(i,title,segId,num);}));
     },
     toggle:function(item){
-      if(this.has(item.title,item.segId)){this.remove(item.title,item.segId);return false;}
+      if(this.has(item.title,item.segId,item.num)){this.remove(item.title,item.segId,item.num);return false;}
       this.add(item);return true;
     },
-    has:function(title,segId){
-      return load().some(function(i){return bmSame(i,title,segId);});
+    has:function(title,segId,num){
+      return load().some(function(i){return bmSame(i,title,segId,num);});
     },
     getAll:function(){return load();}
   };
@@ -852,12 +867,15 @@ window.showToast=function(msg,type){
       items.map(function(it){
         var own=Object.prototype.hasOwnProperty.call(TC,it.type);
         var bg=own?TC[it.type]:TC.sop,tc=(own&&TT[it.type])||TT.sop,lbl=(own&&TS[it.type])||'DOC';
-        var bare=bmBare(it.title), num=bmNum(it.title);
+        // An old title-only bookmark is matched to its number in the live
+        // register (same area, the revision in force first), so it opens the
+        // document's real status rather than whatever the title finds.
+        var bare=bmBare(it.title), num=bmNumOf(it)||bmResolve(bare,it.segId);
         var esc=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
         return '<a class="bm-item" href="viewer.html?seg='+encodeURIComponent(it.segId)+'&type='+encodeURIComponent(it.type||'')+'&title='+encodeURIComponent(bare)+(num?'&doc='+encodeURIComponent(num):'')+'">'+
           '<div class="bm-ico" style="background:'+bg+';color:'+tc+'">'+taqaEsc(lbl)+'</div>'+
           '<div class="bm-inf"><div class="bm-t">'+esc(bare)+'</div><div class="bm-m">'+esc(it.segName)+' · '+taqaEsc(lbl)+'</div></div>'+
-          '<button class="bm-x" data-t="'+taqaEsc(it.title)+'" data-s="'+taqaEsc(it.segId)+'" title="Remove">×</button>'+
+          '<button class="bm-x" data-t="'+taqaEsc(it.title)+'" data-s="'+taqaEsc(it.segId)+'" data-n="'+taqaEsc(bmNumOf(it))+'" title="Remove">×</button>'+
         '</a>';
       }).join('')+'</div>';
   }
@@ -867,7 +885,7 @@ window.showToast=function(msg,type){
     panel.addEventListener('click',function(e){
       var x=e.target.closest('.bm-x');
       if(x){e.preventDefault();e.stopPropagation();
-        window.TAQA_Bookmarks.remove(x.dataset.t,x.dataset.s);
+        window.TAQA_Bookmarks.remove(x.dataset.t,x.dataset.s,x.dataset.n);
         renderBmPanel();
         document.querySelectorAll('.bm-btn').forEach(function(b){if(bmBare(b.dataset.title)===bmBare(x.dataset.t)){b.textContent='☆';b.classList.remove('bm-on');}});
       }

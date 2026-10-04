@@ -131,35 +131,31 @@ test.describe('approval', () => {
 });
 
 test.describe('software', () => {
-  test('software filed by maintenance is on the Maintenance shelf only; untagged software stays on Operations', async ({ page, gotoApp, setRole, clearAppState }) => {
+  // Software filing is closed (PI-33), so a software record is seeded into
+  // the register as one already held there, not filed through the store.
+  test('software filed by maintenance is on the Maintenance shelf only; untagged software stays on Operations', async ({ page, gotoApp, setRole, clearAppState, seedRegister }) => {
     await start(page, gotoApp, setRole, clearAppState, 'qms');
-    await page.evaluate(() => {
-      TAQA_STORE.add({ docNumber: 'MNT-SW-01', title: 'Injector Diagnostic Tool', segment: 'coiled-tubing', docType: 'software',
-        classification: 'internal', revision: '1.0', department: 'maintenance', status: 'asset' });
-    });
+    await seedRegister([{ docNumber: 'MNT-SW-01', title: 'Injector Diagnostic Tool', segment: 'coiled-tubing', docType: 'software',
+      classification: 'internal', revision: '1.0', department: 'maintenance', status: 'asset' }]);
     await gotoApp('/segment.html?id=coiled-tubing&dept=maintenance&tab=software');
     await expect(page.locator('#panel-software')).toContainText('Injector Diagnostic Tool');
     await gotoApp('/segment.html?id=coiled-tubing&dept=operations');
     await expect(page.locator('#panel-software')).not.toContainText('Injector Diagnostic Tool');
   });
 
-  test('an empty maintenance Software shelf says so and uploads as maintenance software', async ({ page, gotoApp, setRole, clearAppState }) => {
+  test('an empty maintenance Software shelf says so, and offers no upload while software filing is closed', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, setRole, clearAppState, 'qms');
     await gotoApp('/segment.html?id=drilling&dept=maintenance&tab=software');
     await expect(page.locator('#panel-software .empty-state h3')).toHaveText('No maintenance software for Drilling Services yet');
-    await expect(page.locator('#panel-software a.empty-state-upload')).toHaveAttribute('href', 'upload.html?type=software&seg=drilling&dept=maintenance');
+    await expect(page.locator('#panel-software .empty-state')).toContainText('Software filing is not open yet');
+    await expect(page.locator('#panel-software a.empty-state-upload')).toHaveCount(0);
   });
 
-  test('the maintenance box is offered for software', async ({ page, gotoApp, setRole, clearAppState }) => {
+  test('Software / Tool is not offered on Upload, even from an old software link (PI-33)', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, setRole, clearAppState, 'qms');
-    await gotoApp('/upload.html?seg=coiled-tubing&dept=maintenance');
-    await page.setInputFiles('#file-input', { name: 'tool.zip', mimeType: 'application/zip', buffer: Buffer.from('PK') });
-    await page.click('#go-2');
-    await page.selectOption('#doc-type-select', 'software');
-    await page.selectOption('#seg-select', 'coiled-tubing');
-    await expect(page.locator('#dept-row')).toBeVisible();
-    await expect(page.locator('#dept-maint')).toBeChecked();
-    expect(await page.evaluate(() => buildRecord().department)).toBe('maintenance');
+    await gotoApp('/upload.html?type=software&seg=coiled-tubing&dept=maintenance');
+    expect(await page.locator('#doc-type-select option[value="software"]').count()).toBe(0);
+    expect(await page.locator('#doc-type-select').inputValue()).toBe('');
   });
 });
 

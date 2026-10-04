@@ -1089,6 +1089,30 @@ function submitUpload(e) {
     showUploadToast('No document number', 'Go back and choose an area and a type so a number can be assigned.', ICON_WARN);
     return;
   }
+  // The number is checked again at the moment of filing, against the
+  // register as it is now: another tab, or a draft restored from yesterday,
+  // may have been given the same number since it was shown (PI-01). An
+  // assigned number is re-assigned and shown before anything is filed; a
+  // number the filer typed is never changed behind their back.
+  const refField = document.getElementById('doc-ref-id');
+  if (numberTaken(rec.docNumber)) {
+    if (refField && refField.dataset.autofilled !== 'user') {
+      const was = rec.docNumber;
+      refField.dataset.autofilled = '';
+      autoFillRefId();
+      if (typeof paintRecord === 'function') paintRecord();
+      showUploadToast('Number updated', was + ' has just been used by another filing. This document will be ' +
+        (refField.value || 'given a new number') + '. Check it and submit again.', ICON_WARN);
+    } else {
+      showUploadToast('Number already used', rec.docNumber + ' is already in the register. Go back and use another number.', ICON_WARN);
+    }
+    return;
+  }
+  const problem = (typeof TAQA_STORE !== 'undefined' && TAQA_STORE.checkFiling) ? TAQA_STORE.checkFiling(rec) : null;
+  if (problem) {
+    showUploadToast('Not filed', problem, ICON_WARN);
+    return;
+  }
   console.info('[upload] record to POST', rec);
   window.TAQA_LAST_UPLOAD = rec;
 
@@ -1307,7 +1331,10 @@ let isAutoFilling = false;
 
   var typeSel = document.getElementById('doc-type-select');
   if (typeSel) {
-    var order = ['policy','standard','sop','manual','form','bulletin','alert','lesson','software'];
+    // Software / Tool is not offered: it has no numbering, owner or approver
+    // defined yet, so a filing could never be completed (PI-33). The register
+    // refuses it too, until the business defines how software is controlled.
+    var order = ['policy','standard','sop','manual','form','bulletin','alert','lesson'];
     typeSel.innerHTML = '<option value="" disabled selected>Select type</option>' +
       order.filter(function(t){
         if (!L.types[t]) return false;
@@ -1439,6 +1466,15 @@ function registerDocs() {
   if (typeof TAQA_STORE !== 'undefined') return TAQA_STORE.all();
   return (typeof TAQA_MASTER_DOCS !== 'undefined') ? TAQA_MASTER_DOCS : [];
 }
+/* The record already carrying this number, anywhere in the register and in
+   any status, or null. The register's own check, so Upload and the store
+   can never disagree about what is free. */
+function numberTaken(n) {
+  if (!n || !String(n).trim()) return null;
+  if (typeof TAQA_STORE !== 'undefined' && TAQA_STORE.numberInUse) return TAQA_STORE.numberInUse(n);
+  var k = String(n).trim().toUpperCase();
+  return registerDocs().find(function(d){ return String(d.docNumber || '').toUpperCase() === k; }) || null;
+}
 function areaDocs(segId) {
   if (!segId) return [];
   return registerDocs().filter(function(d){
@@ -1507,13 +1543,19 @@ function checkDocId() {
     refField.dataset.autofilled = refId ? 'user' : ''; // empty = allow auto-fill again
   }
   if (!refId) { statusEl.innerHTML=''; return; }
+  // A number is checked against the whole register, every area and every
+  // status: a withdrawn or superseded number is retired, not free (PI-01).
+  // This used to look at the current area's live documents only, and only
+  // warned: the filing still went through.
+  const used = numberTaken(refId);
+  if (used) {
+    statusEl.innerHTML = `<span class="id-err">✕ <strong>${esc(refId)}</strong> is already the number of “${esc(used.title)}”. A number names one document and is never reused.</span>`;
+    return;
+  }
   if (!currentSegId) { statusEl.innerHTML='<span class="id-warn">⚠ Select a segment to validate the ID</span>'; return; }
   const existingIds = segmentIds(currentSegId);
-  const duplicate = existingIds.find(id => id === refId);
   const similar = existingIds.filter(id => id !== refId && (id.startsWith(refId.split('-').slice(0,-1).join('-')) || refId.startsWith(id.split('-').slice(0,-1).join('-'))));
-  if (duplicate) {
-    statusEl.innerHTML = `<span class="id-err">✕ <strong>${esc(refId)}</strong> already exists in this segment. If this is a revision, select "Revision / Update" below.</span>`;
-  } else if (similar.length) {
+  if (similar.length) {
     statusEl.innerHTML = `<span class="id-warn">~ Related IDs found: ${similar.slice(0,3).map(esc).join(', ')}</span>`;
   } else {
     statusEl.innerHTML = `<span class="id-ok">✓ ID available in this segment</span>`;
@@ -1669,6 +1711,20 @@ function stepReady(n){
     }
     if (docStatus === 'revision' && !document.getElementById('supersedes-select').value) {
       say('hint-2', 'Choose the document this revision replaces.'); return false;
+    }
+    var numField = document.getElementById('doc-ref-id') || {};
+    var used = numberTaken(numField.value);
+    // An assigned number that has since been used (a draft restored from an
+    // earlier visit, another tab) is simply assigned again; a number the
+    // filer typed is theirs to change.
+    if (used && numField.dataset && numField.dataset.autofilled !== 'user') {
+      numField.dataset.autofilled = '';
+      autoFillRefId();
+      used = numberTaken(numField.value);
+    }
+    var num = numField.value || '';
+    if (used) {
+      say('hint-2', num.trim() + ' is already the number of “' + used.title + '”. Use the number assigned, or another that is not in the register.'); return false;
     }
     say('hint-2', ''); return true;
   }
