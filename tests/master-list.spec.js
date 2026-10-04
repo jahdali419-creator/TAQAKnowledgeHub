@@ -78,13 +78,18 @@ test.describe('master-list.html, bulk actions', () => {
     await expect(page.locator('#bulk-count')).toHaveText(rowCount + ' documents selected');
     await expect(page.locator('#bulk-approve')).toHaveText('Confirm selected (QMS check)');
 
-    let dialogText = '';
-    page.once('dialog', (d) => { dialogText = d.message(); d.accept(); });
+    // A preview lists what will be confirmed before anything happens
+    // (qms-queue.spec.js covers the preview and per-document results in full).
     await page.locator('#bulk-approve').click();
+    await expect(page.locator('#bulk-dlg')).toBeVisible();
+    await expect(page.locator('#bulk-dlg-lead')).toContainText('None of them is in force until that approver approves');
+    await expect(page.locator('#bq-in .bq-i')).toHaveCount(waitingOnQms.length);
+    await page.locator('#bulk-dlg-go').click();
 
+    await expect(page.locator('#bulk-dlg-h')).toHaveText('Confirmed ' + waitingOnQms.length + ' documents');
+    await expect(page.locator('#bq-results .bq-res[data-ok="true"]')).toHaveCount(waitingOnQms.length);
     await expect(page.locator('#toast')).toContainText('Confirmed ' + waitingOnQms.length + ' document');
-    await expect(page.locator('#toast')).toContainText('on the Director');
-    expect(dialogText).toContain('not in force until the Director approves');
+    await page.locator('#bulk-dlg-cancel').click();
     await expect(page.locator('#bulk-bar')).toBeHidden();
 
     const after = await page.evaluate(

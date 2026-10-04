@@ -1523,7 +1523,9 @@ document.addEventListener('keydown',function(e){
     '.bell-i .bd{display:block;font-size:11px;color:var(--text-muted,#524D48);line-height:1.35;margin-top:1px;}' +
     '.bell-i.mine-rejected .bt{color:var(--stop-ink,#C8102E);}' +
     '.bell-i.mine-approved .bt{color:var(--ok-ink,#0B7A3B);}' +
-    '.bell-more{padding:6px 10px 2px;font-size:11px;color:var(--text-light,#756A61);}' +
+    '.bell-i .bs{display:block;font-size:10.5px;color:var(--text-light,#756A61);line-height:1.35;margin-top:2px;}' +
+    '.bell-more{display:block;width:100%;text-align:start;padding:6px 10px 2px;border:none;background:transparent;' +
+      'font-family:inherit;font-size:11px;font-weight:600;color:var(--primary,#005D63);cursor:pointer;text-decoration:underline;}' +
     '.bell-foot{display:block;width:100%;text-align:center;margin-top:3px;padding:8px 10px;' +
       'border:none;border-top:1px solid var(--border,#C7DBDD);background:transparent;' +
       'font-family:inherit;font-size:12px;font-weight:700;color:var(--primary,#005D63);cursor:pointer;' +
@@ -1538,9 +1540,21 @@ document.addEventListener('keydown',function(e){
     'html[data-taqa-theme="dark"] .bell-i:hover,html[data-taqa-theme="dark"] .bell-foot:hover{background:rgba(0,187,182,.08);}';
   document.head.appendChild(css);
 
+  // QMS checks every area's documents, so its queue is the company-wide
+  // "Waiting on QMS" view of the Master List. The desk below is one area's
+  // desk by design (right for a Director or a Maintenance Manager), and
+  // sending QMS there showed one segment's two documents under a bell that
+  // counted sixteen, with no single place that held the rest.
+  var QMS_QUEUE = 'master-list.html?view=qms';
+  function qmsQueue(){
+    var R = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE : null;
+    var cap = (R && R.effective) ? R.effective() : null;
+    return !!(cap && cap.countersign && R.canRegister && R.canRegister());
+  }
   // The desk (dashboard.html) already shows the queue on the page; jumping
   // there from anywhere else is what "Open your queue" falls back to.
   function openQueue(){
+    if (qmsQueue()) { location.href = QMS_QUEUE; return; }
     var q = document.getElementById('pending-list');
     if (q && /dashboard\.html/.test(location.pathname)) {
       var nav = document.getElementById('navbar');
@@ -1584,7 +1598,7 @@ document.addEventListener('keydown',function(e){
       if (menu.classList.contains('open') && e.relatedTarget && !wrap.contains(e.relatedTarget)) closeMenu();
     });
     menu.addEventListener('click', function(e){
-      if (e.target.closest('.bell-foot')) { e.preventDefault(); closeMenu(); openQueue(); return; }
+      if (e.target.closest('.bell-foot, .bell-more')) { e.preventDefault(); closeMenu(); openQueue(); return; }
       var ackBtn = e.target.closest('[data-ack]');
       if (ackBtn) { ack(ackBtn.dataset.ack); sync(); }
     });
@@ -1605,6 +1619,23 @@ document.addEventListener('keydown',function(e){
       var have = acked();
       if (have.indexOf(key) === -1) { have.push(key); localStorage.setItem(ACK_KEY, JSON.stringify(have)); }
     } catch(e){}
+  }
+
+  // "Coiled Tubing, Maintenance": the area, and for an operational segment
+  // which of its two departments the document belongs to.
+  function where(d){
+    var R = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE : null;
+    var name = (R && R.areaName) ? R.areaName(d.segment) : (d.segment || 'Area not recorded');
+    var seg = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments[d.segment]) || {};
+    if ((seg.group || 'segment') !== 'segment') return name;
+    var maint = (typeof TAQA_APPROVAL !== 'undefined') && TAQA_APPROVAL.isMaintenance(d);
+    return name + ', ' + (maint ? 'Maintenance' : 'Operations');
+  }
+  function when(iso){
+    var t = iso ? new Date(iso) : null;
+    if (!t || isNaN(t)) return 'submitted date not recorded';
+    return 'submitted ' + t.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'}) +
+      ', ' + t.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
   }
 
   function sync(){
@@ -1665,12 +1696,16 @@ document.addEventListener('keydown',function(e){
               // signer's page unescaped, so a title carrying markup ran as
               // script in the Director's browser the moment the bell was built.
               // It opens the desk the signature is given from, not the viewer.
+              // Where it is from and when, because QMS's bell spans every area
+              // and a bare title does not say whose document it is.
               return '<a class="bell-i" href="dashboard.html?id=' + encodeURIComponent(d.segment || '') + '">' +
                 '<span class="bt">' + esc(d.title) + '</span>' +
-                '<span class="bd">' + esc(d.docNumber) + ' &middot; waiting for your ' + verb + '</span></a>';
+                '<span class="bd">' + esc(d.docNumber) + ' &middot; ' + esc(where(d)) + '</span>' +
+                '<span class="bs">Waiting for your ' + verb + ' &middot; ' + esc(when(d.submittedAt)) + '</span></a>';
             }).join('')
           : '<div class="bell-i" style="cursor:default;"><span class="bd">Nothing waiting right now.</span></div>') +
-        (pending.length > SHOWN ? '<div class="bell-more">+ ' + (pending.length - SHOWN) + ' more in your queue</div>' : '')
+        (pending.length > SHOWN ? '<button type="button" class="bell-more">+ ' + (pending.length - SHOWN) + ' more, see ' +
+          (qmsQueue() ? 'everything waiting on QMS' : 'your queue') + '</button>' : '')
       : '';
     var mineHtml = mine.length
       ? '<div class="bell-hd">Your submissions</div>' +
