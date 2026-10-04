@@ -11,6 +11,7 @@
 try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>/* Installed app on an iPhone: the status bar is drawn over the page, and iOS keeps taps in that strip for itself, so the bell and the other controls under it could not be tapped. Drawing edge to edge (viewport-fit=cover) turns on the bar's safe-area padding in topbar.css, which drops them below the status bar. A browser tab is left exactly as it was. */(function(){try{if(navigator.standalone||matchMedia('(display-mode: standalone)').matches){var m=document.querySelector('meta[name="viewport"]');if(m&&!/viewport-fit/.test(m.content))m.content+=', viewport-fit=cover';}}catch(e){}})();</script>
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-title" content="RISE">
 <meta name="application-name" content="RISE">
@@ -77,7 +78,7 @@ html #navbar{position:sticky;top:0;}
   display:grid;grid-template-columns:200px minmax(0,1fr);column-gap:56px;}
 .rail{grid-column:1;grid-row:1 / span 2;}
 .intro,.body{grid-column:2;min-width:0;max-width:780px;}
-.rail nav{position:sticky;top:96px;}
+.rail nav{position:sticky;top:calc(var(--nav-h,64px) + 32px);}
 .rail-t{font:600 11px/1 var(--read);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
   margin:6px 0 12px;}
 .rail ol{list-style:none;}
@@ -104,7 +105,7 @@ h1{font-family:var(--head);font-size:34px;font-weight:700;color:var(--ink);lette
 /* ── Sheets ── */
 .body{margin-top:40px;display:flex;flex-direction:column;gap:28px;}
 .sheet{background:var(--paper);border:1px solid var(--bedding);border-radius:20px;
-  box-shadow:var(--sheet-shadow);overflow:clip;scroll-margin-top:84px;}
+  box-shadow:var(--sheet-shadow);overflow:clip;scroll-margin-top:calc(var(--nav-h,64px) + 20px);}
 .sh-head{display:grid;grid-template-columns:30px minmax(0,1fr);column-gap:14px;align-items:start;
   padding:22px var(--gap) 18px;}
 .sh-no{width:30px;height:30px;border-radius:50%;background:var(--disc);color:var(--primary-ink);

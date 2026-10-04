@@ -11,6 +11,7 @@
 try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>/* Installed app on an iPhone: the status bar is drawn over the page, and iOS keeps taps in that strip for itself, so the bell and the other controls under it could not be tapped. Drawing edge to edge (viewport-fit=cover) turns on the bar's safe-area padding in topbar.css, which drops them below the status bar. A browser tab is left exactly as it was. */(function(){try{if(navigator.standalone||matchMedia('(display-mode: standalone)').matches){var m=document.querySelector('meta[name="viewport"]');if(m&&!/viewport-fit/.test(m.content))m.content+=', viewport-fit=cover';}}catch(e){}})();</script>
 <title>AI Search, RISE</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#005D63">
@@ -349,7 +350,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 .hw-8{animation-delay:1.38s;}
 
 @media(max-width:640px){
-  .search-hub{padding-top:90px;}
+  .search-hub{padding-top:calc(var(--nav-h,64px) + 26px);}
   .search-hub,.prompts-section,.results-section{padding-left:16px;padding-right:16px;}
   .hub-title{letter-spacing:-1px;font-size:clamp(26px,8vw,40px);}
   .hub-sub{font-size:13.5px;}
@@ -493,7 +494,7 @@ button.filter-chip{font-family:inherit;display:inline-flex;align-items:center;ga
 .filters-clear-btn:hover{border-color:rgba(0,187,182,0.35);color:var(--primary-ink);background:rgba(0,187,182,0.05);}
 @media(min-width:1300px){
   .filters-drawer{
-    top:110px;left:24px;height:auto;max-height:calc(100vh - 140px);
+    top:calc(var(--nav-h,64px) + 46px);left:24px;height:auto;max-height:calc(100vh - 140px - var(--nav-safe,0px));
     border-radius:18px;border:1px solid var(--glass-border);border-inline-end:1px solid var(--glass-border);
     transform:translateX(0);box-shadow:0 4px 28px rgba(0,0,0,0.08);
   }
