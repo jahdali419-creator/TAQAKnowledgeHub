@@ -107,7 +107,9 @@ Delegation must reference real users: the delegate signs in as themselves and th
 | Maintenance Manager holds operational segments only | `TAQA_ROLE.holds` | **B** (identity mapping) |
 | Delegation: expiry ≤ 90 days, no escalation, no re-delegation, department, scope | `TAQA_DELEGATION`, `TAQA_ROLE.effective` | **B + D** |
 | Signer names and timestamps | `store.actingName`, `new Date()` in the browser | **D** (from token and server clock) |
-| Document numbers | `upload.html` `taqaRefId` (next number in this browser) | **B + C** (server allocates, unique) |
+| Document numbers | `upload.html` `taqaRefId` (next number in this browser); `store.add` refuses a number already in the register in any status (PI-01) | **B + C + D** (server allocates; unique `DocNumber` column; duplicate refused by the API) |
+| Document identity in links, bookmarks, QR codes and pins | every link carries `doc=<number>`; viewer resolves title-only links against the live register, same area only (PI-03) | **B + D** (links and QR codes target the immutable item ID; the server returns the real status) |
+| Software / Tool filing | closed: Upload omits it, `store.add` refuses it (PI-33) | **B** (open only once numbering, owner and approver are defined) |
 | Document register, drafts, overlays | `documents-master.js`, `localStorage` | **C** |
 | Approval steps / audit trail | reconstructed from record fields in `viewer.html`, `analytics.html` | **C** (append-only) |
 | Delegations | `localStorage` | **C** |

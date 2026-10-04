@@ -1978,10 +1978,13 @@ function renderSoftware(items){
     if(!items||items.length===0){
       // On a maintenance side the shelf is the department's own, and the
       // upload arrives with the segment, the type and Maintenance chosen.
-      const mntSw=DEPT==='maintenance', sq=encodeURIComponent(segId);
+      const mntSw=DEPT==='maintenance';
       if(el)el.innerHTML=`<div class="empty-state"><div class="empty-icon" style="font-size:32px;font-weight:700;color:rgba(0,187,182,0.2);font-family:'BwGradual','Urbanist',sans-serif;">ZIP</div>`+
-        (mntSw?`<h3>No maintenance software for ${escHtml(seg.name)} yet</h3><p>Tools and programs the ${escHtml(seg.name)} maintenance department uses appear here once they are uploaded.</p><a href="upload.html?type=software&seg=${sq}&dept=maintenance" class="empty-state-upload">+ Upload maintenance software</a>`
-              :`<h3>No software uploaded yet</h3><p>Upload installer packages or tools relevant to this segment.</p><a href="upload.html?type=software&seg=${sq}" class="empty-state-upload">+ Upload Software</a>`)+`</div>`;
+        // Software filing is closed until its numbering, owner and approver
+        // are defined (PI-33), so the shelf says so instead of offering an
+        // upload that can never be completed.
+        (mntSw?`<h3>No maintenance software for ${escHtml(seg.name)} yet</h3><p>Tools and programs the ${escHtml(seg.name)} maintenance department uses will appear here. Software filing is not open yet: its numbering, owner and approver are still being defined.</p>`
+              :`<h3>No software listed yet</h3><p>Installer packages and tools relevant to this segment will appear here. Software filing is not open yet: its numbering, owner and approver are still being defined.</p>`)+`</div>`;
       if(vis)vis.textContent='0';return;
     }
     _renderPage('software');

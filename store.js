@@ -200,31 +200,74 @@
       .map(area);
   }
 
+  /* ── One number, one document ──────────────────────────────────────
+     A document number names one document family, once and for good
+     (PI-01). Upload only warned about a number in use, add() checked
+     nothing, and findDoc() returned whichever match came last, so a second
+     record could take a live procedure's number and from then on links, QR
+     codes, withdrawals and confirmations by that number landed on the wrong
+     record. A number is now in use if any record in the register carries it
+     as its number or legacy ID, whatever its area or status: a withdrawn or
+     superseded number is retired, never handed out again. A new revision of
+     the same document is the only thing that will ever share it (PR 2A-2). */
+  function normNum(n) { return String(n == null ? '' : n).trim().toUpperCase(); }
+  function numberInUse(n) {
+    var k = normNum(n), hit = null;
+    if (!k) return null;
+    fresh();                       // what storage holds now, not this tab's copy
+    all().forEach(function (d) {
+      if (!hit && (normNum(d.docNumber) === k || (d.legacyId && normNum(d.legacyId) === k))) hit = d;
+    });
+    return hit;
+  }
+  var STATUS_WORD = { current: 'in force', 'under-review': 'in force, under review', draft: 'a draft',
+                      superseded: 'superseded', obsolete: 'withdrawn', asset: 'a software record' };
+
+  /* Why a filing would be refused, in words a filer can act on, or null.
+     add() refuses exactly these; Upload asks first so it can say why. */
+  function filingProblem(rec) {
+    if (!rec || !rec.title) return 'A title is needed.';
+    // The same rule upload.html refuses at the door, checked again where the
+    // record is written, so no page can file on a role's behalf that it lacks.
+    if (typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.effective && !TAQA_ROLE.effective().submit)
+      return 'Your role cannot file documents.';
+    // Software and tools have no numbering, owner or approver defined yet,
+    // so they are not filed at all until the business defines them (PI-33).
+    if (rec.docType === 'software' || (types()[rec.docType] || {}).controlled === false)
+      return 'Software and tools cannot be filed yet: their numbering, owner and approver are still to be defined.';
+    // A Maintenance Bulletin belongs to an operational segment's maintenance
+    // team. Anywhere else nobody may approve it, so it is not filed at all.
+    if (rec.docType === 'bulletin' && (segs()[rec.segment] || {}).group !== 'segment')
+      return 'A Maintenance Bulletin is filed only for an operational segment.';
+    // The same for a maintenance department document: only an operational
+    // segment has a maintenance department, so anywhere else it has no
+    // approver either (BUSINESS-RULES §1, §3).
+    if (rec.department === 'maintenance' && (segs()[rec.segment] || {}).group !== 'segment')
+      return 'Only an operational segment has a maintenance department.';
+    // A policy is company policy, signed by the CEO, and only QMS files one.
+    // Upload offers the type to nobody else; the register now says the same.
+    if (rec.docType === 'policy' && (typeof TAQA_ROLE === 'undefined' || TAQA_ROLE.current() !== 'qms'))
+      return 'Only QMS files a policy.';
+    // One file is one document (BUSINESS-RULES §7).
+    if (Array.isArray(rec.files) && rec.files.length > 1) return 'File one controlled document at a time.';
+    if (!normNum(rec.docNumber)) return 'A document number is needed.';
+    var used = numberInUse(rec.docNumber);
+    if (used) return String(rec.docNumber).trim() + ' is already the number of "' + used.title + '" (' +
+      (STATUS_WORD[used.status] || used.status) + '). A number names one document and is never reused.';
+    return null;
+  }
+
   /* ── Writing ─────────────────────────────────────────────────────────
      add() is what an upload calls. The record is stored exactly in register
      shape, so nothing downstream can tell a submitted document from one that
      shipped with the file.                                                */
   function add(rec) {
-    if (!rec || !rec.title) return null;
-    // The same rule upload.html refuses at the door, checked again where the
-    // record is written, so no page can file on a role's behalf that it lacks.
-    if (typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.effective && !TAQA_ROLE.effective().submit) return null;
-    // A Maintenance Bulletin belongs to an operational segment's maintenance
-    // team. Anywhere else nobody may approve it, so it is not filed at all.
-    if (rec.docType === 'bulletin' && (segs()[rec.segment] || {}).group !== 'segment') return null;
-    // The same for a maintenance department document: only an operational
-    // segment has a maintenance department, so anywhere else it has no
-    // approver either (BUSINESS-RULES §1, §3).
-    if (rec.department === 'maintenance' && (segs()[rec.segment] || {}).group !== 'segment') return null;
-    // A policy is company policy, signed by the CEO, and only QMS files one.
-    // Upload offers the type to nobody else; the register now says the same.
-    if (rec.docType === 'policy' && (typeof TAQA_ROLE === 'undefined' || TAQA_ROLE.current() !== 'qms')) return null;
-    // One file is one document (BUSINESS-RULES §7).
-    if (Array.isArray(rec.files) && rec.files.length > 1) return null;
+    if (filingProblem(rec)) return null;
     fresh();
     var row = {};
     for (var k in rec) if (Object.prototype.hasOwnProperty.call(rec, k) &&
                            FILED_BY_STORE.indexOf(k) === -1) row[k] = rec[k];
+    row.docNumber = String(rec.docNumber).trim();
     // A filing is a draft at the QMS check, whatever the caller sent. add()
     // used to keep the caller's status, signatures and filer, so a record
     // could be filed straight into force, "approved" by a name of the
@@ -270,8 +313,7 @@
     var cur = findDoc(docNumber);
     if (!cur || !mayManage(cur)) return null;
     if (!Object.prototype.hasOwnProperty.call(MOVES, status) || MOVES[status].indexOf(cur.status) === -1) return null;
-    var hit = null;
-    load().forEach(function (d) { if (d.docNumber === docNumber) hit = d; });
+    var hit = localTarget(docNumber);
     if (hit) {
       hit.status = status;
       // A withdrawn draft leaves both queues.
@@ -296,10 +338,30 @@
      Kept here rather than in a page, so the dashboard cannot release a
      document by a route the rules never saw. Each refuses unless the caller's
      effective role may take that step on that document right now.          */
+  /* The record a number refers to, chosen by rule rather than by whichever
+     match came last (PI-01): the revision in force first, then an open
+     draft, then a returned draft, then a superseded one, then a withdrawn
+     one. Every read and every write by number goes through here, so what a
+     page shows and what an action changes are always the same record. */
+  var RANK = { current: 0, 'under-review': 0, draft: 1, superseded: 3, obsolete: 4 };
+  function rankOf(d) {
+    if (d.status === 'draft' && d.rejected) return 2;
+    return Object.prototype.hasOwnProperty.call(RANK, d.status) ? RANK[d.status] : 5;
+  }
   function findDoc(docNumber) {
-    var hit = null;
-    all().forEach(function (d) { if (d.docNumber === docNumber) hit = d; });
-    return hit;
+    var best = null, bestRank = 99;
+    all().forEach(function (d) {
+      if (d.docNumber !== docNumber) return;
+      var r = rankOf(d);
+      if (r < bestRank) { best = d; bestRank = r; }
+    });
+    return best;
+  }
+  /* Writes go to that same record: the locally filed row itself, or an
+     overlay on the shipped one. */
+  function localTarget(docNumber) {
+    var d = findDoc(docNumber);
+    return (d && load().indexOf(d) !== -1) ? d : null;
   }
 
   /* Neither step takes a signer: the name on a signature is always the
@@ -436,8 +498,7 @@
      every caller outside this file goes through a step that checks the role. */
   function patch(docNumber, fields) {
     fresh();
-    var local = null;
-    load().forEach(function (d) { if (d.docNumber === docNumber) local = d; });
+    var local = localTarget(docNumber);
     if (local) {
       for (var k in fields) if (Object.prototype.hasOwnProperty.call(fields, k)) local[k] = fields[k];
       save();
@@ -454,7 +515,9 @@
     fresh();
     var d = findDoc(docNumber);
     if (!d || !mayManage(d)) return false;
-    _added = load().filter(function (d) { return d.docNumber !== docNumber; });
+    // Only the record the number resolves to, and only one filed here.
+    if (load().indexOf(d) === -1) return false;
+    _added = load().filter(function (x) { return x !== d; });
     save();
     announce({ action: 'remove', docNumber: docNumber });
     return true;
@@ -481,7 +544,8 @@
 
   root.TAQA_STORE = {
     all: all, rows: rows, count: count, area: area, areasIn: areasIn,
-    add: add, setStatus: setStatus, remove: remove,
+    add: add, checkFiling: filingProblem, numberInUse: numberInUse,
+    setStatus: setStatus, remove: remove,
     approve: approve, countersign: countersign, reject: reject, patch: editFields,
     stageOf: stageOf, findDoc: findDoc, actingName: actingName,
     onChange: onChange, added: load,

@@ -890,7 +890,9 @@ function setMenuNote(text){
 const params = new URLSearchParams(location.search);
 const segId = (params.get('seg') || 'drilling').replace(/[^a-z0-9-]/g,'').slice(0,60) || 'drilling';
 let docTitle = decodeURIComponent(params.get('title') || 'Document').replace(/<[^>]*>/g,'').trim().slice(0,300) || 'Document';
-const docId = decodeURIComponent(params.get('doc') || '').replace(/[^A-Za-z0-9-_&.]/g,'').slice(0,120);
+// '#' is allowed: a placeholder number such as TQ-QHSE-P### is still the
+// number on the record, and stripping it made the record unfindable (PI-03).
+const docId = decodeURIComponent(params.get('doc') || '').replace(/[^A-Za-z0-9-_&.#]/g,'').slice(0,120);
 // The register says what a document is; the link only says what the page that
 // linked here thought it was. A CEO Policy reached through a link that said
 // type=standard used to be drawn as a Standard in the square, the print view
@@ -971,10 +973,20 @@ document.getElementById('doc-badges').innerHTML =
 const MD = (typeof TAQA_MASTER_DOCS !== 'undefined') ? TAQA_MASTER_DOCS : [];
 const MA = (typeof TAQA_DOC !== 'undefined') ? TAQA_DOC : null;
 const _bare = docTitle.replace(/^((?:TQ|TAQA)-[^\s]+|[A-Z][A-Z0-9]*-\d+)\s+/, '').trim();
-const _rec = MA ? (_liveRec(docId) ||
-              MD.find(d => d.title === docTitle && d.segment === segId) ||
-              MD.find(d => d.title === _bare && d.segment === segId) ||
-              MD.find(d => d.title === _bare) || null) : null;
+/* A link with a number is resolved by that number and nothing else. A link
+   with only a title is resolved against the live register (withdrawals and
+   approvals applied), in this area only, preferring the revision in force.
+   It used to fall back to the shipped file, which knows nothing of a
+   withdrawal, and then to the same title in any area, so a withdrawn policy
+   opened from Home, a bookmark or a QR code showed "Current, OK to use"
+   (PI-03). Nothing found means "not in the register", never a guess. */
+function _byTitle(){
+  var all = (typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.all() : MD;
+  var live = function(d){ return d.status === 'current' || d.status === 'under-review'; };
+  var hits = all.filter(function(d){ return d.segment === segId && (d.title === docTitle || d.title === _bare); });
+  return hits.filter(live)[0] || hits[0] || null;
+}
+const _rec = MA ? (docId ? _liveRec(docId) : _byTitle()) : null;
 _maintBack();
 
 const _narrow = window.matchMedia('(max-width:768px)');
@@ -1434,7 +1446,11 @@ document.getElementById('pdf-toolbar-label').textContent = docTitle + '.pdf';
 
 // Share: the link and its QR code live in the Share popover.
 let docUrl = location.origin + location.pathname.replace(/viewer\.html.*/,'') + 'viewer.html?seg=' + encodeURIComponent(segId) + '&type=' + encodeURIComponent(docType) + '&title=' + encodeURIComponent(docTitle);
-if (docId) docUrl += '&doc=' + encodeURIComponent(docId);
+// The share link, its QR code and an offline pin name the document by its
+// number, the one thing that identifies it, even when this page was reached
+// by title alone (PI-03).
+const _docNum = (_rec && _rec.docNumber) || docId;
+if (_docNum) docUrl += '&doc=' + encodeURIComponent(_docNum);
 document.getElementById('qr-img').src = window.TAQA_QR ? window.TAQA_QR(docUrl, 4) : '';
 document.getElementById('share-url').textContent = docUrl;
 document.getElementById('share-url').title = docUrl;
@@ -1442,7 +1458,7 @@ document.getElementById('share-url').title = docUrl;
 // Bookmark state
 function updateBmBtn() {
   const btn = document.getElementById('bm-doc-btn');
-  const isBm = !!(window.TAQA_Bookmarks && window.TAQA_Bookmarks.has(docTitle, segId));
+  const isBm = !!(window.TAQA_Bookmarks && window.TAQA_Bookmarks.has(docTitle, segId, _docNum));
   btn.setAttribute('aria-pressed', String(isBm));
   btn.querySelector('svg').setAttribute('fill', isBm ? 'currentColor' : 'none');
   btn.querySelector('.act-l').textContent = isBm ? 'Bookmarked' : 'Bookmark';
@@ -1450,7 +1466,7 @@ function updateBmBtn() {
 }
 function toggleViewerBm() {
   if (!window.TAQA_Bookmarks) return;
-  const added = window.TAQA_Bookmarks.toggle({title:docTitle, type:docType, segId, segName:segInfo.name});
+  const added = window.TAQA_Bookmarks.toggle({title:docTitle, num:_docNum || '', type:docType, segId, segName:segInfo.name});
   updateBmBtn();
   if (window.updateBmBadge) window.updateBmBadge();
   if (window.showToast) window.showToast(added ? 'Bookmarked!' : 'Bookmark removed', added ? 'success' : 'info');
