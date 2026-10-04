@@ -506,6 +506,31 @@ html[dir="rtl"] .dw{transform:translateX(-102%);}
 .dw-note b{color:var(--ink);font-weight:600;}
 .dw-f{padding:13px 18px;border-top:1px solid var(--rule-firm);display:flex;gap:7px;}
 .dw-f .btn{flex:1;}
+/* QMS Workbench check panel */
+.dw-f.wb{flex-direction:column;gap:9px;}
+.wb-acts{display:flex;gap:7px;width:100%;}
+.wb-acts[hidden],.wb-rej[hidden]{display:none;}
+.wb-acts .btn{flex:1;min-height:38px;}
+.wb-go{background:var(--primary);border-color:var(--primary);color:#fff;}
+.wb-reject{color:var(--due);}
+.wb-stop{background:var(--due);border-color:var(--due);color:#fff;}
+.wb-stop:disabled,.wb-go:disabled{opacity:.45;cursor:default;}
+.wb-rej{display:flex;flex-direction:column;gap:6px;width:100%;}
+.wb-rej label{font:700 11.5px/1.3 'BwGradual',sans-serif;color:var(--ink);}
+.wb-rej textarea{width:100%;min-height:84px;resize:vertical;padding:9px 11px;border:1px solid var(--rule-firm);
+  border-radius:var(--r2);background:var(--paper);color:var(--ink);font:400 13px/1.5 var(--read);}
+.wb-rej textarea:focus{outline:none;border-color:var(--due);box-shadow:0 0 0 3px rgba(200,16,46,.12);}
+.wb-hint{font:500 10.5px/1.3 var(--mono);color:var(--ink-3);}
+.wb-open{align-self:center;font:600 12px/1.3 'BwGradual',sans-serif;color:var(--primary-ink);}
+.wb-pos{margin:13px 18px 0;font:700 10px/1.2 'BwGradual',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--primary-ink);}
+.wb-sum{margin:6px 18px 0;font-family:var(--read);font-size:12.5px;line-height:1.6;color:var(--ink-2);}
+.wb-sum b{color:var(--ink);}
+.wb-meta{font:500 11px/1.4 var(--mono);color:var(--ink-3);}
+.wb-res{margin:13px 18px 0;padding:12px 14px;border-radius:var(--r2);font:600 13px/1.5 var(--read);
+  border:1px solid var(--rule);}
+.wb-res[data-ok="true"]{color:var(--primary-ink);background:var(--brand-soft);}
+.wb-res[data-ok="false"]{color:var(--due);background:rgba(200,16,46,.06);}
+@media(max-width:560px){.wb-acts .btn{min-height:44px;}}
 
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
 @media(max-width:1180px){.frame{padding:16px 13px 54px;}}
@@ -1217,10 +1242,19 @@ function dwRow(k,v,clause,mono){
 }
 function openDetail(i){
   const rows=current(), d=rows[(page-1)*PER_PAGE+i]; if(!d)return;
-  lastFocus=document.activeElement; selected=d.docNumber;
+  openDoc(d);
+}
+function openDoc(d){
+  if(!document.getElementById('dw').classList.contains('open'))lastFocus=document.activeElement;
+  selected=d.docNumber;
   const t=A.type(d), s=A.seg(d), n=A.reviewDays(d), gone=d.status==='obsolete'||d.status==='superseded';
   document.getElementById('dw-title').textContent=d.title;
   document.getElementById('dw-num').textContent=(d.docNumber||'Not numbered')+(d.legacyId?'   was '+d.legacyId:'');
+  // A document waiting on the QMS check opens as the QMS Workbench's check
+  // panel for whoever holds that check: the facts the check needs, then
+  // Confirm and Reject, then the next document. Everyone else, and every
+  // other document, gets the register record below exactly as before.
+  if(TAQA_APPROVAL.canCountersign(d)){wbPaint(d);return;}
   let notes='';
   if(d.status==='obsolete')notes+='<div class="dw-note out"><b>Withdrawn. Do not use.</b> Destroy or mark any printed copy. Take the current document from SCORE.</div>';
   else if(d.status==='superseded')notes+=`<div class="dw-note out"><b>Superseded by ${esc(d.supersededBy||'a later revision')}.</b> Use the current revision from SCORE.</div>`;
@@ -1247,16 +1281,175 @@ function openDetail(i){
     dwRow('Retention',A.retention(d)?A.retention(d)+' years':null,'API Q2 4.5')+
     dwRow('Status',LABEL[d.status]||d.status,'API Q2 4.4.3');
   const url=A.scoreUrl(d), open='viewer.html?doc='+encodeURIComponent(d.docNumber||'')+'&seg='+encodeURIComponent(d.segment)+'&type='+encodeURIComponent(d.docType)+'&title='+encodeURIComponent(d.title);
+  document.getElementById('dw-foot').classList.remove('wb');
   document.getElementById('dw-foot').innerHTML=
     `<a class="btn" href="${esc(open)}">Open document</a>`+(url?`<a class="btn" href="${esc(url)}" rel="noopener">Master in SCORE</a>`:'');
+  showDrawer();
+}
+function showDrawer(focusSel){
   document.getElementById('scrim').classList.add('open');
   const w=document.getElementById('dw');
   w.classList.add('open'); w.setAttribute('aria-hidden','false');
-  w.querySelector('.btn').focus();
+  (w.querySelector(focusSel||'.dw-f .btn')||w.querySelector('.btn')).focus();
   render();
 }
+
+/* ── QMS Workbench: check one document, decide, move on ──────────────────
+   The Master List's "Waiting on QMS" view is QMS's whole queue. Opening a
+   document from it used to show a read-only record, so confirming one meant
+   ticking it and going through the bulk preview, and rejecting one meant
+   finding that area's desk among twenty-six. The panel now carries what the
+   check needs and the two decisions QMS holds, and steps to the next
+   document, so the queue is worked from one place.
+
+   Nothing about who may do what changes here. Confirm calls
+   TAQA_STORE.countersign and Reject calls TAQA_STORE.reject, the same calls
+   the desks make, and both re-read the register and re-check the rules for
+   that document at that moment. A reason is required to reject, at least 20
+   characters, as on the desk. */
+let wbDone=null;   // {d, ok, msg, nextNum} after a decision, until the panel moves on
+function wbQueue(){
+  // The documents this person can check now, in the order the view lists them.
+  return visible().filter(d=>TAQA_APPROVAL.canCountersign(d));
+}
+function wbNextAfter(num){
+  const q=wbQueue().map(d=>d.docNumber).filter(n=>n!==num);
+  if(!q.length)return null;
+  const order=current().map(d=>d.docNumber);
+  const at=order.indexOf(num);
+  const later=q.find(n=>order.indexOf(n)>at);
+  return later||q[0];
+}
+function whenFull(iso){
+  const t=iso?new Date(iso):null;
+  if(!t||isNaN(t))return null;
+  return fmt(iso)+', '+t.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+function sameTitleInArea(d){
+  const key=String(d.title||'').trim().toLowerCase();
+  if(!key)return [];
+  return TAQA_STORE.all().filter(x=>x.docNumber!==d.docNumber&&x.segment===d.segment&&
+    String(x.title||'').trim().toLowerCase()===key&&x.status!=='obsolete'&&x.status!=='superseded');
+}
+function wbPaint(d){
+  wbDone=null;
+  const q=wbQueue(), pos=q.findIndex(x=>x.docNumber===d.docNumber);
+  const t=A.type(d), f=(d.files&&d.files[0])||null, twins=sameTitleInArea(d);
+  const prov=d.numberStatus==='provisional';
+  document.getElementById('dw-body').innerHTML=
+    `<div class="wb-pos" id="wb-pos">QMS check &middot; ${pos+1} of ${q.length} waiting on QMS</div>`+
+    `<div class="dw-note"><b>Waiting on your QMS check.</b> Confirming sends it to ${esc(nextApprover(d))} for final approval. It is not in force until then.</div>`+
+    (prov?`<div class="dw-note"><b>Provisional number.</b> ${esc(A.numberNote(d)||'')}</div>`:'')+
+    (twins.length?`<div class="dw-note out" id="wb-twins"><b>Same title already in this area:</b> ${twins.map(x=>esc(x.docNumber)+' ('+esc(LABEL[x.status]||x.status)+')').join(', ')}. Check this is not a duplicate.</div>`:'')+
+    '<div class="dw-s">What to check</div>'+
+    dwRow('Number',esc(d.docNumber)+(prov?' (provisional)':''),'TQ-QHSE-S001 5.3',true)+
+    dwRow('Type',esc(t.label))+
+    dwRow('Area',esc(areaOf(d)))+
+    dwRow('Revision',esc(d.revision),'API Q2 4.4.3 d',true)+
+    dwRow('Supersedes',esc(d.supersedes),null,true)+
+    dwRow('File',f?esc(f.name)+(f.size!=null?' &middot; '+(f.size<1024?f.size+' B':f.size<1048576?(f.size/1024).toFixed(1)+' KB':(f.size/1048576).toFixed(1)+' MB'):''):null)+
+    dwRow('Submitted by',esc(d.submittedBy||(d.submittedAt?null:'In the register')))+
+    dwRow('Submitted',whenFull(d.submittedAt),null,true)+
+    dwRow('Classification',esc((d.classification||'').toUpperCase()),'ISO 9001 7.5.3.1 b')+
+    dwRow('Next approver',esc(nextApprover(d)),'API Q2 4.4.3 a, role')+
+    (d.summary?'<div class="dw-s">Summary</div><p class="wb-sum">'+esc(d.summary)+'</p>':'');
+  const open='viewer.html?doc='+encodeURIComponent(d.docNumber||'')+'&seg='+encodeURIComponent(d.segment)+'&type='+encodeURIComponent(d.docType)+'&title='+encodeURIComponent(d.title);
+  document.getElementById('dw-foot').classList.add('wb');
+  document.getElementById('dw-foot').innerHTML=
+    `<div class="wb-acts" id="wb-acts">
+      <button type="button" class="btn wb-reject" id="wb-reject" onclick="wbRejectOpen()">Reject&hellip;</button>
+      <button type="button" class="btn wb-go" id="wb-confirm" onclick="wbConfirm()">Confirm QMS check</button>
+    </div>
+    <div class="wb-rej" id="wb-rej" hidden>
+      <label for="wb-reason">Reason for returning it to the author</label>
+      <textarea id="wb-reason" maxlength="500" placeholder="What must be fixed before it is resubmitted" oninput="wbReasonInput()"></textarea>
+      <div class="wb-hint"><span id="wb-count">0</span> / 500, at least 20 characters</div>
+      <div class="wb-acts">
+        <button type="button" class="btn btn-quiet" onclick="wbRejectCancel()">Cancel</button>
+        <button type="button" class="btn wb-stop" id="wb-reject-go" disabled onclick="wbReject()">Reject and return</button>
+      </div>
+    </div>
+    <a class="wb-open" href="${esc(open)}">Open the document</a>`;
+  document.getElementById('dw').dataset.wb=d.docNumber;
+  showDrawer('#wb-confirm');
+}
+function wbRejectOpen(){
+  document.getElementById('wb-acts').hidden=true;
+  document.getElementById('wb-rej').hidden=false;
+  document.getElementById('wb-reason').focus();
+}
+function wbRejectCancel(){
+  document.getElementById('wb-reason').value='';
+  wbReasonInput();
+  document.getElementById('wb-rej').hidden=true;
+  document.getElementById('wb-acts').hidden=false;
+  document.getElementById('wb-reject').focus();
+}
+function wbReasonInput(){
+  const v=document.getElementById('wb-reason').value;
+  document.getElementById('wb-count').textContent=v.length;
+  document.getElementById('wb-reject-go').disabled=v.trim().length<20;
+}
+function wbConfirm(){
+  const num=document.getElementById('dw').dataset.wb; if(!num)return;
+  const next=wbNextAfter(num);
+  let r; try{r=TAQA_STORE.countersign(num);}catch(e){r={ok:false,error:'Something went wrong while confirming it.'};}
+  wbResult(num,r&&r.ok,r&&r.ok?'Confirmed. Now waiting on '+r.next+'.':'Not confirmed. '+wbWhy(num,r),next);
+}
+function wbReject(){
+  const num=document.getElementById('dw').dataset.wb; if(!num)return;
+  const reason=document.getElementById('wb-reason').value.trim();
+  if(reason.length<20)return;
+  const next=wbNextAfter(num);
+  let r; try{r=TAQA_STORE.reject(num,reason);}catch(e){r={ok:false,error:'Something went wrong while rejecting it.'};}
+  wbResult(num,r&&r.ok,r&&r.ok?'Rejected and returned to its author with your reason.':'Not rejected. '+wbWhy(num,r),next);
+}
+function wbWhy(num,r){
+  const d=TAQA_STORE.findDoc(num);
+  return d&&!TAQA_APPROVAL.canCountersign(d)?whyNotQms(d):((r&&r.error)||'');
+}
+function wbResult(num,ok,msg,next){
+  const d=TAQA_STORE.findDoc(num)||{title:num,docNumber:num};
+  // The next document is whichever is still waiting after this decision.
+  const nextDoc=next?TAQA_STORE.findDoc(next):null;
+  const stillNext=nextDoc&&TAQA_APPROVAL.canCountersign(nextDoc)?nextDoc:null;
+  const left=wbQueue().length;
+  wbDone={num,ok};
+  document.getElementById('dw-body').innerHTML=
+    `<div class="wb-pos" id="wb-pos">${left} waiting on QMS</div>`+
+    `<div class="wb-res" id="wb-res" data-ok="${ok}" role="status">${ok?'&#10003; ':'&#10007; '}${esc(msg)}</div>`+
+    (stillNext?`<div class="dw-s">Next</div><p class="wb-sum"><b>${esc(stillNext.title)}</b><br><span class="wb-meta">${esc(stillNext.docNumber)} &middot; ${esc(areaOf(stillNext))}</span></p>`
+      :`<p class="wb-sum">${left?'':'Nothing else is waiting on the QMS check.'}</p>`);
+  document.getElementById('dw-foot').innerHTML=
+    `<div class="wb-acts">
+      <button type="button" class="btn btn-quiet" onclick="closeDetail()">Close</button>
+      ${stillNext?`<button type="button" class="btn wb-go" id="wb-next" data-num="${esc(stillNext.docNumber)}" onclick="wbOpenNum(this.dataset.num)">Next document</button>`:''}
+    </div>`;
+  delete document.getElementById('dw').dataset.wb;
+  renderCuts(); drawSummary(); render();
+  (document.getElementById('wb-next')||document.querySelector('.dw-f .btn')).focus();
+}
+function wbOpenNum(num){
+  const d=TAQA_STORE.findDoc(num);
+  if(!d)return;
+  openDoc(d);
+}
+// master-list.html?view=qms&doc=NUM opens that document's check straight
+// away: it is where the bell and the desks send QMS for one document.
+// Read before the first render: writeUrl() rewrites the address to the
+// filters on screen, which drops doc.
+const DEEP_DOC=new URLSearchParams(location.search).get('doc');
+function openFromUrl(){
+  const num=DEEP_DOC;
+  if(!num||!TAQA_ROLE.canRegister(role()))return;
+  const d=TAQA_STORE.findDoc(num);
+  if(!d||!visible().some(x=>x.docNumber===d.docNumber)){toast('That document is not in the register.');return;}
+  if(quick==='qms'&&TAQA_APPROVAL.stageOf(d)!=='qms')toast(d.docNumber+' is no longer waiting on QMS. '+whyNotQms(d));
+  openDoc(d);
+}
 function closeDetail(){
-  selected=null;
+  selected=null; wbDone=null;
+  delete document.getElementById('dw').dataset.wb;
   document.getElementById('scrim').classList.remove('open');
   const w=document.getElementById('dw');
   w.classList.remove('open'); w.setAttribute('aria-hidden','true');
@@ -1522,6 +1715,7 @@ function heroLine(){
 renderRole(); readUrl();
 if(quick){const c=CT.find(x=>x.k===quick); if(c&&c.control&&!TAQA_ROLES[role()].controlPanel)quick='controlled';}
 renderCuts(); render(); drawSummary();
+openFromUrl();
 // An upload or an approval in another tab changes the register under this
 // list, so redraw rather than showing a count that is quietly out of date.
 if (typeof TAQA_STORE !== 'undefined') window.addEventListener(TAQA_STORE.EVENT, function(){

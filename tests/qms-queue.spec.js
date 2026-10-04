@@ -82,8 +82,10 @@ test.describe('QMS bell: company-wide on every page', () => {
     const ct = page.locator('.bell-i', { hasText: title('coiled-tubing') });
     await expect(ct).toBeVisible();
     await ct.click();
-    await expect(page).toHaveURL(/dashboard\.html\?id=coiled-tubing$/);
-    await expect(page.locator('#pending-list .pending-card', { hasText: title('coiled-tubing') })).toBeVisible();
+    // It opens that document's check in the QMS Workbench (qms-workbench.spec.js).
+    await expect(page).toHaveURL(/master-list\.html\?view=qms/);
+    await expect(page.locator('#dw-title')).toHaveText(title('coiled-tubing'));
+    await expect(page.locator('#wb-confirm')).toBeVisible();
   });
 
   test('every bell item says where it is from, what it waits for and when', async ({ page, gotoApp }) => {
