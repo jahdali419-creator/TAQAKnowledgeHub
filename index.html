@@ -11,6 +11,7 @@
 try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>/* Installed app on an iPhone: the status bar is drawn over the page, and iOS keeps taps in that strip for itself, so the bell and the other controls under it could not be tapped. Drawing edge to edge (viewport-fit=cover) turns on the bar's safe-area padding in topbar.css, which drops them below the status bar. A browser tab is left exactly as it was. */(function(){try{if(navigator.standalone||matchMedia('(display-mode: standalone)').matches){var m=document.querySelector('meta[name="viewport"]');if(m&&!/viewport-fit/.test(m.content))m.content+=', viewport-fit=cover';}}catch(e){}})();</script>
 <title>RISE — What We Know</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#005D63">
@@ -698,7 +699,7 @@ html[data-taqa-theme="dark"] .tile:hover .tile-ghost { opacity:0.16; }
 
 /* Sidebar */
 .panel-sidebar { display:flex; flex-direction:column; }
-.sidebar-inner { position:sticky; top:82px; flex:1; display:flex; flex-direction:column; }
+.sidebar-inner { position:sticky; top:calc(var(--nav-h, 64px) + 18px); flex:1; display:flex; flex-direction:column; }
 .sidebar-label {
   font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px;
   color:var(--text-muted); margin-bottom:14px; padding-bottom:14px;
@@ -1051,7 +1052,7 @@ html[data-taqa-theme="dark"] .section-hl-title { color:var(--text); }
   --st-cap-lamina:rgba(255,255,255,0.17);
   --st-gap:16px;
   --st-ease:cubic-bezier(0.23,1,0.32,1);
-  --st-top:64px;                      /* under the fixed nav               */
+  --st-top:var(--nav-h, 64px);        /* under the fixed nav               */
 }
 html[data-taqa-theme="dark"] #focus.strata {
   --st-paper:#002326;

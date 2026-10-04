@@ -11,6 +11,7 @@
 try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>/* Installed app on an iPhone: the status bar is drawn over the page, and iOS keeps taps in that strip for itself, so the bell and the other controls under it could not be tapped. Drawing edge to edge (viewport-fit=cover) turns on the bar's safe-area padding in topbar.css, which drops them below the status bar. A browser tab is left exactly as it was. */(function(){try{if(navigator.standalone||matchMedia('(display-mode: standalone)').matches){var m=document.querySelector('meta[name="viewport"]');if(m&&!/viewport-fit/.test(m.content))m.content+=', viewport-fit=cover';}}catch(e){}})();</script>
 <title>Field Glossary, RISE</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#005D63">
@@ -92,7 +93,7 @@ button{font:inherit;color:inherit;}
 /* ── Hero ── dark in both themes, so its inks are fixed. The photo is a
    still, teal-graded ground under faint survey lines; the words and the
    search sit on top, and the search is the biggest thing on the page. */
-.page-hero{position:relative;overflow:hidden;background:var(--th-teal-950);padding:116px 24px 44px;}
+.page-hero{position:relative;overflow:hidden;background:var(--th-teal-950);padding:calc(var(--nav-h,64px) + 52px) 24px 44px;}
 .page-hero::before{content:'';position:absolute;inset:0;z-index:1;
   background:radial-gradient(120% 90% at 50% 0%,rgba(0,93,99,.38) 0%,rgba(0,25,27,0) 60%),
              linear-gradient(180deg,rgba(0,19,20,.86) 0%,rgba(0,25,27,.92) 100%);}
@@ -352,7 +353,7 @@ footer::before{content:'';position:absolute;top:0;inset-inline:0;height:3px;back
 
 /* ── Phone ── */
 @media (max-width:720px){
-  .page-hero{padding:92px 16px 26px;}
+  .page-hero{padding:calc(var(--nav-h,64px) + 28px) 16px 26px;}
   .gh-eyebrow{margin-bottom:12px;}
   .page-hero-content h1{font-size:30px;margin-bottom:10px;}
   .gh-sub{font-size:14.5px;line-height:1.55;}

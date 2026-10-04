@@ -11,6 +11,7 @@
 try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>/* Installed app on an iPhone: the status bar is drawn over the page, and iOS keeps taps in that strip for itself, so the bell and the other controls under it could not be tapped. Drawing edge to edge (viewport-fit=cover) turns on the bar's safe-area padding in topbar.css, which drops them below the status bar. A browser tab is left exactly as it was. */(function(){try{if(navigator.standalone||matchMedia('(display-mode: standalone)').matches){var m=document.querySelector('meta[name="viewport"]');if(m&&!/viewport-fit/.test(m.content))m.content+=', viewport-fit=cover';}}catch(e){}})();</script>
 <script src="qrcode.js"></script>
 <script src="qr.js"></script>
 <link rel="manifest" href="manifest.json">
@@ -86,7 +87,7 @@ body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);ove
 /* ── Breadcrumb ── */
 /* The middle crumb carries no class of its own, so it inherited the page ink
    and went near black on the photo band. The trail sets its own light ink. */
-.breadcrumb{padding:88px 48px 8px;max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,0.72);}
+.breadcrumb{padding:calc(var(--nav-h,64px) + 24px) 48px 8px;max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,0.72);}
 .breadcrumb a{color:rgba(255,255,255,0.55);text-decoration:none;transition:color 0.2s;}
 .breadcrumb a:hover{color:#fff;}
 .breadcrumb .bc-sep{color:rgba(255,255,255,0.55);}
@@ -639,7 +640,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 }
 @media(max-width:640px){
   /* Breadcrumb: 72px clears the 64px mobile nav with 8px margin (not 88px) */
-  .breadcrumb{padding-top:72px;font-size:11px;}
+  .breadcrumb{padding-top:calc(var(--nav-h,64px) + 8px);font-size:11px;}
   /* Icon: hide on mobile, it stacks and eats ~80px of vertical space */
   .seg-hero-icon{display:none;}
   /* Hero: correct element selectors (not .seg-hero-title/.seg-hero-sub) */
@@ -668,7 +669,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .manage-btn,.copy-link-btn,.sort-btn{z-index:1;}
   /* The crumbs sit 16px under the top bar, room for a full finger-sized
      hit area that does not reach under the bar. */
-  .breadcrumb{position:relative;z-index:2;padding-top:80px;padding-bottom:16px;}
+  .breadcrumb{position:relative;z-index:2;padding-top:calc(var(--nav-h,64px) + 16px);padding-bottom:16px;}
   .seg-hero{padding-top:0;}
   .breadcrumb a::after{content:'';position:absolute;inset:-15px -8px;}
   .pg-btn,.pg-btn.pg-nav{height:44px;min-width:44px;}
