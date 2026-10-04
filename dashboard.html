@@ -1357,7 +1357,7 @@ function approveDoc(id) {
       result.className = 'action-result show';
       return;
     }
-    const _mnt = TAQA_APPROVAL.isMaintenance(TAQA_STORE.findDoc(storeDoc));
+    const _mnt = TAQA_APPROVAL.isMaintenance((TAQA_STORE.openDraft&&TAQA_STORE.openDraft(storeDoc))||TAQA_STORE.findDoc(storeDoc));
     result.textContent = stage === 'qms'
       ? '✓ Checked. Now with the ' + (_mnt ? 'Maintenance Manager' : 'Director') + ' for final approval'
       : '✓ Approved and published to the segment';
@@ -1365,7 +1365,7 @@ function approveDoc(id) {
   pendingCount = Math.max(0, pendingCount - 1);
   setCount(document.getElementById('stat-pending'), pendingCount);
   document.getElementById('pending-count').textContent = pendingCount + ' document' + (pendingCount !== 1 ? 's' : '');
-  const _mntT = storeDoc && typeof TAQA_STORE !== 'undefined' && TAQA_APPROVAL.isMaintenance(TAQA_STORE.findDoc(storeDoc));
+  const _mntT = storeDoc && typeof TAQA_STORE !== 'undefined' && TAQA_APPROVAL.isMaintenance((TAQA_STORE.openDraft&&TAQA_STORE.openDraft(storeDoc))||TAQA_STORE.findDoc(storeDoc));
   showDashToast(stage === 'qms'
     ? 'Checked, sent on for the ' + (_mntT ? 'Maintenance Manager' : 'Director') + '\'s final approval'
     : 'Document approved and published to segment', '#00BBB6');

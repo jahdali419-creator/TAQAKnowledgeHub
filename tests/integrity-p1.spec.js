@@ -46,23 +46,26 @@ test.describe('PI-05: register and stored text never runs as script', () => {
       { docNumber: tag('upload-num'), title: 'Numbered badly', segment: SEG, docType: 'sop' },
     ]);
     await gotoApp('/upload.html');
-    await page.evaluate((seg) => { onSegmentChange(seg); setDocStatus('revision'); populateSupersedes(seg); }, SEG);
+    await page.evaluate((seg) => {
+      document.getElementById('doc-type-select').value = 'sop'; onTypeChange('sop');
+      onSegmentChange(seg); setDocStatus('revision');
+    }, SEG);
     // Every option is text: the hostile title is there, intact, as an option label.
     const opts = await page.locator('#supersedes-select option').allTextContents();
     expect(opts.some((t) => t.includes('Pump <img src=x onerror='))).toBe(true);
     expect(await page.locator('#supersedes-select img').count()).toBe(0);
-    // Its value round-trips exactly, so choosing it still records the right document.
+    // Choosing it names the document by its number (a revision keeps it).
     const val = await page.evaluate(() => {
       const sel = document.getElementById('supersedes-select');
       const o = [...sel.options].find((x) => x.text.includes('Pump <img'));
-      sel.value = o.value; return sel.value;
+      sel.value = o.value; onSupersedesChange(); return sel.value;
     });
-    expect(val).toBe('TQ-PWN-S001  Pump ' + tag('upload-title') + ' "quoted" & more');
+    expect(val).toBe('TQ-PWN-S001');
+    // The review card repeats the chosen revision.
+    await page.evaluate(() => { if (typeof paintRecord === 'function') paintRecord(); });
 
     // Related IDs: any hyphenated number makes the badly numbered record "related".
-    await page.evaluate(() => { const f = document.getElementById('doc-ref-id'); f.value = 'Q-1'; checkDocId(); });
-    // The review card repeats the chosen Supersedes value.
-    await page.evaluate(() => { if (typeof paintRecord === 'function') paintRecord(); });
+    await page.evaluate(() => { setDocStatus('new'); const f = document.getElementById('doc-ref-id'); f.value = 'Q-1'; checkDocId(); });
     await assertNothingRan(page, 'upload');
     assertNoConsoleErrors(consoleErrors);
   });

@@ -109,6 +109,7 @@ Delegation must reference real users: the delegate signs in as themselves and th
 | Signer names and timestamps | `store.actingName`, `new Date()` in the browser | **D** (from token and server clock) |
 | Document numbers | `upload.html` `taqaRefId` (next number in this browser); `store.add` refuses a number already in the register in any status (PI-01) | **B + C + D** (server allocates; unique `DocNumber` column; duplicate refused by the API) |
 | Document identity in links, bookmarks, QR codes and pins | every link carries `doc=<number>`; viewer resolves title-only links against the live register, same area only (PI-03) | **B + D** (links and QR codes target the immutable item ID; the server returns the real status) |
+| Revisions: same number, next revision, one in force, one open; release supersedes the previous revision and its translations (PI-02, PI-34) | `store.add` (revision path), `store.approve`, `store.setStatus` cascade | **B + C + D** (SharePoint major versions; approval flow promotes and retires in one transaction; server refuses a second open version) |
 | Software / Tool filing | closed: Upload omits it, `store.add` refuses it (PI-33) | **B** (open only once numbering, owner and approver are defined) |
 | Document register, drafts, overlays | `documents-master.js`, `localStorage` | **C** |
 | Approval steps / audit trail | reconstructed from record fields in `viewer.html`, `analytics.html` | **C** (append-only) |
