@@ -163,6 +163,10 @@ needs a branch-protection rule on the repository's default branch
 (Settings -> Branches -> require this workflow's status check), which only
 a repository admin can add from GitHub's own UI or API.
 
+## Register integrity check
+
+`node scripts/check-register.js` checks the register (`documents-master.js`) against the document-control rules and exits non-zero on any finding that is not a known legacy issue in `scripts/register-baseline.json`. `--report` regenerates `docs/QA/REGISTER-CLEANUP-REPORT.md`, the list QMS works from. `tests/register-integrity.spec.js` runs the same gate in CI. Never add a baseline entry to make a new finding pass; remove one once QMS has corrected the record.
+
 ## Known environment quirks (not app bugs)
 
 A couple of sandbox-specific behaviors are documented in code comments

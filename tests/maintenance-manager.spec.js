@@ -277,9 +277,11 @@ test.describe('Maintenance Bulletins belong to operational segments', () => {
 
 test.describe('wording follows the approver', () => {
   test('QMS confirming a Maintenance Bulletin filed without the department says it goes to the Maintenance Manager', async ({ page, gotoApp, setRole, clearAppState }) => {
-    await prime(page, gotoApp, clearAppState, setRole, 'qms');
+    // Filed by an Employee: under PI-31 QMS cannot check what QMS filed.
+    await prime(page, gotoApp, clearAppState, setRole, 'employee');
     await page.evaluate(() => TAQA_STORE.add({ docNumber: 'TQ-TWS-CTSS-MB-959', title: 'Untagged bulletin', segment: 'coiled-tubing',
       docType: 'bulletin', classification: 'internal', revision: '1.0', department: null }));
+    await setRole('qms', SEG);
     await gotoApp('/dashboard.html?id=' + SEG);
     await card(page, 'Untagged bulletin').locator('.btn-approve').click();
     // defect: the card said Maintenance Manager and the result said Director.

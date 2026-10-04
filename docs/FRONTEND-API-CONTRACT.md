@@ -110,6 +110,13 @@ reason the door pill carries that disclaimer.
 3. **Lifecycle and signature fields never change by editing.** `status`, `approvalStage`, every `*By` / `*At` / `*Date` of submission, check, approval and rejection, and `rejected` change only through submit, countersign, approve, reject and withdraw. An edit that names one is refused (`TAQA_STORE.patch`). A content change to a published document is a **new controlled revision** that goes through the same release steps; approval history is never rewritten.
 4. **A Maintenance Manager holds an operational segment only** (`TAQA_ROLE.holds`). The identity claim that maps a person to a Maintenance Manager role must name an operational segment.
 
+### 3.3 Rules added by Priority 2A-3 (October 2026). PRODUCTION CONTROL REQUIRED
+
+10. **Submitter ≠ QMS checker ≠ final approver** (PI-31). `TAQA_APPROVAL.separationReason(doc)` gives the reason a person may not act; `canCountersign` / `canApprove` refuse it (pass `{ignoreSeparation: true}` to ask only about role and area). The API compares Entra ID object ids, not role labels.
+11. **Approval data is keyed by number + revision** (PI-25): the browser overlay is `taqa-status-v2`, `"number@revision"`; the server holds approval state per item version.
+12. **Routing**: department and area defaults come from the user's role and area (PI-16); the server derives the department from the role or claim.
+13. **Register integrity** (PI-53): `scripts/check-register.js` (`TAQA_REGISTER_CHECK.check(records, lookups)` in the browser) is the specification of the integrity rules the migration and the API must hold.
+
 ### 3.2 Rules added by the Priority 1 integrity remediation (October 2026). PRODUCTION CONTROL REQUIRED
 
 5. **A delegation replaces authority** (PI-04). Acting under a delegation, the caller holds approve only if the delegation includes it and the grantor holds it, never the QMS check, and management only as the grantor. A role that performs the QMS check never approves, delegated or not.

@@ -269,7 +269,7 @@ Rated for the platform as it exists today, and again for after the SharePoint in
 | R-09 | The platform was built outside IT governance, on a personal GitHub account and a personal Azure trial subscription | Medium | High | Being resolved. The handover to D&T transfers the repository, the hosting and the ownership |
 | R-10 | No server-side audit trail of who accessed which document | Low | High | Not yet possible, as there is no server. Arrives with SharePoint and Azure logging |
 | R-14 | Authority is decided in the browser. Delegation, the two release steps, status moves and editable fields are now enforced by `roles.js` / `store.js` (PI-04, PI-09), but anyone can bypass them from the console | Low | Critical if copied | Open by design for the prototype. **PRODUCTION CONTROL REQUIRED**: the API enforces `BUSINESS-RULES.md` §9, §10 and §15 from the Entra identity |
-| R-15 | Segregation of duties between filer and approver is undecided (PI-31) | Low | Medium | Open business decision (`BUSINESS-RULES.md` §12 row 8) |
+| R-15 | Segregation of duties between filer, QMS checker and approver (PI-31) | Low | Medium | Decided 4 Oct 2026 and enforced in the prototype against the simulated role identity (`BUSINESS-RULES.md` §4, §17). **PRODUCTION CONTROL REQUIRED:** enforce against the Entra ID object id |
 
 ### Findings already closed
 
