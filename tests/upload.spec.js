@@ -129,20 +129,19 @@ test.describe('upload.html, file intake security', () => {
     });
   }
 
-  // Rejected extensions and rejected sizes are checked separately so mixing
-  // them in one drop still reports both kinds of refusal.
-  test('a mix of allowed and disallowed files adds only the allowed one and reports the rest as refused', async ({
+  // One file is one controlled document, so a selection of several files is
+  // refused as a whole, even when only one of them is an allowed type: it is
+  // never cut down to "the good one" without the person choosing it.
+  // (The input no longer takes several files; addFiles() is what a drop calls.)
+  test('a mix of allowed and disallowed files is refused as a whole: one document at a time', async ({
     page,
     gotoApp,
     setRole,
   }) => {
     await openUpload(gotoApp, setRole);
-    await attach(page, [
-      { name: 'good.pdf', mimeType: 'application/pdf', buffer: fileBuf() },
-      { name: 'bad.exe', mimeType: 'application/octet-stream', buffer: fileBuf() },
-    ]);
-    expect(await page.locator('.file-item').count()).toBe(1);
-    await expect(page.locator('.file-item-name').first()).toHaveText('good.pdf');
+    await page.evaluate(() => addFiles([new File(['a'], 'good.pdf'), new File(['b'], 'bad.exe')]));
+    expect(await page.locator('.file-item').count()).toBe(0);
+    await expect(page.locator('#one-file-note')).toContainText('Upload one controlled document at a time.');
   });
 
   // ── File size limit ─────────────────────────────────────────────────────

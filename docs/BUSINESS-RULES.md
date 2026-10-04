@@ -67,6 +67,8 @@ A document is a maintenance document if **either**:
 - **Withdraw** and **edit details** of any document in any area.
 - **Never** gives final approval, including when acting under someone's delegation (delegations apply only to the role that holds them).
 - Opens every desk, the Master List, Analytics and About; exports F086; bulk-confirms drafts at stage `qms` from the Master List (bulk confirm never publishes).
+- **QMS's queue is company-wide.** The bell lists every document at stage `qms` from every area, each with its number, area (and Operations or Maintenance for an operational segment), what it is waiting for and when it was submitted. "Open your queue" and "+N more" open the Master List's **Waiting on QMS** view, which holds all of them. A Director's and a Maintenance Manager's queue stays their own area's desk.
+- **Bulk confirm** shows a preview first: every document that will be confirmed (title, number, area, current stage, next approver) and every selected document left out, with the reason. Only documents QMS may confirm now are included. Each is confirmed on its own, re-checked at that moment, and the result is shown per document. **Rejection is never bulk**: one document at a time, with its reason. *Azure: one server call and one audit entry per document; a document changed since the preview is refused, not confirmed.*
 
 ### Segment Director
 - **Final approval** (stage `director` → `current`) only when **all** hold: the document's area is the Director's own area, and the document is **not** a maintenance document. Records `approvedBy/At`.
@@ -110,6 +112,7 @@ Final approval follows exactly the same split.
 - A reason is **required**. The store refuses an empty reason; the desk requires at least 20 characters.
 - A rejected document keeps `status = draft`, gets `rejected = true`, `rejectedAtStage`, `rejectedBy/At/Date`, `rejectedReason`, and leaves both queues. It can never be checked or approved afterwards.
 - The submitter sees "Returned by ‹role›: ‹reason›" in Upload's "Your submissions" and on the document page.
+- **One file is one document.** Upload takes one controlled document at a time; selecting several files is refused with "Upload one controlled document at a time. Bulk upload will be supported separately." Several files are never bundled into one record. Real bulk upload (each file its own record, number and approval) is a separate, server-side feature not yet built.
 - **Resubmission is a new filing**: the revised document is filed again from Upload, receives a new record and number, and starts at stage `qms`. The returned record stays as history.
 
 ## 8. Withdrawal and revision

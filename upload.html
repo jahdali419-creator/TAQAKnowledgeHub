@@ -93,6 +93,9 @@ body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min
   text-align:center;cursor:pointer;transition:all 0.3s;margin-bottom:28px;
   background:rgba(0,93,99,0.02);position:relative;overflow:hidden;
 }
+.one-file-note{margin:-16px 0 24px;padding:11px 14px;border-radius:12px;font-size:13px;line-height:1.5;
+  color:var(--alert-ink);background:rgba(253,105,29,0.08);border:1px solid rgba(253,105,29,0.28);}
+.one-file-note[hidden]{display:none;}
 .drop-zone.drag-over{border-color:var(--primary-light);background:rgba(0,187,182,0.05);transform:scale(1.01);}
 .drop-zone:hover{border-color:rgba(0,187,182,0.25);background:rgba(0,93,99,0.04);}
 .drop-icon{margin-bottom:16px;display:block;transition:transform 0.3s;line-height:1;}
@@ -535,11 +538,15 @@ html[data-taqa-theme="dark"] .policy-rules {
     <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
       <span class="drop-icon"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 28V16M20 16L15 21M20 16L25 21" stroke="#00BBB6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 30C6.686 30 4 27.314 4 24C4 21.12 5.954 18.69 8.64 18.13C8.226 17.146 8 16.1 8 15C8 10.582 11.582 7 16 7C19.456 7 22.414 9.094 23.618 12.11C24.37 11.41 25.376 11 26.5 11C28.985 11 31 13.015 31 15.5C31 15.906 30.948 16.3 30.85 16.676C32.718 17.448 34 19.278 34 21.5C34 24.538 31.538 27 28.5 27H28" stroke="#00BBB6" stroke-width="2" stroke-linecap="round"/></svg></span>
       <div class="drop-title">Drag & drop your file here</div>
-      <div class="drop-sub">Supports documents, presentations, and software packages.<br>Max file size: 500 MB per file.</div>
+      <div class="drop-sub">One controlled document per upload. Supports documents, presentations, and software packages.<br>Max file size: 500 MB per file.</div>
       <button class="drop-btn" type="button">Browse Files</button>
       <div class="drop-types">Documents: .pdf · .docx · .xlsx · .pptx &nbsp;|&nbsp; Archives: .zip</div>
     </div>
-    <input type="file" id="file-input" class="drop-input" accept=".pdf,.docx,.doc,.xlsx,.xls,.pptx,.ppt,.zip" multiple>
+    <!-- One file is one controlled document: one record, one number, one
+         approval. The input used to take several files and filed them all
+         on a single record, so an approver saw one card and the first file. -->
+    <input type="file" id="file-input" class="drop-input" accept=".pdf,.docx,.doc,.xlsx,.xls,.pptx,.ppt,.zip">
+    <div class="one-file-note" id="one-file-note" role="alert" hidden></div>
 
     <!-- ── File Queue ── -->
     <div class="file-queue" id="file-queue" style="display:none;">
@@ -946,7 +953,31 @@ function unlockStep1(){
   var b = document.getElementById('go-2');
   if (b) b.disabled = !stepReady(1);
 }
+// Upload files one controlled document at a time. Several files chosen or
+// dropped together are refused as a whole, never bundled onto one record and
+// never quietly cut down to the first: the person is told why, and real bulk
+// upload (each file its own record and approval) is a separate feature.
+const ONE_FILE_MSG = 'Upload one controlled document at a time. Bulk upload will be supported separately.';
+function oneFileNote(text) {
+  const n = document.getElementById('one-file-note');
+  if (!n) return;
+  n.textContent = text || '';
+  n.hidden = !text;
+}
 function addFiles(files) {
+  files = files || [];
+  if (files.length > 1) {
+    oneFileNote(files.length + ' files were selected, so none was added. ' + ONE_FILE_MSG);
+    showUploadToast('One document at a time', ONE_FILE_MSG, ICON_WARN);
+    return;
+  }
+  if (files.length === 1 && selectedFiles.length) {
+    oneFileNote('This upload already has a file, so "' + files[0].name + '" was not added. ' + ONE_FILE_MSG +
+      ' To use a different file, remove the current one first.');
+    showUploadToast('One document at a time', ONE_FILE_MSG, ICON_WARN);
+    return;
+  }
+  oneFileNote('');
   let added = 0;
   const rejected = [];
   const oversized = [];
@@ -1005,6 +1036,7 @@ function addFiles(files) {
 
 function removeFile(id, name) {
   selectedFiles = selectedFiles.filter(f => f.name !== name);
+  oneFileNote('');
   const el = document.getElementById(id);
   if (el) el.remove();
   fileQueue.style.display = selectedFiles.length ? 'block' : 'none';
@@ -1047,6 +1079,10 @@ function submitUpload(e) {
   // It used to mint a random UPL reference and discard everything typed. The
   // record is assembled here instead, in the shape TAQA_MASTER_DOCS stores, so
   // what the back end has to accept is written down rather than implied.
+  if (selectedFiles.length !== 1) {
+    showUploadToast('One document at a time', ONE_FILE_MSG, ICON_WARN);
+    return;
+  }
   const rec = buildRecord();
   if (!rec.docNumber) {
     showUploadToast('No document number', 'Go back and choose an area and a type so a number can be assigned.', ICON_WARN);

@@ -381,6 +381,37 @@ th.bulk-col,td.bulk-col{width:34px;padding-inline-end:2px;}
     justify-content:space-between;}
 }
 
+/* ── Bulk confirm preview and results ── */
+#bulk-dlg{margin:auto;width:min(580px,calc(100% - 32px));max-height:min(84dvh,720px);padding:0;
+  border:1px solid var(--rule-firm);border-radius:var(--r3);background:var(--paper);color:var(--ink-2);
+  box-shadow:0 18px 50px rgba(0,0,0,.28);}
+#bulk-dlg[open]{display:flex;flex-direction:column;}
+#bulk-dlg::backdrop{background:rgba(0,20,22,.45);}
+.bq-head{padding:18px 20px 12px;border-bottom:1px solid var(--rule-soft);}
+.bq-head h2{font:800 16px/1.3 'BwGradual',sans-serif;color:var(--ink);letter-spacing:-.01em;}
+.bq-head p{font-family:var(--read);font-size:12.5px;line-height:1.55;color:var(--ink-2);margin-top:6px;}
+.bq-body{overflow-y:auto;padding:6px 20px 12px;overscroll-behavior:contain;}
+.bq-h{font:700 10.5px/1 'BwGradual',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
+  margin:14px 0 6px;}
+.bq-list{list-style:none;}
+.bq-i{padding:10px 0;border-top:1px solid var(--rule-soft);display:flex;flex-direction:column;gap:3px;}
+.bq-i:first-child{border-top:none;}
+.bq-t{font:700 13px/1.35 'BwGradual',sans-serif;color:var(--ink);}
+.bq-m{font:500 11.5px/1.4 var(--mono);color:var(--ink-3);}
+.bq-s{font-family:var(--read);font-size:12px;line-height:1.5;color:var(--ink-2);}
+.bq-why{color:var(--warn-ink);}
+.bq-res[data-ok="true"]{color:var(--primary-ink);font-weight:600;}
+.bq-res[data-ok="false"]{color:var(--due);font-weight:600;}
+.bq-foot{display:flex;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--rule-soft);}
+.bq-foot .btn{min-height:38px;padding:0 16px;}
+.bq-go{background:var(--primary);border-color:var(--primary);color:#fff;}
+.bq-go:disabled{opacity:.5;cursor:default;}
+@media(max-width:560px){
+  #bulk-dlg{width:calc(100% - 24px);max-height:88dvh;}
+  .bq-head,.bq-body,.bq-foot{padding-inline:16px;}
+  .bq-foot .btn{flex:1;min-height:44px;}
+}
+
 /* ── Register surface: the same glass as the summary above it ── */
 .reg{backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);}
 .reg{background:rgba(255,255,255,.74);border-color:rgba(255,255,255,.86);
@@ -713,6 +744,18 @@ thead th{top:var(--nav-h,64px);}
   </div>
 </div>
 
+<dialog id="bulk-dlg" aria-labelledby="bulk-dlg-h" aria-describedby="bulk-dlg-lead" onclose="bulkPending=[]">
+  <div class="bq-head">
+    <h2 id="bulk-dlg-h">Confirm documents</h2>
+    <p id="bulk-dlg-lead"></p>
+  </div>
+  <div class="bq-body" id="bulk-dlg-body" aria-live="polite"></div>
+  <div class="bq-foot">
+    <button type="button" class="btn btn-quiet" id="bulk-dlg-cancel" onclick="bulkDlgClose()">Cancel</button>
+    <button type="button" class="btn bq-go" id="bulk-dlg-go" onclick="bulkConfirmRun()">Confirm</button>
+  </div>
+</dialog>
+
 <div class="scrim" id="scrim" onclick="closeDetail()"></div>
 <aside class="dw" id="dw" role="dialog" aria-modal="true" aria-labelledby="dw-title" aria-hidden="true">
   <div class="dw-h">
@@ -797,6 +840,9 @@ const DUE_SOON_DAYS=30;
 let selectedRows=new Set(), lastSlice=[], lastFilterKey=null;
 const CT=[
   {k:'controlled', l:'All controlled',f:d=>A.controlled(d),               strip:true},
+  // Every document waiting on the QMS check, from every area: QMS's whole
+  // queue in one place. The bell's "Open your queue" lands here for QMS.
+  {k:'qms',        l:'Waiting on QMS',f:d=>TAQA_APPROVAL.stageOf(d)==='qms', strip:true},
   {k:'current',    l:'Current',       f:d=>d.status==='current'},
   {k:'review',     l:'Review due',    f:d=>d.status==='under-review'},
   {k:'draft',      l:'Draft',         f:d=>d.status==='draft'},
@@ -1022,23 +1068,20 @@ function updateBulkBar(){
 
 // Withdraw calls TAQA_STORE.setStatus(), the same call documents.html's
 // single Withdraw button makes, so the register updates for every reader.
-// The other action is QMS's own step and only that: it confirms drafts that
-// are waiting on the QMS check and sends them to their Director. It used to
-// mark them Current directly, which put an Employee's draft in force with
-// no Director and no name on the approval. A selected row that is not
-// eligible is left untouched, and the confirm dialog says so by name before
-// anything happens, the same honesty documents.html's own withdraw confirm uses.
+// A selected row that is already withdrawn is left untouched, and the confirm
+// dialog says so before anything happens.
+//
+// Confirm is QMS's own step and only that: it confirms drafts that are
+// waiting on the QMS check and sends each to its named approver. It never
+// puts anything in force. It opens a preview first (bulkConfirmPreview below).
 function bulkAction(kind){
   if(!canBulk()||typeof TAQA_STORE==='undefined')return;
   const chosen=Array.from(selectedRows).map(n=>TAQA_STORE.findDoc(n)).filter(Boolean);
-  const eligible=chosen.filter(kind==='approve'
-    ? d=>TAQA_APPROVAL.canCountersign(d)
-    : d=>d.status!=='obsolete'&&d.status!=='superseded');
+  if(kind==='approve'){bulkConfirmPreview(chosen);return;}
+  const eligible=chosen.filter(d=>d.status!=='obsolete'&&d.status!=='superseded');
   const skipped=chosen.length-eligible.length;
   if(!eligible.length){
-    toast(kind==='approve'
-      ? 'Nothing selected is waiting on the QMS check. Documents already with a Director, current or withdrawn are left as they are.'
-      : 'Nothing selected can be withdrawn. It is already marked obsolete or superseded.');
+    toast('Nothing selected can be withdrawn. It is already marked obsolete or superseded.');
     return;
   }
   const n=eligible.length, s=n===1?'':'s';
@@ -1048,27 +1091,122 @@ function bulkAction(kind){
   // agree with how many of those are being left alone.
   const skipNote=skipped
     ? ' '+skipped+' of the selected documents '+(skipped===1?'is':'are')+
-      ' '+(kind==='approve'?'not waiting on the QMS check':'already withdrawn')+
-      ' and will be left as '+(skipped===1?'it is':'they are')+'.'
+      ' already withdrawn and will be left as '+(skipped===1?'it is':'they are')+'.'
     : '';
-  // Who approves next follows the document: a maintenance department
-  // document goes to its Maintenance Manager, anything else to its Director.
-  const nM=eligible.filter(d=>TAQA_APPROVAL.isMaintenance(d)).length;
-  const who=nM===0?'Director':nM===n?'Maintenance Manager':'Director, or Maintenance Manager for a maintenance document,';
-  const msg=kind==='approve'
-    ? n+' document'+s+' will be confirmed as checked by QMS and sent to '+(n===1?'its':'their')+
-      ' '+who+' for approval. '+(n===1?'It is':'They are')+' not in force until '+(nM===0?'the Director':nM===n?'the Maintenance Manager':'that approver')+' approves.'+skipNote
-    : n+' document'+s+' will be marked obsolete. Every reader will see "Withdrawn, do not use." '+
+  const msg=n+' document'+s+' will be marked obsolete. Every reader will see "Withdrawn, do not use." '+
       (n===1?'It stays':'They stay')+' in the register, but '+(n===1?'leaves':'leave')+' the live list.'+skipNote;
   if(!confirm(msg))return;
-  const done=eligible.filter(d=>kind==='approve'
-    ? TAQA_STORE.countersign(d.docNumber).ok
-    : !!TAQA_STORE.setStatus(d.docNumber,'obsolete')).length;
+  const done=eligible.filter(d=>!!TAQA_STORE.setStatus(d.docNumber,'obsolete')).length;
   selectedRows.clear();
   renderCuts(); render(); drawSummary();
-  toast(kind==='approve'
-    ? 'Confirmed '+done+' document'+(done===1?'':'s')+'. '+(done===1?'It now waits':'They now wait')+' on the '+(nM===0?'Director':nM===n?'Maintenance Manager':'named approver')+'.'
-    : 'Withdrew '+done+' document'+(done===1?'':'s')+'.');
+  toast('Withdrew '+done+' document'+(done===1?'':'s')+'.');
+}
+
+/* ── Bulk QMS confirm: preview, then a result for every document ─────────
+   QMS may confirm several documents without opening each one, but never
+   blind. Before anything happens the dialog lists exactly which documents
+   will be confirmed (title, number, area, where it stands now, who approves
+   next) and which of the selected ones are left out and why. Only a document
+   the rules say QMS may countersign right now is included; nothing else can
+   be confirmed from here, and nothing is rejected from here either, because
+   a rejection needs its own reason and stays one document at a time.
+
+   Each document is then confirmed on its own through TAQA_STORE.countersign,
+   which re-reads the register and re-checks the rules for that document, so
+   one that changed after the preview opened (confirmed or rejected in another
+   tab, say) fails on its own line rather than being confirmed anyway. The
+   dialog then shows what happened to each one. In Azure this is the server's
+   job, one call and one audit entry per document; see docs/BUSINESS-RULES.md. */
+function areaOf(d){
+  const seg=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.segments[d.segment])||{};
+  const name=A.seg(d).name||d.segment||'Area not recorded';
+  if((seg.group||'segment')!=='segment')return name;
+  return name+', '+(TAQA_APPROVAL.isMaintenance(d)?'Maintenance':'Operations');
+}
+function nextApprover(d){
+  return TAQA_APPROVAL.approverFor(d)||'the approver named for its type';
+}
+function whyNotQms(d){
+  if(d.status==='obsolete'||d.status==='superseded')return 'Withdrawn, so there is nothing to confirm.';
+  if(d.status!=='draft')return 'Already in force ('+(LABEL[d.status]||d.status)+'), so there is no QMS check to do.';
+  if(d.rejected)return 'Sent back to its author. It comes back to QMS when it is resubmitted.';
+  if(TAQA_APPROVAL.stageOf(d)==='director')return 'Already checked by QMS. It is waiting on '+nextApprover(d)+' for final approval.';
+  return 'Not waiting on the QMS check.';
+}
+function bulkDocLine(d,extra,cls){
+  return `<li class="bq-i${cls?' '+cls:''}"><b class="bq-t">${esc(d.title)}</b>
+    <span class="bq-m">${esc(d.docNumber)} &middot; ${esc(areaOf(d))}</span>${extra}</li>`;
+}
+let bulkPending=[];
+function bulkConfirmPreview(chosen){
+  const dlg=document.getElementById('bulk-dlg');
+  const eligible=chosen.filter(d=>TAQA_APPROVAL.canCountersign(d));
+  const left=chosen.filter(d=>!TAQA_APPROVAL.canCountersign(d));
+  bulkPending=eligible.map(d=>d.docNumber);
+  const n=eligible.length, s=n===1?'':'s';
+  document.getElementById('bulk-dlg-h').textContent=n
+    ? 'Confirm '+n+' document'+s+' as checked by QMS'
+    : 'Nothing selected is waiting on the QMS check';
+  document.getElementById('bulk-dlg-lead').textContent=n
+    ? 'Each document is confirmed on its own and sent to its next approver. None of them is in force until that approver approves. Rejecting is not done here: reject a document from its own card, with a reason.'+
+      (left.length?' '+left.length+' of the selected documents '+(left.length===1?'is':'are')+' left out; '+(left.length===1?'it is':'they are')+' listed at the end with the reason.':'')
+    : 'Only a document waiting on the QMS check can be confirmed. Nothing has been changed.';
+  document.getElementById('bulk-dlg-body').innerHTML=
+    (n?`<h3 class="bq-h" id="bq-in-h">Will be confirmed (${n})</h3><ul class="bq-list" id="bq-in" aria-labelledby="bq-in-h">`+
+      eligible.map(d=>bulkDocLine(d,
+        `<span class="bq-s">Now: waiting on the QMS check &rarr; next: ${esc(nextApprover(d))}</span>`)).join('')+'</ul>':'')+
+    (left.length?`<h3 class="bq-h" id="bq-out-h">Left out (${left.length})</h3><ul class="bq-list" id="bq-out" aria-labelledby="bq-out-h">`+
+      left.map(d=>bulkDocLine(d,`<span class="bq-s bq-why">${esc(whyNotQms(d))}</span>`,'bq-out')).join('')+'</ul>':'');
+  const go=document.getElementById('bulk-dlg-go');
+  go.hidden=!n; go.disabled=false;
+  go.textContent='Confirm '+n+' document'+s;
+  document.getElementById('bulk-dlg-cancel').textContent=n?'Cancel':'Close';
+  dlg.dataset.state='preview';
+  if(!dlg.open)dlg.showModal();
+  (n?go:document.getElementById('bulk-dlg-cancel')).focus();
+}
+function bulkConfirmRun(){
+  const dlg=document.getElementById('bulk-dlg'), go=document.getElementById('bulk-dlg-go');
+  if(dlg.dataset.state!=='preview'||!bulkPending.length)return;
+  go.disabled=true;
+  const results=bulkPending.map(num=>{
+    let r;
+    try{r=TAQA_STORE.countersign(num);}catch(e){r={ok:false,error:'Something went wrong while confirming it.'};}
+    const d=TAQA_STORE.findDoc(num), ok=!!(r&&r.ok);
+    // A refusal for a document that changed since the preview says what it
+    // is now, not just that it was refused.
+    const why=!ok&&d&&!TAQA_APPROVAL.canCountersign(d)&&TAQA_APPROVAL.stageOf(d)!=='qms'?whyNotQms(d):((r&&r.error)||'');
+    return {num,d,ok,next:ok?r.next:null,msg:ok?'Confirmed. Now waiting on '+r.next+'.':'Not confirmed. '+why};
+  });
+  bulkPending=[];
+  const ok=results.filter(r=>r.ok).length, bad=results.length-ok;
+  dlg.dataset.state='done';
+  document.getElementById('bulk-dlg-h').textContent=bad
+    ? ok+' confirmed, '+bad+' not confirmed'
+    : 'Confirmed '+ok+' document'+(ok===1?'':'s');
+  document.getElementById('bulk-dlg-lead').textContent=bad
+    ? 'The ones not confirmed are unchanged. The reason is given against each one.'
+    : 'Each one is now waiting on its next approver. None is in force yet.';
+  document.getElementById('bulk-dlg-body').innerHTML=
+    `<ul class="bq-list" id="bq-results" aria-label="Result for each document">`+results.map(r=>{
+      const d=r.d||{title:r.num,docNumber:r.num,segment:''};
+      return bulkDocLine(d,`<span class="bq-s bq-res" data-ok="${r.ok}">${r.ok?'&#10003; ':'&#10007; '}${esc(r.msg)}</span>`,r.ok?'bq-ok':'bq-bad');
+    }).join('')+'</ul>';
+  go.hidden=true;
+  document.getElementById('bulk-dlg-cancel').textContent='Close';
+  document.getElementById('bulk-dlg-cancel').focus();
+  selectedRows.clear();
+  renderCuts(); render(); drawSummary();
+  // Name the next step when every confirmed document shares it.
+  const nexts=Array.from(new Set(results.filter(r=>r.ok).map(r=>r.next)));
+  toast(bad?ok+' confirmed, '+bad+' not confirmed. See the list for each document.'
+    :'Confirmed '+ok+' document'+(ok===1?'':'s')+'. '+(ok===1?'It now waits':'They now wait')+' on '+
+      (nexts.length===1?nexts[0]:'its named approver')+'.');
+}
+function bulkDlgClose(){
+  const dlg=document.getElementById('bulk-dlg');
+  bulkPending=[];
+  if(dlg.open)dlg.close();
 }
 
 let lastFocus=null;
@@ -1339,7 +1477,8 @@ function renderCuts(){
   const HSH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9.5 3.5L7.5 20.5M16.5 3.5l-2 17M4 8.5h16M3.5 15.5h16"/></svg>';
   const GLB='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/><path d="M12 3.5a14 14 0 010 17a14 14 0 010-17z"/></svg>';
   const BOX='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="7" width="17" height="13" rx="2"/><path d="M3.5 11h17M8 4v3"/></svg>';
-  const ICON={controlled:DOC,overdue:CLK,provisional:HSH,ar:GLB,asset:BOX};
+  const CHK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M9 13.5l2 2 4-4.5"/></svg>';
+  const ICON={controlled:DOC,qms:CHK,overdue:CLK,provisional:HSH,ar:GLB,asset:BOX};
   document.getElementById('cuts').innerHTML=CT.filter(c=>c.strip&&(ctrl||!c.control)).map(c=>{
     const n=(c.control?rows.filter(d=>c.f(d)&&TAQA_ROLE.inControlScope(d,k)):rows.filter(c.f)).length;
     return `<button type="button" class="nav-i" aria-pressed="${quick===c.k}"
