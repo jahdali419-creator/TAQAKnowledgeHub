@@ -1387,6 +1387,30 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
   font-size:11.5px; color:var(--text-muted); margin-top:4px;
 }
 
+/* ── Home header: the RISE logo with "WHAT WE KNOW." beneath it ──
+   The logo is the supplied artwork, unchanged. Its own tagline line is cut
+   from the header image because at bar height it would be about 4px tall,
+   so the words are set here in BW Gradual, in the artwork's colours (dark
+   teal, white on a dark bar, the orange dot), starting under the R of RISE
+   as in the full logo. Home only. */
+#navbar .nav-brand.nav-brand-tag{ --brand-h:36px; flex-direction:column; align-items:flex-start;
+  justify-content:center; gap:2px; padding:2px 0; }
+#navbar .nav-brand.nav-brand-tag .nav-logo{ height:var(--brand-h); }
+#navbar .nav-tagline{ display:block; margin-inline-start:calc(var(--brand-h) * 0.917);
+  font:600 8.5px/1 'BwGradual','Urbanist',sans-serif; letter-spacing:.3em; white-space:nowrap;
+  color:#002B32; }
+#navbar .nav-tagline-dot{ color:#FF5B07; letter-spacing:0; }
+html[data-taqa-theme="dark"] #navbar .nav-tagline,
+#navbar.nav-on-hero .nav-tagline{ color:#FFFFFF; }
+@media (max-width:480px){
+  #navbar .nav-brand.nav-brand-tag{ --brand-h:30px; }
+  #navbar .nav-tagline{ font-size:7.5px; letter-spacing:.26em; }
+}
+@media (max-width:360px){
+  #navbar .nav-brand.nav-brand-tag{ --brand-h:27px; }
+  #navbar .nav-tagline{ font-size:7px; letter-spacing:.22em; }
+}
+
 /* ── Sidebar Brand Card ── */
 .sidebar-brand-card {
   margin-top:12px; border-radius:var(--radius); padding:20px;
@@ -1408,17 +1432,21 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
 /* The full RISE logo straight on the dark card, transparent ground: the
    reverse artwork (white wordmark, orange and cyan unchanged). */
 .sidebar-brand-card-name img {
-  display:block; width:100%; max-width:240px; height:auto; margin-bottom:10px;
+  display:block; width:100%; max-width:196px; height:auto; margin-bottom:12px;
 }
 @media (prefers-contrast:more){
   .sidebar-brand-card-name{background:none; -webkit-text-fill-color:unset; color:var(--primary-light);}
 }
+/* The card's words are in BW Gradual at a regular weight, so the logo is
+   the only heavy mark on the card. */
 .sidebar-brand-card-tagline {
-  font-size:12.5px; color:rgba(255,255,255,0.6); line-height:1.65; margin-bottom:16px;
+  font-family:'BwGradual','Urbanist',sans-serif; font-weight:400;
+  font-size:12.5px; color:rgba(255,255,255,0.66); line-height:1.65; margin-bottom:16px;
 }
 .sidebar-brand-card-credit {
-  font-size:10px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase;
-  color:rgba(255,255,255,0.6);
+  font-family:'BwGradual','Urbanist',sans-serif;
+  font-size:10px; font-weight:500; letter-spacing:1.2px; text-transform:uppercase;
+  color:rgba(255,255,255,0.62);
 }
 .sidebar-brand-card-credit span { color:var(--primary-light); }
 
@@ -1501,7 +1529,13 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
 .hero-bg-layer { animation:none; filter:grayscale(.25); }
 .hero-lines { z-index:2; }
 .hero { padding-block:calc(var(--nav-h, 64px) + 40px) 104px; }
-.hero-eyebrow { margin-bottom:18px; }
+/* "RISE PLATFORM": the two-colour treatment of the headline below (white,
+   then teal), set in BW Gradual at a regular weight so it introduces the
+   headline rather than competing with it. */
+.hero-left .th-eyebrow.hero-eyebrow { margin-bottom:18px; gap:.5em; font:500 16px/1.2 var(--th-font-display); letter-spacing:.24em; }
+.hero-left .hero-eyebrow .hero-eyebrow-a { color:#FFFFFF; }
+.hero-left .hero-eyebrow .hero-eyebrow-b { color:var(--th-teal-400); }
+@media (max-width:480px){ .hero-left .th-eyebrow.hero-eyebrow { font-size:14px; letter-spacing:.2em; margin-bottom:14px; } }
 .hero h1 { font-family:var(--th-font-display); font-size:var(--th-fs-hero); line-height:1.04;
   letter-spacing:var(--th-track-tight); margin-bottom:14px; }
 .hero h1 span { color:var(--th-teal-400); }
@@ -1588,9 +1622,10 @@ html[data-taqa-theme="dark"] .stats-strip { background:transparent; }
 
 <!-- ── Navigation ── -->
 <nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
-  <a href="index.html" class="nav-brand">
+  <a href="index.html" class="nav-brand nav-brand-tag">
     <img src="assets/brand/rise-lockup-header.png" alt="RISE" class="nav-logo nav-logo-light" width="320" height="120">
     <img src="assets/brand/rise-lockup-header-reverse.png" alt="RISE" class="nav-logo nav-logo-dark" width="320" height="120">
+    <span class="nav-tagline" aria-hidden="true">WHAT WE KNOW<span class="nav-tagline-dot">.</span></span>
   </a>
   <ul class="nav-links">
     <li><a href="index.html" class="active" aria-current="page">Home</a></li>
@@ -1623,7 +1658,7 @@ html[data-taqa-theme="dark"] .stats-strip { background:transparent; }
 
 <div class="hero">
   <div class="hero-left">
-<p class="th-eyebrow on-dark hero-eyebrow hw hw-1">RISE</p>
+<p class="th-eyebrow on-dark hero-eyebrow hw hw-1"><span class="hero-eyebrow-a">RISE</span> <span class="hero-eyebrow-b">PLATFORM</span></p>
 <h1><span class="hw hw-2 hw-i hero-h1-lead">Knowledge Is&nbsp;</span><span class="hw hw-3 hw-i">Better Together.</span></h1>
 <p class="hero-sub hw hw-4">Every Answer, Within Reach.</p>
     <form class="hero-search hw hw-5" id="hero-search" action="ai-search.html" method="get" role="search" aria-label="Search the register">

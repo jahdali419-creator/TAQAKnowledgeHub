@@ -1,4 +1,4 @@
-# TechHub (TAQA Knowledge Hub)
+# RISE — What We Know (TAQA Knowledge Hub)
 
 Internal document-control and field-knowledge portal for TAQA. Static frontend prototype; Azure integration (Entra ID, API, database, file storage, notifications) is being handed over to IT.
 

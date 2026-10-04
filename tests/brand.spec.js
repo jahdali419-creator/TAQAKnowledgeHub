@@ -198,3 +198,95 @@ test.describe('RISE icons and names', () => {
     }
   });
 });
+
+// Home branding: "WHAT WE KNOW." under the header logo, a lighter brand card
+// and "RISE PLATFORM" over the hero headline. Every new piece of text is in
+// BW Gradual, checked from the computed style AND from the browser's own font
+// matching (document.fonts.check), not from a class name.
+test.describe('Home branding lockups', () => {
+  const bw = (page, sel) => page.locator(sel).evaluate((el) => {
+    const cs = getComputedStyle(el);
+    const first = cs.fontFamily.split(',')[0].replace(/["']/g, '').trim();
+    return { first, weight: cs.fontWeight, size: parseFloat(cs.fontSize), color: cs.color,
+      loaded: document.fonts.check(cs.fontWeight + ' ' + cs.fontSize + ' BwGradual') };
+  });
+
+  for (const width of [1440, 820, 390, 320]) {
+    test(`${width}px: WHAT WE KNOW. sits under the logo, inside the bar, clear of the controls`, async ({ page, gotoApp }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await gotoApp('/index.html');
+      await page.evaluate(() => document.fonts.ready);
+      const tag = page.locator('#navbar .nav-tagline');
+      await expect(tag).toBeVisible();
+      await expect(tag).toHaveText('WHAT WE KNOW.');
+      const f = await bw(page, '#navbar .nav-tagline');
+      expect(f.first).toBe('BwGradual');
+      expect(f.loaded).toBe(true);
+      expect(f.size).toBeGreaterThanOrEqual(7);
+      const geo = await page.evaluate(() => {
+        const t = document.querySelector('#navbar .nav-tagline').getBoundingClientRect();
+        const img = [...document.querySelectorAll('#navbar .nav-brand img')].find((x) => x.offsetParent !== null).getBoundingClientRect();
+        const bar = document.getElementById('navbar').getBoundingClientRect();
+        const ctrls = [...document.querySelectorAll('#navbar .nav-right > *, #navbar .nav-hamburger, #navbar .nav-links')]
+          .filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0 && getComputedStyle(e).display !== 'none'; })
+          .map((e) => e.getBoundingClientRect());
+        return { below: t.top >= img.bottom - 1, gap: t.top - img.bottom, inBar: t.bottom <= bar.bottom,
+          overlap: ctrls.some((b) => !(b.right <= t.left || b.left >= t.right || b.bottom <= t.top || b.top >= t.bottom)),
+          scroll: document.documentElement.scrollWidth > innerWidth };
+      });
+      expect(geo.below).toBe(true);
+      expect(geo.gap).toBeLessThanOrEqual(6);
+      expect(geo.inBar).toBe(true);
+      expect(geo.overlap).toBe(false);
+      expect(geo.scroll).toBe(false);
+    });
+  }
+
+  test('the tagline follows the bar: white over the hero, dark teal on the light bar', async ({ page, gotoApp }) => {
+    await gotoApp('/index.html');
+    await expect(page.locator('#navbar')).toHaveClass(/nav-on-hero/);
+    expect((await bw(page, '#navbar .nav-tagline')).color).toBe('rgb(255, 255, 255)');
+    await page.evaluate(() => window.scrollTo(0, 1400));
+    await expect(page.locator('#navbar')).not.toHaveClass(/nav-on-hero/);
+    expect((await bw(page, '#navbar .nav-tagline')).color).toBe('rgb(0, 43, 50)');
+    const dot = await page.locator('#navbar .nav-tagline-dot').evaluate((el) => getComputedStyle(el).color);
+    expect(dot).toBe('rgb(255, 91, 7)');
+  });
+
+  test('RISE PLATFORM over the headline: two colours, BW Gradual, regular weight', async ({ page, gotoApp }) => {
+    await gotoApp('/index.html');
+    await page.evaluate(() => document.fonts.ready);
+    await expect(page.locator('.hero-eyebrow')).toHaveText(/RISE\s+PLATFORM/);
+    const a = await bw(page, '.hero-eyebrow-a');
+    const b = await bw(page, '.hero-eyebrow-b');
+    for (const f of [a, b]) {
+      expect(f.first).toBe('BwGradual');
+      expect(f.loaded).toBe(true);
+      expect(f.weight).toBe('500');
+      expect(f.size).toBeGreaterThanOrEqual(14);
+    }
+    expect(a.color).toBe('rgb(255, 255, 255)');
+    expect(b.color).toBe('rgb(0, 187, 182)');
+  });
+
+  test('the brand card logo is smaller, and the card words are BW Gradual at a regular weight', async ({ page, gotoApp }) => {
+    await gotoApp('/index.html');
+    await page.evaluate(() => document.fonts.ready);
+    const w = await page.locator('.sidebar-brand-card-name img').evaluate((el) => el.getBoundingClientRect().width);
+    expect(w).toBeLessThanOrEqual(200);
+    expect(w).toBeGreaterThan(150);
+    for (const sel of ['.sidebar-brand-card-tagline', '.sidebar-brand-card-credit']) {
+      const f = await bw(page, sel);
+      expect(f.first, sel).toBe('BwGradual');
+      expect(f.loaded, sel).toBe(true);
+      expect(Number(f.weight), sel).toBeLessThanOrEqual(500);
+    }
+  });
+
+  test('the README carries the RISE name, not TechHub', async () => {
+    const fs = require('fs');
+    const readme = fs.readFileSync(require('path').join(__dirname, '..', 'README.md'), 'utf8');
+    expect(readme.split('\n')[0]).toBe('# RISE — What We Know (TAQA Knowledge Hub)');
+    expect(readme).not.toMatch(/TechHub/);
+  });
+});
