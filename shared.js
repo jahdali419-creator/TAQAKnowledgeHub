@@ -1761,3 +1761,36 @@ document.addEventListener('keydown',function(e){
   window.addEventListener('taqa:register-changed', sync);
   window.addEventListener('storage', sync);
 })();
+
+// ── Upload links carry where you are (PI-16) ──
+// The top-bar and menu Upload links pointed at a bare upload.html, so a
+// maintenance procedure filed from a segment's Maintenance side started with
+// no area and the maintenance box unticked, and was routed to the Segment
+// Director. They now carry the area of the page they are on, and on a
+// segment page its side (Operations or Maintenance). Upload itself defaults
+// a Director or Maintenance Manager to the area they hold when a link
+// carries none.
+(function(){
+  function uploadHref(){
+    var p = new URLSearchParams(location.search), path = location.pathname, seg = null, dept = null;
+    if (/(segment|dashboard|documents)\.html/.test(path)) seg = p.get('id');
+    else if (/viewer\.html/.test(path)) seg = p.get('seg');
+    if (/segment\.html/.test(path)) {
+      try { if (typeof DEPT !== 'undefined') dept = DEPT; } catch (e) {}
+      if (p.get('dept') === 'maintenance' || p.get('dept') === 'operations') dept = p.get('dept');
+    }
+    var q = [];
+    if (seg && /^[a-z0-9-]+$/.test(seg)) q.push('seg=' + encodeURIComponent(seg));
+    if (dept === 'maintenance' || dept === 'operations') q.push('dept=' + dept);
+    return q.length ? 'upload.html?' + q.join('&') : 'upload.html';
+  }
+  function apply(){
+    document.querySelectorAll('a.nav-up, a.mm-up').forEach(function(a){ a.setAttribute('href', uploadHref()); });
+  }
+  // The phone menu is drawn later, so a click is corrected as it happens too.
+  document.addEventListener('click', function(e){
+    var a = e.target.closest && e.target.closest('a.nav-up, a.mm-up');
+    if (a) a.setAttribute('href', uploadHref());
+  }, true);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply); else apply();
+})();

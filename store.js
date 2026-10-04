@@ -36,7 +36,8 @@
   'use strict';
 
   var KEY  = 'taqa-uploads-v1';
-  var OKEY = 'taqa-status-v1';
+  var OKEY = 'taqa-status-v2';
+  var OKEY_V1 = 'taqa-status-v1';     // read once, to migrate; never written
   var EVT  = 'taqa:register-changed';
 
   function base() { return (typeof TAQA_MASTER_DOCS !== 'undefined') ? TAQA_MASTER_DOCS : []; }
@@ -69,15 +70,44 @@
      on read. In Azure this is a PATCH and the overlay disappears. Without it a
      draft that shipped with the file could be approved on screen and quietly
      spring back on the next page load. */
+  /* An overlay belongs to one revision of a document, never to its number
+     alone (PI-25). It used to be keyed by number, so an approval given to
+     Rev 1.0 in this browser was applied to whatever the register later
+     shipped under that number: a Rev 2.0 draft read "Current", signed by
+     Rev 1.0's approvers. Overlays are now keyed "number@revision" and apply
+     only to the shipped row of exactly that revision.
+
+     Version 1 overlays (keyed by number) are migrated once, each stamped with
+     the revision of the shipped row it was being applied to when this
+     version first ran, which is the revision it was given for. Nothing is
+     deleted: the version 1 key is left as it was and simply no longer read. */
+  function ovKey(d) { return d.docNumber + '@' + String(d.revision == null ? '' : d.revision).trim(); }
   var _over = null;
   function overrides() {
     if (_over) return _over;
     try {
       var raw = localStorage.getItem(OKEY);
-      _over = raw ? JSON.parse(raw) : {};
-      if (!_over || typeof _over !== 'object') _over = {};
+      if (raw === null) {
+        _over = migrateV1();
+      } else {
+        _over = JSON.parse(raw);
+        if (!_over || typeof _over !== 'object') _over = {};
+      }
     } catch (e) { _over = {}; }
     return _over;
+  }
+  function migrateV1() {
+    var out = {}, old = null;
+    try { old = JSON.parse(localStorage.getItem(OKEY_V1) || 'null'); } catch (e) { old = null; }
+    if (old && typeof old === 'object') {
+      var byNum = {};
+      base().forEach(function (d) { if (d.docNumber) byNum[d.docNumber] = d; });
+      Object.keys(old).forEach(function (num) {
+        if (byNum[num] && old[num] && typeof old[num] === 'object') out[ovKey(byNum[num])] = old[num];
+      });
+    }
+    try { localStorage.setItem(OKEY, JSON.stringify(out)); } catch (e) {}
+    return out;
   }
   function saveOverrides() {
     try { localStorage.setItem(OKEY, JSON.stringify(overrides())); } catch (e) {}
@@ -106,7 +136,7 @@
   function all() {
     var o = overrides();
     var shipped = base().map(function (d) {
-      var ov = o[d.docNumber];
+      var ov = d.docNumber ? o[ovKey(d)] : null;
       if (!ov) return d;
       var c = {};
       for (var k in d) if (Object.prototype.hasOwnProperty.call(d, k)) c[k] = d[k];
@@ -456,8 +486,9 @@
       save();
     } else {
       var o = overrides();
-      o[d.docNumber] = o[d.docNumber] || {};
-      for (k in fields) if (Object.prototype.hasOwnProperty.call(fields, k)) o[d.docNumber][k] = fields[k];
+      var ok = ovKey(d);
+      o[ok] = o[ok] || {};
+      for (k in fields) if (Object.prototype.hasOwnProperty.call(fields, k)) o[ok][k] = fields[k];
       saveOverrides();
     }
   }

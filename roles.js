@@ -396,8 +396,34 @@ const TAQA_APPROVAL = {
     return doc.approvalStage || 'qms';
   },
 
+  /* Separation of duties (PI-31; BUSINESS-RULES §4, §10):
+       SUBMITTER ≠ QMS CHECKER ≠ FINAL APPROVER.
+     Whoever filed a document may not perform the QMS check on it or give it
+     final approval, and whoever performed the check may not also approve it.
+     A delegate signs as themselves, so a delegate may approve the grantor's
+     own filing. Returns the reason in words, or null.
+
+     The prototype's only identity is the simulated role (or the delegate's
+     name), so every QMS user is one person here and a document QMS filed
+     cannot be checked in the demo. In production the comparison is on the
+     signed-in Entra ID object id, so any other QMS member can check it. */
+  separationReason(doc, roleKey){
+    if (!doc || (roleKey && roleKey !== TAQA_ROLE.current())) return null;
+    if (typeof TAQA_STORE === 'undefined' || !TAQA_STORE.actingName) return null;
+    var me = TAQA_STORE.actingName(), stage = TAQA_APPROVAL.stageOf(doc);
+    if (doc.submittedBy && doc.submittedBy === me)
+      return stage === 'director'
+        ? 'You filed this document, so someone else must give it final approval.'
+        : 'You filed this document, so someone else must do the QMS check.';
+    if (stage === 'director' && doc.countersignedBy && doc.countersignedBy === me)
+      return 'You did the QMS check on this document, so someone else must give it final approval.';
+    return null;
+  },
+
   // May this role take the technical sign-off on this document now?
-  canApprove(doc, roleKey){
+  // opts.ignoreSeparation asks only whether the role and area would allow it,
+  // so a page can say "someone else must approve this" instead of hiding it.
+  canApprove(doc, roleKey, opts){
     if (TAQA_APPROVAL.stageOf(doc) !== 'director') return false;
     const cap = TAQA_ROLE.effective(roleKey);
     if (!cap.approve) return false;
@@ -410,19 +436,16 @@ const TAQA_APPROVAL = {
     // documents, and a Maintenance Manager signs nothing outside them.
     // An 'all' scope (none holds approve today) is not narrowed.
     if (cap.scope !== 'all' && TAQA_APPROVAL.isMaintenance(doc) !== (cap.department === 'maintenance')) return false;
-    // Two people, never one: whoever performed the QMS check on this document
-    // may not also give it final approval. In the prototype the name is the
-    // only identity there is; in production it is the Entra object id (PI-04).
-    if ((!roleKey || roleKey === TAQA_ROLE.current()) && doc.countersignedBy &&
-        typeof TAQA_STORE !== 'undefined' && TAQA_STORE.actingName &&
-        doc.countersignedBy === TAQA_STORE.actingName()) return false;
+    if (!(opts && opts.ignoreSeparation) && TAQA_APPROVAL.separationReason(doc, roleKey)) return false;
     return true;
   },
 
   // May this role countersign and release it?
-  canCountersign(doc, roleKey){
+  canCountersign(doc, roleKey, opts){
     if (TAQA_APPROVAL.stageOf(doc) !== 'qms') return false;
-    return !!TAQA_ROLE.effective(roleKey).countersign;
+    if (!TAQA_ROLE.effective(roleKey).countersign) return false;
+    if (!(opts && opts.ignoreSeparation) && TAQA_APPROVAL.separationReason(doc, roleKey)) return false;
+    return true;
   },
 
   // What is this document waiting for, in words, for whoever is looking at it.

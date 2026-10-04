@@ -1168,6 +1168,8 @@ function whyNotQms(d){
   if(d.status!=='draft')return 'Already in force ('+(LABEL[d.status]||d.status)+'), so there is no QMS check to do.';
   if(d.rejected)return 'Sent back to its author. It comes back to QMS when it is resubmitted.';
   if(TAQA_APPROVAL.stageOf(d)==='director')return 'Already checked by QMS. It is waiting on '+nextApprover(d)+' for final approval.';
+  const sep=TAQA_APPROVAL.separationReason&&TAQA_APPROVAL.separationReason(d);
+  if(sep)return sep;
   return 'Not waiting on the QMS check.';
 }
 function bulkDocLine(d,extra,cls){
@@ -1271,6 +1273,10 @@ function openDoc(d){
   if(d.status==='obsolete')notes+='<div class="dw-note out"><b>Withdrawn. Do not use.</b> Destroy or mark any printed copy. Take the current document from SCORE.</div>';
   else if(d.status==='superseded')notes+=`<div class="dw-note out"><b>Superseded by ${esc(d.supersededBy||'a later revision')}.</b> Use the current revision from SCORE.</div>`;
   else if(d.status==='draft')notes+='<div class="dw-note"><b>Draft.</b> Approval is not complete, so this carries no authority.</div>';
+  // QMS opening a document it may not check: say why, rather than leave the
+  // Confirm and Reject buttons silently missing (PI-31).
+  const sep=TAQA_APPROVAL.canCountersign(d,undefined,{ignoreSeparation:true})&&TAQA_APPROVAL.separationReason(d);
+  if(sep)notes+=`<div class="dw-note" id="dw-sep"><b>Not yours to check.</b> ${esc(sep)} Submitter, QMS checker and final approver are three different people.</div>`;
   else if(A.overdue(d))notes+=`<div class="dw-note"><b>Review overdue by ${Math.abs(n)} days.</b> It stays in force until withdrawn, but nobody has confirmed it is still suitable.</div>`;
   if(d.numberStatus==='provisional')notes+=`<div class="dw-note"><b>Provisional number.</b> ${esc(A.numberNote(d)||'')}</div>`;
   document.getElementById('dw-body').innerHTML = notes +

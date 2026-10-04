@@ -1862,6 +1862,10 @@ function editNumber(){
 /* ── The record, before it exists ──────────────────────────────────────
    Everything the register would store, with each value marked as typed or
    derived, so nobody is surprised by what gets filed. */
+function segKeyOf(){
+  var type = (document.getElementById('doc-type-select') || {}).value;
+  return type === 'policy' ? 'company' : ((document.getElementById('seg-select') || {}).value || '');
+}
 function revisionLine(){
   var num = (document.getElementById('supersedes-select') || {}).value;
   var p = (num && typeof TAQA_STORE !== 'undefined' && TAQA_STORE.revisionParent) ? TAQA_STORE.revisionParent(num) : null;
@@ -1896,8 +1900,17 @@ function paintRecord(){
     ['Department', deptMaintenance() ? 'Maintenance' : 'Segment (general)'],
     ['Revision', (docStatus === 'revision' ? revisionLine() : 'Rev 1.0, first issue') + D()],
     ['Owner', esc(t.owner || ',') + D()],
+    // Who will actually give final approval: the desk this filing is routed
+    // to after the QMS check (PI-16). Operations → QMS → the area's Segment
+    // Director (or Function Head, Centre Manager); Maintenance → QMS → the
+    // segment's Maintenance Manager. The register's named approver for the
+    // type is shown beside it while that naming is an open decision
+    // (BUSINESS-RULES §12 #1).
     ['Approver', (isPolicy ? 'Chief Executive Officer'
-        : deptMaintenance() ? 'Maintenance Manager, ' + esc(e.name || '')
+        : deptMaintenance() ? '<b>Maintenance Manager, ' + esc(e.name || '') + '</b>, after the QMS check'
+        : e.name ? '<b>' + esc((typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.areaTitle) ? TAQA_ROLE.areaTitle(segKeyOf()) : 'Segment Director') +
+                   ', ' + esc(e.name) + '</b>, after the QMS check' +
+                   (t.approver && t.approver.trim() !== ',' ? '<span class="warn">Named in the register for this type: ' + esc(t.approver) + '.</span>' : '')
         : esc(t.approver || ',')) + D()],
     ['Review cycle', esc(t.reviewCycleMonths || 24) + ' months' + D()],
     ['Next review due', fmt(due) + D()],
@@ -1958,8 +1971,14 @@ document.addEventListener('DOMContentLoaded', function(){
     ts.value = wantType;
     onTypeChange(wantType);
   }
-  // Arriving from an area's empty tab, that area is already chosen.
-  var want = new URLSearchParams(location.search).get('seg');
+  // Arriving from an area's empty tab, that area is already chosen. With no
+  // area in the link, a Segment Director or Maintenance Manager files into
+  // the area they hold (PI-16): a maintenance procedure uploaded from the
+  // top bar used to start blank and unticked, and went to the Director.
+  var qs = new URLSearchParams(location.search);
+  var want = qs.get('seg');
+  var held = (typeof TAQA_ROLE !== 'undefined' && /^(owner|maintenance)$/.test(TAQA_ROLE.current())) ? TAQA_ROLE.area() : null;
+  if (!want && held) want = held;
   var ss = document.getElementById('seg-select');
   if (want && ss && ss.querySelector('option[value="' + want.replace(/[^a-z0-9-]/gi,'') + '"]')) {
     ss.value = want;
@@ -1975,7 +1994,10 @@ document.addEventListener('DOMContentLoaded', function(){
   });
   // "Submit a maintenance document" on a segment's Maintenance tab links here
   // with dept=maintenance, so the box is already ticked.
-  if (new URLSearchParams(location.search).get('dept') === 'maintenance') {
+  // A Maintenance Manager files maintenance documents unless the link says
+  // otherwise; the box can still be unticked.
+  var wantDept = qs.get('dept') || (typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.current() === 'maintenance' ? 'maintenance' : '');
+  if (wantDept === 'maintenance') {
     var dm = document.getElementById('dept-maint'); if (dm) dm.checked = true;
   }
   // The department narrows which documents a revision may be of.

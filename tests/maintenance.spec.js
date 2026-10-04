@@ -19,14 +19,16 @@ async function start(page, gotoApp, setRole, clearAppState, role = 'employee', a
   await setRole(role, area);
 }
 
-// A draft filed the way upload.html files it, already checked by QMS.
+// A draft filed the way upload.html files it (by an Employee: under PI-31
+// QMS cannot check what QMS filed), already checked by QMS.
 async function checkedDraft(page, setRole, docNumber, extra = {}) {
-  await setRole('qms', 'coiled-tubing');
+  await setRole('employee', 'coiled-tubing');
   await page.evaluate(({ dn, extra }) => {
     TAQA_STORE.add(Object.assign({ docNumber: dn, title: 'Injector Head Overhaul', segment: 'coiled-tubing', docType: 'sop',
       classification: 'internal', revision: '1.0', department: 'maintenance' }, extra));
-    TAQA_STORE.countersign(dn, 'QMS Tester');
   }, { dn: docNumber, extra });
+  await setRole('qms', 'coiled-tubing');
+  expect((await page.evaluate((dn) => TAQA_STORE.countersign(dn, 'QMS Tester'), docNumber)).ok).toBe(true);
 }
 
 test.describe('the register', () => {

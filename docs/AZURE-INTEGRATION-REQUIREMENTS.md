@@ -100,7 +100,10 @@ Delegation must reference real users: the delegate signs in as themselves and th
 | Editable fields allow-list (PI-09) | `store.patch` (`EDITABLE`) | **B + D** |
 | Delegation replaces authority; grant by holder in own area; revoke by grantor (PI-04, PI-09) | `TAQA_ROLE.effective`, `TAQA_DELEGATION.grant/revoke` | **B + D** |
 | The QMS checker cannot give final approval to the same document (PI-04) | `TAQA_APPROVAL.canApprove` | **B + D** |
-| Filer checking or approving their own filing (PI-31) | not enforced; open owner decision | **B + D** once decided |
+| Submitter ≠ QMS checker ≠ final approver (PI-31) | `TAQA_APPROVAL.separationReason`, `canCountersign`, `canApprove` (simulated role identity) | **B + D** (Entra ID object id) |
+| Department routing defaults (PI-16) | `upload.html` defaults; Upload links carry area and side | **B** (department from role or claim) |
+| Approval data bound to one revision (PI-25) | `store.js` overlay `taqa-status-v2` keyed number@revision | **C + D** (server-held per item version) |
+| Register integrity gate (PI-53) | `scripts/check-register.js`, baseline, `tests/register-integrity.spec.js`, `docs/QA/REGISTER-CLEANUP-REPORT.md` | **B + C** (pre-migration gate with QMS sign-off) |
 | Register and lookup text rendered as text, never markup (PI-05) | escaping in every page | **A** in the browser, **D** at the API (validation) and hosting (CSP without `'unsafe-inline'`) |
 | Maintenance classification (department or bulletin) | `TAQA_APPROVAL.isMaintenance` | **B** |
 | Bulletins only for operational segments | `upload.html`, `store.add` | **B** |
