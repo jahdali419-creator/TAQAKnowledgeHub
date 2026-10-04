@@ -636,10 +636,10 @@ html[data-taqa-theme="dark"] .policy-rules {
           </div>
           <div class="form-group" style="margin-bottom:0;">
             <label class="form-label">Supersedes (Document Being Replaced) <span>*</span></label>
-            <select class="form-select" id="supersedes-select">
+            <select class="form-select" id="supersedes-select" onchange="onSupersedesChange()">
               <option value="" disabled selected>Select segment first, then choose document…</option>
             </select>
-            <div style="font-size:11.5px;color:var(--text-muted);margin-top:5px;">The selected document will be archived when this revision is approved by the admin.</div>
+            <div style="font-size:11.5px;color:var(--text-muted);margin-top:5px;">The revision keeps the document's number. When it is approved, the revision it replaces is marked Superseded and keeps its history; its translations are marked for re-issue.</div>
           </div>
         </div>
         <div class="form-row" id="software-fields" style="display:none;">
@@ -1095,7 +1095,7 @@ function submitUpload(e) {
   // assigned number is re-assigned and shown before anything is filed; a
   // number the filer typed is never changed behind their back.
   const refField = document.getElementById('doc-ref-id');
-  if (numberTaken(rec.docNumber)) {
+  if (docStatus !== 'revision' && numberTaken(rec.docNumber)) {
     if (refField && refField.dataset.autofilled !== 'user') {
       const was = rec.docNumber;
       refField.dataset.autofilled = '';
@@ -1229,7 +1229,9 @@ function buildRecord(){
   const due = new Date(today.getTime());
   due.setMonth(due.getMonth() + (t.reviewCycleMonths || 24));
   const iso = d => d.toISOString().slice(0,10);
-  const sup = (document.getElementById('supersedes-select') || {}).value || null;
+  // Only a revision supersedes anything; switching back to "New" leaves no trace.
+  const sup = docStatus === 'revision' ? ((document.getElementById('supersedes-select') || {}).value || null) : null;
+  const parent = (sup && typeof TAQA_STORE !== 'undefined' && TAQA_STORE.revisionParent) ? TAQA_STORE.revisionParent(sup) : null;
 
   return {
     docNumber:      (document.getElementById('doc-ref-id') || {}).value || null,
@@ -1238,7 +1240,7 @@ function buildRecord(){
     segment:        segKey,
     docType:        typeKey,
     scope:          isPolicy ? 'company' : 'area',
-    revision:       docStatus === 'revision' ? null : '1.0',
+    revision:       parent ? TAQA_STORE.nextRevision(parent.revision) : '1.0',
     issueDate:      iso(today),
     approvedDate:   null,                 // set when the approver signs
     nextReviewDate: iso(due),
@@ -1372,6 +1374,7 @@ function onTypeChange(val){
 
   toggleSoftwareFields(val === 'software' ? 'Software' : val);
   autoFillRefId();
+  if (docStatus === 'revision') populateSupersedes(currentSegId);
 }
 
 /* ── Numbering, per TQ-QHSE-S001 5.3 ─────────────────────────────────────
@@ -1436,6 +1439,7 @@ function autoFillRefId(){
   var statusEl = document.getElementById('doc-id-status');
   if (!refField) return;
   if (refField.dataset.autofilled === 'user') return;   // a typed number is respected
+  if (refField.dataset.autofilled === 'revision') return; // a revision keeps its document's number
   var r = taqaRefId();
   if (!r) {                     // nothing to build one from yet, so say nothing
     refField.value = '';
@@ -1517,24 +1521,106 @@ function onSegmentChange(segId) {
   autoFillRefId();
 }
 
+/* ── Revision / Update (PR 2A-2, PI-02) ───────────────────────────────
+   A revision keeps its document's number; the register gives it the next
+   revision and supersedes the one it replaces when it is approved. The
+   section used to stay hidden (the toggle cleared an inline style, so the
+   stylesheet's display:none won), the picker offered every live document of
+   any type as free text, and a revision was given a brand new number. */
 function setDocStatus(status) {
   docStatus = status;
   document.getElementById('status-new').classList.toggle('active', status==='new');
   document.getElementById('status-revision').classList.toggle('active', status==='revision');
-  document.getElementById('supersedes-section').style.display = status==='revision' ? '' : 'none';
+  document.getElementById('supersedes-section').style.display = status==='revision' ? 'block' : 'none';
+  if (status === 'revision') { populateSupersedes(currentSegId); return; }
+  // Back to a new document: nothing of the revision is kept.
+  const sel = document.getElementById('supersedes-select');
+  if (sel) sel.value = '';
+  releaseRevisionNumber();
+}
+
+// The area a revision is looked for in: company-wide for a policy.
+function revisionArea() {
+  const type = (document.getElementById('doc-type-select') || {}).value;
+  return type === 'policy' ? 'company' : ((document.getElementById('seg-select') || {}).value || currentSegId || '');
+}
+
+/* The documents this filing may be a revision of: the revision in force of
+   each document of the chosen type and department in the chosen area, plus
+   any translation waiting to be re-issued after its source was revised. A
+   document already being revised is shown but cannot be chosen: only one
+   revision may be open at a time. */
+function revisionCandidates() {
+  const type = (document.getElementById('doc-type-select') || {}).value;
+  const area = revisionArea();
+  if (!type || !area || typeof TAQA_STORE === 'undefined' || !TAQA_STORE.revisionParent) return [];
+  const dept = deptMaintenance() ? 'maintenance' : null;
+  const nums = {};
+  registerDocs().forEach(function(d){
+    if (d.docNumber && d.segment === area && d.docType === type) nums[d.docNumber] = true;
+  });
+  return Object.keys(nums).map(function(n){
+    const p = TAQA_STORE.revisionParent(n);
+    if (!p) return null;
+    if (type !== 'bulletin' && (p.department || null) !== dept) return null;
+    return { num: n, title: p.title, rev: p.revision || '', reissue: p.status === 'superseded',
+             busy: !!TAQA_STORE.openDraft(n) };
+  }).filter(Boolean).sort(function(a, b){ return a.num.localeCompare(b.num); });
 }
 
 function populateSupersedes(segId) {
   const sel = document.getElementById('supersedes-select');
-  const titles = segmentTitles(segId);
-  sel.innerHTML = '<option value="" disabled selected>Choose the document being replaced…</option>' +
-    // Register titles are other people's text: escaped in the value and the
-    // label alike, or a title with markup in it runs here (PI-05).
-    titles.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  if (!sel) return;
+  const keep = sel.value;
+  const list = revisionCandidates();
+  const type = (document.getElementById('doc-type-select') || {}).value;
+  const lead = !type || !revisionArea()
+    ? 'Choose the type and area first…'
+    : (list.length ? 'Choose the document this revises…' : 'No document of this type is in force here');
+  // Register titles are other people's text: escaped in the value and the
+  // label alike, or a title with markup in it runs here (PI-05).
+  sel.innerHTML = '<option value="" disabled selected>' + esc(lead) + '</option>' +
+    list.map(function(c){
+      const note = c.busy ? ' (a revision is already in progress)' : c.reissue ? ' (translation to re-issue)' : '';
+      return '<option value="' + esc(c.num) + '"' + (c.busy ? ' disabled' : '') + '>' +
+        esc(c.num + '  ' + c.title + (c.rev ? ', Rev ' + c.rev : '') + note) + '</option>';
+    }).join('');
+  if (keep && list.some(function(c){ return c.num === keep && !c.busy; })) sel.value = keep;
+  onSupersedesChange();
+}
+
+/* Choosing the document being revised fixes the number to that document's
+   own and says which revision this will be. */
+function onSupersedesChange() {
+  const sel = document.getElementById('supersedes-select');
+  const f = document.getElementById('doc-ref-id');
+  const statusEl = document.getElementById('doc-id-status');
+  if (!sel || !f) return;
+  const num = docStatus === 'revision' ? sel.value : '';
+  if (!num) { releaseRevisionNumber(); return; }
+  const p = TAQA_STORE.revisionParent(num);
+  isAutoFilling = true;
+  f.value = num;
+  f.dataset.autofilled = 'revision';
+  isAutoFilling = false;
+  if (statusEl && p) statusEl.innerHTML = '<span class="id-ok">Revision of ' + esc(num) + ': Rev ' +
+    esc(p.revision || '?') + ' → Rev ' + esc(TAQA_STORE.nextRevision(p.revision)) + '. A revision keeps its number.</span>';
+}
+// Leaving revision mode gives the number field back to the generator.
+function releaseRevisionNumber() {
+  const f = document.getElementById('doc-ref-id');
+  if (!f || f.dataset.autofilled !== 'revision') return;
+  f.dataset.autofilled = '';
+  f.value = '';
+  const statusEl = document.getElementById('doc-id-status');
+  if (statusEl) statusEl.innerHTML = '';
+  autoFillRefId();
 }
 
 function checkDocId() {
   const refField = document.getElementById('doc-ref-id');
+  // A revision carries its document's number on purpose.
+  if (docStatus === 'revision' && refField.dataset.autofilled === 'revision') return;
   const refId = refField.value.trim().toUpperCase();
   const statusEl = document.getElementById('doc-id-status');
   // Track manual edits so autoFillRefId won't override the user's own text.
@@ -1709,8 +1795,16 @@ function stepReady(n){
     if (type === 'bulletin' && !isOperational(seg)) {
       say('hint-2', 'A Maintenance Bulletin is for the maintenance team of an operational segment. Choose an operational segment.'); return false;
     }
-    if (docStatus === 'revision' && !document.getElementById('supersedes-select').value) {
-      say('hint-2', 'Choose the document this revision replaces.'); return false;
+    if (docStatus === 'revision') {
+      var supNum = document.getElementById('supersedes-select').value;
+      if (!supNum) { say('hint-2', 'Choose the document this revision replaces.'); return false; }
+      // The register's own rule: one open revision at a time, same type,
+      // area and department, never a withdrawn document.
+      var why = (typeof TAQA_STORE !== 'undefined' && TAQA_STORE.checkFiling) ? TAQA_STORE.checkFiling({
+        docNumber: supNum, supersedes: supNum, title: 'revision', docType: type,
+        segment: isPolicy ? 'company' : seg, department: deptMaintenance() ? 'maintenance' : null }) : null;
+      if (why) { say('hint-2', why); return false; }
+      say('hint-2', ''); return true;
     }
     var numField = document.getElementById('doc-ref-id') || {};
     var used = numberTaken(numField.value);
@@ -1743,6 +1837,8 @@ function stepReady(n){
 function editNumber(){
   var chip = document.getElementById('numchip');
   var f = document.getElementById('doc-ref-id');
+  // A revision's number is its document's: it is not edited.
+  if (docStatus === 'revision' && f.dataset.autofilled === 'revision') return;
   chip.classList.add('editing');
   f.dataset.autofilled = 'user';
   f.focus(); f.select();
@@ -1766,6 +1862,13 @@ function editNumber(){
 /* ── The record, before it exists ──────────────────────────────────────
    Everything the register would store, with each value marked as typed or
    derived, so nobody is surprised by what gets filed. */
+function revisionLine(){
+  var num = (document.getElementById('supersedes-select') || {}).value;
+  var p = (num && typeof TAQA_STORE !== 'undefined' && TAQA_STORE.revisionParent) ? TAQA_STORE.revisionParent(num) : null;
+  if (!p) return 'Revision of a document not yet chosen';
+  return 'Revision of ' + esc(num) + ': Rev ' + esc(p.revision || '?') + ' → Rev ' + esc(TAQA_STORE.nextRevision(p.revision)) +
+    '<span class="warn">When this revision is approved, Rev ' + esc(p.revision || '?') + ' is marked Superseded and keeps its history.</span>';
+}
 function paintRecord(){
   var L = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS : null;
   var box = document.getElementById('rec-card');
@@ -1791,9 +1894,7 @@ function paintRecord(){
     ['Type', esc(t.label || typeKey || ',')+ D()],
     [isPolicy ? 'Scope' : 'Area', esc(e.name || ',') + (isPolicy ? ' ' + D() : '')],
     ['Department', deptMaintenance() ? 'Maintenance' : 'Segment (general)'],
-    ['Revision', (docStatus === 'revision' ? 'Supersedes ' +
-        esc(document.getElementById('supersedes-select').value || 'a document not yet chosen')
-      : 'Rev 1.0, first issue') + D()],
+    ['Revision', (docStatus === 'revision' ? revisionLine() : 'Rev 1.0, first issue') + D()],
     ['Owner', esc(t.owner || ',') + D()],
     ['Approver', (isPolicy ? 'Chief Executive Officer'
         : deptMaintenance() ? 'Maintenance Manager, ' + esc(e.name || '')
@@ -1833,10 +1934,13 @@ function paintMySubmissions(){
       why = '<span class="subs-why">Returned by ' + esc(d.rejectedBy || 'the reviewer') + ': \u201C' +
             esc(d.rejectedReason || 'no reason recorded') + '\u201D. Revise it and file it again.</span>';
     } else if (d.status === 'current') { st = 'Published'; cls = 'st-live'; }
-    else if (d.status === 'superseded' || d.status === 'obsolete') { st = 'Withdrawn'; cls = 'st-back'; }
+    else if (d.status === 'superseded') { st = 'Superseded'; cls = 'st-back'; }
+    else if (d.status === 'obsolete') { st = 'Withdrawn'; cls = 'st-back'; }
     else if (stage === 'director') { st = 'Waiting on the Director'; cls = 'st-wait'; }
     else { st = 'Waiting on QMS check'; cls = 'st-wait'; }
-    var href = 'viewer.html?doc=' + encodeURIComponent(d.docNumber || '') + '&seg=' + encodeURIComponent(d.segment || '');
+    // The exact revision filed, not whichever revision is in force.
+    var href = 'viewer.html?doc=' + encodeURIComponent(d.docNumber || '') + '&seg=' + encodeURIComponent(d.segment || '') +
+               (d.revision ? '&rev=' + encodeURIComponent(d.revision) : '');
     var when = d.submittedAt ? new Date(d.submittedAt).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'}) : '';
     return '<li class="subs-row"><div class="subs-t"><a href="' + href + '">' + esc(d.title || d.docNumber) + '</a>' +
            '<span class="subs-n">' + esc(d.docNumber || '') + (when ? ' \u00b7 filed ' + esc(when) : '') + '</span></div>' +
@@ -1874,6 +1978,9 @@ document.addEventListener('DOMContentLoaded', function(){
   if (new URLSearchParams(location.search).get('dept') === 'maintenance') {
     var dm = document.getElementById('dept-maint'); if (dm) dm.checked = true;
   }
+  // The department narrows which documents a revision may be of.
+  var dmBox = document.getElementById('dept-maint');
+  if (dmBox) dmBox.addEventListener('change', function(){ if (docStatus === 'revision') populateSupersedes(currentSegId); });
   syncDeptRow();
   ['doc-title-input','summary-main','audience-select'].forEach(function(id){
     var el = document.getElementById(id);

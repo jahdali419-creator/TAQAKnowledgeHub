@@ -864,6 +864,16 @@ const DUE_SOON_DAYS=30;
 // them clears a selection that no longer means what it did, while simply
 // turning the page, or a store update repainting the same view, does not.
 let selectedRows=new Set(), lastSlice=[], lastFilterKey=null;
+/* One number can carry more than one revision (a document in force and its
+   revision in progress), so a row is the number and its revision together,
+   and an action names exactly the revision that was chosen (PR 2A-2). */
+const rkey=d=>(d.docNumber||'')+'|'+(d.revision||'');
+function byKey(k){
+  const i=k.lastIndexOf('|'), n=k.slice(0,i), r=k.slice(i+1);
+  return (TAQA_STORE.findRev&&TAQA_STORE.findRev(n,r))||TAQA_STORE.findDoc(n);
+}
+// What the QMS check acts on for a number: its open revision, if any.
+function workDoc(n){return (TAQA_STORE.openDraft&&TAQA_STORE.openDraft(n))||TAQA_STORE.findDoc(n);}
 const CT=[
   {k:'controlled', l:'All controlled',f:d=>A.controlled(d),               strip:true},
   // Every document waiting on the QMS check, from every area: QMS's whole
@@ -1038,10 +1048,10 @@ function render(){
     + 'Retention runs to 10 years under API Q2 3rd Edition 4.5.';
   document.getElementById('rows').innerHTML=slice.map((d,i)=>{
     const s=A.seg(d), pv=d.numberStatus==='provisional';
-    return `<tr tabindex="0" aria-selected="${!!selected&&selected===d.docNumber}"
+    return `<tr tabindex="0" aria-selected="${!!selected&&selected===rkey(d)}"
         onclick="openDetail(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetail(${i});}">
-      <td class="bulk-col chk" onclick="event.stopPropagation()" onkeydown="event.stopPropagation()"><input type="checkbox" class="row-chk" data-doc="${esc(d.docNumber||'')}"
-        ${d.docNumber?'':'disabled'} ${d.docNumber&&selectedRows.has(d.docNumber)?'checked':''}
+      <td class="bulk-col chk" onclick="event.stopPropagation()" onkeydown="event.stopPropagation()"><input type="checkbox" class="row-chk" data-doc="${esc(d.docNumber||'')}" data-key="${esc(d.docNumber?rkey(d):'')}"
+        ${d.docNumber?'':'disabled'} ${d.docNumber&&selectedRows.has(rkey(d))?'checked':''}
         onchange="toggleRowSelect(this)" aria-label="Select ${esc(d.title)}"></td>
       <td><div class="num${pv?' prov':''}">${esc(d.docNumber||'Not numbered')}</div>${d.legacyId?`<div class="was">was ${esc(d.legacyId)}</div>`:''}</td>
       <td><div class="ttl">${esc(d.title)}${d.language==='ar'?'<span class="ar">AR</span>':''}</div><div class="org">${esc(s.name)}</div></td>
@@ -1054,7 +1064,7 @@ function render(){
   lastSlice=slice;
   const chkAll=document.getElementById('sel-all');
   if(chkAll){
-    const pageDocs=slice.filter(d=>d.docNumber).map(d=>d.docNumber);
+    const pageDocs=slice.filter(d=>d.docNumber).map(rkey);
     const selOnPage=pageDocs.filter(n=>selectedRows.has(n));
     chkAll.checked=pageDocs.length>0&&selOnPage.length===pageDocs.length;
     chkAll.indeterminate=selOnPage.length>0&&selOnPage.length<pageDocs.length;
@@ -1065,18 +1075,18 @@ function render(){
 
 // ── Bulk selection and action ───────────────────────────────────────────
 function toggleSelectAll(el){
-  const docs=lastSlice.filter(d=>d.docNumber).map(d=>d.docNumber);
+  const docs=lastSlice.filter(d=>d.docNumber).map(rkey);
   if(el.checked)docs.forEach(n=>selectedRows.add(n));
   else docs.forEach(n=>selectedRows.delete(n));
   document.querySelectorAll('#rows .row-chk').forEach(cb=>{cb.checked=el.checked&&!cb.disabled;});
   updateBulkBar();
 }
 function toggleRowSelect(el){
-  const num=el.dataset.doc; if(!num)return;
-  if(el.checked)selectedRows.add(num); else selectedRows.delete(num);
+  const key=el.dataset.key; if(!key)return;
+  if(el.checked)selectedRows.add(key); else selectedRows.delete(key);
   const chkAll=document.getElementById('sel-all');
   if(chkAll){
-    const pageDocs=lastSlice.filter(d=>d.docNumber).map(d=>d.docNumber);
+    const pageDocs=lastSlice.filter(d=>d.docNumber).map(rkey);
     const selOnPage=pageDocs.filter(n=>selectedRows.has(n));
     chkAll.checked=pageDocs.length>0&&selOnPage.length===pageDocs.length;
     chkAll.indeterminate=selOnPage.length>0&&selOnPage.length<pageDocs.length;
@@ -1102,7 +1112,7 @@ function updateBulkBar(){
 // puts anything in force. It opens a preview first (bulkConfirmPreview below).
 function bulkAction(kind){
   if(!canBulk()||typeof TAQA_STORE==='undefined')return;
-  const chosen=Array.from(selectedRows).map(n=>TAQA_STORE.findDoc(n)).filter(Boolean);
+  const chosen=Array.from(selectedRows).map(byKey).filter(Boolean);
   if(kind==='approve'){bulkConfirmPreview(chosen);return;}
   const eligible=chosen.filter(d=>d.status!=='obsolete'&&d.status!=='superseded');
   const skipped=chosen.length-eligible.length;
@@ -1122,7 +1132,8 @@ function bulkAction(kind){
   const msg=n+' document'+s+' will be marked obsolete. Every reader will see "Withdrawn, do not use." '+
       (n===1?'It stays':'They stay')+' in the register, but '+(n===1?'leaves':'leave')+' the live list.'+skipNote;
   if(!confirm(msg))return;
-  const done=eligible.filter(d=>!!TAQA_STORE.setStatus(d.docNumber,'obsolete')).length;
+  // The revision chosen, not whichever revision of that number is in force.
+  const done=eligible.filter(d=>!!TAQA_STORE.setStatus(d.docNumber,'obsolete',d.revision)).length;
   selectedRows.clear();
   renderCuts(); render(); drawSummary();
   toast('Withdrew '+done+' document'+(done===1?'':'s')+'.');
@@ -1198,7 +1209,7 @@ function bulkConfirmRun(){
   const results=bulkPending.map(num=>{
     let r;
     try{r=TAQA_STORE.countersign(num);}catch(e){r={ok:false,error:'Something went wrong while confirming it.'};}
-    const d=TAQA_STORE.findDoc(num), ok=!!(r&&r.ok);
+    const d=workDoc(num), ok=!!(r&&r.ok);
     // A refusal for a document that changed since the preview says what it
     // is now, not just that it was refused.
     const why=!ok&&d&&!TAQA_APPROVAL.canCountersign(d)&&TAQA_APPROVAL.stageOf(d)!=='qms'?whyNotQms(d):((r&&r.error)||'');
@@ -1247,7 +1258,7 @@ function openDetail(i){
 }
 function openDoc(d){
   if(!document.getElementById('dw').classList.contains('open'))lastFocus=document.activeElement;
-  selected=d.docNumber;
+  selected=rkey(d);
   const t=A.type(d), s=A.seg(d), n=A.reviewDays(d), gone=d.status==='obsolete'||d.status==='superseded';
   document.getElementById('dw-title').textContent=d.title;
   document.getElementById('dw-num').textContent=(d.docNumber||'Not numbered')+(d.legacyId?'   was '+d.legacyId:'');
@@ -1281,7 +1292,7 @@ function openDoc(d){
     dwRow('Classification',esc((d.classification||'').toUpperCase()),'ISO 9001 7.5.3.1 b')+
     dwRow('Retention',A.retention(d)?esc(A.retention(d))+' years':null,'API Q2 4.5')+
     dwRow('Status',esc(LABEL[d.status]||d.status),'API Q2 4.4.3');
-  const url=A.scoreUrl(d), open='viewer.html?doc='+encodeURIComponent(d.docNumber||'')+'&seg='+encodeURIComponent(d.segment)+'&type='+encodeURIComponent(d.docType)+'&title='+encodeURIComponent(d.title);
+  const url=A.scoreUrl(d), open='viewer.html?doc='+encodeURIComponent(d.docNumber||'')+(d.revision?'&rev='+encodeURIComponent(d.revision):'')+'&seg='+encodeURIComponent(d.segment)+'&type='+encodeURIComponent(d.docType)+'&title='+encodeURIComponent(d.title);
   document.getElementById('dw-foot').classList.remove('wb');
   document.getElementById('dw-foot').innerHTML=
     `<a class="btn" href="${esc(open)}">Open document</a>`+(url?`<a class="btn" href="${esc(url)}" rel="noopener">Master in SCORE</a>`:'');
@@ -1354,7 +1365,7 @@ function wbPaint(d){
     dwRow('Classification',esc((d.classification||'').toUpperCase()),'ISO 9001 7.5.3.1 b')+
     dwRow('Next approver',esc(nextApprover(d)),'API Q2 4.4.3 a, role')+
     (d.summary?'<div class="dw-s">Summary</div><p class="wb-sum">'+esc(d.summary)+'</p>':'');
-  const open='viewer.html?doc='+encodeURIComponent(d.docNumber||'')+'&seg='+encodeURIComponent(d.segment)+'&type='+encodeURIComponent(d.docType)+'&title='+encodeURIComponent(d.title);
+  const open='viewer.html?doc='+encodeURIComponent(d.docNumber||'')+(d.revision?'&rev='+encodeURIComponent(d.revision):'')+'&seg='+encodeURIComponent(d.segment)+'&type='+encodeURIComponent(d.docType)+'&title='+encodeURIComponent(d.title);
   document.getElementById('dw-foot').classList.add('wb');
   document.getElementById('dw-foot').innerHTML=
     `<div class="wb-acts" id="wb-acts">
@@ -1406,13 +1417,13 @@ function wbReject(){
   wbResult(num,r&&r.ok,r&&r.ok?'Rejected and returned to its author with your reason.':'Not rejected. '+wbWhy(num,r),next);
 }
 function wbWhy(num,r){
-  const d=TAQA_STORE.findDoc(num);
+  const d=workDoc(num);
   return d&&!TAQA_APPROVAL.canCountersign(d)?whyNotQms(d):((r&&r.error)||'');
 }
 function wbResult(num,ok,msg,next){
-  const d=TAQA_STORE.findDoc(num)||{title:num,docNumber:num};
+  const d=workDoc(num)||{title:num,docNumber:num};
   // The next document is whichever is still waiting after this decision.
-  const nextDoc=next?TAQA_STORE.findDoc(next):null;
+  const nextDoc=next?workDoc(next):null;
   const stillNext=nextDoc&&TAQA_APPROVAL.canCountersign(nextDoc)?nextDoc:null;
   const left=wbQueue().length;
   wbDone={num,ok};
@@ -1431,7 +1442,7 @@ function wbResult(num,ok,msg,next){
   (document.getElementById('wb-next')||document.querySelector('.dw-f .btn')).focus();
 }
 function wbOpenNum(num){
-  const d=TAQA_STORE.findDoc(num);
+  const d=workDoc(num);
   if(!d)return;
   openDoc(d);
 }
@@ -1443,7 +1454,8 @@ const DEEP_DOC=new URLSearchParams(location.search).get('doc');
 function openFromUrl(){
   const num=DEEP_DOC;
   if(!num||!TAQA_ROLE.canRegister(role()))return;
-  const d=TAQA_STORE.findDoc(num);
+  // In the QMS queue a number means the revision waiting on the check.
+  const d=quick==='qms'?workDoc(num):TAQA_STORE.findDoc(num);
   if(!d||!visible().some(x=>x.docNumber===d.docNumber)){toast('That document is not in the register.');return;}
   if(quick==='qms'&&TAQA_APPROVAL.stageOf(d)!=='qms')toast(d.docNumber+' is no longer waiting on QMS. '+whyNotQms(d));
   openDoc(d);

@@ -901,9 +901,14 @@ const docId = decodeURIComponent(params.get('doc') || '').replace(/[^A-Za-z0-9-_
    a document filed through upload.html, or one QMS and the Director have just
    moved, was invisible here and the page told every role it had "no entry in
    the register". The store is that file plus what has happened to it since. */
+// One number can carry several revisions; &rev= opens that exact one (a
+// superseded revision, or a revision still in progress), and without it the
+// page shows the revision in force (PR 2A-2).
+const docRev = (params.get('rev') || '').replace(/[^A-Za-z0-9.\-]/g,'').slice(0,20);
 function _liveRec(n){
   if (!n) return null;
-  var hit = (typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(n) : null;
+  var hit = (typeof TAQA_STORE !== 'undefined')
+    ? ((docRev && TAQA_STORE.findRev && TAQA_STORE.findRev(n, docRev)) || TAQA_STORE.findDoc(n)) : null;
   if (hit) return hit;
   return (typeof TAQA_DOC !== 'undefined') ? (TAQA_DOC.byNumber(n) || TAQA_DOC.byLegacy(n)) : null;
 }
@@ -1451,6 +1456,10 @@ let docUrl = location.origin + location.pathname.replace(/viewer\.html.*/,'') + 
 // by title alone (PI-03).
 const _docNum = (_rec && _rec.docNumber) || docId;
 if (_docNum) docUrl += '&doc=' + encodeURIComponent(_docNum);
+// A revision other than the one in force is shared as that revision.
+if (_rec && _docNum && typeof TAQA_STORE !== 'undefined' && TAQA_STORE.findDoc(_docNum) &&
+    String(TAQA_STORE.findDoc(_docNum).revision || '') !== String(_rec.revision || '') && _rec.revision)
+  docUrl += '&rev=' + encodeURIComponent(_rec.revision);
 document.getElementById('qr-img').src = window.TAQA_QR ? window.TAQA_QR(docUrl, 4) : '';
 document.getElementById('share-url').textContent = docUrl;
 document.getElementById('share-url').title = docUrl;

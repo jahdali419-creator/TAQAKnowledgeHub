@@ -842,8 +842,10 @@ document.addEventListener('click',function(e){
   // The one place a match becomes a link. Every card, in the type-ahead
   // preview and in the full results below, opens the same real record.
   function docHref(d){
-    return 'viewer.html?doc='+encodeURIComponent(d.n||'')+'&seg='+encodeURIComponent(d.s)+
-      '&type='+encodeURIComponent(d.tp)+'&title='+encodeURIComponent(d.t);
+    // A draft result is a revision in progress: open that revision, not the
+    // one in force under the same number (PR 2A-2).
+    return 'viewer.html?doc='+encodeURIComponent(d.n||'')+(d.st==='draft'&&d.rev?'&rev='+encodeURIComponent(d.rev):'')+
+      '&seg='+encodeURIComponent(d.s)+'&type='+encodeURIComponent(d.tp)+'&title='+encodeURIComponent(d.t);
   }
   function statusNote(d){
     if(!d.st||d.st==='current'||d.st==='asset')return '';
