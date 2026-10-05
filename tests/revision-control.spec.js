@@ -208,13 +208,18 @@ test.describe('every action lands on the revision it means', () => {
     expect(!!(await page.evaluate(({ n, r }) => TAQA_STORE.setStatus(n, 'obsolete', r), { n: DOC.n, r: DOC.next }))).toBe(true);
     expect((await family(page, DOC.n)).map((r) => [r.rev, r.status])).toEqual([[DOC.rev, 'current'], [DOC.next, 'obsolete']]);
 
-    // Again with a fresh revision: by number, it is the revision in force that goes.
+    // Again with a fresh revision: by number, it is the revision in force that
+    // goes. Withdrawing it withdraws the document, so the revision still in
+    // progress is cancelled with it, as history, never put in force (owner's
+    // decision for NEW-02, PR 2B; it used to stay open at the QMS check).
     await setRole('employee', SEG);
     await page.evaluate(() => localStorage.removeItem('taqa-uploads-v1'));
     await fileRevision(page, DOC.n);
     await setRole('qms', SEG);
     expect(!!(await page.evaluate((n) => TAQA_STORE.setStatus(n, 'obsolete'), DOC.n))).toBe(true);
-    expect((await family(page, DOC.n)).map((r) => [r.rev, r.status, r.stage])).toEqual([[DOC.rev, 'obsolete', null], [DOC.next, 'draft', 'qms']]);
+    expect((await family(page, DOC.n)).map((r) => [r.rev, r.status, r.stage])).toEqual([[DOC.rev, 'obsolete', null], [DOC.next, 'obsolete', null]]);
+    expect(await page.evaluate(({ n, r }) => { const d = TAQA_STORE.findRev(n, r); return [!!d.cancelled, d.cancelledReason]; }, { n: DOC.n, r: DOC.next }))
+      .toEqual([true, 'Cancelled because the document family was withdrawn.']);
   });
 
   test('the Master List withdraws the row that was ticked, not its sibling revision', async ({ page, gotoApp, setRole, clearAppState }) => {

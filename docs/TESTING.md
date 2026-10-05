@@ -102,13 +102,14 @@ Each file under `tests/` maps to one page or one cross-cutting concern:
 | `navigation.spec.js` | the shared topbar: areas dropdown, role/area switcher, bookmarks, dark mode, mobile menu, popover behavior |
 | `home.spec.js` | index.html: hero/search, the three ways in, real counts, the RISE logo in the bar |
 | `brand.spec.js` | RISE branding: the logo in the bar on eight key pages, light and dark, desktop and phone (full-colour logo on light bars, reverse logo on dark bars and the hero with no plate, switching on scroll; loads, undistorted, clear of the controls); favicon, Apple touch, manifest icons and names |
-| `segment.spec.js` | segment.html: per-area document library, tabs, counts, amber pre-warning |
+| `segment.spec.js` | segment.html: per-area document library, tabs, counts, amber pre-warning (on a pinned page clock, never today's date) |
 | `viewer.spec.js` | viewer.html: document metadata, statuses, version history, QR, print, breadcrumb |
 | `documents.spec.js` | documents.html: published-documents table, sorting, withdraw, XSS escaping |
 | `master-list.spec.js` | master-list.html: the QMS/auditor register, bulk actions, filters, charts |
 | `search.spec.js` | ai-search.html: keyword search, filters, safety disclaimer |
 | `dashboard.spec.js` | dashboard.html: the approval desk UI, toasts, contributors |
 | `approval-workflow.spec.js` | the real two-step QMS-then-approver release flow, end to end |
+| `decision-integrity.spec.js` | PR 2B: stale desk, Workbench and bulk decisions refused with nothing written (NEW-01); withdrawal cancels the open revision and its translations' (NEW-02); a returned revision filed again is the same revision, next attempt (NEW-03); held / rapid Enter and double-click in the Workbench (PI-07); Upload Enter before the review step (PI-06); the approver's card, Preview and final confirmation (PI-12); per-revision bell memory and its migration (NEW-05) |
 | `release-journey.spec.js` | one Operations document through Employee, QMS, Director and Auditor by UI; register write refusals; two tabs; phone layout |
 | `maintenance.spec.js` | the Operations / Maintenance switch, shelves, maintenance approval rule at the store, bulletins, maintenance software, the upload box |
 | `maintenance-manager.spec.js` | the Maintenance Manager through the pages: page access, the maintenance journey through the desks, returning a document, delegation, wording |
@@ -153,6 +154,15 @@ Shared helpers live in `tests/helpers/`:
 - Client-side role checks in this app are a specification, not a security
   control (see roles.js's own header comment); don't describe tests
   against them as "security tests."
+- Never depend on today's date. A test about review dates pins the page's
+  clock (`page.clock.setFixedTime`), either relative to a register row's own
+  date or to a fixed instant with seeded rows, and tests the window's edges
+  (TB-13: the due-soon tests used to rely on a real row's date still being
+  under 30 days away, and would have failed from 17 Oct 2026).
+- Drive a workflow with the people who would really act: an employee files,
+  QMS checks, the Director or Maintenance Manager approves. Since PR 2A-3 a
+  filer cannot check or approve their own filing, so a test that files as
+  QMS and then checks will (correctly) be refused.
 
 ## CI
 

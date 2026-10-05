@@ -844,6 +844,9 @@ const D=TAQA_MASTER_DOCS, L=TAQA_DOC_LOOKUPS, A=TAQA_DOC;
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):null;
 const LABEL={current:'Current','under-review':'Review due',draft:'Draft',superseded:'Superseded',obsolete:'Obsolete',asset:'Asset'};
+// A revision cancelled because its family was withdrawn is stored as obsolete
+// but says what happened to it (PR 2B, NEW-02).
+const statusLabel=d=>d&&d.cancelled?'Cancelled':(LABEL[d.status]||d.status);
 
 const fs=document.getElementById('f-seg'), ft=document.getElementById('f-type');
 Object.keys(L.segments).sort((a,b)=>L.segments[a].name.localeCompare(L.segments[b].name))
@@ -867,9 +870,13 @@ let selectedRows=new Set(), lastSlice=[], lastFilterKey=null;
 /* One number can carry more than one revision (a document in force and its
    revision in progress), so a row is the number and its revision together,
    and an action names exactly the revision that was chosen (PR 2A-2). */
-const rkey=d=>(d.docNumber||'')+'|'+(d.revision||'');
+/* A revision returned and filed again is the same revision, next attempt
+   (PR 2B, NEW-03), so a later attempt adds "#attempt" to its key. */
+const rkey=d=>(d.docNumber||'')+'|'+(d.revision||'')+(d.attempt>1?'#'+d.attempt:'');
 function byKey(k){
-  const i=k.lastIndexOf('|'), n=k.slice(0,i), r=k.slice(i+1);
+  const i=k.lastIndexOf('|'), n=k.slice(0,i), rest=k.slice(i+1);
+  const h=rest.lastIndexOf('#'), at=h>=0?parseInt(rest.slice(h+1),10):0, r=h>=0?rest.slice(0,h):rest;
+  if(at>1)return TAQA_STORE.revisionsOf(n).filter(d=>String(d.revision||'')===r&&d.attempt===at)[0]||null;
   return (TAQA_STORE.findRev&&TAQA_STORE.findRev(n,r))||TAQA_STORE.findDoc(n);
 }
 // What the QMS check acts on for a number: its open revision, if any.
@@ -1055,10 +1062,10 @@ function render(){
         onchange="toggleRowSelect(this)" aria-label="Select ${esc(d.title)}"></td>
       <td><div class="num${pv?' prov':''}">${esc(d.docNumber||'Not numbered')}</div>${d.legacyId?`<div class="was">was ${esc(d.legacyId)}</div>`:''}</td>
       <td><div class="ttl">${esc(d.title)}${d.language==='ar'?'<span class="ar">AR</span>':''}</div><div class="org">${esc(s.name)}</div></td>
-      <td><span class="dat">${esc(d.revision||'n/a')}</span></td>
+      <td><span class="dat">${esc(d.revision||'n/a')}${d.attempt>1?' <small>(attempt '+esc(d.attempt)+')</small>':''}</span></td>
       <td><span class="dat${d.issueDate?'':' nil'}">${fmt(d.issueDate)||'Not recorded'}</span></td>
       <td>${due(d)}</td>
-      <td><span class="mark m-${esc(String(d.status).replace('under-review','review'))}">${esc(LABEL[d.status]||d.status)}</span></td>
+      <td><span class="mark m-${esc(String(d.status).replace('under-review','review'))}">${esc(statusLabel(d))}</span></td>
       <td><span class="cls${d.classification==='restricted'?' hi':''}">${esc(d.classification||'')}</span></td>
     </tr>`}).join('');
   lastSlice=slice;
@@ -1129,8 +1136,15 @@ function bulkAction(kind){
     ? ' '+skipped+' of the selected documents '+(skipped===1?'is':'are')+
       ' already withdrawn and will be left as '+(skipped===1?'it is':'they are')+'.'
     : '';
+  // Withdrawing a revision in force cancels that document's revision in
+  // progress (PR 2B, NEW-02): said before anything happens.
+  const cancels=eligible.filter(d=>(d.status==='current'||d.status==='under-review')&&TAQA_STORE.openDraft(d.docNumber)).length;
+  const cancelNote=cancels
+    ? ' '+cancels+' revision'+(cancels===1?'':'s')+' in progress will be cancelled with '+(n===1?'it':'them')+': '+
+      (cancels===1?'it leaves':'they leave')+' the approval queues and '+(cancels===1?'is':'are')+' kept as history.'
+    : '';
   const msg=n+' document'+s+' will be marked obsolete. Every reader will see "Withdrawn, do not use." '+
-      (n===1?'It stays':'They stay')+' in the register, but '+(n===1?'leaves':'leave')+' the live list.'+skipNote;
+      (n===1?'It stays':'They stay')+' in the register, but '+(n===1?'leaves':'leave')+' the live list.'+skipNote+cancelNote;
   if(!confirm(msg))return;
   // The revision chosen, not whichever revision of that number is in force.
   const done=eligible.filter(d=>!!TAQA_STORE.setStatus(d.docNumber,'obsolete',d.revision)).length;
@@ -1164,6 +1178,7 @@ function nextApprover(d){
   return TAQA_APPROVAL.approverFor(d)||'the approver named for its type';
 }
 function whyNotQms(d){
+  if(d.cancelled)return d.cancelledReason||'Cancelled, so there is nothing to confirm.';
   if(d.status==='obsolete'||d.status==='superseded')return 'Withdrawn, so there is nothing to confirm.';
   if(d.status!=='draft')return 'Already in force ('+(LABEL[d.status]||d.status)+'), so there is no QMS check to do.';
   if(d.rejected)return 'Sent back to its author. It comes back to QMS when it is resubmitted.';
@@ -1181,7 +1196,8 @@ function bulkConfirmPreview(chosen){
   const dlg=document.getElementById('bulk-dlg');
   const eligible=chosen.filter(d=>TAQA_APPROVAL.canCountersign(d));
   const left=chosen.filter(d=>!TAQA_APPROVAL.canCountersign(d));
-  bulkPending=eligible.map(d=>d.docNumber);
+  // Each document is confirmed as the exact record listed here (PR 2B).
+  bulkPending=eligible.map(d=>({num:d.docNumber,key:TAQA_STORE.recordKey(d)}));
   const n=eligible.length, s=n===1?'':'s';
   document.getElementById('bulk-dlg-h').textContent=n
     ? 'Confirm '+n+' document'+s+' as checked by QMS'
@@ -1208,9 +1224,11 @@ function bulkConfirmRun(){
   const dlg=document.getElementById('bulk-dlg'), go=document.getElementById('bulk-dlg-go');
   if(dlg.dataset.state!=='preview'||!bulkPending.length)return;
   go.disabled=true;
-  const results=bulkPending.map(num=>{
+  const results=bulkPending.map(p=>{
+    const num=p.num;
     let r;
-    try{r=TAQA_STORE.countersign(num);}catch(e){r={ok:false,error:'Something went wrong while confirming it.'};}
+    try{r=TAQA_STORE.countersign(num,{key:p.key,stage:'qms'});}catch(e){r={ok:false,error:'Something went wrong while confirming it.'};}
+    if(r&&r.stale)return {num,d:workDoc(num),ok:false,next:null,msg:'Not confirmed. '+staleWhy(num,p.key,r)};
     const d=workDoc(num), ok=!!(r&&r.ok);
     // A refusal for a document that changed since the preview says what it
     // is now, not just that it was refused.
@@ -1285,7 +1303,7 @@ function openDoc(d){
     dwRow('Language',d.language==='ar'?'العربية':'English')+
     (d.translationOf?dwRow('Translation of',esc(d.translationOf),'API Q2 4.4.3',true):'')+
     '<div class="dw-s">Revision and approval</div>'+
-    dwRow('Revision',esc(d.revision),'API Q2 4.4.3 d',true)+
+    dwRow('Revision',esc(TAQA_STORE.revisionLabel(d).replace(/^Rev /,'')),'API Q2 4.4.3 d',true)+
     dwRow('Issued',fmt(d.issueDate),null,true)+
     dwRow('Approved',fmt(d.approvedDate),'API Q2 4.4.3 b',true)+
     dwRow('Supersedes',esc(d.supersedes),null,true)+
@@ -1297,7 +1315,7 @@ function openDoc(d){
     dwRow('Review due',gone?'Not applicable':fmt(d.nextReviewDate),null,true)+
     dwRow('Classification',esc((d.classification||'').toUpperCase()),'ISO 9001 7.5.3.1 b')+
     dwRow('Retention',A.retention(d)?esc(A.retention(d))+' years':null,'API Q2 4.5')+
-    dwRow('Status',esc(LABEL[d.status]||d.status),'API Q2 4.4.3');
+    dwRow('Status',esc(statusLabel(d)),'API Q2 4.4.3');
   const url=A.scoreUrl(d), open='viewer.html?doc='+encodeURIComponent(d.docNumber||'')+(d.revision?'&rev='+encodeURIComponent(d.revision):'')+'&seg='+encodeURIComponent(d.segment)+'&type='+encodeURIComponent(d.docType)+'&title='+encodeURIComponent(d.title);
   document.getElementById('dw-foot').classList.remove('wb');
   document.getElementById('dw-foot').innerHTML=
@@ -1349,13 +1367,32 @@ function sameTitleInArea(d){
   return TAQA_STORE.all().filter(x=>x.docNumber!==d.docNumber&&x.segment===d.segment&&
     String(x.title||'').trim().toLowerCase()===key&&x.status!=='obsolete'&&x.status!=='superseded');
 }
+/* One deliberate action is one decision (PR 2B, PI-07). Focus never lands on
+   a decision button by itself: a newly painted document focuses its heading
+   and a result focuses the result, so a held or repeated Enter has nothing
+   to press. A decision button also ignores activation for a moment after it
+   is drawn (a double-click's second click lands on the button drawn in the
+   same place) and while a decision is being made, and key repeat is never an
+   activation. */
+const WB_ARM_MS=600;
+let wbBusy=false;
+function wbArm(ids){
+  ids.forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=true;});
+  setTimeout(()=>ids.forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=false;}),WB_ARM_MS);
+}
+function wbReady(){return !wbBusy;}
+document.addEventListener('keydown',e=>{
+  if(!e.repeat||(e.key!=='Enter'&&e.key!==' '))return;
+  const dw=document.getElementById('dw');
+  if(dw&&dw.contains(e.target)&&e.target.tagName!=='TEXTAREA'){e.preventDefault();e.stopPropagation();}
+},true);
 function wbPaint(d){
   wbDone=null;
   const q=wbQueue(), pos=q.findIndex(x=>x.docNumber===d.docNumber);
   const t=A.type(d), f=(d.files&&d.files[0])||null, twins=sameTitleInArea(d);
   const prov=d.numberStatus==='provisional';
   document.getElementById('dw-body').innerHTML=
-    `<div class="wb-pos" id="wb-pos">QMS check &middot; ${pos+1} of ${q.length} waiting on QMS</div>`+
+    `<div class="wb-pos" id="wb-pos" tabindex="-1">QMS check &middot; ${pos+1} of ${q.length} waiting on QMS</div>`+
     `<div class="dw-note"><b>Waiting on your QMS check.</b> Confirming sends it to ${esc(nextApprover(d))} for final approval. It is not in force until then.</div>`+
     (prov?`<div class="dw-note"><b>Provisional number.</b> ${esc(A.numberNote(d)||'')}</div>`:'')+
     (twins.length?`<div class="dw-note out" id="wb-twins"><b>Same title already in this area:</b> ${twins.map(x=>esc(x.docNumber)+' ('+esc(LABEL[x.status]||x.status)+')').join(', ')}. Check this is not a duplicate.</div>`:'')+
@@ -1363,7 +1400,7 @@ function wbPaint(d){
     dwRow('Number',esc(d.docNumber)+(prov?' (provisional)':''),'TQ-QHSE-S001 5.3',true)+
     dwRow('Type',esc(t.label))+
     dwRow('Area',esc(areaOf(d)))+
-    dwRow('Revision',esc(d.revision),'API Q2 4.4.3 d',true)+
+    dwRow('Revision',esc(TAQA_STORE.revisionLabel(d).replace(/^Rev /,'')),'API Q2 4.4.3 d',true)+
     dwRow('Supersedes',esc(d.supersedes),null,true)+
     dwRow('File',f?esc(f.name)+(f.size!=null?' &middot; '+(f.size<1024?f.size+' B':f.size<1048576?(f.size/1024).toFixed(1)+' KB':(f.size/1048576).toFixed(1)+' MB'):''):null)+
     dwRow('Submitted by',esc(d.submittedBy||(d.submittedAt?null:'In the register')))+
@@ -1371,7 +1408,7 @@ function wbPaint(d){
     dwRow('Classification',esc((d.classification||'').toUpperCase()),'ISO 9001 7.5.3.1 b')+
     dwRow('Next approver',esc(nextApprover(d)),'API Q2 4.4.3 a, role')+
     (d.summary?'<div class="dw-s">Summary</div><p class="wb-sum">'+esc(d.summary)+'</p>':'');
-  const open='viewer.html?doc='+encodeURIComponent(d.docNumber||'')+(d.revision?'&rev='+encodeURIComponent(d.revision):'')+'&seg='+encodeURIComponent(d.segment)+'&type='+encodeURIComponent(d.docType)+'&title='+encodeURIComponent(d.title);
+  const open='viewer.html?doc='+encodeURIComponent(d.docNumber||'')+(d.revision?'&rev='+encodeURIComponent(d.revision):'')+(d.recordId?'&rid='+encodeURIComponent(d.recordId):'')+'&seg='+encodeURIComponent(d.segment)+'&type='+encodeURIComponent(d.docType)+'&title='+encodeURIComponent(d.title);
   document.getElementById('dw-foot').classList.add('wb');
   document.getElementById('dw-foot').innerHTML=
     `<div class="wb-acts" id="wb-acts">
@@ -1389,9 +1426,13 @@ function wbPaint(d){
     </div>
     <a class="wb-open" href="${esc(open)}">Open the document</a>`;
   document.getElementById('dw').dataset.wb=d.docNumber;
-  showDrawer('#wb-confirm');
+  // The exact record on screen: the decision is bound to it (NEW-01).
+  document.getElementById('dw').dataset.wbKey=TAQA_STORE.recordKey(d);
+  wbBusy=false; wbArm(['wb-confirm','wb-reject']);
+  showDrawer('#wb-pos');
 }
 function wbRejectOpen(){
+  if(!wbReady())return;
   document.getElementById('wb-acts').hidden=true;
   document.getElementById('wb-rej').hidden=false;
   document.getElementById('wb-reason').focus();
@@ -1409,45 +1450,67 @@ function wbReasonInput(){
   document.getElementById('wb-reject-go').disabled=v.trim().length<20;
 }
 function wbConfirm(){
-  const num=document.getElementById('dw').dataset.wb; if(!num)return;
-  const next=wbNextAfter(num);
-  let r; try{r=TAQA_STORE.countersign(num);}catch(e){r={ok:false,error:'Something went wrong while confirming it.'};}
-  wbResult(num,r&&r.ok,r&&r.ok?'Confirmed. Now waiting on '+r.next+'.':'Not confirmed. '+wbWhy(num,r),next);
+  const dw=document.getElementById('dw'), num=dw.dataset.wb; if(!num||!wbReady())return;
+  wbBusy=true;
+  const next=wbNextAfter(num), expect={key:dw.dataset.wbKey,stage:'qms'};
+  let r; try{r=TAQA_STORE.countersign(num,expect);}catch(e){r={ok:false,error:'Something went wrong while confirming it.'};}
+  wbResult(num,r&&r.ok,r&&r.ok?'Confirmed. Now waiting on '+r.next+'.':'Not confirmed. '+wbWhy(num,r,expect.key),next,r&&r.stale&&staleOther(num,expect.key));
 }
 function wbReject(){
-  const num=document.getElementById('dw').dataset.wb; if(!num)return;
+  const dw=document.getElementById('dw'), num=dw.dataset.wb; if(!num||wbBusy)return;
   const reason=document.getElementById('wb-reason').value.trim();
   if(reason.length<20)return;
-  const next=wbNextAfter(num);
-  let r; try{r=TAQA_STORE.reject(num,reason);}catch(e){r={ok:false,error:'Something went wrong while rejecting it.'};}
-  wbResult(num,r&&r.ok,r&&r.ok?'Rejected and returned to its author with your reason.':'Not rejected. '+wbWhy(num,r),next);
+  wbBusy=true;
+  const next=wbNextAfter(num), expect={key:dw.dataset.wbKey,stage:'qms'};
+  let r; try{r=TAQA_STORE.reject(num,reason,expect);}catch(e){r={ok:false,error:'Something went wrong while rejecting it.'};}
+  wbResult(num,r&&r.ok,r&&r.ok?'Rejected and returned to its author with your reason.':'Not rejected. '+wbWhy(num,r,expect.key),next,r&&r.stale&&staleOther(num,expect.key));
 }
-function wbWhy(num,r){
+/* A refusal because the record changed says what changed (PR 2B, NEW-01).
+   Another record now waiting under the number: the person must review that
+   one first. The same record moved on (checked or returned elsewhere, or
+   cancelled): what happened to it. */
+function staleOther(num,key){
+  const now=TAQA_STORE.openDraft(num);
+  return !!(now&&TAQA_STORE.recordKey(now)!==key);
+}
+function staleWhy(num,key,r){
+  const meant=TAQA_STORE.byKey(key);
+  return (!staleOther(num,key)&&meant)?whyNotQms(meant):((r&&r.error)||TAQA_STORE.STALE);
+}
+function wbWhy(num,r,key){
+  if(r&&r.stale)return staleWhy(num,key,r);
   const d=workDoc(num);
   return d&&!TAQA_APPROVAL.canCountersign(d)?whyNotQms(d):((r&&r.error)||'');
 }
-function wbResult(num,ok,msg,next){
+function wbResult(num,ok,msg,next,stale){
   const d=workDoc(num)||{title:num,docNumber:num};
   // The next document is whichever is still waiting after this decision.
-  const nextDoc=next?workDoc(next):null;
+  // Refused because the record changed: what is waiting under that number
+  // now is offered for review first, never decided on for the person.
+  const nextDoc=stale&&TAQA_APPROVAL.canCountersign(d)?d:(next?workDoc(next):null);
   const stillNext=nextDoc&&TAQA_APPROVAL.canCountersign(nextDoc)?nextDoc:null;
   const left=wbQueue().length;
   wbDone={num,ok};
   document.getElementById('dw-body').innerHTML=
     `<div class="wb-pos" id="wb-pos">${left} waiting on QMS</div>`+
-    `<div class="wb-res" id="wb-res" data-ok="${ok}" role="status">${ok?'&#10003; ':'&#10007; '}${esc(msg)}</div>`+
-    (stillNext?`<div class="dw-s">Next</div><p class="wb-sum"><b>${esc(stillNext.title)}</b><br><span class="wb-meta">${esc(stillNext.docNumber)} &middot; ${esc(areaOf(stillNext))}</span></p>`
+    `<div class="wb-res" id="wb-res" data-ok="${ok}" role="status" tabindex="-1">${ok?'&#10003; ':'&#10007; '}${esc(msg)}</div>`+
+    (stillNext?`<div class="dw-s">${stale&&stillNext===d?'Waiting under this number now':'Next'}</div><p class="wb-sum"><b>${esc(stillNext.title)}</b><br><span class="wb-meta">${esc(stillNext.docNumber)} &middot; ${esc(areaOf(stillNext))}</span></p>`
       :`<p class="wb-sum">${left?'':'Nothing else is waiting on the QMS check.'}</p>`);
   document.getElementById('dw-foot').innerHTML=
     `<div class="wb-acts">
       <button type="button" class="btn btn-quiet" onclick="closeDetail()">Close</button>
-      ${stillNext?`<button type="button" class="btn wb-go" id="wb-next" data-num="${esc(stillNext.docNumber)}" onclick="wbOpenNum(this.dataset.num)">Next document</button>`:''}
+      ${stillNext?`<button type="button" class="btn wb-go" id="wb-next" data-num="${esc(stillNext.docNumber)}" onclick="wbOpenNum(this.dataset.num)">${stale&&stillNext===d?'Review the current revision':'Next document'}</button>`:''}
     </div>`;
   delete document.getElementById('dw').dataset.wb;
+  delete document.getElementById('dw').dataset.wbKey;
   renderCuts(); drawSummary(); render();
-  (document.getElementById('wb-next')||document.querySelector('.dw-f .btn')).focus();
+  // The result has the focus, not the next document: moving on is its own
+  // deliberate step (Tab to "Next document", then Enter).
+  wbBusy=false; wbArm(['wb-next']);
+  document.getElementById('wb-res').focus();
 }
 function wbOpenNum(num){
+  if(!wbReady())return;
   const d=workDoc(num);
   if(!d)return;
   openDoc(d);
@@ -1469,6 +1532,7 @@ function openFromUrl(){
 function closeDetail(){
   selected=null; wbDone=null;
   delete document.getElementById('dw').dataset.wb;
+  delete document.getElementById('dw').dataset.wbKey;
   document.getElementById('scrim').classList.remove('open');
   const w=document.getElementById('dw');
   w.classList.remove('open'); w.setAttribute('aria-hidden','true');

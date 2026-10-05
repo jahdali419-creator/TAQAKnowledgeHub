@@ -201,7 +201,8 @@ test.describe('PI-31: submitter ≠ QMS checker ≠ final approver', () => {
     await setRole('qms', SEG);
     await gotoApp(`/master-list.html?view=qms&seg=${SEG}`);
     const r = await page.evaluate(() => { bulkConfirmPreview(['TQ-SOD-S004', 'TQ-SOD-S005'].map((n) => TAQA_STORE.findDoc(n))); return [bulkPending.slice(), document.getElementById('bulk-dlg').textContent]; });
-    expect(r[0]).toEqual(['TQ-SOD-S005']);
+    // Each entry names the exact record listed (PR 2B, NEW-01).
+    expect(r[0].map((p) => p.num)).toEqual(['TQ-SOD-S005']);
     expect(r[1]).toContain('You filed this document');
   });
 });

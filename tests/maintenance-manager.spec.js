@@ -110,6 +110,9 @@ test.describe('the maintenance journey through the desks', () => {
     await setRole('maintenance', SEG);
     await gotoApp('/dashboard.html?id=' + SEG);
     await card(page, TITLE).locator('.btn-approve').click();
+    // Final approval publishes, so it is confirmed once more, naming the
+    // record (PR 2B, PI-12).
+    await page.locator('#approve-modal-confirm').click();
     await expect.poll(() => page.evaluate((n) => TAQA_STORE.findDoc(n).status, N)).toBe('current');
     expect(await page.evaluate((n) => TAQA_STORE.findDoc(n).approvedBy, N)).toBe('Maintenance Manager');
 
@@ -185,6 +188,9 @@ test.describe('delegation from a Maintenance Manager', () => {
     await gotoApp('/dashboard.html?id=' + SEG);
     await expect(card(page, 'Deleg ops')).toHaveCount(0);
     await card(page, 'Deleg maint').locator('.btn-approve').click();
+    // Final approval publishes, so it is confirmed once more, naming the
+    // record (PR 2B, PI-12).
+    await page.locator('#approve-modal-confirm').click();
     await expect.poll(() => page.evaluate(() => TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-955').approvedBy))
       .toBe('Deputy Maintenance Engineer (delegate for Maintenance Manager, Coiled Tubing)');
     expect((await page.evaluate(() => TAQA_STORE.approve('TQ-TWS-CTSS-SOP-956'))).ok).toBe(false);

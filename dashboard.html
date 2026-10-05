@@ -134,6 +134,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
   background:transparent;font-family:'Inter',sans-serif;transition:all 0.2s;}
 .btn-preview-link:hover{border-color:var(--glass-border-hover);color:var(--primary-ink);}
 .action-result{font-size:12px;font-weight:600;margin-left:4px;display:none;}
+/* The exact record a card is about (PR 2B, PI-12): number, revision and step,
+   so what is approved is what was read. */
+.pending-doc-ident{font-size:12px;color:var(--text);margin:2px 0 4px;font-variant-numeric:tabular-nums;}
+.pending-doc-ident b{font-family:monospace;font-size:11.5px;}
+.desk-notice{margin:0 0 12px;padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.5;
+  color:var(--warn-ink);background:rgba(255,184,28,0.10);border:1px solid rgba(255,184,28,0.35);}
+.desk-notice:focus{outline:2px solid var(--primary-light);outline-offset:2px;}
+.approve-modal-rec{font-size:13px;color:var(--text);background:var(--inset);border:1px solid var(--border);
+  border-radius:8px;padding:10px 12px;margin:0 0 12px;line-height:1.55;}
+.approve-modal-rec b{font-family:monospace;font-size:12px;}
+.btn-approve-confirm{flex:1;padding:11px;border-radius:10px;background:var(--primary);color:#fff;border:none;
+  font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+.btn-approve-confirm:hover{opacity:0.9;}
 .action-result.show{display:inline;}
 .action-result.approved-txt{color:var(--primary-ink);}
 .action-result.rejected-txt{color:var(--stop-ink);}
@@ -1073,6 +1086,24 @@ function initDashboard() {
   function fmtBytes(n) {
     return n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : (n / 1048576).toFixed(1) + ' MB';
   }
+  /* What approving this record does to the register, in its own words: the
+     revision it replaces and that it becomes Superseded, or that it is a
+     first issue. Read from the record, never assumed (PR 2B, PI-12). */
+  function revisionChange(d) {
+    const m = String(d.supersedes || '').match(/^Rev\s+(.+)$/);
+    const to = ST.revisionLabel(d);
+    const when = STAGE === 'qms' ? 'On final approval' : 'When you approve it';
+    if (m) {
+      const from = 'Rev ' + m[1];
+      const parent = ST.findRev(d.docNumber, m[1]);
+      const live = parent && (parent.status === 'current' || parent.status === 'under-review');
+      return { label: 'Revision', text: from + ' \u2192 ' + to + '. ' +
+        (live ? when + ', ' + from + ' becomes Superseded.'
+              : from + ' is ' + (parent ? parent.status.replace('-', ' ') : 'not in the register') + ', so nothing in force is replaced.') };
+    }
+    if (d.translationOf) return { label: 'Translation', text: 'Translation of ' + d.translationOf + '. ' + to + ' is its first issue: no revision is replaced.' };
+    return { label: 'New', text: 'First issue of ' + d.docNumber + ': no revision is replaced.' };
+  }
   const MYROLE = TAQA_ROLE.current();
   const CAP    = TAQA_ROLE.effective();
   const STAGE  = CAP.countersign ? 'qms' : (CAP.approve ? 'director' : null);
@@ -1119,7 +1150,14 @@ function initDashboard() {
         '. Your approval as ' + dEsc(TAQA_APPROVAL.approverFor(d) || 'the named approver') +
         ' is what publishes it.',
     fromStore: true,
-    stage: STAGE
+    stage: STAGE,
+    // The exact record shown, so the decision can be bound to it (PR 2B).
+    key: ST.recordKey(d),
+    revLabel: ST.revisionLabel(d),
+    seg: d.segment || '',
+    rev: d.revision || '',
+    rid: d.recordId || '',
+    change: revisionChange(d)
   }));
   // The queue is the register's drafts. Hand-written example cards used to be
   // appended for a Director; they named documents the register does not hold
@@ -1158,8 +1196,11 @@ function initDashboard() {
         </div>` : '';
       const exactBanner = p.isExactDup ? `
         <div class="dup-exact-banner"><span class="dup-exact-badge">EXACT DUPLICATE</span><span class="dup-exact-txt">File fingerprint matches a document already published in this segment. Verify before approving.</span></div>` : '';
-      const supersRow = p.supersedes ? `
-        <div class="supersedes-row"><span class="supersedes-label">Replaces →</span><span class="supersedes-doc-title" title="${esc(p.supersedes)}">${esc(p.supersedes)}</span></div>` : '';
+      const supersRow = p.change ? `
+        <div class="supersedes-row"><span class="supersedes-label">${esc(p.change.label)}</span><span class="supersedes-doc-title" title="${esc(p.change.text)}">${esc(p.change.text)}</span></div>` : '';
+      const stepTxt = p.stage === 'qms' ? 'Draft, waiting for your conformance check' : 'Draft, checked by QMS, waiting for your final approval';
+      const previewHref = 'viewer.html?doc=' + encodeURIComponent(p.docId || '') + '&seg=' + encodeURIComponent(p.seg) +
+        (p.rev ? '&rev=' + encodeURIComponent(p.rev) : '') + (p.rid ? '&rid=' + encodeURIComponent(p.rid) : '');
       // Every type reads the same calm way except an alert, which is an
       // operational warning and keeps the warm ink.
       const typeCls = 'pending-doc-type' + (/alert/i.test(p.type || '') ? ' type-alert' : '');
@@ -1172,6 +1213,7 @@ function initDashboard() {
           <div class="pending-doc-info">
             ${docTypeLabel}
             <div class="pending-doc-title">${esc(p.title)}</div>
+            <div class="pending-doc-ident"><b>${esc(p.docId)}</b> · ${esc(p.revLabel)} · ${esc(stepTxt)}</div>
             <div class="pending-doc-meta">Submitted by <strong>${esc(p.submitter)}</strong> · ${esc(p.when)}${p.file ? ' · ' + esc(p.file.name) + (p.file.size ? ' · ' + esc(fmtBytes(p.file.size)) : '') : ''}</div>
           </div>
           <span class="pending-status-badge badge-pending">Awaiting Review</span>
@@ -1179,15 +1221,28 @@ function initDashboard() {
         <div class="pending-doc-preview">${p.preview}</div>
         ${exactBanner}${supersRow}${simPanel}
         <div class="pending-actions">
-          <button class="btn-approve" data-store-doc="${p.fromStore ? dEsc(p.docId) : ''}" data-stage="${dEsc(p.stage||'')}" onclick="approveDoc(${i+1})">✓ ${VERB}</button>
-          <button class="btn-reject" data-store-doc="${p.fromStore ? dEsc(p.docId) : ''}" data-stage="${dEsc(p.stage||'')}" data-doc-title="${esc(p.title||'')}" onclick="rejectDoc(${i+1})">✕ Reject</button>
-          <button class="btn-preview-link">Preview Document</button>
+          <button class="btn-approve" data-store-doc="${p.fromStore ? dEsc(p.docId) : ''}" data-stage="${dEsc(p.stage||'')}" data-key="${dEsc(p.key||'')}" data-rev-label="${dEsc(p.revLabel||'')}" data-change="${dEsc(p.change ? p.change.text : '')}" data-doc-title="${esc(p.title||'')}" onclick="approveDoc(${i+1})">✓ ${VERB}</button>
+          <button class="btn-reject" data-store-doc="${p.fromStore ? dEsc(p.docId) : ''}" data-stage="${dEsc(p.stage||'')}" data-key="${dEsc(p.key||'')}" data-rev-label="${dEsc(p.revLabel||'')}" data-doc-title="${esc(p.title||'')}" onclick="rejectDoc(${i+1})">✕ Reject</button>
+          <a class="btn-preview-link" href="${dEsc(previewHref)}" aria-label="Preview ${dEsc(p.docId)} ${dEsc(p.revLabel)}">Preview Document</a>
           <span class="action-result" id="result-${i+1}"></span>
         </div>
       </div>`;
     }).join('');
   }
   if (heldBackHtml && pendingList) pendingList.insertAdjacentHTML('beforeend', heldBackHtml);
+  // A decision refused because the record changed reloads the desk, so the
+  // queue is the register's now; the reason is shown above it (PR 2B).
+  (function(){
+    let msg = null;
+    try { msg = sessionStorage.getItem('taqa-desk-notice'); sessionStorage.removeItem('taqa-desk-notice'); } catch(e){}
+    if (!msg || !pendingList) return;
+    const n = document.createElement('div');
+    n.className = 'desk-notice'; n.id = 'desk-notice';
+    n.setAttribute('role', 'alert'); n.tabIndex = -1;
+    n.textContent = msg + ' The queue below has been refreshed.';
+    pendingList.parentNode.insertBefore(n, pendingList);
+    n.focus();
+  })();
 
   // ── Delegation ──────────────────────────────────────────────────────
   // Shown only to a role that holds authority to hand on. Every refusal comes
@@ -1350,7 +1405,72 @@ function showDashToast(msg, color) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
+/* A decision the register refused because the record changed after the desk
+   was drawn. Nothing was written. The desk is reloaded so every card is the
+   register's current record, and the reason is shown at the top. */
+const DESK_NOTICE = 'taqa-desk-notice';
+function deskStale(msg) {
+  try { sessionStorage.setItem(DESK_NOTICE, msg || TAQA_STORE.STALE); } catch(e){}
+  location.reload();
+}
+
+/* Final approval publishes the document, so it is asked for once more, naming
+   the exact number, revision and what it replaces (PR 2B, PI-12). Cancel has
+   the focus, so a stray Enter never publishes. QMS's check is not final and
+   is not asked twice. */
+let approveOverlay = null, approvePending = null;
+function ensureApproveModal() {
+  if (approveOverlay) return;
+  approveOverlay = document.createElement('div');
+  approveOverlay.className = 'reject-modal-overlay';
+  approveOverlay.id = 'approve-modal';
+  approveOverlay.setAttribute('role', 'dialog');
+  approveOverlay.setAttribute('aria-modal', 'true');
+  approveOverlay.setAttribute('aria-labelledby', 'approve-modal-title');
+  approveOverlay.innerHTML =
+    '<div class="reject-modal">' +
+      '<h3 id="approve-modal-title">Approve and publish?</h3>' +
+      '<div class="approve-modal-rec" id="approve-modal-rec"></div>' +
+      '<p>Your approval releases this exact revision into the register for everyone in the area.</p>' +
+      '<div class="reject-modal-actions">' +
+        '<button type="button" class="btn-reject-cancel" id="approve-modal-cancel">Cancel</button>' +
+        '<button type="button" class="btn-approve-confirm" id="approve-modal-confirm">Approve</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(approveOverlay);
+  const close = function () {
+    approveOverlay.classList.remove('open');
+    const p = approvePending; approvePending = null;
+    if (p && p.openedBy && document.body.contains(p.openedBy)) p.openedBy.focus();
+  };
+  document.getElementById('approve-modal-cancel').addEventListener('click', close);
+  approveOverlay.addEventListener('click', function (e) { if (e.target === approveOverlay) close(); });
+  approveOverlay.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  document.getElementById('approve-modal-confirm').addEventListener('click', function () {
+    const p = approvePending;
+    if (!p) return;
+    approvePending = null;
+    approveOverlay.classList.remove('open');
+    decideApprove(p.id);
+  });
+}
+
 function approveDoc(id) {
+  const card = document.getElementById('pcard-' + id);
+  const btn = card && card.querySelector('.btn-approve');
+  if (!btn || btn.disabled) return;
+  if (btn.dataset.stage === 'qms') { decideApprove(id); return; }
+  ensureApproveModal();
+  approvePending = { id: id, openedBy: btn };
+  const rec = document.getElementById('approve-modal-rec');
+  rec.innerHTML = '<b>' + dEsc(btn.dataset.storeDoc) + '</b> \u00b7 ' + dEsc(btn.dataset.revLabel) + '<br>' +
+    dEsc(btn.dataset.docTitle) + (btn.dataset.change ? '<br>' + dEsc(btn.dataset.change) : '');
+  document.getElementById('approve-modal-confirm').textContent = 'Approve ' + (btn.dataset.revLabel || '') + ' and publish';
+  approveOverlay.classList.add('open');
+  document.getElementById('approve-modal-cancel').focus();
+}
+
+function decideApprove(id) {
   const card = document.getElementById('pcard-' + id);
   const badge = card.querySelector('.pending-status-badge');
   const result = document.getElementById('result-' + id);
@@ -1369,8 +1489,11 @@ function approveDoc(id) {
   const btn = actions.querySelector('.btn-approve');
   const storeDoc = btn.dataset.storeDoc, stage = btn.dataset.stage;
   if (storeDoc && typeof TAQA_STORE !== 'undefined') {
-    const out = stage === 'qms' ? TAQA_STORE.countersign(storeDoc)
-                                : TAQA_STORE.approve(storeDoc);
+    // Bound to the record this card showed, at the step it showed (NEW-01).
+    const expect = { key: btn.dataset.key, stage: stage };
+    const out = stage === 'qms' ? TAQA_STORE.countersign(storeDoc, expect)
+                                : TAQA_STORE.approve(storeDoc, expect);
+    if (out && out.stale) { deskStale(out.error); return; }
     if (!out || !out.ok) {
       badge.className = 'pending-status-badge badge-pending';
       badge.textContent = 'Awaiting Review';
@@ -1463,7 +1586,8 @@ function ensureRejectModal() {
     if (reason.length < 20) return;
 
     if (storeDoc && typeof TAQA_STORE !== 'undefined') {
-      const out = TAQA_STORE.reject(storeDoc, reason);
+      const out = TAQA_STORE.reject(storeDoc, reason, rejectTarget.expect);
+      if (out && out.stale) { closeRejectModal(); deskStale(out.error); return; }
       if (!out || !out.ok) {
         showDashToast('✕ ' + ((out && out.error) || 'Could not reject this document.'), '#FF8A94');
         closeRejectModal();
@@ -1509,8 +1633,9 @@ function rejectDoc(id) {
   const title = btn.dataset.docTitle || card.querySelector('.pending-doc-title')?.textContent || 'this document';
 
   ensureRejectModal();
-  rejectTarget = { id, card, badge, result, actions, storeDoc: btn.dataset.storeDoc, openedBy: btn };
-  rejectDocName.textContent = '"' + title + '"';
+  rejectTarget = { id, card, badge, result, actions, storeDoc: btn.dataset.storeDoc, openedBy: btn,
+                   expect: { key: btn.dataset.key, stage: btn.dataset.stage } };
+  rejectDocName.textContent = '"' + title + '" \u00b7 ' + (btn.dataset.storeDoc || '') + ' \u00b7 ' + (btn.dataset.revLabel || '');
   rejectInput.value = '';
   rejectCount.textContent = '0';
   rejectConfirm.disabled = true;

@@ -602,9 +602,14 @@ function removeDoc(btn) {
   if (!num || typeof TAQA_STORE === 'undefined') return;
   const row = btn.closest('tr');
   const title = row.querySelector('.pub-doc-title').textContent.trim();
+  // A revision still in progress is cancelled with it (PR 2B, NEW-02), so
+  // the dialog says so before anything happens.
+  const open = TAQA_STORE.openDraft ? TAQA_STORE.openDraft(num) : null;
+  const openNote = open ? ' ' + TAQA_STORE.revisionLabel(open) + ', which is in progress, will be cancelled with it: ' +
+      'it leaves the approval queues and is kept as history.' : '';
   if (!confirm('Withdraw "' + title + '"? It will be marked obsolete and ' +
       'every reader will see "Withdrawn, do not use." It stays in the ' +
-      'register, but leaves this list.')) return;
+      'register, but leaves this list.' + openNote)) return;
   const updated = TAQA_STORE.setStatus(num, 'obsolete');
   if (!updated) { showDocsToast('Could not withdraw this document', '#C8102E'); return; }
   row.style.opacity = '0.3';

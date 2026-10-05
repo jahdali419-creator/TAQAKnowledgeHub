@@ -262,14 +262,31 @@ test.describe('tabs switch to the right subset of documents', () => {
 // further out than 30 days (or with no review clock) gets neither. Only
 // shown to roles that hold editMetadata or the register view (owner, qms,
 // auditor), never employee (seesComplianceState()).
+//
+// The page's clock is pinned, so nothing here depends on the day the suite
+// runs (TB-13). These tests used to rely on TQ-GEO-M003's real review date
+// (16 Oct 2026) still being less than 30 days away, and began failing on
+// 17 Oct 2026. The register's data is unchanged: the clock is set relative
+// to that row's own date, and the window's edges are tested on seeded rows
+// against a fixed instant.
 test.describe('amber pre-warning for a review due soon', () => {
   // TQ-GEO-M003 "Technology Readiness Review", segment geothermal-coe
-  // (group 'function'), nextReviewDate 2026-10-16: a real register row whose
-  // review is due within 30 days as of this suite's run, picked by querying
-  // the actual register rather than inventing a date.
+  // (group 'function'): a real register row, read at run time.
   const DOC_NUM = 'TQ-GEO-M003';
   const DOC_TITLE = 'Technology Readiness Review';
   const SEG = 'geothermal-coe';
+  const DAY = 86400000;
+
+  // Pin the page's clock to noon UTC, `daysBefore` days before the row's
+  // review date. The page computes floor((now - due) / day), so this is
+  // exactly `daysBefore` days to go.
+  async function pinBefore(page, gotoApp, num, daysBefore) {
+    await gotoApp('/index.html');
+    const due = await page.evaluate((n) => TAQA_STORE.findDoc(n).nextReviewDate, num);
+    expect(due, num + ' has a review date in the register').toBeTruthy();
+    await page.clock.setFixedTime(new Date(Date.parse(due) - daysBefore * DAY + DAY / 2));
+    return due;
+  }
 
   test('a document due for review soon gets the amber "Review due soon" flag, for a role that acts on it', async ({
     page,
@@ -277,29 +294,16 @@ test.describe('amber pre-warning for a review due soon', () => {
     setRole,
     consoleErrors,
   }) => {
-    await gotoApp('/index.html');
+    await pinBefore(page, gotoApp, DOC_NUM, 10);
     await setRole('qms', SEG);
     await gotoApp('/segment.html?id=' + SEG + '&tab=manuals');
-
-    // Confirm this doc is genuinely due soon (not overdue, not far out) as
-    // of the moment the test actually runs, and compute the expected label
-    // the same way segment.html's rowMeta() does, rather than hardcoding a
-    // day count that would go stale.
-    const expectation = await page.evaluate((num) => {
-      const d = TAQA_STORE.findDoc(num);
-      const due = new Date(d.nextReviewDate);
-      const delta = Math.floor((Date.now() - due) / 86400000);
-      if (!(delta > -30 && delta <= 0)) return { amber: false, delta };
-      const soon = -delta;
-      const how = soon < 60 ? soon + (soon === 1 ? ' day' : ' days') : Math.floor(soon / 30.44) + ' months';
-      return { amber: true, text: 'Review due soon, ' + how };
-    }, DOC_NUM);
-    expect(expectation.amber, 'TQ-GEO-M003 should still be inside the 30-day due-soon window').toBe(true);
+    // The page really is running on the pinned clock.
+    const delta = await page.evaluate((num) => Math.floor((Date.now() - new Date(TAQA_STORE.findDoc(num).nextReviewDate)) / 86400000), DOC_NUM);
+    expect(delta).toBe(-10);
 
     const card = page.locator(`.doc-card[data-title^="${DOC_NUM}"]`).first();
     await expect(card).toBeVisible();
-    const amberBadge = card.locator('.doc-review-soon');
-    await expect(amberBadge).toHaveText(expectation.text);
+    await expect(card.locator('.doc-review-soon')).toHaveText('Review due soon, 10 days');
     await expect(card.locator('.doc-review-late')).toHaveCount(0);
     assertNoConsoleErrors(consoleErrors);
   });
@@ -310,7 +314,7 @@ test.describe('amber pre-warning for a review due soon', () => {
     setRole,
     consoleErrors,
   }) => {
-    await gotoApp('/index.html');
+    await pinBefore(page, gotoApp, DOC_NUM, 10);
     await setRole('employee', SEG);
     await gotoApp('/segment.html?id=' + SEG + '&tab=manuals');
     const card = page.locator(`.doc-card[data-title*="${DOC_TITLE}"]`).first();
@@ -320,15 +324,55 @@ test.describe('amber pre-warning for a review due soon', () => {
     assertNoConsoleErrors(consoleErrors);
   });
 
+  test('the edges of the window on a fixed clock: overdue, due today, 1 and 29 days out, then outside it', async ({
+    page,
+    gotoApp,
+    setRole,
+    seedRegister,
+    clearAppState,
+    consoleErrors,
+  }) => {
+    // Noon UTC on 15 Mar 2026. Each row's review date is a whole day, read
+    // as midnight UTC, so every delta below is exact.
+    const NOW = new Date('2026-03-15T12:00:00Z');
+    const ROWS = [
+      ['TQ-TWS-CTSS-SOP-9101', '2026-03-14', 'late', 'Review overdue, 1 day'],
+      ['TQ-TWS-CTSS-SOP-9102', '2026-03-15', 'soon', 'Review due soon, 0 days'],
+      ['TQ-TWS-CTSS-SOP-9103', '2026-03-16', 'soon', 'Review due soon, 1 day'],
+      ['TQ-TWS-CTSS-SOP-9104', '2026-04-13', 'soon', 'Review due soon, 29 days'],
+      ['TQ-TWS-CTSS-SOP-9105', '2026-04-14', 'none', 'Review due Apr 2026'],
+      ['TQ-TWS-CTSS-SOP-9106', '2026-07-01', 'none', null],
+    ];
+    await gotoApp('/index.html');
+    await clearAppState();
+    await seedRegister(ROWS.map(([n, due]) => ({
+      docNumber: n, title: n + ' Review window probe', segment: 'coiled-tubing', docType: 'sop',
+      issueDate: '2025-01-01', nextReviewDate: due, summary: 'Seeded for the due-soon window test.',
+    })));
+    await page.clock.setFixedTime(NOW);
+    await setRole('qms', 'coiled-tubing');
+    await gotoApp('/segment.html?id=coiled-tubing&tab=sops');
+    for (const [n, , kind, text] of ROWS) {
+      const card = page.locator(`.doc-card[data-title^="${n}"]`).first();
+      await expect(card, n).toBeVisible();
+      await expect(card.locator('.doc-review-soon'), n).toHaveCount(kind === 'soon' ? 1 : 0);
+      await expect(card.locator('.doc-review-late'), n).toHaveCount(kind === 'late' ? 1 : 0);
+      if (kind === 'soon') await expect(card.locator('.doc-review-soon'), n).toHaveText(text);
+      if (kind === 'late') await expect(card.locator('.doc-review-late'), n).toHaveText(text);
+      if (kind === 'none' && text) await expect(card, n).toContainText(text);
+    }
+    assertNoConsoleErrors(consoleErrors);
+  });
+
   test('a document not due for a long time gets no amber flag at all', async ({
     page,
     gotoApp,
     setRole,
     consoleErrors,
   }) => {
-    // TQ-TWS-CTSS-SOP-011, nextReviewDate 2028-01-10: far outside both the
-    // overdue and the 30-day due-soon windows.
-    await gotoApp('/index.html');
+    // TQ-TWS-CTSS-SOP-011, review due 10 Jan 2028, seen from 400 days before
+    // that date: far outside both the overdue and the due-soon windows.
+    await pinBefore(page, gotoApp, 'TQ-TWS-CTSS-SOP-011', 400);
     await setRole('qms', 'coiled-tubing');
     await gotoApp('/segment.html?id=coiled-tubing&tab=sops');
     const card = page.locator('.doc-card[data-title^="TQ-TWS-CTSS-SOP-011"]').first();

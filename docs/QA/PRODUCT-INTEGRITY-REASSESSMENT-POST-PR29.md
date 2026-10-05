@@ -239,6 +239,13 @@ The evidence points here rather than to the next item on the old roadmap. The tw
 - If-Match / ETag on every decision (NEW-01, PI-49);
 - decisions keyed by Entra object id (NEW-04).
 
+**Status after PR 2B (owner's decisions of 5 Oct 2026).** Addressed in the prototype, with regression tests in `tests/decision-integrity.spec.js` and the rules in `BUSINESS-RULES.md` §7, §8 and §18:
+- **NEW-01 / PI-49 (stale part):** every desk, Workbench and bulk decision is bound to the exact record and step shown; a changed record is refused with nothing written and an honest message. Production: item ID + version + If-Match.
+- **NEW-02:** withdrawal cancels the open revision (and its translations' open revisions) with the reason "Cancelled because the document family was withdrawn."; the Withdraw dialogs say so beforehand.
+- **NEW-03:** a returned revision filed again is the same revision, next attempt, with its own record id; the returned attempt stays as history.
+- **PI-07, PI-06, PI-12 (prototype part), NEW-05** and **TB-13** as specified above.
+- **Not in 2B:** the PI-06 number-validation part (PI-14) and the rest of PI-24 stay in 2C; PI-12's file and hash binding is production work.
+
 **After 2B, in this order** (proposed, for your decision later):
 1. **2C: Record truth.** PI-11 withdrawal record and honest trail; PI-10 bulk withdraw over drafts; PI-21 release dates; the rest of PI-24 (Returned state, not pending); PI-13 duplicate detection; PI-14 number validation; NEW-04 delegation-naming guard; PI-32 delegate withdraw/type limits; PI-54.
 2. **2D: Phone and installed-app reliability.** PI-08 drawer close; PI-18 Back; PI-30 update reload; PI-48 offline bars; PI-26 / PI-28 honest offline state; PI-61, PI-51; plus TB-04 / TB-06 tests and adding a WebKit job to CI (TB-05).

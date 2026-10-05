@@ -53,11 +53,21 @@
     Object.keys(fam).forEach(function (n) {
       var rows = fam[n];
       // Same number and same revision twice: two records claim one version.
-      var seen = {};
+      // A revision returned by QMS or the approver stays as history, and its
+      // re-filing is the same revision, next attempt (PR 2B, NEW-03), so the
+      // rule is over records that were not returned; each attempt at a
+      // revision must still be one record.
+      var seen = {}, tries = {};
       rows.forEach(function (d) {
         var k = norm(d.revision);
-        if (seen[k]) add('integrity', 'duplicate-number-revision', d, n + ' Rev ' + revLabel(d.revision) + ' is held by more than one record.', 'rev' + k);
-        seen[k] = 1;
+        if (!d.rejected) {
+          if (seen[k]) add('integrity', 'duplicate-number-revision', d, n + ' Rev ' + revLabel(d.revision) + ' is held by more than one record.', 'rev' + k);
+          seen[k] = 1;
+        }
+        var a = k + '#' + (d.attempt || 1), first = tries[a];
+        if (first && (first.rejected || d.rejected))
+          add('integrity', 'duplicate-attempt', d, n + ' Rev ' + revLabel(d.revision) + ' attempt ' + (d.attempt || 1) + ' is held by more than one record.', 'rev' + a);
+        if (!first) tries[a] = d;
       });
       // More than one revision in force.
       var live = rows.filter(function (d) { return LIVE[d.status]; });
@@ -66,6 +76,14 @@
       // More than one open revision.
       var open = rows.filter(function (d) { return d.status === 'draft' && !d.rejected; });
       if (open.length > 1) add('integrity', 'multiple-open-revisions', open[0], n + ' has ' + open.length + ' revisions in progress. Only one may be open.');
+      // A revision still in progress for a document that has been withdrawn:
+      // it should have been cancelled with the family (PR 2B, NEW-02).
+      open.forEach(function (d) {
+        var m = String(d.supersedes || '').match(/^Rev\s+(.+)$/i);
+        var parent = m ? rows.filter(function (x) { return x !== d && norm(x.revision) === norm(m[1]); })[0] : null;
+        if (parent && parent.status === 'obsolete' && !rows.some(function (x) { return LIVE[x.status]; }))
+          add('integrity', 'open-revision-of-withdrawn-document', d, n + ' Rev ' + revLabel(d.revision) + ' is still in progress, but ' + n + ' Rev ' + revLabel(parent.revision) + ' has been withdrawn. It should have been cancelled with it.');
+      });
     });
 
     records.forEach(function (d) {
@@ -98,6 +116,9 @@
         if (!srcRows) add('integrity', 'translation-source-missing', d, n + ' is a translation of ' + d.translationOf + ', which is not in the register.');
         else if (LIVE[d.status] && !srcRows.some(function (x) { return LIVE[x.status]; }))
           add('integrity', 'translation-live-without-source', d, n + ' is in force but its source ' + d.translationOf + ' has no revision in force.');
+        else if (d.status === 'draft' && !d.rejected && !srcRows.some(function (x) { return LIVE[x.status]; }) &&
+                 srcRows.some(function (x) { return x.status === 'obsolete' && !x.cancelled; }))
+          add('integrity', 'open-translation-of-withdrawn-source', d, n + ' is still in progress, but its source ' + d.translationOf + ' has been withdrawn. It should have been cancelled with it.');
       }
       // A revision above the first with no recorded predecessor.
       var m = major(d.revision);
@@ -169,6 +190,9 @@
     findings.forEach(function (f) { (groups[f.kind + '|' + f.code] = groups[f.kind + '|' + f.code] || []).push(f); });
     var TITLES = {
       'duplicate-number-revision': 'Same number and revision held twice',
+      'duplicate-attempt': 'Same attempt at a revision held twice',
+      'open-revision-of-withdrawn-document': 'Revision still in progress for a withdrawn document',
+      'open-translation-of-withdrawn-source': 'Translation still in progress for a withdrawn source',
       'multiple-live-revisions': 'More than one revision in force',
       'multiple-open-revisions': 'More than one revision in progress',
       'superseded-without-successor': 'Superseded with no successor named',
