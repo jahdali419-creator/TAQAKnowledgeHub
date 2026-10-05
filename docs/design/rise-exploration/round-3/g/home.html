@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RISE Command · Home</title>
+<link rel="stylesheet" href="g.css">
+<style>
+main{padding:18px 16px 210px}
+.stage .eyebrow{display:flex;gap:8px;align-items:center}
+.stage .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ok)}
+.ask{font:300 40px/1.05 var(--font-d);letter-spacing:-.02em;margin:14px 0 18px;color:var(--ink)}
+.ask .caret{height:.9em;width:3px;vertical-align:-.06em;margin:0 4px 0 0}
+.ask .ph{color:var(--ink)}
+.field{display:none}
+/* living context line */
+.ctx{display:grid;gap:8px}
+.ctx a{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:12px;min-height:56px;padding:8px 12px;border-radius:14px;background:var(--s0);border:1px solid var(--line)}
+.ctx .ic{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:var(--s1);color:var(--cyan-hi)}
+.ctx .ic.al{color:var(--due)}
+.ctx small{display:block;font:600 11px/1.2 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px}
+.ctx span.v{display:block;font:500 15px/1.3 var(--font);color:var(--ink)}
+.ctx em{font-style:normal;color:var(--ink3)}
+.ctx .chev{color:var(--ink3)}
+.ctx .lk{display:inline-flex;align-items:center;gap:4px;color:var(--ink2);letter-spacing:.06em;vertical-align:-2px}
+.ctx .lk svg{width:13px;height:13px}
+.sec-h{display:flex;align-items:center;justify-content:space-between;margin:26px 0 8px}
+.cmds{list-style:none;border-top:1px solid var(--line)}
+.cmds a{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:12px;align-items:center;min-height:56px;padding:8px 4px;border-bottom:1px solid var(--line)}
+.cmds .t{font:500 16px/1.3 var(--font);color:var(--ink)}
+.cmds .t small{display:block;font:400 13px/1.3 var(--font);color:var(--ink3);margin-top:2px}
+.cmds svg.i{color:var(--ink2)}
+.cmds .sel{position:relative;background:var(--s2);border-radius:12px;border-color:transparent;padding-left:12px;margin-left:-8px;margin-right:-8px;padding-right:12px;grid-template-columns:24px minmax(0,1fr) auto}
+.cmds .sel::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;background:var(--grad-v)}
+.cmds .sel svg.i{color:var(--cyan-hi)}
+.q-ex{font:500 16px/1.3 var(--font);color:var(--ink)}
+.q-ex::before{content:"\201C";color:var(--ink3)} .q-ex::after{content:"\201D";color:var(--ink3)}
+/* trail as a timeline */
+.tl{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:4px 16px 2px}
+.tl::-webkit-scrollbar{display:none}
+.tl a{position:relative;flex:none;width:172px;padding:18px 14px 0 0}
+.tl a::before{content:"";position:absolute;top:5px;left:0;width:9px;height:9px;border-radius:50%;border:1.5px solid var(--ink3);background:var(--bg);z-index:1}
+.tl a::after{content:"";position:absolute;top:9px;left:9px;right:0;height:1px;background:var(--line2)}
+.tl a:last-child::after{display:none}
+.tl a.now::before{border:0;background:var(--grad)}
+.tl small{display:block;font:600 11px/1.2 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.tl span{display:block;font:500 14px/1.3 var(--font);color:var(--ink2);margin-top:4px}
+.tl a.now span{color:var(--ink)}
+.rail{display:none}
+.reg{display:none}
+.mobile-only{display:block}
+
+@media (min-width:1024px){
+  .mobile-only{display:none}
+  main{display:grid;grid-template-columns:minmax(0,1fr) 360px;grid-template-rows:auto auto;gap:0 64px;padding:56px 72px 0 120px;min-height:calc(100vh - 56px);
+    background:radial-gradient(900px 420px at 30% 18%,rgba(0,173,194,.08),transparent 70%)}
+  .ask{display:none}
+  .field{display:flex;align-items:center;gap:20px;margin:18px 0 0;padding:6px 0 18px;position:relative}
+  .field::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--line2)}
+  .field::before{content:"";position:absolute;left:0;width:180px;bottom:-1px;height:3px;border-radius:3px;background:var(--grad);z-index:1}
+  .field .q{flex:1;font:300 72px/1 var(--font-d);letter-spacing:-.03em;color:var(--ink);white-space:nowrap}
+  .field .q .caret{height:.86em;width:4px;vertical-align:-.04em;margin-right:8px}
+  .field .q .ph{color:#6E8C91}
+  .field .hk{display:flex;gap:8px;align-items:center;color:var(--ink3);font:500 13px/1 var(--font)}
+  .ctx{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+  .ctx a{grid-template-columns:auto auto auto;min-height:40px;padding:6px 12px 6px 6px;border-radius:12px;gap:10px}
+  .ctx .ic{width:28px;height:28px;border-radius:8px}
+  .ctx .ic svg{width:16px;height:16px}
+  .ctx small{display:inline;margin:0 8px 0 0;font-size:10.5px}
+  .ctx span.v{display:inline;font-size:14px;white-space:nowrap}
+  .ctx .chev{display:none}
+  .hints{display:flex;gap:18px;margin-top:22px;color:var(--ink3);font:500 13px/1 var(--font)}
+  .hints span{display:inline-flex;gap:7px;align-items:center}
+  .sec-h{margin:40px 0 6px}
+  .cmds{display:grid;grid-template-columns:1fr 1fr;column-gap:36px;border-top:0}
+  .cmds li{border-top:1px solid var(--line)}
+  .cmds a{border-bottom:0;min-height:64px}
+  .cmds .t{font-size:15px}
+  .rail{display:block;grid-column:2;grid-row:1 / span 2;padding-top:6px}
+  .rail .box{border:1px solid var(--line);background:linear-gradient(180deg,var(--s0),rgba(6,28,34,.4));border-radius:18px;padding:18px 18px 8px}
+  .rail h2{font:inherit;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .rail p.syn{font:400 13px/1.5 var(--font);color:var(--ink3);margin-bottom:10px}
+  .rail p.syn b{color:var(--cyan-hi);font-weight:600}
+  .rail ol{list-style:none}
+  .rail li a{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:10px;align-items:center;height:44px;border-top:1px solid var(--line);font:500 14px/1 var(--font);color:var(--ink2)}
+  .rail li a .k{min-width:20px;height:20px;font-size:10.5px}
+  .rail li a em{font-style:normal;color:var(--ink3);font-size:13px;font-feature-settings:'tnum'}
+  .rail li a.home{color:var(--ink)}
+  .rail li a.home .tag{font:600 10px/1 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--orange);margin-left:8px}
+  .reg{display:grid;grid-template-columns:1fr 1fr;gap:14px 10px;margin-top:20px;padding:0 4px}
+  .reg div{font:300 26px/1 var(--font-d);color:var(--ink)}
+  .reg small{display:block;font:500 12px/1.3 var(--font);color:var(--ink3);margin-top:6px}
+  .trailwrap{grid-column:1 / -1;align-self:end;margin:36px -72px 0 -120px;padding:18px 72px 26px 120px;border-top:1px solid var(--line);background:rgba(6,28,34,.55);display:flex;gap:28px;align-items:flex-start}
+  .trailwrap .sec-h{margin:0;flex:none;width:150px;display:block}
+  .trailwrap .sec-h .eyebrow{display:block}
+  .trailwrap .sec-h .keys{margin-top:10px}
+  .tl{margin:0;padding:0;flex:1;overflow:visible}
+  .tl a{flex:1;width:auto}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+<symbol id="i-cmd" viewBox="0 0 24 24"><path d="M9 6.5V17.5M15 6.5V17.5M6.5 9H17.5M6.5 15H17.5"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="6.5" r="2.5"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></symbol>
+<symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+<symbol id="i-arrow-l" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+<symbol id="i-enter" viewBox="0 0 24 24"><path d="M19 5v7a3 3 0 0 1-3 3H6M10 11l-4 4 4 4"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+<symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.3 12.3l2.5 2.5 4.9-5.2"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4L21 19.5H3L12 4z"/><path d="M12 10v4.2M12 16.8v.2"/></symbol>
+<symbol id="i-expert" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5"/></symbol>
+<symbol id="i-area" viewBox="0 0 24 24"><path d="M4 7l8-3.5L20 7l-8 3.5L4 7z"/><path d="M4 12l8 3.5 8-3.5M4 17l8 3.5 8-3.5"/></symbol>
+<symbol id="i-gloss" viewBox="0 0 24 24"><path d="M5 5.5A1.5 1.5 0 0 1 6.5 4H19v14H6.5A1.5 1.5 0 0 0 5 19.5v-14z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19M9 8.5h6"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3.5h8l4 4V20.5H6z"/><path d="M14 3.5v4h4M9 12h6M9 15.5h6"/></symbol>
+<symbol id="i-sop" viewBox="0 0 24 24"><path d="M6 3.5h12v17H6z"/><path d="M9 8l1 1 2-2M9 13l1 1 2-2M14 8.5h1.5M14 13.5h1.5M9 17.5h6"/></symbol>
+<symbol id="i-wi" viewBox="0 0 24 24"><path d="M4 5.5c3-1 5.5-1 8 .8 2.5-1.8 5-1.8 8-.8v13c-3-1-5.5-1-8 .8-2.5-1.8-5-1.8-8-.8z"/><path d="M12 6.3v13"/></symbol>
+<symbol id="i-std" viewBox="0 0 24 24"><path d="M12 3.5l7 3v5.5c0 4.2-3 7.3-7 8.5-4-1.2-7-4.3-7-8.5V6.5z"/><path d="M9 12l2 2 4-4"/></symbol>
+<symbol id="i-lesson" viewBox="0 0 24 24"><path d="M9 17.5h6M10 20.5h4"/><path d="M12 3.5a5.5 5.5 0 0 0-3.2 10c.8.6 1.2 1.4 1.2 2.3v1.7h4v-1.7c0-.9.4-1.7 1.2-2.3A5.5 5.5 0 0 0 12 3.5z"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.5 2H5z"/><path d="M10 20.5h4"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3M6 6l2.1 2.1M15.9 15.9L18 18M6 18l2.1-2.1M15.9 8.1L18 6"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></symbol>
+<symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M7 3.5h10v17l-5-3.8-5 3.8z"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><circle cx="17" cy="6" r="2.5"/><circle cx="7" cy="12" r="2.5"/><circle cx="17" cy="18" r="2.5"/><path d="M9.3 10.8l5.4-3.4M9.3 13.2l5.4 3.4"/></symbol>
+<symbol id="i-ask" viewBox="0 0 24 24"><path d="M4.5 5.5h15v10h-8l-4.5 4v-4H4.5z"/><path d="M9.5 9a2.5 2.5 0 1 1 3.3 2.4c-.5.2-.8.6-.8 1.1M12 14v.1"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21v-5M8 3.5h8l-1 5 3 3.5H6l3-3.5z"/></symbol>
+<symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V3.5h10V9M7 17H4.5V9h15v8H17"/><path d="M7 14h10v6.5H7z"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 3.5 5.4 3.5 8.5s-1 5.9-3.5 8.5c-2.5-2.6-3.5-5.4-3.5-8.5s1-5.9 3.5-8.5z"/></symbol>
+<symbol id="i-hide" viewBox="0 0 24 24"><path d="M4 4l16 16M10 5.8c.6-.2 1.3-.3 2-.3 6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-2.8 3.6M6.6 7.4C4 9.2 2.5 12 2.5 12S6 18.5 12 18.5c1.6 0 3-.4 4.2-1"/></symbol>
+<symbol id="i-trail" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 12h3M14 12h3"/><circle cx="12" cy="12" r="1"/></symbol>
+<symbol id="i-section" viewBox="0 0 24 24"><path d="M15 6.5c-.6-1.3-1.8-2-3.3-2-2 0-3.2 1.1-3.2 2.6 0 3.6 7 2.5 7 6.6 0 1.4-1 2.4-2.3 2.8M9 17.5c.6 1.3 1.8 2 3.3 2 2 0 3.2-1.1 3.2-2.6 0-3.6-7-2.5-7-6.6 0-1.4 1-2.4 2.3-2.8"/></symbol>
+<symbol id="i-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 20h1M20 14v1"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol>
+<symbol id="i-swap" viewBox="0 0 24 24"><path d="M5 9h13M14 5l4 4-4 4M19 15H6M10 11l-4 4 4 4"/></symbol>
+</defs></svg>
+<header class="sys">
+  <img class="mark" src="../../kit/brand/rise-icon.png" alt="RISE">
+  <img class="lock-up" src="../../kit/brand/rise-lockup-header-reverse.png" alt="RISE">
+  <span class="scope"><span class="dot"></span><b>Coiled Tubing</b> · Operations</span>
+  <span class="sp"></span>
+  <span class="me-txt"><b>Faisal Al-Ghamdi</b>Field Supervisor · Employee</span>
+  <span class="me" aria-label="Faisal Al-Ghamdi, Employee">FA</span>
+</header>
+
+<main>
+  <section class="stage">
+    <p class="eyebrow rise-in">520 in force · 25 areas · 33 alerts</p>
+    <h1 class="ask mobile-only rise-in d1"><span class="ph">What do you need?</span></h1>
+
+    <div class="field rise-in d1" role="search">
+      <div class="q"><span class="caret"></span><span class="ph">What do you need?</span></div>
+      <div class="hk">anywhere <span class="k">Ctrl</span><span class="k">K</span> or <span class="k">/</span></div>
+    </div>
+
+    <!-- the living context line -->
+    <div class="ctx rise-in d2">
+      <a href="area.html"><span class="ic"><svg class="i"><use href="#i-area"/></svg></span>
+        <span><small>Your area</small><span class="v">Coiled Tubing <em>· 36 in force</em></span></span>
+        <svg class="i s chev"><use href="#i-chev"/></svg></a>
+      <a href="area.html#alerts"><span class="ic al"><svg class="i"><use href="#i-alert"/></svg></span>
+        <span><small>Active alert · <span class="lk"><svg class="i s"><use href="#i-lock"/></svg>Confidential</span></small><span class="v">ALT-002 New pressure rating for 2-inch CT string</span></span>
+        <svg class="i s chev"><use href="#i-chev"/></svg></a>
+      <a href="document.html"><span class="ic"><svg class="i"><use href="#i-doc"/></svg></span>
+        <span><small>Last opened</small><span class="v">Injector Head Operations Manual <em>· Rev 4.0</em></span></span>
+        <svg class="i s chev"><use href="#i-chev"/></svg></a>
+    </div>
+
+    <div class="hints keys rise-in d2">
+      <span><span class="k">↑</span><span class="k">↓</span> move</span>
+      <span><span class="k">Space</span> peek</span>
+      <span><span class="k go">↵</span> open</span>
+      <span><span class="k">Tab</span> add filter</span>
+      <span><span class="k">Alt</span><span class="k">←</span> step back on trail</span>
+    </div>
+
+    <div class="sec-h rise-in d3"><span class="eyebrow">Commands for right now</span><span class="keys"><span class="k">↵</span></span></div>
+    <ul class="cmds rise-in d3">
+      <li><a class="sel" href="document.html"><svg class="i"><use href="#i-wi"/></svg>
+        <span class="t">Resume Injector Head Operations Manual<small>§5 Operating limits (2-inch string) · Rev 4.0</small></span><span class="keys"><span class="k go">↵</span></span></a></li>
+      <li><a href="area.html"><svg class="i"><use href="#i-area"/></svg>
+        <span class="t">Enter Coiled Tubing<small>Scope the bar · 6 shelves · 2 active alerts</small></span><span class="keys"><span class="k">G</span><span class="k">C</span></span></a></li>
+      <li><a href="search.html"><svg class="i"><use href="#i-search"/></svg>
+        <span class="t q-ex">pressure test</span><span class="keys"><span class="k">1</span></span></a></li>
+      <li><a href="search-intent.html"><svg class="i"><use href="#i-search"/></svg>
+        <span class="t q-ex">I need to isolate a pump</span><span class="keys"><span class="k">2</span></span></a></li>
+      <li><a href="#"><svg class="i"><use href="#i-ask"/></svg>
+        <span class="t">Ask the Coiled Tubing expert<small>Routed by your area · role, not a name</small></span><span class="keys"><span class="k">A</span></span></a></li>
+      <li><a href="search-start.html"><svg class="i"><use href="#i-gloss"/></svg>
+        <span class="t">Look up a Field Glossary term<small>190+ terms · type <b style="color:var(--cyan-hi);font-weight:600">def:</b> then the term</small></span><span class="keys"><span class="k">?</span></span></a></li>
+    </ul>
+  </section>
+
+  <aside class="rail rise-in d2" aria-label="Scopes">
+    <div class="box">
+      <h2><span class="eyebrow">Scopes</span><span class="keys"><span class="k">G</span> then key</span></h2>
+      <p class="syn">Typing <b>in:</b> narrows the bar to one area.</p>
+      <ol>
+        <li><a class="home" href="area.html"><span class="k">C</span><span>Coiled Tubing<span class="tag">Home</span></span><em>45</em></a></li>
+        <li><a href="#"><span class="k">D</span><span>Drilling Services</span><em>68</em></a></li>
+        <li><a href="#"><span class="k">S</span><span>Safety Services</span><em>66</em></a></li>
+        <li><a href="#"><span class="k">F</span><span>Fracturing</span><em>59</em></a></li>
+        <li><a href="#"><span class="k">I</span><span>Inspection</span><em>45</em></a></li>
+        <li><a href="#"><span class="k">M</span><span>Cementing</span><em>36</em></a></li>
+        <li><a href="#"><span class="k">W</span><span>Well Testing</span><em>32</em></a></li>
+        <li><a href="#"><span class="k">L</span><span>Wireline Services</span><em>29</em></a></li>
+        <li><a href="search-start.html"><span class="k">…</span><span>All 25 areas</span><em></em></a></li>
+      </ol>
+    </div>
+    <div class="reg">
+      <div>33<small>active technical alerts</small></div>
+      <div>190+<small>Field Glossary terms</small></div>
+      <div>14<small>Arabic translations</small></div>
+      <div>~5,000<small>employees</small></div>
+    </div>
+  </aside>
+
+  <section class="trailwrap rise-in d4">
+    <div class="sec-h"><span class="eyebrow">Your trail</span><span class="keys"><span class="k">Alt</span><span class="k">←</span></span></div>
+    <nav class="tl" aria-label="Trail">
+      <a href="search.html"><small>Search</small><span>“pressure test”</span></a>
+      <a href="search.html"><small>Peeked</small><span>Iron Pressure Test</span></a>
+      <a href="search-intent.html"><small>Search</small><span>“I need to isolate a pump”</span></a>
+      <a href="search-intent.html"><small>Section</small><span>§7 Shutdown and isolation</span></a>
+      <a href="area.html"><small>Scope</small><span>Coiled Tubing</span></a>
+      <a class="now" href="document.html"><small>Opened</small><span>Injector Head Operations Manual</span></a>
+    </nav>
+  </section>
+</main>
+
+<div class="dock mobile-only">
+  <div class="chips">
+    <span class="chip"><i>in:</i>coiled-tubing</span>
+    <span class="chip"><i>type:</i>sop</span>
+    <span class="chip"><i>status:</i>current</span>
+    <span class="chip"><i>def:</i>glossary</span>
+  </div>
+  <a class="cmd" href="search-start.html"><svg class="i"><use href="#i-search"/></svg>
+    <span class="q"><span class="caret"></span><span class="ph">Search 520 in force…</span></span>
+    <span class="go"><svg class="i"><use href="#i-arrow-r"/></svg></span></a>
+</div>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RISE Command · Injector Head Operations Manual</title>
+<link rel="stylesheet" href="g.css">
+<style>
+main{padding:16px 16px 170px}
+.idl{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font:500 13px/1.3 var(--font);color:var(--ink3)}
+.idl .code{color:var(--ink2)}
+h1{font:400 34px/1.05 var(--font-d);letter-spacing:-.02em;margin:10px 0 16px}
+/* the trust verdict */
+.verdict{border-radius:20px;border:1px solid rgba(91,224,160,.4);background:linear-gradient(160deg,rgba(91,224,160,.10),rgba(91,224,160,.02) 60%);overflow:hidden}
+.v-top{display:grid;grid-template-columns:56px 1fr;gap:14px;align-items:center;padding:16px}
+.v-top .big{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;background:rgba(91,224,160,.16);color:var(--ok)}
+.v-top .big svg{width:32px;height:32px;stroke-width:1.8}
+.v-top b{display:block;font:700 22px/1.1 var(--font-d);color:var(--ink)}
+.v-top span{display:block;font:400 14px/1.35 var(--font);color:var(--ink2);margin-top:4px}
+.v-grid{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid rgba(91,224,160,.22)}
+.v-grid div{padding:12px 16px;border-top:1px solid rgba(91,224,160,.14)}
+.v-grid div:nth-child(-n+2){border-top:0}
+.v-grid div:nth-child(odd){border-right:1px solid rgba(91,224,160,.14)}
+.v-grid small{display:block;font:600 10.5px/1.2 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+.v-grid span{display:block;font:600 15px/1.3 var(--font);color:var(--ink);margin-top:4px}
+.v-grid .wide{grid-column:1 / -1;border-right:0 !important}
+.alertbind{display:grid;grid-template-columns:22px 1fr;gap:10px;margin-top:12px;padding:12px 14px;border-radius:14px;border:1px solid rgba(244,193,90,.4);background:rgba(244,193,90,.06);font:400 14px/1.45 var(--font);color:var(--ink2)}
+.alertbind svg{color:var(--due);margin-top:2px}
+.alertbind b{color:var(--ink);font-weight:600}
+.alertbind .lk{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.alertbind .lk svg{width:13px;height:13px;color:var(--ink2);margin:0}
+/* actions: each has a key */
+.acts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.acts a{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 4px;gap:6px;min-height:68px;border-radius:14px;border:1px solid var(--line2);background:var(--s0);font:600 13px/1.1 var(--font);color:var(--ink)}
+.acts a svg{color:var(--cyan-hi)}
+.acts a .keys{display:none}
+.acts a.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.acts a.pri svg{color:var(--bg)}
+.acts .more{display:none}
+.sec-h{display:flex;align-items:center;justify-content:space-between;margin:26px 0 10px}
+.changed{padding:14px;border-radius:14px;background:var(--s0);border:1px solid var(--line)}
+.changed q{display:block;font:400 20px/1.25 var(--font-d);color:var(--ink);quotes:none;margin-top:6px}
+.changed p{font:400 14.5px/1.5 var(--font);color:var(--ink2);margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+/* revision timeline */
+.revs{list-style:none;position:relative;padding-left:22px}
+.revs::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:1px;background:var(--line2)}
+.revs li{position:relative;padding:6px 0 10px}
+.revs li::before{content:"";position:absolute;left:-21px;top:11px;width:11px;height:11px;border-radius:50%;background:var(--bg);border:1.5px solid var(--ink3)}
+.revs li.cur::before{background:var(--grad);border:0;width:13px;height:13px;left:-22px;top:10px;box-shadow:0 0 0 4px rgba(253,105,29,.15)}
+.revs li.next::before{border-style:dashed;border-color:var(--ink2)}
+.revs .rv{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font:600 15px/1.3 var(--font);color:var(--ink)}
+.revs .rv small{font:400 13px/1.3 var(--font);color:var(--ink3)}
+.revs li.old .rv{color:var(--ink2)}
+.trailp{list-style:none;margin-top:8px;display:grid;gap:4px;font:400 13px/1.4 var(--font);color:var(--ink2)}
+.trailp li{display:grid;grid-template-columns:88px 1fr;gap:8px}
+.supinset b svg{flex:none}
+.trailp li span:first-child{color:var(--ink3);font-feature-settings:'tnum'}
+.supinset{margin-top:6px;padding:10px 12px;border-radius:12px;border:1px dashed var(--line2);font:400 13px/1.45 var(--font);color:var(--ink3)}
+.supinset b{display:inline-flex;gap:6px;align-items:center;color:var(--ink2);font-weight:600}
+.toc{list-style:none}
+.toc li a{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;min-height:48px;border-top:1px solid var(--line);font:500 15px/1.3 var(--font);color:var(--ink)}
+.toc li a>span:first-child{color:var(--ink3);font-feature-settings:'tnum'}
+.toc .flag{font:600 12px/1 var(--font);color:var(--due);display:inline-flex;gap:4px;align-items:center}
+.toc .flag svg{width:14px;height:14px}
+.toc .seen{font:500 12px/1 var(--font);color:var(--ink3)}
+.next a{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:12px;align-items:center;min-height:56px;border-top:1px solid var(--line);font:500 15px/1.3 var(--font)}
+.next a svg{color:var(--ink3)}
+.next a small{display:block;font:400 13px/1.3 var(--font);color:var(--ink3)}
+.next a .r{font:500 13px/1 var(--font);color:var(--ink3);display:inline-flex;gap:4px;align-items:center}
+.next a .r svg{width:13px;height:13px}
+.eqs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.eqs a{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--line2);font:500 14px/1 var(--font)}
+.expert{margin-top:14px;padding:14px;border-radius:16px;background:linear-gradient(135deg,rgba(0,93,99,.35),rgba(10,36,43,.6));border:1px solid var(--line2)}
+.expert b{display:flex;gap:8px;align-items:center;font:600 15px/1.3 var(--font)}
+.expert b svg{color:var(--cyan-hi)}
+.expert q{display:block;margin-top:8px;font:400 14px/1.45 var(--font);color:var(--ink2);padding-left:10px;border-left:2px solid var(--line2)}
+.expert a{display:inline-flex;align-items:center;gap:8px;margin-top:10px;height:44px;padding:0 14px;border-radius:12px;background:var(--ink);color:var(--bg);font:600 14px/1 var(--font)}
+.page{display:none}
+.side-cmd{display:none !important}
+.side .sec-h:first-of-type{}
+.side{margin-top:4px}
+
+@media (min-width:1024px){
+  .dock{display:none}
+  main{display:grid;grid-template-columns:minmax(0,1fr) 392px;gap:0 40px;padding:24px 40px 0;height:calc(100vh - 56px);overflow:hidden}
+  .main{min-width:0}
+  h1{font-size:54px;margin:10px 0 18px;white-space:nowrap}
+  .verdict{display:grid;grid-template-columns:330px 1fr}
+  .v-top{padding:26px 22px;border-right:1px solid rgba(91,224,160,.22)}
+  .v-top b{font-size:26px}
+  .v-grid{border-top:0;grid-template-columns:1fr 1fr}
+  .v-grid div{padding:18px 20px}
+  .v-grid span{font-size:14.5px}
+  .alertbind{font-size:13.5px;margin-top:14px;padding:12px 14px}
+  .row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:28px;margin-top:4px}
+  .supinset{margin-top:12px}
+  .sec-h{margin:30px 0 12px}
+  .revs li{padding:4px 0 8px}
+  .revs .rv{font-size:14px}
+  .trailp{font-size:12.5px}
+  .changed q{font-size:19px}
+  .changed p{font-size:13.5px}
+  .acts{grid-template-columns:repeat(4,auto) 1fr;display:flex;flex-wrap:nowrap;margin-top:22px;gap:6px}
+  .acts a{flex-direction:row;min-height:44px;padding:0 9px 0 11px;border-radius:11px;font-size:13px;gap:7px}
+  .acts a svg{width:16px;height:16px}
+  .acts a .keys{display:inline-flex}
+  .acts a .k{height:20px;min-width:20px;font-size:10.5px}
+  .acts a.pri .k{background:#d5e2e3;color:var(--bg);border-color:transparent}
+  .acts .more{display:flex}
+  .side{margin:0;padding-left:28px;border-left:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column}
+  .side-cmd{display:flex !important}
+  .side .cmd{min-height:48px;border-radius:12px;padding:4px 10px 4px 14px}
+  .side .cmd .q{font-size:14px}
+  .side .cmd svg{width:18px;height:18px}
+  .side .cmd .in{font-size:14px}
+  .side .cmd .q .ph{font-size:14px}
+  .pagewrap{display:grid;grid-template-columns:84px 1fr;gap:14px;margin-top:16px}
+  .page{display:block;position:relative;height:116px;border-radius:5px;background:#F3F6F6;box-shadow:0 14px 30px -10px rgba(0,0,0,.7);padding:10px 9px;overflow:hidden}
+  .page::before{content:"";position:absolute;left:0;top:0;right:0;height:4px;background:linear-gradient(90deg,#005D63,#00ADC2)}
+  .page i{display:block;height:3px;border-radius:2px;background:#C9D6D8;margin-top:6px}
+  .page .pt{font:700 9px/1.2 var(--font);color:#002B32;margin-top:6px}
+  .page .pc{font:600 6px/1 var(--font);color:#4a6468}
+  .page .na{position:absolute;left:7px;right:7px;bottom:7px;font:500 7.5px/1.25 var(--font);color:#4a6468}
+  .toc li a{min-height:32px;font-size:12.5px;white-space:nowrap;grid-template-columns:20px 1fr auto}
+  .toc li:first-child a{border-top:0}
+  .toc .flag{font-size:11px}
+  .next a{min-height:42px;font-size:13.5px}
+  .next a small{font-size:12px}
+  .side .sec-h{margin:16px 0 4px}
+  .expert{margin-top:12px;padding:12px 14px}
+  .expert q{font-size:13px}
+  .expert a{height:36px;font-size:13px}
+  .eqs{margin-top:10px}
+  .eqs a{height:30px;font-size:13px}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+<symbol id="i-cmd" viewBox="0 0 24 24"><path d="M9 6.5V17.5M15 6.5V17.5M6.5 9H17.5M6.5 15H17.5"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="6.5" r="2.5"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></symbol>
+<symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+<symbol id="i-arrow-l" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+<symbol id="i-enter" viewBox="0 0 24 24"><path d="M19 5v7a3 3 0 0 1-3 3H6M10 11l-4 4 4 4"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+<symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.3 12.3l2.5 2.5 4.9-5.2"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4L21 19.5H3L12 4z"/><path d="M12 10v4.2M12 16.8v.2"/></symbol>
+<symbol id="i-expert" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5"/></symbol>
+<symbol id="i-area" viewBox="0 0 24 24"><path d="M4 7l8-3.5L20 7l-8 3.5L4 7z"/><path d="M4 12l8 3.5 8-3.5M4 17l8 3.5 8-3.5"/></symbol>
+<symbol id="i-gloss" viewBox="0 0 24 24"><path d="M5 5.5A1.5 1.5 0 0 1 6.5 4H19v14H6.5A1.5 1.5 0 0 0 5 19.5v-14z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19M9 8.5h6"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3.5h8l4 4V20.5H6z"/><path d="M14 3.5v4h4M9 12h6M9 15.5h6"/></symbol>
+<symbol id="i-sop" viewBox="0 0 24 24"><path d="M6 3.5h12v17H6z"/><path d="M9 8l1 1 2-2M9 13l1 1 2-2M14 8.5h1.5M14 13.5h1.5M9 17.5h6"/></symbol>
+<symbol id="i-wi" viewBox="0 0 24 24"><path d="M4 5.5c3-1 5.5-1 8 .8 2.5-1.8 5-1.8 8-.8v13c-3-1-5.5-1-8 .8-2.5-1.8-5-1.8-8-.8z"/><path d="M12 6.3v13"/></symbol>
+<symbol id="i-std" viewBox="0 0 24 24"><path d="M12 3.5l7 3v5.5c0 4.2-3 7.3-7 8.5-4-1.2-7-4.3-7-8.5V6.5z"/><path d="M9 12l2 2 4-4"/></symbol>
+<symbol id="i-lesson" viewBox="0 0 24 24"><path d="M9 17.5h6M10 20.5h4"/><path d="M12 3.5a5.5 5.5 0 0 0-3.2 10c.8.6 1.2 1.4 1.2 2.3v1.7h4v-1.7c0-.9.4-1.7 1.2-2.3A5.5 5.5 0 0 0 12 3.5z"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.5 2H5z"/><path d="M10 20.5h4"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3M6 6l2.1 2.1M15.9 15.9L18 18M6 18l2.1-2.1M15.9 8.1L18 6"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></symbol>
+<symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M7 3.5h10v17l-5-3.8-5 3.8z"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><circle cx="17" cy="6" r="2.5"/><circle cx="7" cy="12" r="2.5"/><circle cx="17" cy="18" r="2.5"/><path d="M9.3 10.8l5.4-3.4M9.3 13.2l5.4 3.4"/></symbol>
+<symbol id="i-ask" viewBox="0 0 24 24"><path d="M4.5 5.5h15v10h-8l-4.5 4v-4H4.5z"/><path d="M9.5 9a2.5 2.5 0 1 1 3.3 2.4c-.5.2-.8.6-.8 1.1M12 14v.1"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21v-5M8 3.5h8l-1 5 3 3.5H6l3-3.5z"/></symbol>
+<symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V3.5h10V9M7 17H4.5V9h15v8H17"/><path d="M7 14h10v6.5H7z"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 3.5 5.4 3.5 8.5s-1 5.9-3.5 8.5c-2.5-2.6-3.5-5.4-3.5-8.5s1-5.9 3.5-8.5z"/></symbol>
+<symbol id="i-hide" viewBox="0 0 24 24"><path d="M4 4l16 16M10 5.8c.6-.2 1.3-.3 2-.3 6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-2.8 3.6M6.6 7.4C4 9.2 2.5 12 2.5 12S6 18.5 12 18.5c1.6 0 3-.4 4.2-1"/></symbol>
+<symbol id="i-trail" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 12h3M14 12h3"/><circle cx="12" cy="12" r="1"/></symbol>
+<symbol id="i-section" viewBox="0 0 24 24"><path d="M15 6.5c-.6-1.3-1.8-2-3.3-2-2 0-3.2 1.1-3.2 2.6 0 3.6 7 2.5 7 6.6 0 1.4-1 2.4-2.3 2.8M9 17.5c.6 1.3 1.8 2 3.3 2 2 0 3.2-1.1 3.2-2.6 0-3.6-7-2.5-7-6.6 0-1.4 1-2.4 2.3-2.8"/></symbol>
+<symbol id="i-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 20h1M20 14v1"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol>
+<symbol id="i-swap" viewBox="0 0 24 24"><path d="M5 9h13M14 5l4 4-4 4M19 15H6M10 11l-4 4 4 4"/></symbol>
+</defs></svg>
+<header class="sys">
+  <a class="back" href="area.html"><svg class="i"><use href="#i-arrow-l"/></svg><span>in Coiled Tubing</span></a>
+  <img class="lock-up" src="../../kit/brand/rise-lockup-header-reverse.png" alt="RISE">
+  <nav class="trail" aria-label="Trail">
+    <a href="search-intent.html">“I need to isolate a pump”</a><span class="ln"></span>
+    <a href="area.html">in Coiled Tubing</a><span class="ln"></span>
+    <a class="now" href="document.html">WI-003 Injector Head Operations Manual</a>
+    <span class="hint keys"><span class="k">Alt</span><span class="k">←</span></span>
+  </nav>
+  <span class="sp"></span>
+  <span class="me-txt"><b>Faisal Al-Ghamdi</b>Field Supervisor · Employee</span>
+  <span class="me" aria-label="Faisal Al-Ghamdi, Employee">FA</span>
+</header>
+
+<main>
+ <div class="main">
+  <p class="idl rise-in"><span class="code">TQ-TWS-CTSS-WI-003</span><span>Manual</span><span>·</span><span>Coiled Tubing · Operations</span><span>·</span><span>English</span><span>·</span><span>36-month review cycle</span></p>
+  <h1 class="rise-in d1">Injector Head Operations Manual</h1>
+
+  <section class="verdict rise-in d1" aria-label="Can I trust this document">
+    <div class="v-top">
+      <span class="big"><svg class="i"><use href="#i-ok"/></svg></span>
+      <div><b>Current. Use it.</b><span>Rev 4.0 is the revision in force · Internal, full view</span></div>
+    </div>
+    <div class="v-grid">
+      <div><small>Revision</small><span>Rev 4.0</span></div>
+      <div><small>Effective</small><span>30 Aug 2025</span></div>
+      <div><small>Approved by</small><span>Segment Director, Coiled Tubing</span></div>
+      <div><small>Next review</small><span>30 Aug 2028</span></div>
+    </div>
+  </section>
+
+  <p class="alertbind rise-in d2"><svg class="i"><use href="#i-alert"/></svg><span><b>Read with ALT-002.</b> New pressure rating for 2-inch CT string changes the limits in §5. <span class="lk"><svg class="i"><use href="#i-lock"/></svg>Confidential · request access through QMS</span></span></p>
+
+  <div class="acts rise-in d2">
+    <a class="pri" href="#"><svg class="i"><use href="#i-download"/></svg>Download PDF<span class="keys"><span class="k">D</span></span></a>
+    <a href="#"><svg class="i"><use href="#i-bookmark"/></svg>Bookmark<span class="keys"><span class="k">B</span></span></a>
+    <a href="#"><svg class="i"><use href="#i-qr"/></svg>Share<span class="keys"><span class="k">S</span></span></a>
+    <a href="#ask"><svg class="i"><use href="#i-ask"/></svg>Ask expert<span class="keys"><span class="k">A</span></span></a>
+    <a class="more" href="#"><svg class="i"><use href="#i-sun"/></svg>Quick reference card<span class="keys"><span class="k">Q</span></span></a>
+    <a class="more ico" href="#" aria-label="Pin offline" title="Pin offline"><svg class="i"><use href="#i-pin"/></svg><span class="keys"><span class="k">O</span></span></a>
+    <a class="more ico" href="#" aria-label="Print" title="Print"><svg class="i"><use href="#i-print"/></svg><span class="keys"><span class="k">P</span></span></a>
+  </div>
+
+  <div class="row2">
+    <div>
+      <div class="sec-h"><span class="eyebrow">What changed in Rev 4.0</span></div>
+      <div class="changed rise-in d3">
+        <q>Traction pressure limits for 2-inch string</q>
+        <p>How to rig up, operate, monitor and shut down the CT injector head safely: chain tension, gripper block inspection, traction pressure limits, and what to do on a chain slip.</p>
+      </div>
+      <p class="supinset">Open Rev 3.0 by its link and the bar says: <b><svg class="i s"><use href="#i-clock"/></svg>Superseded. A newer revision exists: Rev 4.0</b></p>
+    </div>
+    <div>
+      <div class="sec-h"><span class="eyebrow">Revision timeline</span><span class="keys"><span class="k">H</span></span></div>
+      <ol class="revs rise-in d3">
+        <li class="next"><div class="rv">Next review<small>30 Aug 2028</small></div></li>
+        <li class="cur"><div class="rv">Rev 4.0 · Current<small>from 30 Aug 2025</small></div>
+          <ul class="trailp">
+            <li><span>19 Aug 2025</span><span>Filed · Khalid Al-Otaibi, CT Engineer</span></li>
+            <li><span>24 Aug 2025</span><span>QMS check · QMS Document Control</span></li>
+            <li><span>28 Aug 2025</span><span>Final approval · Segment Director</span></li>
+          </ul></li>
+        <li class="old"><div class="rv">Rev 3.0 · 2.0 · 1.0<small>Superseded · current revision only</small></div></li>
+      </ol>
+    </div>
+  </div>
+ </div>
+
+ <aside class="side">
+  <div class="cmd side-cmd" role="search"><svg class="i"><use href="#i-search"/></svg><span class="q"><span class="in">in WI-003 ›</span><span class="ph">jump to a section</span></span><span class="keys"><span class="k">/</span></span></div>
+  <div class="pagewrap">
+    <div class="page" aria-hidden="true"><span class="pc">TQ-TWS-CTSS-WI-003 · REV 4.0</span><div class="pt">Injector Head Operations Manual</div><i style="width:80%"></i><i></i><i style="width:90%"></i><i style="width:60%"></i><i></i><span class="na">Preview not connected</span></div>
+    <ol class="toc">
+      <li><a href="#"><span>1</span><span>Scope</span><span></span></a></li>
+      <li><a href="#"><span>2</span><span>Injector head components</span><span></span></a></li>
+      <li><a href="#"><span>3</span><span>Pre-job inspection</span><span></span></a></li>
+      <li><a href="#"><span>4</span><span>Chain tension and traction pressure</span><span></span></a></li>
+      <li><a href="#"><span>5</span><span>Operating limits (2-inch string)</span><span class="flag"><svg class="i"><use href="#i-alert"/></svg>ALT</span></a></li>
+      <li><a href="#"><span>6</span><span>Chain slip response</span><span></span></a></li>
+      <li><a href="#"><span>7</span><span>Shutdown and isolation</span><span class="seen">on trail</span></a></li>
+      <li><a href="#"><span>A</span><span>Inspection record (F001)</span><span></span></a></li>
+    </ol>
+  </div>
+
+  <div class="sec-h"><span class="eyebrow">Related · next commands</span><span class="keys"><span class="k">R</span></span></div>
+  <nav class="next">
+    <a href="#"><svg class="i"><use href="#i-wi"/></svg><span>CT String Inspection Manual<small>WI-005 · Manual</small></span><span class="r">Current</span></a>
+    <a href="#"><svg class="i"><use href="#i-sop"/></svg><span>CT Unit Rig-Up &amp; Rig-Down<small>SOP-006 · Review due</small></span><span class="r"><svg class="i"><use href="#i-lock"/></svg>Restricted</span></a>
+    <a href="#"><svg class="i"><use href="#i-doc"/></svg><span>Pre-Job Safety Checklist<small>F001 · Appendix A</small></span><span class="r">Form</span></a>
+  </nav>
+  <div class="eqs"><span class="concept">Proposed equipment</span><a href="area.html">Injector head</a><a href="#">CT string (2-inch)</a></div>
+
+  <div class="expert" id="ask">
+    <b><svg class="i"><use href="#i-ask"/></svg>Ask the Coiled Tubing expert</b>
+    <q>Chain slip on the injector at 4,200 ft — can we continue at reduced traction pressure?</q>
+    <a href="#">Ask with this question <span class="keys"><span class="k" style="background:#d5e2e3;color:var(--bg);border-color:transparent">A</span></span></a>
+  </div>
+ </aside>
+</main>
+
+<div class="dock">
+  <div class="cmd" role="search"><svg class="i"><use href="#i-search"/></svg>
+    <span class="q"><span class="in">in WI-003 ›</span><span class="ph">jump to a section</span></span>
+    <span class="go"><svg class="i"><use href="#i-arrow-r"/></svg></span></div>
+</div>
+</body>
+</html>
