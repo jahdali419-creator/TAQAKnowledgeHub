@@ -2050,16 +2050,22 @@ function goPage(type,page){
   // so a keyboard or screen reader continues from the new page.
   const listEl=document.getElementById('list-'+type);
   if(!listEl)return;
-  requestAnimationFrame(()=>{
+  // Focus goes first: in WebKit a focus after the smooth scroll began cut
+  // the scroll short, which is the landing-at-the-bottom fault itself.
+  if(!listEl.hasAttribute('tabindex'))listEl.setAttribute('tabindex','-1');
+  listEl.focus({preventScroll:true});
+  const covered=()=>{
     const tabs=document.querySelector('.tabs-outer');
-    const covered=tabs&&getComputedStyle(tabs).position==='sticky'
+    return tabs&&getComputedStyle(tabs).position==='sticky'
       ?(parseFloat(getComputedStyle(tabs).top)||0)+tabs.offsetHeight
       :(window.TAQA_TOP?TAQA_TOP():64);
-    const y=listEl.getBoundingClientRect().top+window.scrollY-covered-8;
+  };
+  const target=()=>Math.max(0,listEl.getBoundingClientRect().top+window.scrollY-covered()-8);
+  requestAnimationFrame(()=>{
     const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-    window.scrollTo({top:Math.max(0,y),behavior:reduce?'auto':'smooth'});
-    if(!listEl.hasAttribute('tabindex'))listEl.setAttribute('tabindex','-1');
-    listEl.focus({preventScroll:true});
+    window.scrollTo({top:target(),behavior:reduce?'auto':'smooth'});
+    // If anything still cut it short, land it exactly.
+    setTimeout(()=>{ if(Math.abs(window.scrollY-target())>24)window.scrollTo({top:target(),behavior:'auto'}); },700);
   });
 }
 

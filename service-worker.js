@@ -88,7 +88,11 @@ self.addEventListener('message', e => {
   // open the update waits for "Update now" or for them to close.
   if (e.data.type === 'SKIP_WAITING_IF_ALONE') {
     e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => {
-      if (cs.length <= 1) return self.skipWaiting();
+      const alone = cs.length <= 1;
+      // Tell the page which it was, so it offers "Update now" only when
+      // the update did not apply.
+      if (e.source && e.source.postMessage) e.source.postMessage({ type: 'QUIET', applied: alone });
+      if (alone) return self.skipWaiting();
     }));
   }
   if (e.data.type === 'HOW_SERVED' && e.source) {

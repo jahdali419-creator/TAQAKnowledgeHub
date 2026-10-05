@@ -469,7 +469,14 @@ window.TAQA_TOP = function(){
   navigator.serviceWorker.addEventListener('controllerchange', function(){
     // Only the tab that asked reloads. A first install, or another tab's
     // update, changes the controller here too, and must not touch this page.
-    if (reloadAsked) window.location.reload();
+    if (reloadAsked) { window.location.reload(); return; }
+    // Applied elsewhere (or quietly here): nothing is waiting any more.
+    navigator.serviceWorker.getRegistration().then(function(r){ if (!r || !r.waiting) bar.style.display = 'none'; });
+  });
+  // The worker's answer to the quiet apply: offer "Update now" only if it
+  // did not apply (another RISE window is open).
+  navigator.serviceWorker.addEventListener('message', function(e){
+    if (e.data && e.data.type === 'QUIET' && !e.data.applied) show();
   });
   navigator.serviceWorker.getRegistration().then(function(reg){
     if (!reg) return;
@@ -480,7 +487,8 @@ window.TAQA_TOP = function(){
         // Applied only if this is the only RISE window (service-worker.js);
         // otherwise it keeps waiting, and "Update now" is offered.
         reg.waiting.postMessage({ type: 'SKIP_WAITING_IF_ALONE' });
-        setTimeout(function(){ if (reg.waiting) show(); }, 1500);
+        // If no answer comes, say so after a while rather than never.
+        setTimeout(function(){ if (reg.waiting && bar.style.display !== 'flex') show(); }, 8000);
         return;
       }
       show();

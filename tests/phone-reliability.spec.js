@@ -288,16 +288,15 @@ test.describe('segment pager on a phone', () => {
     await next.scrollIntoViewIfNeeded();
     await next.click();
     await expect(page.locator('#pg-sops .pg-info')).toHaveText(/Page 2 of 2/);
-    await page.waitForTimeout(900); // smooth scroll settles
-    const geo = await page.evaluate(() => {
+    // Where it settles (smooth scrolling runs at the engine's own pace).
+    const geo = () => page.evaluate(() => {
       const list = document.activeElement;
       const tabs = document.querySelector('.tabs-outer').getBoundingClientRect();
       const first = list && list.firstElementChild ? list.firstElementChild.getBoundingClientRect() : null;
-      return { id: list && list.id, tabsBottom: tabs.bottom, firstTop: first && first.top };
+      return { id: list && list.id, gap: first ? Math.round(first.top - tabs.bottom) : null };
     });
-    expect(geo.id).toBe('list-sops');
-    expect(geo.firstTop).toBeGreaterThanOrEqual(geo.tabsBottom - 1);
-    expect(geo.firstTop).toBeLessThan(geo.tabsBottom + 60);
+    await expect.poll(async () => (await geo()).id).toBe('list-sops');
+    await expect.poll(async () => { const g = await geo(); return g.gap >= -1 && g.gap < 60; }, { timeout: 6000 }).toBe(true);
   });
 });
 
