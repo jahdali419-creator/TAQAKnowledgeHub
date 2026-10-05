@@ -238,9 +238,12 @@ window.TAQA_WORK = (function(){
       if (document.querySelector('dialog[open]')) return true;
       var open = document.querySelectorAll('.open[role="dialog"], [aria-modal="true"].open, .modal-overlay.open, .reject-overlay.open, .approve-overlay.open');
       for (var i = 0; i < open.length; i++) if (visible(open[i])) return true;
-      var typed = document.querySelectorAll('textarea, input[type="text"]:not([type="search"]):not(#q):not(.nav-search-input), input[type="file"]');
+      // Any field a person types into (text, no type, email, tel, number,
+      // date and the like), and a chosen file. Search boxes do not count.
+      var typed = document.querySelectorAll('textarea, input:not([type]), input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="url"], input[type="date"], input[type="file"]');
       for (var j = 0; j < typed.length; j++) {
         var t = typed[j];
+        if (t.id === 'q' || (t.classList && t.classList.contains('nav-search-input'))) continue;
         if (t.closest && t.closest('#navbar, .bm-panel, .search, [role="search"]')) continue;
         if (t.type === 'file' ? (t.files && t.files.length) : (String(t.value || '').trim() && t.defaultValue !== t.value && visible(t))) return true;
       }
@@ -302,10 +305,16 @@ window.TAQA_NET = (function(){
     return 'RISE cannot be reached. This is the copy saved on this device from ' + when(cachedAt) + '; nothing can be sent.';
   }
   function shortText(){
-    return state === 'offline' ? 'Offline: saved copies only. Nothing can be sent.' : 'RISE not reached: saved copy. Nothing can be sent.';
+    return state === 'offline' ? 'Offline. Nothing can be sent.' : 'RISE not reached. Nothing can be sent.';
   }
+  var painted = null;
   function paint(){
     var on = state !== 'online';
+    // Redrawn only when the words change, so a screen reader is not told the
+    // same thing again at every re-check.
+    var key = on ? state + '|' + cachedAt : '';
+    if (key === painted && (!on || bar.parentNode)) { listeners.forEach(function(fn){ try { fn(state); } catch(e){} }); return; }
+    painted = key;
     document.documentElement.classList.toggle('taqa-net-on', on);
     if (on) {
       var sp = bar.querySelector('span');
@@ -327,16 +336,19 @@ window.TAQA_NET = (function(){
       schedule();
     }, retryMs);
   }
-  function set(next, date){
+  function set(next, date, unconfirmed){
     if (next === 'unreachable' && date) cachedAt = date;
     var was = state; state = next;
     if (next === 'online') { if (retry) clearTimeout(retry); retry = null; retryMs = 20000; }
     else if (next === 'unreachable') schedule();
-    if (next === 'online') { try { localStorage.setItem('taqa-last-sync', Date.now().toString()); } catch(e){} }
+    if (next === 'online' && !unconfirmed) { try { localStorage.setItem('taqa-last-sync', Date.now().toString()); } catch(e){} }
     paint();
     // For scripts that ran before this file (the viewer's sync note).
     try { window.dispatchEvent(new CustomEvent('taqa:net', { detail: { state: state } })); } catch(e){}
-    if (was !== 'online' && next === 'online' && window.showToast) window.showToast('Back online');
+    if (was !== 'online' && next === 'online' && window.showToast) {
+      // The page on screen may still be the saved copy: say so.
+      window.showToast(cachedAt || was === 'unreachable' ? 'RISE is reachable again. Reload this page for the current copy.' : 'Back online');
+    }
   }
   // Is the server really there? A tiny request that the service worker never
   // answers from its cache.
@@ -367,7 +379,7 @@ window.TAQA_NET = (function(){
     try { navigator.serviceWorker.controller.postMessage({ type: 'HOW_SERVED' }); } catch(e){}
     // A worker from before this release does not answer: then it is the
     // device's word, as before, until a probe or a write says otherwise.
-    setTimeout(function(){ if (!answered && state === 'online') set('online'); }, 1500);
+    setTimeout(function(){ if (!answered && state === 'online') set('online', null, true); }, 1500);
   } else if (state === 'online') {
     set('online');
   }
@@ -431,7 +443,7 @@ window.TAQA_TOP = function(){
     '#sw-update-bar{position:fixed;bottom:0;left:0;right:0;z-index:9996;background:#005D63;' +
       'padding:10px max(16px, var(--safe-r)) calc(10px + var(--safe-b)) max(16px, var(--safe-l));' +
       'display:none;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 12px;font-size:13.5px;font-weight:600;color:#fff;box-shadow:0 -4px 20px rgba(0,93,99,0.35);}' +
-    '#sw-update-bar button{background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.4);color:#fff;padding:6px 14px;min-height:36px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}' +
+    '#sw-update-bar button{background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.4);color:#fff;padding:6px 14px;min-height:44px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}' +
     '#sw-update-bar button:hover{background:rgba(255,255,255,0.35);}' +
     '#sw-update-bar button:focus-visible{outline:2px solid #fff;outline-offset:2px;}';
   document.head.appendChild(s);
@@ -465,7 +477,10 @@ window.TAQA_TOP = function(){
       if (!navigator.serviceWorker.controller) return;   // first install: nothing to replace
       // Just loaded, nothing in progress: apply it quietly, without a reload.
       if (document.readyState !== 'loading' && performance.now() < 4000 && !TAQA_WORK.busy()) {
-        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        // Applied only if this is the only RISE window (service-worker.js);
+        // otherwise it keeps waiting, and "Update now" is offered.
+        reg.waiting.postMessage({ type: 'SKIP_WAITING_IF_ALONE' });
+        setTimeout(function(){ if (reg.waiting) show(); }, 1500);
         return;
       }
       show();
@@ -482,7 +497,7 @@ window.TAQA_TOP = function(){
       var id = e.target && e.target.id;
       if (id === 'sw-reload-btn') { if (TAQA_WORK.busy()) warn(); else apply(reg); }
       else if (id === 'sw-reload-anyway') apply(reg);
-      else if (id === 'sw-later') show();
+      else if (id === 'sw-later') { show(); var b = document.getElementById('sw-reload-btn'); if (b) b.focus(); }
     });
   });
 })();
@@ -496,7 +511,8 @@ window.addEventListener('pageshow', function(e){
   document.body && document.body.classList.remove('page-exit');
   if (e.persisted) {
     try { window.dispatchEvent(new CustomEvent('taqa:resume')); } catch(err){}
-    if (window.TAQA_NET && TAQA_NET.state() !== 'online') TAQA_NET.probe();
+    // Restored after time away: ask again whether RISE is there.
+    if (window.TAQA_NET) TAQA_NET.probe();
   }
 });
 

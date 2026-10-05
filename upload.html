@@ -1111,6 +1111,11 @@ function submitUpload(e) {
   }
   // Nothing is sent while RISE cannot be reached, and nothing is lost: the
   // file and every field stay as they are, ready to submit again (PI-28).
+  // The reason also stays in place above the button (the toast goes after a
+  // few seconds and is easy to miss on a phone); an older note is cleared
+  // once it can be sent.
+  const p4row = document.querySelector('#panel-4 .submit-row');
+  if (window.TAQA_NET && p4row) TAQA_NET.hold(document.getElementById('panel-4'), p4row);
   const offline = (typeof TAQA_STORE !== 'undefined' && TAQA_STORE.notSent) ? TAQA_STORE.notSent() : null;
   if (offline) {
     showUploadToast('Not sent', offline, ICON_WARN);

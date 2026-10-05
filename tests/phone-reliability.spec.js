@@ -51,8 +51,14 @@ test.describe('connectivity: one bar, under the top bar, honest about what it sh
     await expect(page.locator('#taqa-net-bar')).toContainText('Offline. Showing copies saved on this device; nothing can be sent');
     // On a phone the short wording shows, whole: "Nothing can be sent" is never cut off.
     await expect(page.locator('#taqa-net-bar .nb-s')).toBeVisible();
-    await expect(page.locator('#taqa-net-bar .nb-s')).toHaveText('Offline: saved copies only. Nothing can be sent.');
+    await expect(page.locator('#taqa-net-bar .nb-s')).toHaveText('Offline. Nothing can be sent.');
     expect(await page.locator('#taqa-net-bar > span').evaluate((e) => e.scrollWidth <= e.clientWidth + 1)).toBe(true);
+    // Whole on the narrowest phone too, in both states.
+    await page.setViewportSize({ width: 320, height: 640 });
+    expect(await page.locator('#taqa-net-bar > span').evaluate((e) => e.scrollWidth <= e.clientWidth + 1)).toBe(true);
+    await page.evaluate(() => { document.querySelector('#taqa-net-bar .nb-s').textContent = 'RISE not reached. Nothing can be sent.'; });
+    expect(await page.locator('#taqa-net-bar > span').evaluate((e) => e.scrollWidth <= e.clientWidth + 1)).toBe(true);
+    await page.setViewportSize({ width: 390, height: 844 });
     // The old three bars are gone for good.
     await expect(page.locator('#offline-banner, #offline-bar, .offline-bar, #taqa-offline-bar')).toHaveCount(0);
 
@@ -227,29 +233,40 @@ test.describe('offline: nothing is pretended, and nothing typed is lost', () => 
   test('every register change refuses offline and says so: approve, check, reject, edit, withdraw, delegate, revoke', async ({ page, gotoApp, context }) => {
     await prime(page, gotoApp, 'employee');
     await page.evaluate(() => TAQA_STORE.add({ title: 'API offline', segment: 'coiled-tubing', docType: 'sop', docNumber: 'TQ-TWS-CTSS-SOP-983', summary: 'Offline API check.' }));
+    // A grant made while connected, to revoke offline.
+    const grantId = await page.evaluate(() => {
+      TAQA_ROLE.set('owner', 'coiled-tubing'); if (TAQA_ROLE.setArea) TAQA_ROLE.setArea('coiled-tubing');
+      const g = TAQA_DELEGATION.grant({ to: 'Deputy Director', reason: 'Annual leave, desk cover while away', from: TAQA_DELEGATION.today(), until: TAQA_DELEGATION.today() });
+      return g.ok ? g.delegation.id : null;
+    });
+    expect(grantId).toBeTruthy();
     await context.setOffline(true);
     await expect(page.locator('#taqa-net-bar')).toBeVisible();
-    const out = await page.evaluate(() => {
+    const out = await page.evaluate((grantId) => {
       const n = 'TQ-TWS-CTSS-SOP-983';
       TAQA_ROLE.set('qms');
       const key = TAQA_STORE.recordKey(TAQA_STORE.findDoc(n));
       const cs = TAQA_STORE.countersign(n, { key, stage: 'qms' });
       const rj = TAQA_STORE.reject(n, 'A reason that is long enough to count.', { key, stage: 'qms' });
-      const ed = TAQA_STORE.editFields ? TAQA_STORE.editFields(n, { summary: 'changed' }) : { ok: false, offline: true };
+      const ed = TAQA_STORE.patch(n, { summary: 'changed' });
       const st = TAQA_STORE.setStatus(n, 'obsolete', null, { reason: 'A reason that is long enough to count.' });
       TAQA_ROLE.set('director');
       const ap = TAQA_STORE.approve(n, { key, stage: 'director' });
       const g = TAQA_DELEGATION.grant({ fromRole: 'director', to: 'Deputy', segment: 'coiled-tubing', reason: 'Annual leave cover for two weeks.' });
+      TAQA_ROLE.set('owner');
+      const rv = TAQA_DELEGATION.revoke(grantId);
+      const still = TAQA_DELEGATION.list().find((x) => x.id === grantId);
       const d = TAQA_STORE.findDoc(n);
-      return { cs, rj, ed, st, ap, g, stage: TAQA_APPROVAL.stageOf(d), status: d.status, why: TAQA_STORE.statusError() };
-    });
-    for (const k of ['cs', 'rj', 'ap', 'g']) {
+      return { cs, rj, ed, st, ap, g, rv, revoked: !!(still && (still.revokedAt || still.revoked)), summary: d.summary, stage: TAQA_APPROVAL.stageOf(d), status: d.status, why: TAQA_STORE.statusError() };
+    }, grantId);
+    for (const k of ['cs', 'rj', 'ap', 'g', 'rv', 'ed']) {
       expect(out[k].ok, k).toBe(false);
       expect(out[k].offline, k).toBe(true);
       expect(out[k].error, k).toContain('Not sent');
     }
-    expect(out.ed.ok).toBe(false);
     expect(out.st).toBeNull();
+    expect(out.revoked).toBe(false);
+    expect(out.summary).toBe('Offline API check.');
     expect(out.why).toContain('Not sent');
     expect(out.stage).toBe('qms');
     expect(out.status).not.toBe('obsolete');
@@ -403,9 +420,14 @@ test.describe('a new version never reloads a page in the middle of work (PI-30)'
     await a.locator('#sw-later').click();
     await expect(a.locator('#sw-update-bar')).toContainText('New version available');
 
-    // A fresh, idle page applies it quietly. Neither working tab reloads.
+    // A fresh, idle page does not apply it quietly while other RISE tabs are
+    // open (it would swap the worker under them): it offers "Update now".
     const c = await ctx.newPage();
     await c.goto(site + '/index.html');
+    await expect(c.locator('#sw-update-bar')).toContainText('New version available', { timeout: 10_000 });
+    expect(await c.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => !!r.waiting))).toBe(true); // still waiting
+    // Chosen there, it reloads only that tab. Neither working tab reloads.
+    await Promise.all([c.waitForEvent('load'), c.locator('#sw-reload-btn').click()]);
     await c.waitForFunction(() => caches.keys().then((k) => k.includes('taqa-hub-deploy-test-2') && k.length === 1), null, { timeout: 15_000 });
     await a.waitForTimeout(1000);
     expect(await a.evaluate(() => window.__same)).toBe(true);
@@ -426,6 +448,47 @@ test.describe('a new version never reloads a page in the middle of work (PI-30)'
     await expect(c.locator('#taqa-net-bar')).toBeVisible();
     await expect(c.locator('h1').first()).toBeVisible();
     await ctx.setOffline(false);
+    await ctx.close();
+  });
+
+  test('with the worker on: a server that stops answering shows "cannot be reached", and the probe never answers "online" from the cache', async ({ browser }) => {
+    test.setTimeout(90_000);
+    const d2 = copySite(); const s2 = await serve(d2); const site2 = 'http://127.0.0.1:' + s2.address().port;
+    const ctx = await browser.newContext({ serviceWorkers: 'allow' });
+    const p = await ctx.newPage();
+    await p.goto(site2 + '/index.html');
+    await p.evaluate(() => { localStorage.setItem('taqa-tour-done', '1'); localStorage.setItem('taqa-install-dismissed', String(Date.now())); });
+    await p.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 15_000 });
+    await p.goto(site2 + '/segment.html?id=drilling');
+    expect(await p.evaluate(() => TAQA_NET.probe())).toBe(true);     // RISE answers
+    expect(await p.evaluate(() => caches.keys().then((ks) => Promise.all(ks.map((k) => caches.open(k).then((c) => c.keys())))).then((all) => all.flat().filter((r) => /probe=/.test(r.url)).length))).toBe(0);
+    // The server goes away; the device still says it is online.
+    await new Promise((r) => s2.close(r)); s2.closeAllConnections && s2.closeAllConnections();
+    await p.goto(site2 + '/segment.html?id=coiled-tubing').catch(() => {});
+    await expect(p.locator('#taqa-net-bar')).toContainText('RISE cannot be reached', { timeout: 15_000 });
+    expect(await p.evaluate(() => TAQA_NET.probe())).toBe(false);    // never "online" from the cache
+    expect(await p.evaluate(() => TAQA_NET.canWrite())).toBe(false);
+    expect(await p.evaluate(() => { TAQA_ROLE.set('employee'); return TAQA_STORE.add({ title: 'Server down', segment: 'drilling', docType: 'sop', docNumber: 'TQ-TDS-DSS-SOP-988', summary: 'x' }); })).toBeNull();
+    await ctx.close();
+    fs.rmSync(d2, { recursive: true, force: true });
+  });
+
+  test('the only RISE window, freshly loaded and idle, takes a new version quietly, without a reload', async ({ browser }) => {
+    test.setTimeout(90_000);
+    const ctx = await browser.newContext({ serviceWorkers: 'allow' });
+    const p = await ctx.newPage();
+    await p.goto(site + '/index.html');
+    await p.evaluate(() => { localStorage.setItem('taqa-tour-done', '1'); localStorage.setItem('taqa-install-dismissed', String(Date.now())); });
+    await p.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 15_000 });
+    bump(dir, 'taqa-hub-deploy-test-quiet');
+    await p.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
+    await p.waitForFunction(() => navigator.serviceWorker.getRegistration().then((r) => !!r.waiting), null, { timeout: 15_000 });
+    await p.goto(site + '/glossary.html');
+    await p.evaluate(() => { window.__same = true; });
+    await p.waitForFunction(() => caches.keys().then((k) => k.includes('taqa-hub-deploy-test-quiet') && k.length === 1), null, { timeout: 15_000 });
+    await p.waitForTimeout(800);
+    expect(await p.evaluate(() => window.__same)).toBe(true);           // no reload
+    await expect(p.locator('#sw-update-bar')).toBeHidden();
     await ctx.close();
   });
 

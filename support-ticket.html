@@ -536,7 +536,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
           <span class="urg-note-hint" id="urg-hint"><b>Medium.</b> Continuing with the issue.</span>
           <span class="urg-note-time">Target reply <b id="urg-time">1 business day</b></span>
         </p>
-        <p class="urg-emergency" id="urg-emergency" role="note" hidden><b>This form is not an emergency channel.</b> If anyone is in danger or a hazard is uncontrolled, stop work and follow your site emergency response procedure. Contact your supervisor or site HSE immediately.</p>
+        <p class="urg-emergency" id="urg-emergency" role="alert" hidden><b>This form is not an emergency channel.</b> If anyone is in danger or a hazard is uncontrolled, stop work and follow your site emergency response procedure. Contact your supervisor or site HSE immediately.</p>
       </section>
 
       <!-- ── Photos ── -->
@@ -644,6 +644,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
         <p>Everything you entered is still in the form. Copy it to pass on through your usual channel.</p>
         <div class="ticket-result-actions">
           <button type="button" class="btn-copy" id="btn-copy">Copy question</button>
+          <button type="button" class="btn-copy" id="btn-clear">Clear form</button>
           <span class="copy-state" id="copy-state" aria-live="polite"></span>
         </div>
         <textarea class="copy-text" id="copy-text" readonly aria-label="Your question as text" hidden></textarea>
@@ -819,6 +820,21 @@ document.getElementById('btn-copy').addEventListener('click', () => {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(() => { state.textContent = 'Copied. Paste it into an email or message.'; }, fallback);
   } else fallback();
+});
+// The question stays (and is kept as a draft on this device) until the
+// person chooses to clear it: then the form and the saved draft go.
+document.getElementById('btn-clear').addEventListener('click', () => {
+  const f = document.getElementById('ticket-form');
+  f.reset();
+  selectPriority('medium');
+  if (window.paintAskTo) window.paintAskTo();
+  annotImages = {};
+  document.getElementById('photo-thumbs').innerHTML = '';
+  document.getElementById('annot-section').classList.remove('visible');
+  activeThumb = null;
+  document.getElementById('ticket-result').hidden = true;
+  try { window.dispatchEvent(new Event('taqa:draft-done')); } catch (e) {}
+  document.getElementById('issue-title').focus();
 });
 // The notice describes the form as it was; once the form changes it goes.
 document.getElementById('ticket-form').addEventListener('input', () => {

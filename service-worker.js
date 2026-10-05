@@ -81,6 +81,16 @@ self.addEventListener('message', e => {
   if (!e.data) return;
   // The page's own "Update now", never anything automatic mid-task (PI-30).
   if (e.data.type === 'SKIP_WAITING') self.skipWaiting();
+  // The quiet apply on a fresh, idle page load: only when that page is the
+  // only RISE window open. Activating swaps the worker under every open tab,
+  // and a tab still running the previous release reloads itself on that
+  // swap (its own code did), which would lose work there. With other tabs
+  // open the update waits for "Update now" or for them to close.
+  if (e.data.type === 'SKIP_WAITING_IF_ALONE') {
+    e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => {
+      if (cs.length <= 1) return self.skipWaiting();
+    }));
+  }
   if (e.data.type === 'HOW_SERVED' && e.source) {
     e.source.postMessage({ type: 'SERVED', how: served.get(e.source.id) || { cache: false, date: null } });
   }
@@ -91,10 +101,17 @@ self.addEventListener('message', e => {
 // Long enough for a slow field link to still count as reaching RISE; the
 // page keeps re-checking while it shows "cannot be reached" (shared.js).
 const NET_TIMEOUT = 6000;
-function fetchWithin(request, ms) {
+// The network answer, raced against the timeout. A late answer is still
+// saved to the cache (kept alive by waitUntil), so a slow link refreshes
+// the saved copy instead of serving the same old one for ever.
+function fetchWithin(e, ms) {
+  const net = fetch(e.request);
+  e.waitUntil(net.then(res => {
+    if (res && res.ok) { const clone = res.clone(); return caches.open(CACHE).then(c => c.put(e.request, clone)); }
+  }).catch(() => {}));
   return new Promise((resolve, reject) => {
     const t = setTimeout(() => reject(new Error('timeout')), ms);
-    fetch(request).then(r => { clearTimeout(t); resolve(r); }, err => { clearTimeout(t); reject(err); });
+    net.then(r => { clearTimeout(t); resolve(r); }, err => { clearTimeout(t); reject(err); });
   });
 }
 
@@ -129,12 +146,8 @@ self.addEventListener('fetch', e => {
   if (e.request.mode === 'navigate') {
     const client = e.resultingClientId || e.clientId;
     e.respondWith(
-      fetchWithin(e.request, NET_TIMEOUT)
+      fetchWithin(e, NET_TIMEOUT)
         .then(res => {
-          if (res && res.ok) {
-            const clone = res.clone();
-            caches.open(CACHE).then(c => c.put(e.request, clone));
-          }
           note(client, false);
           return res;
         })
@@ -158,16 +171,14 @@ self.addEventListener('fetch', e => {
   // is about, since the cached copy can describe a revision that has since been
   // withdrawn. Fonts and images stay cache first; they do not carry meaning.
   const url = new URL(e.request.url);
+  // The page's "is RISE there?" question (shared.js TAQA_NET.probe) goes to
+  // the network only: never answered from, or saved to, this cache. Answered
+  // from the cache it said "online" while the server was down (PR 2D review).
+  if (url.searchParams.has('probe')) return;
   const fresh = /\.(js|css|json)$/.test(url.pathname) || e.request.destination === 'script';
   if (fresh) {
     e.respondWith(
-      fetchWithin(e.request, NET_TIMEOUT).then(res => {
-        if (res && res.ok) {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-        }
-        return res;
-      }).catch(() => caches.match(e.request, { ignoreSearch: true }).then(cached => {
+      fetchWithin(e, NET_TIMEOUT).catch(() => caches.match(e.request, { ignoreSearch: true }).then(cached => {
         // The register or a script from the cache makes the whole page a
         // cached copy, whatever the HTML was.
         if (cached) note(e.clientId, true, cached);
