@@ -11,8 +11,11 @@ options designed at 390 × 844 first and scaled to desktop from the same respons
 - **E · Full Stop:** warm paper and BW Gradual throughout. The orange full stop is the only accent, and the statement builds in place on Home.
 - **F · Rise:** the logo becomes the interface. The pillar is the header or rail, the bars become colour tiles, the 45° cut is on every tile, and the screen rises into the logo.
 
-Open `round-2/index.html` for the review page (filmstrips of each brand moment, phone and desktop
-screens, brand kit, why it works, comparison). Each option folder has its live HTML screens and `notes.md`.
+Each option now covers the same eight key screens (Home, Search, Area, Document, Upload step 3, QMS
+workspace concept, Ask an Expert, Field Glossary) on phone (390 × 844) and desktop (1440 × 900) from one
+responsive file per screen, checked against the live app's capabilities. Open `round-2/index.html` for
+the review page (brand-moment filmstrips, all screens per option, a screen-by-screen comparison,
+side-by-side table, status and open questions). Each option folder has its live HTML screens and `notes.md`.
 `round-2/shots/` holds the screenshots. Waiting on the owner's choice; nothing is implemented.
 
 ## Round 1: what is here
