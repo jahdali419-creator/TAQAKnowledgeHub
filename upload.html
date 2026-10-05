@@ -434,6 +434,10 @@ html[data-taqa-theme="dark"] .policy-rules {
   box-shadow:0 6px 18px rgba(0,93,99,0.28);
 }
 .btn-step:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 10px 26px rgba(0,93,99,0.36); }
+/* The hover lift moves the button 2px up; this strip keeps the pointer over
+   it, so a pointer resting on its lower edge does not make it flicker. */
+.btn-step { position:relative; }
+.btn-step::after { content:''; position:absolute; left:0; right:0; bottom:-3px; height:3px; }
 .btn-step:disabled { opacity:0.4; cursor:not-allowed; box-shadow:none; }
 .btn-back {
   padding:12px 18px; border-radius:11px; cursor:pointer; font-family:inherit;

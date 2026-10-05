@@ -1423,7 +1423,7 @@ function ensureApproveModal() {
     '<div class="reject-modal">' +
       '<h3 id="approve-modal-title">Approve and publish?</h3>' +
       '<div class="approve-modal-rec" id="approve-modal-rec"></div>' +
-      '<p>Your approval releases this exact revision into the register for everyone in the area.</p>' +
+      '<p id="approve-modal-lead">Your approval releases this exact revision into the register for everyone in the area.</p>' +
       '<label class="approve-eff-l" for="approve-modal-eff">Effective from</label>' +
       '<input type="date" class="approve-eff" id="approve-modal-eff">' +
       '<p class="approve-eff-n" id="approve-modal-eff-n"></p>' +
@@ -1461,8 +1461,9 @@ function approveDoc(id) {
   approvePending = { id: id, openedBy: btn };
   const rec = document.getElementById('approve-modal-rec');
   rec.innerHTML = '<b>' + dEsc(btn.dataset.storeDoc) + '</b> \u00b7 ' + dEsc(btn.dataset.revLabel) + '<br>' +
-    dEsc(btn.dataset.docTitle) + (btn.dataset.change ? '<br>' + dEsc(btn.dataset.change) : '');
-  document.getElementById('approve-modal-confirm').textContent = 'Approve ' + (btn.dataset.revLabel || '') + ' and publish';
+    dEsc(btn.dataset.docTitle) + (btn.dataset.change ? '<br><span id="approve-modal-change"></span>' : '');
+  approvePending.revLabel = btn.dataset.revLabel || '';
+  approvePending.change = btn.dataset.change || '';
   // The effective date is when the approved revision becomes valid for use:
   // today by default, never earlier (owner's decision for PI-21).
   const eff = document.getElementById('approve-modal-eff'), today = TAQA_STORE.localDay();
@@ -1478,6 +1479,15 @@ function paintEffNote() {
   const btn = document.getElementById('approve-modal-confirm');
   if (v < today) { n.textContent = 'The effective date cannot be before today.'; btn.disabled = true; return; }
   btn.disabled = false;
+  // Everything the dialog says follows the date chosen: approved today, in
+  // force from the effective date (PI-21).
+  const p = approvePending || {}, later = v > today;
+  btn.textContent = 'Approve ' + (p.revLabel || '') + (later ? ', in force from ' + v : ' and publish');
+  document.getElementById('approve-modal-lead').textContent = later
+    ? 'Your approval is recorded today. This exact revision is released to everyone in the area on its effective date.'
+    : 'Your approval releases this exact revision into the register for everyone in the area.';
+  const ch = document.getElementById('approve-modal-change');
+  if (ch) ch.textContent = later ? (p.change || '').replace('When you approve it, ', 'On ' + v + ', ') : (p.change || '');
   n.textContent = v === today
     ? 'In force as soon as you approve it.'
     : 'Approved today, in force from ' + v + '. Until then the revision in force stays current and employees do not see this one.';

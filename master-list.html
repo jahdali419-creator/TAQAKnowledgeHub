@@ -1148,7 +1148,11 @@ function whyNotWithdraw(d){
 }
 function bulkWithdrawPreview(chosen){
   const dlg=document.getElementById('bulk-dlg');
-  const eligible=chosen.filter(d=>!whyNotWithdraw(d)), left=chosen.filter(d=>!!whyNotWithdraw(d));
+  const eligible=chosen.filter(d=>!whyNotWithdraw(d));
+  // A ticked open revision whose document is being withdrawn is already
+  // listed under it as cancelled with it, so it is not also "left out".
+  const going=new Set(eligible.map(d=>d.docNumber));
+  const left=chosen.filter(d=>!!whyNotWithdraw(d)&&!((d.status==='draft'&&!d.rejected||d.status==='approved')&&going.has(d.docNumber)));
   bulkWithdrawPending=eligible.map(d=>({num:d.docNumber,rev:d.revision,key:TAQA_STORE.recordKey(d),status:d.status}));
   const n=eligible.length, s=n===1?'':'s';
   dlg.dataset.mode='withdraw';

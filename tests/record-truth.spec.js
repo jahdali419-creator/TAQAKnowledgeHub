@@ -178,8 +178,9 @@ test.describe('C. PI-10: bulk withdrawal acts on the exact revisions ticked', ()
     await setRole('qms', SEG);
     // One filter shows all three documents; changing the filter would clear a selection.
     await gotoApp(`/master-list.html?view=register&seg=${SEG}&q=${encodeURIComponent('TQ-TWS-CTSS-SOP-0')}`);
-    for (const k of [DOC + '|1.0', DOC2 + '|3.0', DOC3 + '|4.0']) await page.locator(`#rows .row-chk[data-key="${k}"]`).check();
-    await expect(page.locator('#bulk-count')).toHaveText('3 documents selected');
+    // DOC's open Rev 2.0 is ticked too: it is cancelled with DOC, so it is listed there and not also "left out".
+    for (const k of [DOC + '|1.0', DOC + '|2.0', DOC2 + '|3.0', DOC3 + '|4.0']) await page.locator(`#rows .row-chk[data-key="${k}"]`).check();
+    await expect(page.locator('#bulk-count')).toHaveText('4 documents selected');
     await page.locator('#bulk-withdraw').click();
     const dlg = page.locator('#bulk-dlg');
     await expect(dlg).toBeVisible();
@@ -191,6 +192,8 @@ test.describe('C. PI-10: bulk withdrawal acts on the exact revisions ticked', ()
     await expect(will).toContainText(DOC2);
     await expect(page.locator('#bq-out')).toContainText(DOC3);
     await expect(page.locator('#bq-out')).toContainText('A revision in progress is not withdrawn from here');
+    await expect(page.locator('#bq-out')).not.toContainText(DOC);
+    await expect(page.locator('#bq-out-h')).toHaveText('Left out (1)');
     await expect(page.locator('#bulk-dlg-go')).toBeDisabled();
     await page.fill('#bq-reason', REASON);
     await expect(page.locator('#bulk-dlg-go')).toBeEnabled();
@@ -262,8 +265,13 @@ test.describe('D. PI-21: approval and effective dates are the register\'s, per r
     await setRole('owner', SEG);
     await gotoApp('/dashboard.html?id=' + SEG);
     await page.locator('.pending-card', { hasText: 'Rev 2 effective later' }).locator('.btn-approve').click();
+    await expect(page.locator('#approve-modal-confirm')).toHaveText('Approve Rev 2.0 and publish');
     await page.fill('#approve-modal-eff', eff);
     await expect(page.locator('#approve-modal-eff-n')).toContainText('in force from ' + eff);
+    // Everything the dialog says follows the date: nothing is superseded or released today.
+    await expect(page.locator('#approve-modal-confirm')).toHaveText('Approve Rev 2.0, in force from ' + eff);
+    await expect(page.locator('#approve-modal-change')).toContainText('On ' + eff + ', Rev 1.0 becomes Superseded');
+    await expect(page.locator('#approve-modal-lead')).toContainText('on its effective date');
     await page.locator('#approve-modal-confirm').click();
     await expect(page.locator('.pending-card', { hasText: 'Rev 2 effective later' }).locator('.action-result')).toContainText('In force from ' + eff);
 
