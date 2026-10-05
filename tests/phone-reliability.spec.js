@@ -363,9 +363,14 @@ function serve(dir) {
   });
   return new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve(server)));
 }
+// A deploy: a new cache name, unique every time, so a repeated test always
+// ships a changed worker. Returns the name used.
+let bumps = 0;
 function bump(dir, name) {
   const f = path.join(dir, 'service-worker.js');
-  fs.writeFileSync(f, fs.readFileSync(f, 'utf8').replace(/const CACHE = '[^']+';/, `const CACHE = '${name}';`));
+  const unique = name + '-' + process.pid + '-' + (++bumps);
+  fs.writeFileSync(f, fs.readFileSync(f, 'utf8').replace(/const CACHE = '[^']+';/, `const CACHE = '${unique}';`));
+  return unique;
 }
 
 test.describe('a new version never reloads a page in the middle of work (PI-30)', () => {
@@ -408,7 +413,7 @@ test.describe('a new version never reloads a page in the middle of work (PI-30)'
     await b.evaluate(() => { window.__same = true; });
 
     // A deploy: the cache version changes and both tabs find the new worker.
-    bump(dir, 'taqa-hub-deploy-test-2');
+    const v2 = bump(dir, 'taqa-hub-deploy-test-2');
     for (const p of [a, b]) await p.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
     await a.waitForFunction(() => navigator.serviceWorker.getRegistration().then((r) => !!r.waiting), null, { timeout: 15_000 });
     for (const p of [a, b]) await expect(p.locator('#sw-update-bar')).toContainText('New version available', { timeout: 10_000 });
@@ -427,7 +432,7 @@ test.describe('a new version never reloads a page in the middle of work (PI-30)'
     expect(await c.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => !!r.waiting))).toBe(true); // still waiting
     // Chosen there, it reloads only that tab. Neither working tab reloads.
     await Promise.all([c.waitForEvent('load'), c.locator('#sw-reload-btn').click()]);
-    await c.waitForFunction(() => caches.keys().then((k) => k.includes('taqa-hub-deploy-test-2') && k.length === 1), null, { timeout: 15_000 });
+    await c.waitForFunction((v) => caches.keys().then((k) => k.includes(v) && k.length === 1), v2, { timeout: 15_000 });
     await a.waitForTimeout(1000);
     expect(await a.evaluate(() => window.__same)).toBe(true);
     expect(await b.evaluate(() => window.__same)).toBe(true);
@@ -476,18 +481,25 @@ test.describe('a new version never reloads a page in the middle of work (PI-30)'
     test.setTimeout(90_000);
     const ctx = await browser.newContext({ serviceWorkers: 'allow' });
     const p = await ctx.newPage();
+    await p.addInitScript(() => { window.__taqaSwDebug = []; });
     await p.goto(site + '/index.html');
     await p.evaluate(() => { localStorage.setItem('taqa-tour-done', '1'); localStorage.setItem('taqa-install-dismissed', String(Date.now())); });
     await p.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 15_000 });
-    bump(dir, 'taqa-hub-deploy-test-quiet');
+    const vq = bump(dir, 'taqa-hub-deploy-test-quiet');
     await p.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
     await p.waitForFunction(() => navigator.serviceWorker.getRegistration().then((r) => !!r.waiting), null, { timeout: 15_000 });
     await p.goto(site + '/glossary.html');
     await p.evaluate(() => { window.__same = true; });
-    await p.waitForFunction(() => caches.keys().then((k) => k.includes('taqa-hub-deploy-test-quiet') && k.length === 1), null, { timeout: 15_000 });
+    // Applied for real: nothing waiting any more, only the new cache left.
+    await p.waitForFunction((v) => navigator.serviceWorker.getRegistration().then((r) => !r.waiting && r.active && r.active.state === 'activated')
+      .then((done) => done && caches.keys().then((k) => k.includes(v) && k.length === 1)), vq, { timeout: 15_000 });
     await p.waitForTimeout(800);
     expect(await p.evaluate(() => window.__same)).toBe(true);           // no reload
-    await expect(p.locator('#sw-update-bar')).toBeHidden();
+    const why = async () => JSON.stringify(await p.evaluate(async () => {
+      const r = await navigator.serviceWorker.getRegistration();
+      return { trace: window.__taqaSwDebug, waiting: !!(r && r.waiting), active: r && r.active && r.active.state, ctl: !!navigator.serviceWorker.controller };
+    }));
+    await expect(p.locator('#sw-update-bar'), await why()).toBeHidden();
     await ctx.close();
   });
 
@@ -500,13 +512,13 @@ test.describe('a new version never reloads a page in the middle of work (PI-30)'
     await p.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 15_000 });
     await p.goto(site + '/glossary.html');
     await p.waitForTimeout(4200); // past the quiet window of a fresh load
-    bump(dir, 'taqa-hub-deploy-test-3');
+    const v3 = bump(dir, 'taqa-hub-deploy-test-3');
     await p.evaluate(() => { window.__same = true; return navigator.serviceWorker.getRegistration().then((r) => r.update()); });
     await expect(p.locator('#sw-update-bar')).toContainText('New version available', { timeout: 15_000 });
     expect(await p.evaluate(() => window.__same)).toBe(true); // nothing reloaded on its own
     await Promise.all([p.waitForEvent('load'), p.locator('#sw-reload-btn').click()]);
     expect(await p.evaluate(() => window.__same)).toBeUndefined();
-    await p.waitForFunction(() => caches.keys().then((k) => k.includes('taqa-hub-deploy-test-3')), null, { timeout: 15_000 });
+    await p.waitForFunction((v) => caches.keys().then((k) => k.includes(v)), v3, { timeout: 15_000 });
     await ctx.close();
   });
 

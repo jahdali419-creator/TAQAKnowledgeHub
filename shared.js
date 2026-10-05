@@ -452,7 +452,10 @@ window.TAQA_TOP = function(){
   bar.setAttribute('role', 'status');
   document.body.appendChild(bar);
   var reloadAsked = false;
+  // A test may set window.__taqaSwDebug = [] to see which way an update went.
+  function trace(m){ try { if (window.__taqaSwDebug) window.__taqaSwDebug.push(m + '@' + Math.round(performance.now())); } catch(e){} }
   function show(){
+    trace('show');
     bar.innerHTML = '<span>New version available.</span> <button type="button" id="sw-reload-btn">Update now</button>';
     bar.style.display = 'flex';
   }
@@ -469,6 +472,7 @@ window.TAQA_TOP = function(){
   navigator.serviceWorker.addEventListener('controllerchange', function(){
     // Only the tab that asked reloads. A first install, or another tab's
     // update, changes the controller here too, and must not touch this page.
+    trace('controllerchange');
     if (reloadAsked) { window.location.reload(); return; }
     // Applied elsewhere (or quietly here): nothing is waiting any more.
     navigator.serviceWorker.getRegistration().then(function(r){ if (!r || !r.waiting) bar.style.display = 'none'; });
@@ -476,11 +480,13 @@ window.TAQA_TOP = function(){
   // The worker's answer to the quiet apply: offer "Update now" only if it
   // did not apply (another RISE window is open).
   navigator.serviceWorker.addEventListener('message', function(e){
+    if (e.data && e.data.type === 'QUIET') trace('quiet-reply:' + e.data.applied);
     if (e.data && e.data.type === 'QUIET' && !e.data.applied) show();
   });
   navigator.serviceWorker.getRegistration().then(function(reg){
     if (!reg) return;
     function waitingFound(){
+      trace('waiting-found:' + document.readyState + ':busy=' + TAQA_WORK.busy());
       if (!navigator.serviceWorker.controller) return;   // first install: nothing to replace
       // Once that worker is no longer waiting (applied here, in another tab,
       // or by the browser when the last old page closed), the notice is
@@ -489,13 +495,21 @@ window.TAQA_TOP = function(){
       if (w && !w.__taqaWatched) {
         w.__taqaWatched = true;
         w.addEventListener('statechange', function(){
+          trace('waiting-state:' + w.state);
           if (w.state !== 'installed' && reg.waiting !== w && !reloadAsked) bar.style.display = 'none';
         });
       }
+      // Still being drawn: decide once the page is there (this used to fall
+      // through to the notice whenever the check answered early).
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', waitingFound, { once: true });
+        return;
+      }
       // Just loaded, nothing in progress: apply it quietly, without a reload.
-      if (document.readyState !== 'loading' && performance.now() < 4000 && !TAQA_WORK.busy()) {
+      if (performance.now() < 4000 && !TAQA_WORK.busy()) {
         // Applied only if this is the only RISE window (service-worker.js);
         // otherwise it keeps waiting, and "Update now" is offered.
+        trace('quiet-sent');
         reg.waiting.postMessage({ type: 'SKIP_WAITING_IF_ALONE' });
         // If no answer comes, say so after a while rather than never.
         setTimeout(function(){ if (reg.waiting && bar.style.display !== 'flex') show(); }, 8000);
