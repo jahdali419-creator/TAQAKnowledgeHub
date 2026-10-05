@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Injector Head Manual</title>
+<style>@import url("../../kit/fonts.css");
+:root{
+  --ground:#EFF1EE; --ground-2:#E6EAE6; --surface:#FFFFFF; --veil:rgba(255,255,255,.86);
+  --ink:#002B32; --ink-2:#34525A; --ink-3:#566F74; --line:#D2DBD9; --line-2:#E2E7E5;
+  --teal:#005D63; --teal-deep:#013F4E; --cyan:#00ADC2; --thread:#0E8C9C;
+  --signal:#C8102E; --orange:#FD691D; --grad:linear-gradient(90deg,#FD691D,#C8102E);
+  --ok:#17663F; --ok-dot:#2E9A5F; --due:#7A4E00; --due-dot:#D18A00; --lock:#46585D;
+  --fam-ops:#E3ECE9; --fam-corp:#ECEAE3; --fam-pt:#E5E9EE; --fam-cw:#EEE7E3;
+  --node:#FFFFFF; --node-line:#9FB5B2;
+  --r:14px; --shadow:0 1px 2px rgba(0,43,50,.06),0 8px 28px rgba(0,43,50,.08);
+  --display:'BwGradual',Inter,system-ui,sans-serif; --ui:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 16px/1.5 var(--ui);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:6px}
+.ic{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ic.s{width:16px;height:16px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.eyebrow{font:600 11.5px/1.2 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.mono{font-feature-settings:"tnum" 1;letter-spacing:.01em}
+.code{font:600 12.5px/1.2 var(--ui);letter-spacing:.02em;color:var(--ink-3);font-feature-settings:"tnum" 1}
+.concept{display:inline-flex;align-items:center;gap:4px;font:600 10.5px/1 var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--teal);border:1px dashed #7FA6A6;border-radius:99px;padding:4px 7px;white-space:nowrap}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;height:60px;padding:0 16px;background:rgba(239,241,238,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2)}
+.brand img{height:28px;width:auto;display:block}
+.top .alt-crumb{display:none}
+.top-r{margin-left:auto;display:flex;align-items:center;gap:6px}
+.tbtn{position:relative;display:grid;place-items:center;width:44px;height:44px;border-radius:12px;color:var(--ink)}
+.tbtn:hover{background:var(--ground-2)}
+.tbtn .pip{position:absolute;top:10px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 2px var(--ground)}
+.me{display:flex;align-items:center;gap:10px}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--teal-deep);color:#fff;font:600 13px/1 var(--ui)}
+.me-t{display:none}
+/* altitude gauge glyph */
+.gauge{display:inline-grid;gap:2px;width:14px;flex:none}
+.gauge i{display:block;height:3px;border-radius:2px;background:#C3CFCD}
+.gauge i.on{background:var(--ink)}
+.gauge i.past{background:#7E9A9A}
+/* phone altitude strip */
+.altbar{position:sticky;top:60px;z-index:19;display:flex;align-items:center;gap:10px;min-height:48px;padding:6px 16px;background:rgba(239,241,238,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2);font-size:14px}
+.altbar .up{display:inline-flex;align-items:center;gap:6px;min-height:44px;color:var(--ink-2)}
+.altbar .here{font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.altbar .lvl{margin-left:auto;font:600 11px/1 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+
+/* status language: always words, colour is secondary */
+.st{display:inline-flex;align-items:center;gap:6px;font:500 13px/1.2 var(--ui);color:var(--ink-2);white-space:nowrap}
+.st::before{content:"";width:8px;height:8px;border-radius:50%;flex:none}
+.st.cur{color:var(--ok)} .st.cur::before{background:var(--ok-dot)}
+.st.due{color:var(--due)} .st.due::before{background:transparent;border:2px solid var(--due-dot);width:8px;height:8px;box-sizing:border-box;background:linear-gradient(90deg,var(--due-dot) 50%,transparent 50%)}
+.cls{display:inline-flex;align-items:center;gap:4px;font:500 13px/1.2 var(--ui);color:var(--ink-3);white-space:nowrap}
+.cls.lk{color:var(--lock)}
+.ar{font:600 11px/1 var(--ui);letter-spacing:.06em;color:var(--teal);border:1px solid #B9CFCD;border-radius:5px;padding:3px 5px}
+.sig{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 3px rgba(200,16,46,.14);flex:none}
+
+/* map/list toggle */
+.seg{display:inline-flex;padding:3px;border-radius:12px;background:var(--ground-2);border:1px solid var(--line-2)}
+.seg a{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:9px;font:500 14px/1 var(--ui);color:var(--ink-2)}
+.seg a[aria-current]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,43,50,.12)}
+
+/* search field */
+.field{display:flex;align-items:center;gap:12px;height:54px;padding:0 10px 0 18px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);color:var(--ink)}
+.field .q{flex:1;min-width:0;font:400 17px/1 var(--ui);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.field .q.ph{color:var(--ink-3)}
+.kbd{display:none;font:500 12px/1 var(--ui);color:var(--ink-3);border:1px solid var(--line);border-radius:6px;padding:4px 7px;background:var(--ground)}
+
+.btn{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:12px;font:500 15px/1 var(--ui);border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.pri{background:var(--ink);border-color:var(--ink);color:#fff}
+.lnk{display:inline-flex;align-items:center;gap:6px;min-height:44px;font:600 15px/1.2 var(--ui);color:var(--teal)}
+
+@media (min-width:1024px){
+  body{font-size:15px}
+  .top{height:64px;padding:0 32px;gap:28px}
+  .brand img{height:32px}
+  .top .alt-crumb{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink-3)}
+  .alt-crumb a{color:var(--ink-2);padding:6px 2px}
+  .alt-crumb a:hover{color:var(--ink)}
+  .alt-crumb .sep{color:#A9BAB8}
+  .alt-crumb b{font-weight:600;color:var(--ink)}
+  .me-t{display:block;font:500 14px/1.2 var(--ui)}
+  .me-t small{display:block;font-size:12px;color:var(--ink-3);font-weight:400}
+  .altbar{display:none}
+  .kbd{display:inline-block}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+.tmap{display:block;width:100%;height:100%;font-family:var(--ui);overflow:visible}
+.tmap .rlab{fill:var(--ink-3);font-weight:600;letter-spacing:.12em}
+.tmap .rlab .rs{letter-spacing:.02em;font-weight:400}
+.tmap .dot{filter:drop-shadow(0 2px 3px rgba(0,43,50,.08));fill:var(--node);stroke:var(--node-line);stroke-width:1.2;transition:fill .3s}
+.tmap .f-corp .dot{stroke:#B8B19F} .tmap .f-pt .dot{stroke:#9EABBD} .tmap .f-cw .dot{stroke:#B9A39A}
+.tmap .lab{fill:var(--ink);font-weight:500}
+.tmap .lab .n{fill:var(--ink-3);font-weight:400}
+.tmap .ring{fill:none;stroke-width:2.2}
+.tmap .youlab{fill:var(--ink);font-weight:700;letter-spacing:.14em}
+.tmap .hull{fill:rgba(0,173,194,.05);stroke:var(--thread);stroke-width:1.4;stroke-dasharray:5 5}
+.tmap .hull-on{fill:rgba(0,93,99,.07);stroke:var(--teal);stroke-width:2;stroke-dasharray:none}
+.tmap .hlab{fill:var(--teal)} .tmap .hsub{fill:var(--ink-3);font-style:italic}
+.tmap .sigh{fill:rgba(200,16,46,.16)} .tmap .sigc{fill:var(--signal);stroke:#fff;stroke-width:1.5}
+.tmap .alab{fill:var(--signal);font-weight:600}
+.tmap .dim .dot{fill:transparent;stroke:#C4D0CE;stroke-dasharray:2 3}
+.tmap .dim .lab{fill:#7D9195} .tmap .dim .lab .n{fill:#8FA2A5}
+.tmap-search,.tmap-mini{overflow:hidden!important}
+.tmap .lit .dot{fill:#fff;stroke:var(--teal);stroke-width:1.5}
+.tmap .hit{fill:var(--teal-deep)}
+.tmap .lit .cnt{fill:#fff;font-weight:700}
+.tmap .lnote{fill:var(--teal);font-weight:500}
+.tmap .thr{fill:none;stroke:var(--thread);stroke-width:2.5}
+.tmap a .dot{cursor:pointer} .tmap a:hover .dot{fill:#F6FBFA;stroke:var(--teal)}
+
+.d-only{display:none}
+.id{padding:20px 16px 4px}
+.id .code{font-size:13px}
+.id h1{font:700 32px/1.05 var(--display);letter-spacing:-.012em;margin:8px 0 10px}
+.id .kind{font-size:14px;color:var(--ink-3)}
+.verdict{margin:14px 16px 0;padding:18px;border-radius:20px;background:var(--surface);border:1px solid var(--line-2);box-shadow:var(--shadow)}
+.vd-top{display:flex;align-items:center;gap:12px}
+.vd-badge{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:#E3F1E8;color:var(--ok);flex:none}
+.vd-badge .ic{width:24px;height:24px;stroke-width:2.2}
+.vd-top b{display:block;font:700 22px/1.1 var(--display)}
+.vd-top>span:last-child>span{display:block;font-size:14px;color:var(--ok);font-weight:500;margin-top:3px}
+.vd-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;margin:16px 0 0;padding:14px 0 0;border-top:1px solid var(--line-2)}
+.vd-grid dt{font:600 10.5px/1.2 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.vd-grid dd{margin:3px 0 0;font:500 15px/1.3 var(--ui)}
+.vd-grid .w{grid-column:1/3}
+.caveat{display:flex;gap:12px;margin:14px 0 0;padding:12px 14px;border-radius:14px;background:#FCF1F2;border:1px solid #F0CBD1}
+.caveat .sig{margin-top:6px}
+.caveat b{display:block;font:600 14.5px/1.35 var(--ui)}
+.caveat small{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--ink-2);margin-top:4px;line-height:1.35}
+.acts{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:8px;padding:14px 16px 4px}
+.acts .btn{flex-direction:column;gap:4px;min-height:58px;padding:6px 4px;font-size:12.5px}
+.acts .btn.pri{flex-direction:row;font-size:15px}
+.sec{padding:18px 16px 6px}
+.sec h2{font:700 19px/1.2 var(--display);margin:0 0 8px}
+.sum{margin:0;font-size:16px;line-height:1.55;color:var(--ink-2)}
+.toc{list-style:none;margin:0;padding:0;counter-reset:t}
+.toc a{display:flex;gap:12px;align-items:center;min-height:46px;padding:6px 0;border-top:1px solid var(--line-2);font-size:15px}
+.toc .n{width:26px;font:600 13px/1 var(--ui);color:var(--ink-3)}
+.toc .fl{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font:600 12px/1 var(--ui);color:var(--signal);white-space:nowrap}
+.toc .fl.k{color:var(--ink-3);font-weight:500}
+.chg{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line-2);font-size:15px}
+.chg b{font-weight:600}
+.lineage{display:flex;align-items:flex-start;justify-content:space-between;position:relative;margin:8px 4px 4px;padding-top:4px}
+.lineage::before{content:"";position:absolute;left:12px;right:12px;top:15px;height:2px;background:var(--line)}
+.lineage li{position:relative;list-style:none;text-align:center;flex:1;font-size:12.5px;color:var(--ink-3);line-height:1.35}
+.lineage li::before{content:"";display:block;width:14px;height:14px;margin:4px auto 8px;border-radius:50%;background:var(--ground);border:2px solid #A6B8B6;box-sizing:border-box;position:relative}
+.lineage li b{display:block;font:600 14px/1.2 var(--ui);color:var(--ink-2)}
+.lineage li.now::before{width:22px;height:22px;margin-top:0;margin-bottom:4px;background:var(--ok-dot);border-color:#fff;box-shadow:0 0 0 2px var(--ok-dot)}
+.lineage li.now b{color:var(--ink)}
+.lineage-note{font-size:13px;color:var(--ink-3);margin:6px 0 0}
+.trail{list-style:none;margin:0;padding:0}
+.trail li{display:grid;grid-template-columns:18px 1fr;gap:10px;padding:8px 0;font-size:14px;color:var(--ink-2);position:relative}
+.trail li::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--teal);margin-top:5px;margin-left:3px}
+.trail li::after{content:"";position:absolute;left:7px;top:22px;bottom:-6px;width:2px;background:var(--line)}
+.trail li:last-child::after{display:none}
+.trail b{color:var(--ink);font-weight:600}
+.near{list-style:none;margin:0;padding:0}
+.near a{display:flex;gap:12px;align-items:center;min-height:56px;padding:8px 0;border-top:1px solid var(--line-2)}
+.near .k{width:84px;flex:none;font:600 10.5px/1.25 var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.near b{display:block;font:500 15px/1.3 var(--ui)} .near small{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-3)}
+.ngl{display:block;width:100%;height:auto;margin:4px 0 6px}
+.expert{display:flex;gap:14px;align-items:center;margin:14px 16px 32px;padding:16px;border-radius:18px;background:var(--ink);color:#fff}
+.expert .av{background:#fff;color:var(--ink);flex:none}
+.expert b{display:block;font:500 16px/1.3 var(--ui)} .expert small{display:block;font-size:13px;color:#B9CCCC;line-height:1.4;margin-top:2px}
+
+@media (min-width:1024px){
+  .p-only{display:none!important}
+  .d-only{display:block}
+  .wrap{display:grid;grid-template-columns:400px 1fr 330px;height:calc(100vh - 64px);min-height:800px}
+  .left{padding:24px 28px 20px 40px;border-right:1px solid var(--line-2);overflow:hidden;display:flex;flex-direction:column}
+  .left .id{padding:0}
+  .left .id h1{font-size:34px;margin:6px 0 4px}
+  .left .verdict{margin:16px 0 0;padding:16px}
+  .left .vd-grid{gap:10px 14px;margin-top:14px;padding-top:12px}
+  .left .vd-grid dd{font-size:14px}
+  .left .caveat{margin-top:12px}
+  .left .acts{padding:14px 0 0;grid-template-columns:1.7fr 1fr 1fr 1fr}
+  .left .acts .btn{min-height:52px}
+  .left .sum{font-size:14px;margin-top:14px;color:var(--ink-2)}
+  .canvas{position:relative;overflow:hidden;background:radial-gradient(420px 400px at 50% 44%,#F8F9F6,var(--ground))}
+  .cv-top{position:absolute;left:28px;right:28px;top:20px;display:flex;justify-content:space-between;align-items:center}
+  .stage{position:absolute;left:50%;top:56px;width:660px;height:770px;transform:translateX(-50%)}
+  .stage svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  .node{position:absolute;left:330px;top:300px;transform:translate(-50%,-50%);width:212px;height:276px;border-radius:6px 18px 6px 6px;background:var(--surface);box-shadow:0 0 0 1px var(--line-2),0 30px 60px -20px rgba(0,43,50,.28),0 0 0 18px rgba(255,255,255,.45);padding:20px 18px;display:flex;flex-direction:column}
+  .node .code{font-size:11px}
+  .node h3{font:700 19px/1.1 var(--display);margin:8px 0 10px}
+  .where{margin-top:auto;display:block;padding:12px 14px 10px;border-radius:16px;background:var(--surface);border:1px solid var(--line-2)}
+  .where .tmap{height:118px;margin:6px 0 4px}
+  .where .wc{font-size:12.5px;color:var(--ink-3)}
+  .node .ln{height:5px;border-radius:3px;background:#E7ECEA;margin:6px 0}
+  .node .ln.s{width:62%}
+  .node .ftr{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--ink-3)}
+  .node .ftr .st{font-size:11.5px}
+  .node .pv{position:absolute;right:-8px;bottom:-14px;font:500 11px/1 var(--ui);color:var(--ink-3);background:var(--ground);padding:5px 8px;border-radius:99px;border:1px solid var(--line-2)}
+  .sat{position:absolute;width:186px;font-size:13px;line-height:1.3}
+  .sat .k{display:block;font:600 10px/1.2 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px}
+  .sat a.p{display:block;padding:8px 11px;border-radius:11px;background:var(--surface);border:1px solid var(--line-2);box-shadow:0 1px 2px rgba(0,43,50,.05)}
+  .sat a.p:hover{border-color:var(--teal)}
+  .sat a.p+a.p{margin-top:6px}
+  .sat .code{font-size:11px;margin-right:3px}
+  .sat .m{display:flex;gap:8px;margin-top:3px}
+  .sat .m .cls,.sat .m .st{font-size:11.5px}
+  .eqc{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px 0 8px;border-radius:99px;background:var(--surface);border:1px solid var(--line);font:500 13.5px/1 var(--ui)}
+  .eqc i{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--teal)}
+  .sat.alert a.p{background:#FFF8F9;border-color:#EDC1C8}
+  .sat.exp a.p{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .sat.exp a.p small{display:block;color:#B9CCCC;font-size:12px;margin-top:4px;font-style:italic}
+  .lin{position:absolute;left:40px;right:40px;top:612px}
+  .lin .lineage{margin:6px 0 0}
+  .lin .lineage-note{text-align:center}
+  .right{border-left:1px solid var(--line-2);padding:22px 26px;overflow:hidden}
+  .right .sec{padding:0 0 16px}
+  .right .sec h2{font-size:16px;margin-bottom:6px}
+  .right .toc a{min-height:36px;font-size:14px;padding:4px 0}
+  .right .chg{font-size:14px}
+  .right .trail li{font-size:13px;padding:5px 0}
+  .node,.sat{animation:pop .6s cubic-bezier(.2,.7,.2,1) both}
+  .sat{animation-delay:.15s}
+}
+@keyframes pop{from{opacity:0}to{opacity:1}}
+</style></head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+<symbol id="i-map" viewBox="0 0 24 24"><circle cx="7" cy="8" r="3"/><circle cx="16.5" cy="7" r="2"/><circle cx="14" cy="16" r="4"/><path d="M9.6 9.6l1.9 3"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6.5h11M9 12h11M9 17.5h11"/><circle cx="4.5" cy="6.5" r=".8"/><circle cx="4.5" cy="12" r=".8"/><circle cx="4.5" cy="17.5" r=".8"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5.5" y="10.5" width="13" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></symbol>
+<symbol id="i-mark" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3.5L7 20z"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/><path d="M13 4h7v7M4 13v7h7"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><circle cx="6" cy="12" r=".9"/><circle cx="12" cy="12" r=".9"/><circle cx="18" cy="12" r=".9"/></symbol>
+<symbol id="i-expert" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></symbol>
+<symbol id="i-ask" viewBox="0 0 24 24"><path d="M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4 3.5v-3.5h0a1.5 1.5 0 0 1-1.5-1.5z"/><path d="M10 9.2a2 2 0 1 1 2.7 1.9c-.5.2-.7.6-.7 1.1M12 14.2v.1"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6.5 10.5L12 5l5.5 5.5"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-fit" viewBox="0 0 24 24"><path d="M4.5 9V4.5H9M15 4.5h4.5V9M19.5 15v4.5H15M9 19.5H4.5V15"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 15.5H3z"/><path d="M12 10v4M12 16.6v.1"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M6.5 3.5h7l4 4v13h-11z"/><path d="M13.5 3.5v4h4M9 12h6M9 15.5h6"/></symbol>
+<symbol id="i-thread" viewBox="0 0 24 24"><path d="M3 17c4 0 4-10 9-10s5 10 9 10"/><circle cx="12" cy="7" r="1.6"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M5 5.5A1.5 1.5 0 0 1 6.5 4H19v14H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+<symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6c1.6 0 3 .5 4.2 1.2M21 12s-3.5 6-9 6c-1.6 0-3-.5-4.2-1.2"/><path d="M4 20L20 4"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+<symbol id="i-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2M20 14v6h-3M14 18v2"/></symbol>
+</svg>
+
+<header class="top">
+  <a class="brand" href="home.html"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE"></a>
+  <nav class="alt-crumb" aria-label="Where you are">
+    <span class="gauge" aria-hidden="true"><i class="past"></i><i class="past"></i><i class="past"></i><i class="past"></i><i class="on"></i></span>
+    <a href="home.html">TAQA</a><span class="sep">›</span><a href="home.html">Well Intervention</a><span class="sep">›</span><a href="area.html">Coiled Tubing</a><span class="sep">›</span><a href="area.html">Injector head</a><span class="sep">›</span><b>WI-003</b>
+  </nav>
+  <div class="top-r">
+    <a class="tbtn" href="search-start.html" aria-label="Search"><svg class="ic"><use href="#i-search"/></svg></a>
+    <a class="tbtn" href="#" aria-label="Active technical alerts"><svg class="ic"><use href="#i-bell"/></svg><span class="pip"></span></a>
+    <span class="me"><span class="av" aria-hidden="true">FA</span><span class="me-t">Faisal Al-Ghamdi<small>Field Supervisor · Employee</small></span></span>
+  </div>
+</header>
+<nav class="altbar" aria-label="Where you are">
+  <span class="gauge" aria-hidden="true"><i class="past"></i><i class="past"></i><i class="past"></i><i class="past"></i><i class="on"></i></span>
+  <a class="up" href="area.html"><svg class="ic s"><use href="#i-up"/></svg>Injector head</a><span style="color:#A9BAB8">/</span><span class="here">WI-003</span><span class="lvl">Alt 4</span>
+</nav>
+
+<!-- ============ PHONE ============ -->
+<div class="p-only">
+  <section class="id">
+    <span class="code">TQ-TWS-CTSS-WI-003</span>
+    <h1>Injector Head Operations Manual</h1>
+    <div class="kind">Manual · Coiled Tubing · Operations · English · Internal</div>
+  </section>
+  <section class="verdict" aria-label="Can I trust this document">
+    <div class="vd-top"><span class="vd-badge"><svg class="ic"><use href="#i-check"/></svg></span><span><b>Current · Rev 4.0</b><span>In force. This is the revision to use.</span></span></div>
+    <dl class="vd-grid">
+      <div class="w"><dt>Approved by</dt><dd>Segment Director, Coiled Tubing · 28 Aug 2025</dd></div>
+      <div><dt>Effective</dt><dd>30 Aug 2025</dd></div>
+      <div><dt>Next review</dt><dd>30 Aug 2028</dd></div>
+    </dl>
+    <a class="caveat" href="#"><span class="sig"></span><span><b>ALT-002 changes the limits in section 5</b><small><svg class="ic s"><use href="#i-lock"/></svg>Confidential · Access restricted · request access through QMS</small></span></a>
+  </section>
+  <div class="acts">
+    <a class="btn pri" href="#"><svg class="ic"><use href="#i-down"/></svg>PDF</a>
+    <a class="btn" href="#"><svg class="ic"><use href="#i-mark"/></svg>Save</a>
+    <a class="btn" href="#"><svg class="ic"><use href="#i-qr"/></svg>Share</a>
+    <a class="btn" href="#"><svg class="ic"><use href="#i-more"/></svg>More</a>
+  </div>
+  <section class="sec"><p class="sum">How to rig up, operate, monitor and shut down the CT injector head safely: chain tension, gripper block inspection, traction pressure limits, and what to do on a chain slip.</p></section>
+  <section class="sec">
+    <h2>Its neighbourhood</h2>
+    <svg class="ngl" viewBox="0 0 358 120" aria-hidden="true">
+      <g stroke="#C3D1CF" stroke-width="1.2" fill="none"><path d="M179 60 L60 26M179 60 L60 94M179 60 L298 26M179 60 L298 94M179 60 L40 60"/></g>
+      <path d="M179 60 L318 60" stroke="#C8102E" stroke-width="1.4" stroke-dasharray="3 4"/>
+      <rect x="160" y="34" width="38" height="52" rx="4" fill="#fff" stroke="#002B32" stroke-width="1.5"/>
+      <g fill="#fff" stroke="#005D63" stroke-width="1.5"><circle cx="60" cy="26" r="9"/><circle cx="298" cy="26" r="9"/></g>
+      <g fill="#fff" stroke="#9FB5B2"><rect x="30" y="52" width="20" height="16" rx="3"/><rect x="50" y="86" width="20" height="16" rx="3"/></g>
+      <circle cx="318" cy="60" r="6" fill="#C8102E"/><circle cx="298" cy="94" r="9" fill="#002B32"/>
+    </svg>
+    <ul class="near">
+      <li><a href="area.html"><span class="k">Equipment</span><span><b>Injector head · CT string (2-inch)</b><small><span class="concept">Proposed tags</span></small></span></a></li>
+      <li><a href="#"><span class="k">Alert</span><span><b>ALT-002 · New pressure rating for 2-inch CT string</b><small><span class="sig"></span>Changes section 5 · Confidential</small></span></a></li>
+      <li><a href="#"><span class="k">Related</span><span><b>WI-005 · CT String Inspection Manual</b><small><span class="st cur">Current</span></small></span></a></li>
+      <li><a href="#"><span class="k">Related</span><span><b>SOP-006 · CT Unit Rig-Up &amp; Rig-Down</b><small><span class="st due">Review due</span><span class="cls lk"><svg class="ic s"><use href="#i-lock"/></svg>Restricted</span></small></span></a></li>
+      <li><a href="#"><span class="k">Appendix A</span><span><b>F001 · Pre-Job Safety Checklist</b><small><span class="st cur">Current</span> Rev 4.0</small></span></a></li>
+    </ul>
+  </section>
+  <section class="sec">
+    <h2>What changed in Rev 4.0</h2>
+    <div class="chg"><svg class="ic"><use href="#i-check"/></svg><span><b>Traction pressure limits for 2-inch string</b></span></div>
+  </section>
+  <section class="sec">
+    <h2>Contents</h2>
+    <ol class="toc">
+      <li><a href="#"><span class="n">1</span>Scope</a></li>
+      <li><a href="#"><span class="n">2</span>Injector head components</a></li>
+      <li><a href="#"><span class="n">3</span>Pre-job inspection</a></li>
+      <li><a href="#"><span class="n">4</span>Chain tension and traction pressure</a></li>
+      <li><a href="#"><span class="n">5</span>Operating limits (2-inch string)<span class="fl"><span class="sig"></span>ALT-002</span></a></li>
+      <li><a href="#"><span class="n">6</span>Chain slip response</a></li>
+      <li><a href="#"><span class="n">7</span>Shutdown and isolation</a></li>
+      <li><a href="#"><span class="n">A</span>Inspection record<span class="fl k">F001</span></a></li>
+    </ol>
+  </section>
+  <section class="sec">
+    <h2>Lineage</h2>
+    <ol class="lineage"><li><b>Rev 1.0</b>14 Jan 2022</li><li><b>Rev 2.0</b>02 Feb 2023</li><li><b>Rev 3.0</b>11 Mar 2024</li><li class="now"><b>Rev 4.0</b>30 Aug 2025</li></ol>
+    <p class="lineage-note">Earlier revisions are superseded. Employees see the current revision only.</p>
+  </section>
+  <section class="sec">
+    <h2>Approval trail</h2>
+    <ol class="trail">
+      <li><span><b>Filed</b> 19 Aug 2025 · Khalid Al-Otaibi, CT Engineer</span></li>
+      <li><span><b>QMS check</b> 24 Aug 2025 · QMS Document Control</span></li>
+      <li><span><b>Final approval</b> 28 Aug 2025 · Segment Director, Coiled Tubing</span></li>
+      <li><span><b>Current</b> from 30 Aug 2025</span></li>
+    </ol>
+  </section>
+  <a class="expert" href="#"><span class="av"><svg class="ic"><use href="#i-ask"/></svg></span><span><b>Ask the Coiled Tubing expert</b><small>"Chain slip on the injector at 4,200 ft — can we continue at reduced traction pressure?"</small></span></a>
+</div>
+
+<!-- ============ DESKTOP ============ -->
+<main class="wrap d-only">
+  <aside class="left">
+    <section class="id">
+      <span class="eyebrow">Altitude 4 · Document · Manual</span>
+      <h1>Injector Head Operations Manual</h1>
+      <span class="code">TQ-TWS-CTSS-WI-003 · English · Internal</span>
+    </section>
+    <section class="verdict" aria-label="Can I trust this document">
+      <div class="vd-top"><span class="vd-badge"><svg class="ic"><use href="#i-check"/></svg></span><span><b>Current · Rev 4.0</b><span>In force. This is the revision to use.</span></span></div>
+      <dl class="vd-grid">
+        <div class="w"><dt>Approved by</dt><dd>Segment Director, Coiled Tubing · 28 Aug 2025</dd></div>
+        <div><dt>Effective</dt><dd>30 Aug 2025</dd></div>
+        <div><dt>Next review</dt><dd>30 Aug 2028</dd></div>
+      </dl>
+      <a class="caveat" href="#"><span class="sig"></span><span><b>ALT-002 changes the limits in section 5</b><small><svg class="ic s"><use href="#i-lock"/></svg>Confidential · request access through QMS</small></span></a>
+    </section>
+    <div class="acts">
+      <a class="btn pri" href="#"><svg class="ic"><use href="#i-down"/></svg>Download PDF</a>
+      <a class="btn" href="#"><svg class="ic"><use href="#i-mark"/></svg>Bookmark</a>
+      <a class="btn" href="#"><svg class="ic"><use href="#i-qr"/></svg>Share</a>
+      <a class="btn" href="#"><svg class="ic"><use href="#i-more"/></svg>More</a>
+    </div>
+    <p class="sum">How to rig up, operate, monitor and shut down the CT injector head safely: chain tension, gripper block inspection, traction pressure limits, and what to do on a chain slip.</p>
+    <a class="where" href="area.html"><span class="eyebrow">Where it sits</span><svg class="tmap tmap-mini" viewBox="30 100 1052 650" role="img" aria-label="Orientation: Coiled Tubing within the TAQA map" preserveAspectRatio="xMidYMid meet"><defs><radialGradient id="gloww"><stop offset="0" stop-color="#FD691D" stop-opacity=".30"/><stop offset=".55" stop-color="#FD691D" stop-opacity=".10"/><stop offset="1" stop-color="#FD691D" stop-opacity="0"/></radialGradient>
+  <linearGradient id="ringw" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FD691D"/><stop offset="1" stop-color="#C8102E"/></linearGradient></defs><rect class="reg reg-ops" x="40" y="110" width="560" height="440" rx="44" fill="var(--fam-ops)"/><rect class="reg reg-corp" x="640" y="110" width="432" height="440" rx="44" fill="var(--fam-corp)"/><rect class="reg reg-pt" x="330" y="572" width="510" height="168" rx="44" fill="var(--fam-pt)"/><rect class="reg reg-cw" x="860" y="572" width="212" height="168" rx="44" fill="var(--fam-cw)"/><path class="hull" d="M306 350 C331.3 332.3, 398.3 327.3, 440 326 C481.7 324.7, 534.3 324.7, 556 342 C577.7 359.3, 571.0 400.3, 570 430 C569.0 459.7, 553.0 485.0, 550 520 C547.0 555.0, 554.3 607.7, 552 640 C549.7 672.3, 556.3 700.7, 536 714 C515.7 727.3, 453.3 732.3, 430 720 C406.7 707.7, 403.3 666.7, 396 640 C388.7 613.3, 402.0 582.5, 386 560 C370.0 537.5, 316.3 526.3, 300 505 C283.7 483.7, 287.0 457.8, 288 432 C289.0 406.2, 280.7 367.7, 306 350Z"/><g class="a a-dr f-ops   "><circle class="dot" cx="130" cy="225" r="42.88029850642367"/></g><g class="a a-sa f-ops   "><circle class="dot" cx="270" cy="225" r="42.244999704106995"/></g><g class="a a-fr f-ops   "><circle class="dot" cx="410" cy="225" r="39.94195788891676"/></g><g class="a a-cm f-ops   "><circle class="dot" cx="535" cy="225" r="31.200000000000003"/></g><g class="a a-in f-ops   "><circle class="dot" cx="110" cy="400" r="34.882660448996724"/></g><g class="a a-wt f-ops   "><circle class="dot" cx="225" cy="400" r="29.41564209736038"/></g><g class="a a-ws f-ops   "><circle class="dot" cx="360" cy="400" r="28.00285699709942"/></g><g class="a a-ct f-ops   you"><circle class="dot" cx="490" cy="400" r="34.882660448996724"/><circle class="ring" cx="490" cy="400" r="39.882660448996724" stroke="url(#ringw)"/><text class="lab" x="490" y="475.3826604489967" text-anchor="middle" font-size="30"><tspan x="490">Coiled Tubing <tspan class="n">45</tspan></tspan></text></g><g class="a a-sl f-ops   "><circle class="dot" cx="420" cy="512" r="9.00666419935816"/></g><g class="a a-wc f-ops   "><circle class="dot" cx="76" cy="494" r="9.00666419935816"/></g><g class="a a-ma f-ops   "><circle class="dot" cx="76" cy="522" r="9.00666419935816"/></g><g class="a a-qh f-corp   "><circle class="dot" cx="724" cy="240" r="39.60202015049233"/></g><g class="a a-gr f-corp   "><circle class="dot" cx="862" cy="240" r="34.098680326370406"/></g><g class="a a-hr f-corp   "><circle class="dot" cx="1010" cy="240" r="32.473989591671675"/></g><g class="a a-fi f-corp   "><circle class="dot" cx="680" cy="392" r="9.00666419935816"/></g><g class="a a-it f-corp   "><circle class="dot" cx="680" cy="420" r="9.00666419935816"/></g><g class="a a-sc f-corp   "><circle class="dot" cx="680" cy="448" r="9.00666419935816"/></g><g class="a a-le f-corp   "><circle class="dot" cx="680" cy="476" r="9.00666419935816"/></g><g class="a a-ld f-corp   "><circle class="dot" cx="872" cy="392" r="9.00666419935816"/></g><g class="a a-cs f-corp   "><circle class="dot" cx="872" cy="420" r="9.00666419935816"/></g><g class="a a-ge f-corp   "><circle class="dot" cx="872" cy="448" r="9.00666419935816"/></g><g class="a a-wic f-pt   "><circle class="dot" cx="474" cy="648" r="14.70782104868019"/></g><g class="a a-dsc f-pt   "><circle class="dot" cx="622" cy="648" r="14.70782104868019"/></g><g class="a a-wcc f-pt   "><circle class="dot" cx="762" cy="648" r="13.757906817535872"/></g><g class="a a-cw f-cw   "><circle class="dot" cx="890" cy="652" r="18.01332839871632"/></g></svg><span class="wc">Operational segments › Coiled Tubing › Injector head</span></a>
+  </aside>
+
+  <section class="canvas" aria-label="The document in its neighbourhood">
+    <div class="cv-top"><span class="eyebrow">The document in its neighbourhood</span><span class="concept">Equipment tags proposed</span></div>
+    <div class="stage">
+      <svg viewBox="0 0 660 770" aria-hidden="true">
+        <g fill="none" stroke="#C3D1CF" stroke-width="1.2">
+          <path d="M224 220 C 180 150, 150 120, 130 82"/><path d="M436 220 C 480 150, 510 120, 530 82"/>
+          <path d="M224 340 L196 340"/>
+          <path d="M436 390 C 470 430, 470 450, 474 470"/>
+        </g>
+        <path d="M436 300 C 452 300, 460 300, 474 300" fill="none" stroke="#C8102E" stroke-width="1.6" stroke-dasharray="4 4"/>
+        <path d="M330 438 L330 592" stroke="#C3D1CF" stroke-width="1.2" stroke-dasharray="2 5"/>
+      </svg>
+      <div class="sat" style="left:40px;top:40px;width:200px"><span class="k">Equipment</span><a class="eqc" href="area.html"><i></i>Injector head</a></div>
+      <div class="sat" style="left:440px;top:40px;width:200px"><span class="k">Equipment</span><a class="eqc" href="area.html"><i></i>CT string · 2-inch</a></div>
+      <div class="sat" style="left:6px;top:210px">
+        <span class="k">Related documents</span>
+        <a class="p" href="#"><span class="code">WI-005</span>CT String Inspection Manual<span class="m"><span class="st cur">Current</span></span></a>
+        <a class="p" href="#"><span class="code">SOP-006</span>CT Unit Rig-Up &amp; Rig-Down<span class="m"><span class="st due">Review due</span><span class="cls lk"><svg class="ic s" style="width:13px;height:13px"><use href="#i-lock"/></svg>Restricted</span></span></a>
+        <a class="p" href="#"><span class="code">F001</span>Pre-Job Safety Checklist · Appendix A</a>
+      </div>
+      <div class="sat alert" style="left:474px;top:222px">
+        <span class="k" style="color:var(--signal)">Associated alert · section 5</span>
+        <a class="p" href="#"><span class="code">ALT-002</span>New pressure rating for 2-inch CT string, effective immediately<span class="m"><span class="sig" style="width:7px;height:7px;margin-top:3px"></span><span class="cls lk"><svg class="ic s" style="width:13px;height:13px"><use href="#i-lock"/></svg>Confidential</span></span></a>
+      </div>
+      <div class="sat exp" style="left:474px;top:440px">
+        <span class="k">Expert</span>
+        <a class="p" href="#"><b style="font-weight:600">Ask the Coiled Tubing expert</b><small>"Chain slip on the injector at 4,200 ft — can we continue at reduced traction pressure?"</small></a>
+      </div>
+      <div class="node">
+        <span class="code">TQ-TWS-CTSS-WI-003</span>
+        <h3>Injector Head Operations Manual</h3>
+        <span class="ln"></span><span class="ln"></span><span class="ln s"></span><span class="ln"></span><span class="ln s"></span><span class="ln"></span><span class="ln" style="width:48%"></span>
+        <div class="ftr"><span class="st cur">Current</span><span>Rev 4.0</span></div>
+        <span class="pv">Preview · PDF viewer not connected</span>
+      </div>
+      <div class="lin">
+        <span class="sat" style="position:static;width:auto"><span class="k" style="text-align:center">Revision lineage</span></span>
+        <ol class="lineage"><li><b>Rev 1.0</b>14 Jan 2022</li><li><b>Rev 2.0</b>02 Feb 2023</li><li><b>Rev 3.0</b>11 Mar 2024</li><li class="now"><b>Rev 4.0 · Current</b>30 Aug 2025</li></ol>
+        <p class="lineage-note">Rev 1–3 superseded · Employees see the current revision only</p>
+      </div>
+    </div>
+  </section>
+
+  <aside class="right">
+    <section class="sec">
+      <h2>What changed in Rev 4.0</h2>
+      <div class="chg"><svg class="ic"><use href="#i-check"/></svg><span><b>Traction pressure limits for 2-inch string</b></span></div>
+    </section>
+    <section class="sec">
+      <h2>Contents</h2>
+      <ol class="toc">
+        <li><a href="#"><span class="n">1</span>Scope</a></li>
+        <li><a href="#"><span class="n">2</span>Injector head components</a></li>
+        <li><a href="#"><span class="n">3</span>Pre-job inspection</a></li>
+        <li><a href="#"><span class="n">4</span>Chain tension and traction pressure</a></li>
+        <li><a href="#"><span class="n">5</span>Operating limits (2-inch)<span class="fl"><span class="sig"></span>ALT-002</span></a></li>
+        <li><a href="#"><span class="n">6</span>Chain slip response</a></li>
+        <li><a href="#"><span class="n">7</span>Shutdown and isolation</a></li>
+        <li><a href="#"><span class="n">A</span>Inspection record<span class="fl k">F001</span></a></li>
+      </ol>
+    </section>
+    <section class="sec">
+      <h2>Approval trail</h2>
+      <ol class="trail">
+        <li><span><b>Filed</b> 19 Aug 2025 · Khalid Al-Otaibi, CT Engineer</span></li>
+        <li><span><b>QMS check</b> 24 Aug 2025 · QMS Document Control</span></li>
+        <li><span><b>Final approval</b> 28 Aug 2025 · Segment Director, Coiled Tubing</span></li>
+        <li><span><b>Current</b> from 30 Aug 2025 · 36-month review cycle</span></li>
+      </ol>
+    </section>
+  </aside>
+</main>
+</body></html>

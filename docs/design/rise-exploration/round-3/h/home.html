@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RISE Knowledge Map</title>
+<style>@import url("../../kit/fonts.css");
+:root{
+  --ground:#EFF1EE; --ground-2:#E6EAE6; --surface:#FFFFFF; --veil:rgba(255,255,255,.86);
+  --ink:#002B32; --ink-2:#34525A; --ink-3:#566F74; --line:#D2DBD9; --line-2:#E2E7E5;
+  --teal:#005D63; --teal-deep:#013F4E; --cyan:#00ADC2; --thread:#0E8C9C;
+  --signal:#C8102E; --orange:#FD691D; --grad:linear-gradient(90deg,#FD691D,#C8102E);
+  --ok:#17663F; --ok-dot:#2E9A5F; --due:#7A4E00; --due-dot:#D18A00; --lock:#46585D;
+  --fam-ops:#E3ECE9; --fam-corp:#ECEAE3; --fam-pt:#E5E9EE; --fam-cw:#EEE7E3;
+  --node:#FFFFFF; --node-line:#9FB5B2;
+  --r:14px; --shadow:0 1px 2px rgba(0,43,50,.06),0 8px 28px rgba(0,43,50,.08);
+  --display:'BwGradual',Inter,system-ui,sans-serif; --ui:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 16px/1.5 var(--ui);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:6px}
+.ic{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ic.s{width:16px;height:16px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.eyebrow{font:600 11.5px/1.2 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.mono{font-feature-settings:"tnum" 1;letter-spacing:.01em}
+.code{font:600 12.5px/1.2 var(--ui);letter-spacing:.02em;color:var(--ink-3);font-feature-settings:"tnum" 1}
+.concept{display:inline-flex;align-items:center;gap:4px;font:600 10.5px/1 var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--teal);border:1px dashed #7FA6A6;border-radius:99px;padding:4px 7px;white-space:nowrap}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;height:60px;padding:0 16px;background:rgba(239,241,238,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2)}
+.brand img{height:28px;width:auto;display:block}
+.top .alt-crumb{display:none}
+.top-r{margin-left:auto;display:flex;align-items:center;gap:6px}
+.tbtn{position:relative;display:grid;place-items:center;width:44px;height:44px;border-radius:12px;color:var(--ink)}
+.tbtn:hover{background:var(--ground-2)}
+.tbtn .pip{position:absolute;top:10px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 2px var(--ground)}
+.me{display:flex;align-items:center;gap:10px}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--teal-deep);color:#fff;font:600 13px/1 var(--ui)}
+.me-t{display:none}
+/* altitude gauge glyph */
+.gauge{display:inline-grid;gap:2px;width:14px;flex:none}
+.gauge i{display:block;height:3px;border-radius:2px;background:#C3CFCD}
+.gauge i.on{background:var(--ink)}
+.gauge i.past{background:#7E9A9A}
+/* phone altitude strip */
+.altbar{position:sticky;top:60px;z-index:19;display:flex;align-items:center;gap:10px;min-height:48px;padding:6px 16px;background:rgba(239,241,238,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2);font-size:14px}
+.altbar .up{display:inline-flex;align-items:center;gap:6px;min-height:44px;color:var(--ink-2)}
+.altbar .here{font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.altbar .lvl{margin-left:auto;font:600 11px/1 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+
+/* status language: always words, colour is secondary */
+.st{display:inline-flex;align-items:center;gap:6px;font:500 13px/1.2 var(--ui);color:var(--ink-2);white-space:nowrap}
+.st::before{content:"";width:8px;height:8px;border-radius:50%;flex:none}
+.st.cur{color:var(--ok)} .st.cur::before{background:var(--ok-dot)}
+.st.due{color:var(--due)} .st.due::before{background:transparent;border:2px solid var(--due-dot);width:8px;height:8px;box-sizing:border-box;background:linear-gradient(90deg,var(--due-dot) 50%,transparent 50%)}
+.cls{display:inline-flex;align-items:center;gap:4px;font:500 13px/1.2 var(--ui);color:var(--ink-3);white-space:nowrap}
+.cls.lk{color:var(--lock)}
+.ar{font:600 11px/1 var(--ui);letter-spacing:.06em;color:var(--teal);border:1px solid #B9CFCD;border-radius:5px;padding:3px 5px}
+.sig{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 3px rgba(200,16,46,.14);flex:none}
+
+/* map/list toggle */
+.seg{display:inline-flex;padding:3px;border-radius:12px;background:var(--ground-2);border:1px solid var(--line-2)}
+.seg a{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:9px;font:500 14px/1 var(--ui);color:var(--ink-2)}
+.seg a[aria-current]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,43,50,.12)}
+
+/* search field */
+.field{display:flex;align-items:center;gap:12px;height:54px;padding:0 10px 0 18px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);color:var(--ink)}
+.field .q{flex:1;min-width:0;font:400 17px/1 var(--ui);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.field .q.ph{color:var(--ink-3)}
+.kbd{display:none;font:500 12px/1 var(--ui);color:var(--ink-3);border:1px solid var(--line);border-radius:6px;padding:4px 7px;background:var(--ground)}
+
+.btn{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:12px;font:500 15px/1 var(--ui);border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.pri{background:var(--ink);border-color:var(--ink);color:#fff}
+.lnk{display:inline-flex;align-items:center;gap:6px;min-height:44px;font:600 15px/1.2 var(--ui);color:var(--teal)}
+
+@media (min-width:1024px){
+  body{font-size:15px}
+  .top{height:64px;padding:0 32px;gap:28px}
+  .brand img{height:32px}
+  .top .alt-crumb{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink-3)}
+  .alt-crumb a{color:var(--ink-2);padding:6px 2px}
+  .alt-crumb a:hover{color:var(--ink)}
+  .alt-crumb .sep{color:#A9BAB8}
+  .alt-crumb b{font-weight:600;color:var(--ink)}
+  .me-t{display:block;font:500 14px/1.2 var(--ui)}
+  .me-t small{display:block;font-size:12px;color:var(--ink-3);font-weight:400}
+  .altbar{display:none}
+  .kbd{display:inline-block}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+.tmap{display:block;width:100%;height:100%;font-family:var(--ui);overflow:visible}
+.tmap .rlab{fill:var(--ink-3);font-weight:600;letter-spacing:.12em}
+.tmap .rlab .rs{letter-spacing:.02em;font-weight:400}
+.tmap .dot{filter:drop-shadow(0 2px 3px rgba(0,43,50,.08));fill:var(--node);stroke:var(--node-line);stroke-width:1.2;transition:fill .3s}
+.tmap .f-corp .dot{stroke:#B8B19F} .tmap .f-pt .dot{stroke:#9EABBD} .tmap .f-cw .dot{stroke:#B9A39A}
+.tmap .lab{fill:var(--ink);font-weight:500}
+.tmap .lab .n{fill:var(--ink-3);font-weight:400}
+.tmap .ring{fill:none;stroke-width:2.2}
+.tmap .youlab{fill:var(--ink);font-weight:700;letter-spacing:.14em}
+.tmap .hull{fill:rgba(0,173,194,.05);stroke:var(--thread);stroke-width:1.4;stroke-dasharray:5 5}
+.tmap .hull-on{fill:rgba(0,93,99,.07);stroke:var(--teal);stroke-width:2;stroke-dasharray:none}
+.tmap .hlab{fill:var(--teal)} .tmap .hsub{fill:var(--ink-3);font-style:italic}
+.tmap .sigh{fill:rgba(200,16,46,.16)} .tmap .sigc{fill:var(--signal);stroke:#fff;stroke-width:1.5}
+.tmap .alab{fill:var(--signal);font-weight:600}
+.tmap .dim .dot{fill:transparent;stroke:#C4D0CE;stroke-dasharray:2 3}
+.tmap .dim .lab{fill:#7D9195} .tmap .dim .lab .n{fill:#8FA2A5}
+.tmap-search,.tmap-mini{overflow:hidden!important}
+.tmap .lit .dot{fill:#fff;stroke:var(--teal);stroke-width:1.5}
+.tmap .hit{fill:var(--teal-deep)}
+.tmap .lit .cnt{fill:#fff;font-weight:700}
+.tmap .lnote{fill:var(--teal);font-weight:500}
+.tmap .thr{fill:none;stroke:var(--thread);stroke-width:2.5}
+.tmap a .dot{cursor:pointer} .tmap a:hover .dot{fill:#F6FBFA;stroke:var(--teal)}
+
+.d-only{display:none}
+/* ---------- phone: a vertical descent ---------- */
+.intro{padding:20px 16px 8px}
+.intro h1{font:400 31px/1.08 var(--display);letter-spacing:-.01em;margin:10px 0 12px}
+.intro h1 b{font-weight:700}
+.facts{display:flex;flex-wrap:wrap;gap:4px 16px;margin:0;padding:0;list-style:none;font-size:14px;color:var(--ink-2)}
+.facts b{font:700 17px/1 var(--display);color:var(--ink);margin-right:4px}
+.p-search{display:block;padding:12px 16px 4px}
+.descent{position:relative;padding:8px 16px 40px}
+.band{position:relative;padding:18px 0 22px 40px}
+.band::before{content:"";position:absolute;left:13px;top:0;bottom:0;width:2px;background:linear-gradient(var(--line),var(--line))}
+.band:first-child::before{top:30px}
+.band:last-child::before{bottom:auto;height:30px}
+.mk{position:absolute;left:2px;top:20px;width:24px;height:24px;border-radius:50%;background:var(--ground);border:2px solid var(--ink);display:grid;place-items:center;font:700 11px/1 var(--ui)}
+.band.here .mk{background:var(--ink);color:#fff}
+.band.ahead .mk{border-color:#A6B8B6;color:var(--ink-3)}
+.lv{font:600 11px/1 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:4px 0 6px}
+.band h2{font:700 22px/1.15 var(--display);margin:0 0 4px}
+.band p{margin:0 0 12px;color:var(--ink-2);font-size:15px}
+.glyph{background:var(--surface);border:1px solid var(--line-2);border-radius:16px;padding:10px 6px 4px;margin:8px 0 6px}
+.glyph .tmap{height:auto}
+.glyph-cap{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-3);padding:6px 8px 6px}
+.rows{list-style:none;margin:6px 0 0;padding:0;border-top:1px solid var(--line-2)}
+.rows li{border-bottom:1px solid var(--line-2)}
+.rows a{display:flex;align-items:center;gap:12px;min-height:58px;padding:8px 2px}
+.rows .nm{flex:1;min-width:0}
+.rows .nm b{display:block;font:500 16px/1.25 var(--ui)}
+.rows .nm small{display:block;font-size:13px;color:var(--ink-3)}
+.rows .ic{color:var(--ink-3)}
+.pdots{flex:none;width:44px;height:30px}
+.pdots circle{fill:var(--node);stroke:var(--node-line);stroke-width:1.2}
+.rows .youRow{background:linear-gradient(90deg,rgba(253,105,29,.07),transparent 70%);margin:0 -8px;padding-left:10px;padding-right:10px;border-radius:12px}
+.youtag{display:inline-flex;align-items:center;gap:6px;font:600 11px/1 var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--ink)}
+.youtag::before{content:"";width:10px;height:10px;border-radius:50%;border:2px solid #E5461F;box-sizing:border-box}
+.alerts{list-style:none;margin:10px 0 14px;padding:0;display:grid;gap:8px}
+.alerts a{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;min-height:56px;background:var(--surface);border:1px solid var(--line-2);border-radius:14px}
+.alerts .sig{margin-top:7px}
+.alerts b{display:block;font:500 15px/1.35 var(--ui)}
+.alerts .meta{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px;padding:0;list-style:none}
+.chips a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:99px;background:var(--surface);border:1px solid var(--line);font-size:15px}
+.descend{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:56px;padding:0 18px;border-radius:16px;background:var(--ink);color:#fff;font:500 16px/1 var(--ui)}
+.descend .ic{transform:rotate(90deg)}
+.foot{padding:4px 16px 32px 56px;font-size:13px;color:var(--ink-3)}
+
+/* ---------- desktop: the landscape ---------- */
+@media (min-width:1024px){
+  .p-only{display:none!important}
+  .d-only{display:block}
+  .land{display:grid;grid-template-columns:350px 1fr;height:calc(100vh - 64px);min-height:780px}
+  .side{display:flex;flex-direction:column;padding:28px 28px 24px 40px;border-right:1px solid var(--line-2);background:var(--ground);overflow:hidden}
+  .side h1{font:400 30px/1.08 var(--display);letter-spacing:-.012em;margin:12px 0 12px}
+  .side h1 b{font-weight:700}
+  .side .lead{margin:0 0 18px;color:var(--ink-2);font-size:15px;line-height:1.5}
+  .alt{margin:22px 0 0;padding:0;list-style:none;position:relative}
+  .alt::before{content:"";position:absolute;left:7px;top:14px;bottom:14px;width:2px;background:var(--line)}
+  .alt li a{position:relative;display:flex;align-items:baseline;gap:14px;padding:6px 0 6px 30px;min-height:34px}
+  .alt li a::before{content:"";position:absolute;left:1px;top:12px;width:14px;height:14px;border-radius:50%;background:var(--ground);border:2px solid #A6B8B6;box-sizing:border-box}
+  .alt li.here a::before{background:var(--ink);border-color:var(--ink);box-shadow:0 0 0 4px rgba(0,43,50,.1)}
+  .alt b{font:500 15px/1.2 var(--ui);min-width:86px}
+  .alt li.here b{font-weight:700}
+  .alt span{font-size:13px;color:var(--ink-3)}
+  .alt a:hover b{color:var(--teal)}
+  .alt-h{display:flex;justify-content:space-between;align-items:center;margin-top:20px}
+  .alt{margin-top:12px!important}
+  .yours{margin-top:auto;background:var(--surface);border:1px solid var(--line-2);border-radius:18px;padding:18px 18px 10px;box-shadow:var(--shadow)}
+  .yours h2{font:700 21px/1.1 var(--display);margin:8px 0 4px}
+  .yours .sub{font-size:13.5px;color:var(--ink-3);margin:0 0 10px}
+  .yours .al{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line-2)}
+  .yours .al .sig{margin-top:6px}
+  .yours .al b{display:block;font:500 14px/1.35 var(--ui)}
+  .yours .al .meta{display:flex;gap:10px;margin-top:3px}
+  .yours .cls,.yours .st{font-size:12.5px}
+  .mapwrap{position:relative;overflow:hidden;background:radial-gradient(1200px 700px at 60% 45%,#F6F7F4,var(--ground))}
+  .mapwrap .tmap{position:absolute;left:20px;top:96px;width:calc(100% - 44px);height:calc(100% - 110px)}
+  .fsearch{position:absolute;z-index:3;top:22px;left:50%;transform:translateX(-50%);width:min(560px,60%)}
+  .fsearch .field{height:56px;box-shadow:0 2px 4px rgba(0,43,50,.06),0 18px 40px rgba(0,43,50,.12)}
+  .zoom{position:absolute;right:28px;top:22px;display:grid;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+  .zoom a{display:grid;place-items:center;width:44px;height:44px;border-bottom:1px solid var(--line-2)}
+  .zoom a:last-child{border-bottom:0}
+  .zoom a:hover{background:var(--ground)}
+  .legend{position:absolute;left:28px;bottom:26px;margin:0;padding:14px 16px;list-style:none;display:grid;gap:8px;font-size:12.5px;color:var(--ink-2);background:var(--veil);border:1px solid var(--line-2);border-radius:14px;backdrop-filter:blur(6px)}
+  .legend li{display:flex;align-items:center;gap:10px}
+  .legend svg{width:26px;height:16px;flex:none}
+  .hint{position:absolute;right:88px;bottom:34px;font-size:13px;color:var(--ink-3);display:flex;gap:8px;align-items:center}
+  .tmap .a{animation:rise .7s cubic-bezier(.2,.7,.2,1) both}
+  .tmap .f-corp{animation-delay:.08s}.tmap .f-pt{animation-delay:.14s}.tmap .f-cw{animation-delay:.18s}
+  .tmap .ring{animation:breathe 1.2s .5s ease-out both}
+}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes breathe{from{opacity:0}to{opacity:1}}
+</style></head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+<symbol id="i-map" viewBox="0 0 24 24"><circle cx="7" cy="8" r="3"/><circle cx="16.5" cy="7" r="2"/><circle cx="14" cy="16" r="4"/><path d="M9.6 9.6l1.9 3"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6.5h11M9 12h11M9 17.5h11"/><circle cx="4.5" cy="6.5" r=".8"/><circle cx="4.5" cy="12" r=".8"/><circle cx="4.5" cy="17.5" r=".8"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5.5" y="10.5" width="13" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></symbol>
+<symbol id="i-mark" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3.5L7 20z"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/><path d="M13 4h7v7M4 13v7h7"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><circle cx="6" cy="12" r=".9"/><circle cx="12" cy="12" r=".9"/><circle cx="18" cy="12" r=".9"/></symbol>
+<symbol id="i-expert" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></symbol>
+<symbol id="i-ask" viewBox="0 0 24 24"><path d="M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4 3.5v-3.5h0a1.5 1.5 0 0 1-1.5-1.5z"/><path d="M10 9.2a2 2 0 1 1 2.7 1.9c-.5.2-.7.6-.7 1.1M12 14.2v.1"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6.5 10.5L12 5l5.5 5.5"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-fit" viewBox="0 0 24 24"><path d="M4.5 9V4.5H9M15 4.5h4.5V9M19.5 15v4.5H15M9 19.5H4.5V15"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 15.5H3z"/><path d="M12 10v4M12 16.6v.1"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M6.5 3.5h7l4 4v13h-11z"/><path d="M13.5 3.5v4h4M9 12h6M9 15.5h6"/></symbol>
+<symbol id="i-thread" viewBox="0 0 24 24"><path d="M3 17c4 0 4-10 9-10s5 10 9 10"/><circle cx="12" cy="7" r="1.6"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M5 5.5A1.5 1.5 0 0 1 6.5 4H19v14H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+<symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6c1.6 0 3 .5 4.2 1.2M21 12s-3.5 6-9 6c-1.6 0-3-.5-4.2-1.2"/><path d="M4 20L20 4"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+<symbol id="i-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2M20 14v6h-3M14 18v2"/></symbol>
+</svg>
+
+<header class="top">
+  <a class="brand" href="home.html"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE"></a>
+  <nav class="alt-crumb" aria-label="Where you are">
+    <span class="gauge" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i><i></i></span>
+    <b>TAQA</b><span class="sep">·</span><span>25 areas · 520 documents in force</span>
+  </nav>
+  <div class="top-r">
+    <a class="tbtn p-only" href="search-start.html" aria-label="Search"><svg class="ic"><use href="#i-search"/></svg></a>
+    <a class="tbtn" href="#" aria-label="33 active technical alerts"><svg class="ic"><use href="#i-bell"/></svg><span class="pip"></span></a>
+    <span class="me"><span class="av" aria-hidden="true">FA</span><span class="me-t">Faisal Al-Ghamdi<small>Field Supervisor · Employee</small></span></span>
+  </div>
+</header>
+
+<!-- ============ PHONE ============ -->
+<div class="p-only">
+  <section class="intro">
+    <div class="eyebrow">Knowledge map · altitude 0</div>
+    <h1>Everything TAQA knows, <b>and where it lives.</b></h1>
+    <ul class="facts"><li><b>520</b>in force</li><li><b>25</b>areas</li><li><b>33</b>active alerts</li></ul>
+  </section>
+  <a class="p-search" href="search-start.html"><span class="field"><svg class="ic"><use href="#i-search"/></svg><span class="q ph">Search 520 documents in force</span></span></a>
+
+  <div class="descent">
+    <section class="band here">
+      <span class="mk">0</span>
+      <div class="lv">Altitude 0 · Company</div>
+      <h2>TAQA</h2>
+      <p>Four families of knowledge. Your area is lit, in Operational segments.</p>
+      <div class="glyph"><svg class="tmap tmap-mini" viewBox="30 100 1052 650" role="img" aria-label="Orientation glyph: all 25 TAQA areas, your area Coiled Tubing lit" preserveAspectRatio="xMidYMid meet"><defs><radialGradient id="glowp"><stop offset="0" stop-color="#FD691D" stop-opacity=".30"/><stop offset=".55" stop-color="#FD691D" stop-opacity=".10"/><stop offset="1" stop-color="#FD691D" stop-opacity="0"/></radialGradient>
+  <linearGradient id="ringp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FD691D"/><stop offset="1" stop-color="#C8102E"/></linearGradient></defs><rect class="reg reg-ops" x="40" y="110" width="560" height="440" rx="44" fill="var(--fam-ops)"/><rect class="reg reg-corp" x="640" y="110" width="432" height="440" rx="44" fill="var(--fam-corp)"/><rect class="reg reg-pt" x="330" y="572" width="510" height="168" rx="44" fill="var(--fam-pt)"/><rect class="reg reg-cw" x="860" y="572" width="212" height="168" rx="44" fill="var(--fam-cw)"/><path class="hull" d="M306 350 C331.3 332.3, 398.3 327.3, 440 326 C481.7 324.7, 534.3 324.7, 556 342 C577.7 359.3, 571.0 400.3, 570 430 C569.0 459.7, 553.0 485.0, 550 520 C547.0 555.0, 554.3 607.7, 552 640 C549.7 672.3, 556.3 700.7, 536 714 C515.7 727.3, 453.3 732.3, 430 720 C406.7 707.7, 403.3 666.7, 396 640 C388.7 613.3, 402.0 582.5, 386 560 C370.0 537.5, 316.3 526.3, 300 505 C283.7 483.7, 287.0 457.8, 288 432 C289.0 406.2, 280.7 367.7, 306 350Z"/><g class="a a-dr f-ops   "><circle class="dot" cx="130" cy="225" r="42.88029850642367"/></g><g class="a a-sa f-ops   "><circle class="dot" cx="270" cy="225" r="42.244999704106995"/></g><g class="a a-fr f-ops   "><circle class="dot" cx="410" cy="225" r="39.94195788891676"/></g><g class="a a-cm f-ops   "><circle class="dot" cx="535" cy="225" r="31.200000000000003"/></g><g class="a a-in f-ops   "><circle class="dot" cx="110" cy="400" r="34.882660448996724"/></g><g class="a a-wt f-ops   "><circle class="dot" cx="225" cy="400" r="29.41564209736038"/><g class="alrt"><circle cx="246.17926231009946" cy="378.8207376899005" r="7" class="sigh"/><circle cx="246.17926231009946" cy="378.8207376899005" r="4" class="sigc"/></g></g><g class="a a-ws f-ops   "><circle class="dot" cx="360" cy="400" r="28.00285699709942"/></g><g class="a a-ct f-ops   you"><circle class="dot" cx="490" cy="400" r="34.882660448996724"/><circle class="ring" cx="490" cy="400" r="39.882660448996724" stroke="url(#ringp)"/><g class="alrt"><circle cx="515.1155155232776" cy="374.8844844767224" r="7" class="sigh"/><circle cx="515.1155155232776" cy="374.8844844767224" r="4" class="sigc"/></g></g><g class="a a-sl f-ops   "><circle class="dot" cx="420" cy="512" r="9.00666419935816"/></g><g class="a a-wc f-ops   "><circle class="dot" cx="76" cy="494" r="9.00666419935816"/></g><g class="a a-ma f-ops   "><circle class="dot" cx="76" cy="522" r="9.00666419935816"/></g><g class="a a-qh f-corp   "><circle class="dot" cx="724" cy="240" r="39.60202015049233"/></g><g class="a a-gr f-corp   "><circle class="dot" cx="862" cy="240" r="34.098680326370406"/></g><g class="a a-hr f-corp   "><circle class="dot" cx="1010" cy="240" r="32.473989591671675"/></g><g class="a a-fi f-corp   "><circle class="dot" cx="680" cy="392" r="9.00666419935816"/></g><g class="a a-it f-corp   "><circle class="dot" cx="680" cy="420" r="9.00666419935816"/></g><g class="a a-sc f-corp   "><circle class="dot" cx="680" cy="448" r="9.00666419935816"/></g><g class="a a-le f-corp   "><circle class="dot" cx="680" cy="476" r="9.00666419935816"/></g><g class="a a-ld f-corp   "><circle class="dot" cx="872" cy="392" r="9.00666419935816"/></g><g class="a a-cs f-corp   "><circle class="dot" cx="872" cy="420" r="9.00666419935816"/></g><g class="a a-ge f-corp   "><circle class="dot" cx="872" cy="448" r="9.00666419935816"/></g><g class="a a-wic f-pt   "><circle class="dot" cx="474" cy="648" r="14.70782104868019"/><g class="alrt"><circle cx="484.58963115504974" cy="637.4103688449503" r="7" class="sigh"/><circle cx="484.58963115504974" cy="637.4103688449503" r="4" class="sigc"/></g></g><g class="a a-dsc f-pt   "><circle class="dot" cx="622" cy="648" r="14.70782104868019"/></g><g class="a a-wcc f-pt   "><circle class="dot" cx="762" cy="648" r="13.757906817535872"/></g><g class="a a-cw f-cw   "><circle class="dot" cx="890" cy="652" r="18.01332839871632"/></g></svg>
+        <div class="glyph-cap"><span class="sig"></span>Active alert<span style="margin-left:auto">Circle size = documents</span></div>
+      </div>
+      <ul class="rows">
+        <li><a href="#"><svg class="pdots" viewBox="0 0 44 30"><circle cx="9" cy="15" r="8"/><circle cx="26" cy="15" r="6"/><circle cx="38" cy="15" r="3.5"/></svg><span class="nm"><b>Operational segments</b><small>11 areas · Drilling, Safety, Fracturing…</small></span><svg class="ic"><use href="#i-chev"/></svg></a></li>
+        <li><a href="#"><svg class="pdots" viewBox="0 0 44 30"><circle cx="9" cy="15" r="7.5" style="stroke:#B8B19F"/><circle cx="25" cy="15" r="6" style="stroke:#B8B19F"/><circle cx="38" cy="15" r="2.5" style="stroke:#B8B19F"/></svg><span class="nm"><b>Corporate functions</b><small>10 areas · QHSE, GRC, HR…</small></span><svg class="ic"><use href="#i-chev"/></svg></a></li>
+        <li><a href="#"><svg class="pdots" viewBox="0 0 44 30"><circle cx="10" cy="15" r="3.5" style="stroke:#9EABBD"/><circle cx="21" cy="15" r="3.5" style="stroke:#9EABBD"/><circle cx="32" cy="15" r="3.3" style="stroke:#9EABBD"/></svg><span class="nm"><b>Products &amp; Technology</b><small>3 areas · Centers of Excellence</small></span><svg class="ic"><use href="#i-chev"/></svg></a></li>
+        <li><a href="#"><svg class="pdots" viewBox="0 0 44 30"><circle cx="12" cy="15" r="5" style="stroke:#B9A39A"/></svg><span class="nm"><b>Company Wide</b><small>Policies, CEO · 12 documents</small></span><svg class="ic"><use href="#i-chev"/></svg></a></li>
+      </ul>
+    </section>
+
+    <section class="band">
+      <span class="mk">1</span>
+      <div class="lv">Altitude 1 · Grouping <span class="concept">Proposed</span></div>
+      <h2>Well Intervention</h2>
+      <p>Your neighbourhood: four areas that share equipment and the pressure-control thread.</p>
+      <ul class="rows">
+        <li><a class="youRow" href="area.html"><svg class="pdots" viewBox="0 0 44 30"><circle cx="15" cy="15" r="11" style="stroke:#E5461F;stroke-width:2"/></svg><span class="nm"><b>Coiled Tubing</b><small><span class="youtag">Your area</span> · 45 documents · 2 alerts</small></span><svg class="ic"><use href="#i-chev"/></svg></a></li>
+        <li><a href="#"><svg class="pdots" viewBox="0 0 44 30"><circle cx="15" cy="15" r="9"/></svg><span class="nm"><b>Wireline Services</b><small>29 documents</small></span><svg class="ic"><use href="#i-chev"/></svg></a></li>
+        <li><a href="#"><svg class="pdots" viewBox="0 0 44 30"><circle cx="15" cy="15" r="4" style="stroke:#9EABBD"/></svg><span class="nm"><b>Well Intervention CoE</b><small>Products &amp; Technology · 8 documents</small></span><svg class="ic"><use href="#i-chev"/></svg></a></li>
+        <li><a href="#"><svg class="pdots" viewBox="0 0 44 30"><circle cx="15" cy="15" r="3"/></svg><span class="nm"><b>Slickline</b><small>3 documents</small></span><svg class="ic"><use href="#i-chev"/></svg></a></li>
+      </ul>
+    </section>
+
+    <section class="band ahead">
+      <span class="mk">2</span>
+      <div class="lv">Altitude 2 · Area</div>
+      <h2>Coiled Tubing</h2>
+      <p>36 documents in force · 2 active alerts</p>
+      <ul class="alerts">
+        <li><a href="document.html"><span class="sig"></span><span><b>ALT-002 · New pressure rating for 2-inch CT string, effective immediately</b><span class="meta"><span class="st cur">Current</span><span class="cls lk"><svg class="ic s"><use href="#i-lock"/></svg>Confidential</span></span></span></a></li>
+        <li><a href="area.html"><span class="sig"></span><span><b>ALT-003 · Chemical compatibility update for H2S environments</b><span class="meta"><span class="st due">Review due</span><span class="cls">Internal</span></span></span></a></li>
+      </ul>
+      <div class="lv">Below it · equipment <span class="concept">Proposed</span></div>
+      <ul class="chips">
+        <li><a href="area.html">Injector head</a></li><li><a href="area.html">CT string</a></li><li><a href="area.html">CT unit</a></li><li><a href="area.html">BHA</a></li><li><a href="area.html">Control cabin</a></li><li><a href="area.html">Wellhead equipment</a></li><li><a href="area.html">Nitrogen</a></li><li><a href="area.html">Crane &amp; rigging</a></li>
+      </ul>
+      <a class="descend" href="area.html">Descend into Coiled Tubing <svg class="ic"><use href="#i-chev"/></svg></a>
+    </section>
+  </div>
+  <p class="foot">190+ Field Glossary terms · 14 Arabic translations · Drafts, superseded and obsolete files never appear here.</p>
+</div>
+
+<!-- ============ DESKTOP ============ -->
+<main class="land d-only">
+  <aside class="side">
+    <div class="eyebrow">RISE · Knowledge map</div>
+    <h1>Everything TAQA knows, <b>and where it lives.</b></h1>
+    <p class="lead">Zoom and the meaning changes: area, then equipment, then the document itself.</p>
+    <nav class="seg" aria-label="View"><a href="home.html" aria-current="page"><svg class="ic s"><use href="#i-map"/></svg>Map</a><a href="#"><svg class="ic s"><use href="#i-list"/></svg>List</a></nav>
+    <div class="alt-h"><span class="eyebrow">Altitude</span><span class="eyebrow" style="letter-spacing:.04em;text-transform:none">scroll or pinch to descend</span></div>
+    <ol class="alt">
+      <li class="here"><a href="home.html" aria-current="page"><b>TAQA</b><span>25 areas, 4 families</span></a></li>
+      <li><a href="#"><b>Grouping</b><span>Well Intervention · proposed</span></a></li>
+      <li><a href="area.html"><b>Area</b><span>shelves and equipment</span></a></li>
+      <li><a href="area.html"><b>Equipment</b><span>documents attached</span></a></li>
+      <li><a href="document.html"><b>Document</b><span>with its neighbourhood</span></a></li>
+    </ol>
+    <section class="yours" aria-label="Your area">
+      <span class="youtag">Your area</span>
+      <h2>Coiled Tubing</h2>
+      <p class="sub">36 documents in force · 2 active alerts</p>
+      <a class="al" href="document.html"><span class="sig"></span><span><b>New pressure rating for 2-inch CT string</b><span class="meta"><span class="code">ALT-002</span><span class="cls lk"><svg class="ic s"><use href="#i-lock"/></svg>Confidential</span></span></span></a>
+      <a class="lnk" href="area.html" style="border-top:1px solid var(--line-2);width:100%;justify-content:space-between">Descend into Coiled Tubing<svg class="ic"><use href="#i-chev"/></svg></a>
+    </section>
+  </aside>
+
+  <section class="mapwrap" aria-label="Knowledge landscape">
+    <a class="fsearch" href="search-start.html"><span class="field"><svg class="ic"><use href="#i-search"/></svg><span class="q ph">Search 520 documents in force, or ask in plain words</span><span class="kbd">/</span></span></a>
+    <svg class="tmap tmap-home" viewBox="20 96 1072 640" role="img" aria-label="Map of TAQA knowledge: 25 areas in four families, circle size by number of documents" preserveAspectRatio="xMidYMid meet"><defs><radialGradient id="glowd"><stop offset="0" stop-color="#FD691D" stop-opacity=".30"/><stop offset=".55" stop-color="#FD691D" stop-opacity=".10"/><stop offset="1" stop-color="#FD691D" stop-opacity="0"/></radialGradient>
+  <linearGradient id="ringd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FD691D"/><stop offset="1" stop-color="#C8102E"/></linearGradient></defs><rect class="reg reg-ops" x="40" y="110" width="560" height="440" rx="44" fill="var(--fam-ops)"/><text class="rlab" x="70" y="148" font-size="11.069999999999999"><tspan class="rt">OPERATIONAL SEGMENTS</tspan><tspan class="rs" dx="10">11 areas</tspan></text><rect class="reg reg-corp" x="640" y="110" width="432" height="440" rx="44" fill="var(--fam-corp)"/><text class="rlab" x="670" y="148" font-size="11.069999999999999"><tspan class="rt">CORPORATE FUNCTIONS</tspan><tspan class="rs" dx="10">10 areas</tspan></text><rect class="reg reg-pt" x="330" y="572" width="510" height="168" rx="44" fill="var(--fam-pt)"/><text class="rlab" x="610" y="610" font-size="11.069999999999999"><tspan class="rt">PRODUCTS &amp; TECHNOLOGY</tspan><tspan class="rs" dx="10">3 areas</tspan></text><rect class="reg reg-cw" x="860" y="572" width="212" height="168" rx="44" fill="var(--fam-cw)"/><text class="rlab" x="890" y="610" font-size="11.069999999999999"><tspan class="rt">COMPANY WIDE</tspan><tspan class="rs" dx="10">1 area</tspan></text><path class="hull" d="M306 350 C331.3 332.3, 398.3 327.3, 440 326 C481.7 324.7, 534.3 324.7, 556 342 C577.7 359.3, 571.0 400.3, 570 430 C569.0 459.7, 553.0 485.0, 550 520 C547.0 555.0, 554.3 607.7, 552 640 C549.7 672.3, 556.3 700.7, 536 714 C515.7 727.3, 453.3 732.3, 430 720 C406.7 707.7, 403.3 666.7, 396 640 C388.7 613.3, 402.0 582.5, 386 560 C370.0 537.5, 316.3 526.3, 300 505 C283.7 483.7, 287.0 457.8, 288 432 C289.0 406.2, 280.7 367.7, 306 350Z"/><text class="hlab" x="386" y="600" text-anchor="end" font-size="12.825"><tspan x="386" font-weight="600">Well Intervention</tspan><tspan x="386" dy="16.875" class="hsub">proposed grouping</tspan></text><g class="a a-dr f-ops   "><circle class="dot" cx="130" cy="225" r="42.88029850642367"/><text class="lab" x="130" y="286.1052985064237" text-anchor="middle" font-size="13.5"><tspan x="130">Drilling Services <tspan class="n">68</tspan></tspan></text></g><g class="a a-sa f-ops   "><circle class="dot" cx="270" cy="225" r="42.244999704106995"/><text class="lab" x="270" y="285.469999704107" text-anchor="middle" font-size="13.5"><tspan x="270">Safety Services <tspan class="n">66</tspan></tspan></text></g><g class="a a-fr f-ops   "><circle class="dot" cx="410" cy="225" r="39.94195788891676"/><text class="lab" x="410" y="283.1669578889168" text-anchor="middle" font-size="13.5"><tspan x="410">Fracturing <tspan class="n">59</tspan></tspan></text></g><g class="a a-cm f-ops   "><circle class="dot" cx="535" cy="225" r="31.200000000000003"/><text class="lab" x="535" y="274.425" text-anchor="middle" font-size="13.5"><tspan x="535">Cementing <tspan class="n">36</tspan></tspan></text></g><g class="a a-in f-ops   "><circle class="dot" cx="110" cy="400" r="34.882660448996724"/><text class="lab" x="110" y="453.10766044899674" text-anchor="middle" font-size="13.5"><tspan x="110">Inspection <tspan class="n">45</tspan></tspan></text></g><g class="a a-wt f-ops   "><circle class="dot" cx="225" cy="400" r="29.41564209736038"/><text class="lab" x="225" y="447.6406420973604" text-anchor="middle" font-size="13.5"><tspan x="225">Well Testing <tspan class="n">32</tspan></tspan></text><g class="alrt"><circle cx="246.17926231009946" cy="378.8207376899005" r="9" class="sigh"/><circle cx="246.17926231009946" cy="378.8207376899005" r="5" class="sigc"/></g></g><g class="a a-ws f-ops   "><circle class="dot" cx="360" cy="400" r="28.00285699709942"/><text class="lab" x="360" y="446.2278569970994" text-anchor="middle" font-size="13.5"><tspan x="360">Wireline Services <tspan class="n">29</tspan></tspan></text></g><a href="area.html" class="a a-ct f-ops   you"><circle cx="490" cy="400" r="80.23011903269246" fill="url(#glowd)"/><circle class="dot" cx="490" cy="400" r="34.882660448996724"/><circle class="ring" cx="490" cy="400" r="39.882660448996724" stroke="url(#ringd)"/><text class="lab" x="490" y="453.10766044899674" text-anchor="middle" font-size="13.5"><tspan x="490">Coiled Tubing <tspan class="n">45</tspan></tspan></text><text class="youlab" x="490" y="351.1173395510033" text-anchor="middle" font-size="10.530000000000001">YOUR AREA</text><g class="alrt"><circle cx="515.1155155232776" cy="374.8844844767224" r="9" class="sigh"/><circle cx="515.1155155232776" cy="374.8844844767224" r="5" class="sigc"/></g><text class="alab" x="529.1155155232776" y="378.8844844767224" font-size="11.069999999999999">2</text></a><g class="a a-sl f-ops   "><circle class="dot" cx="420" cy="512" r="9.00666419935816"/><text class="lab" x="437.00666419935817" y="516.86" font-size="12.959999999999999">Slickline <tspan class="n">3</tspan></text></g><g class="a a-wc f-ops   "><circle class="dot" cx="76" cy="494" r="9.00666419935816"/><text class="lab" x="93.00666419935816" y="498.86" font-size="12.959999999999999">Well Completions <tspan class="n">3</tspan></text></g><g class="a a-ma f-ops   "><circle class="dot" cx="76" cy="522" r="9.00666419935816"/><text class="lab" x="93.00666419935816" y="526.86" font-size="12.959999999999999">Marine Services <tspan class="n">3</tspan></text></g><g class="a a-qh f-corp   "><circle class="dot" cx="724" cy="240" r="39.60202015049233"/><text class="lab" x="724" y="297.82702015049233" text-anchor="middle" font-size="13.5"><tspan x="724">QHSE <tspan class="n">58</tspan></tspan></text></g><g class="a a-gr f-corp   "><circle class="dot" cx="862" cy="240" r="34.098680326370406"/><text class="lab" x="862" y="292.32368032637044" text-anchor="middle" font-size="13.5"><tspan x="862">Governance, Risk</tspan><tspan x="862" dy="16.2">&amp; Compliance <tspan class="n">43</tspan></tspan></text></g><g class="a a-hr f-corp   "><circle class="dot" cx="1010" cy="240" r="32.473989591671675"/><text class="lab" x="1010" y="290.6989895916717" text-anchor="middle" font-size="13.5"><tspan x="1010">Human</tspan><tspan x="1010" dy="16.2">Resources <tspan class="n">39</tspan></tspan></text></g><g class="a a-fi f-corp   "><circle class="dot" cx="680" cy="392" r="9.00666419935816"/><text class="lab" x="697.0066641993582" y="396.86" font-size="12.959999999999999">Finance <tspan class="n">3</tspan></text></g><g class="a a-it f-corp   "><circle class="dot" cx="680" cy="420" r="9.00666419935816"/><text class="lab" x="697.0066641993582" y="424.86" font-size="12.959999999999999">Information Technology <tspan class="n">3</tspan></text></g><g class="a a-sc f-corp   "><circle class="dot" cx="680" cy="448" r="9.00666419935816"/><text class="lab" x="697.0066641993582" y="452.86" font-size="12.959999999999999">Supply Chain <tspan class="n">3</tspan></text></g><g class="a a-le f-corp   "><circle class="dot" cx="680" cy="476" r="9.00666419935816"/><text class="lab" x="697.0066641993582" y="480.86" font-size="12.959999999999999">Legal <tspan class="n">3</tspan></text></g><g class="a a-ld f-corp   "><circle class="dot" cx="872" cy="392" r="9.00666419935816"/><text class="lab" x="889.0066641993582" y="396.86" font-size="12.959999999999999">Learning and Development <tspan class="n">3</tspan></text></g><g class="a a-cs f-corp   "><circle class="dot" cx="872" cy="420" r="9.00666419935816"/><text class="lab" x="889.0066641993582" y="424.86" font-size="12.959999999999999">Commercial &amp; Sales <tspan class="n">3</tspan></text></g><g class="a a-ge f-corp   "><circle class="dot" cx="872" cy="448" r="9.00666419935816"/><text class="lab" x="889.0066641993582" y="452.86" font-size="12.959999999999999">Geothermal CoE <tspan class="n">3</tspan></text></g><g class="a a-wic f-pt   "><circle class="dot" cx="474" cy="648" r="14.70782104868019"/><text class="lab" x="474" y="680.9328210486802" text-anchor="middle" font-size="13.5"><tspan x="474">Well Intervention</tspan><tspan x="474" dy="16.2">CoE <tspan class="n">8</tspan></tspan></text><g class="alrt"><circle cx="484.58963115504974" cy="637.4103688449503" r="9" class="sigh"/><circle cx="484.58963115504974" cy="637.4103688449503" r="5" class="sigc"/></g></g><g class="a a-dsc f-pt   "><circle class="dot" cx="622" cy="648" r="14.70782104868019"/><text class="lab" x="622" y="680.9328210486802" text-anchor="middle" font-size="13.5"><tspan x="622">Drilling Solutions</tspan><tspan x="622" dy="16.2">CoE <tspan class="n">8</tspan></tspan></text></g><g class="a a-wcc f-pt   "><circle class="dot" cx="762" cy="648" r="13.757906817535872"/><text class="lab" x="762" y="679.9829068175359" text-anchor="middle" font-size="13.5"><tspan x="762">Well Completions</tspan><tspan x="762" dy="16.2">CoE <tspan class="n">7</tspan></tspan></text></g><g class="a a-cw f-cw   "><circle class="dot" cx="890" cy="652" r="18.01332839871632"/><text class="lab" x="916.0133283987163" y="656.86" font-size="13.5">Company Wide<tspan x="916.0133283987163" dy="16.2" class="n">Policies, CEO · 12</tspan></text></g></svg>
+    <ul class="legend" aria-label="Legend">
+      <li><svg viewBox="0 0 26 16"><circle cx="6" cy="8" r="3" fill="#fff" stroke="#9FB5B2"/><circle cx="18" cy="8" r="7" fill="#fff" stroke="#9FB5B2"/></svg>Circle area = documents in register</li>
+      <li><svg viewBox="0 0 26 16"><circle cx="13" cy="8" r="7" fill="rgba(200,16,46,.16)"/><circle cx="13" cy="8" r="4" fill="#C8102E"/></svg>Active technical alert (33 in all)</li>
+      <li><svg viewBox="0 0 26 16"><rect x="2" y="2" width="22" height="12" rx="6" fill="rgba(0,173,194,.05)" stroke="#0E8C9C" stroke-dasharray="3 3"/></svg>Proposed grouping, not in register yet</li>
+      <li><svg viewBox="0 0 26 16"><circle cx="13" cy="8" r="6" fill="#fff" stroke="#E5461F" stroke-width="2"/></svg>Your area · click any area to descend</li>
+    </ul>
+    <nav class="zoom" aria-label="Zoom"><a href="area.html" aria-label="Zoom in"><svg class="ic"><use href="#i-plus"/></svg></a><a href="#" aria-label="Zoom out"><svg class="ic"><use href="#i-minus"/></svg></a><a href="#" aria-label="Fit all"><svg class="ic"><use href="#i-fit"/></svg></a></nav>
+  </section>
+</main>
+</body></html>

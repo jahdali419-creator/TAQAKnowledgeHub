@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Coiled Tubing Map</title>
+<style>@import url("../../kit/fonts.css");
+:root{
+  --ground:#EFF1EE; --ground-2:#E6EAE6; --surface:#FFFFFF; --veil:rgba(255,255,255,.86);
+  --ink:#002B32; --ink-2:#34525A; --ink-3:#566F74; --line:#D2DBD9; --line-2:#E2E7E5;
+  --teal:#005D63; --teal-deep:#013F4E; --cyan:#00ADC2; --thread:#0E8C9C;
+  --signal:#C8102E; --orange:#FD691D; --grad:linear-gradient(90deg,#FD691D,#C8102E);
+  --ok:#17663F; --ok-dot:#2E9A5F; --due:#7A4E00; --due-dot:#D18A00; --lock:#46585D;
+  --fam-ops:#E3ECE9; --fam-corp:#ECEAE3; --fam-pt:#E5E9EE; --fam-cw:#EEE7E3;
+  --node:#FFFFFF; --node-line:#9FB5B2;
+  --r:14px; --shadow:0 1px 2px rgba(0,43,50,.06),0 8px 28px rgba(0,43,50,.08);
+  --display:'BwGradual',Inter,system-ui,sans-serif; --ui:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 16px/1.5 var(--ui);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:6px}
+.ic{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ic.s{width:16px;height:16px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.eyebrow{font:600 11.5px/1.2 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.mono{font-feature-settings:"tnum" 1;letter-spacing:.01em}
+.code{font:600 12.5px/1.2 var(--ui);letter-spacing:.02em;color:var(--ink-3);font-feature-settings:"tnum" 1}
+.concept{display:inline-flex;align-items:center;gap:4px;font:600 10.5px/1 var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--teal);border:1px dashed #7FA6A6;border-radius:99px;padding:4px 7px;white-space:nowrap}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;height:60px;padding:0 16px;background:rgba(239,241,238,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2)}
+.brand img{height:28px;width:auto;display:block}
+.top .alt-crumb{display:none}
+.top-r{margin-left:auto;display:flex;align-items:center;gap:6px}
+.tbtn{position:relative;display:grid;place-items:center;width:44px;height:44px;border-radius:12px;color:var(--ink)}
+.tbtn:hover{background:var(--ground-2)}
+.tbtn .pip{position:absolute;top:10px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 2px var(--ground)}
+.me{display:flex;align-items:center;gap:10px}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--teal-deep);color:#fff;font:600 13px/1 var(--ui)}
+.me-t{display:none}
+/* altitude gauge glyph */
+.gauge{display:inline-grid;gap:2px;width:14px;flex:none}
+.gauge i{display:block;height:3px;border-radius:2px;background:#C3CFCD}
+.gauge i.on{background:var(--ink)}
+.gauge i.past{background:#7E9A9A}
+/* phone altitude strip */
+.altbar{position:sticky;top:60px;z-index:19;display:flex;align-items:center;gap:10px;min-height:48px;padding:6px 16px;background:rgba(239,241,238,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2);font-size:14px}
+.altbar .up{display:inline-flex;align-items:center;gap:6px;min-height:44px;color:var(--ink-2)}
+.altbar .here{font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.altbar .lvl{margin-left:auto;font:600 11px/1 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+
+/* status language: always words, colour is secondary */
+.st{display:inline-flex;align-items:center;gap:6px;font:500 13px/1.2 var(--ui);color:var(--ink-2);white-space:nowrap}
+.st::before{content:"";width:8px;height:8px;border-radius:50%;flex:none}
+.st.cur{color:var(--ok)} .st.cur::before{background:var(--ok-dot)}
+.st.due{color:var(--due)} .st.due::before{background:transparent;border:2px solid var(--due-dot);width:8px;height:8px;box-sizing:border-box;background:linear-gradient(90deg,var(--due-dot) 50%,transparent 50%)}
+.cls{display:inline-flex;align-items:center;gap:4px;font:500 13px/1.2 var(--ui);color:var(--ink-3);white-space:nowrap}
+.cls.lk{color:var(--lock)}
+.ar{font:600 11px/1 var(--ui);letter-spacing:.06em;color:var(--teal);border:1px solid #B9CFCD;border-radius:5px;padding:3px 5px}
+.sig{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 3px rgba(200,16,46,.14);flex:none}
+
+/* map/list toggle */
+.seg{display:inline-flex;padding:3px;border-radius:12px;background:var(--ground-2);border:1px solid var(--line-2)}
+.seg a{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:9px;font:500 14px/1 var(--ui);color:var(--ink-2)}
+.seg a[aria-current]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,43,50,.12)}
+
+/* search field */
+.field{display:flex;align-items:center;gap:12px;height:54px;padding:0 10px 0 18px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);color:var(--ink)}
+.field .q{flex:1;min-width:0;font:400 17px/1 var(--ui);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.field .q.ph{color:var(--ink-3)}
+.kbd{display:none;font:500 12px/1 var(--ui);color:var(--ink-3);border:1px solid var(--line);border-radius:6px;padding:4px 7px;background:var(--ground)}
+
+.btn{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:12px;font:500 15px/1 var(--ui);border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.pri{background:var(--ink);border-color:var(--ink);color:#fff}
+.lnk{display:inline-flex;align-items:center;gap:6px;min-height:44px;font:600 15px/1.2 var(--ui);color:var(--teal)}
+
+@media (min-width:1024px){
+  body{font-size:15px}
+  .top{height:64px;padding:0 32px;gap:28px}
+  .brand img{height:32px}
+  .top .alt-crumb{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink-3)}
+  .alt-crumb a{color:var(--ink-2);padding:6px 2px}
+  .alt-crumb a:hover{color:var(--ink)}
+  .alt-crumb .sep{color:#A9BAB8}
+  .alt-crumb b{font-weight:600;color:var(--ink)}
+  .me-t{display:block;font:500 14px/1.2 var(--ui)}
+  .me-t small{display:block;font-size:12px;color:var(--ink-3);font-weight:400}
+  .altbar{display:none}
+  .kbd{display:inline-block}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+.tmap{display:block;width:100%;height:100%;font-family:var(--ui);overflow:visible}
+.tmap .rlab{fill:var(--ink-3);font-weight:600;letter-spacing:.12em}
+.tmap .rlab .rs{letter-spacing:.02em;font-weight:400}
+.tmap .dot{filter:drop-shadow(0 2px 3px rgba(0,43,50,.08));fill:var(--node);stroke:var(--node-line);stroke-width:1.2;transition:fill .3s}
+.tmap .f-corp .dot{stroke:#B8B19F} .tmap .f-pt .dot{stroke:#9EABBD} .tmap .f-cw .dot{stroke:#B9A39A}
+.tmap .lab{fill:var(--ink);font-weight:500}
+.tmap .lab .n{fill:var(--ink-3);font-weight:400}
+.tmap .ring{fill:none;stroke-width:2.2}
+.tmap .youlab{fill:var(--ink);font-weight:700;letter-spacing:.14em}
+.tmap .hull{fill:rgba(0,173,194,.05);stroke:var(--thread);stroke-width:1.4;stroke-dasharray:5 5}
+.tmap .hull-on{fill:rgba(0,93,99,.07);stroke:var(--teal);stroke-width:2;stroke-dasharray:none}
+.tmap .hlab{fill:var(--teal)} .tmap .hsub{fill:var(--ink-3);font-style:italic}
+.tmap .sigh{fill:rgba(200,16,46,.16)} .tmap .sigc{fill:var(--signal);stroke:#fff;stroke-width:1.5}
+.tmap .alab{fill:var(--signal);font-weight:600}
+.tmap .dim .dot{fill:transparent;stroke:#C4D0CE;stroke-dasharray:2 3}
+.tmap .dim .lab{fill:#7D9195} .tmap .dim .lab .n{fill:#8FA2A5}
+.tmap-search,.tmap-mini{overflow:hidden!important}
+.tmap .lit .dot{fill:#fff;stroke:var(--teal);stroke-width:1.5}
+.tmap .hit{fill:var(--teal-deep)}
+.tmap .lit .cnt{fill:#fff;font-weight:700}
+.tmap .lnote{fill:var(--teal);font-weight:500}
+.tmap .thr{fill:none;stroke:var(--thread);stroke-width:2.5}
+.tmap a .dot{cursor:pointer} .tmap a:hover .dot{fill:#F6FBFA;stroke:var(--teal)}
+
+.d-only{display:none}
+.head{padding:20px 16px 6px}
+.head h1{font:700 40px/1 var(--display);letter-spacing:-.015em;margin:10px 0 10px}
+.facts{display:flex;flex-wrap:wrap;gap:4px 16px;margin:0 0 14px;padding:0;list-style:none;font-size:14px;color:var(--ink-2)}
+.facts b{font:700 17px/1 var(--display);color:var(--ink);margin-right:4px}
+.shelves{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.shelves a{display:flex;flex-direction:column;justify-content:center;min-height:62px;padding:10px 14px;background:var(--surface);border:1px solid var(--line-2);border-radius:14px}
+.shelves b{font:700 20px/1 var(--display)}
+.shelves span{font-size:14px;color:var(--ink-2);margin-top:4px}
+.shelves .bar{display:block;height:3px;border-radius:2px;background:var(--teal);opacity:.55;margin-top:8px}
+.note{font-size:13px;color:var(--ink-3);margin:8px 0 0}
+.sec{padding:18px 16px}
+.sec-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.sec-h h2{font:700 20px/1.2 var(--display);margin:0}
+.doc{display:flex;gap:12px;align-items:flex-start;padding:12px 0;min-height:56px;border-top:1px solid var(--line-2)}
+.doc .ic{color:var(--ink-3);margin-top:2px}
+.doc b{display:block;font:500 15.5px/1.35 var(--ui)}
+.doc .meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-top:4px}
+.doc .meta .code{font-size:12px}
+/* phone equipment descent */
+.eqs{list-style:none;margin:0;padding:0;position:relative}
+.eqs>li{position:relative;padding:0 0 6px 34px}
+.eqs>li::before{content:"";position:absolute;left:11px;top:0;bottom:0;width:2px;background:var(--line)}
+.eqs>li:last-child::before{bottom:auto;height:26px}
+.eqh{display:flex;align-items:center;gap:10px;min-height:52px;position:relative}
+.eqh::before{content:"";position:absolute;left:-29px;width:14px;height:14px;border-radius:50%;background:var(--surface);border:2px solid var(--teal)}
+.eqh b{font:700 18px/1.2 var(--display)}
+.eqh span{margin-left:auto;font-size:13px;color:var(--ink-3)}
+.eqs .doc{padding:10px 0}
+.thread{margin:6px 16px 0;padding:16px;border-radius:18px;background:var(--surface);border:1px solid var(--line-2);position:relative;overflow:hidden}
+.thread::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--thread)}
+.thread h2{display:flex;align-items:center;gap:8px;font:700 19px/1.2 var(--display);margin:6px 0 4px;color:var(--ink)}
+.thread h2 .ic{color:var(--thread)}
+.thread p{margin:0 0 6px;font-size:14px;color:var(--ink-2)}
+.tg{font:600 11px/1 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:14px 0 2px}
+.expert{display:flex;gap:14px;align-items:center;margin:0 16px 32px;padding:16px;border-radius:18px;background:var(--ink);color:#fff}
+.expert .av{background:#fff;color:var(--ink)}
+.expert b{display:block;font:500 16px/1.3 var(--ui)} .expert small{display:block;font-size:13px;color:#B9CCCC}
+.expert .go{margin-left:auto;display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.12)}
+.sw{font-size:13px;color:var(--ink-3);padding:0 16px 24px}
+
+@media (min-width:1024px){
+  .p-only{display:none!important}
+  .d-only{display:block}
+  .wrap{display:grid;grid-template-columns:330px 1fr 340px;height:calc(100vh - 64px);min-height:800px}
+  .left{padding:26px 26px 22px 40px;border-right:1px solid var(--line-2);display:flex;flex-direction:column;overflow:hidden}
+  .left .head{padding:0}
+  .left .head h1{font-size:46px;margin:10px 0 8px}
+  .left .facts{margin-bottom:16px}
+  .left .seg{align-self:flex-start;margin-bottom:22px}
+  .shelf-l{list-style:none;margin:8px 0 0;padding:0}
+  .shelf-l a{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 10px;padding:8px 0;border-top:1px solid var(--line-2)}
+  .shelf-l b{font:500 14.5px/1.2 var(--ui)} .shelf-l em{font:700 15px/1 var(--display);font-style:normal}
+  .shelf-l i{grid-column:1/3;height:3px;border-radius:2px;background:#C9D6D4;position:relative}
+  .shelf-l i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);border-radius:2px;background:var(--teal)}
+  .left .ask{margin-top:auto;display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:var(--ink);color:#fff}
+  .left .ask .av{background:#fff;color:var(--ink)}
+  .left .ask b{display:block;font:500 14.5px/1.3 var(--ui)} .left .ask small{display:block;font-size:12.5px;color:#B9CCCC;line-height:1.35}
+  .canvas{position:relative;overflow:hidden;background:radial-gradient(520px 460px at 50% 47%,#F7F8F5 0,#F3F5F1 55%,var(--ground) 100%)}
+  .cv-top{position:absolute;left:28px;right:28px;top:20px;display:flex;justify-content:space-between;align-items:center;z-index:3}
+  .stage{position:absolute;left:50%;top:58px;width:740px;height:780px;transform:translateX(-50%)}
+  .stage svg.lines{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  .core{position:absolute;left:370px;top:372px;transform:translate(-50%,-50%);width:186px;height:186px;border-radius:50%;display:grid;place-content:center;text-align:center;background:var(--surface);box-shadow:0 0 0 14px rgba(255,255,255,.5),0 0 0 15px var(--line-2),var(--shadow)}
+  .core .ring{position:absolute;inset:-6px;border-radius:50%;border:2px solid transparent;background:conic-gradient(#FD691D,#C8102E,#FD691D) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.9}
+  .core b{font:700 22px/1.05 var(--display)} .core span{font-size:12.5px;color:var(--ink-3);margin-top:6px}
+  .eq{position:absolute;width:206px;transform:translateX(-50%)}
+  .eq .nd{display:flex;align-items:center;gap:10px}
+  .eq .c{flex:none;border-radius:50%;background:var(--surface);border:1.5px solid var(--teal);box-shadow:0 2px 6px rgba(0,43,50,.08)}
+  .eq h3{margin:0;font:700 16px/1.15 var(--display)}
+  .eq h3 small{display:block;font:400 12px/1.3 var(--ui);color:var(--ink-3);margin-top:2px}
+  .eq ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:5px}
+  .pin{display:block;padding:7px 10px;border-radius:10px;background:var(--surface);border:1px solid var(--line-2);font-size:13px;line-height:1.3;box-shadow:0 1px 2px rgba(0,43,50,.05)}
+  .pin:hover{border-color:var(--teal)}
+  .pin .code{font-size:11.5px;margin-right:4px}
+  .pin .m{display:flex;gap:8px;margin-top:3px}
+  .pin .st,.pin .cls{font-size:11.5px}
+  .pin.alert{border-color:#EBC3C9;background:#FFF9FA}
+  .pin.sel{border-color:var(--ink);box-shadow:0 0 0 3px rgba(0,43,50,.08)}
+  .tstop{position:absolute;left:370px;top:510px;transform:translateX(-50%);width:230px;padding:9px 12px;border-radius:12px;background:var(--surface);border:1.5px solid var(--thread);font-size:13px;line-height:1.3}
+  .tstop .tl{display:flex;align-items:center;gap:6px;font:600 10.5px/1 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--thread);margin-bottom:5px}
+  .legend{position:absolute;left:28px;bottom:20px;display:flex;gap:18px;font-size:12.5px;color:var(--ink-3)}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .right{border-left:1px solid var(--line-2);padding:26px 28px 22px;overflow:hidden;display:flex;flex-direction:column;background:var(--ground)}
+  .right .thread{margin:0;padding:18px 18px 8px}
+  .right .doc{padding:9px 0;min-height:0}
+  .right .doc b{font-size:14px}
+  .right .doc .st,.right .doc .cls{font-size:12px}
+  .right .tg{margin-top:12px}
+  .right .sec{padding:18px 0 0}
+  .right .sec-h h2{font-size:17px}
+  .eq,.core,.tstop{animation:pop .6s cubic-bezier(.2,.7,.2,1) both}
+  .eq:nth-of-type(2){animation-delay:.05s}.eq:nth-of-type(3){animation-delay:.1s}.eq:nth-of-type(4){animation-delay:.15s}.eq:nth-of-type(5){animation-delay:.2s}
+}
+@keyframes pop{from{opacity:0;transform:translateX(-50%) scale(.96)}to{opacity:1}}
+</style></head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+<symbol id="i-map" viewBox="0 0 24 24"><circle cx="7" cy="8" r="3"/><circle cx="16.5" cy="7" r="2"/><circle cx="14" cy="16" r="4"/><path d="M9.6 9.6l1.9 3"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6.5h11M9 12h11M9 17.5h11"/><circle cx="4.5" cy="6.5" r=".8"/><circle cx="4.5" cy="12" r=".8"/><circle cx="4.5" cy="17.5" r=".8"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5.5" y="10.5" width="13" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></symbol>
+<symbol id="i-mark" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3.5L7 20z"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/><path d="M13 4h7v7M4 13v7h7"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><circle cx="6" cy="12" r=".9"/><circle cx="12" cy="12" r=".9"/><circle cx="18" cy="12" r=".9"/></symbol>
+<symbol id="i-expert" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></symbol>
+<symbol id="i-ask" viewBox="0 0 24 24"><path d="M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4 3.5v-3.5h0a1.5 1.5 0 0 1-1.5-1.5z"/><path d="M10 9.2a2 2 0 1 1 2.7 1.9c-.5.2-.7.6-.7 1.1M12 14.2v.1"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6.5 10.5L12 5l5.5 5.5"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-fit" viewBox="0 0 24 24"><path d="M4.5 9V4.5H9M15 4.5h4.5V9M19.5 15v4.5H15M9 19.5H4.5V15"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 15.5H3z"/><path d="M12 10v4M12 16.6v.1"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M6.5 3.5h7l4 4v13h-11z"/><path d="M13.5 3.5v4h4M9 12h6M9 15.5h6"/></symbol>
+<symbol id="i-thread" viewBox="0 0 24 24"><path d="M3 17c4 0 4-10 9-10s5 10 9 10"/><circle cx="12" cy="7" r="1.6"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M5 5.5A1.5 1.5 0 0 1 6.5 4H19v14H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+<symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6c1.6 0 3 .5 4.2 1.2M21 12s-3.5 6-9 6c-1.6 0-3-.5-4.2-1.2"/><path d="M4 20L20 4"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+<symbol id="i-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2M20 14v6h-3M14 18v2"/></symbol>
+</svg>
+
+<header class="top">
+  <a class="brand" href="home.html"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE"></a>
+  <nav class="alt-crumb" aria-label="Where you are">
+    <span class="gauge" aria-hidden="true"><i class="past"></i><i class="past"></i><i class="on"></i><i></i><i></i></span>
+    <a href="home.html">TAQA</a><span class="sep">›</span><a href="home.html">Well Intervention <span class="concept" style="margin-left:4px">Proposed</span></a><span class="sep">›</span><b>Coiled Tubing</b>
+  </nav>
+  <div class="top-r">
+    <a class="tbtn" href="search-start.html" aria-label="Search"><svg class="ic"><use href="#i-search"/></svg></a>
+    <a class="tbtn" href="#" aria-label="Active technical alerts"><svg class="ic"><use href="#i-bell"/></svg><span class="pip"></span></a>
+    <span class="me"><span class="av" aria-hidden="true">FA</span><span class="me-t">Faisal Al-Ghamdi<small>Field Supervisor · Employee</small></span></span>
+  </div>
+</header>
+<nav class="altbar" aria-label="Where you are">
+  <span class="gauge" aria-hidden="true"><i class="past"></i><i class="past"></i><i class="on"></i><i></i><i></i></span>
+  <a class="up" href="home.html"><svg class="ic s"><use href="#i-up"/></svg>Well Intervention</a><span style="color:#A9BAB8">/</span><span class="here">Coiled Tubing</span><span class="lvl">Alt 2</span>
+</nav>
+
+<!-- ============ PHONE ============ -->
+<div class="p-only">
+  <section class="head">
+    <div class="eyebrow">Area · Operational segment</div>
+    <h1>Coiled Tubing</h1>
+    <ul class="facts"><li><b>36</b>in force</li><li><b>2</b>active alerts</li><li><b>45</b>in register</li></ul>
+    <nav class="seg" aria-label="View"><a href="#" aria-current="page"><svg class="ic s"><use href="#i-map"/></svg>By equipment</a><a href="#"><svg class="ic s"><use href="#i-list"/></svg>Shelves</a></nav>
+  </section>
+  <section class="sec">
+    <div class="sec-h"><h2>Descend by equipment</h2><span class="concept">Proposed tags</span></div>
+    <ul class="eqs">
+      <li><div class="eqh"><b>Injector head</b><span>1 document</span></div>
+        <a class="doc" href="document.html"><svg class="ic"><use href="#i-doc"/></svg><span><b>Injector Head Operations Manual</b><span class="meta"><span class="code">WI-003 · Rev 4.0</span><span class="st cur">Current</span><span class="cls">Internal</span></span></span></a></li>
+      <li><div class="eqh"><b>CT string</b><span>3 documents</span></div>
+        <a class="doc" href="#"><svg class="ic"><use href="#i-doc"/></svg><span><b>CT String Inspection Manual</b><span class="meta"><span class="code">WI-005 · Rev 3.0</span><span class="st cur">Current</span></span></span></a>
+        <a class="doc" href="#"><span class="sig" style="margin:6px 6px 0"></span><span><b>New pressure rating for 2-inch CT string, effective immediately</b><span class="meta"><span class="code">ALT-002 · Rev 2.0</span><span class="cls lk"><svg class="ic s"><use href="#i-lock"/></svg>Confidential</span></span></span></a>
+        <a class="doc" href="#"><svg class="ic"><use href="#i-book"/></svg><span><b>CT string failure analysis, root cause and prevention</b><span class="meta"><span class="code">LL-002</span><span class="st due">Review due</span><span class="cls lk"><svg class="ic s"><use href="#i-lock"/></svg>Restricted</span></span></span></a></li>
+      <li><div class="eqh"><b>CT unit</b><span>3 documents</span></div>
+        <a class="doc" href="#"><svg class="ic"><use href="#i-doc"/></svg><span><b>CT Unit Rig-Up &amp; Rig-Down</b><span class="meta"><span class="code">SOP-006 · Rev 4.0</span><span class="st due">Review due</span><span class="cls lk"><svg class="ic s"><use href="#i-lock"/></svg>Restricted</span></span></span></a>
+        <a class="doc" href="#"><svg class="ic"><use href="#i-doc"/></svg><span><b>CT Unit Maintenance Manual v3.2</b><span class="meta"><span class="code">WI-001 · Rev 1.0</span><span class="st cur">Current</span></span></span></a>
+        <a class="doc" href="#"><svg class="ic"><use href="#i-book"/></svg><span><b>Near-miss during CT rig-up, lessons from H2 field</b><span class="meta"><span class="code">LL-001</span><span class="st cur">Current</span></span></span></a></li>
+      <li><div class="eqh"><b>BHA</b><span>SOP-002</span></div></li>
+      <li><div class="eqh"><b>Control cabin</b><span>WI-004</span></div></li>
+      <li><div class="eqh"><b>Wellhead equipment</b><span>WI-009</span></div></li>
+      <li><div class="eqh"><b>Nitrogen</b><span>SOP-007</span></div></li>
+      <li><div class="eqh"><b>Crane &amp; rigging</b><span>WI-006</span></div></li>
+    </ul>
+  </section>
+  <section class="thread" aria-label="Pressure control thread">
+    <span class="concept">Proposed topic thread</span>
+    <h2><svg class="ic"><use href="#i-thread"/></svg>Pressure control</h2>
+    <p>Runs across Coiled Tubing, Wireline Services and Slickline.</p>
+    <div class="tg">Coiled Tubing</div>
+    <a class="doc" href="search.html"><svg class="ic"><use href="#i-doc"/></svg><span><b>Pressure Testing Procedure</b><span class="meta"><span class="code">SOP-005 · Rev 2.0</span><span class="st cur">Current</span><span class="cls lk"><svg class="ic s"><use href="#i-lock"/></svg>Restricted</span></span></span></a>
+    <div class="tg">Wireline Services · 3</div>
+    <a class="doc" href="#"><svg class="ic"><use href="#i-doc"/></svg><span><b>PCE Maintenance Manual</b><span class="meta"><span class="code">WS-WI-003</span><span class="st cur">Current</span></span></span></a>
+    <a class="doc" href="#"><svg class="ic"><use href="#i-doc"/></svg><span><b>Pressure Control Standard</b><span class="meta"><span class="code">WS-S003</span><span class="cls lk"><svg class="ic s"><use href="#i-lock"/></svg>Confidential</span></span></span></a>
+    <a class="doc" href="#"><svg class="ic"><use href="#i-doc"/></svg><span><b>Pressure Control Equipment Check</b><span class="meta"><span class="code">WS-SOP-007</span><span class="st due">Review due</span></span></span></a>
+    <div class="tg">Slickline</div>
+    <a class="doc" href="#"><svg class="ic"><use href="#i-doc"/></svg><span><b>Slickline Pressure Control Equipment Rig-Up</b><span class="meta"><span class="code">SS-SOP-001</span><span class="st due">Review due</span></span></span></a>
+  </section>
+  <section class="sec">
+    <div class="sec-h"><h2>All shelves</h2><span class="note" style="margin:0">36 in force</span></div>
+    <ul class="shelves">
+      <li><a href="#"><b>15</b><span>SOPs</span></a></li><li><a href="#"><b>8</b><span>Manuals</span></a></li>
+      <li><a href="#"><b>5</b><span>Standards</span></a></li><li><a href="#"><b>4</b><span>Lessons Learned</span></a></li>
+      <li><a href="#"><b>2</b><span>Forms &amp; Checklists</span></a></li><li><a href="#"><b>2</b><span>Alerts</span></a></li>
+    </ul>
+    <p class="note">Maintenance side adds Maintenance Bulletins.</p>
+  </section>
+  <a class="expert" href="#"><span class="av"><svg class="ic"><use href="#i-expert"/></svg></span><span><b>Ask the Coiled Tubing expert</b><small>Maintenance: Coiled Tubing Maintenance Manager</small></span><span class="go"><svg class="ic"><use href="#i-chev"/></svg></span></a>
+  <p class="sw">Software assets (not controlled): Orion CT Control System v2.3 · WellPlan CT Simulator v4.1 · CoilScan Inspection Reporter v1.8</p>
+</div>
+
+<!-- ============ DESKTOP ============ -->
+<main class="wrap d-only">
+  <aside class="left">
+    <section class="head">
+      <div class="eyebrow">Altitude 2 · Area · Operational segment</div>
+      <h1>Coiled Tubing</h1>
+      <ul class="facts"><li><b>36</b>in force</li><li><b>2</b>active alerts</li><li><b>45</b>in register</li></ul>
+    </section>
+    <nav class="seg" aria-label="View"><a href="#" aria-current="page"><svg class="ic s"><use href="#i-map"/></svg>Map</a><a href="#"><svg class="ic s"><use href="#i-list"/></svg>List</a></nav>
+    <div class="eyebrow">Shelves · Operations</div>
+    <ul class="shelf-l">
+      <li><a href="#"><b>SOPs</b><em>15</em><i style="--w:100%"></i></a></li>
+      <li><a href="#"><b>Manuals</b><em>8</em><i style="--w:53%"></i></a></li>
+      <li><a href="#"><b>Standards</b><em>5</em><i style="--w:33%"></i></a></li>
+      <li><a href="#"><b>Lessons Learned</b><em>4</em><i style="--w:27%"></i></a></li>
+      <li><a href="#"><b>Forms &amp; Checklists</b><em>2</em><i style="--w:13%"></i></a></li>
+      <li><a href="#"><b>Alerts</b><em>2</em><i style="--w:13%"></i></a></li>
+    </ul>
+    <p class="note">Maintenance side adds Maintenance Bulletins. Software assets (not controlled): Orion CT Control System, WellPlan CT Simulator, CoilScan Inspection Reporter.</p>
+    <a class="ask" href="#"><span class="av"><svg class="ic"><use href="#i-expert"/></svg></span><span><b>Ask the Coiled Tubing expert</b><small>Maintenance questions go to the Coiled Tubing Maintenance Manager</small></span></a>
+  </aside>
+
+  <section class="canvas" aria-label="Coiled Tubing by equipment">
+    <div class="cv-top"><span class="eyebrow">Zoomed to equipment · documents attached</span><span class="concept">Equipment tags proposed</span></div>
+    <div class="stage">
+      <svg class="lines" viewBox="0 0 740 780" aria-hidden="true">
+        <g fill="none" stroke="#C3D1CF" stroke-width="1.2" stroke-dasharray="2 5">
+          <path d="M370 279 L370 120"/><path d="M300 330 L170 150"/><path d="M440 330 L575 150"/>
+          <path d="M280 372 L150 410"/><path d="M460 372 L600 410"/><path d="M310 440 L180 600"/><path d="M430 440 L570 600"/>
+        </g>
+        <path d="M485 555 C 640 555, 650 200, 772 200" fill="none" stroke="#0E8C9C" stroke-width="2.5"/>
+        <circle cx="485" cy="555" r="4" fill="#0E8C9C"/>
+      </svg>
+      <div class="core"><span class="ring"></span><b>Coiled<br>Tubing</b><span>8 pieces of equipment<br>12 documents tagged</span></div>
+
+      <div class="eq" style="left:370px;top:24px">
+        <div class="nd"><span class="c" style="width:26px;height:26px"></span><h3>Injector head<small>1 document</small></h3></div>
+        <ul><li><a class="pin sel" href="document.html"><span class="code">WI-003</span>Injector Head Operations Manual<span class="m"><span class="st cur">Current</span><span class="cls">Rev 4.0</span></span></a></li></ul>
+      </div>
+      <div class="eq" style="left:150px;top:60px">
+        <div class="nd"><span class="c" style="width:40px;height:40px"></span><h3>CT string<small>3 documents · 1 alert</small></h3></div>
+        <ul>
+          <li><a class="pin" href="#"><span class="code">WI-005</span>CT String Inspection Manual</a></li>
+          <li><a class="pin alert" href="#"><span class="code">ALT-002</span>New pressure rating for 2-inch CT string<span class="m"><span class="sig" style="width:7px;height:7px;margin-top:3px"></span><span class="cls lk"><svg class="ic s" style="width:13px;height:13px"><use href="#i-lock"/></svg>Confidential</span></span></a></li>
+          <li><a class="pin" href="#"><span class="code">LL-002</span>CT string failure analysis<span class="m"><span class="st due">Review due</span></span></a></li>
+        </ul>
+      </div>
+      <div class="eq" style="left:600px;top:60px">
+        <div class="nd"><span class="c" style="width:40px;height:40px"></span><h3>CT unit<small>3 documents</small></h3></div>
+        <ul>
+          <li><a class="pin" href="#"><span class="code">SOP-006</span>CT Unit Rig-Up &amp; Rig-Down<span class="m"><span class="st due">Review due</span><span class="cls lk"><svg class="ic s" style="width:13px;height:13px"><use href="#i-lock"/></svg>Restricted</span></span></a></li>
+          <li><a class="pin" href="#"><span class="code">WI-001</span>CT Unit Maintenance Manual v3.2</a></li>
+          <li><a class="pin" href="#"><span class="code">LL-001</span>Near-miss during CT rig-up</a></li>
+        </ul>
+      </div>
+      <div class="eq" style="left:118px;top:372px;width:180px">
+        <div class="nd"><span class="c" style="width:26px;height:26px"></span><h3>Control cabin</h3></div>
+        <ul><li><a class="pin" href="#"><span class="code">WI-004</span>Control Cabin Systems Manual</a></li></ul>
+      </div>
+      <div class="eq" style="left:622px;top:372px;width:180px">
+        <div class="nd"><span class="c" style="width:26px;height:26px"></span><h3>Wellhead equipment</h3></div>
+        <ul><li><a class="pin" href="#"><span class="code">WI-009</span>CT Wellhead Equipment Manual<span class="m"><span class="st due">Review due</span></span></a></li></ul>
+      </div>
+      <div class="eq" style="left:150px;top:590px;width:190px">
+        <div class="nd"><span class="c" style="width:26px;height:26px"></span><h3>BHA</h3></div>
+        <ul><li><a class="pin" href="#"><span class="code">SOP-002</span>BHA Assembly Procedure</a></li></ul>
+      </div>
+      <div class="eq" style="left:370px;top:640px;width:180px">
+        <div class="nd"><span class="c" style="width:26px;height:26px"></span><h3>Nitrogen</h3></div>
+        <ul><li><a class="pin" href="#"><span class="code">SOP-007</span>Nitrogen Injection SOP</a></li></ul>
+      </div>
+      <div class="eq" style="left:590px;top:590px;width:190px">
+        <div class="nd"><span class="c" style="width:26px;height:26px"></span><h3>Crane &amp; rigging</h3></div>
+        <ul><li><a class="pin" href="#"><span class="code">WI-006</span>Crane &amp; Rigging Safety Manual</a></li></ul>
+      </div>
+      <a class="tstop" href="search.html"><span class="tl"><svg class="ic s"><use href="#i-thread"/></svg>Pressure control thread</span><span class="code">SOP-005</span> Pressure Testing Procedure</a>
+    </div>
+    <div class="legend"><span><span class="sig"></span>Active alert</span><span><svg class="ic s"><use href="#i-lock"/></svg>Access restricted · request through QMS</span><span>Not every document is tagged yet: the shelves hold all 36</span></div>
+  </section>
+
+  <aside class="right">
+    <section class="thread" aria-label="Pressure control thread">
+      <span class="concept">Proposed topic thread</span>
+      <h2><svg class="ic"><use href="#i-thread"/></svg>Pressure control</h2>
+      <p>The same topic, followed out of Coiled Tubing into its neighbours.</p>
+      <div class="tg">Wireline Services · 3</div>
+      <a class="doc" href="#"><span><b>PCE Maintenance Manual</b><span class="meta"><span class="code">WS-WI-003</span><span class="st cur">Current</span></span></span></a>
+      <a class="doc" href="#"><span><b>Pressure Control Standard</b><span class="meta"><span class="code">WS-S003</span><span class="cls lk"><svg class="ic s"><use href="#i-lock"/></svg>Confidential</span></span></span></a>
+      <a class="doc" href="#"><span><b>Pressure Control Equipment Check</b><span class="meta"><span class="code">WS-SOP-007</span><span class="st due">Review due</span></span></span></a>
+      <div class="tg">Slickline · 1</div>
+      <a class="doc" href="#"><span><b>Slickline Pressure Control Equipment Rig-Up</b><span class="meta"><span class="code">SS-SOP-001</span><span class="st due">Review due</span></span></span></a>
+    </section>
+    <section class="sec">
+      <div class="sec-h"><h2>Active alerts here</h2><span class="note" style="margin:0">2</span></div>
+      <a class="doc" href="#"><span class="sig" style="margin-top:6px"></span><span><b>New pressure rating for 2-inch CT string, effective immediately</b><span class="meta"><span class="code">ALT-002</span><span class="cls lk"><svg class="ic s"><use href="#i-lock"/></svg>Confidential</span></span></span></a>
+      <a class="doc" href="#"><span class="sig" style="margin-top:6px"></span><span><b>Chemical compatibility update for H2S environments</b><span class="meta"><span class="code">ALT-003</span><span class="st due">Review due</span></span></span></a>
+    </section>
+  </aside>
+</main>
+</body></html>

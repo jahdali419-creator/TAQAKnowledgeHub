@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pressure Test Search</title>
+<style>@import url("../../kit/fonts.css");
+:root{
+  --ground:#EFF1EE; --ground-2:#E6EAE6; --surface:#FFFFFF; --veil:rgba(255,255,255,.86);
+  --ink:#002B32; --ink-2:#34525A; --ink-3:#566F74; --line:#D2DBD9; --line-2:#E2E7E5;
+  --teal:#005D63; --teal-deep:#013F4E; --cyan:#00ADC2; --thread:#0E8C9C;
+  --signal:#C8102E; --orange:#FD691D; --grad:linear-gradient(90deg,#FD691D,#C8102E);
+  --ok:#17663F; --ok-dot:#2E9A5F; --due:#7A4E00; --due-dot:#D18A00; --lock:#46585D;
+  --fam-ops:#E3ECE9; --fam-corp:#ECEAE3; --fam-pt:#E5E9EE; --fam-cw:#EEE7E3;
+  --node:#FFFFFF; --node-line:#9FB5B2;
+  --r:14px; --shadow:0 1px 2px rgba(0,43,50,.06),0 8px 28px rgba(0,43,50,.08);
+  --display:'BwGradual',Inter,system-ui,sans-serif; --ui:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 16px/1.5 var(--ui);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:6px}
+.ic{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ic.s{width:16px;height:16px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.eyebrow{font:600 11.5px/1.2 var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.mono{font-feature-settings:"tnum" 1;letter-spacing:.01em}
+.code{font:600 12.5px/1.2 var(--ui);letter-spacing:.02em;color:var(--ink-3);font-feature-settings:"tnum" 1}
+.concept{display:inline-flex;align-items:center;gap:4px;font:600 10.5px/1 var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--teal);border:1px dashed #7FA6A6;border-radius:99px;padding:4px 7px;white-space:nowrap}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;height:60px;padding:0 16px;background:rgba(239,241,238,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2)}
+.brand img{height:28px;width:auto;display:block}
+.top .alt-crumb{display:none}
+.top-r{margin-left:auto;display:flex;align-items:center;gap:6px}
+.tbtn{position:relative;display:grid;place-items:center;width:44px;height:44px;border-radius:12px;color:var(--ink)}
+.tbtn:hover{background:var(--ground-2)}
+.tbtn .pip{position:absolute;top:10px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 2px var(--ground)}
+.me{display:flex;align-items:center;gap:10px}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--teal-deep);color:#fff;font:600 13px/1 var(--ui)}
+.me-t{display:none}
+/* altitude gauge glyph */
+.gauge{display:inline-grid;gap:2px;width:14px;flex:none}
+.gauge i{display:block;height:3px;border-radius:2px;background:#C3CFCD}
+.gauge i.on{background:var(--ink)}
+.gauge i.past{background:#7E9A9A}
+/* phone altitude strip */
+.altbar{position:sticky;top:60px;z-index:19;display:flex;align-items:center;gap:10px;min-height:48px;padding:6px 16px;background:rgba(239,241,238,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2);font-size:14px}
+.altbar .up{display:inline-flex;align-items:center;gap:6px;min-height:44px;color:var(--ink-2)}
+.altbar .here{font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.altbar .lvl{margin-left:auto;font:600 11px/1 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+
+/* status language: always words, colour is secondary */
+.st{display:inline-flex;align-items:center;gap:6px;font:500 13px/1.2 var(--ui);color:var(--ink-2);white-space:nowrap}
+.st::before{content:"";width:8px;height:8px;border-radius:50%;flex:none}
+.st.cur{color:var(--ok)} .st.cur::before{background:var(--ok-dot)}
+.st.due{color:var(--due)} .st.due::before{background:transparent;border:2px solid var(--due-dot);width:8px;height:8px;box-sizing:border-box;background:linear-gradient(90deg,var(--due-dot) 50%,transparent 50%)}
+.cls{display:inline-flex;align-items:center;gap:4px;font:500 13px/1.2 var(--ui);color:var(--ink-3);white-space:nowrap}
+.cls.lk{color:var(--lock)}
+.ar{font:600 11px/1 var(--ui);letter-spacing:.06em;color:var(--teal);border:1px solid #B9CFCD;border-radius:5px;padding:3px 5px}
+.sig{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 3px rgba(200,16,46,.14);flex:none}
+
+/* map/list toggle */
+.seg{display:inline-flex;padding:3px;border-radius:12px;background:var(--ground-2);border:1px solid var(--line-2)}
+.seg a{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:9px;font:500 14px/1 var(--ui);color:var(--ink-2)}
+.seg a[aria-current]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,43,50,.12)}
+
+/* search field */
+.field{display:flex;align-items:center;gap:12px;height:54px;padding:0 10px 0 18px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);color:var(--ink)}
+.field .q{flex:1;min-width:0;font:400 17px/1 var(--ui);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.field .q.ph{color:var(--ink-3)}
+.kbd{display:none;font:500 12px/1 var(--ui);color:var(--ink-3);border:1px solid var(--line);border-radius:6px;padding:4px 7px;background:var(--ground)}
+
+.btn{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:12px;font:500 15px/1 var(--ui);border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.pri{background:var(--ink);border-color:var(--ink);color:#fff}
+.lnk{display:inline-flex;align-items:center;gap:6px;min-height:44px;font:600 15px/1.2 var(--ui);color:var(--teal)}
+
+@media (min-width:1024px){
+  body{font-size:15px}
+  .top{height:64px;padding:0 32px;gap:28px}
+  .brand img{height:32px}
+  .top .alt-crumb{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink-3)}
+  .alt-crumb a{color:var(--ink-2);padding:6px 2px}
+  .alt-crumb a:hover{color:var(--ink)}
+  .alt-crumb .sep{color:#A9BAB8}
+  .alt-crumb b{font-weight:600;color:var(--ink)}
+  .me-t{display:block;font:500 14px/1.2 var(--ui)}
+  .me-t small{display:block;font-size:12px;color:var(--ink-3);font-weight:400}
+  .altbar{display:none}
+  .kbd{display:inline-block}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+.tmap{display:block;width:100%;height:100%;font-family:var(--ui);overflow:visible}
+.tmap .rlab{fill:var(--ink-3);font-weight:600;letter-spacing:.12em}
+.tmap .rlab .rs{letter-spacing:.02em;font-weight:400}
+.tmap .dot{filter:drop-shadow(0 2px 3px rgba(0,43,50,.08));fill:var(--node);stroke:var(--node-line);stroke-width:1.2;transition:fill .3s}
+.tmap .f-corp .dot{stroke:#B8B19F} .tmap .f-pt .dot{stroke:#9EABBD} .tmap .f-cw .dot{stroke:#B9A39A}
+.tmap .lab{fill:var(--ink);font-weight:500}
+.tmap .lab .n{fill:var(--ink-3);font-weight:400}
+.tmap .ring{fill:none;stroke-width:2.2}
+.tmap .youlab{fill:var(--ink);font-weight:700;letter-spacing:.14em}
+.tmap .hull{fill:rgba(0,173,194,.05);stroke:var(--thread);stroke-width:1.4;stroke-dasharray:5 5}
+.tmap .hull-on{fill:rgba(0,93,99,.07);stroke:var(--teal);stroke-width:2;stroke-dasharray:none}
+.tmap .hlab{fill:var(--teal)} .tmap .hsub{fill:var(--ink-3);font-style:italic}
+.tmap .sigh{fill:rgba(200,16,46,.16)} .tmap .sigc{fill:var(--signal);stroke:#fff;stroke-width:1.5}
+.tmap .alab{fill:var(--signal);font-weight:600}
+.tmap .dim .dot{fill:transparent;stroke:#C4D0CE;stroke-dasharray:2 3}
+.tmap .dim .lab{fill:#7D9195} .tmap .dim .lab .n{fill:#8FA2A5}
+.tmap-search,.tmap-mini{overflow:hidden!important}
+.tmap .lit .dot{fill:#fff;stroke:var(--teal);stroke-width:1.5}
+.tmap .hit{fill:var(--teal-deep)}
+.tmap .lit .cnt{fill:#fff;font-weight:700}
+.tmap .lnote{fill:var(--teal);font-weight:500}
+.tmap .thr{fill:none;stroke:var(--thread);stroke-width:2.5}
+.tmap a .dot{cursor:pointer} .tmap a:hover .dot{fill:#F6FBFA;stroke:var(--teal)}
+
+.d-only{display:none}
+.sq{padding:14px 16px 6px}
+.sq .field{box-shadow:0 1px 2px rgba(0,43,50,.06);border-color:var(--ink)}
+.sq .field .x{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;color:var(--ink-3)}
+.chipsrow{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 10px;scrollbar-width:none}
+.chipsrow::-webkit-scrollbar{display:none}
+.chip{display:inline-flex;align-items:center;gap:6px;flex:none;min-height:40px;padding:0 13px;border-radius:99px;border:1px solid var(--line);background:var(--surface);font:500 14px/1 var(--ui);color:var(--ink-2);white-space:nowrap}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip.fixed{background:transparent;border-style:dashed}
+.sum{padding:0 16px 8px;font-size:14px;color:var(--ink-2);line-height:1.45}
+.sum b{color:var(--ink)}
+.hid{display:inline-flex;align-items:center;gap:6px;color:var(--ink-3);font-size:13px}
+.grp{padding:6px 16px 0}
+.grp h3{display:flex;justify-content:space-between;align-items:baseline;margin:14px 0 2px;font:600 11px/1.2 var(--ui);letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
+.res{display:flex;gap:12px;align-items:flex-start;padding:12px 4px;min-height:56px;border-top:1px solid var(--line-2);border-radius:2px}
+.res .ic{color:var(--ink-3);margin-top:2px}
+.res b{display:block;font:500 15.5px/1.35 var(--ui)}
+.res mark{background:linear-gradient(transparent 62%,rgba(0,173,194,.28) 0);color:inherit;padding:0 1px}
+.res .meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-top:4px}
+.res .meta .code{font-size:12px}
+.res .yt{font:600 10.5px/1 var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--ink);border-left:2px solid #E5461F;padding-left:6px}
+.res.sel{background:var(--surface);border:1px solid var(--ink);border-radius:14px;padding:12px;margin:4px -8px;box-shadow:var(--shadow)}
+.res.sel+.res{border-top:0}
+.also{list-style:none;margin:0;padding:0}
+.also a{display:flex;gap:12px;align-items:center;min-height:52px;padding:8px 0;border-top:1px solid var(--line-2);font-size:15px}
+.also small{display:block;font-size:13px;color:var(--ink-3)}
+.also .ic{color:var(--ink-3)}
+.also .go{margin-left:auto}
+.where{margin:6px 16px 4px;padding:10px 8px 8px;border-radius:18px;background:var(--surface);border:1px solid var(--line-2)}
+.where .tmap{height:auto}
+.where .wh{display:flex;justify-content:space-between;align-items:center;padding:2px 8px 4px;font-size:13px;color:var(--ink-3)}
+.where .wh b{font:600 14px/1.2 var(--ui);color:var(--ink)}
+.wgrid{list-style:none;margin:6px 0 0;padding:0 4px;display:grid;grid-template-columns:1fr 1fr;gap:4px 8px}
+.wgrid a{display:flex;align-items:center;gap:10px;min-height:44px;padding:4px 8px;border-radius:12px;font-size:14.5px}
+.wgrid i{display:grid;place-items:center;width:var(--s,22px);height:var(--s,22px);border-radius:50%;background:var(--teal-deep);color:#fff;font:700 12px/1 var(--ui);font-style:normal;flex:none}
+.wgrid .wi a{background:rgba(0,93,99,.07);box-shadow:inset 0 0 0 1.5px var(--teal)}
+.eqt{display:flex;flex-wrap:wrap;gap:6px;padding:4px 8px 4px}
+.eqt span{font-size:13px;padding:6px 10px;border-radius:99px;background:var(--ground);color:var(--ink-2)}
+.pv-lock{display:flex;gap:12px;padding:14px;border-radius:14px;background:var(--ground);border:1px solid var(--line-2);font-size:14px;color:var(--ink-2)}
+.pv-lock b{display:block;color:var(--ink);font-weight:600}
+@media (min-width:1024px){
+  .p-only{display:none!important}
+  .d-only{display:block}
+  .wrap{display:grid;grid-template-columns:450px 1fr 400px;height:calc(100vh - 64px);min-height:800px}
+  .list{border-right:1px solid var(--line-2);overflow-y:auto;padding:18px 0 24px}
+  .list .chip{min-height:38px;padding:0 11px}
+  .list .sq,.list .chipsrow,.list .sum,.list .grp{padding-left:28px!important;padding-right:24px!important}
+  .list .sq,.list .chipsrow,.list .sum,.list .grp{padding-left:32px;padding-right:28px}
+  .list .chipsrow{flex-wrap:wrap;overflow:visible}
+  .list .res{padding:9px 4px;min-height:0}
+  .list .res b{font-size:14.5px}
+  .list .res.sel{padding:10px 12px}
+  .list .grp h3{margin-top:10px}
+  .mapcol{overflow:hidden;position:relative;display:flex;flex-direction:column;padding:22px 24px 18px;background:radial-gradient(500px 420px at 50% 45%,#F7F8F5,var(--ground))}
+  .mapcol .mh{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .mapcol h2{font:400 26px/1.1 var(--display);margin:6px 0 0}
+  .mapcol h2 b{font-weight:700}
+  .mapcol .tmap{flex:1;min-height:0;margin:8px 0}
+  .mapcol .foot{font-size:13px;color:var(--ink-3);border-top:1px solid var(--line-2);padding-top:12px;display:grid;gap:8px}
+  .mapcol .eqt{padding:0}
+  .prev{border-left:1px solid var(--line-2);background:var(--surface);padding:24px 30px;overflow:hidden;display:flex;flex-direction:column}
+  .prev h2{font:700 26px/1.1 var(--display);margin:8px 0 10px}
+  .prev .meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-bottom:14px}
+  .prev dl{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 16px;padding:14px 0;border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2)}
+  .prev dt{font:600 10.5px/1.2 var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+  .prev dd{margin:3px 0 0;font:500 14px/1.3 var(--ui)}
+  .why{font-size:13.5px;color:var(--ink-2);margin:0 0 14px;line-height:1.5}
+  .why mark{background:linear-gradient(transparent 62%,rgba(0,173,194,.28) 0);color:inherit}
+  .prev .pk{font:600 11px/1.2 var(--ui);letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin:16px 0 4px}
+  .prev .acts{display:flex;gap:8px}
+  .gl .pk{display:block;margin-bottom:6px}
+  .gl{margin-top:auto;padding:16px;border-radius:14px;background:var(--ground);font-size:14px}
+  .gl p{margin:6px 0 0;color:var(--ink-2);font-size:13.5px;line-height:1.5}
+}
+
+</style></head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+<symbol id="i-map" viewBox="0 0 24 24"><circle cx="7" cy="8" r="3"/><circle cx="16.5" cy="7" r="2"/><circle cx="14" cy="16" r="4"/><path d="M9.6 9.6l1.9 3"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6.5h11M9 12h11M9 17.5h11"/><circle cx="4.5" cy="6.5" r=".8"/><circle cx="4.5" cy="12" r=".8"/><circle cx="4.5" cy="17.5" r=".8"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5.5" y="10.5" width="13" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></symbol>
+<symbol id="i-mark" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3.5L7 20z"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/><path d="M13 4h7v7M4 13v7h7"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><circle cx="6" cy="12" r=".9"/><circle cx="12" cy="12" r=".9"/><circle cx="18" cy="12" r=".9"/></symbol>
+<symbol id="i-expert" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></symbol>
+<symbol id="i-ask" viewBox="0 0 24 24"><path d="M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4 3.5v-3.5h0a1.5 1.5 0 0 1-1.5-1.5z"/><path d="M10 9.2a2 2 0 1 1 2.7 1.9c-.5.2-.7.6-.7 1.1M12 14.2v.1"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6.5 10.5L12 5l5.5 5.5"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-fit" viewBox="0 0 24 24"><path d="M4.5 9V4.5H9M15 4.5h4.5V9M19.5 15v4.5H15M9 19.5H4.5V15"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 15.5H3z"/><path d="M12 10v4M12 16.6v.1"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M6.5 3.5h7l4 4v13h-11z"/><path d="M13.5 3.5v4h4M9 12h6M9 15.5h6"/></symbol>
+<symbol id="i-thread" viewBox="0 0 24 24"><path d="M3 17c4 0 4-10 9-10s5 10 9 10"/><circle cx="12" cy="7" r="1.6"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M5 5.5A1.5 1.5 0 0 1 6.5 4H19v14H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+<symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6c1.6 0 3 .5 4.2 1.2M21 12s-3.5 6-9 6c-1.6 0-3-.5-4.2-1.2"/><path d="M4 20L20 4"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+<symbol id="i-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2M20 14v6h-3M14 18v2"/></symbol>
+</svg>
+
+<header class="top">
+  <a class="brand" href="home.html"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE"></a>
+  <nav class="alt-crumb" aria-label="Where you are">
+    <span class="gauge" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i><i></i></span>
+    <a href="home.html">TAQA</a><span class="sep">›</span><b>Search: “pressure test”</b>
+  </nav>
+  <div class="top-r">
+    <a class="tbtn" href="#" aria-label="Active technical alerts"><svg class="ic"><use href="#i-bell"/></svg><span class="pip"></span></a>
+    <span class="me"><span class="av" aria-hidden="true">FA</span><span class="me-t">Faisal Al-Ghamdi<small>Field Supervisor · Employee</small></span></span>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="list" aria-label="Results">
+    <div class="sq"><div class="field" role="search"><svg class="ic"><use href="#i-search"/></svg><span class="q">pressure test</span><a class="x" href="search-start.html" aria-label="Clear search"><svg class="ic"><use href="#i-x"/></svg></a></div></div>
+    <div class="chipsrow" aria-label="Filters">
+      <a class="chip on" href="#"><svg class="ic s"><use href="#i-map"/></svg>Well Intervention<svg class="ic s"><use href="#i-x"/></svg></a>
+      <a class="chip" href="#">Your area first</a>
+      <a class="chip" href="#"><svg class="ic s"><use href="#i-filter"/></svg>Kind</a>
+    </div>
+    <p class="sum"><b>5 of 17</b> strongest matches, in force, sit in Well Intervention (proposed grouping). 12 more in 6 other areas.<br><span class="hid"><svg class="ic s"><use href="#i-eye-off"/></svg>2 not in force are hidden</span></p>
+
+    <!-- phone: where it lives -->
+    <div class="where p-only">
+      <div class="wh"><b>Where it lives</b><span>8 areas · tap to filter</span></div>
+      <svg class="tmap tmap-search" viewBox="50 165 560 390" role="img" aria-label="Matches by area: Fracturing 4, Coiled Tubing 3, Well Testing 3, Cementing 2, Wireline Services 2, Drilling Services 1, Safety Services 1, Inspection 1" preserveAspectRatio="xMidYMid meet"><defs><radialGradient id="glowp"><stop offset="0" stop-color="#FD691D" stop-opacity=".30"/><stop offset=".55" stop-color="#FD691D" stop-opacity=".10"/><stop offset="1" stop-color="#FD691D" stop-opacity="0"/></radialGradient>
+  <linearGradient id="ringp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FD691D"/><stop offset="1" stop-color="#C8102E"/></linearGradient></defs><rect class="reg reg-ops" x="40" y="110" width="560" height="440" rx="44" fill="var(--fam-ops)"/><rect class="reg reg-corp" x="640" y="110" width="432" height="440" rx="44" fill="var(--fam-corp)"/><rect class="reg reg-pt" x="330" y="572" width="510" height="168" rx="44" fill="var(--fam-pt)"/><rect class="reg reg-cw" x="860" y="572" width="212" height="168" rx="44" fill="var(--fam-cw)"/><path class="hull hull-on" d="M306 350 C331.3 332.3, 398.3 327.3, 440 326 C481.7 324.7, 534.3 324.7, 556 342 C577.7 359.3, 571.0 400.3, 570 430 C569.0 459.7, 553.0 485.0, 550 520 C547.0 555.0, 554.3 607.7, 552 640 C549.7 672.3, 556.3 700.7, 536 714 C515.7 727.3, 453.3 732.3, 430 720 C406.7 707.7, 403.3 666.7, 396 640 C388.7 613.3, 402.0 582.5, 386 560 C370.0 537.5, 316.3 526.3, 300 505 C283.7 483.7, 287.0 457.8, 288 432 C289.0 406.2, 280.7 367.7, 306 350Z"/><g class="a a-dr f-ops lit  "><circle class="dot" cx="130" cy="225" r="42.88029850642367"/><circle class="hit" cx="130" cy="225" r="24.7"/><text class="cnt" x="130" y="234.36" text-anchor="middle" font-size="24.7">1</text></g><g class="a a-sa f-ops lit  "><circle class="dot" cx="270" cy="225" r="42.244999704106995"/><circle class="hit" cx="270" cy="225" r="24.7"/><text class="cnt" x="270" y="234.36" text-anchor="middle" font-size="24.7">1</text></g><g class="a a-fr f-ops lit  "><circle class="dot" cx="410" cy="225" r="39.94195788891676"/><circle class="hit" cx="410" cy="225" r="36.4"/><text class="cnt" x="410" y="234.36" text-anchor="middle" font-size="24.7">4</text></g><g class="a a-cm f-ops lit  "><circle class="dot" cx="535" cy="225" r="31.200000000000003"/><circle class="hit" cx="535" cy="225" r="29.546298679765215"/><text class="cnt" x="535" y="234.36" text-anchor="middle" font-size="24.7">2</text></g><g class="a a-in f-ops lit  "><circle class="dot" cx="110" cy="400" r="34.882660448996724"/><circle class="hit" cx="110" cy="400" r="24.7"/><text class="cnt" x="110" y="409.36" text-anchor="middle" font-size="24.7">1</text></g><g class="a a-wt f-ops lit  "><circle class="dot" cx="225" cy="400" r="29.41564209736038"/><circle class="hit" cx="225" cy="400" r="33.26499444855586"/><text class="cnt" x="225" y="409.36" text-anchor="middle" font-size="24.7">3</text></g><g class="a a-ws f-ops lit  "><circle class="dot" cx="360" cy="400" r="28.00285699709942"/><circle class="hit" cx="360" cy="400" r="29.546298679765215"/><text class="cnt" x="360" y="409.36" text-anchor="middle" font-size="24.7">2</text></g><g class="a a-ct f-ops lit  "><circle class="dot" cx="490" cy="400" r="34.882660448996724"/><circle class="hit" cx="490" cy="400" r="33.26499444855586"/><text class="cnt" x="490" y="409.36" text-anchor="middle" font-size="24.7">3</text></g><g class="a a-sl f-ops  dim "><circle class="dot" cx="420" cy="512" r="9.00666419935816"/></g><g class="a a-wc f-ops  dim "><circle class="dot" cx="76" cy="494" r="9.00666419935816"/></g><g class="a a-ma f-ops  dim "><circle class="dot" cx="76" cy="522" r="9.00666419935816"/></g><g class="a a-qh f-corp  dim "><circle class="dot" cx="724" cy="240" r="39.60202015049233"/></g><g class="a a-gr f-corp  dim "><circle class="dot" cx="862" cy="240" r="34.098680326370406"/></g><g class="a a-hr f-corp  dim "><circle class="dot" cx="1010" cy="240" r="32.473989591671675"/></g><g class="a a-fi f-corp  dim "><circle class="dot" cx="680" cy="392" r="9.00666419935816"/></g><g class="a a-it f-corp  dim "><circle class="dot" cx="680" cy="420" r="9.00666419935816"/></g><g class="a a-sc f-corp  dim "><circle class="dot" cx="680" cy="448" r="9.00666419935816"/></g><g class="a a-le f-corp  dim "><circle class="dot" cx="680" cy="476" r="9.00666419935816"/></g><g class="a a-ld f-corp  dim "><circle class="dot" cx="872" cy="392" r="9.00666419935816"/></g><g class="a a-cs f-corp  dim "><circle class="dot" cx="872" cy="420" r="9.00666419935816"/></g><g class="a a-ge f-corp  dim "><circle class="dot" cx="872" cy="448" r="9.00666419935816"/></g><g class="a a-wic f-pt  dim "><circle class="dot" cx="474" cy="648" r="14.70782104868019"/></g></svg>
+      <ul class="wgrid">
+        <li class="wi"><a href="area.html"><i style="--s:26px">3</i>Coiled Tubing</a></li>
+        <li class="wi"><a href="#"><i style="--s:24px">2</i>Wireline Services</a></li>
+        <li><a href="#"><i style="--s:28px">4</i>Fracturing</a></li>
+        <li><a href="#"><i style="--s:26px">3</i>Well Testing</a></li>
+        <li><a href="#"><i style="--s:24px">2</i>Cementing</a></li>
+        <li><a href="#"><i>1</i>Drilling Services</a></li>
+        <li><a href="#"><i>1</i>Safety Services</a></li>
+        <li><a href="#"><i>1</i>Inspection</a></li>
+      </ul>
+    </div>
+
+    <div class="grp">
+      <h3>Procedures (SOP)<span>2</span></h3>
+      <a class="res sel" href="#pv"><svg class="ic"><use href="#i-doc"/></svg><span><b><mark>Pressure</mark> <mark>Testing</mark> Procedure</b><span class="meta"><span class="yt">Your area</span><span class="code">CTSS-SOP-005 · Rev 2.0</span><span class="st cur">Current</span><span class="cls lk"><svg class="ic s"><use href="#i-lock"/></svg>Restricted</span><span class="ar">AR</span></span></span></a>
+      <a class="res" href="#"><svg class="ic"><use href="#i-doc"/></svg><span><b><mark>Pressure</mark> Control Equipment Check</b><span class="meta"><span class="code">WS-SOP-007 · Wireline</span><span class="st due">Review due</span><span class="cls lk"><svg class="ic s"><use href="#i-lock"/></svg>Confidential</span></span></span></a>
+      <h3>Standards<span>1</span></h3>
+      <a class="res" href="#"><svg class="ic"><use href="#i-doc"/></svg><span><b><mark>Pressure</mark> Control Standard</b><span class="meta"><span class="code">WS-S003 · Wireline</span><span class="st cur">Current</span><span class="cls lk"><svg class="ic s"><use href="#i-lock"/></svg>Confidential</span></span></span></a>
+      <h3>Lessons learned<span>1</span></h3>
+      <a class="res" href="#"><svg class="ic"><use href="#i-book"/></svg><span><b><mark>Pressure</mark> integrity <mark>test</mark> failure, field findings</b><span class="meta"><span class="yt">Your area</span><span class="code">CTSS-LL-005 · Rev 4.0</span><span class="st due">Review due</span><span class="cls">Internal</span></span></span></a>
+      <h3>Technical alerts<span>1</span></h3>
+      <a class="res" href="#"><span class="sig" style="margin:6px 6px 0"></span><span><b>New <mark>pressure</mark> rating for 2-inch CT string, effective immediately</b><span class="meta"><span class="yt">Your area</span><span class="code">CTSS-ALT-002 · 13 Apr 2026</span><span class="cls lk"><svg class="ic s"><use href="#i-lock"/></svg>Confidential</span></span></span></a>
+      <h3>Also matched</h3>
+      <ul class="also">
+        <li><a href="#"><svg class="ic"><use href="#i-map"/></svg><span>12 more in 6 other areas<small>Fracturing 4 · Well Testing 3 · Cementing 2 · Drilling 1 · Safety 1 · Inspection 1</small></span><svg class="ic go"><use href="#i-chev"/></svg></a></li>
+        <li><a href="#"><svg class="ic"><use href="#i-expert"/></svg><span>3 experts<small>Coiled Tubing · Fracturing · Well Testing</small></span><svg class="ic go"><use href="#i-chev"/></svg></a></li>
+        <li><a href="#"><svg class="ic"><use href="#i-book"/></svg><span>Field Glossary: BOP<small>Blowout Preventer · Well Control</small></span><svg class="ic go"><use href="#i-chev"/></svg></a></li>
+        <li><a href="#"><svg class="ic"><use href="#i-list"/></svg><span>More partial matches<small>One word only, e.g. DSS-S009 BOP Testing Standard</small></span><svg class="ic go"><use href="#i-chev"/></svg></a></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="mapcol d-only" aria-label="Where the results live">
+    <div class="mh"><div><span class="eyebrow">Where “pressure test” lives</span><h2><b>8 areas</b>, all operational</h2></div><nav class="seg" aria-label="View"><a href="#" aria-current="page"><svg class="ic s"><use href="#i-map"/></svg>Map</a><a href="#"><svg class="ic s"><use href="#i-list"/></svg>List</a></nav></div>
+    <svg class="tmap tmap-search" viewBox="34 112 590 620" role="img" aria-label="Matches by area: Fracturing 4, Coiled Tubing 3, Well Testing 3, Cementing 2, Wireline Services 2, Drilling Services 1, Safety Services 1, Inspection 1. Filter Well Intervention outlined." preserveAspectRatio="xMidYMid meet"><defs><radialGradient id="glowd"><stop offset="0" stop-color="#FD691D" stop-opacity=".30"/><stop offset=".55" stop-color="#FD691D" stop-opacity=".10"/><stop offset="1" stop-color="#FD691D" stop-opacity="0"/></radialGradient>
+  <linearGradient id="ringd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FD691D"/><stop offset="1" stop-color="#C8102E"/></linearGradient></defs><rect class="reg reg-ops" x="40" y="110" width="560" height="440" rx="44" fill="var(--fam-ops)"/><rect class="reg reg-corp" x="640" y="110" width="432" height="440" rx="44" fill="var(--fam-corp)"/><rect class="reg reg-pt" x="330" y="572" width="510" height="168" rx="44" fill="var(--fam-pt)"/><rect class="reg reg-cw" x="860" y="572" width="212" height="168" rx="44" fill="var(--fam-cw)"/><path class="hull hull-on" d="M306 350 C331.3 332.3, 398.3 327.3, 440 326 C481.7 324.7, 534.3 324.7, 556 342 C577.7 359.3, 571.0 400.3, 570 430 C569.0 459.7, 553.0 485.0, 550 520 C547.0 555.0, 554.3 607.7, 552 640 C549.7 672.3, 556.3 700.7, 536 714 C515.7 727.3, 453.3 732.3, 430 720 C406.7 707.7, 403.3 666.7, 396 640 C388.7 613.3, 402.0 582.5, 386 560 C370.0 537.5, 316.3 526.3, 300 505 C283.7 483.7, 287.0 457.8, 288 432 C289.0 406.2, 280.7 367.7, 306 350Z"/><text class="hlab" x="386" y="600" text-anchor="end" font-size="14.25"><tspan x="386" font-weight="600">Filter: Well Intervention</tspan><tspan x="386" dy="18.75" class="hsub">proposed grouping</tspan></text><g class="a a-dr f-ops lit  "><circle class="dot" cx="130" cy="225" r="42.88029850642367"/><circle class="hit" cx="130" cy="225" r="14.25"/><text class="cnt" x="130" y="230.4" text-anchor="middle" font-size="14.25">1</text><text class="lab" x="130" y="288.1302985064237" text-anchor="middle" font-size="15"><tspan x="130">Drilling Services</tspan></text></g><g class="a a-sa f-ops lit  "><circle class="dot" cx="270" cy="225" r="42.244999704106995"/><circle class="hit" cx="270" cy="225" r="14.25"/><text class="cnt" x="270" y="230.4" text-anchor="middle" font-size="14.25">1</text><text class="lab" x="270" y="287.494999704107" text-anchor="middle" font-size="15"><tspan x="270">Safety Services</tspan></text></g><g class="a a-fr f-ops lit  "><circle class="dot" cx="410" cy="225" r="39.94195788891676"/><circle class="hit" cx="410" cy="225" r="21"/><text class="cnt" x="410" y="230.4" text-anchor="middle" font-size="14.25">4</text><text class="lab" x="410" y="285.19195788891676" text-anchor="middle" font-size="15"><tspan x="410">Fracturing</tspan></text></g><g class="a a-cm f-ops lit  "><circle class="dot" cx="535" cy="225" r="31.200000000000003"/><circle class="hit" cx="535" cy="225" r="17.045941546018394"/><text class="cnt" x="535" y="230.4" text-anchor="middle" font-size="14.25">2</text><text class="lab" x="535" y="276.45" text-anchor="middle" font-size="15"><tspan x="535">Cementing</tspan></text></g><g class="a a-in f-ops lit  "><circle class="dot" cx="110" cy="400" r="34.882660448996724"/><circle class="hit" cx="110" cy="400" r="14.25"/><text class="cnt" x="110" y="405.4" text-anchor="middle" font-size="14.25">1</text><text class="lab" x="110" y="455.1326604489967" text-anchor="middle" font-size="15"><tspan x="110">Inspection</tspan></text></g><g class="a a-wt f-ops lit  "><circle class="dot" cx="225" cy="400" r="29.41564209736038"/><circle class="hit" cx="225" cy="400" r="19.191342951089922"/><text class="cnt" x="225" y="405.4" text-anchor="middle" font-size="14.25">3</text><text class="lab" x="225" y="449.6656420973604" text-anchor="middle" font-size="15"><tspan x="225">Well Testing</tspan></text></g><g class="a a-ws f-ops lit  "><circle class="dot" cx="360" cy="400" r="28.00285699709942"/><circle class="hit" cx="360" cy="400" r="17.045941546018394"/><text class="cnt" x="360" y="405.4" text-anchor="middle" font-size="14.25">2</text><text class="lab" x="360" y="448.2528569970994" text-anchor="middle" font-size="15"><tspan x="360">Wireline Services</tspan></text></g><g class="a a-ct f-ops lit  "><circle class="dot" cx="490" cy="400" r="34.882660448996724"/><circle class="hit" cx="490" cy="400" r="19.191342951089922"/><text class="cnt" x="490" y="405.4" text-anchor="middle" font-size="14.25">3</text><text class="lab" x="490" y="455.1326604489967" text-anchor="middle" font-size="15"><tspan x="490">Coiled Tubing</tspan></text></g><g class="a a-sl f-ops  dim "><circle class="dot" cx="420" cy="512" r="9.00666419935816"/><text class="lab" x="437.00666419935817" y="517.4" font-size="14.399999999999999">Slickline</text></g><g class="a a-wc f-ops  dim "><circle class="dot" cx="76" cy="494" r="9.00666419935816"/><text class="lab" x="93.00666419935816" y="499.4" font-size="14.399999999999999">Well Completions</text></g><g class="a a-ma f-ops  dim "><circle class="dot" cx="76" cy="522" r="9.00666419935816"/><text class="lab" x="93.00666419935816" y="527.4" font-size="14.399999999999999">Marine Services</text></g><g class="a a-qh f-corp  dim "><circle class="dot" cx="724" cy="240" r="39.60202015049233"/><text class="lab" x="724" y="299.8520201504923" text-anchor="middle" font-size="15"><tspan x="724">QHSE</tspan></text></g><g class="a a-gr f-corp  dim "><circle class="dot" cx="862" cy="240" r="34.098680326370406"/><text class="lab" x="862" y="294.3486803263704" text-anchor="middle" font-size="15"><tspan x="862">Governance, Risk</tspan><tspan x="862" dy="18">&amp; Compliance</tspan></text></g><g class="a a-hr f-corp  dim "><circle class="dot" cx="1010" cy="240" r="32.473989591671675"/><text class="lab" x="1010" y="292.7239895916717" text-anchor="middle" font-size="15"><tspan x="1010">Human</tspan><tspan x="1010" dy="18">Resources</tspan></text></g><g class="a a-fi f-corp  dim "><circle class="dot" cx="680" cy="392" r="9.00666419935816"/><text class="lab" x="697.0066641993582" y="397.4" font-size="14.399999999999999">Finance</text></g><g class="a a-it f-corp  dim "><circle class="dot" cx="680" cy="420" r="9.00666419935816"/><text class="lab" x="697.0066641993582" y="425.4" font-size="14.399999999999999">Information Technology</text></g><g class="a a-sc f-corp  dim "><circle class="dot" cx="680" cy="448" r="9.00666419935816"/><text class="lab" x="697.0066641993582" y="453.4" font-size="14.399999999999999">Supply Chain</text></g><g class="a a-le f-corp  dim "><circle class="dot" cx="680" cy="476" r="9.00666419935816"/><text class="lab" x="697.0066641993582" y="481.4" font-size="14.399999999999999">Legal</text></g><g class="a a-ld f-corp  dim "><circle class="dot" cx="872" cy="392" r="9.00666419935816"/><text class="lab" x="889.0066641993582" y="397.4" font-size="14.399999999999999">Learning and Development</text></g><g class="a a-cs f-corp  dim "><circle class="dot" cx="872" cy="420" r="9.00666419935816"/><text class="lab" x="889.0066641993582" y="425.4" font-size="14.399999999999999">Commercial &amp; Sales</text></g><g class="a a-ge f-corp  dim "><circle class="dot" cx="872" cy="448" r="9.00666419935816"/><text class="lab" x="889.0066641993582" y="453.4" font-size="14.399999999999999">Geothermal CoE</text></g><g class="a a-wic f-pt  dim "><circle class="dot" cx="474" cy="648" r="14.70782104868019"/><text class="lab" x="474" y="682.9578210486802" text-anchor="middle" font-size="15"><tspan x="474">Well Intervention</tspan><tspan x="474" dy="18">CoE</tspan></text></g></svg>
+    <div class="foot">
+      <span>No strongest matches in Corporate functions, Products &amp; Technology or Company Wide. Number = matching documents in force. Drag around areas to filter.</span>
+      <div class="eqt"><span class="concept">Proposed equipment</span><span>BOP</span><span>High-pressure iron</span><span>Pressure gauge</span><span>Separator</span><span>CT string</span></div>
+    </div>
+  </section>
+
+  <aside class="prev d-only" id="pv" aria-label="Preview">
+    <span class="code">TQ-TWS-CTSS-SOP-005 · SOP</span>
+    <h2>Pressure Testing Procedure</h2>
+    <div class="meta"><span class="st cur">Current</span><span class="cls">Rev 2.0</span><span class="cls lk"><svg class="ic s"><use href="#i-lock"/></svg>Restricted</span><span class="ar">AR</span></div>
+    <dl>
+      <div><dt>Area</dt><dd>Coiled Tubing</dd></div>
+      <div><dt>Issued</dt><dd>12 Jun 2025</dd></div>
+      <div><dt>Arabic version</dt><dd>SOP-005-AR</dd></div>
+      <div><dt>Ranking</dt><dd>Your area first</dd></div>
+    </dl>
+    <p class="why"><b>Why it matched:</b> title contains <mark>Pressure</mark> and <mark>Testing</mark> (test, testing). Deterministic title match, no generated text.</p>
+    <div class="pv-lock"><svg class="ic"><use href="#i-lock"/></svg><span><b>Access restricted</b>Request access through QMS to open the file. Its identity and status stay visible.</span></div>
+    <div class="pk">On the map</div>
+    <a class="res" href="area.html" style="border-top:0;padding-top:4px"><svg class="ic" style="color:var(--thread)"><use href="#i-thread"/></svg><span><b>Pressure control thread</b><span class="meta" style="font-size:13px;color:var(--ink-3)">Also WS-S003 · WS-SOP-007 · WS-WI-003 · SS-SOP-001</span></span></a>
+    <a class="res" href="#"><svg class="ic"><use href="#i-expert"/></svg><span><b>Ask the Coiled Tubing expert</b><span class="meta"><span class="cls">Routed by area</span></span></span></a>
+    <div class="acts" style="margin-top:18px;padding-top:0"><a class="btn pri" href="#">Request access</a><a class="btn" href="area.html"><svg class="ic s"><use href="#i-map"/></svg>Show on map</a></div>
+    <div class="gl"><span class="pk" style="margin-top:0">Field Glossary · also matched</span><b>BOP · Blowout Preventer</b> <span class="cls">Well Control</span><p>“A large specialised valve installed at the wellhead that can be closed to prevent uncontrolled flow of formation fluids (kick) to surface during drilling or well intervention.”</p></div>
+  </aside>
+</main>
+</body></html>

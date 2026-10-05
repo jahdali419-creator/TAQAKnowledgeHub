@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RISE Field · Search · pressure test</title>
+<link rel="stylesheet" href="../../kit/fonts.css">
+<link rel="stylesheet" href="field.css">
+<style>
+mark{background:none;color:inherit;box-shadow:inset 0 -5px 0 color-mix(in srgb,var(--legacy) 45%,transparent)}
+.q{padding:14px 16px 0}
+.qf{display:flex;align-items:center;gap:10px;height:68px;padding:0 6px 0 18px;border-radius:20px;background:var(--card);border:2.5px solid var(--ink)}
+.qf .ico{width:28px;height:28px}
+.qf .v{flex:1;font:700 23px/1 var(--ui);letter-spacing:-.01em}
+.qf .v::after{content:"";display:inline-block;width:2px;height:26px;margin-left:3px;vertical-align:-4px;background:var(--teal)}
+.qf button{width:56px;height:56px;display:grid;place-items:center;border-radius:14px;color:var(--ink-2)}
+.chips{display:grid;grid-template-columns:auto auto auto;gap:8px;margin-top:10px}
+.chip{display:flex;align-items:center;gap:10px;min-height:var(--tap);padding:0 14px;border-radius:16px;border:1.5px solid var(--line-2);background:var(--card);font:700 16px/1.15 var(--ui)}
+.chip .bx{width:26px;height:26px;border-radius:8px;border:2px solid var(--ink-3);display:grid;place-items:center;flex:none}
+.chip .bx .ico{width:18px;height:18px;stroke-width:3;opacity:0}
+.chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip[aria-pressed=true] .bx{border-color:#fff;background:#fff;color:var(--ink)}
+.chip[aria-pressed=true] .bx .ico{opacity:1}
+.chip.fixed{background:var(--paper);border-style:dashed}
+.chip.fixed .bx{border-color:var(--ok);background:var(--ok);color:#fff}.chip.fixed .bx .ico{opacity:1}
+.chip small{display:none;font:500 12.5px/1.2 var(--ui);opacity:.8}
+.chip.fixed{display:none}
+.chip{padding:0 6px;gap:6px;font-size:15px;white-space:nowrap;justify-content:center}
+.chip .bx{width:20px;height:20px;border-radius:6px}
+.chip .bx .ico{width:15px;height:15px}
+.tally{margin:12px 16px 0;padding:12px 16px;font-size:14.5px!important;border-radius:16px;background:color-mix(in srgb,var(--ink) 5%,transparent);font:500 15px/1.45 var(--ui);color:var(--ink-2)}
+.tally b{display:block;font:800 22px/1.15 var(--disp);color:var(--ink);margin-bottom:4px}
+.res{padding:0 16px;display:flex;flex-direction:column}
+.res .g-al{order:2}.res .g-pr{order:1}.res .g-ll{order:3}.res .g-ma{order:4}.res .g-st{order:5}.res .also{order:6}
+.row.cmp{min-height:0;padding:12px 14px}
+.row.cmp .t{font-size:16.5px}
+.row.cmp .m{font-size:13.5px}
+.row.cmp .st-col{gap:6px}
+.row.cmp .g{width:28px;height:28px}
+.res .g-pr{margin-top:20px}
+.grp-h .pin{display:inline-flex;align-items:center;gap:6px;font:600 13.5px/1 var(--ui);color:var(--ink-2)}
+.also{margin-top:28px;display:grid;gap:10px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.box h3{display:flex;align-items:center;gap:10px;font:800 19px/1.15 var(--disp)}
+.box h3 .ico{width:26px;height:26px;color:var(--teal)}
+.box p{margin-top:8px;font:400 16px/1.45 var(--ui);color:var(--ink-2)}
+.box p b{color:var(--ink)}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.pills a{display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:0 16px;border-radius:14px;border:1.5px solid var(--line-2);font:700 15.5px/1 var(--ui)}
+.pills a.mine{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pills .ico{width:20px;height:20px}
+.morep{display:flex;align-items:center;justify-content:space-between;min-height:64px;padding:0 16px;border-radius:var(--r);border:1.5px dashed var(--line-2);font:700 16px/1.2 var(--ui)}
+.morep small{display:block;font:500 13.5px/1.3 var(--ui);color:var(--ink-2)}
+.pv{display:none}
+@media (min-width:1024px){
+  .shell{display:grid;grid-template-columns:600px 1fr;gap:28px;padding:0 40px 40px;align-items:start}
+  .head{grid-column:1/-1;display:grid;grid-template-columns:1fr auto;gap:12px 20px;align-items:center;padding-top:22px}
+  .q{padding:0}
+  .qf{height:80px;border-radius:24px;padding-left:26px}
+  .qf .v{font-size:30px}
+  .chips{display:flex;margin:0}
+  .chip.fixed{display:flex}
+  .chip{padding:0 14px;gap:10px;font-size:16px}
+  .chip .bx{width:26px;height:26px}.chip .bx .ico{width:18px;height:18px}
+  .chip{min-height:60px}
+  .chip small{display:block}
+  .tally{grid-column:1/-1;margin:0;display:flex;align-items:baseline;gap:16px;padding:14px 18px}
+  .tally b{margin:0;font-size:22px}
+  .res{padding:0}
+  .res{display:block}
+  .res .grp:first-child{margin-top:0}
+  .res .g-pr{margin-top:28px}
+  .row.cmp{padding:14px}.row.cmp .t{font-size:18px}
+  .pv{display:block;position:sticky;top:96px}
+  .pv .trust{display:block}
+  .pv .verdict{padding:22px 24px}
+  .pv .verdict .w{font-size:56px}
+  .pv-h{padding:22px 24px 18px;background:var(--card);border-bottom:1px solid var(--line)}
+  .pv-h .code{font:600 14px/1 var(--ui);letter-spacing:.04em;color:var(--teal)}
+  .pv-h h2{margin-top:8px;font:800 34px/1.05 var(--disp)}
+  .pv-h .why{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px;font:500 14.5px/1.3 var(--ui);color:var(--ink-2)}
+  .pv-h .why mark{font-weight:700;color:var(--ink)}
+  .pv .facts{grid-template-columns:110px 1.25fr .9fr 1.3fr}
+  .pv .facts>div{border-right:1px solid var(--line)!important}
+  .pv .facts>div:last-child{border-right:0!important}
+  .pv-acts{display:flex;gap:8px;padding:16px 20px;border-bottom:1px solid var(--line)}
+  .pv-acts .btn.icon{width:56px;padding:0}
+  .pv-acts .btn[aria-pressed=true]{background:var(--ok-tint);border-color:var(--ok);color:var(--ok-ink)}
+  .pv-rel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .pv-rel>div{padding:16px 20px 18px}
+  .pv-rel>div+div{border-left:1px solid var(--line)}
+  .pv-rel h3{font:700 12.5px/1.2 var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:10px}
+  .mini{display:grid;grid-template-columns:24px 1fr;gap:10px;padding:8px 0;font:600 15px/1.3 var(--ui)}
+  .mini .g{width:22px;height:22px;margin-top:1px}
+  .mini small{display:block;font:500 13px/1.3 var(--ui);color:var(--ink-2)}
+  .pv-rel .btn{width:100%;margin-top:6px;min-height:52px;font-size:15.5px}
+  .pv-rel p{font:400 15px/1.45 var(--ui);color:var(--ink-2)}
+  .also{grid-template-columns:1fr 1fr}
+  .also .box.wide,.also .morep{grid-column:1/-1}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs><linearGradient id="sig" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FD691D"/><stop offset="1" stop-color="#C8102E"/></linearGradient></defs>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3.5 10.5 12 3.5l8.5 7V20.5h-5.5v-6h-6v6H3.5z"/></symbol>
+<symbol id="i-scan" viewBox="0 0 24 24"><path d="M3.5 8V4.5h4M16.5 4.5h4V8M20.5 16v3.5h-4M7.5 19.5h-4V16M8 8h3v3H8zM13 13h3v3h-3zM13 8h3M8 16h2"/></symbol>
+<symbol id="i-equip" viewBox="0 0 24 24"><path d="M12 2.8 20 7.4v9.2l-8 4.6-8-4.6V7.4z"/><circle cx="12" cy="12" r="3.4"/></symbol>
+<symbol id="i-type" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.8-4.8"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m4.5 12.5 4.8 4.8L19.5 7"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="m5 9 7 7 7-7"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="m9.3 12 2 2 3.6-3.7"/></symbol>
+<symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6.5 3.5h11v17L12 16.5l-5.5 4z"/></symbol>
+<symbol id="i-qr" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 20h1.5M20 14v1.5"/></symbol>
+<symbol id="i-pdf" viewBox="0 0 24 24"><path d="M6 2.5h8.5L19 7v14.5H6z"/><path d="M14 2.5V7h5M12.5 10.5v6m0 0-2.5-2.5m2.5 2.5 2.5-2.5"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></symbol>
+<symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 16a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.3" r=".9"/></symbol>
+<symbol id="i-offline" viewBox="0 0 24 24"><path d="M2.5 9a14 14 0 0 1 5-3M11 4.6A14 14 0 0 1 21.5 9M5.5 12.5a9.5 9.5 0 0 1 3.4-2M15.2 10.7a9.5 9.5 0 0 1 3.3 1.8M8.6 16a5 5 0 0 1 6.8 0M3 3l18 18"/></symbol>
+<symbol id="i-expert" viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M2.5 20.5a7.5 7.5 0 0 1 12.4-5.7M18 13.5a2.2 2.2 0 1 1 2.6 2.2c-.6.1-.9.5-.9 1v.5M19.7 20.3h.01"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M4.5 19V5a2 2 0 0 1 2-2h13v15.5h-13a2 2 0 0 0-2 2 2 2 0 0 0 2 2h13"/><path d="M8.5 7.5h7"/></symbol>
+<symbol id="i-shelf" viewBox="0 0 24 24"><path d="M3 20.5h18M5 20.5V4h3.5v16.5M8.5 20.5V7H12v13.5M14 20.5l2.5-15 3.4.6-2.5 14.9"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.6 2.2H4.4zM10 21a2.2 2.2 0 0 0 4 0"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18.5" cy="12" r="1.2"/></symbol>
+<symbol id="i-sync" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.3-4.6M4 13a8 8 0 0 0 14.3 4.6M5.5 2.5v4h4M18.5 21.5v-4h-4"/></symbol>
+<symbol id="i-section" viewBox="0 0 24 24"><path d="M4 6h16M4 12h11M4 18h7"/></symbol>
+<symbol id="i-change" viewBox="0 0 24 24"><path d="M12 3.5v17M3.5 12h17" transform="rotate(45 12 12)"/><circle cx="12" cy="12" r="9"/></symbol>
+<symbol id="i-delta" viewBox="0 0 24 24"><path d="M12 4 21 20H3z"/><path d="M12 10v5"/></symbol>
+<symbol id="i-print" viewBox="0 0 24 24"><path d="M7 8.5V3.5h10v5M7 17H4.5V9.5h15V17H17M7 14h10v6.5H7z"/></symbol>
+<symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9.5h6M7 13h10M7 16h4"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></symbol>
+<symbol id="i-flash" viewBox="0 0 24 24"><path d="M13 2.5 5 13.5h6l-1 8 8-11h-6z"/></symbol>
+<symbol id="i-crew" viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="3.2"/><circle cx="16.5" cy="9" r="2.6"/><path d="M2.5 19.5a6 6 0 0 1 12 0M14.5 14.6a5 5 0 0 1 7 4.4"/></symbol>
+<symbol id="g-ok" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" style="fill:var(--ok)"/><path d="m9 16.5 4.6 4.6L23.5 11" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="g-ok-w" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#fff"/><path d="m9 16.5 4.6 4.6L23.5 11" fill="none" style="stroke:var(--ok)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="g-due" viewBox="0 0 32 32"><path d="M16 2.5 30.5 28.5h-29z" style="fill:var(--due)" stroke-linejoin="round"/><path d="M16 11.5v8" stroke="#00242A" stroke-width="3.2" stroke-linecap="round"/><circle cx="16" cy="24" r="1.9" fill="#00242A"/></symbol>
+<symbol id="g-stop" viewBox="0 0 32 32"><path d="M10.2 1.5h11.6l8.7 8.7v11.6l-8.7 8.7H10.2l-8.7-8.7V10.2z" style="fill:var(--stop)"/><path d="M9 16h14" stroke="#fff" stroke-width="3.6" stroke-linecap="round"/></symbol>
+<symbol id="g-alert" viewBox="0 0 32 32"><path d="M16 1.5 30.5 16 16 30.5 1.5 16z" fill="url(#sig)"/><path d="M16 9.5v8" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/><circle cx="16" cy="22" r="1.9" fill="#fff"/></symbol>
+<symbol id="g-lock" viewBox="0 0 32 32"><rect x="1.5" y="1.5" width="29" height="29" rx="8" style="fill:var(--lock-tint)"/><rect x="9.5" y="14.5" width="13" height="10" rx="2" fill="none" style="stroke:var(--lock)" stroke-width="2.4"/><path d="M12 14.5v-2.8a4 4 0 0 1 8 0v2.8" fill="none" style="stroke:var(--lock)" stroke-width="2.4"/></symbol>
+</svg>
+
+<header class="top">
+  <img class="logo" src="../../kit/brand/rise-lockup-header.png" alt="RISE">
+  <span class="sp"></span>
+  <span class="net"><i></i>Online</span>
+  <button class="tbtn" aria-pressed="false" aria-label="Sunlight mode, off"><svg class="ico"><use href="#i-sun"/></svg></button>
+</header>
+<nav class="modes" aria-label="Field modes">
+<span class="brand"><img src="../../kit/brand/rise-logo-reverse.png" alt="RISE"></span>
+<a href="home.html"><svg class="ico"><use href="#i-home"/></svg>Home</a>
+<a href="search-start.html"><svg class="ico"><use href="#i-scan"/></svg>Scan</a>
+<a href="area.html"><svg class="ico"><use href="#i-equip"/></svg>Equipment</a>
+<a href="search.html" aria-current="page"><svg class="ico"><use href="#i-type"/></svg>Type</a>
+<span class="who"><b>FA</b>Field<br>Supervisor</span>
+</nav>
+
+<main class="shell">
+  <div class="head">
+    <div class="q">
+      <div class="qf" role="search"><svg class="ico"><use href="#i-type"/></svg><span class="v">pressure test</span><button aria-label="Clear"><svg class="ico"><use href="#i-x"/></svg></button></div>
+    </div>
+    <div class="q" style="padding-top:0">
+      <div class="chips" role="group" aria-label="Filters">
+        <span class="chip fixed"><span class="bx"><svg class="ico"><use href="#i-check"/></svg></span><span>In force<small>always on</small></span></span>
+        <button class="chip" aria-pressed="true"><span class="bx"><svg class="ico"><use href="#i-check"/></svg></span><span>Opens now<small>no lock</small></span></button>
+        <button class="chip" aria-pressed="true"><span class="bx"><svg class="ico"><use href="#i-check"/></svg></span><span>My area<span class="dk">&nbsp;first</span><small>Coiled Tubing</small></span></button>
+        <button class="chip" aria-pressed="false"><span class="bx"><svg class="ico"><use href="#i-check"/></svg></span><span>Alerts<span class="dk">&nbsp;only</span><small>2</small></span></button>
+      </div>
+    </div>
+    <div class="tally"><b>9 you can open now</b><span class="ph">In force only · 8 locked hidden · 2 not in force hidden</span><span class="dk">of 17 strongest matches · 8 locked hidden by “Opens now” · 2 not in force are hidden</span></div>
+  </div>
+
+  <div class="res">
+    <section class="grp g-al">
+      <div class="grp-h"><h2>Alerts</h2><span class="pin"><svg class="ico" style="width:16px;height:16px"><use href="#i-bell"/></svg>always shown, even when locked</span></div>
+      <div class="list">
+        <div class="row locked cmp"><div class="st-col al"><svg class="g"><use href="#g-alert"/></svg>Alert</div><div><span class="area-first">Your area · Coiled Tubing</span><div class="t">New <mark>pressure</mark> rating for 2&#8209;inch CT string, effective immediately</div><div class="m"><b>Rev 2.0</b> · ALT&#8209;002 · 13 Apr 2026</div><div class="lockline"><svg class="ico"><use href="#i-lock"/></svg>Confidential · request access through QMS</div></div><span></span></div>
+        <div class="row locked cmp"><div class="st-col al"><svg class="g"><use href="#g-alert"/></svg>Alert</div><div><div class="t">Separator <mark>pressure</mark> rating update, verify all units before deployment</div><div class="m">Well Testing · <b>Rev 4.0</b> · 29 Mar 2026</div><div class="lockline"><svg class="ico"><use href="#i-lock"/></svg>Restricted · request access through QMS</div></div><span></span></div>
+      </div>
+    </section>
+
+    <section class="grp g-pr">
+      <div class="grp-h"><h2>Procedures</h2><span>3 of 6</span></div>
+      <div class="list">
+        <a class="row sel" href="document.html"><div class="st-col ok"><svg class="g"><use href="#g-ok"/></svg>Current</div><div><div class="t">Iron <mark>Pressure Test</mark></div><div class="m">Fracturing · <b>Rev 4.0</b> · 14 Apr 2025 · Arabic too</div></div><svg class="ico chev"><use href="#i-chev"/></svg></a>
+        <a class="row" href="document.html"><div class="st-col ok"><svg class="g"><use href="#g-ok"/></svg>Current</div><div><div class="t"><mark>Pressure Test</mark> SOP</div><div class="m">Cementing · <b>Rev 1.0</b> · 05 Mar 2025</div></div><svg class="ico chev"><use href="#i-chev"/></svg></a>
+        <a class="row" href="document.html"><div class="st-col due"><svg class="g"><use href="#g-due"/></svg>Review due</div><div><div class="t"><mark>Pressure</mark> Buildup <mark>Test</mark> SOP</div><div class="m">Well Testing · <b>Rev 3.0</b> · 21 Dec 2023 · still in force</div></div><svg class="ico chev"><use href="#i-chev"/></svg></a>
+      </div>
+    </section>
+
+    <section class="grp g-ll">
+      <div class="grp-h"><h2>Lessons learned</h2><span>3 of 3</span></div>
+      <div class="list">
+        <a class="row" href="document.html"><div class="st-col due"><svg class="g"><use href="#g-due"/></svg>Review due</div><div><span class="area-first">Your area first</span><div class="t"><mark>Pressure</mark> integrity <mark>test</mark> failure, field findings</div><div class="m">Coiled Tubing · <b>Rev 4.0</b> · LL&#8209;005</div></div><svg class="ico chev"><use href="#i-chev"/></svg></a>
+        <a class="row" href="document.html"><div class="st-col ok"><svg class="g"><use href="#g-ok"/></svg>Current</div><div><div class="t">Wellhead <mark>pressure</mark> anomaly, identification and mitigation</div><div class="m">Fracturing · <b>Rev 4.0</b> · LL&#8209;005</div></div><svg class="ico chev"><use href="#i-chev"/></svg></a>
+        <a class="row" href="document.html"><div class="st-col ok"><svg class="g"><use href="#g-ok"/></svg>Current</div><div><div class="t">Float collar failure, pre-job <mark>testing</mark> enhancement</div><div class="m">Cementing · <b>Rev 4.0</b> · LL&#8209;004</div></div><svg class="ico chev"><use href="#i-chev"/></svg></a>
+      </div>
+    </section>
+
+    <section class="grp g-ma">
+      <div class="grp-h"><h2>Manuals</h2><span>2 of 3</span></div>
+      <div class="list">
+        <a class="row" href="document.html"><div class="st-col ok"><svg class="g"><use href="#g-ok"/></svg>Current</div><div><div class="t"><mark>Pressure</mark> Gauge Calibration Manual</div><div class="m">Well Testing · <b>Rev 3.0</b> · 15 Mar 2024</div></div><svg class="ico chev"><use href="#i-chev"/></svg></a>
+        <a class="row" href="document.html"><div class="st-col ok"><svg class="g"><use href="#g-ok"/></svg>Current</div><div><div class="t">High-<mark>Pressure</mark> Iron Manual</div><div class="m">Fracturing · <b>Rev 1.0</b> · 25 Dec 2025</div></div><svg class="ico chev"><use href="#i-chev"/></svg></a>
+      </div>
+    </section>
+
+    <section class="grp g-st">
+      <div class="grp-h"><h2>Standards</h2><span>1 of 3</span></div>
+      <div class="list">
+        <a class="row" href="document.html"><div class="st-col ok"><svg class="g"><use href="#g-ok"/></svg>Current</div><div><div class="t">BOP <mark>Testing</mark> Standard</div><div class="m">Safety Services · <b>Rev 2.0</b> · 09 Mar 2026</div></div><svg class="ico chev"><use href="#i-chev"/></svg></a>
+      </div>
+    </section>
+
+    <section class="also">
+      <div class="box">
+        <h3><svg class="ico"><use href="#i-expert"/></svg>Ask an expert</h3>
+        <p>Routed by area. Your area first.</p>
+        <div class="pills"><a class="mine" href="#">Coiled Tubing</a><a href="#">Fracturing</a><a href="#">Well Testing</a></div>
+      </div>
+      <div class="box">
+        <h3><svg class="ico"><use href="#i-book"/></svg>Field Glossary</h3>
+        <p><b>BOP · Blowout Preventer</b> (Well Control). A large specialised valve installed at the wellhead that can be closed to prevent uncontrolled flow of formation fluids (kick) to surface during drilling or well intervention.</p>
+      </div>
+      <div class="box wide">
+        <h3><svg class="ico"><use href="#i-shelf"/></svg>8 areas with matches</h3>
+        <div class="pills"><a class="mine" href="area.html">Coiled Tubing</a><a href="#">Fracturing</a><a href="#">Cementing</a><a href="#">Well Testing</a><a href="#">Wireline Services</a><a href="#">Drilling Services</a><a href="#">Safety Services</a><a href="#">Inspection</a></div>
+      </div>
+      <a class="morep" href="#"><span>More partial matches<small>One word only, e.g. Wireline Valve Function Test</small></span><svg class="ico"><use href="#i-down"/></svg></a>
+    </section>
+  </div>
+
+  <aside class="pv" aria-label="Preview of selected result">
+    <div class="trust">
+      <div class="pv-h">
+        <div class="code">TQ&#8209;TWS&#8209;FS&#8209;SOP&#8209;003 · Procedure · Fracturing</div>
+        <h2>Iron Pressure Test</h2>
+        <div class="why">Matched in title: <mark>Pressure</mark> <mark>Test</mark> · ranked 1st of 3 procedures you can open</div>
+      </div>
+      <div class="verdict">
+        <svg class="vg"><use href="#g-ok-w"/></svg>
+        <div><div class="w">CURRENT</div><div class="s">In force. Safe to use on the job.</div></div>
+      </div>
+      <dl class="facts">
+        <div><dt>Revision</dt><dd class="big">4.0</dd></div>
+        <div><dt>Issued</dt><dd>14 Apr 2025</dd></div>
+        <div><dt>Class</dt><dd>Internal</dd></div>
+        <div><dt>Language</dt><dd>English + Arabic</dd></div>
+      </dl>
+      <div class="pv-acts">
+        <a class="btn pri" href="document.html" style="flex:1"><svg class="ico"><use href="#i-arrow"/></svg>Open trust card &amp; PDF</a>
+        <button class="btn icon" aria-label="Pin offline"><svg class="ico"><use href="#i-pin"/></svg></button>
+        <button class="btn icon" aria-label="Bookmark"><svg class="ico"><use href="#i-bookmark"/></svg></button>
+        <button class="btn icon" aria-label="Share QR"><svg class="ico"><use href="#i-qr"/></svg></button>
+      </div>
+      <div class="pv-rel">
+        <div>
+          <h3>Also in Fracturing for “pressure”</h3>
+          <div class="mini"><svg class="g"><use href="#g-ok"/></svg><div>High-Pressure Iron Manual<small>Current · Rev 1.0</small></div></div>
+          <div class="mini"><svg class="g"><use href="#g-ok"/></svg><div>Wellhead pressure anomaly<small>Current · Rev 4.0 · Lesson</small></div></div>
+          <div class="mini"><svg class="g"><use href="#g-lock"/></svg><div>High Pressure Operations Standard<small>Current · Restricted · locked</small></div></div>
+        </div>
+        <div>
+          <h3>Owner area expert</h3>
+          <p>Questions about this procedure route to the Fracturing expert.</p>
+          <a class="btn" href="#"><svg class="ico"><use href="#i-expert"/></svg>Ask the Fracturing expert</a>
+        </div>
+      </div>
+    </div>
+  </aside>
+</main>
+</body>
+</html>
