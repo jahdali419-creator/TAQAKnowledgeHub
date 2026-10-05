@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RISE — Future Concepts</title>
+<link rel="stylesheet" href="../kit/fonts.css">
+<style>/* RISE — Future Concepts. Layout: one review column (~1240px); each concept shows four desktop+mobile pairs, then its assessment. */
+:root{
+  --ground:#F2F4F3; --sheet:#FFFFFF; --ink:#0B2A30; --ink-2:#3C5459; --ink-3:#5C6F73;
+  --rule:#D8DEDD; --chip:#E6EBEA; --teal:#005D63; --cyan:#00ADC2; --signal-a:#FD691D; --signal-b:#C8102E;
+  --frame:#0B2A30; --ok:#167A4A; --warn:#8A5800; --bad:#A3222B;
+  --shadow:0 1px 2px rgba(0,43,50,.06),0 18px 36px -22px rgba(0,43,50,.45);
+  --logo-l:block; --logo-d:none;
+  --display:'BwGradual','Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --text:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#0A1A1D; --sheet:#10262A; --ink:#E4EEEE; --ink-2:#B5C6C8; --ink-3:#8FA3A6;
+  --rule:#22393D; --chip:#18322F; --teal:#5FC2C4; --cyan:#22C3D6; --frame:#2A4950;
+  --ok:#5CC491; --warn:#E6B55A; --bad:#F08A90;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 18px 36px -22px rgba(0,0,0,.7); --logo-l:none; --logo-d:block; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#0A1A1D; --sheet:#10262A; --ink:#E4EEEE; --ink-2:#B5C6C8; --ink-3:#8FA3A6;
+  --rule:#22393D; --chip:#18322F; --teal:#5FC2C4; --cyan:#22C3D6; --frame:#2A4950;
+  --ok:#5CC491; --warn:#E6B55A; --bad:#F08A90;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 18px 36px -22px rgba(0,0,0,.7); --logo-l:none; --logo-d:block; color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 16px/1.6 var(--text);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:24px}
+@media (max-width:560px){.wrap{padding-inline:16px}}
+a{color:var(--teal)}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:6px}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:-.02em;margin:0;text-wrap:balance}
+p,ul{margin:0}
+img{display:block;max-width:100%}
+.eyebrow{font:600 12px/1 var(--text);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.logo-l{display:var(--logo-l)}.logo-d{display:var(--logo-d)}
+
+.mast{padding-block:44px 32px}
+.mast-top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:44px}
+.mast-top img{height:34px;width:auto}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px dashed var(--rule);border-radius:999px;font:600 12px/1 var(--text);color:var(--ink-2)}
+.badge i{width:7px;height:7px;border-radius:50%;background:linear-gradient(90deg,var(--signal-a),var(--signal-b))}
+.mast h1{font-size:clamp(40px,7vw,84px);line-height:.98;letter-spacing:-.035em;margin:14px 0 20px}
+.lede{font-size:19px;line-height:1.55;color:var(--ink-2);max-width:62ch}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:32px}
+.cards a{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;padding:18px;border-radius:14px;background:var(--sheet);border:1px solid var(--rule);text-decoration:none;color:var(--ink)}
+.cards a:hover{border-color:var(--ink-3)}
+.cards b{font:700 19px/1.2 var(--display);align-self:center}
+.cards span:last-child{grid-column:2;font-size:14.5px;color:var(--ink-2);line-height:1.45}
+.cards .c-let{grid-row:1/3}
+@media (max-width:820px){.cards{grid-template-columns:1fr}}
+.same{margin-top:22px;font-size:14.5px;color:var(--ink-3);max-width:90ch}
+.c-let{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:12px;background:var(--ink);color:var(--ground);font:800 22px/1 var(--display)}
+.c-let.sm{width:28px;height:28px;border-radius:8px;font-size:14px;margin-right:10px;vertical-align:middle}
+
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ground);border-block:1px solid var(--rule)}
+.tabs .wrap{display:flex;gap:6px;overflow-x:auto;padding-block:10px;scrollbar-width:none}
+.tabs a{flex:none;padding:7px 14px;border-radius:999px;color:var(--ink-2);text-decoration:none;font:500 14px/1.2 var(--text)}
+.tabs a:hover{background:var(--chip);color:var(--ink)}
+
+.concept{padding-block:72px 24px;border-bottom:1px solid var(--rule)}
+.c-head{display:flex;align-items:center;gap:18px;margin-bottom:28px}
+.c-head .c-let{width:64px;height:64px;border-radius:16px;font-size:32px}
+.c-head h2{font-size:clamp(30px,4.4vw,48px);line-height:1.02;margin-top:6px}
+
+.views{display:grid;gap:28px}
+.pair{display:grid;grid-template-columns:minmax(0,3.46fr) minmax(0,1fr);gap:20px;align-items:start}
+.pair figure{margin:0;position:relative;min-width:0}
+.screen{display:block;border-radius:10px;overflow:hidden;border:1px solid var(--rule);box-shadow:var(--shadow);aspect-ratio:1440/900;background:var(--sheet)}
+.phone{display:block;border-radius:26px;overflow:hidden;border:5px solid var(--frame);background:var(--frame);box-shadow:var(--shadow);aspect-ratio:390/844}
+.screen img,.phone img{width:100%;height:100%;object-fit:cover;object-position:top}
+figcaption{margin-top:10px;font:500 13.5px/1.35 var(--text);color:var(--ink-2)}
+.num{position:absolute;top:-10px;left:-10px;z-index:2;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:var(--ground);font:700 12px/1 var(--text);font-variant-numeric:tabular-nums}
+@media (max-width:700px){.pair{grid-template-columns:1fr}.pair .ph{max-width:260px}}
+
+.more{margin-top:26px;border:1px solid var(--rule);border-radius:12px;background:var(--sheet)}
+.more summary{cursor:pointer;padding:14px 18px;font:600 15px/1.3 var(--text)}
+.extra{display:grid;grid-template-columns:repeat(2,minmax(0,170px)) repeat(2,minmax(0,1fr));gap:18px;padding:4px 18px 20px;align-items:start}
+.extra figure{margin:0;min-width:0}
+@media (max-width:900px){.extra{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.assess{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:32px;margin-top:36px}
+@media (max-width:900px){.assess{grid-template-columns:1fr}}
+.assess h3{font-size:13px;font-family:var(--text);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+.a-main{display:grid;gap:8px;align-content:start}
+.a-main p{color:var(--ink-2);max-width:64ch}
+.a-main p+h3{margin-top:18px}
+.thesis{font:400 21px/1.45 var(--display)!important;color:var(--ink)!important;letter-spacing:-.01em}
+.a-side{display:grid;gap:20px;align-content:start}
+.wf ul{list-style:none;padding:0;display:grid;gap:9px}
+.wf li{position:relative;padding-left:22px;line-height:1.5;color:var(--ink-2);font-size:15px}
+.win li::before{content:"";position:absolute;left:2px;top:.55em;width:9px;height:9px;border-radius:50%;background:var(--ok)}
+.fail li::before{content:"";position:absolute;left:2px;top:.55em;width:9px;height:9px;transform:rotate(45deg);background:var(--bad);border-radius:1px}
+.meta{background:var(--sheet);border:1px solid var(--rule);border-radius:14px;padding:18px;display:grid;gap:12px}
+.sc{display:grid;grid-template-columns:150px minmax(0,1fr) auto auto;align-items:center;gap:10px;font-size:14px;color:var(--ink-2)}
+.sc .bar{height:8px;border-radius:99px;background:var(--chip);overflow:hidden}
+.sc .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--signal-a),var(--signal-b))}
+.sc b{font:700 20px/1 var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
+.sc small{color:var(--ink-3)}
+.sc.diff{grid-template-columns:150px 1fr}
+.sc.diff b{font-size:17px;justify-self:start;padding:4px 10px;border-radius:8px;background:var(--chip)}
+.dnote{font-size:13.5px;color:var(--ink-3);line-height:1.45;padding-bottom:6px;border-bottom:1px solid var(--rule)}
+@media (max-width:420px){.sc{grid-template-columns:110px minmax(0,1fr) auto auto}.sc.diff{grid-template-columns:110px 1fr}}
+
+.plain{padding-block:72px 24px}
+.plain h2{font-size:clamp(28px,3.4vw,38px);margin-bottom:20px}
+.tbl{overflow-x:auto;border:1px solid var(--rule);border-radius:14px;background:var(--sheet)}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:15px}
+th,td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--rule);vertical-align:middle}
+tr:last-child th,tr:last-child td{border-bottom:0}
+thead th{font:600 12.5px/1.2 var(--text);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+tbody th{font:700 16px/1.2 var(--display);white-space:nowrap}
+td{color:var(--ink-2)}
+td.n{font:700 20px/1 var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
+.note{margin-top:16px;font-size:14.5px;color:var(--ink-3);max-width:80ch}
+footer{padding-block:48px 64px;color:var(--ink-3);font-size:14px}
+</style>
+</head>
+<body>
+<header class="wrap mast">
+  <div class="mast-top"><img class="logo-l" src="../kit/brand/rise-lockup-header.png" alt="RISE" width="320" height="120"><img class="logo-d" src="../kit/brand/rise-lockup-header-reverse.png" alt="RISE" width="320" height="120"><span class="badge"><i></i>Design exploration · not implemented</span></div>
+  <p class="eyebrow">Round 3 · Future concepts for 2030</p>
+  <h1>RISE — Future Concepts</h1>
+  <p class="lede">Three ideas that each break one assumption about how an internal knowledge platform should work. Same functions, same business rules and the same real RISE content in all three; only the experience changes.</p>
+  <div class="cards">
+    <a href="#g"><span class="c-let">G</span><b>Command</b><span>What do you need? One command surface instead of pages.</span></a>
+    <a href="#h"><span class="c-let">H</span><b>Knowledge Map</b><span>Knowledge as a place you can zoom into, not a list.</span></a>
+    <a href="#i"><span class="c-let">I</span><b>Field Mode</b><span>What’s in front of you? Trust first, built for the field.</span></a>
+  </div>
+  <p class="same">Every concept shows the same searches (“pressure test”, “I need to isolate a pump”), the same area (Coiled Tubing) and the same document (TQ-TWS-CTSS-WI-003 Injector Head Operations Manual, Rev 4.0), seen by an Employee. Equipment tags, the Well Intervention grouping and synonym tables are proposals and are labelled on screen.</p>
+</header>
+<nav class="tabs" aria-label="Concepts"><div class="wrap"><a href="#g">G · Command</a><a href="#h">H · Knowledge Map</a><a href="#i">I · Field Mode</a><a href="#scores">Scores</a></div></nav>
+<main class="wrap">
+
+<section class="concept" id="g">
+  <header class="c-head">
+    <span class="c-let">G</span>
+    <div><p class="eyebrow">Concept G · Knowledge as an operating system</p><h2>RISE Command</h2></div>
+  </header>
+  <div class="views"><div class="pair">
+  <figure class="dk"><span class="num">1</span><a class="screen" href="g/home.html"><img src="shots/g-home-desktop.jpg" alt="Home, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Desktop · Home</figcaption></figure>
+  <figure class="ph"><span class="num">2</span><a class="phone" href="g/home.html"><img src="shots/g-home-phone.jpg" alt="Home, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Mobile · Home</figcaption></figure>
+</div><div class="pair">
+  <figure class="dk"><span class="num">3</span><a class="screen" href="g/search.html"><img src="shots/g-search-desktop.jpg" alt="Search · “pressure test”, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Desktop · Search · “pressure test”</figcaption></figure>
+  <figure class="ph"><span class="num">4</span><a class="phone" href="g/search.html"><img src="shots/g-search-phone.jpg" alt="Search · “pressure test”, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Mobile · Search · “pressure test”</figcaption></figure>
+</div><div class="pair">
+  <figure class="dk"><span class="num">5</span><a class="screen" href="g/area.html"><img src="shots/g-area-desktop.jpg" alt="Area · Coiled Tubing, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Desktop · Area · Coiled Tubing</figcaption></figure>
+  <figure class="ph"><span class="num">6</span><a class="phone" href="g/area.html"><img src="shots/g-area-phone.jpg" alt="Area · Coiled Tubing, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Mobile · Area · Coiled Tubing</figcaption></figure>
+</div><div class="pair">
+  <figure class="dk"><span class="num">7</span><a class="screen" href="g/document.html"><img src="shots/g-document-desktop.jpg" alt="Document · WI-003, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Desktop · Document · WI-003</figcaption></figure>
+  <figure class="ph"><span class="num">8</span><a class="phone" href="g/document.html"><img src="shots/g-document-phone.jpg" alt="Document · WI-003, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Mobile · Document · WI-003</figcaption></figure>
+</div></div>
+  <details class="more"><summary>Two more search states</summary><div class="extra"><figure><a class="phone" href="g/search-start.html"><img src="shots/g-search-start-phone.jpg" alt="Search · start state, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Search · start state</figcaption></figure><figure><a class="phone" href="g/search-intent.html"><img src="shots/g-search-intent-phone.jpg" alt="Search · “I need to isolate a pump”, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Search · “I need to isolate a pump”</figcaption></figure><figure><a class="screen" href="g/search-start.html"><img src="shots/g-search-start-desktop.jpg" alt="Search · start state, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Search · start state, desktop</figcaption></figure><figure><a class="screen" href="g/search-intent.html"><img src="shots/g-search-intent-desktop.jpg" alt="Search · “I need to isolate a pump”, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Search · “I need to isolate a pump”, desktop</figcaption></figure></div></details>
+  <div class="assess">
+    <div class="a-main">
+      <h3>Design thesis</h3><p class="thesis">RISE has no home page: home is a command surface that asks “What do you need?” and carries your context — your area, the active alert, the last document you opened. Search, area and document are the same bar with a scope, and every result shows why it matched, what was hidden and what you may open.</p>
+      <h3>Signature interaction</h3><p>Lanes and peek. Type, and results arrive in typed lanes (Procedures, Work Instructions, Standards, Lessons, Alerts, Experts, Areas, Glossary, proposed Equipment), each tagged with why it matched. Arrow keys move, Space opens a live preview with the trust verdict beside the results, and filters are tokens typed into the bar (status:current, area:coiled-tubing).</p>
+      <h3>Assumption it challenges</h3><p>That a knowledge platform is a website of pages you navigate. Here you state a need; navigation becomes a trail you can step back through.</p>
+    </div>
+    <div class="a-side">
+      <div class="wf"><h3>Why it could win</h3><ul class="win"><li>One surface for every need: keyboard-first on desktop, thumb-first on the phone.</li><li>Radical honesty: it says “No approved document is titled for pump isolation” instead of guessing.</li><li>Scales to 520 documents and 25 areas without adding menus.</li></ul></div>
+      <div class="wf"><h3>What could fail</h3><ul class="fail"><li>Field users who never touch a keyboard may miss the power features.</li><li>The dark, OS-like look can read as a developer tool; it needs a light theme.</li><li>Ranking rules and the synonym table need governance to stay trusted.</li></ul></div>
+      <div class="meta">
+        <div class="sc diff"><span>Difficulty to implement</span><b class="d-medium">Medium</b></div>
+        <p class="dnote">Search, filters and role rules exist; the new work is lanes, match reasons, token parsing and a preview panel.</p>
+        <div class="sc"><span>Innovation</span><span class="bar"><i style="width:80%"></i></span><b>8</b><small>/10</small></div><div class="sc"><span>Usability</span><span class="bar"><i style="width:80%"></i></span><b>8</b><small>/10</small></div><div class="sc"><span>RISE identity</span><span class="bar"><i style="width:70%"></i></span><b>7</b><small>/10</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="concept" id="h">
+  <header class="c-head">
+    <span class="c-let">H</span>
+    <div><p class="eyebrow">Concept H · Knowledge as a place</p><h2>RISE Knowledge Map</h2></div>
+  </header>
+  <div class="views"><div class="pair">
+  <figure class="dk"><span class="num">1</span><a class="screen" href="h/home.html"><img src="shots/h-home-desktop.jpg" alt="Home, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Desktop · Home</figcaption></figure>
+  <figure class="ph"><span class="num">2</span><a class="phone" href="h/home.html"><img src="shots/h-home-phone.jpg" alt="Home, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Mobile · Home</figcaption></figure>
+</div><div class="pair">
+  <figure class="dk"><span class="num">3</span><a class="screen" href="h/search.html"><img src="shots/h-search-desktop.jpg" alt="Search · “pressure test”, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Desktop · Search · “pressure test”</figcaption></figure>
+  <figure class="ph"><span class="num">4</span><a class="phone" href="h/search.html"><img src="shots/h-search-phone.jpg" alt="Search · “pressure test”, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Mobile · Search · “pressure test”</figcaption></figure>
+</div><div class="pair">
+  <figure class="dk"><span class="num">5</span><a class="screen" href="h/area.html"><img src="shots/h-area-desktop.jpg" alt="Area · Coiled Tubing, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Desktop · Area · Coiled Tubing</figcaption></figure>
+  <figure class="ph"><span class="num">6</span><a class="phone" href="h/area.html"><img src="shots/h-area-phone.jpg" alt="Area · Coiled Tubing, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Mobile · Area · Coiled Tubing</figcaption></figure>
+</div><div class="pair">
+  <figure class="dk"><span class="num">7</span><a class="screen" href="h/document.html"><img src="shots/h-document-desktop.jpg" alt="Document · WI-003, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Desktop · Document · WI-003</figcaption></figure>
+  <figure class="ph"><span class="num">8</span><a class="phone" href="h/document.html"><img src="shots/h-document-phone.jpg" alt="Document · WI-003, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Mobile · Document · WI-003</figcaption></figure>
+</div></div>
+  <details class="more"><summary>Two more search states</summary><div class="extra"><figure><a class="phone" href="h/search-start.html"><img src="shots/h-search-start-phone.jpg" alt="Search · start state, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Search · start state</figcaption></figure><figure><a class="phone" href="h/search-intent.html"><img src="shots/h-search-intent-phone.jpg" alt="Search · “I need to isolate a pump”, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Search · “I need to isolate a pump”</figcaption></figure><figure><a class="screen" href="h/search-start.html"><img src="shots/h-search-start-desktop.jpg" alt="Search · start state, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Search · start state, desktop</figcaption></figure><figure><a class="screen" href="h/search-intent.html"><img src="shots/h-search-intent-desktop.jpg" alt="Search · “I need to isolate a pump”, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Search · “I need to isolate a pump”, desktop</figcaption></figure></div></details>
+  <div class="assess">
+    <div class="a-main">
+      <h3>Design thesis</h3><p class="thesis">TAQA’s knowledge is a place, not a list. Home is a calm map of all 25 areas in their four families, each sized by its real document count; zooming changes meaning, from area to equipment to the document and everything around it. On the phone the same idea becomes a vertical descent, and every map has a list beside it.</p>
+      <h3>Signature interaction</h3><p>Semantic zoom with an altitude gauge. Zooming into Coiled Tubing turns it into its equipment, each carrying its documents, with a “Pressure control” thread running out to Wireline and Slickline. A five-level gauge (TAQA › Grouping › Area › Equipment › Document) always shows how deep you are and takes you back up.</p>
+      <h3>Assumption it challenges</h3><p>That knowledge is lists and folders. Search shows where knowledge lives, and a document is a node with its equipment, alert, expert and lineage drawn around it.</p>
+    </div>
+    <div class="a-side">
+      <div class="wf"><h3>Why it could win</h3><ul class="win"><li>Shows at a glance where knowledge is, where it is thin and where alerts sit.</li><li>Makes cross-area knowledge visible (pressure control across three segments) without searching.</li><li>Never traps anyone: a Map/List toggle and the trust verdict are always on screen.</li></ul></div>
+      <div class="wf"><h3>What could fail</h3><ul class="fail"><li>Equipment tags and topic threads don’t exist yet; the map is only as good as that curation.</li><li>A much larger register would need clustering rules to stay calm.</li><li>Some people may treat the map as decoration and go straight to search.</li></ul></div>
+      <div class="meta">
+        <div class="sc diff"><span>Difficulty to implement</span><b class="d-high">High</b></div>
+        <p class="dnote">The landscape is easy; semantic zoom plus curating equipment tags and topic threads is real product and data work.</p>
+        <div class="sc"><span>Innovation</span><span class="bar"><i style="width:90%"></i></span><b>9</b><small>/10</small></div><div class="sc"><span>Usability</span><span class="bar"><i style="width:60%"></i></span><b>6</b><small>/10</small></div><div class="sc"><span>RISE identity</span><span class="bar"><i style="width:60%"></i></span><b>6</b><small>/10</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="concept" id="i">
+  <header class="c-head">
+    <span class="c-let">I</span>
+    <div><p class="eyebrow">Concept I · Knowledge from where the work is</p><h2>RISE Field Mode</h2></div>
+  </header>
+  <div class="views"><div class="pair">
+  <figure class="dk"><span class="num">1</span><a class="screen" href="i/home.html"><img src="shots/i-home-desktop.jpg" alt="Home, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Desktop · Home</figcaption></figure>
+  <figure class="ph"><span class="num">2</span><a class="phone" href="i/home.html"><img src="shots/i-home-phone.jpg" alt="Home, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Mobile · Home</figcaption></figure>
+</div><div class="pair">
+  <figure class="dk"><span class="num">3</span><a class="screen" href="i/search.html"><img src="shots/i-search-desktop.jpg" alt="Search · “pressure test”, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Desktop · Search · “pressure test”</figcaption></figure>
+  <figure class="ph"><span class="num">4</span><a class="phone" href="i/search.html"><img src="shots/i-search-phone.jpg" alt="Search · “pressure test”, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Mobile · Search · “pressure test”</figcaption></figure>
+</div><div class="pair">
+  <figure class="dk"><span class="num">5</span><a class="screen" href="i/area.html"><img src="shots/i-area-desktop.jpg" alt="Area · Coiled Tubing, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Desktop · Area · Coiled Tubing</figcaption></figure>
+  <figure class="ph"><span class="num">6</span><a class="phone" href="i/area.html"><img src="shots/i-area-phone.jpg" alt="Area · Coiled Tubing, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Mobile · Area · Coiled Tubing</figcaption></figure>
+</div><div class="pair">
+  <figure class="dk"><span class="num">7</span><a class="screen" href="i/document.html"><img src="shots/i-document-desktop.jpg" alt="Document · WI-003, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Desktop · Document · WI-003</figcaption></figure>
+  <figure class="ph"><span class="num">8</span><a class="phone" href="i/document.html"><img src="shots/i-document-phone.jpg" alt="Document · WI-003, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Mobile · Document · WI-003</figcaption></figure>
+</div></div>
+  <details class="more"><summary>Two more search states</summary><div class="extra"><figure><a class="phone" href="i/search-start.html"><img src="shots/i-search-start-phone.jpg" alt="Search · start state, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Search · start state</figcaption></figure><figure><a class="phone" href="i/search-intent.html"><img src="shots/i-search-intent-phone.jpg" alt="Search · “I need to isolate a pump”, mobile" loading="lazy" width="780" height="1688"></a><figcaption>Search · “I need to isolate a pump”</figcaption></figure><figure><a class="screen" href="i/search-start.html"><img src="shots/i-search-start-desktop.jpg" alt="Search · start state, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Search · start state, desktop</figcaption></figure><figure><a class="screen" href="i/search-intent.html"><img src="shots/i-search-intent-desktop.jpg" alt="Search · “I need to isolate a pump”, desktop" loading="lazy" width="1440" height="900"></a><figcaption>Search · “I need to isolate a pump”, desktop</figcaption></figure></div></details>
+  <div class="assess">
+    <div class="a-main">
+      <h3>Design thesis</h3><p class="thesis">RISE starts from the person standing at the equipment. Home asks one question, “What’s in front of you?”, and answers it three ways: scan, equipment or type. Whatever you open, a full-width Trust Card comes first, so in two seconds you know whether the document is safe to use.</p>
+      <h3>Signature interaction</h3><p>The two-second Trust Card. Scan, tap or search, and a huge verdict appears first: CURRENT with a tick, “In force. Safe to use on the job.”, revision, effective date, approver, what changed and the linked alert. Scanning an old print shows an unmistakable SUPERSEDED stop card with one button to Rev 4.0.</p>
+      <h3>Assumption it challenges</h3><p>That knowledge is navigated by organisation chart (area, shelf, list). Field Mode navigates by what is physically in front of you and puts trust before content.</p>
+    </div>
+    <div class="a-side">
+      <div class="wf"><h3>Why it could win</h3><ul class="win"><li>Answers the field’s real question — can I use this? — in two seconds, in sunlight, with gloves.</li><li>Equipment and QR entry remove most decisions; nobody needs to know the numbering system.</li><li>Offline is designed in: status on every screen, pinned documents and crew job packs.</li></ul></div>
+      <div class="wf"><h3>What could fail</h3><ul class="fail"><li>Equipment tags and asset QR codes don’t exist yet.</li><li>Big type shows fewer documents per screen; office and QMS users will want denser views.</li><li>Job packs and asset labelling add operational process beyond the software.</li></ul></div>
+      <div class="meta">
+        <div class="sc diff"><span>Difficulty to implement</span><b class="d-medium">Medium</b></div>
+        <p class="dnote">Trust data, Pin offline and document QR codes already exist in the live app; equipment tags, camera scan, job packs and a Sunlight theme are new.</p>
+        <div class="sc"><span>Innovation</span><span class="bar"><i style="width:70%"></i></span><b>7</b><small>/10</small></div><div class="sc"><span>Usability</span><span class="bar"><i style="width:90%"></i></span><b>9</b><small>/10</small></div><div class="sc"><span>RISE identity</span><span class="bar"><i style="width:70%"></i></span><b>7</b><small>/10</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="plain" id="scores">
+  <h2>The three side by side</h2>
+  <div class="tbl"><table><thead><tr><th>Concept</th><th>Idea</th><th>Difficulty</th><th>Innovation</th><th>Usability</th><th>RISE identity</th></tr></thead><tbody><tr><th scope="row"><span class="c-let sm">G</span>RISE Command</th><td>Knowledge as an operating system</td><td>Medium</td><td class="n">8</td><td class="n">8</td><td class="n">7</td></tr><tr><th scope="row"><span class="c-let sm">H</span>RISE Knowledge Map</th><td>Knowledge as a place</td><td>High</td><td class="n">9</td><td class="n">6</td><td class="n">6</td></tr><tr><th scope="row"><span class="c-let sm">I</span>RISE Field Mode</th><td>Knowledge from where the work is</td><td>Medium</td><td class="n">7</td><td class="n">9</td><td class="n">7</td></tr></tbody></table></div>
+  <p class="note">Scores are the design team’s first read, out of 10, to start the conversation. No winner is chosen and the concepts are not combined. Nothing is implemented until a direction is approved.</p>
+</section>
+</main>
+<footer class="wrap">RISE design exploration · round 3 · Built by TAQA Learning Center · branch design/rise-exploration</footer>
+</body>
+</html>
