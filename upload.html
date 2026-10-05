@@ -1109,6 +1109,13 @@ function submitUpload(e) {
     showUploadToast('One document at a time', ONE_FILE_MSG, ICON_WARN);
     return;
   }
+  // Nothing is sent while RISE cannot be reached, and nothing is lost: the
+  // file and every field stay as they are, ready to submit again (PI-28).
+  const offline = (typeof TAQA_STORE !== 'undefined' && TAQA_STORE.notSent) ? TAQA_STORE.notSent() : null;
+  if (offline) {
+    showUploadToast('Not sent', offline, ICON_WARN);
+    return;
+  }
   const rec = buildRecord();
   if (!rec.docNumber) {
     showUploadToast('No document number', 'Go back and choose an area and a type so a number can be assigned.', ICON_WARN);
@@ -1147,9 +1154,11 @@ function submitUpload(e) {
   // the register total and the pending queue move now and the in-force counts
   // move when QMS approves it. Every open page repaints off this one call.
   if (typeof TAQA_STORE !== 'undefined' && !TAQA_STORE.add(rec)) {
-    showUploadToast('Not filed', 'Your role cannot file documents, so nothing was added to the register.', ICON_WARN);
+    const why = TAQA_STORE.writeError && TAQA_STORE.writeError();
+    showUploadToast(why ? 'Not sent' : 'Not filed', why || 'Your role cannot file documents, so nothing was added to the register.', ICON_WARN);
     return;
   }
+  if (window.TAQA_WORK) TAQA_WORK.set('upload', false);
 
   setUploadStep(3);
   const ref = rec.docNumber;
@@ -1860,6 +1869,8 @@ document.addEventListener('DOMContentLoaded', function(){
 function goStep(n){
   if (n > _step && !stepReady(_step)) return;
   _step = n;
+  // Past step 1 a filing is in progress: a new release waits (PI-30).
+  if (window.TAQA_WORK) TAQA_WORK.set('upload', n > 1);
   _maxStep = Math.max(_maxStep, n);
   for (var i = 1; i <= 4; i++) {
     var panel = document.getElementById('panel-' + i);

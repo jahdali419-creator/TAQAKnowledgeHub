@@ -1,4 +1,4 @@
-const CACHE = 'taqa-hub-v106';
+const CACHE = 'taqa-hub-v107';
 
 // Detect base path automatically, works on GitHub Pages and Azure
 const BASE = self.location.pathname.replace('service-worker.js', '');
@@ -65,14 +65,44 @@ const OPTIONAL = FONTS.concat([
   BASE + 'taqa-hero-5.jpeg'
 ]);
 
+/* How each open page was served (PI-26): from the network, or from this
+   cache because the network failed or took too long. A page asks once it
+   has loaded; the answer is the only honest source for "last synced". */
+const served = new Map();   // client id -> { cache: bool, date: string|null }
+function note(clientId, fromCache, res) {
+  if (!clientId) return;
+  const prev = served.get(clientId) || { cache: false, date: null };
+  if (fromCache) served.set(clientId, { cache: true, date: (res && res.headers.get('date')) || prev.date });
+  else if (!prev.cache) served.set(clientId, { cache: false, date: null });
+  if (served.size > 200) served.delete(served.keys().next().value);
+}
+
 self.addEventListener('message', e => {
-  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
+  if (!e.data) return;
+  // The page's own "Update now", never anything automatic mid-task (PI-30).
+  if (e.data.type === 'SKIP_WAITING') self.skipWaiting();
+  if (e.data.type === 'HOW_SERVED' && e.source) {
+    e.source.postMessage({ type: 'SERVED', how: served.get(e.source.id) || { cache: false, date: null } });
+  }
 });
 
+// A network answer slower than this is treated as no answer: a phone on a
+// captive portal or a dead link reports "online" and then waits forever.
+const NET_TIMEOUT = 4000;
+function fetchWithin(request, ms) {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error('timeout')), ms);
+    fetch(request).then(r => { clearTimeout(t); resolve(r); }, err => { clearTimeout(t); reject(err); });
+  });
+}
+
 self.addEventListener('install', e => {
-  // Take over at once. Waiting for every tab to close is how the old worker
-  // stayed in charge for five days.
-  self.skipWaiting();
+  // The first install takes control at once: no page depends on an older
+  // worker. An update waits (PI-30): it used to take over immediately and the
+  // page reloaded in the middle of whatever the person was doing, losing an
+  // Upload at step 3. A waiting update is applied when the person taps
+  // "Update now", or on the next page load where nothing is in progress.
+  if (!self.registration.active) self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE).then(c =>
       c.addAll(CORE).then(() =>
@@ -95,17 +125,22 @@ self.addEventListener('fetch', e => {
   if (!e.request.url.startsWith(self.location.origin)) return;
 
   if (e.request.mode === 'navigate') {
+    const client = e.resultingClientId || e.clientId;
     e.respondWith(
-      fetch(e.request)
+      fetchWithin(e.request, NET_TIMEOUT)
         .then(res => {
           if (res && res.ok) {
             const clone = res.clone();
             caches.open(CACHE).then(c => c.put(e.request, clone));
           }
+          note(client, false);
           return res;
         })
         .catch(() =>
-          caches.match(e.request, { ignoreSearch: true }).then(cached => cached || caches.match(BASE + 'offline.html'))
+          caches.match(e.request, { ignoreSearch: true }).then(cached => {
+            note(client, true, cached);
+            return cached || caches.match(BASE + 'offline.html');
+          })
         )
     );
     return;
@@ -124,13 +159,18 @@ self.addEventListener('fetch', e => {
   const fresh = /\.(js|css|json)$/.test(url.pathname) || e.request.destination === 'script';
   if (fresh) {
     e.respondWith(
-      fetch(e.request).then(res => {
+      fetchWithin(e.request, NET_TIMEOUT).then(res => {
         if (res && res.ok) {
           const clone = res.clone();
           caches.open(CACHE).then(c => c.put(e.request, clone));
         }
         return res;
-      }).catch(() => caches.match(e.request, { ignoreSearch: true }))
+      }).catch(() => caches.match(e.request, { ignoreSearch: true }).then(cached => {
+        // The register or a script from the cache makes the whole page a
+        // cached copy, whatever the HTML was.
+        if (cached) note(e.clientId, true, cached);
+        return cached;
+      }))
     );
     return;
   }

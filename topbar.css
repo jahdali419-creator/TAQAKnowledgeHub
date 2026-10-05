@@ -12,7 +12,12 @@
      by that inset and keeps its content below the clock; on every other page
      the inset is 0 and nothing changes. */
   --nav-safe:env(safe-area-inset-top, 0px);
-  --nav-h:calc(64px + var(--nav-safe));
+  /* The connectivity bar (shared.js, PI-48) sits directly under the top bar
+     while it shows. --nav-h includes it, so everything placed under the top
+     bar (sticky tabs, menus, drawers, page padding) moves down with it and
+     nothing is covered; the top bar itself keeps its own height. */
+  --net-bar-h:0px;
+  --nav-h:calc(64px + var(--nav-safe) + var(--net-bar-h));
   --tb-paper:rgba(255,255,255,0.97);
   --tb-solid:#FFFFFF;
   --tb-text:#1E1C1A;
@@ -45,7 +50,7 @@ html[data-taqa-theme="dark"]{
 
 #navbar{
   position:fixed; top:0; inset-inline:0; z-index:1000;
-  height:var(--nav-h); margin:0; padding:var(--nav-safe) max(32px, env(safe-area-inset-right)) 0 max(32px, env(safe-area-inset-left));
+  height:calc(64px + var(--nav-safe)); margin:0; padding:var(--nav-safe) max(32px, env(safe-area-inset-right)) 0 max(32px, env(safe-area-inset-left));
   /* A 3-column grid, not flex, is what actually centers .nav-links on the
      bar's full width: the brand and the right cluster get equal 1fr tracks,
      so the middle (auto-width) track sits truly in the middle regardless of
