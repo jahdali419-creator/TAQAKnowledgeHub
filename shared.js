@@ -482,6 +482,16 @@ window.TAQA_TOP = function(){
     if (!reg) return;
     function waitingFound(){
       if (!navigator.serviceWorker.controller) return;   // first install: nothing to replace
+      // Once that worker is no longer waiting (applied here, in another tab,
+      // or by the browser when the last old page closed), the notice is
+      // stale: take it away.
+      var w = reg.waiting;
+      if (w && !w.__taqaWatched) {
+        w.__taqaWatched = true;
+        w.addEventListener('statechange', function(){
+          if (w.state !== 'installed' && reg.waiting !== w && !reloadAsked) bar.style.display = 'none';
+        });
+      }
       // Just loaded, nothing in progress: apply it quietly, without a reload.
       if (document.readyState !== 'loading' && performance.now() < 4000 && !TAQA_WORK.busy()) {
         // Applied only if this is the only RISE window (service-worker.js);
