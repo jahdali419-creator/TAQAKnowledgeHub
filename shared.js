@@ -305,6 +305,8 @@ window.TAQA_NET = (function(){
     var was = state; state = next;
     if (next === 'online') { try { localStorage.setItem('taqa-last-sync', Date.now().toString()); } catch(e){} }
     paint();
+    // For scripts that ran before this file (the viewer's sync note).
+    try { window.dispatchEvent(new CustomEvent('taqa:net', { detail: { state: state } })); } catch(e){}
     if (was !== 'online' && next === 'online' && window.showToast) window.showToast('Back online');
   }
   // Is the server really there? A tiny request that the service worker never
@@ -365,6 +367,17 @@ window.TAQA_NET = (function(){
     }
   };
 })();
+
+// How much of the top of the screen the bar (and the connectivity bar under
+// it) covers, measured, for code that scrolls something into view below it
+// (PI-51). It is taller in the installed app and while the connectivity bar
+// shows, so a fixed number lands content under it.
+window.TAQA_TOP = function(){
+  var b = 0, n = document.getElementById('navbar'), t = document.getElementById('taqa-net-bar');
+  if (n) b = Math.max(b, n.getBoundingClientRect().bottom);
+  if (t && t.offsetParent !== null) b = Math.max(b, t.getBoundingClientRect().bottom);
+  return b || 64;
+};
 
 // ── New version (PI-30) ──
 /* A new release never reloads a page on its own. The service worker waits
@@ -762,7 +775,7 @@ window.addEventListener('pageshow', function(e){
     '#pwa-sheet{position:fixed;bottom:0;left:0;right:0;z-index:99998;'+
     'background:rgba(255,255,255,0.99);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);'+
     'border-top:1px solid rgba(0,0,0,0.07);border-radius:24px 24px 0 0;'+
-    'padding:16px 24px 36px;box-shadow:0 -8px 40px rgba(0,0,0,0.18);'+
+    'padding:16px 24px calc(28px + var(--safe-b,0px));box-shadow:0 -8px 40px rgba(0,0,0,0.18);'+
     'transform:translateY(100%);transition:transform 0.4s cubic-bezier(.32,1.12,.64,1);pointer-events:none;}'+
     '#pwa-sheet.pwa-open{transform:translateY(0);pointer-events:auto;}'+
     'html[data-taqa-theme="dark"] #pwa-sheet{background:rgba(0,35,38,0.99);border-color:rgba(255,255,255,0.07);}'+
@@ -814,7 +827,7 @@ window.addEventListener('pageshow', function(e){
     '<div class="pwa-row">'+APP_ICON+
       '<div class="pwa-text-block">'+
         '<div class="pwa-title">Install RISE</div>'+
-        '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
+        '<div class="pwa-sub">Opens like an app. Pages you have opened stay readable offline; nothing can be sent offline.</div>'+
       '</div>'+
     '</div>'+
     '<div class="pwa-steps">'+
@@ -830,7 +843,7 @@ window.addEventListener('pageshow', function(e){
     '<div class="pwa-row">'+APP_ICON+
       '<div class="pwa-text-block">'+
         '<div class="pwa-title">Install RISE</div>'+
-        '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
+        '<div class="pwa-sub">Opens like an app. Pages you have opened stay readable offline; nothing can be sent offline.</div>'+
       '</div>'+
     '</div>'+
     '<div class="pwa-steps">'+
@@ -847,7 +860,7 @@ window.addEventListener('pageshow', function(e){
     '<div class="pwa-row">'+APP_ICON+
       '<div class="pwa-text-block">'+
         '<div class="pwa-title">Install RISE</div>'+
-        '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
+        '<div class="pwa-sub">Opens like an app. Pages you have opened stay readable offline; nothing can be sent offline.</div>'+
       '</div>'+
     '</div>'+
     '<button class="pwa-install-btn" id="pwa-install-btn">Install App</button>'+
@@ -870,6 +883,9 @@ window.addEventListener('pageshow', function(e){
     var tourOn=false;
     try{ tourOn=!!document.getElementById('tc-skip')&&!localStorage.getItem('taqa-tour-done'); }catch(e){}
     if(tourOn){ setTimeout(showSheet,1500); return; }
+    // Not over anything the person has started or opened since the page
+    // loaded: typed text, a chosen file, an open dialog, drawer or menu.
+    if((window.TAQA_WORK&&TAQA_WORK.busy())||document.querySelector('.nav-mobile-menu.open,.bell-menu.open,.bm-panel.open,.dw.open,.doc-modal-panel.open'))return;
     sheet.classList.add('pwa-open');
     overlay.classList.add('pwa-open');
   }
@@ -886,6 +902,10 @@ window.addEventListener('pageshow', function(e){
   var onForm = /support-ticket|upload/.test(location.pathname) ||
                !!document.querySelector('form .form-card, form .upload-form-card');
   if (onForm) return;
+  // Offered on Home only. On a task page (the Workbench, an approval desk, the
+  // Master List, a document) it slid over the controls being used (PR 2D).
+  var home = /(^|\/)(index\.html)?$/.test(location.pathname);
+  if (!home) return;
 
   if(isIPhone){
     // Show to all iPhone users, Safari gets install steps, others get "open in Safari" guidance

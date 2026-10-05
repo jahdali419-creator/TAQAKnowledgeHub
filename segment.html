@@ -128,6 +128,7 @@ html.seg-unknown #breadcrumb-tab,html.seg-unknown .bc-sep:has(+ #breadcrumb-tab)
 html.seg-unknown .content-outer{padding-top:32px;}
 
 /* ── Tab Navigation ── */
+.docs-grid[tabindex="-1"]:focus{outline:none;}
 .tabs-outer{padding:10px 48px;max-width:none;margin:0;position:sticky;top:var(--nav-h,64px);z-index:500;background:var(--dark);border-bottom:1px solid var(--glass-border);box-shadow:0 2px 8px rgba(0,0,0,0.04);}
 .tabs-outer .tabs{max-width:1104px;margin:0 auto;}
 html[data-taqa-theme="dark"] .tabs-outer{background:#001314;}
@@ -2041,9 +2042,25 @@ function goPage(type,page){
   url.searchParams.set('tab',type);
   url.searchParams.set('page',page+1);
   history.replaceState({},'',url.toString());
-  const listEl=document.getElementById('list-'+type);
-  if(listEl){const y=listEl.getBoundingClientRect().top+window.scrollY-90;window.scrollTo({top:Math.max(0,y),behavior:'smooth'});}
   _renderPage(type);
+  // The new page's first row goes just below the bar and the sticky tabs,
+  // measured after it is drawn (PI-51). It used to start a smooth scroll to
+  // a fixed 90px before drawing; the redraw cut the scroll short and on an
+  // iPhone the list landed at the bottom or under the tabs. Focus follows,
+  // so a keyboard or screen reader continues from the new page.
+  const listEl=document.getElementById('list-'+type);
+  if(!listEl)return;
+  requestAnimationFrame(()=>{
+    const tabs=document.querySelector('.tabs-outer');
+    const covered=tabs&&getComputedStyle(tabs).position==='sticky'
+      ?(parseFloat(getComputedStyle(tabs).top)||0)+tabs.offsetHeight
+      :(window.TAQA_TOP?TAQA_TOP():64);
+    const y=listEl.getBoundingClientRect().top+window.scrollY-covered-8;
+    const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({top:Math.max(0,y),behavior:reduce?'auto':'smooth'});
+    if(!listEl.hasAttribute('tabindex'))listEl.setAttribute('tabindex','-1');
+    listEl.focus({preventScroll:true});
+  });
 }
 
 // ── Tab Switching ──

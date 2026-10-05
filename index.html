@@ -2407,8 +2407,8 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
     if (f) {
       var lay = f.closest('.st-layer');
       setOpen(null); remember(null);
-      var top = lay.getBoundingClientRect().top;
-      if (top < 72) window.scrollBy({ top: top - 80, behavior: reduce ? 'auto' : 'smooth' });
+      var top = lay.getBoundingClientRect().top, cov = window.TAQA_TOP ? TAQA_TOP() : 64;
+      if (top < cov + 8) window.scrollBy({ top: top - cov - 16, behavior: reduce ? 'auto' : 'smooth' });
       var h = lay.querySelector('.st-head'); if (h) h.focus({ preventScroll:true });
     }
   });
@@ -2448,8 +2448,8 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
     pane.addEventListener('click', function(e){
       if (!e.target.closest('.st-fold')) return;
       showCharter(false);
-      var top = btn.getBoundingClientRect().top;
-      if (top < 72) window.scrollBy({ top: top - 80, behavior: reduce ? 'auto' : 'smooth' });
+      var top = btn.getBoundingClientRect().top, cov = window.TAQA_TOP ? TAQA_TOP() : 64;
+      if (top < cov + 8) window.scrollBy({ top: top - cov - 16, behavior: reduce ? 'auto' : 'smooth' });
       btn.focus({ preventScroll:true });
     });
   }

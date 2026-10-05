@@ -1654,7 +1654,10 @@ function syncText(short) {
   if (!el) return;
   function paint(){ el.textContent = syncText(false); }
   paint();
-  if (window.TAQA_NET) TAQA_NET.onChange(paint);
+  // shared.js loads after this script: repaint when it has decided, and on
+  // every change after that.
+  window.addEventListener('taqa:net', paint);
+  document.addEventListener('DOMContentLoaded', paint);
 })();
 
 // ── Pin for offline ──
