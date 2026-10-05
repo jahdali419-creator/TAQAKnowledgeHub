@@ -4,6 +4,12 @@
 business rule or workflow of the production RISE app was changed. These files live on the
 `design/rise-exploration` branch and are not deployed.
 
+## Catalogue for leadership review
+`RISE-Design-Directions-Catalog.pdf` (20 pages, A4 landscape) presents all six directions (A–F) for people
+without access to these files: what RISE is, the six home screens at a glance, each direction's idea,
+strengths, risks and key screens on phone and desktop, a comparison table and the decision being asked for.
+It is built from `catalog/` (`python3 build.py` then `node render.js`).
+
 ## Round 2 (5 Oct 2026): mobile-first directions
 Feedback on round 1: too dense for a phone, and the brand did not stand out. `round-2/` holds three new
 options designed at 390 × 844 first and scaled to desktop from the same responsive pages:
