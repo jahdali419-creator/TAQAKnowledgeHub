@@ -333,6 +333,8 @@ test.describe('E. PI-24: a returned attempt is history; the next attempt keeps i
     await expect(row).toContainText('Returned');
     await row.locator('.subs-again').click();
     await expect(page).toHaveURL(/refile=/);
+    // The link navigates: the file is chosen once the new page is ready.
+    await page.waitForLoadState('load');
     await page.setInputFiles('#file-input', PDF('refile'));
     await page.click('#go-2');
     await expect(page.locator('#refile-note')).toContainText('attempt 2');
