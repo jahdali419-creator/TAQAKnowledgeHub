@@ -66,10 +66,10 @@ exports.test = base.test.extend({
         // Fall through to the readyState poll below, see file header.
       }
       // A refused page (TAQA_ROLE.refuse, the Master List gate) ends with
-      // window.stop(); WebKit then never reaches "complete", only
-      // "interactive", so the refusal's own marker counts as loaded.
+      // window.stop(); WebKit then stays at readyState "loading" for good,
+      // so the refusal's own marker, set once the page is drawn, counts.
       await page.waitForFunction(() => document.readyState === 'complete' ||
-        (document.readyState !== 'loading' && document.documentElement.hasAttribute('data-taqa-refused')),
+        document.documentElement.hasAttribute('data-taqa-refused'),
         // A timer, not animation frames: WebKit draws no frames in a page
         // that window.stop() ended, so frame polling never re-checks.
         { timeout: 15_000, polling: 100 });

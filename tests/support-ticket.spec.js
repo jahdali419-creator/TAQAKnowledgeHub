@@ -77,6 +77,16 @@ test.describe('support-ticket.html, honest "not sent" result', () => {
     await expect(box).toHaveValue(/Urgency: Medium/);
   });
 
+  test('the question is still there after a reload: "not sent" never clears the saved draft', async ({ page, gotoApp, setRole }) => {
+    await openTicket(gotoApp, setRole);
+    await fillRequired(page);
+    await page.click('.btn-submit');
+    await expect(page.locator('#ticket-result')).toBeVisible();
+    await page.reload();
+    await expect(page.locator('#issue-title')).toHaveValue('Pump pressure issue');
+    await expect(page.locator('#issue-what')).toHaveValue(/Pressure held then dropped/);
+  });
+
   test('changing the form takes the notice away, so it never describes an older question', async ({ page, gotoApp, setRole }) => {
     await openTicket(gotoApp, setRole);
     await fillRequired(page);
@@ -92,6 +102,10 @@ test.describe('support-ticket.html, honest "not sent" result', () => {
     await fillRequired(page);
     await page.click('.btn-submit');
     const after = await page.evaluate(() => ({ ...localStorage }));
+    // The only thing kept is the person's own unsent draft, on this device,
+    // so a reload does not lose it. No ticket, no register entry.
+    expect(Object.keys(after).filter((k) => !(k in before))).toEqual(['taqa-draft-ticket']);
+    delete after['taqa-draft-ticket'];
     expect(after).toEqual(before);
   });
 });

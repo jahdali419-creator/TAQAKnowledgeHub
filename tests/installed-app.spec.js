@@ -241,7 +241,9 @@ for (const orient of [
         await page.evaluate(() => localStorage.setItem('taqa-install-dismissed', '1'));
         await gotoApp(o.path);
         await o.open(page);
-        await page.waitForTimeout(450); // slide-in transitions
+        // Measure once the slide-in has finished: WebKit runs it slower here.
+        await page.waitForTimeout(100);
+        await page.waitForFunction(() => document.getAnimations().every((a) => !(a instanceof CSSTransition) || a.playState !== 'running'), null, { timeout: 5000, polling: 100 });
         expect(await unreachable(page, o.root)).toEqual([]);
       });
     }

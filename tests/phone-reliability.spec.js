@@ -161,10 +161,15 @@ test.describe('offline: nothing is pretended, and nothing typed is lost', () => 
     await expect(page.locator('#panel-4')).toBeVisible();
     expect(await page.inputValue('#doc-title-input')).toBe('Offline filed procedure');
 
+    // The saved draft survives the refusal, so even a reload keeps the work.
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('taqa-draft-upload') || '{}')['doc-title-input'])).toBe('Offline filed procedure');
+
     await context.setOffline(false);
     await expect(page.locator('#taqa-net-bar')).toBeHidden();
     await page.click('#submit-btn');
     await expect.poll(count).toBe(1);
+    // Filed for real: the draft is no longer needed.
+    expect(await page.evaluate(() => localStorage.getItem('taqa-draft-upload'))).toBeNull();
   });
 
   test('Workbench reject offline: refused in the panel, the typed reason stays, the record still waits', async ({ page, gotoApp, context }) => {

@@ -1291,12 +1291,13 @@ document.addEventListener('keydown',function(e){
     loadDraft();
     document.addEventListener('input', saveDraft);
     document.addEventListener('change', saveDraft);
-    // Clear draft on successful submit
-    var forms=document.querySelectorAll('form');
-    forms.forEach(function(form){
-      form.addEventListener('submit', function(){
-        try{ localStorage.removeItem(KEY); }catch(e){}
-      });
+    // The draft is cleared only when the page says the work really went
+    // through ('taqa:draft-done'). It used to go on the form's submit
+    // event, which also fires when nothing is sent: an Upload refused
+    // offline, or an Ask Expert question that has nowhere to go, then came
+    // back empty after a reload (PR 2D, no lost work).
+    window.addEventListener('taqa:draft-done', function(){
+      try{ localStorage.removeItem(KEY); }catch(e){}
     });
   });
 })();

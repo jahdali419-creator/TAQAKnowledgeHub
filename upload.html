@@ -1159,6 +1159,8 @@ function submitUpload(e) {
     return;
   }
   if (window.TAQA_WORK) TAQA_WORK.set('upload', false);
+  // Filed: only now is the saved draft no longer needed.
+  try { window.dispatchEvent(new Event('taqa:draft-done')); } catch (e) {}
 
   setUploadStep(3);
   const ref = rec.docNumber;
