@@ -852,6 +852,12 @@ TAQA_ROLE.effective = function(roleKey){
   cap.docTypes     = d.docTypes;
   cap.department   = grantor.department || null;   // a delegate signs in the grantor's department
   cap.delegate     = false;                 // a delegate cannot re-delegate
+  // Nothing the grant does not name comes with it. Filing is not delegated:
+  // a document filed while acting would name the delegate as its filer for
+  // something nobody granted; the person stops acting and files as
+  // themselves. The register export is not delegated either.
+  cap.submit       = false;
+  cap.export       = false;
   cap.delegated    = d;
   return cap;
 };

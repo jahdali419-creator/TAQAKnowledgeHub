@@ -169,6 +169,10 @@ test.describe('B. PI-32: approval and "Manage documents" are separate permission
         redelegate: TAQA_ROLE.effective().delegate,
       }), c);
       expect(cap).toEqual({ approve: c.a, manage: c.m, desk: true, countersign: false, redelegate: false });
+      // Nothing the grant does not name: no filing (it would name the delegate as filer) and no export.
+      expect(await page.evaluate(() => [TAQA_ROLE.effective().submit, TAQA_ROLE.effective().export,
+        !!TAQA_STORE.add({ docNumber: 'TQ-TWS-CTSS-SOP-959', title: 'Filed while acting', segment: 'coiled-tubing', docType: 'sop', revision: '1.0', summary: 'x' })]))
+        .toEqual([false, false, false]);
       // And the register agrees when each is tried.
       const out = await page.evaluate(({ n, w, why }) => ({
         edit: TAQA_STORE.patch(w, { summary: 'Edited under a delegation.' }).ok,
@@ -403,6 +407,9 @@ test.describe('G. PI-31 still holds, direct and delegated', () => {
       const d = TAQA_STORE.findDoc(n); return [d.submittedById, d.countersignedById, d.approvedById, d.approvedUnderGrant || null]; }));
     expect(r).toEqual([['sim:employee', 'sim:qms', 'sim:owner@coiled-tubing', null],
                        ['sim:employee', 'sim:qms', 'sim:owner@coiled-tubing', g.delegation.id]]);
+    // The delegated approval names the actor, the grant and whose authority it carried, separately.
+    expect(await rec(page, 'TQ-TWS-CTSS-SOP-950')).toMatchObject({ approvedBy: 'Deputy Director (delegate for Segment Director)',
+      approvedOnBehalfOfId: g.delegation.grantorId, approvedAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/), status: 'current' });
   });
 
   test('Employee → QMS → Maintenance Manager, and its delegate: maintenance documents only, three actors separate', async ({ page, gotoApp, setRole, clearAppState }) => {

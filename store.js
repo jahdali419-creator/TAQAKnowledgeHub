@@ -636,7 +636,7 @@
       f.approvalStage = null;                              // a withdrawn draft leaves both queues
       f.withdrawnFromStatus = cur.status;
       f.withdrawnBy = by; f.withdrawnById = byId; f.withdrawnAt = now; f.withdrawnDate = localDay(now); f.withdrawnReason = why;
-      if (grant) f.withdrawnUnderGrant = grant;
+      if (grant) { f.withdrawnUnderGrant = grant; f.withdrawnOnBehalfOfId = actingFor(); }
     } else {
       f.supersededAt = now; f.supersededDate = localDay(now);
     }
@@ -875,7 +875,7 @@
     if (!/^\d{4}-\d{2}-\d{2}$/.test(eff) || addMonths(eff, 0) !== eff)
       return { ok: false, error: 'The effective date is not a date.' };
     if (eff < today) return { ok: false, error: 'The effective date cannot be earlier than the approval date (' + today + ').' };
-    var dates = { approvedBy: actingName(), approvedById: actingId(), approvedUnderGrant: actingGrant(), approvedDate: today, approvedAt: now,
+    var dates = { approvedBy: actingName(), approvedById: actingId(), approvedUnderGrant: actingGrant(), approvedOnBehalfOfId: actingFor(), approvedDate: today, approvedAt: now,
                   issueDate: eff, nextReviewDate: addMonths(eff, reviewCycle(d)), reviewOverdue: false };
     if (eff > today) {
       // Approved now, in force from its effective date: the revision it
@@ -949,6 +949,7 @@
       rejectedBy: actingName(),
       rejectedById: actingId(),
       rejectedUnderGrant: actingGrant(),
+      rejectedOnBehalfOfId: actingFor(),
       rejectedReason: String(reason).trim(),
       rejectedDate: new Date().toISOString().slice(0, 10),
       rejectedAt: new Date().toISOString()
@@ -971,6 +972,13 @@
   function actingGrant() {
     var d = (typeof TAQA_DELEGATION !== 'undefined') ? TAQA_DELEGATION.current() : null;
     return d ? d.id : null;
+  }
+  // Whose authority the grant carries: the grantor's identity, kept on the
+  // record beside the actor's, so the record names both without looking the
+  // grant up. A grant recorded before identities were kept has none.
+  function actingFor() {
+    var d = (typeof TAQA_DELEGATION !== 'undefined') ? TAQA_DELEGATION.current() : null;
+    return d ? (d.grantorId || null) : null;
   }
   function actingName() {
     if (typeof TAQA_DELEGATION === 'undefined') return 'Unknown';
@@ -1000,6 +1008,7 @@
     'withdrawnBy', 'withdrawnAt', 'withdrawnDate', 'withdrawnReason', 'withdrawnFromStatus',
     'submittedById', 'countersignedById', 'approvedById', 'approvedUnderGrant', 'rejectedById', 'rejectedUnderGrant',
     'withdrawnById', 'withdrawnUnderGrant', 'cancelledById',
+    'approvedOnBehalfOfId', 'rejectedOnBehalfOfId', 'withdrawnOnBehalfOfId',
     'supersededAt', 'supersededDate', 'tookEffectAt', 'issueDate'];
 
   /* Never taken from a caller of add(): the store writes each of these. */
