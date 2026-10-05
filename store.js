@@ -571,6 +571,7 @@
     // Who filed it goes on the record at the moment of filing, the same way
     // the two signatures do, and from the signed-in identity, not the caller.
     row.submittedBy = actingName();
+    row.submittedById = actingId();
     row.locallyAdded = true;
     load().push(row);
     save();
@@ -624,7 +625,7 @@
     }
     if (!cur || !mayManage(cur)) return null;
     if (!Object.prototype.hasOwnProperty.call(MOVES, status) || MOVES[status].indexOf(cur.status) === -1) return null;
-    var now = new Date().toISOString(), by = actingName();
+    var now = new Date().toISOString(), by = actingName(), byId = actingId(), grant = actingGrant();
     var f = { status: status };
     if (status === 'obsolete') {
       var why = String(opts.reason == null ? '' : opts.reason).trim();
@@ -634,7 +635,8 @@
       }
       f.approvalStage = null;                              // a withdrawn draft leaves both queues
       f.withdrawnFromStatus = cur.status;
-      f.withdrawnBy = by; f.withdrawnAt = now; f.withdrawnDate = localDay(now); f.withdrawnReason = why;
+      f.withdrawnBy = by; f.withdrawnById = byId; f.withdrawnAt = now; f.withdrawnDate = localDay(now); f.withdrawnReason = why;
+      if (grant) f.withdrawnUnderGrant = grant;
     } else {
       f.supersededAt = now; f.supersededDate = localDay(now);
     }
@@ -644,7 +646,7 @@
     // translations with it (PI-34).
     if (wasLive) cascadeToTranslations(cur.docNumber, status,
       'Source ' + cur.docNumber + ' superseded: translation to be re-issued',
-      status === 'obsolete' ? { withdrawnBy: by, withdrawnAt: now, withdrawnDate: localDay(now),
+      status === 'obsolete' ? { withdrawnBy: by, withdrawnById: byId, withdrawnAt: now, withdrawnDate: localDay(now),
         withdrawnReason: 'Withdrawn with its source ' + cur.docNumber + ': ' + f.withdrawnReason } : null);
     // Withdrawing the revision in force withdraws the document family. A
     // revision still in progress, of this document or of its translations,
@@ -798,13 +800,13 @@
 
   var CANCEL_REASON = 'Cancelled because the document family was withdrawn.';
   function cancelOpenRevisions(docNumber) {
-    var now = new Date().toISOString(), by = actingName();
+    var now = new Date().toISOString(), by = actingName(), byId = actingId();
     all().filter(function (d) {
       return ((d.status === 'draft' && !d.rejected) || d.status === 'approved') &&
         (d.docNumber === docNumber || d.translationOf === docNumber);
     }).forEach(function (d) {
       write(d, { status: 'obsolete', approvalStage: null, cancelled: true, cancelledFromStatus: d.status,
-        cancelledReason: CANCEL_REASON, cancelledBy: by, cancelledAt: now,
+        cancelledReason: CANCEL_REASON, cancelledBy: by, cancelledById: byId, cancelledAt: now,
         cancelledDate: now.slice(0, 10) });
     });
   }
@@ -873,7 +875,7 @@
     if (!/^\d{4}-\d{2}-\d{2}$/.test(eff) || addMonths(eff, 0) !== eff)
       return { ok: false, error: 'The effective date is not a date.' };
     if (eff < today) return { ok: false, error: 'The effective date cannot be earlier than the approval date (' + today + ').' };
-    var dates = { approvedBy: actingName(), approvedDate: today, approvedAt: now,
+    var dates = { approvedBy: actingName(), approvedById: actingId(), approvedUnderGrant: actingGrant(), approvedDate: today, approvedAt: now,
                   issueDate: eff, nextReviewDate: addMonths(eff, reviewCycle(d)), reviewOverdue: false };
     if (eff > today) {
       // Approved now, in force from its effective date: the revision it
@@ -910,6 +912,7 @@
     write(d, {
       approvalStage: 'director',
       countersignedBy: actingName(),
+      countersignedById: actingId(),
       countersignedDate: new Date().toISOString().slice(0, 10),
       countersignedAt: new Date().toISOString()
     });
@@ -944,6 +947,8 @@
       rejected: true,
       rejectedAtStage: stage,
       rejectedBy: actingName(),
+      rejectedById: actingId(),
+      rejectedUnderGrant: actingGrant(),
       rejectedReason: String(reason).trim(),
       rejectedDate: new Date().toISOString().slice(0, 10),
       rejectedAt: new Date().toISOString()
@@ -955,6 +960,18 @@
   /* The name that goes on the signature. A delegate signs in their own name,
      noting who they acted for, because an audit trail that records the absent
      Director as signer is worse than no trail at all. */
+  /* The actor's identity, which separation of duties compares (NEW-04):
+     the prototype's simulated person (role and area); the Entra object id in
+     production. The name beside it is a label. */
+  function actingId() {
+    return (typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.identity) ? TAQA_ROLE.identity() : null;
+  }
+  // The grant acted under, if any: evidence of the authority used, never an
+  // identity.
+  function actingGrant() {
+    var d = (typeof TAQA_DELEGATION !== 'undefined') ? TAQA_DELEGATION.current() : null;
+    return d ? d.id : null;
+  }
   function actingName() {
     if (typeof TAQA_DELEGATION === 'undefined') return 'Unknown';
     var d = TAQA_DELEGATION.current();
@@ -981,6 +998,8 @@
     'rejectedBy', 'rejectedReason', 'rejectedDate', 'rejectedAt', 'submittedBy', 'submittedAt',
     'cancelled', 'cancelledReason', 'cancelledBy', 'cancelledAt', 'cancelledDate', 'cancelledFromStatus',
     'withdrawnBy', 'withdrawnAt', 'withdrawnDate', 'withdrawnReason', 'withdrawnFromStatus',
+    'submittedById', 'countersignedById', 'approvedById', 'approvedUnderGrant', 'rejectedById', 'rejectedUnderGrant',
+    'withdrawnById', 'withdrawnUnderGrant', 'cancelledById',
     'supersededAt', 'supersededDate', 'tookEffectAt', 'issueDate'];
 
   /* Never taken from a caller of add(): the store writes each of these. */

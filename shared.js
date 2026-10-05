@@ -1333,11 +1333,17 @@ document.addEventListener('keydown',function(e){
   function banner() {
     if (typeof TAQA_DELEGATION === 'undefined') return;
     var d = TAQA_DELEGATION.current();
-    if (!d) return;
+    // A grant revoked or expired while this tab was acting under it holds
+    // nothing any more; say so, and offer the way out (PI-32).
+    var broken = !d && TAQA_DELEGATION.broken && TAQA_DELEGATION.broken();
+    if (!d && !broken) return;
     var bar = document.createElement('div');
     bar.className = 'deleg-bar';
-    bar.innerHTML = '<span>Delegate for <b>' + taqaEsc(d.fromName) + '</b> until <b>' + taqaEsc(d.until) + '</b>' +
-      (d.includesApproval ? '' : ', without approval') + '</span>' +
+    bar.innerHTML = (broken
+      ? '<span>The delegation you were acting under has been revoked or has ended. Nothing can be done under it.</span>'
+      : '<span>Delegate for <b>' + taqaEsc(d.fromName) + '</b> until <b>' + taqaEsc(d.until) + '</b>: ' +
+        (d.includesApproval ? 'approval' : 'no approval') + ', ' +
+        (d.includesManagement ? 'manage documents' : 'no document management') + '</span>') +
       '<span class="db-end"><button type="button" id="deleg-stop">Stop</button></span>';
     document.body.insertBefore(bar, document.body.firstChild);
     document.getElementById('deleg-stop').addEventListener('click', function () {

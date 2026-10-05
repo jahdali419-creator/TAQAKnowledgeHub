@@ -297,11 +297,19 @@ TAQA_ROLE.refuse = function(title, why){
       // A preview has no sign-in, so whoever is previewing needs a way to try
       // another role from here instead of going home to find the switcher.
       '<p style="font-size:12.5px;color:' + mute + ';margin:22px 0 8px">Trying a different role? View this page as</p>' +
+      // Acting under a delegation that has ended or been revoked opens nothing,
+      // so the way out is offered here too.
+      ((typeof TAQA_DELEGATION !== 'undefined' && TAQA_DELEGATION.actingAs())
+        ? '<p style="font-size:12.5px;color:' + mute + ';margin:22px 0 8px">You are acting under a delegation.</p>' +
+          '<button type="button" data-stop-acting="1" style="font:inherit;font-size:12.5px;font-weight:600;color:' + teal + ';background:none;border:1px solid ' + line + ';border-radius:999px;padding:8px 14px;min-height:44px;margin:0 3px 6px;cursor:pointer">Stop acting under it</button>'
+        : '') +
       TAQA_ROLE_ORDER.filter(function(k){ return k !== TAQA_ROLE.current(); }).map(function(k){
         return '<button type="button" data-role="' + k + '" style="font:inherit;font-size:12.5px;font-weight:600;color:' + teal + ';background:none;border:1px solid ' + line + ';border-radius:999px;padding:8px 14px;min-height:44px;margin:0 3px 6px;cursor:pointer">' + e(TAQA_ROLES[k].label) + '</button>';
       }).join('') +
     '</main>';
   document.body.addEventListener('click', function(ev){
+    var stop = ev.target.closest && ev.target.closest('button[data-stop-acting]');
+    if (stop) { TAQA_DELEGATION.actAs(null); location.reload(); return; }
     var b = ev.target.closest && ev.target.closest('button[data-role]');
     if (!b) return;
     TAQA_ROLE.set(b.getAttribute('data-role'));
@@ -335,7 +343,34 @@ TAQA_ROLE.canManage = function(target){
   if (areaId && areaId !== cap.ownSegment) return false;
   if (doc && typeof TAQA_APPROVAL !== 'undefined' &&
       TAQA_APPROVAL.isMaintenance(doc) !== (cap.department === 'maintenance')) return false;
+  // A delegation limited to some document types manages only those (PI-32).
+  if (doc && cap.docTypes && cap.docTypes.indexOf(doc.docType) === -1) return false;
   return true;
+};
+
+/* May this person open an area's desk? Whoever manages the area, and, while
+   acting under a delegation for that area, its delegate: a delegation that
+   gives approval but not "Manage documents" still needs the desk to approve
+   from, and shows only what it allows (PI-32). */
+TAQA_ROLE.canOpenDesk = function(areaId){
+  if (TAQA_ROLE.canManage(areaId)) return true;
+  var cap = TAQA_ROLE.effective();
+  return !!cap.delegated && !!areaId && areaId === cap.ownSegment;
+};
+
+/* ── Who is acting (NEW-04) ──────────────────────────────────────────
+   The prototype simulates people by role and the area they hold: that is
+   its only stable actor identity, and it is what separation of duties
+   compares. A display name is a label, never an identity. A grant id names
+   a grant, never a person. Acting under a delegation does not change who
+   is at the keyboard: in the prototype that is still the grantor's session
+   (see TAQA_DELEGATION.current), so it keeps the grantor's identity.
+   PRODUCTION: the identity is the signed-in person's Microsoft Entra object
+   id, for grantor, delegate, filer, checker, approver, withdrawer and
+   revoker alike. */
+TAQA_ROLE.identity = function(roleKey){
+  var r = roleKey || TAQA_ROLE.current(), def = TAQA_ROLES[r] || {};
+  return 'sim:' + r + (def.scope === 'own' ? '@' + (TAQA_ROLE.area() || '') : '');
 };
 
 if (typeof module !== 'undefined' && module.exports)
@@ -402,24 +437,60 @@ const TAQA_APPROVAL = {
        SUBMITTER ≠ QMS CHECKER ≠ FINAL APPROVER.
      Whoever filed a document may not perform the QMS check on it or give it
      final approval, and whoever performed the check may not also approve it.
-     A delegate signs as themselves, so a delegate may approve the grantor's
-     own filing. Returns the reason in words, or null.
+     Returns the reason in words, or null.
 
-     The prototype's only identity is the simulated role (or the delegate's
-     name), so every QMS user is one person here and a document QMS filed
-     cannot be checked in the demo. In production the comparison is on the
-     signed-in Entra ID object id, so any other QMS member can check it. */
+     Who is who (NEW-04). The comparison is on the actor identity the record
+     carries (submittedById, countersignedById: TAQA_ROLE.identity()), never
+     on a display name alone. Where the prototype cannot show two actors are
+     different people it refuses rather than allows:
+       - a record with no identity recorded (shipped, or filed before
+         identities were kept) is compared by its name label instead;
+       - acting under a delegation is still the grantor's session, so the
+         grantor's own filing or check stays theirs; a delegate who is truly
+         someone else approves it in production, where the delegate signs in
+         with their own Entra object id;
+       - a delegate whose name is the filer's or the checker's label cannot
+         be shown to be someone else either.
+     The prototype's only identity is the simulated role and area, so every
+     QMS user is one person here and a document QMS filed cannot be checked
+     in the demo. In production the comparison is on the signed-in Entra ID
+     object id, so any other QMS member can check it. */
   separationReason(doc, roleKey){
     if (!doc || (roleKey && roleKey !== TAQA_ROLE.current())) return null;
     if (typeof TAQA_STORE === 'undefined' || !TAQA_STORE.actingName) return null;
-    var me = TAQA_STORE.actingName(), stage = TAQA_APPROVAL.stageOf(doc);
-    if (doc.submittedBy && doc.submittedBy === me)
+    var stage = TAQA_APPROVAL.stageOf(doc);
+    if (TAQA_APPROVAL.mayBeMe(doc.submittedById, doc.submittedBy))
       return stage === 'director'
         ? 'You filed this document, so someone else must give it final approval.'
         : 'You filed this document, so someone else must do the QMS check.';
-    if (stage === 'director' && doc.countersignedBy && doc.countersignedBy === me)
+    if (stage === 'director' && TAQA_APPROVAL.mayBeMe(doc.countersignedById, doc.countersignedBy))
       return 'You did the QMS check on this document, so someone else must give it final approval.';
     return null;
+  },
+
+  /* Could the person acting now be the one recorded as (id, name)? True
+     unless the prototype can show otherwise. */
+  mayBeMe(id, name){
+    if (!id && !name) return false;
+    if (id && id === TAQA_ROLE.identity()) return true;
+    var who = TAQA_APPROVAL.personName(name);
+    if (!who) return false;
+    // No identity on the record: its label is all there is to go on.
+    if (!id && TAQA_APPROVAL.myNames().indexOf(who) !== -1) return true;
+    // A delegate is named, not identified, in the prototype.
+    var d = (typeof TAQA_DELEGATION !== 'undefined') ? TAQA_DELEGATION.current() : null;
+    return !!d && TAQA_APPROVAL.personName(d.to) === who;
+  },
+  // "Ahmed (delegate for Segment Director)" is Ahmed; case and spacing never
+  // make two labels different people.
+  personName(n){
+    return String(n == null ? '' : n).replace(/\s*\(delegate for [^)]*\)\s*$/i, '')
+      .replace(/\s+/g, ' ').trim().toLowerCase();
+  },
+  myNames(){
+    var out = [TAQA_APPROVAL.personName((TAQA_ROLE.def() || {}).label)];
+    if (typeof TAQA_STORE !== 'undefined' && TAQA_STORE.actingName) out.push(TAQA_APPROVAL.personName(TAQA_STORE.actingName()));
+    return out.filter(Boolean);
   },
 
   // May this role take the technical sign-off on this document now?
@@ -480,7 +551,9 @@ const TAQA_APPROVAL = {
    ────────────────────────────────────────────────────────────────────────── */
 const TAQA_DELEGATION = {
   KEY: 'taqa-delegations-v1',
-  MAX_DAYS: 90,
+  MAX_DAYS: 90,          // calendar days, counting the start and end dates (owner's decision, 5 Oct 2026)
+  REASON_MIN: 20,        // the same floor as returning or withdrawing a document
+  SCHEMA: 2,             // a grant written before this carried less evidence (see legacy())
 
   _read(){
     try { const r = localStorage.getItem(TAQA_DELEGATION.KEY);
@@ -494,16 +567,63 @@ const TAQA_DELEGATION = {
 
   list(){ return TAQA_DELEGATION._read(); },
 
-  isActive(d){
-    if (d.revokedAt) return false;
-    const now = Date.now();
-    return now >= new Date(d.from).getTime() && now <= new Date(d.until).getTime() + 86399000;
+  /* ── Dates (PI-32) ────────────────────────────────────────────────────
+     A grant's dates are calendar dates (YYYY-MM-DD), compared as dates, never
+     as UTC-midnight instants: it is valid for the whole of its start and end
+     dates and expired from the day after, whatever the time of day. Today is
+     the local calendar day of whoever is acting. PRODUCTION: the server's
+     business date decides. */
+  today(){
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   },
+  isDate(t){
+    const m = String(t || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return false;
+    const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+    return d.getUTCFullYear() === +m[1] && d.getUTCMonth() === +m[2] - 1 && d.getUTCDate() === +m[3];
+  },
+  // Calendar days from a to b, counting both: the same date is 1.
+  daysInclusive(a, b){
+    const p = function(t){ const m = t.split('-'); return Date.UTC(+m[0], +m[1] - 1, +m[2]); };
+    return Math.round((p(b) - p(a)) / 86400000) + 1;
+  },
+
+  /* Active, Scheduled, Expired or Revoked. Evidence, not a stored field: it
+     follows from the grant's dates and revocation. */
+  state(d){
+    if (!d) return 'expired';
+    if (d.revokedAt) return 'revoked';
+    const t = TAQA_DELEGATION.today(), from = String(d.from || '').slice(0, 10), until = String(d.until || '').slice(0, 10);
+    if (!TAQA_DELEGATION.isDate(until)) return 'expired';
+    if (TAQA_DELEGATION.isDate(from) && t < from) return 'scheduled';
+    return t <= until ? 'active' : 'expired';
+  },
+  isActive(d){ return TAQA_DELEGATION.state(d) === 'active'; },
   active(){ return TAQA_DELEGATION._read().filter(TAQA_DELEGATION.isActive); },
+  // A grant recorded before RISE kept the full evidence (PI-54): read as it
+  // is, never rewritten, and labelled so.
+  legacy(d){ return !d || (d.schema || 0) < TAQA_DELEGATION.SCHEMA; },
+
+  /* Which document types the grantor could ever act on, so a grant cannot
+     name more (PI-54): a Director never holds maintenance bulletins, a
+     Maintenance Manager never holds policies, and software is a record, not
+     a controlled document. */
+  typesFor(roleKey){
+    const all = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? Object.keys(TAQA_DOC_LOOKUPS.types) : [];
+    const maint = (TAQA_ROLES[roleKey] || {}).department === 'maintenance';
+    return all.filter(function(t){
+      if (t === 'software') return false;
+      return maint ? t !== 'policy' : t !== 'bulletin';
+    });
+  },
 
   /* grant() refuses rather than silently narrowing, so a Director is told why
      a delegation was not created instead of discovering later that it does
-     less than they intended. */
+     less than they intended. A grant passes on only what it names (owner's
+     decisions, 5 Oct 2026): approval, and separately "Manage documents" (edit
+     details and withdraw); neither brings the other, both are off unless
+     asked for, and neither can exceed what the grantor holds. */
   grant(g){
     g = g || {};
     const me = TAQA_ROLE.current();
@@ -515,44 +635,86 @@ const TAQA_DELEGATION = {
     // console by passing fromRole 'owner' (PI-09). In production the grantor
     // is the token's subject and nothing in the request can change it.
     if (fromRole !== me)     return { ok:false, error:'You can only delegate your own authority.' };
+    // Someone acting under a delegation cannot pass it on, and cannot grant
+    // their own authority while borrowing someone else's either.
+    if (TAQA_DELEGATION.actingAs())
+                             return { ok:false, error:'Stop acting under a delegation before you grant one.' };
     if (!grantor.delegate || !TAQA_ROLE.effective().delegate)
                              return { ok:false, error:'This role cannot delegate.' };
     const myArea = TAQA_ROLE.area();
     if (g.segment && g.segment !== myArea)
                              return { ok:false, error:'You can only delegate in the area you hold.' };
-    if (g.docTypes && (!Array.isArray(g.docTypes) || g.docTypes.some(function(t){
-          return typeof TAQA_DOC_LOOKUPS !== 'undefined' && !Object.prototype.hasOwnProperty.call(TAQA_DOC_LOOKUPS.types, t); })))
+    const myDept = grantor.department || null;
+    if (g.department !== undefined && (g.department || null) !== myDept)
+                             return { ok:false, error:'You can only delegate in your own department.' };
+    if (g.docTypes !== undefined && g.docTypes !== null) {
+      if (!Array.isArray(g.docTypes) || g.docTypes.some(function(t){
+            return typeof TAQA_DOC_LOOKUPS !== 'undefined' && !Object.prototype.hasOwnProperty.call(TAQA_DOC_LOOKUPS.types, t); }))
                              return { ok:false, error:'Unknown document type.' };
-    if (!g.to || !String(g.to).trim())
-                             return { ok:false, error:'Name the person receiving it.' };
-    if (!g.reason || !String(g.reason).trim())
-                             return { ok:false, error:'Record a reason. An auditor will ask.' };
-    if (!g.until)            return { ok:false, error:'Every delegation must expire.' };
+      const mine = TAQA_DELEGATION.typesFor(fromRole);
+      const outside = g.docTypes.filter(function(t){ return mine.indexOf(t) === -1; });
+      if (outside.length)    return { ok:false, error:'You do not hold ' + outside.join(', ') + ' documents, so you cannot delegate them.' };
+    }
 
-    const until = new Date(g.until), from = g.from ? new Date(g.from) : new Date();
-    if (isNaN(until))        return { ok:false, error:'The end date is not a date.' };
+    // Who receives it. The prototype has no directory of people, so the
+    // delegate is a name only: it cannot be the grantor's own name or title,
+    // or the name of a role, because then nobody could tell from the record
+    // who acted. PRODUCTION: the delegate is chosen from Entra ID and the
+    // grant refuses the grantor's own object id.
+    const to = String(g.to == null ? '' : g.to).replace(/\s+/g, ' ').trim();
+    if (!to)                 return { ok:false, error:'Name the person receiving it.' };
+    const pn = TAQA_APPROVAL.personName;
+    const fromName = String(g.fromName || grantor.label).trim();
+    const taken = [fromName, grantor.label, TAQA_ROLE.holderTitle ? TAQA_ROLE.holderTitle() : '']
+      .concat(Object.keys(TAQA_ROLES).map(function(k){ return TAQA_ROLES[k].label; })).map(pn).filter(Boolean);
+    if (taken.indexOf(pn(to)) !== -1)
+                             return { ok:false, error:'Name the person receiving it, not yourself or a role. "' + to + '" would not show who acted.' };
+
+    const reason = String(g.reason == null ? '' : g.reason).trim();
+    if (reason.length < TAQA_DELEGATION.REASON_MIN)
+                             return { ok:false, error:'Record why, in at least ' + TAQA_DELEGATION.REASON_MIN + ' characters. An auditor will ask.' };
+
+    // Dates are calendar dates: both required, starting today or later,
+    // ending on or after the start, at most 90 days counting both.
+    const from = String(g.from == null ? '' : g.from).trim(), until = String(g.until == null ? '' : g.until).trim();
+    if (!from)               return { ok:false, error:'Give the date it starts.' };
+    if (!until)              return { ok:false, error:'Every delegation must expire. Give the date it ends.' };
+    if (!TAQA_DELEGATION.isDate(from))  return { ok:false, error:'The start date is not a date.' };
+    if (!TAQA_DELEGATION.isDate(until)) return { ok:false, error:'The end date is not a date.' };
+    const today = TAQA_DELEGATION.today();
+    if (from < today)        return { ok:false, error:'A delegation cannot start in the past (' + from + '). Start it today or later.' };
     if (until < from)        return { ok:false, error:'The end date is before the start.' };
-    const days = Math.round((until - from) / 86400000);
-    if (days > TAQA_DELEGATION.MAX_DAYS)
-      return { ok:false, error:'A delegation may not run longer than ' + TAQA_DELEGATION.MAX_DAYS + ' days. Renew it instead.' };
+    if (TAQA_DELEGATION.daysInclusive(from, until) > TAQA_DELEGATION.MAX_DAYS)
+      return { ok:false, error:'A delegation may run at most ' + TAQA_DELEGATION.MAX_DAYS + ' days, counting its first and last day. Renew it instead.' };
 
-    // No escalation: you cannot hand over approval you do not hold.
+    // No escalation: you cannot hand over approval or management you do not hold.
     if (g.includesApproval && !grantor.approve)
       return { ok:false, error:'You do not hold approval authority, so you cannot delegate it.' };
+    if (g.includesManagement && !grantor.editMetadata)
+      return { ok:false, error:'You do not manage documents, so you cannot delegate it.' };
 
+    const now = new Date().toISOString(), myId = TAQA_ROLE.identity();
     const row = {
-      id: 'DEL-' + Date.now().toString(36).toUpperCase(),
-      to: String(g.to).trim(),
+      schema: TAQA_DELEGATION.SCHEMA,
+      // Names this grant and nothing else: it is not anyone's identity.
+      id: 'DEL-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase(),
       fromRole: fromRole,
-      fromName: g.fromName || grantor.label,
-      segment: myArea || null,
-      docTypes: (g.docTypes && g.docTypes.length) ? g.docTypes.slice() : null,  // null means every type the grantor holds
+      grantorId: myId,                  // the prototype's actor identity; Entra object id in production
+      fromName: fromName,               // display label
+      to: to,                           // display label
+      delegateId: null,                 // not established in the prototype: there is no directory of people
       includesApproval: !!g.includesApproval,
-      from: from.toISOString().slice(0,10),
-      until: until.toISOString().slice(0,10),
-      reason: String(g.reason).trim(),
-      createdAt: new Date().toISOString(),
-      revokedAt: null
+      includesManagement: !!g.includesManagement,
+      segment: myArea || null,
+      department: myDept,
+      docTypes: (g.docTypes && g.docTypes.length) ? g.docTypes.slice() : null,  // null means every type the grantor holds
+      from: from,
+      until: until,
+      reason: reason,
+      createdById: myId,
+      createdBy: fromName,
+      createdAt: now,
+      revokedAt: null, revokedBy: null, revokedById: null
     };
     const all = TAQA_DELEGATION._read(); all.push(row); TAQA_DELEGATION._write(all);
     return { ok:true, delegation: row };
@@ -560,35 +722,65 @@ const TAQA_DELEGATION = {
 
   /* Only the holder who granted it, in that area, may revoke it (BUSINESS-RULES
      §9: each desk revokes only what its own holder granted). It used to revoke
-     for anyone who knew the id (PI-09). */
+     for anyone who knew the id (PI-09). Revoking ends it at once and records
+     who and when; the grant itself is never changed or deleted, so it stays
+     in the history as evidence (PI-32). The page asks first. */
   revoke(id){
     const all = TAQA_DELEGATION._read();
     const hit = all.find(d => d.id === id);
     if (!hit) return { ok:false, error:'No such delegation.' };
+    if (TAQA_DELEGATION.actingAs())
+      return { ok:false, error:'Stop acting under a delegation before you revoke one.' };
     if (hit.fromRole !== TAQA_ROLE.current() || !TAQA_ROLE.effective().delegate ||
-        (hit.segment || null) !== (TAQA_ROLE.area() || null))
+        (hit.segment || null) !== (TAQA_ROLE.area() || null) ||
+        (hit.grantorId && hit.grantorId !== TAQA_ROLE.identity()))
       return { ok:false, error:'Only the person who granted this delegation can revoke it.' };
+    if (hit.revokedAt) return { ok:false, error:'This delegation was already revoked.' };
+    if (TAQA_DELEGATION.state(hit) === 'expired') return { ok:false, error:'This delegation has already expired.' };
     hit.revokedAt = new Date().toISOString();
+    hit.revokedById = TAQA_ROLE.identity();
+    hit.revokedBy = hit.fromName || (TAQA_ROLE.def() || {}).label || null;   // only its grantor revokes it
     TAQA_DELEGATION._write(all);
-    return { ok:true };
+    return { ok:true, delegation: hit };
   },
 
   /* The prototype has no signed-in identity, so "acting as a delegate" is a
-     choice in the role switcher. In Azure this is the SSO subject matched
-     against the 'to' field, and there is nothing to choose. */
+     choice the grantor makes on their own desk, standing in for the delegate
+     signing in. It is valid only in the session it was granted from (the
+     same role, area and grantor identity): an acting id set from another
+     role, another area or the console is ignored, so nobody borrows a grant
+     that is not theirs (NEW-04). In Azure this is the SSO subject matched
+     against the delegate's Entra object id, and there is nothing to choose. */
   actingAs(){
     try { return localStorage.getItem('taqa-acting-delegation') || null; } catch(e){ return null; }
   },
   actAs(id){
+    if (id) {
+      const d = TAQA_DELEGATION._read().find(x => x.id === id);
+      if (!d || !TAQA_DELEGATION.mine(d) || !TAQA_DELEGATION.isActive(d)) return false;
+    }
     try { id ? localStorage.setItem('taqa-acting-delegation', id)
              : localStorage.removeItem('taqa-acting-delegation'); } catch(e){}
     try { window.dispatchEvent(new CustomEvent('taqa:delegation-changed')); } catch(e){}
+    return true;
   },
+  // Was this grant made by the person in this session?
+  mine(d){
+    return !!d && d.fromRole === TAQA_ROLE.current() && (d.segment || null) === (TAQA_ROLE.area() || null) &&
+      (!d.grantorId || d.grantorId === TAQA_ROLE.identity());
+  },
+  // The grant being acted under, read afresh on every call, so a grant
+  // revoked or expired in another tab stops working here too.
   current(){
     const id = TAQA_DELEGATION.actingAs();
     if (!id) return null;
     const d = TAQA_DELEGATION._read().find(x => x.id === id);
-    return (d && TAQA_DELEGATION.isActive(d)) ? d : null;
+    return (d && TAQA_DELEGATION.mine(d) && TAQA_DELEGATION.isActive(d)) ? d : null;
+  },
+  // Acting under a grant that no longer works: revoked, expired or not this
+  // session's. Nothing is allowed until the person stops acting under it.
+  broken(){
+    return !!TAQA_DELEGATION.actingAs() && !TAQA_DELEGATION.current();
   }
 };
 
@@ -612,6 +804,15 @@ TAQA_ROLE.effective = function(roleKey){
   // Director's delegation was active, which is the escalation this model is
   // supposed to prevent. Only the role actually signed in picks it up.
   if (roleKey && roleKey !== TAQA_ROLE.current()) return cap;
+  // A tab still acting under a grant that was revoked or has expired holds
+  // nothing at all, not even its own role's powers, until it stops acting:
+  // the grant must not keep working, and the person must not sign as
+  // someone they think they are not (PI-32).
+  if (TAQA_DELEGATION.broken()) {
+    cap.approve = cap.countersign = cap.editMetadata = cap.delegate = cap.controlPanel = cap.submit = cap.export = false;
+    cap.scope = 'own'; cap.ownSegment = null; cap.docTypes = [];
+    return cap;
+  }
   const d = TAQA_DELEGATION.current();
   if (!d) return cap;
   const grantor = TAQA_ROLES[d.fromRole] || {};
@@ -626,10 +827,15 @@ TAQA_ROLE.effective = function(roleKey){
   //                gives final approval, delegation included (BUSINESS-RULES §4)
   //   countersign  never: the QMS check is not delegable, and a delegate is
   //                someone signing in another person's place
-  //   manage       only what the grantor could, in the grantor's area
+  //   manage       (edit details and withdraw) only if the delegation names
+  //                "Manage documents" and the grantor holds it: approval does
+  //                not bring it, and a grant made before it existed has none
+  //                (owner's decision, 5 Oct 2026; PI-32)
+  //   scope        the grantor's area, department and the grant's types,
+  //                for every one of these
   cap.approve      = !!d.includesApproval && !!grantor.approve && !base.countersign;
   cap.countersign  = false;
-  cap.editMetadata = !!grantor.editMetadata;
+  cap.editMetadata = !!d.includesManagement && !!grantor.editMetadata;
   cap.controlPanel = !!grantor.controlPanel;
   cap.scope        = 'own';                 // a delegation is always scoped
   cap.ownSegment   = d.segment || null;

@@ -132,7 +132,7 @@ test.describe('TAQA_ROLE.current()/set()/area()/setArea()', () => {
     await page.evaluate(() => TAQA_ROLE.set('owner'));
     const grant = await page.evaluate(() => TAQA_DELEGATION.grant({
       fromRole: 'owner', to: 'Someone Else', segment: 'coiled-tubing',
-      reason: 'Annual leave', until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
+      reason: 'Annual leave, desk cover while away', from: TAQA_DELEGATION.today(), until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
     }));
     expect(grant.ok).toBe(true);
     await page.evaluate((id) => TAQA_DELEGATION.actAs(id), grant.delegation.id);
@@ -148,7 +148,7 @@ test.describe('TAQA_ROLE.current()/set()/area()/setArea()', () => {
     await page.evaluate(() => { TAQA_ROLE.set('owner'); TAQA_ROLE.setArea('coiled-tubing'); });
     const grant = await page.evaluate(() => TAQA_DELEGATION.grant({
       fromRole: 'owner', to: 'Someone Else', segment: 'coiled-tubing',
-      reason: 'Annual leave', until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
+      reason: 'Annual leave, desk cover while away', from: TAQA_DELEGATION.today(), until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
     }));
     await page.evaluate((id) => TAQA_DELEGATION.actAs(id), grant.delegation.id);
 
@@ -197,8 +197,8 @@ test.describe('TAQA_DELEGATION contract', () => {
     for (const role of ['qms', 'employee', 'auditor']) {
       await page.evaluate((role) => TAQA_ROLE.set(role), role);
       const out = await page.evaluate((role) => TAQA_DELEGATION.grant({
-        fromRole: role, to: 'X', reason: 'test',
-        until: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
+        fromRole: role, to: 'X', reason: 'Annual leave, desk cover while away',
+        from: TAQA_DELEGATION.today(), until: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
       }), role);
       expect(out, `${role} should not be able to grant a delegation`).toEqual({ ok: false, error: 'This role cannot delegate.' });
     }
@@ -207,69 +207,72 @@ test.describe('TAQA_DELEGATION contract', () => {
   test('grant() refuses an unknown granting role before anything else', async ({ page, gotoApp, clearAppState }) => {
     await gotoApp('/index.html');
     await clearAppState();
-    const out = await page.evaluate(() => TAQA_DELEGATION.grant({ fromRole: 'not-a-role', to: 'X', reason: 'r', until: '2099-01-01' }));
+    const out = await page.evaluate(() => TAQA_DELEGATION.grant({ fromRole: 'not-a-role', to: 'X', reason: 'Annual leave, desk cover while away', until: '2099-01-01' }));
     expect(out).toEqual({ ok: false, error: 'Unknown granting role.' });
   });
 
-  test('grant() requires a recipient, a reason and an expiry', async ({ page, gotoApp, clearAppState }) => {
+  test('grant() requires a recipient, a meaningful reason, a start and an end date (PI-54)', async ({ page, gotoApp, clearAppState }) => {
     await gotoApp('/index.html');
     await clearAppState();
     await page.evaluate(() => TAQA_ROLE.set('owner'));
-    let out = await page.evaluate(() => TAQA_DELEGATION.grant({ fromRole: 'owner' }));
-    expect(out.error).toBe('Name the person receiving it.');
-
-    out = await page.evaluate(() => TAQA_DELEGATION.grant({ fromRole: 'owner', to: 'X' }));
-    expect(out.error).toBe('Record a reason. An auditor will ask.');
-
-    out = await page.evaluate(() => TAQA_DELEGATION.grant({ fromRole: 'owner', to: 'X', reason: 'r' }));
-    expect(out.error).toBe('Every delegation must expire.');
-
-    out = await page.evaluate(() => TAQA_DELEGATION.grant({ fromRole: 'owner', to: 'X', reason: 'r', until: 'not-a-date' }));
-    expect(out.error).toBe('The end date is not a date.');
+    const g = (o) => page.evaluate((o) => TAQA_DELEGATION.grant(Object.assign({ fromRole: 'owner' }, o)), o);
+    expect((await g({})).error).toBe('Name the person receiving it.');
+    expect((await g({ to: '   ' })).error).toBe('Name the person receiving it.');
+    expect((await g({ to: 'X' })).error).toMatch(/at least 20 characters/);
+    // "." and other token reasons are refused: an auditor needs the why.
+    expect((await g({ to: 'X', reason: '.' })).error).toMatch(/at least 20 characters/);
+    expect((await g({ to: 'X', reason: '   Annual leave      ' })).error).toMatch(/at least 20 characters/);
+    expect((await g({ to: 'X', reason: 'Annual leave, desk cover while away' })).error).toBe('Give the date it starts.');
+    const today = await page.evaluate(() => TAQA_DELEGATION.today());
+    expect((await g({ to: 'X', reason: 'Annual leave, desk cover while away', from: today })).error).toMatch(/must expire/);
+    expect((await g({ to: 'X', reason: 'Annual leave, desk cover while away', from: today, until: 'not-a-date' })).error).toBe('The end date is not a date.');
+    expect((await g({ to: 'X', reason: 'Annual leave, desk cover while away', from: '2026-02-30', until: '2099-01-01' })).error).toBe('The start date is not a date.');
   });
 
-  test('grant() refuses an end date before the start, and a span over the 90-day maximum, but allows exactly 90', async ({ page, gotoApp, clearAppState }) => {
+  test('grant() counts 90 calendar days inclusive: start + 89 is accepted, start + 90 is refused; an end before the start is refused', async ({ page, gotoApp, clearAppState }) => {
     await gotoApp('/index.html');
     await clearAppState();
     await page.evaluate(() => TAQA_ROLE.set('owner'));
-    const iso = (d) => d.toISOString().slice(0, 10);
-    const today = new Date();
-
-    let out = await page.evaluate(({ from, until }) => TAQA_DELEGATION.grant({ fromRole: 'owner', to: 'X', reason: 'r', from, until }),
-      { from: iso(today), until: iso(new Date(today.getTime() - 86400000)) });
-    expect(out.error).toBe('The end date is before the start.');
-
-    out = await page.evaluate(({ from, until }) => TAQA_DELEGATION.grant({ fromRole: 'owner', to: 'X', reason: 'r', from, until }),
-      { from: iso(today), until: iso(new Date(today.getTime() + 91 * 86400000)) });
-    expect(out.error).toMatch(/may not run longer than 90 days/);
-
-    out = await page.evaluate(({ from, until }) => TAQA_DELEGATION.grant({ fromRole: 'owner', to: 'X', reason: 'r', from, until }),
-      { from: iso(today), until: iso(new Date(today.getTime() + 90 * 86400000)) });
-    expect(out.ok).toBe(true);
+    const r = await page.evaluate((reason) => {
+      const t = TAQA_DELEGATION.today();
+      const plus = (n) => { const m = t.split('-'); const d = new Date(+m[0], +m[1] - 1, +m[2] + n);
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+      const g = (from, until) => TAQA_DELEGATION.grant({ fromRole: 'owner', to: 'X', reason, from, until });
+      return { before: g(t, plus(-1)), d91: g(t, plus(90)), d90: g(t, plus(89)), oneDay: g(t, t),
+               days90: TAQA_DELEGATION.daysInclusive(t, plus(89)) };
+    }, 'Annual leave, desk cover while away');
+    expect(r.before.error).toBe('The end date is before the start.');
+    expect(r.d91.error).toMatch(/at most 90 days, counting its first and last day/);
+    expect(r.d90.ok).toBe(true);
+    expect(r.days90).toBe(90);
+    expect(r.oneDay.ok).toBe(true);                        // today to today: one whole day
+    expect(r.oneDay.delegation.from).toBe(r.oneDay.delegation.until);
   });
 
-  test('EDGE CASE: grant() can produce an already-expired delegation, it validates the span, not that it lies in the future', async ({ page, gotoApp, clearAppState }) => {
+  test('grant() refuses a start in the past: no retroactive delegation (it used to accept 2020)', async ({ page, gotoApp, clearAppState }) => {
     await gotoApp('/index.html');
     await clearAppState();
     await page.evaluate(() => TAQA_ROLE.set('owner'));
-    const out = await page.evaluate(() => TAQA_DELEGATION.grant({
-      fromRole: 'owner', to: 'X', reason: 'r', from: '2020-01-01', until: '2020-01-05',
-    }));
-    expect(out.ok).toBe(true);
-    expect(await page.evaluate((row) => TAQA_DELEGATION.isActive(row), out.delegation)).toBe(false);
-    expect(await page.evaluate((id) => TAQA_DELEGATION.active().some((d) => d.id === id), out.delegation.id)).toBe(false);
+    const out = await page.evaluate((reason) => TAQA_DELEGATION.grant({
+      fromRole: 'owner', to: 'X', reason, from: '2020-01-01', until: '2020-01-05',
+    }), 'Annual leave, desk cover while away');
+    expect(out.ok).toBe(false);
+    expect(out.error).toMatch(/cannot start in the past/);
+    expect(await page.evaluate(() => TAQA_DELEGATION.list().length)).toBe(0);
   });
 
-  test('EDGE CASE: grant() allows delegating to yourself, the prototype has no identity to check that against', async ({ page, gotoApp, clearAppState }) => {
+  test('grant() refuses a delegate named as the grantor, the grantor\'s title or a role (NEW-04, PI-54; it used to accept them)', async ({ page, gotoApp, clearAppState }) => {
     await gotoApp('/index.html');
     await clearAppState();
     await page.evaluate(() => TAQA_ROLE.set('owner'));
-    const out = await page.evaluate(() => TAQA_DELEGATION.grant({
-      fromRole: 'owner', fromName: 'Mohammed Jahdali', to: 'Mohammed Jahdali', reason: 'Covering myself while out',
-      until: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
-    }));
-    expect(out.ok).toBe(true);
-    expect(out.delegation.to).toBe('Mohammed Jahdali');
+    for (const to of ['Mohammed Jahdali', '  mohammed   JAHDALI ', 'Segment Director', 'QMS / Document Controller', 'qms / document controller', 'Employee']) {
+      const out = await page.evaluate(({ to, reason }) => TAQA_DELEGATION.grant({
+        fromRole: 'owner', fromName: 'Mohammed Jahdali', to, reason, from: TAQA_DELEGATION.today(),
+        until: TAQA_DELEGATION.today(),
+      }), { to, reason: 'Annual leave, desk cover while away' });
+      expect(out.ok, to).toBe(false);
+      expect(out.error, to).toMatch(/not yourself or a role/);
+    }
   });
 
   test('grant() refuses to hand over approval the grantor does not hold ("no escalation")', async ({ page, gotoApp, clearAppState }) => {
@@ -288,8 +291,8 @@ test.describe('TAQA_DELEGATION contract', () => {
       const real = TAQA_ROLES.owner.approve;
       TAQA_ROLES.owner.approve = false;
       const r = TAQA_DELEGATION.grant({
-        fromRole: 'owner', to: 'X', reason: 'r', includesApproval: true,
-        until: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
+        fromRole: 'owner', to: 'X', reason: 'Annual leave, desk cover while away', includesApproval: true,
+        from: TAQA_DELEGATION.today(), until: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
       });
       TAQA_ROLES.owner.approve = real;
       return r;
@@ -309,8 +312,8 @@ test.describe('TAQA_DELEGATION contract', () => {
     await clearAppState();
     await page.evaluate(() => TAQA_ROLE.set('owner'));
     const grant = await page.evaluate(() => TAQA_DELEGATION.grant({
-      fromRole: 'owner', to: 'X', reason: 'r',
-      until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
+      fromRole: 'owner', to: 'X', reason: 'Annual leave, desk cover while away',
+      from: TAQA_DELEGATION.today(), until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
     }));
     expect(await page.evaluate((id) => TAQA_DELEGATION.isActive(TAQA_DELEGATION.list().find((d) => d.id === id)), grant.delegation.id)).toBe(true);
 
@@ -320,15 +323,21 @@ test.describe('TAQA_DELEGATION contract', () => {
     expect(await page.evaluate((id) => TAQA_DELEGATION.active().some((d) => d.id === id), grant.delegation.id)).toBe(false);
   });
 
-  test('actAs()/current(): acting under an expired delegation reads as not delegated at all', async ({ page, gotoApp, clearAppState }) => {
+  test('actAs()/current(): an expired delegation cannot be acted under and reads as not delegated at all', async ({ page, gotoApp, clearAppState }) => {
     await gotoApp('/index.html');
     await clearAppState();
-    await page.evaluate(() => TAQA_ROLE.set('owner'));
-    const grant = await page.evaluate(() => TAQA_DELEGATION.grant({
-      fromRole: 'owner', to: 'X', reason: 'r', from: '2020-01-01', until: '2020-01-05',
-    })); // already expired by construction, see the EDGE CASE test above
-    await page.evaluate((id) => TAQA_DELEGATION.actAs(id), grant.delegation.id);
+    await page.evaluate(() => { TAQA_ROLE.set('owner'); TAQA_ROLE.setArea('coiled-tubing'); });
+    // grant() no longer makes a grant in the past, so the expired one is stored directly.
+    await page.evaluate(() => localStorage.setItem('taqa-delegations-v1', JSON.stringify([{
+      schema: 2, id: 'DEL-OLD', fromRole: 'owner', grantorId: TAQA_ROLE.identity(), fromName: 'Director', to: 'X',
+      includesApproval: true, includesManagement: true, segment: 'coiled-tubing', department: null, docTypes: null,
+      from: '2020-01-01', until: '2020-01-05', reason: 'Expired grant for the test only', createdAt: '2020-01-01T00:00:00Z', revokedAt: null }])));
+    expect(await page.evaluate(() => TAQA_DELEGATION.actAs('DEL-OLD'))).toBe(false);
     expect(await page.evaluate(() => TAQA_DELEGATION.current())).toBeNull();
+    // Forced into storage, it still reads as nothing, and grants nothing.
+    await page.evaluate(() => localStorage.setItem('taqa-acting-delegation', 'DEL-OLD'));
+    expect(await page.evaluate(() => TAQA_DELEGATION.current())).toBeNull();
+    expect(await page.evaluate(() => TAQA_ROLE.effective().approve)).toBe(false);
   });
 
   test('actAs()/current(): acting under a revoked delegation also reads as not delegated', async ({ page, gotoApp, clearAppState }) => {
@@ -336,8 +345,8 @@ test.describe('TAQA_DELEGATION contract', () => {
     await clearAppState();
     await page.evaluate(() => TAQA_ROLE.set('owner'));
     const grant = await page.evaluate(() => TAQA_DELEGATION.grant({
-      fromRole: 'owner', to: 'X', reason: 'r',
-      until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
+      fromRole: 'owner', to: 'X', reason: 'Annual leave, desk cover while away',
+      from: TAQA_DELEGATION.today(), until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
     }));
     await page.evaluate((id) => TAQA_DELEGATION.actAs(id), grant.delegation.id);
     expect(await page.evaluate(() => TAQA_DELEGATION.current())).not.toBeNull();
@@ -347,7 +356,7 @@ test.describe('TAQA_DELEGATION contract', () => {
     expect((await page.evaluate((id) => TAQA_DELEGATION.revoke(id), grant.delegation.id)).ok).toBe(false);
     await page.evaluate(() => TAQA_DELEGATION.actAs(null));
     expect((await page.evaluate((id) => TAQA_DELEGATION.revoke(id), grant.delegation.id)).ok).toBe(true);
-    await page.evaluate((id) => TAQA_DELEGATION.actAs(id), grant.delegation.id);
+    expect(await page.evaluate((id) => TAQA_DELEGATION.actAs(id), grant.delegation.id)).toBe(false);
     expect(await page.evaluate(() => TAQA_DELEGATION.current())).toBeNull();
   });
 
@@ -356,8 +365,8 @@ test.describe('TAQA_DELEGATION contract', () => {
     await clearAppState();
     await page.evaluate(() => { TAQA_ROLE.set('owner'); TAQA_ROLE.setArea('coiled-tubing'); });
     const grant = await page.evaluate(() => TAQA_DELEGATION.grant({
-      fromRole: 'owner', to: 'X', reason: 'r', segment: 'coiled-tubing', docTypes: ['sop'],
-      includesApproval: true, until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
+      fromRole: 'owner', to: 'X', reason: 'Annual leave, desk cover while away', segment: 'coiled-tubing', docTypes: ['sop'],
+      includesApproval: true, from: TAQA_DELEGATION.today(), until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
     }));
     await page.evaluate((id) => TAQA_DELEGATION.actAs(id), grant.delegation.id);
     const result = await page.evaluate(() => {
@@ -374,8 +383,8 @@ test.describe('TAQA_DELEGATION contract', () => {
     await page.evaluate(() => { TAQA_ROLE.set('owner'); TAQA_ROLE.setArea('coiled-tubing'); });
 
     const noApprovalGrant = await page.evaluate(() => TAQA_DELEGATION.grant({
-      fromRole: 'owner', to: 'X', reason: 'r', segment: 'coiled-tubing',
-      includesApproval: false, until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
+      fromRole: 'owner', to: 'X', reason: 'Annual leave, desk cover while away', segment: 'coiled-tubing',
+      includesApproval: false, from: TAQA_DELEGATION.today(), until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
     }));
     await page.evaluate((id) => TAQA_DELEGATION.actAs(id), noApprovalGrant.delegation.id);
     let cap = await page.evaluate(() => TAQA_ROLE.effective());
@@ -389,8 +398,8 @@ test.describe('TAQA_DELEGATION contract', () => {
     expect(cap.approve).toBe(false);
     expect(cap.countersign).toBe(false);
 
-    await page.evaluate((id) => TAQA_DELEGATION.revoke(id), noApprovalGrant.delegation.id);
     await page.evaluate(() => TAQA_DELEGATION.actAs(null));
+    await page.evaluate((id) => TAQA_DELEGATION.revoke(id), noApprovalGrant.delegation.id);
 
     // Now check the delegation-only contribution directly against a role
     // that does NOT natively hold approve, using the grantor override from
@@ -398,8 +407,8 @@ test.describe('TAQA_DELEGATION contract', () => {
     // source of approve for this signed-in identity.
     await page.evaluate(() => { TAQA_ROLE.set('owner'); TAQA_ROLE.setArea('coiled-tubing'); });
     const withApprovalGrant = await page.evaluate(() => TAQA_DELEGATION.grant({
-      fromRole: 'owner', to: 'Y', reason: 'r', segment: 'coiled-tubing',
-      includesApproval: true, until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
+      fromRole: 'owner', to: 'Y', reason: 'Annual leave, desk cover while away', segment: 'coiled-tubing',
+      includesApproval: true, from: TAQA_DELEGATION.today(), until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
     }));
     await page.evaluate((id) => TAQA_DELEGATION.actAs(id), withApprovalGrant.delegation.id);
     cap = await page.evaluate(() => TAQA_ROLE.effective());
@@ -412,8 +421,8 @@ test.describe('TAQA_DELEGATION contract', () => {
     await clearAppState();
     await page.evaluate(() => { TAQA_ROLE.set('owner'); TAQA_ROLE.setArea('coiled-tubing'); });
     const grant = await page.evaluate(() => TAQA_DELEGATION.grant({
-      fromRole: 'owner', to: 'X', reason: 'r', segment: 'coiled-tubing',
-      includesApproval: true, until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
+      fromRole: 'owner', to: 'X', reason: 'Annual leave, desk cover while away', segment: 'coiled-tubing',
+      includesApproval: true, from: TAQA_DELEGATION.today(), until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
     }));
     await page.evaluate((id) => TAQA_DELEGATION.actAs(id), grant.delegation.id);
 
