@@ -134,20 +134,47 @@ Final approval follows exactly the same split.
 - **Translations follow their source** (PI-34). When a source's revision is released, its translations in force are marked `superseded` ("Source ‹number› Rev ‹new›: translation to be re-issued"); the translation is then re-issued as its own next revision under its own number. When the source is withdrawn or superseded by status, its translations in force follow.
 
 ## 9. Delegation
-- Only roles that hold `delegate` can grant: the **Segment Director** and the **Maintenance Manager**.
-- A delegation records: delegate name, grantor's role and name (for a Maintenance Manager, "Maintenance Manager, ‹area›"), area, optional document types, whether approval is included, start date, end date, reason.
-- **Must expire**: an end date is required and the span may not exceed **90 days**. An expired or revoked delegation stops working on its own.
-- **No escalation**: a delegation can only pass on authority the grantor holds; a delegate signs **in the grantor's department** (a Director's delegate can never approve maintenance documents, a Maintenance Manager's delegate nothing else) and only in the grantor's area, narrowed further to the listed document types if any.
-- A delegate **cannot re-delegate**.
-- **A delegation replaces authority, it does not add to it** (PI-04). While someone acts under a delegation they hold exactly what it grants: final approval only if `includesApproval` is set **and** the grantor holds approval; **never** the QMS check; withdraw / edit only as the grantor could, in the grantor's area and department. Their own role's approve, check and management powers do not apply while acting. A role that performs the QMS check never gives final approval, delegated or not.
-- **Only the holder grants, only the grantor revokes** (PI-09). The grantor is the signed-in person and the area is the one they hold; a request naming another role or area is refused. A delegation is revoked only by the person who granted it, signed in as themselves (not while acting under it).
-- The signature records the delegate: "‹delegate› (delegate for ‹grantor›)".
+*Updated for PR 2C-2 (NEW-04, PI-32, PI-54) with the owner's decisions of 5 October 2026.*
+
+- Only roles that hold `delegate` can grant: the **Segment Director** and the **Maintenance Manager**. Someone acting under a delegation cannot grant, revoke or re-delegate.
+- **Two separate permissions, each named explicitly** (owner's decision, 5 Oct 2026):
+  - **Approval**: give final approval (and return at that stage) in the grantor's place. Only if the grantor holds approval.
+  - **Manage documents (edit details and withdraw)**: off by default. Only if the grantor holds it.
+  - Approval does **not** bring management, and management does **not** bring approval. A grant recorded before this permission existed carries **no** management.
+  - The QMS check is never delegable. QMS never gives final approval, delegated or not.
+- **Scope, for every delegated action** (approve, return, edit, withdraw): the grantor's own area and department, and the grant's document types if it names any. A grant cannot name another area, another department, or a type the grantor never holds (a Director never holds maintenance bulletins; a Maintenance Manager never holds policies). Withdrawal stays subject to every record-truth and stale-action control (§8, §18, §19).
+- **Dates are calendar dates** (`YYYY-MM-DD`), never UTC-midnight instants:
+  - start and end are both required;
+  - the start is today or later (no retroactive delegation);
+  - the end is on or after the start;
+  - at most **90 calendar days counting both the start and the end** (end ≤ start + 89).
+  - A grant is valid for the **whole** of its end date and expired from the next day, whatever the time.
+  - "Today" is the acting person's local calendar day. *Production: the server's (Microsoft 365) business date.*
+- **State**: **Active**, **Scheduled** (starts later), **Expired** or **Revoked**. It follows from the dates and revocation; it is not edited.
+- **Evidence (PI-54).** Every grant records:
+  - an immutable grant id;
+  - the grantor's identity and display name;
+  - the delegate's display name, and the delegate's identity where it can be established (in the prototype it cannot: `delegateId` is null);
+  - approval and management permissions;
+  - area, department and document types;
+  - start and end dates;
+  - the reason (at least 20 characters, the same floor as returning or withdrawing);
+  - created by (identity and name) and created at.
+  - A delegate may not be named as the grantor, the grantor's title or a role.
+- **Revocation** asks for confirmation. It ends the grant at once and records who revoked it and when (`revokedBy`, `revokedById`, `revokedAt`). The grant is never deleted or otherwise changed: revoked and expired grants stay listed on the desk as history.
+  - Only the grantor, signed in as themselves in that area, revokes.
+  - A tab still acting under a grant that was revoked, has expired, or was dropped in another tab holds **nothing** until it stops acting. It never falls back silently to someone else's authority.
+- **Evidence on the record.** An action taken under a grant keeps, separately, the actor's label (`approvedBy`), the actor's identity (`approvedById`), the grant (`approvedUnderGrant`), the grantor's identity (`approvedOnBehalfOfId`), the time and the action itself (likewise `rejected…` and `withdrawn…`). Filing and the register export are not delegated: while acting under a grant a person cannot file, and stops acting to file as themselves.
+- **Prototype limitation: storage is not tamper-proof.** Grants and revocations live in this browser's storage, which anyone at the keyboard can edit; for example, clearing a grant's `revokedAt` by hand would make it usable again here. The prototype does not pretend otherwise. *PRODUCTION CONTROL REQUIRED: grants, revocations and their evaluation are server-side and append-only; the client never decides.*
+- **Legacy grants** (recorded before PR 2C-2) stay readable exactly as stored, labelled as recorded before RISE kept full delegation evidence, and are never rewritten.
+- The signature records the delegate's label: "‹delegate› (delegate for ‹grantor›)". The record also keeps the actor's identity (`approvedById`) and, as evidence of the authority used, the grant id (`approvedUnderGrant`, `rejectedUnderGrant`, `withdrawnUnderGrant`). A grant id identifies a grant, never a person.
 - Each desk lists and revokes only the delegations its own holder granted for that area.
 - A delegation never creates or changes Segment Membership. A delegate outside the grantor's segment sees only the delegated queue and its documents, only while the delegation is valid (§14.10).
-- Switching role or area drops any delegation being acted under. *(Prototype: "Act as this" stands in for the delegate signing in.)*
+- A delegate opens the grantor's desk while acting under an active grant for that area, and sees only what the grant allows.
+- Switching role or area drops any delegation being acted under. *(Prototype: "Act as this" on the grantor's own desk stands in for the delegate signing in. A grant can be taken up only in the session that made it, the same role, area and grantor identity; a value set from another role, area or the console is ignored.)*
 
 ## 10. Lifecycle-field protection
-These fields change **only** through filing, check, approval, rejection and withdrawal, never by editing a record's details: `status`, `approvalStage`, `approvedBy`, `approvedDate`, `approvedAt`, `countersignedBy`, `countersignedDate`, `countersignedAt`, `rejected`, `rejectedAtStage`, `rejectedBy`, `rejectedReason`, `rejectedDate`, `rejectedAt`, `submittedBy`, `submittedAt`, the cancellation and withdrawal records (`cancelled*`, `withdrawn*`), `supersededAt`, `supersededDate`, `tookEffectAt` and `issueDate`. An edit that names any of them is refused, for every role including QMS. A filing never carries `issueDate`, `nextReviewDate` or `reviewOverdue`: the register sets them at release (§19).
+These fields change **only** through filing, check, approval, rejection and withdrawal, never by editing a record's details: `status`, `approvalStage`, `approvedBy`, `approvedDate`, `approvedAt`, `countersignedBy`, `countersignedDate`, `countersignedAt`, `rejected`, `rejectedAtStage`, `rejectedBy`, `rejectedReason`, `rejectedDate`, `rejectedAt`, `submittedBy`, `submittedAt`, the cancellation and withdrawal records (`cancelled*`, `withdrawn*`), the actor identities and grant references (`submittedById`, `countersignedById`, `approvedById`, `approvedUnderGrant`, `rejectedById`, `rejectedUnderGrant`, `withdrawnById`, `withdrawnUnderGrant`, `cancelledById`; NEW-04), `supersededAt`, `supersededDate`, `tookEffectAt` and `issueDate`. An edit that names any of them is refused, for every role including QMS. A filing never carries `issueDate`, `nextReviewDate` or `reviewOverdue`: the register sets them at release (§19).
 
 Added by the Priority 1 integrity remediation (PI-09), each enforced by `store.js` and each a **server rule** for production:
 - **Filing** always creates `status = draft` at stage `qms`. Any lifecycle field the caller sends is ignored, and `submittedBy` / `submittedAt` are stamped from the signed-in identity and the clock. Filing is also refused for: a Policy from anyone but QMS (as Upload already offered), more than one file (§7), and a maintenance department document outside an operational segment (§3).
@@ -397,7 +424,19 @@ Owner's decisions of 4 October 2026, from `docs/QA/PRODUCT-INTEGRITY-AUDIT.md` P
 
 **Register integrity (PI-53).** `scripts/check-register.js` checks the register against §8 and §16: a number and revision held twice; more than one revision in force or in progress; a superseded revision whose successor is not in the register; `supersedes` that is not an earlier revision; a translation whose source is missing or not in force; a revision above 1 with no predecessor; missing, placeholder and provisional numbers; unknown status, type or area; a legacy ID shared by different documents. Findings already in the shipped register are **known legacy issues**, listed in `scripts/register-baseline.json` and in `docs/QA/REGISTER-CLEANUP-REPORT.md` for QMS to correct at source; nothing in the data was changed to make the check pass. The CI gate (`tests/register-integrity.spec.js`) fails on any finding not in the baseline, whether it comes from new data or from code, checks the live register after the release workflow, and checks the report is current. An entry leaves the baseline only when QMS has corrected it. *Production: run the same checks as a gate before migrating the register into SharePoint, with QMS sign-off of the cleanup.*
 
-**Identity in the prototype.** The prototype simulates **roles**, not people: every QMS user is one identity ("QMS / Document Controller"), every Segment Director another, and a delegate is identified by the name on the delegation. Separation of duties (§4) is therefore checked against that simulated identity. One consequence is a documented limitation, not a defect: a document filed by QMS (every Policy) cannot be checked in the demo, because the only QMS identity filed it; in production any other QMS member can. There is deliberately no person selector to simulate several people in one role. **In production every rule here is enforced against the signed-in person's Microsoft Entra ID object id**, never a role chosen in the browser.
+**Identity in the prototype (NEW-04).** The prototype simulates **people by role and the area they hold** (`TAQA_ROLE.identity()`: for example `sim:owner@coiled-tubing`, `sim:qms`, `sim:employee`); it has no individual sign-in. Every QMS user is therefore one identity, every holder of an area another.
+- Records keep the actor's identity beside the display name: `submittedById`, `countersignedById`, `approvedById`, `rejectedById`, `withdrawnById`, `cancelledById`. These are written by the store and cannot be edited.
+- Separation of duties (§4) compares **identities, never display names alone**. A display name is a label; a grant id names a grant; neither is a person.
+- Where the prototype cannot show that two actors are different people, it **refuses** rather than allows:
+  - a record with no identity (shipped, or filed before identities were kept) is compared by its label;
+  - acting under a delegation is still the grantor's own session, so the grantor's own filing or check stays theirs and is refused;
+  - a delegate named as the filer or checker is refused.
+- Consequences, documented limitations rather than defects:
+  - a document filed by QMS (every Policy) cannot be checked in the demo;
+  - a legitimate delegate approving the grantor's own filing cannot be demonstrated, because the prototype cannot prove the delegate is someone else;
+  - the same human could appear under several delegate labels, which the prototype cannot detect.
+- There is deliberately no person selector, and no invented people.
+- **PRODUCTION CONTROL REQUIRED: the Microsoft Entra ID object id is the authoritative person identity** for grantor, delegate, filer, checker, approver, withdrawer and revoker. The delegate is chosen from Entra ID; a grant refuses the grantor's own object id; the delegate acts by signing in as themselves; every rule here is enforced server-side against object ids, never a role chosen in the browser or a typed name.
 
 
 ## 18. Decision integrity (Priority 2B, October 2026)

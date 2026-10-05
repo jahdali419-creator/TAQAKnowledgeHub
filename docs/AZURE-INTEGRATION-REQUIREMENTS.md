@@ -78,7 +78,7 @@ After sign-in the frontend needs (`GET /me`): `userId`, `displayName`, `roles[]`
 - **One primary segment**; additional memberships only as approved exceptions with a reason and optional expiry, managed by the receiving department authority or QMS, ended automatically at expiry (§14.8). **One department per segment**; a department or segment change is an audited **transfer** performed by QMS / authorised administration (managers may request or confirm), both managers notified, old record kept and linked (§14.9).
 - **Delegation outside the grantor's segment** (§14.10): no membership is created; the delegate gets only the delegated queue, its documents and the allowed actions, only while the delegation is valid, computed server-side; expiry or revocation ends it at once.
 
-Delegation must reference real users: the delegate signs in as themselves and the API applies the delegation to them. The prototype's "Act as this" button is a stand-in and must not ship.
+Delegation must reference real users: the delegate signs in as themselves and the API applies the delegation to them. The prototype's "Act as this" button is a stand-in and must not ship. **PRODUCTION CONTROL REQUIRED (NEW-04):** the Microsoft Entra object id is the authoritative identity for grantor, delegate, filer, checker, approver, withdrawer and revoker; a grant refuses the grantor's own object id; separation of duties compares object ids only. The prototype cannot prove two actors are different people, so it refuses where it cannot tell (BUSINESS-RULES §17, identity).
 
 ## 4. Frontend / backend boundary
 
@@ -108,7 +108,7 @@ Delegation must reference real users: the delegate signs in as themselves and th
 | Maintenance classification (department or bulletin) | `TAQA_APPROVAL.isMaintenance` | **B** |
 | Bulletins only for operational segments | `upload.html`, `store.add` | **B** |
 | Maintenance Manager holds operational segments only | `TAQA_ROLE.holds` | **B** (identity mapping) |
-| Delegation: expiry ≤ 90 days, no escalation, no re-delegation, department, scope | `TAQA_DELEGATION`, `TAQA_ROLE.effective` | **B + D** |
+| Delegation: approval and Manage documents as separate permissions; area, department and type scope on approve, reject, edit and withdraw; calendar dates (start today or later, ≤ 90 days inclusive, valid through the end date on the server's business date); revocation recorded, never deleted; stale clients refused (PI-32, PI-54) | `TAQA_DELEGATION`, `TAQA_ROLE.effective`, `TAQA_ROLE.canManage` | **B + D** |
 | Signer names and timestamps | `store.actingName`, `new Date()` in the browser | **D** (from token and server clock) |
 | Document numbers | `upload.html` `taqaRefId` (next number in this browser); `store.add` refuses a number already in the register in any status (PI-01) | **B + C + D** (server allocates; unique `DocNumber` column; duplicate refused by the API) |
 | Document identity in links, bookmarks, QR codes and pins | every link carries `doc=<number>`; viewer resolves title-only links against the live register, same area only (PI-03) | **B + D** (links and QR codes target the immutable item ID; the server returns the real status) |

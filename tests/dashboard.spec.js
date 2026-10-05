@@ -328,7 +328,8 @@ test.describe('Toast notifications (showDashToast)', () => {
     const until = await page.locator('#dg-until').inputValue(); // pre-filled 14 days out
 
     await page.locator('#deleg-form button.deleg-grant').click();
-    await expect(page.locator('#dash-toast-msg')).toHaveText(`Delegated to Toast Delegate until ${until}`);
+    const from = await page.evaluate(() => TAQA_DELEGATION.today());
+    await expect(page.locator('#dash-toast-msg')).toHaveText(`Delegated to Toast Delegate, ${from} to ${until}`);
   });
 
   test('REGRESSION: no disconnected "Delegate Approvals" duplicate button remains; the only delegation control is the gated #deleg-box', async ({ page, gotoApp, setRole, clearAppState }) => {

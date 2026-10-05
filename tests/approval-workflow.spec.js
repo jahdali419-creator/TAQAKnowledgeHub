@@ -392,7 +392,7 @@ test.describe('8. Delegation in the workflow', () => {
     const until = new Date(Date.now() + 10 * 86400000).toISOString().slice(0, 10);
     const grant = await page.evaluate((until) => TAQA_DELEGATION.grant({
       fromRole: 'owner', to: 'Delegate Tester', segment: 'coiled-tubing',
-      reason: 'Regression test delegation', until, includesApproval: true,
+      reason: 'Regression test delegation', from: TAQA_DELEGATION.today(), until, includesApproval: true,
     }), until);
     expect(grant.ok).toBe(true);
 
@@ -423,7 +423,7 @@ test.describe('8. Delegation in the workflow', () => {
     const grant = await page.evaluate(() => TAQA_DELEGATION.grant({
       fromRole: 'owner', to: 'Editor Only Delegate', segment: 'coiled-tubing',
       reason: 'Preparing and editing only', includesApproval: false,
-      until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
+      from: TAQA_DELEGATION.today(), until: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
     }));
     await page.evaluate((id) => TAQA_DELEGATION.actAs(id), grant.delegation.id);
 

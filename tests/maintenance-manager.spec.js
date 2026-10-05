@@ -177,7 +177,7 @@ test.describe('delegation from a Maintenance Manager', () => {
     await gotoApp('/dashboard.html?id=' + SEG);
     await page.click('#deleg-open');
     await page.fill('#dg-to', 'Deputy Maintenance Engineer');
-    await page.fill('#dg-reason', 'Annual leave');
+    await page.fill('#dg-reason', 'Annual leave, covering the maintenance desk');
     await page.click('#deleg-form button[type="submit"]');
     const d = await page.evaluate(() => TAQA_DELEGATION.list().find((x) => x.to === 'Deputy Maintenance Engineer'));
     expect(d.fromRole).toBe('maintenance');
@@ -202,8 +202,8 @@ test.describe('delegation from a Maintenance Manager', () => {
     await checkedDraft(page, setRole, 'TQ-TWS-CTSS-SOP-958', { title: 'Dir deleg ops' });
     await setRole('owner', SEG);
     const can = await page.evaluate(() => {
-      const g = TAQA_DELEGATION.grant({ fromRole: 'owner', fromName: 'CT Director', to: 'Ops Deputy', reason: 'Leave',
-        segment: 'coiled-tubing', until: new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10), includesApproval: true });
+      const g = TAQA_DELEGATION.grant({ fromRole: 'owner', fromName: 'CT Director', to: 'Ops Deputy', reason: 'Annual leave, desk cover while away',
+        segment: 'coiled-tubing', from: TAQA_DELEGATION.today(), until: new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10), includesApproval: true });
       TAQA_DELEGATION.actAs(g.delegation.id);
       return ['TQ-TWS-CTSS-SOP-957', 'TQ-TWS-CTSS-SOP-958'].map((n) => TAQA_APPROVAL.canApprove(TAQA_STORE.findDoc(n)));
     });
@@ -213,7 +213,7 @@ test.describe('delegation from a Maintenance Manager', () => {
   test('each desk lists only the delegations its own holder granted', async ({ page, gotoApp, setRole, clearAppState }) => {
     await prime(page, gotoApp, clearAppState, setRole, 'maintenance', SEG);
     await page.evaluate(() => TAQA_DELEGATION.grant({ fromRole: 'maintenance', fromName: 'Maintenance Manager, Coiled Tubing',
-      to: 'Maint Deputy', reason: 'Leave', segment: 'coiled-tubing', until: new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10), includesApproval: true }));
+      to: 'Maint Deputy', reason: 'Annual leave, desk cover while away', segment: 'coiled-tubing', from: TAQA_DELEGATION.today(), until: new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10), includesApproval: true }));
     await gotoApp('/dashboard.html?id=' + SEG);
     await expect(page.locator('#deleg-list')).toContainText('Maint Deputy');
     // defect: the Director's desk listed it too, with a Revoke button.
@@ -227,7 +227,7 @@ test.describe('delegation from a Maintenance Manager', () => {
     await prime(page, gotoApp, clearAppState, setRole, 'maintenance', SEG);
     await page.evaluate(() => {
       const g = TAQA_DELEGATION.grant({ fromRole: 'maintenance', fromName: 'Maintenance Manager, Coiled Tubing', to: 'Maint Deputy',
-        reason: 'Leave', segment: 'coiled-tubing', until: new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10), includesApproval: true });
+        reason: 'Annual leave, desk cover while away', segment: 'coiled-tubing', from: TAQA_DELEGATION.today(), until: new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10), includesApproval: true });
       TAQA_DELEGATION.actAs(g.delegation.id);
     });
     await gotoApp('/index.html');

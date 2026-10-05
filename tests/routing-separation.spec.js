@@ -162,7 +162,7 @@ test.describe('PI-31: submitter ≠ QMS checker ≠ final approver', () => {
     await expect(page.locator('#wb-confirm')).toHaveCount(0);
   });
 
-  test('whoever filed a document cannot give it final approval; the desk lists it with the reason; a delegate can', async ({ page, gotoApp, setRole, clearAppState }) => {
+  test('whoever filed a document cannot give it final approval; the desk lists it with the reason; acting under their own delegation does not change that', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, clearAppState, setRole, 'owner');
     expect(await fileDraft(page, 'TQ-TWS-CTSS-SOP-982')).toBe(true);
     await setRole('qms', SEG);
@@ -174,12 +174,17 @@ test.describe('PI-31: submitter ≠ QMS checker ≠ final approver', () => {
     await expect(page.locator('#pending-held')).toContainText('TQ-TWS-CTSS-SOP-982');
     await expect(page.locator('#pending-held')).toContainText('someone else must give it final approval');
     await expect(page.locator('.btn-approve[data-store-doc="TQ-TWS-CTSS-SOP-982"]')).toHaveCount(0);
-    // Delegation still works: the delegate is a different person.
-    const g = await page.evaluate(() => TAQA_DELEGATION.grant({ to: 'Deputy Director', reason: 'Leave', includesApproval: true,
-      until: new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10) }));
+    // In the prototype, acting under a delegation is still the Director's own
+    // session, so it cannot show the delegate is someone else: the filing stays
+    // the Director's and is refused (NEW-04; the owner's identity correction of
+    // 5 Oct 2026). In production a delegate signing in with their own Entra
+    // object id may approve it.
+    const g = await page.evaluate(() => TAQA_DELEGATION.grant({ to: 'Deputy Director', reason: 'Annual leave, desk cover while away', includesApproval: true,
+      from: TAQA_DELEGATION.today(), until: new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10) }));
     await page.evaluate((id) => TAQA_DELEGATION.actAs(id), g.delegation.id);
-    expect((await page.evaluate(() => TAQA_STORE.approve('TQ-TWS-CTSS-SOP-982'))).ok).toBe(true);
-    expect(await rec(page, 'TQ-TWS-CTSS-SOP-982')).toMatchObject({ status: 'current', ap: 'Deputy Director (delegate for Segment Director)' });
+    expect(await page.evaluate(() => TAQA_APPROVAL.separationReason(TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-982')))).toMatch(/You filed this document/);
+    expect((await page.evaluate(() => TAQA_STORE.approve('TQ-TWS-CTSS-SOP-982'))).ok).toBe(false);
+    expect(await rec(page, 'TQ-TWS-CTSS-SOP-982')).toMatchObject({ status: 'draft', stage: 'director', ap: null });
   });
 
   test('the QMS checker cannot approve, and the ordinary three-person path still works', async ({ page, gotoApp, setRole, clearAppState }) => {

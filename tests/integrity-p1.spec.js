@@ -125,7 +125,7 @@ test.describe('PI-05: register and stored text never runs as script', () => {
     // A delegation record as storage holds it, with markup in every field.
     await page.evaluate((t) => localStorage.setItem('taqa-delegations-v1', JSON.stringify([{
       id: 'DEL-X" data-pwn="1', to: 'Deputy', fromRole: 'owner', fromName: t, segment: 'coiled-tubing',
-      docTypes: [t], includesApproval: true, from: '2020-01-01', until: '2099-01-01" data-pwn="1', reason: 'r', revokedAt: null,
+      docTypes: [t], includesApproval: true, from: '2020-01-01', until: '2099-01-01" data-pwn="1', reason: 'Annual leave, desk cover while away', revokedAt: null,
     }])), tag('deleg'));
     await gotoApp(`/dashboard.html?id=${SEG}`);
     const approve = page.locator('.btn-approve').first();
@@ -165,8 +165,8 @@ TAQA_DOC_LOOKUPS.segments[${JSON.stringify('x"><img src=x onerror="window.__pwn=
     await setRole('owner', SEG);
     await page.evaluate((t) => {
       localStorage.setItem('taqa-delegations-v1', JSON.stringify([{
-        id: 'DEL-PWN', to: 'Deputy', fromRole: 'owner', fromName: t, segment: t, docTypes: null,
-        includesApproval: false, from: '2020-01-01', until: '2099-01-01', reason: 'r', revokedAt: null,
+        id: 'DEL-PWN', to: 'Deputy', fromRole: 'owner', fromName: t, segment: 'coiled-tubing', docTypes: null,
+        includesApproval: false, from: '2020-01-01', until: '2099-01-01', reason: 'Annual leave, desk cover while away', revokedAt: null,
       }]));
       TAQA_DELEGATION.actAs('DEL-PWN');
     }, tag('banner'));
@@ -208,25 +208,29 @@ test.describe('PI-04: a delegation carries its own authority, never more', () =>
 
   test('a delegate without approval cannot approve: no Approve on the desk, approve() refused, record unchanged', async ({ page, gotoApp, setRole, clearAppState }) => {
     await director(page, gotoApp, clearAppState, setRole);
-    const g = await page.evaluate((u) => TAQA_DELEGATION.grant({ to: 'Deputy', reason: 'Leave', until: u, includesApproval: false }), until());
+    const g = await page.evaluate((u) => TAQA_DELEGATION.grant({ to: 'Deputy', reason: 'Annual leave, desk cover while away', from: TAQA_DELEGATION.today(), until: u, includesApproval: false }), until());
     expect(g.ok).toBe(true);
     await page.evaluate((id) => TAQA_DELEGATION.actAs(id), g.delegation.id);
     await gotoApp(`/dashboard.html?id=${SEG}`);
-    await expect(page.locator('.deleg-bar')).toContainText('without approval');
+    await expect(page.locator('.deleg-bar')).toContainText('no approval');
     await expect(page.locator('.btn-approve[data-store-doc="TQ-TWS-CTSS-SOP-973"]')).toHaveCount(0);
     expect(await page.evaluate(() => TAQA_STORE.approve('TQ-TWS-CTSS-SOP-973'))).toEqual({ ok: false, error: 'You cannot approve this document.' });
     expect(await page.evaluate(() => { const d = TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-973'); return [d.status, d.approvalStage, d.approvedBy || null]; }))
       .toEqual(['draft', 'director', null]);
   });
 
-  test('QMS acting under a Director\'s delegation can neither check nor approve', async ({ page, gotoApp, setRole, clearAppState }) => {
+  test('QMS cannot act under a Director\'s delegation at all; forced into storage it holds nothing, so it can neither check nor approve', async ({ page, gotoApp, setRole, clearAppState }) => {
     await director(page, gotoApp, clearAppState, setRole);
-    const g = await page.evaluate((u) => TAQA_DELEGATION.grant({ to: 'QMS colleague', reason: 'Leave', until: u, includesApproval: true }), until());
+    const g = await page.evaluate((u) => TAQA_DELEGATION.grant({ to: 'QMS colleague', reason: 'Annual leave, desk cover while away', from: TAQA_DELEGATION.today(), until: u, includesApproval: true }), until());
     await page.evaluate(() => TAQA_STORE.add({ docNumber: 'TQ-TWS-CTSS-SOP-974', title: 'Second target', segment: 'coiled-tubing', docType: 'sop' }));
     await setRole('qms', SEG);
-    await page.evaluate((id) => TAQA_DELEGATION.actAs(id), g.delegation.id);
+    // A grant belongs to the session that made it (NEW-04): QMS cannot take it up.
+    expect(await page.evaluate((id) => TAQA_DELEGATION.actAs(id), g.delegation.id)).toBe(false);
+    expect(await page.evaluate(() => TAQA_ROLE.effective().delegated)).toBeNull();
+    // Forced in from the console, it is not QMS's, so it reads as broken and grants nothing.
+    await page.evaluate((id) => localStorage.setItem('taqa-acting-delegation', id), g.delegation.id);
     const cap = await page.evaluate(() => TAQA_ROLE.effective());
-    expect([cap.approve, cap.countersign]).toEqual([false, false]);
+    expect([cap.approve, cap.countersign, cap.editMetadata]).toEqual([false, false, false]);
     expect((await page.evaluate(() => TAQA_STORE.approve('TQ-TWS-CTSS-SOP-973'))).ok).toBe(false);
     expect((await page.evaluate(() => TAQA_STORE.countersign('TQ-TWS-CTSS-SOP-974'))).ok).toBe(false);
     expect(await page.evaluate(() => [TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-973').status, TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-974').approvalStage]))
@@ -245,7 +249,7 @@ test.describe('PI-04: a delegation carries its own authority, never more', () =>
 
   test('with approval included, the delegate approves and signs in their own name', async ({ page, gotoApp, setRole, clearAppState }) => {
     await director(page, gotoApp, clearAppState, setRole);
-    const g = await page.evaluate((u) => TAQA_DELEGATION.grant({ to: 'Deputy', fromName: 'CT Director', reason: 'Leave', until: u, includesApproval: true }), until());
+    const g = await page.evaluate((u) => TAQA_DELEGATION.grant({ to: 'Deputy', fromName: 'CT Director', reason: 'Annual leave, desk cover while away', from: TAQA_DELEGATION.today(), until: u, includesApproval: true }), until());
     await page.evaluate((id) => TAQA_DELEGATION.actAs(id), g.delegation.id);
     expect((await page.evaluate(() => TAQA_STORE.approve('TQ-TWS-CTSS-SOP-973'))).ok).toBe(true);
     expect(await page.evaluate(() => TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-973').approvedBy)).toBe('Deputy (delegate for CT Director)');
@@ -328,12 +332,12 @@ test.describe('PI-09: the register refuses forged lifecycle, identity and author
     await start(page, gotoApp, clearAppState, setRole, 'employee');
     const u = new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10);
     // An Employee naming the Director's role, from the console.
-    expect(await page.evaluate((u) => TAQA_DELEGATION.grant({ fromRole: 'owner', to: 'Me', reason: 'r', until: u, includesApproval: true }), u))
+    expect(await page.evaluate((u) => TAQA_DELEGATION.grant({ fromRole: 'owner', to: 'Me', reason: 'Annual leave, desk cover while away', from: TAQA_DELEGATION.today(), until: u, includesApproval: true }), u))
       .toEqual({ ok: false, error: 'You can only delegate your own authority.' });
     // A Director naming another area.
     await setRole('owner', SEG);
-    expect((await page.evaluate((u) => TAQA_DELEGATION.grant({ to: 'X', reason: 'r', until: u, segment: 'drilling' }), u)).ok).toBe(false);
-    const g = await page.evaluate((u) => TAQA_DELEGATION.grant({ to: 'Deputy', reason: 'Leave', until: u, segment: 'coiled-tubing' }), u);
+    expect((await page.evaluate((u) => TAQA_DELEGATION.grant({ to: 'X', reason: 'Annual leave, desk cover while away', from: TAQA_DELEGATION.today(), until: u, segment: 'drilling' }), u)).ok).toBe(false);
+    const g = await page.evaluate((u) => TAQA_DELEGATION.grant({ to: 'Deputy', reason: 'Annual leave, desk cover while away', from: TAQA_DELEGATION.today(), until: u, segment: 'coiled-tubing' }), u);
     expect(g.ok).toBe(true);
     expect(g.delegation.segment).toBe(SEG);
     // Another area's Director, an Employee and QMS cannot revoke it.

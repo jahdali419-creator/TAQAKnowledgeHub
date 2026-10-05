@@ -367,7 +367,23 @@ select { text-overflow:ellipsis; padding-inline-end:30px; }
 .deleg-cancel{background:transparent;border:1px solid var(--border);color:var(--text-muted);
   border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;}
 .deleg-form{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
-.deleg-grid{display:grid;grid-template-columns:1fr 190px;gap:12px;}
+.deleg-grid{display:grid;grid-template-columns:1fr 160px 160px;gap:12px;}
+.deleg-hint{font-size:11.5px;color:var(--text-muted);margin:-6px 0 11px;text-transform:none;letter-spacing:0;font-weight:400;}
+.deleg-row .dr-state{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;
+  border-radius:999px;padding:1px 8px;margin-left:6px;border:1px solid var(--border);color:var(--text-muted);vertical-align:1px;}
+.deleg-row .dr-state.active{border-color:var(--primary);color:var(--primary-ink);}
+.deleg-row .dr-state.revoked,.deleg-row .dr-state.expired{opacity:.85;}
+.deleg-row.ended .dr-who{color:var(--text-muted);}
+.deleg-row .dr-ev{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.dlg-revoke{margin:auto;width:min(460px,calc(100% - 32px));padding:22px;border:1px solid var(--border);border-radius:14px;
+  background:var(--bg-white,#fff);color:var(--text);box-shadow:0 18px 50px rgba(0,0,0,.28);}
+.dlg-revoke::backdrop{background:rgba(0,20,22,.45);}
+.dlg-revoke h2{font-size:16px;font-weight:800;margin:0 0 8px;}
+.dlg-revoke p{font-size:13px;line-height:1.55;color:var(--text-muted);margin:0 0 10px;}
+.dlg-revoke .rv-acts{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+.dlg-revoke .rv-acts button{min-height:40px;padding:0 16px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;
+  border:1px solid var(--border);background:transparent;color:var(--text);font-family:inherit;}
+.dlg-revoke .rv-go{background:var(--stop-ink,#C8102E) !important;border-color:var(--stop-ink,#C8102E) !important;color:#fff !important;}
 @media(max-width:620px){.deleg-grid{grid-template-columns:1fr;}}
 .deleg-form label{display:block;font-size:11px;font-weight:700;letter-spacing:.4px;
   text-transform:uppercase;color:var(--text-muted);margin-bottom:11px;}
@@ -375,7 +391,7 @@ select { text-overflow:ellipsis; padding-inline-end:30px; }
   padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--bg-white);
   color:var(--text);font-size:13px;font-family:inherit;font-weight:400;text-transform:none;letter-spacing:0;}
 .deleg-form input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,93,99,.12);}
-.deleg-check{display:flex;gap:9px;align-items:flex-start;text-transform:none;letter-spacing:0;
+.deleg-form .deleg-check{display:flex;gap:9px;align-items:flex-start;text-transform:none;letter-spacing:0;
   font-weight:400;font-size:12.5px;color:var(--text-muted);line-height:1.5;}
 .deleg-check input{margin-top:2px;flex-shrink:0;}
 .deleg-err{background:rgba(200,16,46,.07);border:1px solid rgba(200,16,46,.28);color:var(--stop-ink);
@@ -513,17 +529,25 @@ html[data-taqa-theme="dark"] .dash-unknown{background:#002326;border-color:#0048
               <label>Who holds it
                 <input type="text" id="dg-to" placeholder="Full name" autocomplete="off">
               </label>
+              <label>From
+                <input type="date" id="dg-from">
+              </label>
               <label>Until
                 <input type="date" id="dg-until">
               </label>
             </div>
+            <div class="deleg-hint">Valid for the whole of both dates, at most 90 days counting both.</div>
             <label>Why
-              <input type="text" id="dg-reason" placeholder="Annual leave, 12 to 20 October" autocomplete="off">
+              <input type="text" id="dg-reason" placeholder="Annual leave, 12 to 20 October" autocomplete="off" maxlength="300">
             </label>
+            <div class="deleg-hint" id="dg-reason-n">At least 20 characters.</div>
             <label class="deleg-check">
               <input type="checkbox" id="dg-approval" checked>
-              <span>Include the approval signature. Without it they can prepare and
-                edit, but not release.</span>
+              <span>Approval: give final approval in your place.</span>
+            </label>
+            <label class="deleg-check">
+              <input type="checkbox" id="dg-manage">
+              <span>Manage documents: edit details and withdraw. Separate from approval; off unless you tick it.</span>
             </label>
             <div class="deleg-err" id="dg-err" hidden></div>
             <div class="deleg-actions">
@@ -533,6 +557,15 @@ html[data-taqa-theme="dark"] .dash-unknown{background:#002326;border-color:#0048
           </form>
           <div id="deleg-list"></div>
         </div>
+        <dialog class="dlg-revoke" id="revoke-dlg" aria-labelledby="revoke-dlg-h">
+          <h2 id="revoke-dlg-h">Revoke this delegation?</h2>
+          <p id="revoke-dlg-what"></p>
+          <p>It stops working at once, in every open tab. It is not deleted: it stays in this list as a record of what was granted, and who revoked it and when.</p>
+          <div class="rv-acts">
+            <button type="button" id="revoke-dlg-cancel">Keep it</button>
+            <button type="button" class="rv-go" id="revoke-dlg-go">Revoke</button>
+          </div>
+        </dialog>
       </div>
 
       <div id="pending-list">
@@ -746,7 +779,9 @@ html[data-taqa-theme="dark"] .dash-unknown{background:#002326;border-color:#0048
 (function(){
   if (typeof TAQA_ROLE === 'undefined') return;
   var id = new URLSearchParams(location.search).get('id') || TAQA_ROLE.area();
-  if (TAQA_ROLE.canManage(id)) return;
+  // The desk also opens to its delegate, acting under a delegation for this
+  // area, who sees only what the delegation allows (PI-32).
+  if (TAQA_ROLE.canOpenDesk ? TAQA_ROLE.canOpenDesk(id) : TAQA_ROLE.canManage(id)) return;
   TAQA_ROLE.refuse("Managing an area is its director\u2019s desk", "The control panel approves, delegates and names contributors for one area. It is open to the holder of that area and to QMS.");
 })();
 </script>
@@ -1250,10 +1285,28 @@ function initDashboard() {
         err  = document.getElementById('dg-err'),
         list = document.getElementById('deleg-list');
 
-    // Default to a fortnight out, which is the common case and still expires.
-    var d14 = new Date(Date.now() + 14 * 86400000).toISOString().slice(0,10);
-    document.getElementById('dg-until').value = d14;
-    document.getElementById('dg-until').min = new Date().toISOString().slice(0,10);
+    // Calendar dates in this person's own day (PI-32): it starts today and
+    // runs a fortnight, counting both ends, which is the common case.
+    var today = TAQA_DELEGATION.today();
+    function plusDays(day, n){ var m = day.split('-'), d = new Date(+m[0], +m[1] - 1, +m[2] + n);
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+    function resetDates(){
+      document.getElementById('dg-from').value = today;
+      document.getElementById('dg-until').value = plusDays(today, 13);
+    }
+    document.getElementById('dg-from').min = today;
+    document.getElementById('dg-until').min = today;
+    resetDates();
+    document.getElementById('dg-from').addEventListener('input', function(){
+      var f = this.value || today;
+      document.getElementById('dg-until').min = f;
+      document.getElementById('dg-until').max = plusDays(f, TAQA_DELEGATION.MAX_DAYS - 1);
+    });
+    document.getElementById('dg-until').max = plusDays(today, TAQA_DELEGATION.MAX_DAYS - 1);
+    document.getElementById('dg-reason').addEventListener('input', function(){
+      var n = this.value.trim().length, min = TAQA_DELEGATION.REASON_MIN;
+      document.getElementById('dg-reason-n').textContent = n >= min ? n + ' characters.' : n + ' of at least ' + min + ' characters.';
+    });
 
     document.getElementById('deleg-open').addEventListener('click', function(){
       form.hidden = !form.hidden;
@@ -1263,40 +1316,73 @@ function initDashboard() {
       form.hidden = true; err.hidden = true;
     });
 
+    var STATE = { active:'Active', scheduled:'Scheduled', expired:'Expired', revoked:'Revoked' };
+    function fmtDay(t){ return t ? dEsc(String(t).slice(0, 10)) : 'not recorded'; }
+    // Every delegation this holder granted for this area, whatever its state:
+    // a revoked or expired one stays as the record of what was granted
+    // (PI-32, PI-54).
     function paintList(){
       var mineSeg = CAP.ownSegment || dashSegId, me = TAQA_ROLE.current();
       var all = TAQA_DELEGATION.list().filter(function(x){
-        return !x.revokedAt && x.fromRole === me && (x.segment || mineSeg) === mineSeg;
-      });
+        return x.fromRole === me && (x.segment || mineSeg) === mineSeg;
+      }).reverse();
       if (!all.length) {
         list.innerHTML = '<div class="deleg-none">Nothing delegated. Your authority is yours alone.</div>';
         return;
       }
       list.innerHTML = all.map(function(x){
-        var live = TAQA_DELEGATION.isActive(x),
-            acting = (TAQA_DELEGATION.actingAs() === x.id);
-        return '<div class="deleg-row">' +
+        var st = TAQA_DELEGATION.state(x), live = st === 'active',
+            acting = (TAQA_DELEGATION.actingAs() === x.id), legacy = TAQA_DELEGATION.legacy(x);
+        var grants = [x.includesApproval ? 'approval' : 'no approval',
+                      x.includesManagement ? 'manage documents' : 'no document management'].join(', ');
+        return '<div class="deleg-row' + (st === 'revoked' || st === 'expired' ? ' ended' : '') + '" data-grant="' + dEsc(x.id) + '">' +
           '<div class="dr-main"><div class="dr-who">' + esc(x.to) +
-            (x.includesApproval ? '' : ' <span style="font-weight:400;opacity:.7">(no approval)</span>') +
-          '</div><div class="dr-meta">' + esc(x.segment || 'segment') +
-            (x.docTypes ? ', ' + dEsc([].concat(x.docTypes).join(' and ')) : ', every type') +
-            ' &middot; until ' + dEsc(x.until) + ' &middot; ' + esc(x.reason) +
-            (live ? '' : ' &middot; expired') + '</div></div>' +
+            '<span class="dr-state ' + st + '">' + STATE[st] + '</span></div>' +
+          '<div class="dr-meta">' + grants + ' &middot; ' + esc(TAQA_ROLE.areaName ? TAQA_ROLE.areaName(x.segment) : (x.segment || 'segment')) +
+            (x.department ? ', ' + esc(x.department) + ' department' : '') +
+            (x.docTypes ? ', ' + dEsc([].concat(x.docTypes).join(' and ')) + ' only' : ', every type you hold') +
+            ' &middot; ' + fmtDay(x.from) + ' to ' + fmtDay(x.until) + ' &middot; ' + esc(x.reason) + '</div>' +
+          '<div class="dr-ev">' + dEsc(x.id) + ' &middot; granted by ' + esc(x.createdBy || x.fromName || 'not recorded') + ' ' + fmtDay(x.createdAt) +
+            (x.revokedAt ? ' &middot; revoked by ' + esc(x.revokedBy || 'not recorded') + ' ' + fmtDay(x.revokedAt) : '') +
+            (legacy ? ' &middot; recorded before RISE kept full delegation evidence: grantor identity, department and document management not recorded' : '') +
+          '</div></div>' +
           '<div class="dr-act">' +
             (live ? '<button type="button" class="dr-use" data-act="' + dEsc(x.id) + '">' +
                       (acting ? 'Acting' : 'Act as this') + '</button>' : '') +
-            '<button type="button" data-rev="' + dEsc(x.id) + '">Revoke</button>' +
+            (st === 'active' || st === 'scheduled' ? '<button type="button" data-rev="' + dEsc(x.id) + '">Revoke</button>' : '') +
           '</div></div>';
       }).join('');
     }
     function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
+    // Revoking asks first and names what it ends (PI-32).
+    var rdlg = document.getElementById('revoke-dlg'), revId = null, revBtn = null;
+    function closeRevoke(){ revId = null; if (rdlg.open) rdlg.close(); if (revBtn && document.body.contains(revBtn)) revBtn.focus(); }
+    document.getElementById('revoke-dlg-cancel').addEventListener('click', closeRevoke);
+    document.getElementById('revoke-dlg-go').addEventListener('click', function(){
+      if (!revId) return;
+      var out = TAQA_DELEGATION.revoke(revId);
+      revId = null; if (rdlg.open) rdlg.close();
+      paintList();
+      showDashToast(out.ok ? 'Revoked. It stays in the list as a record.' : out.error, out.ok ? '#00BBB6' : '#C8102E');
+    });
+
     list.addEventListener('click', function(e){
       var rev = e.target.closest('[data-rev]'), use = e.target.closest('[data-act]');
-      if (rev) { TAQA_DELEGATION.revoke(rev.dataset.rev); location.reload(); }
+      if (rev) {
+        var x = TAQA_DELEGATION.list().find(function(g){ return g.id === rev.dataset.rev; });
+        if (!x) return;
+        revId = x.id; revBtn = rev;
+        document.getElementById('revoke-dlg-what').textContent = x.to + ', ' +
+          (x.includesApproval ? 'with approval' : 'without approval') + ' and ' +
+          (x.includesManagement ? 'with document management' : 'without document management') +
+          ', ' + x.from + ' to ' + x.until + ' (' + x.id + ').';
+        rdlg.showModal();
+        document.getElementById('revoke-dlg-cancel').focus();
+      }
       // Acting as the delegate is how the third door is walked through here.
-      if (use) { TAQA_DELEGATION.actAs(use.dataset.act); location.reload(); }
+      if (use) { if (TAQA_DELEGATION.actAs(use.dataset.act)) location.reload(); }
     });
 
     form.addEventListener('submit', function(e){
@@ -1309,15 +1395,20 @@ function initDashboard() {
         to: document.getElementById('dg-to').value,
         segment: CAP.ownSegment || dashSegId,
         reason: document.getElementById('dg-reason').value,
+        from: document.getElementById('dg-from').value,
         until: document.getElementById('dg-until').value,
-        includesApproval: document.getElementById('dg-approval').checked
+        includesApproval: document.getElementById('dg-approval').checked,
+        includesManagement: document.getElementById('dg-manage').checked
       });
       if (!out.ok) { err.textContent = out.error; err.hidden = false; return; }
       err.hidden = true; form.hidden = true; form.reset();
-      document.getElementById('dg-until').value = d14;
+      resetDates();
       document.getElementById('dg-approval').checked = true;
+      document.getElementById('dg-manage').checked = false;
+      document.getElementById('dg-reason-n').textContent = 'At least ' + TAQA_DELEGATION.REASON_MIN + ' characters.';
       paintList();
-      showDashToast('Delegated to ' + out.delegation.to + ' until ' + out.delegation.until, '#00BBB6');
+      showDashToast('Delegated to ' + out.delegation.to + ', ' + out.delegation.from + ' to ' + out.delegation.until +
+        (TAQA_DELEGATION.state(out.delegation) === 'scheduled' ? ' (scheduled)' : ''), '#00BBB6');
     });
 
     paintList();
