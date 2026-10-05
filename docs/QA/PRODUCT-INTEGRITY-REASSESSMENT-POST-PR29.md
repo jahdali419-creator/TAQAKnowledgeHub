@@ -250,6 +250,16 @@ The evidence points here rather than to the next item on the old roadmap. The tw
 
 **Status after PR 2C-2 (owner's decisions of 5 Oct 2026).** NEW-04 (separation of duties on actor identities, never display names; a grant is taken up only in the session that made it; the prototype refuses where it cannot tell people apart, and the Entra object id is the production control), PI-32 (approval and Manage documents as separate permissions; area, department and type scope on approve, reject, edit and withdraw; calendar-date validity; revocation confirmed, recorded and kept; stale tabs refused) and PI-54 (grant evidence, 20-character reason, validated dates and scope, no self-naming, legacy grants readable) are addressed in the prototype; tests in `tests/delegation-integrity.spec.js`, rules in `BUSINESS-RULES.md` §9 and the identity note in §17.
 
+**Status after PR 2D (owner's decisions of 5 Oct 2026).** Addressed in the prototype, with tests in `tests/phone-reliability.spec.js`, `tests/installed-app.spec.js` and `tests/support-ticket.spec.js`, and the rules in `BUSINESS-RULES.md` §20:
+- **PI-08, PI-61:** the record / Workbench drawer and the segment document panel start below the status bar in the installed app; the drawer also closes from the bottom on a phone. *Real iPhone check required.*
+- **PI-18:** a restored page clears the exit fade and refreshes from the register. Proven by event in every engine; Chromium's real back-forward cache did not restore in this sandbox. *Real iPhone check required.*
+- **PI-26, PI-48:** one bar, under the top bar, "Offline" or "RISE cannot be reached", honest "last synced"; the three old bars are gone.
+- **PI-28:** every register change refused while not connected, nothing written, nothing typed lost; Ask Expert says "not sent" (decision A) and Critical shows the emergency wording (decision A).
+- **PI-30:** a new version waits, warns, and applies only on a safe page or by choice; proven with a mid-task deploy in Chromium. *Safari's installed-app lifecycle: real iPhone check required.*
+- **PI-51:** the pager lands below the tabs with focus; other JS offsets use the measured bar.
+- **PI-52:** side and bottom insets on drawers, menus, bars and sheets; content keeps out of the notch. Simulated; *real iPhone check required.*
+- **TB-04:** the installed-app test covers every overlay, upright and on its side. **TB-05 / TB-06:** see `docs/TESTING.md` (WebKit smoke job, service-worker and back-forward tests).
+
 **After 2B, in this order** (proposed, for your decision later):
 1. **2C: Record truth.** PI-11 withdrawal record and honest trail; PI-10 bulk withdraw over drafts; PI-21 release dates; the rest of PI-24 (Returned state, not pending); PI-13 duplicate detection; PI-14 number validation; NEW-04 delegation-naming guard; PI-32 delegate withdraw/type limits; PI-54.
 2. **2D: Phone and installed-app reliability.** PI-08 drawer close; PI-18 Back; PI-30 update reload; PI-48 offline bars; PI-26 / PI-28 honest offline state; PI-61, PI-51; plus TB-04 / TB-06 tests and adding a WebKit job to CI (TB-05).

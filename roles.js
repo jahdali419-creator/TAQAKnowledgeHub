@@ -316,6 +316,9 @@ TAQA_ROLE.refuse = function(title, why){
     location.reload();
   });
   document.body.style.background = bg;
+  // Marks the page as refused: window.stop() below leaves WebKit's
+  // readyState at "interactive" for good, so a test cannot wait for "complete".
+  document.documentElement.setAttribute('data-taqa-refused', '');
   if (window.stop) window.stop();
 };
 

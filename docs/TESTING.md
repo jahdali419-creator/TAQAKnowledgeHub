@@ -109,6 +109,8 @@ Each file under `tests/` maps to one page or one cross-cutting concern:
 | `search.spec.js` | ai-search.html: keyword search, filters, safety disclaimer |
 | `dashboard.spec.js` | dashboard.html: the approval desk UI, toasts, contributors |
 | `approval-workflow.spec.js` | the real two-step QMS-then-approver release flow, end to end |
+| `phone-reliability.spec.js` | PR 2D: one connectivity bar under the top bar, honest "offline" / "cannot be reached" and "last synced" (PI-26, PI-48); every register change refused offline with nothing written and nothing typed lost, in Upload, the Workbench and the withdraw dialog (PI-28); a deploy (bumped cache) mid-Upload and mid-rejection on a private copy of the site with the service worker on: nothing reloads, the update waits, warns, and applies only on a safe page or by choice (PI-30); the pager on a phone (PI-51); the install sheet on idle Home only; Back restore (PI-18) |
+| `installed-app.spec.js` | the installed iPhone app, simulated (status bar upright; notch, side insets and home indicator on its side): the bell on every page, and every overlay (record drawer, Workbench, segment panel, phone menu, bookmarks, search filters, glossary drawer, viewer menus) usable and closable (PI-08, PI-61, PI-52, TB-04) |
 | `delegation-integrity.spec.js` | PR 2C-2: actor identities and conservative separation of duties (NEW-04); approval and Manage documents as separate permissions in all four combinations, scope on every delegated action, calendar-date validity in UTC+3, revocation evidence and stale tabs (PI-32); grant evidence and validation, legacy grants (PI-54); PI-31 direct and delegated for the Director and the Maintenance Manager |
 | `record-truth.spec.js` | PR 2C-1: withdrawal record and reason (PI-11), bulk withdrawal on exact records with stale refusal (PI-10), approval and effective dates including a future effective date on a pinned clock (PI-21), returned attempts and filing again (PI-24), duplicate warnings with reasons (PI-13), number validation for new filings (PI-14) |
 | `decision-integrity.spec.js` | PR 2B: stale desk, Workbench and bulk decisions refused with nothing written (NEW-01); withdrawal cancels the open revision and its translations' (NEW-02); a returned revision filed again is the same revision, next attempt (NEW-03); held / rapid Enter and double-click in the Workbench (PI-07); Upload Enter before the review step (PI-06); the approver's card, Preview and final confirmation (PI-12); per-revision bell memory and its migration (NEW-05) |
@@ -120,7 +122,7 @@ Each file under `tests/` maps to one page or one cross-cutting concern:
 | `numbering.spec.js` | TQ-QHSE-S001 5.3 numbering from upload |
 | `roles.spec.js` | the role/permission matrix and delegation logic, independent of any page |
 | `upload.spec.js` | upload.html: the submission wizard, file-type/size security checks |
-| `support-ticket.spec.js` | support-ticket.html: form validation, photo annotation, ticket refs |
+| `support-ticket.spec.js` | support-ticket.html: form validation, photo annotation; "not sent" with no ticket number, the text kept and copyable; Critical shows the emergency wording |
 | `glossary.spec.js` | glossary.html: term search, submission, persistence, escaping |
 | `analytics.spec.js` | analytics.html: local usage stats, trend charts, no-overclaim wording |
 | `bookmarks.spec.js` | the shared bookmarks feature across pages, per-device isolation |
@@ -194,3 +196,14 @@ where they matter, rather than worked around silently:
   specific offline-fallback scenario in `offline.spec.js`. That test
   detects the exact failure signature this causes and skips with a clear
   reason rather than failing red or silently dropping the coverage.
+
+## Real iPhone checks (cannot be automated here)
+
+Playwright drives Chromium and a desktop WebKit build. It cannot run an installed iPhone app, Safari's own back-forward cache, the real notch and home indicator, or a real network dropping. `installed-app.spec.js` simulates the status bar and the landscape insets; `phone-reliability.spec.js` drives the service worker in Chromium. These must be checked by hand on a real iPhone before production (the PR 2D report lists the steps):
+
+- Installed app (Add to Home Screen), upright and on its side: the Master List record drawer and Workbench close from the × and from the bottom Close; the segment document panel's × works; the phone menu scrolls to its last area; nothing sits under the notch or the home indicator.
+- Back from a document to a segment page, and from Master List to Home: the page is visible and takes taps.
+- Airplane mode while reading: one bar under the top bar; a document already opened still reads; Upload, approve, reject and withdraw say "Not sent" and keep what was typed; back online, the same action goes through.
+- A captive or dead Wi-Fi (connected but no internet): the bar says "RISE cannot be reached" within a few seconds of opening a page.
+- A deploy while Upload is at step 3: no reload; "New version available" appears; "Update now" warns; "Keep working" keeps the form.
+- Ask Expert: "Not sent" wording, nothing cleared, "Copy question" pastes into Mail or Teams; Critical shows the emergency wording.

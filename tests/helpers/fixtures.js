@@ -50,7 +50,11 @@ exports.test = base.test.extend({
         if (!/Timeout .*exceeded/.test(String(err && err.message))) throw err;
         // Fall through to the readyState poll below, see file header.
       }
-      await page.waitForFunction(() => document.readyState === 'complete', { timeout: 15_000 });
+      // A refused page (TAQA_ROLE.refuse, the Master List gate) ends with
+      // window.stop(); WebKit then never reaches "complete", only
+      // "interactive", so the refusal's own marker counts as loaded.
+      await page.waitForFunction(() => document.readyState === 'complete' ||
+        (document.readyState !== 'loading' && document.documentElement.hasAttribute('data-taqa-refused')), { timeout: 15_000 });
       // A hair of settle time: the app's own role-repaint / analytics-ping
       // listeners can still be mid-flight the instant readyState flips, and
       // an `evaluate()` that lands in that window intermittently throws
