@@ -421,9 +421,10 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
      which the bar now occupies, so both step up above it. */
   .toast-wrap{bottom:calc(var(--bar-h) + env(safe-area-inset-bottom) + 14px)!important;}
   #back-to-top{bottom:calc(var(--bar-h) + env(safe-area-inset-bottom) + 14px)!important;}
-  /* The same for the offline banner and the update bar shared.js pins to the
-     bottom edge: they rest on the action bar instead of covering it. */
-  #offline-banner,#sw-update-bar{bottom:calc(var(--bar-h) + env(safe-area-inset-bottom))!important;}
+  /* The same for the update bar shared.js pins to the bottom edge: it rests
+     on the action bar instead of covering it, so its own safe-area padding
+     is not needed there. */
+  #sw-update-bar{bottom:calc(var(--bar-h) + env(safe-area-inset-bottom))!important;padding-bottom:10px!important;}
   /* A transform on body would make it the bar's containing block while the
      page fades in, so on a phone the entrance is opacity only. */
   body{animation-name:pageFadeInFlat;}
@@ -1627,18 +1628,33 @@ function renderRelated(){
 setTimeout(renderRelated, 600);
 
 // ── Last synced indicator ──
-(function(){
+/* From TAQA_NET (shared.js): "last synced" is only ever the time this device
+   last really heard from RISE, and a copy from this device says so. It used
+   to read navigator.onLine, which says nothing about the server (PI-26). */
+function syncText(short) {
+  var N = window.TAQA_NET, st = N ? N.state() : (navigator.onLine === false ? 'offline' : 'online');
+  if (st === 'offline') return short ? 'Offline copy' : 'Offline: the copy saved on this device';
+  if (st === 'unreachable') {
+    var d = N.cachedAt() ? new Date(N.cachedAt()) : null;
+    var when = d && !isNaN(d) ? d.toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+    return short ? 'Saved copy' : 'RISE not reached: the copy saved on this device' + (when ? ' from ' + when : '');
+  }
   var ts = null;
   try { ts = localStorage.getItem('taqa-last-sync'); } catch(e) {}
+  if (!ts) return '';
+  var mins = Math.round((Date.now() - parseInt(ts, 10)) / 60000);
+  if (short) return mins < 2 ? 'Synced just now' : mins < 60 ? 'Synced ' + mins + 'm ago' : 'Synced ' + Math.round(mins/60) + 'h ago';
+  if (mins < 2) return 'Last synced: just now';
+  if (mins < 60) return 'Last synced: ' + mins + ' minutes ago';
+  if (mins < 1440) return 'Last synced: ' + Math.round(mins/60) + ' hours ago';
+  return 'Last synced: ' + Math.round(mins/1440) + ' days ago';
+}
+(function(){
   var el = document.getElementById('sync-note');
   if (!el) return;
-  if (!ts) { el.textContent = navigator.onLine ? 'Synced now' : 'Offline'; return; }
-  var mins = Math.round((Date.now() - parseInt(ts, 10)) / 60000);
-  if (mins < 2) el.textContent = 'Last synced: just now';
-  else if (mins < 60) el.textContent = 'Last synced: ' + mins + ' minutes ago';
-  else if (mins < 1440) el.textContent = 'Last synced: ' + Math.round(mins/60) + ' hours ago';
-  else el.textContent = 'Last synced: ' + Math.round(mins/1440) + ' days ago';
-  if (!navigator.onLine) el.textContent += ' · Offline mode';
+  function paint(){ el.textContent = syncText(false); }
+  paint();
+  if (window.TAQA_NET) TAQA_NET.onChange(paint);
 })();
 
 // ── Pin for offline ──
@@ -1714,13 +1730,8 @@ function showQuickRef() {
     (_rec && MA.scoreUrl(_rec) ? ' \u00b7 ' + esc(_rec.docNumber) : '');
 
   // Last synced in toolbar
-  var syncTs = null;
-  try { syncTs = localStorage.getItem('taqa-last-sync'); } catch(e) {}
-  var syncEl = document.getElementById('qref-sync-text');
-  if (syncTs) {
-    var m = Math.round((Date.now() - parseInt(syncTs,10)) / 60000);
-    syncEl.textContent = m < 2 ? 'Synced just now' : m < 60 ? 'Synced ' + m + 'm ago' : 'Synced ' + Math.round(m/60) + 'h ago';
-  }
+  var syncEl = document.getElementById('qref-sync-text'), syncT = syncText(true);
+  if (syncT) syncEl.textContent = syncT;
 
   // Focus moves into the dialog and comes back to whoever opened it. The menu
   // item that did is hidden once the menu closes, so the way back is More.

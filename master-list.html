@@ -1190,6 +1190,7 @@ function bulkWithdrawRun(){
   if(dlg.dataset.state!=='preview'||!bulkWithdrawPending.length)return;
   const reason=(document.getElementById('bq-reason')||{}).value||'';
   if(reason.trim().length<20)return;
+  if(window.TAQA_NET&&TAQA_NET.hold(dlg,dlg.querySelector('.bq-foot')))return;
   go.disabled=true;
   const results=bulkWithdrawPending.map(p=>{
     let r=null;
@@ -1305,6 +1306,7 @@ function bulkConfirmPreview(chosen){
 function bulkConfirmRun(){
   const dlg=document.getElementById('bulk-dlg'), go=document.getElementById('bulk-dlg-go');
   if(dlg.dataset.state!=='preview'||!bulkPending.length)return;
+  if(window.TAQA_NET&&TAQA_NET.hold(dlg,dlg.querySelector('.bq-foot')))return;
   go.disabled=true;
   const results=bulkPending.map(p=>{
     const num=p.num;
@@ -1541,6 +1543,8 @@ function wbReasonInput(){
 }
 function wbConfirm(){
   const dw=document.getElementById('dw'), num=dw.dataset.wb; if(!num||!wbReady())return;
+  // Offline: the panel stays as it is, with the reason if one is typed (PI-28).
+  if(window.TAQA_NET&&TAQA_NET.hold(document.getElementById('dw-foot'),document.getElementById('wb-acts')))return;
   wbBusy=true;
   const next=wbNextAfter(num), expect={key:dw.dataset.wbKey,stage:'qms'};
   let r; try{r=TAQA_STORE.countersign(num,expect);}catch(e){r={ok:false,error:'Something went wrong while confirming it.'};}
@@ -1550,6 +1554,7 @@ function wbReject(){
   const dw=document.getElementById('dw'), num=dw.dataset.wb; if(!num||wbBusy)return;
   const reason=document.getElementById('wb-reason').value.trim();
   if(reason.length<20)return;
+  if(window.TAQA_NET&&TAQA_NET.hold(document.getElementById('dw-foot'),document.getElementById('wb-acts')))return;
   wbBusy=true;
   const next=wbNextAfter(num), expect={key:dw.dataset.wbKey,stage:'qms'};
   let r; try{r=TAQA_STORE.reject(num,reason,expect);}catch(e){r={ok:false,error:'Something went wrong while rejecting it.'};}

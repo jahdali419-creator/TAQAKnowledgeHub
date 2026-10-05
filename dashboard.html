@@ -1533,6 +1533,8 @@ function ensureApproveModal() {
   approveOverlay.addEventListener('click', function (e) { if (e.target === approveOverlay) close(); });
   approveOverlay.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
   document.getElementById('approve-modal-confirm').addEventListener('click', function () {
+    // Offline: say so here and keep the dialog, not a refusal behind it (PI-28).
+    if (window.TAQA_NET && TAQA_NET.hold(approveOverlay.querySelector('.reject-modal'), approveOverlay.querySelector('.reject-modal-actions'))) return;
     const p = approvePending;
     if (!p) return;
     const eff = document.getElementById('approve-modal-eff').value;
@@ -1702,6 +1704,8 @@ function ensureRejectModal() {
     const { id, card, badge, result, actions, storeDoc } = rejectTarget;
     const reason = rejectInput.value.trim();
     if (reason.length < 20) return;
+    // Offline: the reason stays typed in the open dialog (PI-28).
+    if (window.TAQA_NET && TAQA_NET.hold(rejectOverlay.querySelector('.reject-modal'), rejectOverlay.querySelector('.reject-modal-actions'))) return;
 
     if (storeDoc && typeof TAQA_STORE !== 'undefined') {
       const out = TAQA_STORE.reject(storeDoc, reason, rejectTarget.expect);

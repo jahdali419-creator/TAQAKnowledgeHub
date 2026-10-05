@@ -274,7 +274,10 @@ window.TAQA_NET = (function(){
     '#taqa-net-bar span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0;}' +
     '#taqa-net-bar svg{flex-shrink:0;}' +
     'html.taqa-net-on #taqa-net-bar{display:flex;}' +
-    '@media print{#taqa-net-bar{display:none!important;}}';
+    '@media print{#taqa-net-bar{display:none!important;}}' +
+    '.taqa-net-refusal{margin:10px 0;padding:10px 12px;border-radius:10px;font-size:13px;line-height:1.45;' +
+      'color:#7A0A1C;background:#FDEDEF;border:1px solid rgba(200,16,46,0.25);}' +
+    'html[data-taqa-theme="dark"] .taqa-net-refusal{color:#FFD1D6;background:rgba(200,16,46,0.18);border-color:rgba(255,138,148,0.35);}';
   document.head.appendChild(css);
   var bar = document.createElement('div');
   bar.id = 'taqa-net-bar';
@@ -344,7 +347,22 @@ window.TAQA_NET = (function(){
         : 'Not sent: RISE cannot be reached. Nothing was saved to the register. What you entered is still here; try again when the connection is back.';
     },
     probe: probe,
-    onChange: function(fn){ listeners.push(fn); }
+    onChange: function(fn){ listeners.push(fn); },
+    // Before a decision that closes a dialog or replaces a panel: when it
+    // cannot be sent, say so in place (before `before`, or at the top of
+    // `where`) and return true, so the caller stops with the dialog still
+    // open and the typed reason still in it. Clears the note once it can.
+    hold: function(where, before){
+      if (!where) return !this.canWrite();
+      var old = where.querySelector('.taqa-net-refusal');
+      if (this.canWrite()) { if (old) old.remove(); return false; }
+      var p = old || document.createElement('p');
+      p.className = 'taqa-net-refusal';
+      p.setAttribute('role', 'alert');
+      p.textContent = this.why();
+      if (!old) { if (before && before.parentNode) before.parentNode.insertBefore(p, before); else where.insertBefore(p, where.firstChild); }
+      return true;
+    }
   };
 })();
 
