@@ -77,6 +77,11 @@ async function unreachable(page, root) {
   return page.evaluate((root) => {
     const box = document.querySelector(root);
     if (!box) return ['missing ' + root];
+    // Measure where things land, not mid-scroll: WebKit has no
+    // scrollIntoView 'instant', and the pages ask for smooth scrolling.
+    const st = document.createElement('style');
+    st.textContent = '*{scroll-behavior:auto!important}';
+    document.head.appendChild(st);
     const bad = [];
     const name = (el) => (el.id ? '#' + el.id : '') + (el.getAttribute('aria-label') || el.textContent || el.tagName).trim().replace(/\s+/g, ' ').slice(0, 30);
     const desc = (el) => el ? (el.id || String(el.className).split(' ')[0] || el.tagName) : 'nothing';
@@ -87,7 +92,7 @@ async function unreachable(page, root) {
       const det = el.closest('details');
       if (det && !det.open && !el.closest('summary')) continue;
       if (!el.getClientRects().length) continue;
-      el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
+      el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
       const r = el.getBoundingClientRect();
       if (r.width < 2 || r.height < 2) continue;
       const x = Math.min(Math.max(r.left + r.width / 2, 0), innerWidth - 1), y = Math.min(Math.max(r.top + r.height / 2, 0), innerHeight - 1);

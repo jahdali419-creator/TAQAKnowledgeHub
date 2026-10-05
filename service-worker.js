@@ -88,7 +88,9 @@ self.addEventListener('message', e => {
 
 // A network answer slower than this is treated as no answer: a phone on a
 // captive portal or a dead link reports "online" and then waits forever.
-const NET_TIMEOUT = 4000;
+// Long enough for a slow field link to still count as reaching RISE; the
+// page keeps re-checking while it shows "cannot be reached" (shared.js).
+const NET_TIMEOUT = 6000;
 function fetchWithin(request, ms) {
   return new Promise((resolve, reject) => {
     const t = setTimeout(() => reject(new Error('timeout')), ms);

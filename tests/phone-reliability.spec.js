@@ -80,6 +80,42 @@ test.describe('connectivity: one bar, under the top bar, honest about what it sh
     expect(Number(await page.evaluate(() => localStorage.getItem('taqa-last-sync')))).toBeGreaterThan(1000);
   });
 
+  test('"cannot be reached" re-checks by itself and recovers without a reload once RISE answers', async ({ page, gotoApp }) => {
+    await prime(page, gotoApp);
+    await page.clock.install();
+    await gotoApp('/index.html');
+    let down = true;
+    await page.route('**/manifest.json?probe=*', (r) => (down ? r.abort() : r.continue()));
+    await page.evaluate(() => { window.__same = true; localStorage.setItem('taqa-last-sync', '1000'); });
+    expect(await page.evaluate(() => TAQA_NET.probe())).toBe(false);
+    await expect(page.locator('#taqa-net-bar')).toContainText('RISE cannot be reached');
+    // Still down at the first re-check: still "cannot be reached", last synced untouched.
+    await page.clock.runFor(21_000);
+    await expect(page.locator('#taqa-net-bar')).toContainText('RISE cannot be reached');
+    expect(await page.evaluate(() => localStorage.getItem('taqa-last-sync'))).toBe('1000');
+    // RISE answers again: the next re-check (backed off to 30s) recovers, no reload.
+    down = false;
+    await page.clock.runFor(31_000);
+    await expect(page.locator('#taqa-net-bar')).toBeHidden();
+    expect(await page.evaluate(() => TAQA_NET.state())).toBe('online');
+    expect(await page.evaluate(() => TAQA_NET.canWrite())).toBe(true);
+    expect(await page.evaluate(() => window.__same)).toBe(true);
+    expect(Number(await page.evaluate(() => localStorage.getItem('taqa-last-sync')))).toBeGreaterThan(1000);
+  });
+
+  test('a refused change while "cannot be reached" asks again at once, so the next try can go through', async ({ page, gotoApp }) => {
+    await prime(page, gotoApp, 'employee');
+    let down = true;
+    await page.route('**/manifest.json?probe=*', (r) => (down ? r.abort() : r.continue()));
+    expect(await page.evaluate(() => TAQA_NET.probe())).toBe(false);
+    down = false;
+    const first = await page.evaluate(() => TAQA_STORE.add({ title: 'Retry filing', segment: 'drilling', docType: 'sop', docNumber: 'TQ-TDS-DSS-SOP-985', summary: 'Retry check.' }));
+    expect(first).toBeNull(); // refused: nothing is sent on a guess
+    await expect.poll(() => page.evaluate(() => TAQA_NET.state())).toBe('online');
+    const second = await page.evaluate(() => !!TAQA_STORE.add({ title: 'Retry filing', segment: 'drilling', docType: 'sop', docNumber: 'TQ-TDS-DSS-SOP-985', summary: 'Retry check.' }));
+    expect(second).toBe(true);
+  });
+
   test('the device says online but RISE does not answer: "cannot be reached", and nothing is sent', async ({ page, gotoApp }) => {
     await prime(page, gotoApp);
     await gotoApp('/index.html');
@@ -231,7 +267,7 @@ test.describe('segment pager on a phone', () => {
 
 // ── Install sheet: Home only, never over a task ──────────────────────────
 test.describe('install sheet', () => {
-  test.use({ ...PHONE, userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1' });
+  test.use({ ...PHONE, installPrompt: true, userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1' });
   test('a phone browser is offered the install on Home, never over the Workbench, the desk or a document', async ({ page, gotoApp }) => {
     await prime(page, gotoApp);
     await page.evaluate(() => localStorage.removeItem('taqa-install-dismissed'));

@@ -264,6 +264,11 @@ window.TAQA_WORK = (function(){
    state is not "online" (TAQA_STORE refuses it and says so). */
 window.TAQA_NET = (function(){
   var state = (navigator.onLine === false) ? 'offline' : 'online', cachedAt = null, listeners = [], answered = false;
+  // While RISE cannot be reached, ask again on a timer (20s, backing off to
+  // 60s), when the person comes back to the tab, and when a change is
+  // refused, so a link that recovers is noticed without a reload. Only a
+  // real answer from the server turns the state back to "online".
+  var retry = null, retryMs = 20000, probing = null;
   var css = document.createElement('style');
   css.textContent =
     'html.taqa-net-on{--net-bar-h:30px;}' +
@@ -300,9 +305,21 @@ window.TAQA_NET = (function(){
     if (on && !bar.parentNode && document.body) document.body.appendChild(bar);
     listeners.forEach(function(fn){ try { fn(state); } catch(e){} });
   }
+  function schedule(){
+    if (retry) return;
+    retry = setTimeout(function(){
+      retry = null;
+      if (state === 'online') return;
+      if (document.visibilityState !== 'hidden') probe();
+      retryMs = Math.min(retryMs * 1.5, 60000);
+      schedule();
+    }, retryMs);
+  }
   function set(next, date){
     if (next === 'unreachable' && date) cachedAt = date;
     var was = state; state = next;
+    if (next === 'online') { if (retry) clearTimeout(retry); retry = null; retryMs = 20000; }
+    else if (next === 'unreachable') schedule();
     if (next === 'online') { try { localStorage.setItem('taqa-last-sync', Date.now().toString()); } catch(e){} }
     paint();
     // For scripts that ran before this file (the viewer's sync note).
@@ -313,12 +330,17 @@ window.TAQA_NET = (function(){
   // answers from its cache.
   function probe(){
     if (navigator.onLine === false) { set('offline'); return Promise.resolve(false); }
+    if (probing) return probing;   // one question at a time
     var ctl = ('AbortController' in window) ? new AbortController() : null;
-    var timer = setTimeout(function(){ if (ctl) ctl.abort(); }, 4000);
-    return fetch('manifest.json?probe=' + Date.now(), { cache: 'no-store', signal: ctl ? ctl.signal : undefined })
-      .then(function(r){ clearTimeout(timer); if (!r.ok) throw new Error('status'); set('online'); return true; })
-      .catch(function(){ clearTimeout(timer); set(navigator.onLine === false ? 'offline' : 'unreachable', cachedAt); return false; });
+    var timer = setTimeout(function(){ if (ctl) ctl.abort(); }, 8000);
+    probing = fetch('manifest.json?probe=' + Date.now(), { cache: 'no-store', signal: ctl ? ctl.signal : undefined })
+      .then(function(r){ clearTimeout(timer); probing = null; if (!r.ok) throw new Error('status'); set('online'); return true; })
+      .catch(function(){ clearTimeout(timer); probing = null; set(navigator.onLine === false ? 'offline' : 'unreachable', cachedAt); return false; });
+    return probing;
   }
+  document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState === 'visible' && state !== 'online') probe();
+  });
   window.addEventListener('offline', function(){ set('offline'); });
   window.addEventListener('online', function(){ probe(); });
   // How this page was served: the service worker answers once it controls
@@ -355,6 +377,7 @@ window.TAQA_NET = (function(){
     // `where`) and return true, so the caller stops with the dialog still
     // open and the typed reason still in it. Clears the note once it can.
     hold: function(where, before){
+      if (!this.canWrite() && state === 'unreachable') probe();   // perhaps it is back: the next try will know
       if (!where) return !this.canWrite();
       var old = where.querySelector('.taqa-net-refusal');
       if (this.canWrite()) { if (old) old.remove(); return false; }

@@ -155,7 +155,11 @@
   var lastWriteError = null;
   function notSent() {
     var n = root.TAQA_NET;
-    if (n && n.canWrite && !n.canWrite()) return n.why();
+    if (n && n.canWrite && !n.canWrite()) {
+      // Perhaps RISE is back: ask now, so the next try can go through.
+      if (n.state && n.state() === 'unreachable' && n.probe) n.probe();
+      return n.why();
+    }
     if (!n && typeof navigator !== 'undefined' && navigator.onLine === false)
       return 'Not sent: you are offline. Nothing was saved to the register. Try again when you are connected.';
     return null;
