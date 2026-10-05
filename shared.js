@@ -398,7 +398,7 @@ window.TAQA_NET = (function(){
 window.TAQA_TOP = function(){
   var b = 0, n = document.getElementById('navbar'), t = document.getElementById('taqa-net-bar');
   if (n) b = Math.max(b, n.getBoundingClientRect().bottom);
-  if (t && t.offsetParent !== null) b = Math.max(b, t.getBoundingClientRect().bottom);
+  if (t && document.documentElement.classList.contains('taqa-net-on')) b = Math.max(b, t.getBoundingClientRect().bottom);
   return b || 64;
 };
 
@@ -590,10 +590,9 @@ window.addEventListener('pageshow', function(e){
   var s=document.createElement('style');
   s.textContent=
     '.nav-hamburger{display:none;}'+
-    /* Never taller than the screen below the bar, so the last areas can be
-       scrolled to on a short or turned phone (it grew past the bottom edge),
-       and clear of the notch and the home indicator (PI-52). */
-    '.nav-mobile-menu{display:none;position:fixed;inset-inline:0;top:var(--nav-h,64px);z-index:998;max-height:calc(100dvh - var(--nav-h,64px));'+
+    /* Clear of the notch and the home indicator on a turned phone (PI-52).
+       Its height is set where it opens, below the bar. */
+    '.nav-mobile-menu{display:none;position:fixed;inset-inline:0;top:var(--nav-h,64px);z-index:998;'+
       'background:var(--tb-solid,#fff);border-bottom:1px solid var(--tb-rule,rgba(117,106,97,.13));'+
       'padding:6px max(16px, var(--safe-r,0px)) calc(28px + var(--safe-b,0px)) max(16px, var(--safe-l,0px));box-shadow:0 22px 44px -26px rgba(0,88,90,.28);'+
       'overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;font-family:"Inter",system-ui,sans-serif;}'+
@@ -706,7 +705,8 @@ window.addEventListener('pageshow', function(e){
   function setMenu(open){
     var m=document.getElementById('nav-mobile-menu'); if(!m) return;
     if(open){
-      var t=navEl?Math.round(navEl.getBoundingClientRect().bottom):64;
+      // Below the bar and the connectivity bar under it, when that shows (PR 2D).
+      var t=window.TAQA_TOP?Math.round(TAQA_TOP()):(navEl?Math.round(navEl.getBoundingClientRect().bottom):64);
       var sheet=window.matchMedia&&window.matchMedia('(min-width:641px)').matches;
       if(sheet) t+=8;
       m.style.top=t+'px';

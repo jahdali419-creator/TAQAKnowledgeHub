@@ -63,6 +63,16 @@ test.describe('connectivity: one bar, under the top bar, honest about what it sh
     expect(tabs.y).toBeGreaterThanOrEqual(bar.y + bar.height - 1);
     expect(before).not.toBeNull();
 
+    // The phone menu opens below both bars, not under the connectivity bar,
+    // and its last row is still within reach.
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.locator('#nav-hamburger').click();
+    const menu = await page.locator('#nav-mobile-menu').boundingBox();
+    expect(menu.y).toBeGreaterThanOrEqual(bar.y + bar.height - 1);
+    expect(await tappable(page, '#nav-mobile-menu a, #nav-mobile-menu button')).toBe(true);
+    expect(menu.y + menu.height).toBeLessThanOrEqual(844 + 1);
+    await page.locator('#nav-hamburger').click();
+
     await context.setOffline(false);
     await expect(page.locator('#taqa-net-bar')).toBeHidden(); // online again only once the server answered
   });
