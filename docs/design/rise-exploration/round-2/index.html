@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RISE Mobile Directions</title>
+<link rel="stylesheet" href="../kit/fonts.css">
+<style>
+/* Layout: a single review column (~1160px). Each option gets a filmstrip of its brand moment, a row of
+   phone frames, two desktop frames, its brand kit and the case for it. Galleries scroll sideways on a phone. */
+:root{
+  --ground:#F3F5F4; --sheet:#FFFFFF; --ink:#0B2A30; --ink-2:#3C5459; --ink-3:#5C6F73;
+  --rule:#D9DFDE; --chip:#E7ECEB; --teal:#005D63; --cyan:#00ADC2; --orange:#FD5805;
+  --frame:#0B2A30; --shadow:0 1px 2px rgba(0,43,50,.06),0 14px 30px -18px rgba(0,43,50,.35);
+  --logo-l:block; --logo-d:none;
+  --display:'BwGradual','Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --text:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#0A1B1E; --sheet:#10262A; --ink:#E4EEEE; --ink-2:#B5C6C8; --ink-3:#8FA3A6;
+  --rule:#22393D; --chip:#18322F; --teal:#5FC2C4; --cyan:#22C3D6; --orange:#FF7A33;
+  --frame:#2A4950; --shadow:0 1px 2px rgba(0,0,0,.3),0 14px 30px -18px rgba(0,0,0,.6);
+  --logo-l:none; --logo-d:block; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#0A1B1E; --sheet:#10262A; --ink:#E4EEEE; --ink-2:#B5C6C8; --ink-3:#8FA3A6;
+  --rule:#22393D; --chip:#18322F; --teal:#5FC2C4; --cyan:#22C3D6; --orange:#FF7A33;
+  --frame:#2A4950; --shadow:0 1px 2px rgba(0,0,0,.3),0 14px 30px -18px rgba(0,0,0,.6);
+  --logo-l:none; --logo-d:block; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 16px/1.6 var(--text);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1160px;margin:0 auto;padding-inline:24px}
+@media (max-width:560px){.wrap{padding-inline:16px}}
+a{color:var(--teal);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:4px}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:-.015em;text-wrap:balance;margin:0}
+p,ul,ol{margin:0}
+.eyebrow{font:600 11.5px/1 var(--text);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-2);max-width:64ch}
+.fs{display:inline-block;width:.17em;height:.17em;border-radius:50%;background:var(--orange);margin-left:.04em}
+.num{font-variant-numeric:tabular-nums}
+
+/* masthead */
+.mast{padding-block:44px 36px;border-bottom:1px solid var(--rule)}
+.mast-top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:40px}
+.mast-top img{height:34px;width:auto}
+.logo-l{display:var(--logo-l)} .logo-d{display:var(--logo-d)}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px dashed var(--rule);border-radius:999px;font:600 12px/1 var(--text);color:var(--ink-2)}
+.badge i{width:7px;height:7px;border-radius:50%;background:var(--orange)}
+.mast h1{font-size:clamp(34px,5.4vw,60px);line-height:1.02;margin:14px 0 18px;letter-spacing:-.03em}
+.rules{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;margin-top:36px;padding-top:20px;border-top:1px solid var(--rule)}
+.rules b{display:block;font:700 15.5px/1.3 var(--display);margin-bottom:6px}
+.rules span{display:block;font-size:14.5px;line-height:1.5;color:var(--ink-2)}
+@media (max-width:860px){.rules{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.rules{grid-template-columns:1fr}}
+
+/* section bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ground);border-bottom:1px solid var(--rule)}
+.bar nav{display:flex;gap:4px;overflow-x:auto;padding-block:10px;scrollbar-width:none}
+.bar a{flex:none;padding:6px 12px;border-radius:999px;color:var(--ink-2);text-decoration:none;font:500 14px/1.2 var(--text)}
+.bar a:hover{background:var(--chip);color:var(--ink)}
+.bar a b{font-family:var(--display);margin-right:4px;color:var(--ink)}
+
+/* option */
+.opt{padding-block:72px 16px;border-bottom:1px solid var(--rule)}
+.opt-h{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 28px;align-items:start}
+.opt-h .let{font:800 88px/.8 var(--display);letter-spacing:-.04em;color:var(--ink)}
+.opt-h h2{font-size:clamp(30px,4vw,42px);line-height:1.05;margin-top:6px}
+.opt-h .idea{font-size:19px;line-height:1.5;color:var(--ink-2);margin-top:10px;max-width:58ch}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.tags span{padding:5px 10px;border-radius:6px;background:var(--chip);font:500 13px/1.2 var(--text);color:var(--ink-2)}
+@media (max-width:560px){.opt-h{grid-template-columns:1fr}.opt-h .let{font-size:64px}}
+
+.blk{margin-top:44px}
+.blk-h{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.blk-h h3{font-size:20px}
+.blk-h p{font-size:14px;color:var(--ink-3)}
+
+/* galleries: phones scroll sideways on narrow screens, never the page */
+.strip{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(200px,1fr);gap:20px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
+.strip figure{margin:0;scroll-snap-align:start;min-width:0}
+.phone{display:block;border-radius:30px;border:6px solid var(--frame);overflow:hidden;background:var(--frame);box-shadow:var(--shadow);aspect-ratio:390/844}
+.phone img{display:block;width:100%;height:100%;object-fit:cover}
+figcaption{margin-top:12px;font-size:14px;line-height:1.45;color:var(--ink-2)}
+figcaption b{display:block;font:700 15px/1.3 var(--display);color:var(--ink);margin-bottom:2px}
+@media (max-width:860px){.strip{grid-auto-columns:220px}}
+
+.film{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;max-width:620px}
+.film figure{margin:0}
+.film .phone{border-width:4px;border-radius:18px}
+.film figcaption{margin-top:8px;font:500 12.5px/1.3 var(--text);color:var(--ink-3);font-variant-numeric:tabular-nums}
+.moment{display:grid;grid-template-columns:minmax(0,620px) minmax(0,1fr);gap:32px;align-items:start}
+.moment p{color:var(--ink-2);max-width:48ch}
+.moment p+p{margin-top:10px}
+@media (max-width:900px){.moment{grid-template-columns:1fr}}
+
+.desk{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.desk figure{margin:0;min-width:0}
+.screen{display:block;border-radius:10px;overflow:hidden;border:1px solid var(--rule);box-shadow:var(--shadow);aspect-ratio:1440/900;background:var(--sheet)}
+.screen img{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
+@media (max-width:760px){.desk{grid-template-columns:1fr}}
+
+.kit{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+.card{background:var(--sheet);border:1px solid var(--rule);border-radius:12px;padding:22px}
+.sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+.sw div{font-size:12.5px;line-height:1.35;color:var(--ink-2)}
+.sw i{display:block;height:44px;border-radius:8px;margin-bottom:8px;box-shadow:inset 0 0 0 1px rgba(127,127,127,.25)}
+.sw b{display:block;color:var(--ink);font-weight:600}
+.type-spec{display:grid;gap:14px}
+.type-spec div{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;align-items:baseline}
+.type-spec span{font-size:12.5px;color:var(--ink-3)}
+@media (max-width:760px){.kit{grid-template-columns:1fr}}
+
+.case{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:32px}
+.case h4{font:700 13px/1 var(--text);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+.case ul{padding:0;list-style:none;display:grid;gap:12px}
+.case li{padding-left:22px;position:relative;line-height:1.55}
+.case li::before{content:"";position:absolute;left:2px;top:.62em;width:8px;height:8px;border-radius:50%;background:var(--teal)}
+.case .risk li::before{background:none;border:2px solid var(--ink-3);width:6px;height:6px}
+.case li b{font-weight:600}
+@media (max-width:760px){.case{grid-template-columns:1fr}}
+
+.open{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:20px;font-size:14px}
+
+/* compare */
+.tbl{overflow-x:auto;border:1px solid var(--rule);border-radius:12px;background:var(--sheet)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:14.5px;line-height:1.45}
+th,td{text-align:left;vertical-align:top;padding:14px 16px;border-bottom:1px solid var(--rule)}
+tr:last-child td{border-bottom:0}
+thead th{font:700 16px/1.2 var(--display);border-bottom:2px solid var(--ink)}
+tbody th{font:600 13px/1.4 var(--text);color:var(--ink-3);width:160px}
+section.plain{padding-block:72px 16px}
+.sec-h{margin-bottom:22px}
+.sec-h h2{font-size:clamp(26px,3.2vw,36px)}
+.next{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.next b{display:block;font:700 17px/1.3 var(--display);margin-bottom:8px}
+.next p{color:var(--ink-2);font-size:15px}
+@media (max-width:860px){.next{grid-template-columns:1fr}}
+footer{padding-block:56px 72px;color:var(--ink-3);font-size:14px}
+</style>
+</head>
+<body>
+
+<header class="wrap mast">
+  <div class="mast-top">
+    <span><img class="logo-l" src="../kit/brand/rise-lockup-header.png" alt="RISE" width="320" height="120"><img class="logo-d" src="../kit/brand/rise-lockup-header-reverse.png" alt="RISE" width="320" height="120"></span>
+    <span class="badge"><i></i>Design exploration · not implemented</span>
+  </div>
+  <p class="eyebrow">Round 2 · 5 Oct 2026</p>
+  <h1>Three new directions for RISE, designed for the phone first<span class="fs"></span></h1>
+  <p class="lede">Round 1 put too much on each screen for a phone, and the RISE brand didn't lead. These three options start at 390 pixels wide, keep only what matters on the first screen, and give the RISE logo a clear moment of its own. Each one then scales up to desktop.</p>
+  <div class="rules">
+    <div><b>Phone first</b><span>Every screen is designed at 390 × 844 and fits one phone screen before you need to scroll.</span></div>
+    <div><b>Three things, not fourteen</b><span>The phone home shows search, the one alert that matters and where you left off. Everything else is one tap away.</span></div>
+    <div><b>The brand leads</b><span>The real logo file, BW Gradual, the RISE colours and one brand moment per option. Each option uses the logo differently.</span></div>
+    <div><b>Same real content</b><span>The register data from round 1 (Coiled Tubing, WI-003, ALT-002), so you compare the designs, not the data.</span></div>
+  </div>
+</header>
+
+<div class="bar"><nav class="wrap" aria-label="Sections">
+  <a href="#d"><b>D</b>Beacon</a><a href="#e"><b>E</b>Full Stop</a><a href="#f"><b>F</b>Rise</a><a href="#compare">Compare</a><a href="#decide">Decide</a>
+</nav></div>
+
+<main>
+<!-- ======================= D ======================= -->
+<section class="wrap opt" id="d">
+  <div class="opt-h">
+    <span class="let" aria-hidden="true">D</span>
+    <div>
+      <p class="eyebrow">Option D</p>
+      <h2>Beacon</h2>
+      <p class="idea">RISE as a lit signal. The deep ink of the logo is the ground, and the logo's own colours are the only light on the screen.</p>
+      <div class="tags"><span>Dark ground</span><span>Full-screen brand entrance</span><span>Symbol and statement locked up</span><span>Cyan for every action</span></div>
+    </div>
+  </div>
+
+  <div class="blk moment">
+    <div class="film" aria-label="Entrance, frame by frame">
+      <figure><span class="phone"><img src="shots/d-moment-100.jpg" alt="Entrance at 0.1 seconds: the pillar starts to rise" loading="lazy" width="390" height="844"></span><figcaption>0.10 s</figcaption></figure>
+      <figure><span class="phone"><img src="shots/d-moment-260.jpg" alt="Entrance at 0.26 seconds: the bars slide in" loading="lazy" width="390" height="844"></span><figcaption>0.26 s</figcaption></figure>
+      <figure><span class="phone"><img src="shots/d-moment-420.jpg" alt="Entrance at 0.42 seconds: the name settles" loading="lazy" width="390" height="844"></span><figcaption>0.42 s</figcaption></figure>
+      <figure><span class="phone"><img src="shots/d-moment-1000.jpg" alt="Entrance complete: the full RISE logo" loading="lazy" width="390" height="844"></span><figcaption>0.70 s · done</figcaption></figure>
+    </div>
+    <div>
+      <h3 style="font-size:20px;margin-bottom:12px">Brand moment: the logo assembles</h3>
+      <p>A full-screen entrance, 700 ms, once per session. The real logo file is cut into its six parts: the pillar rises, the cyan and orange bars slide in, the name settles and the orange full stop lands.</p>
+      <p>A tap skips it, and it never delays search. With reduced motion turned on, the finished logo simply appears.</p>
+    </div>
+  </div>
+
+  <div class="blk">
+    <div class="blk-h"><h3>On the phone</h3><p>390 × 844 · open any screen to see the live mockup</p></div>
+    <div class="strip">
+      <figure><a class="phone" href="d/entrance.html"><img src="shots/d-entrance-phone.jpg" alt="Beacon entrance screen" loading="lazy" width="780" height="1688"></a><figcaption><b>Entrance</b>The RISE logo in full on deep ink, with a single line of credit.</figcaption></figure>
+      <figure><a class="phone" href="d/home.html"><img src="shots/d-home-phone.jpg" alt="Beacon home on a phone" loading="lazy" width="780" height="1688"></a><figcaption><b>Home</b>WHAT WE KNOW. nests under the symbol. Below it: search with QR scan, the critical alert and the last document you opened.</figcaption></figure>
+      <figure><a class="phone" href="d/area.html"><img src="shots/d-area-phone.jpg" alt="Beacon Coiled Tubing area" loading="lazy" width="780" height="1688"></a><figcaption><b>Area</b>Coiled Tubing with the Operations or Maintenance switch, a scrolling shelf row and five SOPs.</figcaption></figure>
+      <figure><a class="phone" href="d/document.html"><img src="shots/d-document-phone.jpg" alt="Beacon document WI-003" loading="lazy" width="780" height="1688"></a><figcaption><b>Document</b>The number, status and approver come first. Reading happens on a light sheet, and the actions sit at the bottom of the screen within thumb reach.</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="blk">
+    <div class="blk-h"><h3>Scaled to desktop</h3><p>1440 × 900 · the same pages, with no separate desktop design</p></div>
+    <div class="desk">
+      <figure><a class="screen" href="d/home.html"><img src="shots/d-home-desktop.jpg" alt="Beacon home on desktop" loading="lazy" width="1440" height="900"></a><figcaption><b>Home</b>The same lockup at 112 px. The cards move into a right-hand column, and the register figures sit in a quiet footer.</figcaption></figure>
+      <figure><a class="screen" href="d/document.html"><img src="shots/d-document-desktop.jpg" alt="Beacon document on desktop" loading="lazy" width="1440" height="900"></a><figcaption><b>Document</b>The identity band runs full width. Below it, the page preview sits beside the summary and the approval trail.</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="blk kit">
+    <div class="card">
+      <h3 style="font-size:17px;margin-bottom:16px">Colour</h3>
+      <div class="sw">
+        <div><i style="background:#002B32"></i><b>Ink</b>#002B32 · ground</div>
+        <div><i style="background:#063A43"></i><b>Raised</b>#063A43 · cards</div>
+        <div><i style="background:#00ADC2"></i><b>Cyan</b>#00ADC2 · actions</div>
+        <div><i style="background:#FD5805"></i><b>Orange</b>#FD5805 · brand, critical</div>
+        <div><i style="background:#F5F7F6"></i><b>Sheet</b>#F5F7F6 · reading</div>
+      </div>
+    </div>
+    <div class="card type-spec">
+      <h3 style="font-size:17px">Type</h3>
+      <div><span>Statement</span><b style="font:800 28px/1 var(--display);letter-spacing:-.035em;text-transform:uppercase">What we know<span class="fs"></span></b></div>
+      <div><span>Titles</span><b style="font:700 20px/1.2 var(--display)">Injector Head Operations Manual</b></div>
+      <div><span>Numbers</span><b style="font:600 14px/1.2 var(--text);letter-spacing:.025em;color:var(--teal)" class="num">TQ-TWS-CTSS-WI-003</b></div>
+      <div><span>Interface</span><span style="font-size:15px;color:var(--ink)">Inter, 16 px minimum on the phone</span></div>
+    </div>
+  </div>
+
+  <div class="blk case">
+    <div><h4>Why it works</h4><ul>
+      <li><b>The brand owns the first second.</b> The symbol and WHAT WE KNOW. lock up on Home the way RISE sits beside the pillar in the logo. It is the strongest first impression of the three.</li>
+      <li><b>The phone home has three things.</b> Search (with QR scan for the code printed on a document), the critical alert and the document you were reading. The tab bar has four items.</li>
+      <li><b>The dark ground is calm in control cabins and on night shifts.</b> Cyan actions and the green and amber status colours stand out clearly on it.</li>
+      <li><b>Desktop keeps the same composition.</b> The cards move to a column on the right. Nothing new is invented for the larger screen.</li>
+    </ul></div>
+    <div class="risk"><h4>Watch out for</h4><ul>
+      <li>Dark screens are harder to read in direct sun on site. Outdoor use would need a light theme too, which doubles testing.</li>
+      <li>Long procedures read on a light sheet, so the app changes ground between lists and documents.</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- ======================= E ======================= -->
+<section class="wrap opt" id="e">
+  <div class="opt-h">
+    <span class="let" aria-hidden="true">E</span>
+    <div>
+      <p class="eyebrow">Option E</p>
+      <h2>Full Stop</h2>
+      <p class="idea">Type does the work. One typeface on warm paper, with the orange full stop from WHAT WE KNOW. as the only accent in the whole product.</p>
+      <div class="tags"><span>Light, warm paper</span><span>Brand moment built into Home</span><span>BW Gradual throughout</span><span>No cards, no tiles</span></div>
+    </div>
+  </div>
+
+  <div class="blk moment">
+    <div class="film" aria-label="Home opening, frame by frame">
+      <figure><span class="phone"><img src="shots/e-moment-60.jpg" alt="Home at 0.06 seconds: WHAT starts to rise" loading="lazy" width="390" height="844"></span><figcaption>0.06 s</figcaption></figure>
+      <figure><span class="phone"><img src="shots/e-moment-200.jpg" alt="Home at 0.2 seconds: the three words rise in turn" loading="lazy" width="390" height="844"></span><figcaption>0.20 s</figcaption></figure>
+      <figure><span class="phone"><img src="shots/e-moment-380.jpg" alt="Home at 0.38 seconds: words in place, waiting for the full stop" loading="lazy" width="390" height="844"></span><figcaption>0.38 s</figcaption></figure>
+      <figure><span class="phone"><img src="shots/e-moment-1000.jpg" alt="Home complete with the orange full stop" loading="lazy" width="390" height="844"></span><figcaption>0.60 s · done</figcaption></figure>
+    </div>
+    <div>
+      <h3 style="font-size:20px;margin-bottom:12px">Brand moment: the full stop lands</h3>
+      <p>There is no splash screen. When Home opens, WHAT, WE and KNOW rise into place one after another and the orange full stop drops in, 600 ms, once per session. The statement is the home screen itself, so there is nothing to wait for or skip.</p>
+      <p>BW Gradual's own full stop is square, so the round dot is drawn to match the logo.</p>
+    </div>
+  </div>
+
+  <div class="blk">
+    <div class="blk-h"><h3>On the phone</h3><p>390 × 844 · open any screen to see the live mockup</p></div>
+    <div class="strip">
+      <figure><a class="phone" href="e/home.html"><img src="shots/e-home-phone.jpg" alt="Full Stop home on a phone" loading="lazy" width="780" height="1688"></a><figcaption><b>Home</b>The statement fills the top. The critical alert and search sit in the thumb zone. Scroll for Continue reading and the areas.</figcaption></figure>
+      <figure><a class="phone" href="e/search.html"><img src="shots/e-search-phone.jpg" alt="Full Stop search results" loading="lazy" width="780" height="1688"></a><figcaption><b>Search</b>Results set like an index. If nothing fits, the matching expert is offered with the question already filled in.</figcaption></figure>
+      <figure><a class="phone" href="e/area.html"><img src="shots/e-area-phone.jpg" alt="Full Stop Coiled Tubing area" loading="lazy" width="780" height="1688"></a><figcaption><b>Area</b>"Coiled Tubing." with its full stop. The short code (SOP-009) is the landmark on each row.</figcaption></figure>
+      <figure><a class="phone" href="e/document.html"><img src="shots/e-document-phone.jpg" alt="Full Stop document WI-003" loading="lazy" width="780" height="1688"></a><figcaption><b>Document</b>Status reads as a sentence: "Current. Rev 4.0, Internal. Approved 28 Aug 2025 by Segment Director, Coiled Tubing."</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="blk">
+    <div class="blk-h"><h3>Scaled to desktop</h3><p>1440 × 900 · the same pages, with no separate desktop design</p></div>
+    <div class="desk">
+      <figure><a class="screen" href="e/home.html"><img src="shots/e-home-desktop.jpg" alt="Full Stop home on desktop" loading="lazy" width="1440" height="900"></a><figcaption><b>Home</b>The statement at 158 px with search beneath it. On the right is an index of the alert, Continue reading and the operational segments.</figcaption></figure>
+      <figure><a class="screen" href="e/document.html"><img src="shots/e-document-desktop.jpg" alt="Full Stop document on desktop" loading="lazy" width="1440" height="900"></a><figcaption><b>Document</b>Three columns: the record and approval trail on the left, the page preview in the centre and the contents on the right.</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="blk kit">
+    <div class="card">
+      <h3 style="font-size:17px;margin-bottom:16px">Colour</h3>
+      <div class="sw">
+        <div><i style="background:#F5F3EE"></i><b>Paper</b>#F5F3EE · ground</div>
+        <div><i style="background:#002B32"></i><b>Ink</b>#002B32 · text, buttons</div>
+        <div><i style="background:#005D63"></i><b>Teal</b>#005D63 · links</div>
+        <div><i style="background:#FD5805"></i><b>Full stop</b>#FD5805 · the only accent</div>
+        <div><i style="background:#1A7547"></i><b>Current</b>#1A7547 · status only</div>
+      </div>
+    </div>
+    <div class="card type-spec">
+      <h3 style="font-size:17px">Type</h3>
+      <div><span>Statement</span><b style="font:800 28px/1 var(--display);letter-spacing:-.045em;text-transform:uppercase">What we know<span class="fs"></span></b></div>
+      <div><span>Area titles</span><b style="font:800 24px/1 var(--display);letter-spacing:-.03em">Coiled Tubing<span class="fs"></span></b></div>
+      <div><span>Reading</span><span style="font:400 16px/1.4 var(--display);color:var(--ink)">BW Gradual Regular, 17–18 px</span></div>
+      <div><span>Numbers</span><b style="font:500 14px/1.2 var(--text);letter-spacing:.02em" class="num">TQ-TWS-CTSS-WI-003 · Rev 4.0</b></div>
+    </div>
+  </div>
+
+  <div class="blk case">
+    <div><h4>Why it works</h4><ul>
+      <li><b>These are the quietest screens of the three.</b> No cards, no tiles and no icons in the tab bar. Status is a word plus a shape: a dot for Current and a diamond for Review due.</li>
+      <li><b>The full stop becomes the interface's marker.</b> It marks the active tab, unread notifications, area titles and critical alerts. People recognise the brand without any decoration.</li>
+      <li><b>Search sits in the thumb zone</b> at the bottom of the first screen, just under the one alert that matters.</li>
+      <li><b>It reads like a publication,</b> which suits controlled documents. Trust is stated in plain sentences rather than badges.</li>
+    </ul></div>
+    <div class="risk"><h4>Watch out for</h4><ul>
+      <li>The brand is mostly typographic, so it depends on BW Gradual loading. With a fallback font it loses much of its character.</li>
+      <li>The first screen has the most open space of the three. Some people may read it as empty, and the logo colours appear only in the lockup.</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- ======================= F ======================= -->
+<section class="wrap opt" id="f">
+  <div class="opt-h">
+    <span class="let" aria-hidden="true">F</span>
+    <div>
+      <p class="eyebrow">Option F</p>
+      <h2>Rise</h2>
+      <p class="idea">The logo becomes the interface. The teal pillar is the header, the orange and cyan bars become colour tiles, and every tile carries the logo's 45° cut.</p>
+      <div class="tags"><span>Colour blocks</span><span>Full-screen brand entrance</span><span>45° chamfer on every tile</span><span>Large, glove-friendly targets</span></div>
+    </div>
+  </div>
+
+  <div class="blk moment">
+    <div class="film" aria-label="Entrance, frame by frame">
+      <figure><span class="phone"><img src="shots/f-moment-120.jpg" alt="Entrance at 0.12 seconds: the teal pillar rises from the bottom" loading="lazy" width="390" height="844"></span><figcaption>0.12 s</figcaption></figure>
+      <figure><span class="phone"><img src="shots/f-moment-300.jpg" alt="Entrance at 0.3 seconds: the bars arrive" loading="lazy" width="390" height="844"></span><figcaption>0.30 s</figcaption></figure>
+      <figure><span class="phone"><img src="shots/f-moment-480.jpg" alt="Entrance at 0.48 seconds: the name settles" loading="lazy" width="390" height="844"></span><figcaption>0.48 s</figcaption></figure>
+      <figure><span class="phone"><img src="shots/f-moment-1000.jpg" alt="Entrance complete: the screen is the logo" loading="lazy" width="390" height="844"></span><figcaption>0.70 s · done</figcaption></figure>
+    </div>
+    <div>
+      <h3 style="font-size:20px;margin-bottom:12px">Brand moment: the screen rises</h3>
+      <p>The teal pillar fills the screen from the bottom, the bars land across the top and the name settles, 700 ms, once per session. The whole screen becomes the logo.</p>
+      <p>In the product, the teal band then shrinks to become the header on Home, so the entrance leads straight into the app.</p>
+    </div>
+  </div>
+
+  <div class="blk">
+    <div class="blk-h"><h3>On the phone</h3><p>390 × 844 · open any screen to see the live mockup</p></div>
+    <div class="strip">
+      <figure><a class="phone" href="f/entrance.html"><img src="shots/f-entrance-phone.jpg" alt="Rise entrance screen" loading="lazy" width="780" height="1688"></a><figcaption><b>Entrance</b>The bars bleed off both edges. The teal ground is the pillar.</figcaption></figure>
+      <figure><a class="phone" href="f/home.html"><img src="shots/f-home-phone.jpg" alt="Rise home on a phone" loading="lazy" width="780" height="1688"></a><figcaption><b>Home</b>Search sits in the teal band, with four tiles below: the alert (orange), Areas (cyan), Ask an Expert (teal) and Continue reading.</figcaption></figure>
+      <figure><a class="phone" href="f/area.html"><img src="shots/f-area-phone.jpg" alt="Rise Coiled Tubing area" loading="lazy" width="780" height="1688"></a><figcaption><b>Area</b>Pick a shelf before you see a list. Six shelf tiles with counts, plus 36 of 39 in force.</figcaption></figure>
+      <figure><a class="phone" href="f/document.html"><img src="shots/f-document-phone.jpg" alt="Rise document WI-003" loading="lazy" width="780" height="1688"></a><figcaption><b>Document</b>A status card overlaps the band: Current, with the approver. Download, Save offline and Share are big tiles.</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="blk">
+    <div class="blk-h"><h3>Scaled to desktop</h3><p>1440 × 900 · the same pages, with no separate desktop design</p></div>
+    <div class="desk">
+      <figure><a class="screen" href="f/home.html"><img src="shots/f-home-desktop.jpg" alt="Rise home on desktop" loading="lazy" width="1440" height="900"></a><figcaption><b>Home</b>The pillar becomes the left navigation rail. The tiles go four across, with the alert spanning two.</figcaption></figure>
+      <figure><a class="screen" href="f/document.html"><img src="shots/f-document-desktop.jpg" alt="Rise document on desktop" loading="lazy" width="1440" height="900"></a><figcaption><b>Document</b>The preview is on the left. On the right are the status card, actions and approval trail.</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="blk kit">
+    <div class="card">
+      <h3 style="font-size:17px;margin-bottom:16px">Colour, each with one job</h3>
+      <div class="sw">
+        <div><i style="background:#013F4E"></i><b>Pillar</b>#013F4E · header, rail</div>
+        <div><i style="background:#00ADC2"></i><b>Cyan</b>#00ADC2 · action, selected</div>
+        <div><i style="background:#FD5805"></i><b>Orange</b>#FD5805 · alerts only</div>
+        <div><i style="background:#005D63"></i><b>Teal</b>#005D63 · help, expert</div>
+        <div><i style="background:#EDF1F0"></i><b>Ground</b>#EDF1F0 · behind tiles</div>
+      </div>
+    </div>
+    <div class="card type-spec">
+      <h3 style="font-size:17px">Type and shape</h3>
+      <div><span>Headlines</span><b style="font:700 24px/1.1 var(--display);letter-spacing:-.02em">What do you need to know?</b></div>
+      <div><span>Counts</span><b style="font:300 34px/1 var(--display);letter-spacing:-.03em" class="num">25 · 15 · 33</b></div>
+      <div><span>The cut</span><span style="display:block;width:120px;height:44px;background:var(--cyan);clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,0 100%)"></span></div>
+      <div><span>Interface</span><span style="font-size:15px;color:var(--ink)">Inter, tiles at least 104 px tall</span></div>
+    </div>
+  </div>
+
+  <div class="blk case">
+    <div><h4>Why it works</h4><ul>
+      <li><b>It has the most recognisable brand of the three.</b> The 45° cut, the colour blocks and the teal band are on every screen, even when the logo has scrolled away.</li>
+      <li><b>Big targets for gloved hands.</b> Every tile is at least 104 px tall on the phone. On the area screen you pick a shelf before you see a list.</li>
+      <li><b>Each colour has a job.</b> Orange means an alert, cyan means action or selection, teal is navigation and help, and white is content. Status keeps its own green.</li>
+      <li><b>On desktop the pillar becomes the rail,</b> so the brand frames every page without a hero image.</li>
+    </ul></div>
+    <div class="risk"><h4>Watch out for</h4><ul>
+      <li>Colour blocks are loud. The rule that orange means an alert has to be held strictly, or alerts lose their urgency.</li>
+      <li>Tiles show fewer documents per screen. QMS and auditor roles will need a denser list view behind them.</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- ======================= compare ======================= -->
+<section class="wrap plain" id="compare">
+  <div class="sec-h"><h2>Side by side</h2></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th scope="col"></th><th scope="col">D · Beacon</th><th scope="col">E · Full Stop</th><th scope="col">F · Rise</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Ground</th><td>Dark logo ink</td><td>Warm paper</td><td>Light grey under a teal band</td></tr>
+        <tr><th scope="row">Brand moment</th><td>The logo assembles, full screen, 700 ms</td><td>The statement builds on Home, 600 ms</td><td>The screen rises into the logo, 700 ms</td></tr>
+        <tr><th scope="row">How the logo is used</th><td>The symbol is locked up with WHAT WE KNOW.</td><td>Lockup only. The full stop appears everywhere.</td><td>Its shapes become the interface</td></tr>
+        <tr><th scope="row">Phone home</th><td>Statement, search, alert, Continue reading</td><td>Statement, alert, search</td><td>Search, then four tiles</td></tr>
+        <tr><th scope="row">Phone navigation</th><td>Four icon tabs. A cyan bar marks the active one.</td><td>Four word tabs. The full stop marks the active one.</td><td>Four icon tabs. A chamfered cyan marker shows the active one.</td></tr>
+        <tr><th scope="row">On desktop</th><td>Same hero, with cards in a right column</td><td>Statement on the left, index on the right</td><td>The pillar becomes the left rail</td></tr>
+        <tr><th scope="row">Best for</th><td>Control cabins, night shifts and a strong first impression</td><td>Reading and trust, in a calm and premium way</td><td>Gloved field use and the strongest brand recall</td></tr>
+        <tr><th scope="row">Main risk</th><td>Hard to read in direct sun</td><td>Can feel too empty</td><td>Needs strict colour discipline</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="wrap plain" id="decide">
+  <div class="sec-h"><h2>What I need from you</h2></div>
+  <div class="next">
+    <div class="card"><b>Pick a direction</b><p>Choose D, E or F, or name a mix, such as E's typography with D's entrance. I haven't made a recommendation this round, because you asked to keep exploring.</p></div>
+    <div class="card"><b>Choose the next screens</b><p>Once a direction is picked, I'll take it through Upload, the QMS workspace and the full viewer at the same phone-first density.</p></div>
+    <div class="card"><b>Nothing changes in the app</b><p>These are static mockups on the <code>design/rise-exploration</code> branch. No app page, stylesheet or test was touched.</p></div>
+  </div>
+</section>
+</main>
+
+<footer class="wrap">Round 2 of the RISE design exploration · Built by TAQA Learning Center · <a href="../index.html">Round 1 directions (A, B, C)</a></footer>
+</body>
+</html>

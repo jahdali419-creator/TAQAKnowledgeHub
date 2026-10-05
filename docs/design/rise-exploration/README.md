@@ -4,7 +4,18 @@
 business rule or workflow of the production RISE app was changed. These files live on the
 `design/rise-exploration` branch and are not deployed.
 
-## What is here
+## Round 2 (5 Oct 2026): mobile-first directions
+Feedback on round 1: too dense for a phone, and the brand did not stand out. `round-2/` holds three new
+options designed at 390 × 844 first and scaled to desktop from the same responsive pages:
+- **D · Beacon:** dark logo ink as the ground, with a full-screen entrance where the logo assembles.
+- **E · Full Stop:** warm paper and BW Gradual throughout. The orange full stop is the only accent, and the statement builds in place on Home.
+- **F · Rise:** the logo becomes the interface. The pillar is the header or rail, the bars become colour tiles, the 45° cut is on every tile, and the screen rises into the logo.
+
+Open `round-2/index.html` for the review page (filmstrips of each brand moment, phone and desktop
+screens, brand kit, why it works, comparison). Each option folder has its live HTML screens and `notes.md`.
+`round-2/shots/` holds the screenshots. Waiting on the owner's choice; nothing is implemented.
+
+## Round 1: what is here
 - `index.html`: the review page. It covers the current product, what happened to the animated landing
   page, the shared RISE visual system, the three directions, a side-by-side comparison and the
   recommendation. Open it in a browser straight from disk.
