@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RISE · Direction B · QMS workspace</title>
+<link rel="stylesheet" href="../../kit/fonts.css">
+<link rel="stylesheet" href="rise.css">
+<style>
+  .gh-in { gap: 28px; }
+  .gh-nav a { padding: 0 11px; font-size: 14.5px; }
+  .gh-nav a.on::after { left: 11px; right: 11px; }
+  .band { padding: 36px 0 56px; }
+  .concept { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: 999px; border: 1px dashed rgba(255,255,255,.35); font: 500 12px/1 var(--f-ui); color: var(--ink-muted); margin-left: 12px; vertical-align: middle; }
+  .band h1 { margin-top: 28px; display: flex; align-items: center; }
+  .band .sub { margin-top: 12px; color: var(--ink-muted); }
+  .band .facts { margin-top: 8px; }
+
+  .qb { display: grid; grid-template-columns: minmax(0,1fr) 340px; gap: 48px; padding: 48px 32px 96px; }
+  .q-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
+  .q-head p { color: var(--text-3); font-size: 14px; margin-top: 4px; }
+  .q-head .select { width: auto; height: 40px; font-size: 14px; gap: 8px; }
+  .q-head .select em { font-style: normal; color: var(--text-3); }
+  .queue { display: grid; gap: 12px; }
+  .qi { display: grid; grid-template-columns: 76px minmax(0,1fr) auto 24px; gap: 20px; align-items: center; padding: 18px 20px 18px 20px; border: 1px solid var(--line); border-radius: var(--r-card); background: #fff; transition: border-color var(--d-fast), box-shadow var(--d-base); }
+  .qi:hover { border-color: var(--line-strong); }
+  .qi .age { text-align: left; }
+  .qi .age b { display: block; font: 300 30px/1 var(--f-brand); letter-spacing: -.02em; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .qi .age span { font-size: 12.5px; color: var(--text-3); }
+  .qi .age.old b { font-weight: 700; }
+  .qi .qt { font: 700 17px/1.3 var(--f-brand); display: block; margin-bottom: 6px; }
+  .qi .qm { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 13.5px; color: var(--text-2); }
+  .qi .qm .sep { width: 3px; height: 3px; border-radius: 50%; background: var(--line-strong); }
+  .qi .qf { margin-top: 6px; font-size: 13.5px; color: var(--text-3); }
+  .qx { min-width: 0; overflow: hidden; }
+  .kind { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 6px; background: var(--canvas); border: 1px solid var(--line); font: 600 12px/1 var(--f-ui); color: var(--text-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .qi .to { font-size: 13px; color: var(--text-3); text-align: right; line-height: 1.35; white-space: nowrap; }
+  .qi .to b { display: block; color: var(--text); font-weight: 600; font-size: 13.5px; }
+  .qi > .ico { color: var(--text-3); }
+  .qi.held { background: var(--canvas); border-style: dashed; }
+  .qi.held .qt, .qi.held .age b { color: var(--text-3); }
+  .held-msg { grid-column: 2 / -1; display: flex; gap: 10px; align-items: center; font-size: 14px; color: var(--text); margin-top: -4px; }
+  .held-msg .ico { color: var(--st-prog); width: 18px; height: 18px; }
+
+  .qi.sel { border-color: var(--teal); box-shadow: inset 0 0 0 1px var(--teal), var(--shadow); padding-bottom: 0; }
+  .qx { grid-column: 1 / -1; margin: 6px -20px 0; padding: 28px 28px 28px 116px; border-top: 1px solid var(--line); display: grid; gap: 24px; }
+  .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; }
+  .checks li { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; line-height: 1.4; }
+  .checks li .ok { width: 22px; height: 22px; border-radius: 50%; background: var(--st-current-bg); color: var(--st-current); display: grid; place-items: center; flex: none; }
+  .checks li .ok .ico { width: 13px; height: 13px; stroke-width: 3; }
+  .checks li small { display: block; color: var(--text-3); font-size: 13px; }
+  .qx .nextto { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px; background: var(--canvas); border-radius: 12px; }
+  .qx .nextto b { font: 700 20px/1.25 var(--f-brand); color: var(--ink); display: block; margin-top: 4px; }
+  .qx .nextto .file { white-space: nowrap; display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text-2); }
+  .qx .nextto .file .ico { color: var(--teal); }
+  .qx .cn { font-size: 15px; color: var(--text); padding-left: 16px; border-left: 2px solid var(--line-strong); }
+  .qx .acts { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 4px 0 4px; }
+  .qx .acts .hint { margin-left: auto; font-size: 13px; color: var(--text-3); display: flex; gap: 6px; align-items: center; }
+  .more { display: flex; justify-content: center; padding: 8px 0 0; }
+
+  .rail { display: grid; gap: 24px; align-content: start; }
+  .health { background: var(--canvas); border-radius: var(--r-card); padding: 28px; }
+  .health h2 { font: 700 18px/1.3 var(--f-brand); }
+  .health > p { font-size: 13.5px; color: var(--text-3); margin-top: 4px; }
+  .hr { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .hr:last-of-type { border-bottom: 0; }
+  .hr span { font-size: 14px; color: var(--text-2); line-height: 1.4; }
+  .hr b { font: 300 30px/1 var(--f-brand); letter-spacing: -.02em; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .hr b small { font: 500 13px/1 var(--f-ui); color: var(--text-3); letter-spacing: 0; }
+  .hr .zero { color: var(--st-current); font-weight: 700; }
+  .routes { padding: 24px 0 0; }
+  .routes h3 { font: 700 16px/1.3 var(--f-brand); padding-bottom: 10px; border-bottom: 1px solid var(--text); }
+  .routes li { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 14px; color: var(--text-2); }
+  .routes li b { color: var(--text); font-weight: 600; text-align: right; }
+</style>
+</head>
+<body>
+<!--SPRITE--><svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+<symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 4h12v17l-6-4-6 4z"/></symbol>
+<symbol id="i-bookmark-on" viewBox="0 0 24 24"><path d="M6 4h12v17l-6-4-6 4z" fill="currentColor"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
+<symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+<symbol id="i-arrow-l" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+<symbol id="i-chev-r" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+<symbol id="i-chev-d" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.2v.1"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+<symbol id="i-check-c" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.8 2.8L16.2 9.5"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.1"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3v5h5M9 13h6M9 16.5h6"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1"/></symbol>
+<symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.5h16v11H10l-4.5 3.5v-3.5H4z"/><path d="M8 9.5h8M8 12.5h5"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4.5h10.5A3.5 3.5 0 0 1 19 8v12H8.5A3.5 3.5 0 0 1 5 16.5z"/><path d="M5 16.5A3.5 3.5 0 0 1 8.5 13H19M9 8h6"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+<symbol id="i-sort" viewBox="0 0 24 24"><path d="M7 4v16M3.5 16.5 7 20l3.5-3.5M17 20V4M13.5 7.5 17 4l3.5 3.5"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20h-5.5v-6h-5v6H4z"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></symbol>
+<symbol id="i-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 20h1M20 14v1"/></symbol>
+<symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V4h10v5"/><rect x="4" y="9" width="16" height="7.5" rx="1.5"/><path d="M7 14h10v6H7z"/></symbol>
+<symbol id="i-offline" viewBox="0 0 24 24"><path d="M7 18.5a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.4 1.6A3.8 3.8 0 0 1 17.5 18.5"/><path d="M12 11v8M9 16l3 3 3-3"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></symbol>
+<symbol id="i-return" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 5 6v5.5c0 4.3 3 7.8 7 9 4-1.2 7-4.7 7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 4 8.5 4.5L12 13 3.5 8.5z"/><path d="m3.5 12.5 8.5 4.5 8.5-4.5M3.5 16.5 12 21l8.5-4.5"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-pdf" viewBox="0 0 24 24"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3v5h5"/><path d="M8.5 17v-4h1.3a1.2 1.2 0 0 1 0 2.4H8.5M13 13v4h.8a1.6 1.6 0 0 0 1.6-1.6v-.8A1.6 1.6 0 0 0 13.8 13z"/></symbol>
+</svg><!--/SPRITE-->
+
+<header class="gh">
+  <div class="wrap gh-in">
+    <a class="gh-logo" href="home.html"><img src="../../kit/brand/rise-lockup-header-reverse.png" alt="RISE"></a>
+    <nav class="gh-nav" aria-label="Main">
+      <a href="home.html">Home</a><a href="browse.html">Areas</a><a href="#">Search</a><a href="#">Field Glossary</a><a href="#">Ask an Expert</a><a href="#">Master List</a><a class="on" href="qms.html">Workspace</a>
+    </nav>
+    <div class="gh-right">
+      <span class="role"><svg class="ico"><use href="#i-user"/></svg><b>QMS</b> Document Control</span>
+      <button class="icon-btn" aria-label="Bookmarks"><svg class="ico"><use href="#i-bookmark"/></svg></button>
+      <button class="icon-btn" aria-label="Notifications, 12 new"><svg class="ico"><use href="#i-bell"/></svg><span class="badge">12</span></button>
+      <a class="btn btn-cyan btn-sm" href="upload.html"><svg class="ico"><use href="#i-upload"/></svg>Upload</a>
+    </div>
+  </div>
+</header>
+
+<main class="m-page">
+  <section class="band ink cut">
+    <div class="wrap">
+      <nav class="crumb" aria-label="Breadcrumb"><a href="home.html">Home</a><svg class="ico"><use href="#i-chev-r"/></svg><span style="color:#fff">Workspace</span></nav>
+      <div class="band-grid">
+        <div>
+          <h1 class="display">Document Control <span class="concept">Concept</span></h1>
+          <p class="sub">Check each filing before it goes to its final approver. Oldest first.</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><b class="cy">12</b><span>Waiting on QMS</span></div>
+          <div class="fact"><b>6<small style="font-size:20px;letter-spacing:0"> days</small></b><span>Oldest in queue</span></div>
+          <div class="fact"><b>1</b><span>Held back</span></div>
+          <div class="fact"><b>147</b><span>Provisional numbers</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap qb">
+    <section aria-label="Queue">
+      <div class="q-head">
+        <div><h2 class="title">Waiting on QMS</h2><p>12 filings · oldest first · showing 7</p></div>
+        <div style="display:flex;gap:8px">
+          <span class="select"><em>Area</em> All <svg class="ico"><use href="#i-chev-d"/></svg></span>
+          <span class="select"><em>Kind</em> All <svg class="ico"><use href="#i-chev-d"/></svg></span>
+        </div>
+      </div>
+
+      <div class="queue">
+        <article class="qi">
+          <div class="age old"><b>6</b><span>days</span></div>
+          <div><span class="qt">CT Asset Management Standard</span>
+            <div class="qm"><span class="docno" style="color:var(--text)">TQ-TWS-CTSS-S005</span><span class="sep"></span><span class="kind">New document</span><span class="sep"></span>Coiled Tubing</div><div class="qf">Filed by Faisal Al-Ghamdi</div></div>
+          <div class="to">Final approver<b>Segment Director</b></div>
+          <svg class="ico"><use href="#i-chev-r"/></svg>
+        </article>
+        <article class="qi">
+          <div class="age"><b>4</b><span>days</span></div>
+          <div><span class="qt">Casing Running SOP</span>
+            <div class="qm"><span class="docno" style="color:var(--text)">TQ-TDS-DSS-SOP-021</span><span class="sep"></span><span class="kind">Revision 2.0 → 3.0</span><span class="sep"></span>Drilling Services</div></div>
+          <div class="to">Final approver<b>Segment Director</b></div>
+          <svg class="ico"><use href="#i-chev-r"/></svg>
+        </article>
+        <article class="qi">
+          <div class="age"><b>3</b><span>days</span></div>
+          <div><span class="qt">Frac Pump Maintenance Manual</span>
+            <div class="qm"><span class="docno" style="color:var(--text)">TQ-TWS-FS-WI-014</span><span class="sep"></span><span class="kind">Maintenance side</span><span class="sep"></span>Fracturing</div></div>
+          <div class="to">Final approver<b>Maintenance Manager</b></div>
+          <svg class="ico"><use href="#i-chev-r"/></svg>
+        </article>
+        <article class="qi held">
+          <div class="age"><b>2</b><span>days</span></div>
+          <div><span class="qt">Permit to Work Standard</span>
+            <div class="qm"><span class="docno">TQ-QHSE-S014</span><span class="sep"></span><span class="kind">Revision</span><span class="sep"></span>QHSE</div></div>
+          <div class="to"><span class="st st-old">Held back</span></div>
+          <svg class="ico"><use href="#i-lock"/></svg>
+          <p class="held-msg"><svg class="ico"><use href="#i-shield"/></svg>You filed this document, so someone else must do the QMS check.</p>
+        </article>
+        <article class="qi">
+          <div class="age"><b>2</b><span>days</span></div>
+          <div><span class="qt">Separator Pre-Start Checklist</span>
+            <div class="qm"><span class="docno" style="color:var(--text)">TQ-TWS-WTS-F007</span><span class="sep"></span><span class="kind">New form</span><span class="sep"></span>Well Testing</div></div>
+          <div class="to">Final approver<b>Segment Director</b></div>
+          <svg class="ico"><use href="#i-chev-r"/></svg>
+        </article>
+
+        <article class="qi sel" aria-expanded="true">
+          <div class="age"><b>1</b><span>day</span></div>
+          <div><span class="qt">Acid Stimulation SOP</span>
+            <div class="qm"><span class="docno" style="color:var(--text)">TQ-TWS-CTSS-SOP-009</span><span class="sep"></span><span class="kind">Revision 3.0 → 4.0</span><span class="sep"></span>Coiled Tubing</div><div class="qf">Filed by Khalid Al-Otaibi</div></div>
+          <div class="to"><span class="st st-prog">In QMS check</span></div>
+          <svg class="ico" style="color:var(--teal)"><use href="#i-chev-d"/></svg>
+          <div class="qx">
+            <ul class="checks">
+              <li><span class="ok"><svg class="ico"><use href="#i-check"/></svg></span><span>Number format<small>TQ-&lt;segment&gt;-&lt;type&gt;-&lt;seq&gt;, TQ-QHSE-S001 §5.3</small></span></li>
+              <li><span class="ok"><svg class="ico"><use href="#i-check"/></svg></span><span>Same number as Rev 3.0<small>Revision chain intact</small></span></li>
+              <li><span class="ok"><svg class="ico"><use href="#i-check"/></svg></span><span>Supersedes Rev 3.0 on approval<small>Rev 3.0 stays visible, marked Superseded</small></span></li>
+              <li><span class="ok"><svg class="ico"><use href="#i-check"/></svg></span><span>Arabic translation will be flagged<small>SOP-009-AR, to be re-issued</small></span></li>
+              <li><span class="ok"><svg class="ico"><use href="#i-check"/></svg></span><span>Template and change note</span></li>
+              <li><span class="ok"><svg class="ico"><use href="#i-check"/></svg></span><span>Classification Internal</span></li>
+            </ul>
+            <p class="cn">“Updated HCl concentration limits and added a neutralisation hold point.”</p>
+            <div class="nextto">
+              <div><span class="label">Next</span><b>Segment Director, Coiled Tubing</b></div>
+              <a class="file" href="#"><svg class="ico"><use href="#i-pdf"/></svg>CT-Acid-Stimulation-Rev4.pdf · 2.4 MB</a>
+            </div>
+            <div class="acts">
+              <button class="btn btn-primary"><svg class="ico"><use href="#i-check"/></svg>Confirm and send for final approval</button>
+              <button class="btn btn-danger"><svg class="ico"><use href="#i-return"/></svg>Return to filer</button>
+              <button class="btn btn-quiet">Next in queue<svg class="ico"><use href="#i-arrow-r"/></svg></button>
+            </div>
+            <p class="hint" style="margin-top:-12px;font-size:13px;color:var(--text-3)">Returning asks for a reason; the filer sees it on the document.</p>
+          </div>
+        </article>
+
+        <article class="qi">
+          <div class="age"><b>1</b><span>day</span></div>
+          <div><span class="qt">Injector chain wear bulletin</span>
+            <div class="qm"><span class="docno" style="color:var(--text)">TQ-TWS-CTSS-MB-###</span><span class="sep"></span><span class="kind">Maintenance Bulletin</span><span class="sep"></span>Coiled Tubing</div><div class="qf"><span class="st st-due">Provisional number</span></div></div>
+          <div class="to">Final approver<b>Maintenance Manager</b></div>
+          <svg class="ico"><use href="#i-chev-r"/></svg>
+        </article>
+      </div>
+      <div class="more"><a class="btn btn-secondary" href="#">Show 5 more</a></div>
+    </section>
+
+    <aside class="rail">
+      <section class="health" aria-label="Register health">
+        <h2>Register health</h2>
+        <p>Whole register · 4 Oct 2026</p>
+        <div class="hr"><span>Reviews overdue</span><b>84</b></div>
+        <div class="hr"><span>Provisional numbers waiting for a QHSE short form</span><b>147</b></div>
+        <div class="hr"><span>Integrity check</span><b>302 <small>known</small> <span class="zero" style="font:700 15px/1 var(--f-ui)">· 0 new</span></b></div>
+        <div class="hr"><span>Superseded with successor missing (legacy)</span><b>13</b></div>
+        <a class="link" href="#" style="margin-top:12px;font-size:14px">Open the Master List <svg class="ico sm"><use href="#i-arrow-r"/></svg></a>
+      </section>
+      <section class="routes" aria-label="Who approves">
+        <h3>Who gives final approval</h3>
+        <ul>
+          <li>Operations documents<b>Segment Director</b></li>
+          <li>Maintenance documents<b>Maintenance Manager</b></li>
+          <li>Company policies<b>CEO</b></li>
+        </ul>
+        <p style="font-size:13.5px;color:var(--text-3);margin-top:14px;line-height:1.5">Filer, QMS checker and final approver are always three different people.</p>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<footer class="foot-slim"><div class="wrap"><span class="mark">What we know<span class="dot"></span></span><span>Built by <b>TAQA Learning Center</b></span></div></footer>
+</body>
+</html>

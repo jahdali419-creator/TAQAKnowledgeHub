@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RISE · Direction C · Viewer</title>
+<link rel="stylesheet" href="../../kit/fonts.css">
+<link rel="stylesheet" href="rise.css">
+<style>
+  .crumbs { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-3); padding: 24px 0 0; }
+  .crumbs a { color: var(--ink-2); }
+  .crumbs .ic { width: 13px; height: 13px; color: var(--rule-2); }
+  .reader { display: grid; grid-template-columns: 208px 720px 1fr; column-gap: 40px; padding-top: 28px; align-items: start; }
+
+  /* Left: contents of the document */
+  .doc-toc { position: sticky; top: 88px; }
+  .doc-toc .tc { font: 700 64px/.82 var(--display); color: var(--ink); letter-spacing: .01em; }
+  .doc-toc .tl { margin-top: 12px; padding-bottom: 14px; border-bottom: 2px solid var(--ink); font-size: 13px; color: var(--ink-2); line-height: 1.45; }
+  .doc-toc ol { margin-top: 6px; }
+  .doc-toc li a { display: grid; grid-template-columns: 22px 1fr; gap: 6px; padding: 7px 0 7px; font-size: 14px; line-height: 1.4; color: var(--ink-2); position: relative; transition: color var(--t-fast) var(--ease); }
+  .doc-toc li a:hover { color: var(--ink); text-decoration: none; }
+  .doc-toc li a .n { font: 700 12px/19.6px var(--display); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .doc-toc li a.on { color: var(--ink); font-weight: 600; }
+  .doc-toc li a.on::before { content: ''; position: absolute; left: -14px; top: 7px; bottom: 7px; width: 3px; background: var(--cyan); transition: top var(--t-fast) var(--ease); }
+  .doc-toc li a.on .n { color: var(--teal); }
+  .doc-toc .tools { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--rule-2); display: grid; gap: 4px; }
+  .doc-toc .tools a { display: flex; gap: 8px; align-items: center; font-size: 14px; font-weight: 500; padding: 5px 0; }
+
+  /* Centre */
+  .dhead .kicker { display: flex; gap: 10px; align-items: center; }
+  .dhead h1 { font: 700 var(--fs-l)/1.1 var(--display); margin-top: 12px; letter-spacing: -.005em; }
+  .idline.lg { margin-top: 16px; font-size: 14px; gap: 6px 12px; }
+  .idline.lg .docno { font-size: 15px; }
+  .idline.lg .st, .idline.lg .cls { font-size: 14px; }
+  .dhead .lede { margin-top: 16px; font-size: 16.5px; }
+  .actions { display: flex; align-items: center; gap: 8px; margin: 24px 0 20px; padding: 12px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+  .actions .r { margin-left: auto; font-size: 13px; color: var(--ink-3); display: flex; align-items: center; gap: 8px; }
+
+  .page { --c: 36px; padding: 56px 64px 40px; min-height: 940px; display: flex; flex-direction: column; }
+  .page .ph { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); letter-spacing: .06em; text-transform: uppercase; font-weight: 600; padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
+  .page .ctr { margin-top: 120px; }
+  .page .ctr .tc { font: 700 15px/1 var(--display); letter-spacing: .14em; color: var(--teal); }
+  .page .ctr h2 { font: 700 44px/1.08 var(--display); margin-top: 18px; max-width: 12ch; }
+  .page .ctr .docno { display: block; margin-top: 24px; font-size: 16px; letter-spacing: .06em; }
+  .page .ctr .rv { margin-top: 6px; font-size: 15px; color: var(--ink-2); }
+  .page .ctab { margin-top: 56px; display: grid; grid-template-columns: repeat(2, 1fr); border-top: 2px solid var(--ink); }
+  .page .ctab div { padding: 12px 16px 12px 0; border-bottom: 1px solid var(--rule); font-size: 14px; line-height: 1.45; }
+  .page .ctab div:nth-child(odd) { padding-right: 24px; }
+  .page .ctab span { display: block; font-size: 12px; color: var(--ink-3); letter-spacing: .06em; text-transform: uppercase; font-weight: 600; margin-bottom: 2px; }
+  .page .pnote { margin-top: auto; display: grid; grid-template-columns: 20px 1fr; gap: 12px; padding: 16px; background: var(--ground); border-radius: var(--r); font-size: 14px; color: var(--ink-2); line-height: 1.5; }
+  .page .pnote b { color: var(--ink); font-weight: 600; }
+  .page .pnote .ic { color: var(--ink-3); }
+  .page .pf { margin-top: 20px; display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+  /* Right: the record */
+  .rec { display: grid; gap: 32px; }
+  .rec h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 10px; margin-bottom: 14px; border-bottom: 2px solid var(--ink); }
+  .rec h3 .label { color: var(--ink); }
+  .rec .record { grid-template-columns: 112px 1fr; font-size: 13.5px; }
+  .rec .record dt, .rec .record dd { padding: 7px 0; }
+  .vis { display: inline-flex; gap: 5px; align-items: center; font-size: 12px; color: var(--ink-3); font-weight: 500; }
+  .vis .ic { width: 13px; height: 13px; }
+  .lin .st { font-size: 12.5px; }
+  .rel { display: grid; gap: 10px; }
+  .rel a { --c: 14px; display: block; padding: 12px 14px; color: inherit; transition: background-color var(--t-fast) var(--ease); }
+  .rel a:hover { background: #FAFAF8; text-decoration: none; }
+  .rel a .docno { font-size: 12.5px; }
+  .rel a p { font-size: 14px; line-height: 1.4; margin-top: 3px; color: var(--ink); font-weight: 500; }
+  .rel a .k { display: flex; margin-top: 6px; gap: 10px; align-items: center; }
+  .rel a .k.st { gap: 6px; }
+</style>
+</head>
+<body class="wide">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol><symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3.6L7 20z"/></symbol><symbol id="i-bookmark-f" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3.6L7 20z" fill="currentColor"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5M5 15v4.5h14V15"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 15v4.5h14V15"/></symbol><symbol id="i-share" viewBox="0 0 24 24"><circle cx="17.5" cy="6" r="2.5"/><circle cx="6.5" cy="12" r="2.5"/><circle cx="17.5" cy="18" r="2.5"/><path d="M8.7 10.8l6.6-3.6M8.7 13.2l6.6 3.6"/></symbol><symbol id="i-more" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="18.5" cy="12" r="1.2" fill="currentColor"/></symbol><symbol id="i-chev-r" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol><symbol id="i-chev-l" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></symbol><symbol id="i-chev-d" viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></symbol><symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-arrow-d" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="1.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.8L21.2 20H2.8z"/><path d="M12 10v4.5M12 17.2v.3"/></symbol><symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1-3.5 4-5 7-5s6 1.5 7 5"/></symbol><symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5c2.6-1.2 5.4-1.2 8 .5v14c-2.6-1.7-5.4-1.7-8-.5zM20 5.5c-2.6-1.2-5.4-1.2-8 .5v14c2.6-1.7 5.4-1.7 8-.5z"/></symbol><symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11h-9.5L6 19.5V16H4z"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5"/><rect x="13.5" y="4" width="6.5" height="6.5"/><rect x="4" y="13.5" width="6.5" height="6.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5"/></symbol><symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5.5v-5.5h-5V20H4z"/></symbol><symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol><symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol><symbol id="i-sort" viewBox="0 0 24 24"><path d="M8 5v14M4.5 15.5L8 19l3.5-3.5M16 19V5M12.5 8.5L16 5l3.5 3.5"/></symbol><symbol id="i-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20M14 20h1M20 14v1"/></symbol><symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V4h10v5M7 17H4.5V9h15v8H17"/><path d="M7 14h10v6H7z"/></symbol><symbol id="i-return" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.3"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></symbol><symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 4l8 4.5-8 4.5-8-4.5z"/><path d="M4 12.5l8 4.5 8-4.5M4 16.5l8 4.5 8-4.5"/></symbol><symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5L19 6v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="1.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-hold" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></symbol><symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.5M4.5 12h.5M4.5 18h.5"/></symbol><symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol></svg>
+<header class="topbar"><div class="wrap">
+  <a class="lockup" href="home.html" aria-label="RISE home"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE"></a>
+  <label class="tb-search"><svg class="ic"><use href="#i-search"/></svg><input placeholder="Search documents, numbers, terms" aria-label="Search RISE"><kbd>/</kbd></label>
+  <nav class="tb-nav" aria-label="Main"><a href="browse.html" aria-current="page">Areas</a><a href="#">Glossary</a><a href="#">Ask an Expert</a></nav>
+  <div class="tb-right">
+    <button class="icon-btn" aria-label="Bookmarks"><svg class="ic"><use href="#i-bookmark"/></svg></button>
+    <button class="icon-btn" aria-label="Notifications"><svg class="ic"><use href="#i-bell"/></svg></button>
+    <span class="vsep"></span>
+    <span class="role"><svg class="ic sm"><use href="#i-eye"/></svg><b>Auditor</b><span class="muted">read-only</span><svg class="ic sm"><use href="#i-chev-d"/></svg></span>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="home.html">Index</a><svg class="ic"><use href="#i-chev-r"/></svg><a href="browse.html">Coiled Tubing</a><svg class="ic"><use href="#i-chev-r"/></svg><a href="#">Operations</a><svg class="ic"><use href="#i-chev-r"/></svg><a href="#">Manuals</a><svg class="ic"><use href="#i-chev-r"/></svg><span class="docno" style="font-size:12.5px;color:var(--ink-2)">TQ-TWS-CTSS-WI-003</span></nav>
+
+  <div class="reader">
+    <nav class="doc-toc" aria-label="Contents of this document">
+      <div class="tc" aria-hidden="true">WI</div>
+      <p class="tl"><b style="color:var(--ink);font-weight:600">Manual</b> · Coiled Tubing<br>Operations side</p>
+      <span class="label" style="display:block;margin-top:18px">Contents</span>
+      <ol>
+        <li><a class="on" href="#"><span class="n">·</span>Cover</a></li>
+        <li><a href="#"><span class="n">1</span>Scope</a></li>
+        <li><a href="#"><span class="n">2</span>Injector head components</a></li>
+        <li><a href="#"><span class="n">3</span>Pre-job inspection</a></li>
+        <li><a href="#"><span class="n">4</span>Chain tension and traction pressure</a></li>
+        <li><a href="#"><span class="n">5</span>Operating limits (2-inch string)</a></li>
+        <li><a href="#"><span class="n">6</span>Chain slip response</a></li>
+        <li><a href="#"><span class="n">7</span>Shutdown and isolation</a></li>
+        <li><a href="#"><span class="n">A</span>Inspection record (F001)</a></li>
+      </ol>
+      <div class="tools">
+        <a href="#"><svg class="ic sm"><use href="#i-bolt"/></svg>Quick reference</a>
+        <a href="#"><svg class="ic sm"><use href="#i-save"/></svg>Save offline</a>
+        <a href="#"><svg class="ic sm"><use href="#i-print"/></svg>Print</a>
+      </div>
+    </nav>
+
+    <article>
+      <header class="dhead">
+        <div class="kicker"><span class="label">Controlled document</span></div>
+        <h1>Injector Head Operations Manual</h1>
+        <div class="idline lg"><span class="docno">TQ-TWS-CTSS-WI-003</span><span class="sep"></span><span class="rev">Rev 4.0</span><span class="sep"></span><span class="st st-current">Current</span><span class="sep"></span><span class="cls">Internal</span><span class="sep"></span><span>English</span></div>
+        <p class="lede">How to rig up, operate, monitor and shut down the CT injector head safely: chain tension, gripper block inspection, traction pressure limits, and what to do on a chain slip.</p>
+      </header>
+
+      <div class="actions">
+        <a class="btn btn-primary" href="#"><svg class="ic sm"><use href="#i-download"/></svg>Download PDF</a>
+        <a class="btn btn-secondary" href="#"><svg class="ic sm"><use href="#i-bookmark"/></svg>Bookmark</a>
+        <a class="btn btn-secondary" href="#"><svg class="ic sm"><use href="#i-share"/></svg>Share</a>
+        <a class="btn btn-quiet" href="#">More <svg class="ic sm"><use href="#i-chev-d"/></svg></a>
+        <span class="r"><svg class="ic sm"><use href="#i-qr"/></svg>Link and QR code under Share</span>
+      </div>
+
+      <div class="sheet-frame loaded">
+        <div class="chf page" role="img" aria-label="Cover page preview">
+          <div class="ph"><span>TAQA · Coiled Tubing · Operations</span><span>Controlled document</span></div>
+          <div class="ctr">
+            <span class="tc">MANUAL · WI</span>
+            <h2>Injector Head Operations Manual</h2>
+            <span class="docno">TQ-TWS-CTSS-WI-003</span>
+            <p class="rv">Revision 4.0 · Issued 30 Aug 2025</p>
+          </div>
+          <div class="ctab">
+            <div><span>Owner</span>Coiled Tubing segment</div>
+            <div><span>Approved</span>28 Aug 2025 · Segment Director, Coiled Tubing</div>
+            <div><span>Classification</span>Internal</div>
+            <div><span>Next review</span>30 Aug 2028</div>
+          </div>
+          <div class="pnote" style="margin-top:96px">
+            <svg class="ic"><use href="#i-info"/></svg>
+            <span><b>Preview connects when storage is linked.</b> This cover is set from the register record; the PDF pages will appear here, and Download PDF serves the same approved file.</span>
+          </div>
+          <div class="pf"><span>TQ-TWS-CTSS-WI-003 · Rev 4.0</span><span>Cover</span></div>
+        </div>
+      </div>
+    </article>
+
+    <aside class="rec" aria-label="The record">
+      <div class="stamp current">
+        <span class="st st-current">Current</span>
+        <p>In force since 30 Aug 2025</p>
+        <p class="muted">Next review 30 Aug 2028 · 36-month cycle for manuals</p>
+      </div>
+
+      <section>
+        <h3><span class="label">Record</span></h3>
+        <dl class="record">
+          <dt>Number</dt><dd class="docno" style="font-size:13px">TQ-TWS-CTSS-WI-003</dd>
+          <dt>Revision</dt><dd class="tab">4.0</dd>
+          <dt>Type</dt><dd>Manual (WI)</dd>
+          <dt>Area</dt><dd>Coiled Tubing · Operations</dd>
+          <dt>Classification</dt><dd>Internal · every employee</dd>
+          <dt>Language</dt><dd>English</dd>
+          <dt>Owner</dt><dd>Coiled Tubing segment</dd>
+          <dt>Issued</dt><dd class="tab">30 Aug 2025</dd>
+        </dl>
+      </section>
+
+      <section>
+        <h3><span class="label">Approval trail · Rev 4.0</span></h3>
+        <div class="lineage">
+          <div class="lin done"><div class="lt">Filed<span class="when">19 Aug 2025</span></div><p class="ld2">Khalid Al-Otaibi, CT Engineer</p></div>
+          <div class="lin done"><div class="lt">QMS check<span class="when">24 Aug 2025</span></div><p class="ld2">QMS Document Control · number, revision chain, template confirmed</p></div>
+          <div class="lin done key"><div class="lt">Final approval<span class="when">28 Aug 2025</span></div><p class="ld2" style="color:var(--ink);font-weight:500">Segment Director, Coiled Tubing</p></div>
+          <div class="lin now"><div class="lt"><span class="cur">Current</span><span class="when">from 30 Aug 2025</span></div><p class="ld2">In force; Rev 3.0 superseded</p></div>
+        </div>
+      </section>
+
+      <section>
+        <h3><span class="label">Revision history</span><span class="vis"><svg class="ic"><use href="#i-lock"/></svg>Owner, QMS, auditors</span></h3>
+        <div class="lineage">
+          <div class="lin now"><div class="lt"><span>Rev 4.0 <span class="cur" style="font-weight:600;margin-left:6px">Current</span></span><span class="when">30 Aug 2025</span></div><p class="ld2">Traction pressure limits for 2-inch string</p></div>
+          <div class="lin old"><div class="lt" style="color:var(--ink-2)"><span>Rev 3.0 <span class="muted" style="font-weight:500;margin-left:6px">Superseded</span></span><span class="when">11 Mar 2024</span></div></div>
+          <div class="lin old"><div class="lt" style="color:var(--ink-2)"><span>Rev 2.0 <span class="muted" style="font-weight:500;margin-left:6px">Superseded</span></span><span class="when">02 Feb 2023</span></div></div>
+          <div class="lin old"><div class="lt" style="color:var(--ink-2)"><span>Rev 1.0 <span class="muted" style="font-weight:500;margin-left:6px">Superseded</span></span><span class="when">14 Jan 2022</span></div></div>
+        </div>
+        <p class="xs muted" style="margin-top:14px">Visible to the document owner, QMS and auditors. Employees see the current revision, its issue date and who approved it.</p>
+      </section>
+
+      <section>
+        <h3><span class="label">Related</span></h3>
+        <div class="rel">
+          <a class="chf s" href="#"><span class="docno">TQ-TWS-CTSS-WI-005</span><p>CT String Inspection Manual</p><span class="k st st-current">Current</span></a>
+          <a class="chf s" href="#"><span class="docno">TQ-TWS-CTSS-SOP-006</span><p>CT Unit Rig-Up &amp; Rig-Down</p><span class="k st st-due">Review due</span></a>
+          <a class="chf s" href="#"><span class="docno">TQ-TWS-CTSS-ALT-002</span><p>New pressure rating for 2-inch CT string</p><span class="k"><span class="st st-current">Current</span><span class="cls confidential"><svg class="ic"><use href="#i-lock"/></svg>Confidential</span></span></a>
+        </div>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <span><b>RISE</b> · WHAT WE KNOW. · Built by TAQA Learning Center</span>
+  <span>Knowledge Is Better Together. <a href="#">#BetterTogether@TAQA</a></span>
+  <span>TAQA, Industrialization &amp; Energy Services Company</span>
+</div></footer>
+</body>
+</html>

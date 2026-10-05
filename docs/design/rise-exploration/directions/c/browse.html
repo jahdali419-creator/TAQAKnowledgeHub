@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RISE · Direction C · Browse</title>
+<link rel="stylesheet" href="../../kit/fonts.css">
+<link rel="stylesheet" href="rise.css">
+<style>
+  .crumbs { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-3); padding-top: 28px; }
+  .crumbs a { color: var(--ink-2); }
+  .crumbs .ic { width: 13px; height: 13px; color: var(--rule-2); }
+  .amast { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; padding: 28px 0 28px; }
+  .amast-l { display: flex; align-items: stretch; gap: 28px; }
+  .bigcode { display: flex; flex-direction: column; justify-content: space-between; padding-right: 28px; border-right: 1px solid var(--rule-2); }
+  .bigcode b { font: 700 64px/.9 var(--display); letter-spacing: .01em; color: var(--teal); }
+  .bigcode .label { margin-top: 12px; }
+  .atitle { display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; }
+  .atitle .label { color: var(--ink-3); }
+  .facts { display: flex; gap: 20px; font-size: 14px; color: var(--ink-2); flex-wrap: wrap; }
+  .facts b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .amast-r { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+  .amast-r .xs { color: var(--ink-3); }
+
+  .notice { margin-bottom: 40px; }
+  .notice .ic.big { width: 24px; height: 24px; color: var(--orange); margin-top: 18px; }
+  .notice .idline { margin-top: 8px; }
+  .notice .na { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; align-self: center; }
+  .notice .na .xs { color: var(--ink-3); }
+
+  .browse { display: grid; grid-template-columns: 248px 1fr; column-gap: 48px; align-items: start; }
+  .contents { position: sticky; top: 88px; }
+  .contents .hd { padding-bottom: 10px; border-bottom: 2px solid var(--ink); }
+  .contents .toc-line { padding: 9px 0; }
+  .contents .toc-line .cd { width: 40px; }
+  .contents .toc-line.on .nm { font-weight: 600; }
+  .contents .toc-line.on::before { content: ''; position: absolute; left: -14px; top: 8px; bottom: 8px; width: 3px; background: var(--cyan); }
+  .contents .toc-line.on .ct { color: var(--ink); font-weight: 600; }
+  .contents .grp { margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--rule-2); }
+  .contents .grp p { font-size: 13.5px; color: var(--ink-2); line-height: 1.5; margin-top: 6px; }
+
+  .shelf-head { display: flex; align-items: flex-end; gap: 24px; padding-bottom: 18px; border-bottom: 2px solid var(--ink); }
+  .shelf-head .tc { font: 700 64px/.82 var(--display); letter-spacing: .01em; color: var(--ink); }
+  .shelf-head h2 { font: 700 var(--fs-m)/1.15 var(--display); }
+  .shelf-head .muted { font-size: 14px; margin-top: 4px; }
+  .shelf-head .r { margin-left: auto; font-size: 13px; color: var(--ink-3); text-align: right; line-height: 1.5; }
+
+  .fbar { display: flex; align-items: center; gap: 8px; padding: 14px 0; border-bottom: 1px solid var(--rule); flex-wrap: wrap; }
+  .fbar .within { position: relative; display: flex; align-items: center; margin-right: 8px; }
+  .fbar .within input { height: 32px; width: 240px; border: 1px solid var(--rule-2); border-radius: var(--r); background: var(--sheet); padding: 0 10px 0 32px; font: 400 13px/1 var(--text); }
+  .fbar .within .ic { position: absolute; left: 10px; width: 15px; height: 15px; color: var(--ink-3); }
+  .fbar .gap { width: 1px; height: 20px; background: var(--rule); margin: 0 4px; }
+  .sort { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-3); }
+  .sort .chip { border-color: transparent; background: transparent; padding: 0 2px; height: 24px; color: var(--ink); font-weight: 600; }
+
+  .cols { display: grid; grid-template-columns: 1fr 168px 24px; align-items: center; padding: 12px 20px 8px; }
+  .entries { background: var(--sheet); border: 1px solid var(--rule); border-top: 0; }
+  .entry { display: grid; grid-template-columns: 1fr 168px 24px; gap: 0; align-items: center; padding: 18px 20px; border-top: 1px solid var(--rule); color: inherit; text-decoration: none; transition: background-color var(--t-fast) var(--ease); }
+  .entry:first-child { border-top: 0; }
+  .entry:hover { background: #FAFAF8; text-decoration: none; color: inherit; }
+  .entry:hover h3 { text-decoration: underline; text-decoration-color: var(--teal); text-underline-offset: 3px; }
+  .entry h3 { font: 600 var(--fs-t)/1.35 var(--text); margin-top: 6px; color: var(--ink); }
+  .entry .em { margin-top: 6px; display: flex; gap: 16px; align-items: center; font-size: 13px; color: var(--ink-3); flex-wrap: wrap; }
+  .entry .em .tab { color: var(--ink-2); }
+  .due { display: grid; gap: 2px; font-size: 14px; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .due .late { font-size: 12.5px; font-weight: 600; color: var(--st-due); }
+  .due .soon { font-size: 12.5px; font-weight: 600; color: var(--st-due); }
+  .entry > .ic { color: var(--ink-3); }
+  .more-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--sheet); border: 1px solid var(--rule); border-top: 0; font-size: 13px; color: var(--ink-3); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol><symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3.6L7 20z"/></symbol><symbol id="i-bookmark-f" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3.6L7 20z" fill="currentColor"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5M5 15v4.5h14V15"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 15v4.5h14V15"/></symbol><symbol id="i-share" viewBox="0 0 24 24"><circle cx="17.5" cy="6" r="2.5"/><circle cx="6.5" cy="12" r="2.5"/><circle cx="17.5" cy="18" r="2.5"/><path d="M8.7 10.8l6.6-3.6M8.7 13.2l6.6 3.6"/></symbol><symbol id="i-more" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="18.5" cy="12" r="1.2" fill="currentColor"/></symbol><symbol id="i-chev-r" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol><symbol id="i-chev-l" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></symbol><symbol id="i-chev-d" viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></symbol><symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-arrow-d" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="1.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.8L21.2 20H2.8z"/><path d="M12 10v4.5M12 17.2v.3"/></symbol><symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1-3.5 4-5 7-5s6 1.5 7 5"/></symbol><symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5c2.6-1.2 5.4-1.2 8 .5v14c-2.6-1.7-5.4-1.7-8-.5zM20 5.5c-2.6-1.2-5.4-1.2-8 .5v14c2.6-1.7 5.4-1.7 8-.5z"/></symbol><symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11h-9.5L6 19.5V16H4z"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5"/><rect x="13.5" y="4" width="6.5" height="6.5"/><rect x="4" y="13.5" width="6.5" height="6.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5"/></symbol><symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5.5v-5.5h-5V20H4z"/></symbol><symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol><symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol><symbol id="i-sort" viewBox="0 0 24 24"><path d="M8 5v14M4.5 15.5L8 19l3.5-3.5M16 19V5M12.5 8.5L16 5l3.5 3.5"/></symbol><symbol id="i-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20M14 20h1M20 14v1"/></symbol><symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V4h10v5M7 17H4.5V9h15v8H17"/><path d="M7 14h10v6H7z"/></symbol><symbol id="i-return" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.3"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></symbol><symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 4l8 4.5-8 4.5-8-4.5z"/><path d="M4 12.5l8 4.5 8-4.5M4 16.5l8 4.5 8-4.5"/></symbol><symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5L19 6v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="1.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-hold" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></symbol><symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.5M4.5 12h.5M4.5 18h.5"/></symbol><symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol></svg>
+<header class="topbar"><div class="wrap">
+  <a class="lockup" href="home.html" aria-label="RISE home"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE"></a>
+  <label class="tb-search"><svg class="ic"><use href="#i-search"/></svg><input placeholder="Search documents, numbers, terms" aria-label="Search RISE"><kbd>/</kbd></label>
+  <nav class="tb-nav" aria-label="Main"><a href="browse.html" aria-current="page">Areas</a><a href="#">Glossary</a><a href="#">Ask an Expert</a></nav>
+  <div class="tb-right">
+    <button class="icon-btn" aria-label="Bookmarks"><svg class="ic"><use href="#i-bookmark"/></svg></button>
+    <button class="icon-btn" aria-label="Notifications"><svg class="ic"><use href="#i-bell"/></svg><span class="pip"></span></button>
+    <span class="vsep"></span>
+    <span class="role"><svg class="ic sm"><use href="#i-user"/></svg><b>Employee</b><svg class="ic sm"><use href="#i-chev-d"/></svg></span>
+    <a class="btn btn-primary" href="upload.html"><svg class="ic sm"><use href="#i-upload"/></svg>Upload</a>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="home.html">Index</a><svg class="ic"><use href="#i-chev-r"/></svg><a href="#">Operational segments</a><svg class="ic"><use href="#i-chev-r"/></svg><span>Coiled Tubing</span></nav>
+
+  <section class="amast">
+    <div class="amast-l">
+      <div class="bigcode"><b>CTSS</b><span class="label">Register code</span></div>
+      <div class="atitle">
+        <span class="label">Operational segment · Operations side</span>
+        <h1 class="d-l dot">Coiled Tubing</h1>
+        <div class="facts"><span><b>39</b> documents</span><span><b>36</b> in force</span><span><b>2</b> active alerts</span><span><b>1</b> awaiting approval</span></div>
+      </div>
+    </div>
+    <div class="amast-r">
+      <nav class="switch" aria-label="Side"><a class="on" href="#">Operations</a><a href="#">Maintenance</a></nav>
+      <a class="xs" href="#" style="display:inline-flex;gap:6px;align-items:center;color:var(--teal);font-weight:600"><svg class="ic sm"><use href="#i-chat"/></svg>Ask a Coiled Tubing expert</a>
+    </div>
+  </section>
+
+  <aside class="notice" role="note" aria-label="Active technical alert">
+    <svg class="ic big"><use href="#i-alert"/></svg>
+    <div>
+      <div class="ntag">Technical alert · Effective immediately</div>
+      <p class="ttl" style="margin-top:6px">New pressure rating for 2-inch CT string, effective immediately</p>
+      <div class="idline"><span class="docno">TQ-TWS-CTSS-ALT-002</span><span class="sep"></span><span class="rev">Rev 2.0</span><span class="sep"></span><span class="st st-current">Current</span><span class="sep"></span><span class="cls confidential"><svg class="ic"><use href="#i-lock"/></svg>Confidential</span><span class="sep"></span><span class="tab">Issued 13 Apr 2026</span></div>
+    </div>
+    <div class="na">
+      <a class="btn btn-secondary" href="#">Read the alert <svg class="ic sm"><use href="#i-arrow-r"/></svg></a>
+      <span class="xs">1 of 2 active alerts in Coiled Tubing</span>
+    </div>
+  </aside>
+
+  <div class="browse">
+    <nav class="contents" aria-label="Shelves">
+      <div class="hd"><span class="label">Contents</span></div>
+      <a class="toc-line" href="#"><span class="cd">ALL</span><span class="nm">All documents</span><span class="ld"></span><span class="ct">39</span></a>
+      <a class="toc-line" href="#"><span class="cd">S</span><span class="nm">Standards</span><span class="ld"></span><span class="ct">5</span></a>
+      <a class="toc-line on" href="#" aria-current="true"><span class="cd">SOP</span><span class="nm">SOPs</span><span class="ld"></span><span class="ct">15</span></a>
+      <a class="toc-line" href="#"><span class="cd">WI</span><span class="nm">Manuals</span><span class="ld"></span><span class="ct">8</span></a>
+      <a class="toc-line" href="#"><span class="cd">F</span><span class="nm">Forms &amp; Checklists</span><span class="ld"></span><span class="ct">2</span></a>
+      <a class="toc-line" href="#"><span class="cd">ALT</span><span class="nm">Alerts</span><span class="ld"></span><span class="ct">2</span></a>
+      <a class="toc-line" href="#"><span class="cd">LL</span><span class="nm">Lessons Learned</span><span class="ld"></span><span class="ct">4</span></a>
+      <div class="grp">
+        <span class="label">Maintenance side</span>
+        <p>Adds a <b style="font-weight:600;color:var(--ink)">Maintenance Bulletins</b> shelf (MB). Maintenance documents are approved by the Maintenance Manager, Coiled Tubing.</p>
+      </div>
+      <div class="grp">
+        <span class="label">Classification</span>
+        <p><span class="cls">Internal</span> every employee.<br><span class="cls restricted"><svg class="ic"><use href="#i-lock"/></svg>Restricted</span> named roles; you see the record, not the file.</p>
+      </div>
+    </nav>
+
+    <section aria-labelledby="shelf">
+      <div class="shelf-head">
+        <span class="tc" aria-hidden="true">SOP</span>
+        <div>
+          <h2 id="shelf">Standard Operating Procedures</h2>
+          <p class="muted">15 on this shelf · Coiled Tubing, Operations</p>
+        </div>
+        <div class="r">Numbered TQ-TWS-CTSS-SOP-###<br>Reviewed every 24 months</div>
+      </div>
+
+      <div class="fbar">
+        <label class="within"><svg class="ic"><use href="#i-search"/></svg><input placeholder="Find on this shelf" aria-label="Find on this shelf"></label>
+        <span class="chip on">All statuses</span>
+        <span class="chip"><span class="st st-current" style="font-weight:500;color:inherit">Current</span></span>
+        <span class="chip"><span class="st st-due" style="font-weight:500;color:inherit">Review due</span></span>
+        <span class="gap"></span>
+        <span class="chip">Classification <svg class="ic sm"><use href="#i-chev-d"/></svg></span>
+        <span class="chip"><span class="ar"><i>ع</i></span>Arabic available</span>
+      </div>
+
+      <div class="cols"><span style="display:flex;align-items:center;gap:16px"><span class="label">Document</span><span class="sort"><svg class="ic sm"><use href="#i-sort"/></svg>Sorted by <span class="chip">document number <svg class="ic sm"><use href="#i-chev-d"/></svg></span></span></span><span class="label">Review due</span><span></span></div>
+      <div class="entries">
+        <a class="entry" href="#">
+          <div>
+            <div class="idline"><span class="docno">TQ-TWS-CTSS-SOP-002</span><span class="sep"></span><span class="rev">Rev 2.0</span><span class="sep"></span><span class="st st-current">Current</span><span class="sep"></span><span class="cls restricted"><svg class="ic"><use href="#i-lock"/></svg>Restricted</span></div>
+            <h3>BHA Assembly Procedure</h3>
+            <div class="em"><span>Issued <span class="tab">13 Mar 2025</span></span><span class="ar"><i>ع</i>Arabic version available</span></div>
+          </div>
+          <div class="due"><span>13 Mar 2027</span></div>
+          <svg class="ic"><use href="#i-chev-r"/></svg>
+        </a>
+        <a class="entry" href="#">
+          <div>
+            <div class="idline"><span class="docno">TQ-TWS-CTSS-SOP-004</span><span class="sep"></span><span class="rev">Rev 1.0</span><span class="sep"></span><span class="st st-due">Review due</span><span class="sep"></span><span class="cls">Internal</span></div>
+            <h3>Emergency Disconnect Procedure</h3>
+            <div class="em"><span>Issued <span class="tab">24 Jan 2024</span></span><span>Still in force until replaced</span></div>
+          </div>
+          <div class="due"><span>24 Jan 2026</span><span class="late">254 days late</span></div>
+          <svg class="ic"><use href="#i-chev-r"/></svg>
+        </a>
+        <a class="entry" href="#">
+          <div>
+            <div class="idline"><span class="docno">TQ-TWS-CTSS-SOP-005</span><span class="sep"></span><span class="rev">Rev 2.0</span><span class="sep"></span><span class="st st-current">Current</span><span class="sep"></span><span class="cls restricted"><svg class="ic"><use href="#i-lock"/></svg>Restricted</span></div>
+            <h3>Pressure Testing Procedure</h3>
+            <div class="em"><span>Issued <span class="tab">12 Jun 2025</span></span><span class="ar"><i>ع</i>Arabic version available</span></div>
+          </div>
+          <div class="due"><span>12 Jun 2027</span></div>
+          <svg class="ic"><use href="#i-chev-r"/></svg>
+        </a>
+        <a class="entry" href="#">
+          <div>
+            <div class="idline"><span class="docno">TQ-TWS-CTSS-SOP-006</span><span class="sep"></span><span class="rev">Rev 4.0</span><span class="sep"></span><span class="st st-due">Review due</span><span class="sep"></span><span class="cls restricted"><svg class="ic"><use href="#i-lock"/></svg>Restricted</span></div>
+            <h3>CT Unit Rig-Up &amp; Rig-Down</h3>
+            <div class="em"><span>Issued <span class="tab">03 Mar 2024</span></span><span>Still in force until replaced</span></div>
+          </div>
+          <div class="due"><span>03 Mar 2026</span><span class="late">216 days late</span></div>
+          <svg class="ic"><use href="#i-chev-r"/></svg>
+        </a>
+        <a class="entry" href="#">
+          <div>
+            <div class="idline"><span class="docno">TQ-TWS-CTSS-SOP-007</span><span class="sep"></span><span class="rev">Rev 1.0</span><span class="sep"></span><span class="st st-current">Current</span><span class="sep"></span><span class="cls">Internal</span></div>
+            <h3>Nitrogen Injection SOP</h3>
+            <div class="em"><span>Issued <span class="tab">07 Feb 2026</span></span><span class="ar"><i>ع</i>Arabic version available</span></div>
+          </div>
+          <div class="due"><span>07 Feb 2028</span></div>
+          <svg class="ic"><use href="#i-chev-r"/></svg>
+        </a>
+        <a class="entry" href="#">
+          <div>
+            <div class="idline"><span class="docno">TQ-TWS-CTSS-SOP-008</span><span class="sep"></span><span class="rev">Rev 4.0</span><span class="sep"></span><span class="st st-due">Review due</span><span class="sep"></span><span class="cls">Internal</span></div>
+            <h3>Milling Operations SOP</h3>
+            <div class="em"><span>Issued <span class="tab">24 Jan 2024</span></span><span>Still in force until replaced</span></div>
+          </div>
+          <div class="due"><span>24 Jan 2026</span><span class="late">254 days late</span></div>
+          <svg class="ic"><use href="#i-chev-r"/></svg>
+        </a>
+        <a class="entry" href="#">
+          <div>
+            <div class="idline"><span class="docno">TQ-TWS-CTSS-SOP-009</span><span class="sep"></span><span class="rev">Rev 3.0</span><span class="sep"></span><span class="st st-current">Current</span><span class="sep"></span><span class="cls">Internal</span></div>
+            <h3>Acid Stimulation SOP</h3>
+            <div class="em"><span>Issued <span class="tab">08 Nov 2024</span></span><span class="ar"><i>ع</i>Arabic version available</span></div>
+          </div>
+          <div class="due"><span>08 Nov 2026</span><span class="soon">In 35 days</span></div>
+          <svg class="ic"><use href="#i-chev-r"/></svg>
+        </a>
+        <a class="entry" href="#">
+          <div>
+            <div class="idline"><span class="docno">TQ-TWS-CTSS-SOP-010</span><span class="sep"></span><span class="rev">Rev 3.0</span><span class="sep"></span><span class="st st-current">Current</span><span class="sep"></span><span class="cls restricted"><svg class="ic"><use href="#i-lock"/></svg>Restricted</span></div>
+            <h3>Fishing Operations SOP</h3>
+            <div class="em"><span>Issued <span class="tab">14 May 2026</span></span><span class="ar"><i>ع</i>Arabic version available</span></div>
+          </div>
+          <div class="due"><span>14 May 2028</span></div>
+          <svg class="ic"><use href="#i-chev-r"/></svg>
+        </a>
+        <a class="entry" href="#">
+          <div>
+            <div class="idline"><span class="docno">TQ-TWS-CTSS-SOP-011</span><span class="sep"></span><span class="rev">Rev 3.0</span><span class="sep"></span><span class="st st-current">Current</span><span class="sep"></span><span class="cls">Internal</span></div>
+            <h3>Logging While CT SOP</h3>
+            <div class="em"><span>Issued <span class="tab">10 Jan 2026</span></span><span class="ar"><i>ع</i>Arabic version available</span></div>
+          </div>
+          <div class="due"><span>10 Jan 2028</span></div>
+          <svg class="ic"><use href="#i-chev-r"/></svg>
+        </a>
+      </div>
+      <div class="more-row"><span>9 of 15 shown</span><a class="btn btn-secondary btn-sm" href="#">Show all 15</a></div>
+    </section>
+  </div>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <span><b>RISE</b> · WHAT WE KNOW. · Built by TAQA Learning Center</span>
+  <span>Knowledge Is Better Together. <a href="#">#BetterTogether@TAQA</a></span>
+  <span>TAQA, Industrialization &amp; Energy Services Company</span>
+</div></footer>
+</body>
+</html>

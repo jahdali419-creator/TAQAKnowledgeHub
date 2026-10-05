@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RISE · Direction C · System sheet</title>
+<link rel="stylesheet" href="../../kit/fonts.css">
+<link rel="stylesheet" href="rise.css">
+<style>
+  .sys { display: grid; grid-template-columns: 200px 1fr; column-gap: 56px; padding-top: 40px; align-items: start; }
+  .srail { position: sticky; top: 88px; }
+  .srail .label { display: block; padding-bottom: 10px; border-bottom: 2px solid var(--ink); }
+  .srail a { display: block; padding: 6px 0; font-size: 14px; color: var(--ink-2); position: relative; }
+  .srail a.on { color: var(--ink); font-weight: 600; }
+  .srail a.on::before { content: ''; position: absolute; left: -14px; top: 6px; bottom: 6px; width: 3px; background: var(--cyan); }
+  .sheet-intro { padding-bottom: 40px; }
+  .sheet-intro .lede { margin-top: 16px; }
+  .blk { padding: 40px 0 8px; }
+  .blk > header { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 12px; border-bottom: 2px solid var(--ink); margin-bottom: 24px; }
+  .blk > header .xs { color: var(--ink-3); max-width: 60ch; text-align: right; text-wrap: balance; }
+
+  .sw-group + .sw-group { margin-top: 24px; }
+  .sw-group > .label { display: block; margin-bottom: 10px; }
+  .sws { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .sw .chip2 { height: 56px; border-radius: 2px; border: 1px solid rgba(0,43,50,.12); }
+  .sw b { display: block; font-size: 13px; font-weight: 600; margin-top: 8px; }
+  .sw span { display: block; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; line-height: 1.4; }
+  .stpairs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .stp { border: 1px solid var(--rule); border-radius: 2px; padding: 12px; background: var(--sheet); }
+  .stp .bg { height: 28px; border-radius: 2px; display: flex; align-items: center; padding: 0 10px; margin-bottom: 8px; }
+  .stp > span { display: block; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+  .tscale { border-top: 1px solid var(--rule); }
+  .ts { display: grid; grid-template-columns: 150px 1fr 210px; gap: 20px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid var(--rule); }
+  .ts .nm { font-size: 13px; font-weight: 600; }
+  .ts .nm span { display: block; font-weight: 400; color: var(--ink-3); font-size: 12px; }
+  .ts .spec { font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; text-align: right; }
+
+  .space { display: flex; align-items: flex-end; gap: 20px; }
+  .space div { display: grid; gap: 6px; justify-items: center; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .space i { display: block; background: var(--teal); opacity: .85; width: 16px; }
+
+  .sig { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 24px; }
+  .sig > div { display: grid; gap: 12px; align-content: start; }
+  .sig p { font-size: 14px; color: var(--ink-2); }
+  .mini-sheet { --c: 22px; height: 150px; padding: 18px; }
+  .mini-sheet .docno { font-size: 12px; }
+  .mini-sheet p { margin-top: 8px; font: 700 18px/1.2 var(--display); color: var(--ink); }
+  .bigcodes { display: flex; gap: 18px; align-items: baseline; font: 700 44px/1 var(--display); color: var(--ink); }
+  .bigcodes span:nth-child(2) { color: var(--teal); }
+
+  .bm { display: grid; grid-template-columns: 110px repeat(4, 1fr); gap: 14px 16px; align-items: center; }
+  .bm .h { font-size: 12px; color: var(--ink-3); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+
+  .rows { background: var(--sheet); border: 1px solid var(--rule); }
+  .row { display: grid; grid-template-columns: 1fr 150px 20px; align-items: center; padding: 16px 20px; border-top: 1px solid var(--rule); }
+  .row:first-child { border-top: 0; }
+  .row h4 { font: 600 17px/1.35 var(--text); margin-top: 5px; }
+  .row .em { margin-top: 5px; display: flex; gap: 14px; font-size: 13px; color: var(--ink-3); align-items: center; }
+  .row.sup h4 { color: var(--ink-2); }
+  .row .due { font-size: 14px; font-variant-numeric: tabular-nums; }
+  .row > .ic { color: var(--ink-3); }
+  .anat { margin-top: 18px; display: flex; gap: 0; font-size: 12px; color: var(--ink-3); }
+  .anat span { padding: 6px 12px 0 0; border-top: 1px solid var(--ink-3); margin-right: 10px; }
+
+  .stlist { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid var(--rule); }
+  .stlist > div { padding: 14px 16px 14px 0; border-bottom: 1px solid var(--rule); }
+  .stlist p { font-size: 12.5px; color: var(--ink-3); margin-top: 6px; line-height: 1.45; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+  .fs { display: grid; gap: 18px; }
+
+  .drawer-demo { position: relative; height: 452px; border: 1px solid var(--rule); background: var(--ground-2); overflow: hidden; border-radius: 2px; }
+  .drawer-demo .under { position: absolute; inset: 0; padding: 24px; }
+  .drawer-demo .under .bar { height: 10px; background: #DAD9D3; border-radius: 2px; margin-bottom: 10px; }
+  .drawer-demo .scrim { position: absolute; inset: 0; background: rgba(0,43,50,.28); }
+  .drawer { position: absolute; top: 0; right: 0; bottom: 0; width: 360px; background: var(--sheet); border-left: 1px solid var(--rule); padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+  .drawer .dh { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+  .drawer .dh b { font: 700 20px/1 var(--display); }
+  .drawer .lnk { display: flex; gap: 8px; }
+  .drawer .lnk .input { font-size: 13px; color: var(--ink-2); height: 40px; overflow: hidden; white-space: nowrap; }
+  .qrbox { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: center; }
+  .qr { width: 96px; height: 96px; border: 1px solid var(--rule-2); display: grid; place-items: center; color: var(--ink-3); background: var(--sheet); }
+  .qr .ic { width: 40px; height: 40px; stroke-width: 1.2; }
+  .drawer .mi { display: grid; border-top: 1px solid var(--rule); }
+  .drawer .mi a { display: flex; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rule); font-size: 14px; color: var(--ink); font-weight: 500; }
+
+  .empty { --c: 22px; padding: 40px; display: grid; grid-template-columns: 120px 1fr; gap: 28px; align-items: center; }
+  .empty .ec { font: 700 64px/1 var(--display); color: var(--rule-2); }
+  .empty h4 { font: 700 22px/1.25 var(--display); }
+  .empty p { font-size: 15px; color: var(--ink-2); margin-top: 6px; }
+  .empty .acts { margin-top: 16px; display: flex; gap: 8px; }
+
+  .icons { display: grid; grid-template-columns: repeat(10, 1fr); gap: 0; border-top: 1px solid var(--rule); border-left: 1px solid var(--rule); background: var(--sheet); }
+  .icons div { display: grid; justify-items: center; gap: 8px; padding: 16px 4px 12px; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); font-size: 11px; color: var(--ink-3); }
+  .icons .ic { width: 22px; height: 22px; color: var(--ink); }
+
+  .mtable td:first-child { font-weight: 600; }
+  .mtable td.tab { white-space: nowrap; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol><symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3.6L7 20z"/></symbol><symbol id="i-bookmark-f" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3.6L7 20z" fill="currentColor"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5M5 15v4.5h14V15"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 15v4.5h14V15"/></symbol><symbol id="i-share" viewBox="0 0 24 24"><circle cx="17.5" cy="6" r="2.5"/><circle cx="6.5" cy="12" r="2.5"/><circle cx="17.5" cy="18" r="2.5"/><path d="M8.7 10.8l6.6-3.6M8.7 13.2l6.6 3.6"/></symbol><symbol id="i-more" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="18.5" cy="12" r="1.2" fill="currentColor"/></symbol><symbol id="i-chev-r" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol><symbol id="i-chev-l" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></symbol><symbol id="i-chev-d" viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></symbol><symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-arrow-d" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="1.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.8L21.2 20H2.8z"/><path d="M12 10v4.5M12 17.2v.3"/></symbol><symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1-3.5 4-5 7-5s6 1.5 7 5"/></symbol><symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5c2.6-1.2 5.4-1.2 8 .5v14c-2.6-1.7-5.4-1.7-8-.5zM20 5.5c-2.6-1.2-5.4-1.2-8 .5v14c2.6-1.7 5.4-1.7 8-.5z"/></symbol><symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11h-9.5L6 19.5V16H4z"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5"/><rect x="13.5" y="4" width="6.5" height="6.5"/><rect x="4" y="13.5" width="6.5" height="6.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5"/></symbol><symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5.5v-5.5h-5V20H4z"/></symbol><symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol><symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol><symbol id="i-sort" viewBox="0 0 24 24"><path d="M8 5v14M4.5 15.5L8 19l3.5-3.5M16 19V5M12.5 8.5L16 5l3.5 3.5"/></symbol><symbol id="i-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20M14 20h1M20 14v1"/></symbol><symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V4h10v5M7 17H4.5V9h15v8H17"/><path d="M7 14h10v6H7z"/></symbol><symbol id="i-return" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.3"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></symbol><symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 4l8 4.5-8 4.5-8-4.5z"/><path d="M4 12.5l8 4.5 8-4.5M4 16.5l8 4.5 8-4.5"/></symbol><symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5L19 6v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="1.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-hold" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></symbol><symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.5M4.5 12h.5M4.5 18h.5"/></symbol><symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol></svg>
+<header class="topbar"><div class="wrap">
+  <a class="lockup" href="home.html" aria-label="RISE home"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE"></a>
+  <label class="tb-search"><svg class="ic"><use href="#i-search"/></svg><input placeholder="Search documents, numbers, terms" aria-label="Search RISE"><kbd>/</kbd></label>
+  <nav class="tb-nav" aria-label="Main"><a href="browse.html">Areas</a><a href="#">Glossary</a><a href="#">Ask an Expert</a></nav>
+  <div class="tb-right">
+    <button class="icon-btn" aria-label="Bookmarks"><svg class="ic"><use href="#i-bookmark"/></svg></button>
+    <button class="icon-btn" aria-label="Notifications"><svg class="ic"><use href="#i-bell"/></svg><span class="pip"></span></button>
+    <span class="vsep"></span>
+    <span class="role"><svg class="ic sm"><use href="#i-user"/></svg><b>Employee</b><svg class="ic sm"><use href="#i-chev-d"/></svg></span>
+    <a class="btn btn-primary" href="upload.html"><svg class="ic sm"><use href="#i-upload"/></svg>Upload</a>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <div class="sys">
+    <nav class="srail" aria-label="System sheet contents">
+      <span class="label">Contents</span>
+      <a class="on" href="#colour">Colour</a><a href="#type">Type</a><a href="#space">Space &amp; grid</a><a href="#sig">Signatures</a><a href="#buttons">Buttons</a><a href="#rows">Identity line &amp; rows</a><a href="#status">Status &amp; classification</a><a href="#trail">Approval trail</a><a href="#forms">Forms</a><a href="#alerts">Alerts</a><a href="#empty">Empty state</a><a href="#drawer">Drawer</a><a href="#icons">Icons</a><a href="#motion">Motion</a>
+    </nav>
+
+    <div>
+      <div class="sheet-intro">
+        <span class="label">Direction C · Atlas</span>
+        <h1 class="d-l dot" style="margin-top:12px">System sheet</h1>
+        <p class="lede">RISE as TAQA's reference library. Paper on a warm grey ground, hairline rules instead of shadows, BW Gradual for names and codes, Inter for reading. Every document has a place, a code and a lineage, and the interface shows that structure calmly.</p>
+      </div>
+
+      <section class="blk" id="colour">
+        <header><h2 class="d-m dot">Colour</h2><span class="xs">Brand colour marks action and identity. Status colours are muted and print-like, and always come with a word and a shape.</span></header>
+        <div class="sw-group"><span class="label">Ground, paper, rules</span>
+          <div class="sws">
+            <div class="sw"><div class="chip2" style="background:#F4F4F2"></div><b>Ground</b><span>#F4F4F2 · page</span></div>
+            <div class="sw"><div class="chip2" style="background:#EBEBE7"></div><b>Ground 2</b><span>#EBEBE7 · sunken, hover</span></div>
+            <div class="sw"><div class="chip2" style="background:#FFFFFF"></div><b>Sheet</b><span>#FFFFFF · paper</span></div>
+            <div class="sw"><div class="chip2" style="background:#DCDBD5"></div><b>Rule</b><span>#DCDBD5 · hairline</span></div>
+            <div class="sw"><div class="chip2" style="background:#C6C5BE"></div><b>Rule 2</b><span>#C6C5BE · field border</span></div>
+            <div class="sw"><div class="chip2" style="background:#BDBCB4"></div><b>Leader</b><span>#BDBCB4 · dotted</span></div>
+          </div>
+        </div>
+        <div class="sw-group"><span class="label">Ink and brand</span>
+          <div class="sws">
+            <div class="sw"><div class="chip2" style="background:#002B32"></div><b>Ink</b><span>#002B32 · text 15.1:1</span></div>
+            <div class="sw"><div class="chip2" style="background:#5A6A6D"></div><b>Ink 3</b><span>#5A6A6D · meta 5.1:1</span></div>
+            <div class="sw"><div class="chip2" style="background:#005D63"></div><b>Product teal</b><span>#005D63 · links, primary</span></div>
+            <div class="sw"><div class="chip2" style="background:#00ADC2"></div><b>Cyan</b><span>#00ADC2 · active, focus</span></div>
+            <div class="sw"><div class="chip2" style="background:#FD5805"></div><b>Orange</b><span>#FD5805 · full stop, alerts</span></div>
+            <div class="sw"><div class="chip2" style="background:#A23A0C"></div><b>Orange ink</b><span>#A23A0C · alert text</span></div>
+          </div>
+        </div>
+        <div class="sw-group"><span class="label">Status</span>
+          <div class="stpairs">
+            <div class="stp"><div class="bg" style="background:var(--st-current-bg)"><span class="st st-current">Current</span></div><span>#2E6A4A on #EAF1EC</span></div>
+            <div class="stp"><div class="bg" style="background:var(--st-due-bg)"><span class="st st-due">Review due</span></div><span>#7A5200 on #F6EFDD</span></div>
+            <div class="stp"><div class="bg" style="background:var(--st-prog-bg)"><span class="st st-prog">In QMS check</span></div><span>#2F5877 on #E8EEF3</span></div>
+            <div class="stp"><div class="bg" style="background:var(--st-ret-bg)"><span class="st st-ret">Returned</span></div><span>#9A3412 on #F8EAE2</span></div>
+            <div class="stp"><div class="bg" style="background:var(--st-dead-bg)"><span class="st st-dead">Superseded</span></div><span>#66666A on #EEEEEC</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="blk" id="type">
+        <header><h2 class="d-m dot">Type</h2><span class="xs">Seven steps. BW Gradual for display and codes; Inter for reading and UI; document numbers in Inter 600, tabular, letter-spaced.</span></header>
+        <div class="tscale">
+          <div class="ts"><span class="nm">Display XL<span>Home masthead</span></span><span style="font:700 56px/1 var(--display);letter-spacing:.03em;text-transform:uppercase" class="dot">What we know</span><span class="spec">BW Gradual 700 · 56/58</span></div>
+          <div class="ts"><span class="nm">Display L<span>Page titles, type codes</span></span><span class="d-l dot">Coiled Tubing</span><span class="spec">BW Gradual 700 · 38/42</span></div>
+          <div class="ts"><span class="nm">Display M<span>Section titles</span></span><span class="d-m dot">Register health</span><span class="spec">BW Gradual 700 · 26/31</span></div>
+          <div class="ts"><span class="nm">Title<span>Document titles</span></span><span class="h-t">Injector Head Operations Manual</span><span class="spec">Inter 600 · 18/25</span></div>
+          <div class="ts"><span class="nm">Body<span>Reading, UI</span></span><span>How to rig up, operate, monitor and shut down the CT injector head safely.</span><span class="spec">Inter 400 · 16/26</span></div>
+          <div class="ts"><span class="nm">Small · Data<span>Numbers, meta</span></span><span><span class="docno">TQ-TWS-CTSS-WI-003</span> <span class="small muted">&nbsp;Issued 30 Aug 2025</span></span><span class="spec">Inter 600 · 14 · +0.045em · tnum</span></div>
+          <div class="ts"><span class="nm">Label<span>Eyebrows, columns</span></span><span class="label">Approval trail · Rev 4.0</span><span class="spec">Inter 600 · 12/16 · +0.08em caps</span></div>
+        </div>
+      </section>
+
+      <section class="blk" id="space">
+        <header><h2 class="d-m dot">Space &amp; grid</h2><span class="xs">4px base. Desktop 1440, content 1200 (1320 for the viewer and QMS), 12 columns, 24px gutter, reading column 720. Phone 390, 16px gutters, 44px targets.</span></header>
+        <div class="space">
+          <div><i style="height:4px"></i>4</div><div><i style="height:8px"></i>8</div><div><i style="height:12px"></i>12</div><div><i style="height:16px"></i>16</div><div><i style="height:24px"></i>24</div><div><i style="height:32px"></i>32</div><div><i style="height:48px"></i>48</div><div><i style="height:64px"></i>64</div><div><i style="height:96px"></i>96</div>
+        </div>
+      </section>
+
+      <section class="blk" id="sig">
+        <header><h2 class="d-m dot">Signatures</h2><span class="xs">Three, used with intent. Nothing else decorates.</span></header>
+        <div class="sig">
+          <div>
+            <div class="sheet-frame"><div class="chf mini-sheet"><span class="docno">TQ-TWS-CTSS-WI-003</span><p>Injector Head Operations Manual</p></div></div>
+            <p><b style="color:var(--ink)">The 45° chamfer</b> from the logo's bars cuts the top-right corner of document sheets and document cards. Nothing else is chamfered.</p>
+          </div>
+          <div>
+            <div style="height:150px;display:flex;align-items:center"><span class="d-l dot" style="font-size:44px">Index</span></div>
+            <p><b style="color:var(--ink)">The orange full stop</b> ends display headings only: the Home masthead, area and section titles. Never on body text or document titles.</p>
+          </div>
+          <div>
+            <div style="height:150px;display:flex;align-items:center"><div class="bigcodes"><span>SOP</span><span>CTSS</span><span>WI</span></div></div>
+            <p><b style="color:var(--ink)">Codes as landmarks.</b> Type and register codes are set large in BW Gradual so people navigate by the structure they already use.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="blk" id="buttons">
+        <header><h2 class="d-m dot">Buttons</h2><span class="xs">One primary per view. Radius 4. Focus ring is cyan, 2px, offset 2px.</span></header>
+        <div class="bm">
+          <span></span><span class="h">Default</span><span class="h">Hover</span><span class="h">Focus</span><span class="h">Disabled</span>
+          <span class="h">Primary</span><span><button class="btn btn-primary">Download PDF</button></span><span><button class="btn btn-primary is-hover">Download PDF</button></span><span><button class="btn btn-primary is-focus">Download PDF</button></span><span><button class="btn btn-primary" disabled>Download PDF</button></span>
+          <span class="h">Secondary</span><span><button class="btn btn-secondary">Bookmark</button></span><span><button class="btn btn-secondary is-hover">Bookmark</button></span><span><button class="btn btn-secondary is-focus">Bookmark</button></span><span><button class="btn btn-secondary" disabled>Bookmark</button></span>
+          <span class="h">Quiet</span><span><button class="btn btn-quiet">Show all 15</button></span><span><button class="btn btn-quiet is-hover">Show all 15</button></span><span><button class="btn btn-quiet is-focus">Show all 15</button></span><span><button class="btn btn-quiet" disabled>Show all 15</button></span>
+          <span class="h">Danger</span><span><button class="btn btn-danger">Return to filer</button></span><span><button class="btn btn-danger is-hover">Return to filer</button></span><span><button class="btn btn-danger is-focus">Return to filer</button></span><span><button class="btn btn-danger" disabled>Return to filer</button></span>
+        </div>
+      </section>
+
+      <section class="blk" id="rows">
+        <header><h2 class="d-m dot">Identity line &amp; rows</h2><span class="xs">number · Rev · status · classification. The same line on rows, the viewer, the QMS queue and the phone, so a number read on the radio is exact.</span></header>
+        <div class="idline" style="font-size:15px"><span class="docno" style="font-size:17px">TQ-TWS-CTSS-WI-003</span><span class="sep"></span><span class="rev" style="font-size:15px">Rev 4.0</span><span class="sep"></span><span class="st st-current" style="font-size:15px">Current</span><span class="sep"></span><span class="cls" style="font-size:15px">Internal</span></div>
+        <div class="anat"><span>Number · TQ-QHSE-S001 §5.3</span><span>Revision</span><span>Status · word + shape</span><span>Classification · lock when limited</span></div>
+        <div class="rows" style="margin-top:24px">
+          <div class="row"><div><div class="idline"><span class="docno">TQ-TWS-CTSS-SOP-005</span><span class="sep"></span><span class="rev">Rev 2.0</span><span class="sep"></span><span class="st st-current">Current</span><span class="sep"></span><span class="cls restricted"><svg class="ic"><use href="#i-lock"/></svg>Restricted</span></div><h4>Pressure Testing Procedure</h4><div class="em"><span>Issued 12 Jun 2025</span><span class="ar"><i>ع</i>Arabic version available</span></div></div><span class="due">12 Jun 2027</span><svg class="ic"><use href="#i-chev-r"/></svg></div>
+          <div class="row"><div><div class="idline"><span class="docno">TQ-TWS-CTSS-SOP-006</span><span class="sep"></span><span class="rev">Rev 4.0</span><span class="sep"></span><span class="st st-due">Review due</span><span class="sep"></span><span class="cls restricted"><svg class="ic"><use href="#i-lock"/></svg>Restricted</span></div><h4>CT Unit Rig-Up &amp; Rig-Down</h4><div class="em"><span>Issued 03 Mar 2024</span><span>Still in force until replaced</span></div></div><span class="due">03 Mar 2026<br><b style="font-size:12.5px;color:var(--st-due)">216 days late</b></span><svg class="ic"><use href="#i-chev-r"/></svg></div>
+          <div class="row sup"><div><div class="idline"><span class="docno" style="color:var(--ink-2)">TQ-TWS-CTSS-WI-003</span><span class="sep"></span><span class="rev" style="color:var(--ink-2)">Rev 3.0</span><span class="sep"></span><span class="st st-dead">Superseded</span><span class="sep"></span><span class="cls">Internal</span></div><h4>Injector Head Operations Manual</h4><div class="em"><span>Issued 11 Mar 2024</span><span>Replaced by Rev 4.0 · not for use</span></div></div><span class="due muted">—</span><svg class="ic"><use href="#i-chev-r"/></svg></div>
+        </div>
+      </section>
+
+      <section class="blk" id="status">
+        <header><h2 class="d-m dot">Status &amp; classification</h2><span class="xs">Readable without colour: each status has its own shape. Superseded and Obsolete are muted, never hidden.</span></header>
+        <div class="stlist">
+          <div><span class="st st-current">Current</span><p>In force. Filled dot.</p></div>
+          <div><span class="st st-due">Review due</span><p>Past review date, still in force until replaced. Half dot.</p></div>
+          <div><span class="st st-prog">Draft</span><p>Being written by the filer. Dashed ring.</p></div>
+          <div><span class="st st-prog">In QMS check</span><p>With QMS Document Control. Dashed ring.</p></div>
+          <div><span class="st st-prog">Awaiting final approval</span><p>With the final approver. Dashed ring.</p></div>
+          <div><span class="st st-ret">Returned</span><p>Needs action by the filer. Diamond.</p></div>
+          <div><span class="st st-dead">Superseded</span><p>Replaced by a newer revision. Open ring.</p></div>
+          <div><span class="st st-obs">Obsolete</span><p>Withdrawn. Struck ring.</p></div>
+        </div>
+        <div style="display:flex;gap:28px;margin-top:20px;align-items:center">
+          <span class="label">Classification</span>
+          <span class="cls">Internal</span><span class="xs muted">every employee</span>
+          <span class="cls restricted"><svg class="ic"><use href="#i-lock"/></svg>Restricted</span><span class="xs muted">named roles; others see the record only</span>
+          <span class="cls confidential"><svg class="ic"><use href="#i-lock"/></svg>Confidential</span>
+        </div>
+      </section>
+
+      <section class="blk" id="trail">
+        <header><h2 class="d-m dot">Approval trail</h2><span class="xs">Filed → QMS check → Final approval → Current. Filer, checker and approver are three different people. The final approver is always named by role.</span></header>
+        <div class="two">
+          <div>
+            <span class="label" style="display:block;margin-bottom:14px">Vertical lineage · record and viewer</span>
+            <div class="lineage">
+              <div class="lin done"><div class="lt">Filed<span class="when">19 Aug 2025</span></div><p class="ld2">Khalid Al-Otaibi, CT Engineer</p></div>
+              <div class="lin done"><div class="lt">QMS check<span class="when">24 Aug 2025</span></div><p class="ld2">QMS Document Control</p></div>
+              <div class="lin done key"><div class="lt">Final approval<span class="when">28 Aug 2025</span></div><p class="ld2" style="color:var(--ink);font-weight:500">Segment Director, Coiled Tubing</p></div>
+              <div class="lin now"><div class="lt"><span class="cur">Current</span><span class="when">from 30 Aug 2025</span></div></div>
+            </div>
+          </div>
+          <div>
+            <span class="label" style="display:block;margin-bottom:14px">Node states</span>
+            <div class="lineage">
+              <div class="lin done"><div class="lt">Done</div><p class="ld2">Filled ink</p></div>
+              <div class="lin next"><div class="lt">Next / in progress</div><p class="ld2">Dashed ring, informational blue</p></div>
+              <div class="lin done key"><div class="lt">Final approver</div><p class="ld2">Ringed: the decision that puts a document in force</p></div>
+              <div class="lin now"><div class="lt"><span class="cur">In force</span></div><p class="ld2">Status green</p></div>
+              <div class="lin old"><div class="lt" style="color:var(--ink-2)">Superseded revision</div><p class="ld2">Open grey ring, kept in the lineage</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="blk" id="forms">
+        <header><h2 class="d-m dot">Forms</h2><span class="xs">44px fields, labels above, plain hints, errors that say what to do.</span></header>
+        <div class="two">
+          <div class="fs">
+            <div class="field"><label>Document title</label><div class="input">Acid Stimulation SOP</div></div>
+            <div class="field"><label>Change note</label><div class="input focus">Updated HCl concentration limits and added a neut|</div><span class="hint">One sentence on what changed. Readers see it in the revision history.</span></div>
+            <div class="field"><label>Area</label><div class="select">Coiled Tubing · Operations <svg class="ic sm"><use href="#i-chev-d"/></svg></div></div>
+            <div class="field"><label>Revision</label><div class="input err">3.0</div><span class="err-msg"><svg class="ic sm"><use href="#i-alert"/></svg>Rev 3.0 is already in force. A revision must be higher, for example 4.0.</span></div>
+          </div>
+          <div class="fs">
+            <div class="field"><span class="flabel">What are you filing?</span>
+              <div class="radio-cards">
+                <div class="rcard"><b>New document</b>Gets a new number in its area</div>
+                <div class="rcard on"><b>Revision</b>Same number, next revision (D1)</div>
+              </div>
+            </div>
+            <div class="field"><span class="flabel">File</span>
+              <div class="drop"><svg class="ic lg" style="color:var(--ink-3)"><use href="#i-upload"/></svg><div style="margin-top:6px"><b style="color:var(--ink);font-weight:600">Drop the PDF here</b> or <a href="#">choose a file</a></div><div class="xs muted" style="margin-top:2px">One file is one document</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="blk" id="alerts">
+        <header><h2 class="d-m dot">Alerts</h2><span class="xs">Info and warning sit inside the flow. A technical alert is set as a printed notice: orange head rule, its own number, read before the work.</span></header>
+        <div class="fs">
+          <div class="alert info"><svg class="ic"><use href="#i-info"/></svg><span><b>Preview connects when storage is linked.</b> The cover is set from the register record.</span></div>
+          <div class="alert warn"><svg class="ic"><use href="#i-clock"/></svg><span><b>Review due.</b> TQ-TWS-CTSS-SOP-004 passed its review date 254 days ago. It stays in force until it is replaced.</span></div>
+          <div class="notice">
+            <svg class="ic" style="width:24px;height:24px;color:var(--orange);margin-top:18px"><use href="#i-alert"/></svg>
+            <div><div class="ntag">Technical alert · Effective immediately</div><p class="ttl" style="margin-top:6px">New pressure rating for 2-inch CT string, effective immediately</p><div class="idline" style="margin-top:8px"><span class="docno">TQ-TWS-CTSS-ALT-002</span><span class="sep"></span><span class="rev">Rev 2.0</span><span class="sep"></span><span class="st st-current">Current</span><span class="sep"></span><span class="cls confidential"><svg class="ic"><use href="#i-lock"/></svg>Confidential</span></div></div>
+            <a class="btn btn-secondary" href="#" style="align-self:center">Read the alert</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="blk" id="empty">
+        <header><h2 class="d-m dot">Empty state</h2><span class="xs">Say what happened and offer the next useful step. No illustrations.</span></header>
+        <div class="sheet-frame"><div class="chf empty">
+          <span class="ec" aria-hidden="true">SOP</span>
+          <div>
+            <h4>No SOPs match “chain slip” on this shelf.</h4>
+            <p>Coiled Tubing, Operations. Try all of RISE, or ask the Coiled Tubing expert.</p>
+            <div class="acts"><a class="btn btn-primary btn-sm" href="#">Search all of RISE</a><a class="btn btn-secondary btn-sm" href="#">Ask an Expert</a></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="blk" id="drawer">
+        <header><h2 class="d-m dot">Drawer</h2><span class="xs">Side panels for Share and More. Slide in 200ms from the right, scrim fades; Esc and the close button dismiss; focus returns to the trigger.</span></header>
+        <div class="drawer-demo">
+          <div class="under"><div class="bar" style="width:40%"></div><div class="bar" style="width:70%"></div><div class="bar" style="width:55%"></div><div class="bar" style="width:62%"></div></div>
+          <div class="scrim"></div>
+          <aside class="drawer" aria-label="Share">
+            <div class="dh"><b>Share</b><button class="icon-btn" aria-label="Close"><svg class="ic"><use href="#i-x"/></svg></button></div>
+            <div><span class="docno" style="font-size:13px">TQ-TWS-CTSS-WI-003</span><div class="small">Injector Head Operations Manual · Rev 4.0</div></div>
+            <div class="lnk"><div class="input">rise / TQ-TWS-CTSS-WI-003</div><button class="btn btn-secondary"><svg class="ic sm"><use href="#i-link"/></svg>Copy</button></div>
+            <div class="qrbox"><div class="qr"><svg class="ic"><use href="#i-qr"/></svg></div><span class="small ink2">QR code for the rig floor. It always opens the current revision.</span></div>
+            <div class="mi"><a href="#"><svg class="ic sm"><use href="#i-bolt"/></svg>Quick reference</a><a href="#"><svg class="ic sm"><use href="#i-save"/></svg>Save offline</a><a href="#"><svg class="ic sm"><use href="#i-print"/></svg>Print</a></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="blk" id="icons">
+        <header><h2 class="d-m dot">Icons</h2><span class="xs">One line set, 24 grid, 1.6 stroke, round caps, inline SVG. Drawn at 15, 18 or 22px.</span></header>
+        <div class="icons">
+          <div><svg class="ic"><use href="#i-search"/></svg>search</div><div><svg class="ic"><use href="#i-bookmark"/></svg>bookmark</div><div><svg class="ic"><use href="#i-bell"/></svg>notify</div><div><svg class="ic"><use href="#i-upload"/></svg>upload</div><div><svg class="ic"><use href="#i-download"/></svg>download</div>
+          <div><svg class="ic"><use href="#i-share"/></svg>share</div><div><svg class="ic"><use href="#i-qr"/></svg>qr</div><div><svg class="ic"><use href="#i-print"/></svg>print</div><div><svg class="ic"><use href="#i-save"/></svg>offline</div><div><svg class="ic"><use href="#i-bolt"/></svg>quick ref</div>
+          <div><svg class="ic"><use href="#i-lock"/></svg>restricted</div><div><svg class="ic"><use href="#i-check"/></svg>check</div><div><svg class="ic"><use href="#i-alert"/></svg>alert</div><div><svg class="ic"><use href="#i-info"/></svg>info</div><div><svg class="ic"><use href="#i-clock"/></svg>due</div>
+          <div><svg class="ic"><use href="#i-return"/></svg>return</div><div><svg class="ic"><use href="#i-hold"/></svg>held</div><div><svg class="ic"><use href="#i-shield"/></svg>control</div><div><svg class="ic"><use href="#i-file"/></svg>file</div><div><svg class="ic"><use href="#i-layers"/></svg>revisions</div>
+          <div><svg class="ic"><use href="#i-book"/></svg>glossary</div><div><svg class="ic"><use href="#i-chat"/></svg>expert</div><div><svg class="ic"><use href="#i-grid"/></svg>areas</div><div><svg class="ic"><use href="#i-home"/></svg>home</div><div><svg class="ic"><use href="#i-user"/></svg>role</div>
+          <div><svg class="ic"><use href="#i-sort"/></svg>sort</div><div><svg class="ic"><use href="#i-filter"/></svg>filter</div><div><svg class="ic"><use href="#i-link"/></svg>link</div><div><svg class="ic"><use href="#i-arrow-r"/></svg>go</div><div><svg class="ic"><use href="#i-x"/></svg>close</div>
+        </div>
+      </section>
+
+      <section class="blk" id="motion">
+        <header><h2 class="d-m dot">Motion</h2><span class="xs">Quiet and functional. No entrance animation. Transform and opacity only; prefers-reduced-motion removes it all.</span></header>
+        <table class="ledger mtable">
+          <thead><tr><th>What moves</th><th>How</th><th>Duration</th><th>Easing</th></tr></thead>
+          <tbody>
+            <tr><td>Links, rows, buttons</td><td>Colour, underline and background change on hover and focus</td><td class="tab">160ms</td><td>ease-out</td></tr>
+            <tr><td>Document sheet</td><td>Fades in when the preview loads; the cover never jumps</td><td class="tab">200ms</td><td>ease-out</td></tr>
+            <tr><td>Contents rail</td><td>Scroll-spy marker moves to the section in view</td><td class="tab">160ms</td><td>ease-out</td></tr>
+            <tr><td>Search results</td><td>Update in place under a fixed-height header; no layout jump</td><td class="tab">120ms</td><td>opacity</td></tr>
+            <tr><td>Drawer</td><td>Slides from the right; scrim fades</td><td class="tab">200ms</td><td>ease-out</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <span><b>RISE</b> · WHAT WE KNOW. · Built by TAQA Learning Center</span>
+  <span>Direction C · Atlas · system sheet</span>
+  <span>TAQA, Industrialization &amp; Energy Services Company</span>
+</div></footer>
+</body>
+</html>

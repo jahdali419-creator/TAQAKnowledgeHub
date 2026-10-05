@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RISE Design Directions</title>
+<link rel="stylesheet" href="kit/fonts.css">
+<style>
+/* Layout: one reading column (≈1120px) with a sticky section bar; galleries break wider. */
+:root{
+  --ground:#F4F5F4; --sheet:#FFFFFF; --ink:#0B2A30; --ink-2:#3C5459; --ink-3:#5F7175;
+  --rule:#DADFDE; --rule-2:#C3CBCA; --teal:#005D63; --teal-wash:#E5F0F0; --cyan:#00ADC2;
+  --orange:#FD5805; --orange-ink:#A23A0C; --ok:#1F6E4A; --ok-wash:#E6F2EB; --warn:#7A5200; --warn-wash:#FBF2DD;
+  --chip:#EAEEED; --shadow:0 1px 2px rgba(0,43,50,.06),0 8px 24px -10px rgba(0,43,50,.18);
+  --verdict:#0B2A30; --logo-light:block; --logo-dark:none;
+  --display:'BwGradual','Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --text:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#0A1B1E; --sheet:#10262A; --ink:#E4EEEE; --ink-2:#B5C6C8; --ink-3:#8FA3A6;
+  --rule:#22393D; --rule-2:#2F4A4F; --teal:#5FC2C4; --teal-wash:#12363A; --cyan:#22C3D6;
+  --orange:#FF7A33; --orange-ink:#FFA06B; --ok:#5CC491; --ok-wash:#123528; --warn:#E6B55A; --warn-wash:#33290F;
+  --chip:#18322F; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -10px rgba(0,0,0,.5); --verdict:#15383E; --logo-light:none; --logo-dark:block; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#0A1B1E; --sheet:#10262A; --ink:#E4EEEE; --ink-2:#B5C6C8; --ink-3:#8FA3A6;
+  --rule:#22393D; --rule-2:#2F4A4F; --teal:#5FC2C4; --teal-wash:#12363A; --cyan:#22C3D6;
+  --orange:#FF7A33; --orange-ink:#FFA06B; --ok:#5CC491; --ok-wash:#123528; --warn:#E6B55A; --warn-wash:#33290F;
+  --chip:#18322F; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -10px rgba(0,0,0,.5); --verdict:#15383E; --logo-light:none; --logo-dark:block; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:400 15.5px/1.6 var(--text);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:24px}
+@media (max-width:560px){.wrap{padding-inline:16px}}
+a{color:var(--teal);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:4px}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:-.015em;text-wrap:balance;margin:0}
+.dot{color:var(--orange)}
+p{margin:0}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-2);max-width:66ch}
+.eyebrow{font:600 11.5px/1 var(--text);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.num{font-variant-numeric:tabular-nums}
+code,.mono{font:500 13px/1.4 var(--text);letter-spacing:.05em;font-variant-numeric:tabular-nums}
+
+/* masthead */
+.mast{padding-block:48px 28px;border-bottom:1px solid var(--rule)}
+.mast-top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:36px}
+.mast-top img{height:34px;width:auto}
+.logo-l{display:var(--logo-light)} .logo-d{display:var(--logo-dark)}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px dashed var(--rule-2);border-radius:999px;font:600 12px/1 var(--text);color:var(--ink-2)}
+.badge i{width:7px;height:7px;border-radius:50%;background:var(--orange);display:inline-block}
+.mast h1{font-size:clamp(34px,5vw,56px);line-height:1.04;margin-bottom:18px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:32px;border-top:1px solid var(--rule)}
+.facts div{padding:16px 16px 0 0}
+.facts b{display:block;font:700 15px/1.3 var(--display);margin-bottom:4px}
+.facts span{color:var(--ink-3);font-size:14px}
+@media (max-width:760px){.facts{grid-template-columns:1fr 1fr}}
+
+/* section bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--ground) 92%,transparent);backdrop-filter:saturate(1.2) blur(6px);border-bottom:1px solid var(--rule)}
+.bar nav{display:flex;gap:4px;overflow-x:auto;padding-block:10px;scrollbar-width:none}
+.bar a{flex:none;padding:6px 12px;border-radius:999px;color:var(--ink-2);text-decoration:none;font:500 13.5px/1.2 var(--text)}
+.bar a:hover{background:var(--chip);color:var(--ink)}
+
+section{padding-block:64px 8px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.sec-h h2{font-size:clamp(26px,3.2vw,34px)}
+.sec-h .eyebrow{white-space:nowrap}
+
+/* recommendation callout */
+.reco{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start;background:var(--sheet);border:1px solid var(--rule);border-radius:12px;padding:22px 24px;margin-top:28px;box-shadow:var(--shadow)}
+.reco .tag{font:800 30px/1 var(--display);color:var(--teal);padding-top:2px}
+.reco h3{font-size:19px;margin-bottom:6px}
+.reco p{color:var(--ink-2)}
+
+/* findings */
+.find{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:28px;align-items:start;padding-block:26px;border-top:1px solid var(--rule)}
+.find:first-of-type{border-top:0}
+.find h3{font-size:19px;margin-bottom:8px}
+.find p{color:var(--ink-2)}
+.find p+p{margin-top:10px}
+.shot{display:block;border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:var(--sheet);box-shadow:var(--shadow)}
+.shot img{display:block;width:100%;height:auto}
+.shot.crop{max-height:420px}
+.cap{margin-top:8px;font-size:13px;color:var(--ink-3)}
+.keep{background:var(--ok-wash);border-radius:10px;padding:18px 20px;margin-top:8px}
+.keep h3{font-size:16px;margin-bottom:6px;color:var(--ok)}
+.keep ul{margin:0;padding-left:18px;color:var(--ink-2)}
+@media (max-width:820px){.find{grid-template-columns:1fr}}
+
+/* timeline */
+.tl{list-style:none;margin:0;padding:0;border-left:2px solid var(--rule-2);margin-left:6px}
+.tl li{position:relative;padding:0 0 18px 22px}
+.tl li::before{content:"";position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--sheet);border:2px solid var(--teal)}
+.tl li.cut::before{border-color:var(--orange)}
+.tl time{display:block;font:600 12px/1.4 var(--text);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tl b{font-weight:600}
+.tl p{color:var(--ink-2);max-width:72ch}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px}
+@media (max-width:860px){.two{grid-template-columns:1fr}}
+.panel{background:var(--sheet);border:1px solid var(--rule);border-radius:12px;padding:22px 24px}
+.panel h3{font-size:18px;margin-bottom:10px}
+.panel ul{margin:0;padding-left:18px;color:var(--ink-2)}
+.panel li+li{margin-top:6px}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--rule);border-radius:12px;background:var(--sheet)}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:12px 16px;border-top:1px solid var(--rule)}
+thead th{border-top:0;font:600 11.5px/1.3 var(--text);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);background:var(--ground)}
+tbody th{font-weight:600;width:190px;color:var(--ink)}
+td{color:var(--ink-2)}
+.status{display:inline-flex;align-items:center;gap:6px;font-weight:600;white-space:nowrap}
+.status i{display:inline-block;width:9px;height:9px}
+.s-cur{color:var(--ok)} .s-cur i{background:var(--ok);border-radius:50%}
+.s-due{color:var(--warn)} .s-due i{background:var(--warn);transform:rotate(45deg) scale(.85)}
+.s-prog{color:var(--teal)} .s-prog i{border:2px solid var(--teal);border-radius:50%;border-right-color:transparent}
+.s-ret{color:#B42318} .s-ret i{background:#B42318}
+.s-old{color:var(--ink-3)} .s-old i{border:2px solid var(--ink-3);border-radius:50%}
+
+/* compare */
+.cmp-ctl{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.cmp-ctl button{font:500 14px/1 var(--text);padding:9px 14px;border-radius:999px;border:1px solid var(--rule-2);background:var(--sheet);color:var(--ink-2);cursor:pointer}
+.cmp-ctl button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--sheet)}
+.cmp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.cmp figure{margin:0}
+.cmp figcaption{display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;font:700 15px/1.3 var(--display)}
+.cmp figcaption span{font:500 12.5px/1.3 var(--text);color:var(--ink-3)}
+.cmp.mob{grid-template-columns:repeat(3,minmax(0,300px));justify-content:start}
+@media (max-width:860px){.cmp,.cmp.mob{grid-template-columns:1fr}}
+
+/* direction */
+.dir{border-top:1px solid var(--rule)}
+.dir-head{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:start;margin-bottom:26px}
+.dir-mark{width:64px;height:64px;border-radius:12px;display:grid;place-items:center;font:800 32px/1 var(--display);color:#fff;background:var(--ink)}
+.dir-mark.b{background:#002B32;box-shadow:inset 0 -6px 0 #00ADC2}
+.dir-mark.a{background:#005D63}
+.dir-mark.c{background:#F4F4F2;color:#002B32;border:1px solid var(--rule-2)}
+.dir-head h2{font-size:clamp(28px,3.4vw,38px);margin-bottom:6px}
+.dir-head p{color:var(--ink-2);max-width:70ch}
+.gal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.gal .wide{grid-column:span 2}
+.gal figure{margin:0}
+.gal figcaption{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:13.5px;color:var(--ink-3)}
+.gal figcaption b{color:var(--ink);font-weight:600}
+.gal .shot{max-height:560px}
+.mobrow{display:flex;gap:18px;flex-wrap:wrap}
+.mobrow figure{width:min(300px,100%)}
+.mobrow .shot{max-height:640px}
+@media (max-width:760px){.gal{grid-template-columns:1fr}.gal .wide{grid-column:auto}}
+.notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:28px}
+.notes .panel p{color:var(--ink-2)}
+.notes .full{grid-column:span 2}
+@media (max-width:760px){.notes{grid-template-columns:1fr}.notes .full{grid-column:auto}}
+.pro h3{color:var(--ok)} .con h3{color:var(--orange-ink)}
+.links{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;border:1px solid var(--rule-2);background:var(--sheet);color:var(--ink);text-decoration:none;font:500 14px/1 var(--text)}
+.btn:hover{border-color:var(--teal);color:var(--teal)}
+
+/* verdict */
+.verdict{background:var(--verdict);color:#F1F6F6;border-radius:16px 16px 0 16px;padding:36px clamp(20px,4vw,44px);position:relative;overflow:hidden}
+.verdict::after{content:"";position:absolute;right:-1px;bottom:-1px;width:72px;height:72px;background:var(--ground);clip-path:polygon(100% 0,100% 100%,0 100%)}
+.verdict .eyebrow{color:#8FD7DF}
+.verdict h2{font-size:clamp(28px,3.6vw,40px);color:#fff;margin:10px 0 14px}
+.verdict p{color:#C9DADB;max-width:72ch}
+.verdict ol{color:#E2EEEE;padding-left:20px;margin:16px 0 0;max-width:76ch}
+.verdict li+li{margin-top:8px}
+.verdict b{color:#fff}
+.next{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:820px){.next{grid-template-columns:1fr}}
+footer{margin-top:72px;padding-block:28px 48px;border-top:1px solid var(--rule);color:var(--ink-3);font-size:13.5px}
+@media (prefers-reduced-motion:no-preference){.cmp img{transition:opacity .16s ease-out}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="mast-top">
+      <span><img class="logo-l" src="kit/brand/rise-lockup-header.png" alt="RISE" width="320" height="120"><img class="logo-d" src="kit/brand/rise-lockup-header-reverse.png" alt="RISE" width="320" height="120"></span>
+      <span class="badge"><i></i>Design exploration · nothing implemented</span>
+    </div>
+    <p class="eyebrow">RISE Premium Product Design · 4 Oct 2026</p>
+    <h1>Three directions for RISE<span class="dot">.</span></h1>
+    <p class="lede">I studied every RISE screen as it runs today, traced what happened to the animated landing page, set out one RISE visual system, and built that system three ways. Each direction shows the same real register content on Home, Browse, the document viewer, Upload, a QMS workspace concept and the phone, so you are comparing design, not data.</p>
+    <div class="facts">
+      <div><b>Zero production risk</b><span>Built in a separate scratch folder. No page, CSS, script, rule or workflow in the app was changed. No PR.</span></div>
+      <div><b>Real content</b><span>Figures from the live register: 520 in force, 33 active alerts, 25 areas, 12 waiting on QMS.</span></div>
+      <div><b>24 screens</b><span>3 directions × 6 desktop screens, 2 phone screens and a system sheet each.</span></div>
+      <div><b>Inspectable</b><span>Every thumbnail opens full size. Every screen also opens as a live HTML page.</span></div>
+    </div>
+    <div class="reco">
+      <div class="tag">C</div>
+      <div>
+        <h3>My recommendation: Direction C, Atlas, as the foundation</h3>
+        <p>It gives field users the clearest answer to "is this the revision I can use, and who approved it?", and it makes document control readable for everyone. For the QMS, Director and audit workspaces it should take Direction A's compact split-view patterns. The reasoning is in <a href="#recommendation">Recommendation</a>.</p>
+      </div>
+    </div>
+  </header>
+</div>
+
+<div class="bar"><div class="wrap"><nav aria-label="Sections">
+  <a href="#today">RISE today</a><a href="#motion">Motion</a><a href="#system">Visual system</a><a href="#compare">Compare</a><a href="#a">A · Instrument</a><a href="#b">B · Flagship</a><a href="#c">C · Atlas</a><a href="#recommendation">Recommendation</a><a href="#next">Next step</a>
+</nav></div></div>
+
+<main class="wrap">
+
+<!-- ============ TODAY ============ -->
+<section id="today">
+  <div class="sec-h"><h2>Where RISE is today</h2><span class="eyebrow">Live product, 4 Oct 2026</span></div>
+  <p class="lede">The product works and the workflows are sound. What holds it back from feeling premium is that its pages were designed one at a time, so the brand, the page headers and even the document itself look different from screen to screen.</p>
+
+  <div class="find">
+    <div>
+      <h3>RISE's own line is not the headline</h3>
+      <p>Home leads with "Knowledge Is Better Together." over a full-bleed photo. RISE appears as a small eyebrow, and WHAT WE KNOW. only shows up in a brand card further down and in the footer. The product doesn't introduce itself.</p>
+      <p>On a phone the hero fills the first screen, so the ways in start below the fold.</p>
+    </div>
+    <div><a class="shot crop" href="img/current/home-d.jpg" target="_blank" rel="noopener"><img src="img/current/home-d.jpg" alt="Current RISE home page on desktop" loading="lazy" width="1200" height="1250"></a><p class="cap">Home today, desktop (Employee). Opens full size.</p></div>
+  </div>
+
+  <div class="find">
+    <div>
+      <h3>Six page-header patterns in one product</h3>
+      <p>Photo heroes on Home, the area pages and Upload; a dark control panel on the Director desk; a teal banner with donut charts on the Master List; a centred "Ask Anything" hero on Search; a white card on the viewer; a dark hero on the Field Glossary.</p>
+      <p>Each is reasonable alone. Together they read as several products, which is the main reason it feels like an intranet.</p>
+    </div>
+    <div class="two" style="gap:12px">
+      <a class="shot crop" href="img/current/master-list-d.jpg" target="_blank" rel="noopener" style="max-height:260px"><img src="img/current/master-list-d.jpg" alt="Current Master List" loading="lazy" width="1200" height="1166"></a>
+      <a class="shot crop" href="img/current/director-desk-d.jpg" target="_blank" rel="noopener" style="max-height:260px"><img src="img/current/director-desk-d.jpg" alt="Current Director desk" loading="lazy" width="1200" height="916"></a>
+      <a class="shot crop" href="img/current/search-d.jpg" target="_blank" rel="noopener" style="max-height:260px"><img src="img/current/search-d.jpg" alt="Current Search page" loading="lazy" width="1200" height="958"></a>
+      <a class="shot crop" href="img/current/upload-d.jpg" target="_blank" rel="noopener" style="max-height:260px"><img src="img/current/upload-d.jpg" alt="Current Upload page" loading="lazy" width="1200" height="833"></a>
+    </div>
+  </div>
+
+  <div class="find">
+    <div>
+      <h3>The document has no single identity</h3>
+      <p>The same document is an icon-badge row in an area, a monospace table row in the Master List, a card with a bar in Search and a line of activity on the desk. On the viewer the number sits in small grey text as "Document ID", and the approval trail and revision history are folded behind "Full control record".</p>
+      <p>For controlled documents, the number, revision, status and approver should read the same everywhere. All three directions fix this with one <b>identity line</b>.</p>
+    </div>
+    <div><a class="shot crop" href="img/current/viewer-d.jpg" target="_blank" rel="noopener"><img src="img/current/viewer-d.jpg" alt="Current document viewer" loading="lazy" width="1200" height="1083"></a><p class="cap">Viewer today: TQ-TWS-CTSS-WI-003 as an Employee.</p></div>
+  </div>
+
+  <div class="find">
+    <div>
+      <h3>Leftover motion works against trust</h3>
+      <p>The home figures count up from zero. My first capture read "107 Documents" and "478 in force" before they settled at 520: for a few seconds the page shows numbers that are not true. The hero photo also zooms on an 18-second loop, blurred colour blobs drift behind the page, and every page change fades with a 0.9-second progress bar.</p>
+    </div>
+    <div class="keep">
+      <h3>Worth keeping in any direction</h3>
+      <ul>
+        <li>One top bar on every page (since 28 Sep) and role-aware navigation.</li>
+        <li>Compact document rows, and the Master List's density and status words.</li>
+        <li>BW Gradual and Inter, already self-hosted.</li>
+        <li>Plain-language states: "Current, OK to use", "254 days late", separation-of-duties reasons.</li>
+        <li>Every workflow: revisions keep their number, QMS before the final approver, held-back items explained.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MOTION ============ -->
+<section id="motion">
+  <div class="sec-h"><h2>What happened to the animated landing page</h2><span class="eyebrow">From git history</span></div>
+  <div class="two">
+    <ol class="tl">
+      <li><time>24–25 May</time><p><b>Animated counters</b>, a glowing pulse on the Manage Segment button, tab transitions.</p></li>
+      <li><time>16 Sep</time><p>Hero reworked around #BetterTogether@TAQA: a <b>full-viewport photo with a slow Ken Burns zoom</b> and a word-by-word headline.</p></li>
+      <li><time>20 Sep</time><p>Master List: glass surfaces, donuts that draw in, figures that count up.</p></li>
+      <li><time>22 Sep</time><p><b>The "focus" layout</b> became Home: three cards on a sheet of real glass over animated colour blobs. Choosing one rearranged them with a FLIP animation and glided an areas panel open. This is the animated landing experience.</p></li>
+      <li class="cut"><time>28 Sep</time><p><b>"Layout redesign: one top bar, compact lists, document first."</b> The doors layout was replaced with a compact Explore list and the hero cut to half height, so search and documents came first. The animation went with the layout, by design.</p></li>
+      <li class="cut"><time>29 Sep – 2 Oct</time><p>Hero height restored, then shortened again in the TechHub redesign; the slogan returned; the RISE rebrand landed.</p></li>
+    </ol>
+    <div class="panel">
+      <h3>What I propose</h3>
+      <ul>
+        <li><b>Don't bring back</b> the glass doors or the FLIP layout. They were removed for a good reason: they put a show between people and their document.</li>
+        <li><b>Remove the leftovers:</b> the count-up (a figure must be true the moment it is visible), the looping photo zoom, the drifting blobs, and the fade and progress bar on every page change.</li>
+        <li><b>Keep motion for state:</b> 120–240 ms ease-out on hover, focus, selection, tabs, drawers and sheets; skeleton rows only when data takes over 300 ms; transform and opacity only.</li>
+        <li><b>At most one brand moment:</b> the logo's two chamfered bars settle into place on the first Home visit of a session, in under 700 ms, with search usable from the first frame. Direction B draws it; A and C leave it out. It is optional in any direction.</li>
+        <li>Nothing loops. <code>prefers-reduced-motion</code> turns everything off.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SYSTEM ============ -->
+<section id="system">
+  <div class="sec-h"><h2>One RISE visual system</h2><span class="eyebrow">Shared by all three directions</span></div>
+  <p class="lede" style="margin-bottom:22px">The structure below is fixed. The directions differ in how they express it: layout model, density, surfaces, type scale and how they use the brand's shapes. Each direction's system sheet draws every component listed here.</p>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Part</th><th>The rule</th></tr></thead>
+    <tbody>
+      <tr><th>Type</th><td>Three roles. <b>Display</b> in BW Gradual for names and page titles. <b>Text</b> in Inter for reading and UI, 15–16px. <b>Data</b> with tabular figures for numbers, revisions, dates and counts. Seven steps at most.</td></tr>
+      <tr><th>Spacing</th><td>4px base: 4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 · 96.</td></tr>
+      <tr><th>Widths and grid</th><td>Desktop at 1440, content 1200–1320, 12 columns, 24px gutter. Reading column 680–760px. Phone at 390 with 16–20px gutters and 44px minimum touch targets.</td></tr>
+      <tr><th>Navigation</th><td>Home, Areas, Search, Field Glossary, Ask an Expert for everyone. Master List and Workspace for QMS, Directors, Maintenance Managers and auditors. Upload is the one primary action, for roles that file. Role, bookmarks and notifications sit at the end of the bar.</td></tr>
+      <tr><th>The identity line</th><td><code>TQ-TWS-CTSS-WI-003 · Rev 4.0 · ● Current · Internal</code>. One component, identical on rows, the viewer, the QMS queue and the phone. Field crews read numbers over the radio, so it is always legible and exact.</td></tr>
+      <tr><th>Status</th><td>
+        <span class="status s-cur"><i></i>Current</span> &nbsp; <span class="status s-due"><i></i>Review due</span> &nbsp; <span class="status s-prog"><i></i>Draft · In QMS check · Awaiting final approval</span> &nbsp; <span class="status s-ret"><i></i>Returned</span> &nbsp; <span class="status s-old"><i></i>Superseded · Obsolete</span><br>
+        Always a word plus a shape, never colour alone. Superseded and Obsolete are muted, never hidden. Restricted and Confidential carry a lock. Status colours are separate from the brand accent.</td></tr>
+      <tr><th>Approval trail</th><td>Filed → QMS check → Final approval → Current. The final approver is named: the Segment Director for Operations, the segment's Maintenance Manager for Maintenance, the CEO for policies. Filer, QMS checker and final approver are three different people, and a held-back item says why.</td></tr>
+      <tr><th>Components</th><td>Buttons (primary, secondary, quiet, danger; default, hover, focus, disabled), document rows, tables, forms (fields, selects, radio cards, file drop), drawers and bottom sheets, alerts (info, warning, critical technical alert), empty states and skeletons, one line-icon set, and one depth model per direction.</td></tr>
+      <tr><th>Colour</th><td>The logo's own palette: ink <code>#002B32</code>, pillar teal <code>#013F4E</code>, cyan <code>#00ADC2</code>, orange <code>#FD5805</code>, plus TAQA's product teal <code>#005D63</code> for actions. Orange is for the full stop and critical alerts only, never for body text.</td></tr>
+      <tr><th>Motion</th><td>As proposed above: state feedback only, 120–240 ms, nothing loops, at most one brand entrance.</td></tr>
+      <tr><th>Access</th><td>WCAG AA contrast, a visible focus ring everywhere, 16px minimum body text on the phone, status readable without colour.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ COMPARE ============ -->
+<section id="compare">
+  <div class="sec-h"><h2>Compare one screen across directions</h2><span class="eyebrow">Same content, three designs</span></div>
+  <div class="cmp-ctl" role="group" aria-label="Screen to compare">
+    <button type="button" data-s="home" aria-pressed="true">Home</button>
+    <button type="button" data-s="browse" aria-pressed="false">Browse</button>
+    <button type="button" data-s="viewer" aria-pressed="false">Document viewer</button>
+    <button type="button" data-s="upload" aria-pressed="false">Upload</button>
+    <button type="button" data-s="qms" aria-pressed="false">QMS concept</button>
+    <button type="button" data-s="mobile-home" aria-pressed="false">Phone · Home</button>
+    <button type="button" data-s="mobile-document" aria-pressed="false">Phone · Document</button>
+    <button type="button" data-s="components" aria-pressed="false">System sheet</button>
+  </div>
+  <div class="cmp" id="cmp">
+    <figure><figcaption>A · Instrument <span><a data-full="a" href="img/full/a-home.jpg" target="_blank" rel="noopener">Full size</a></span></figcaption><a class="shot" data-l="a" href="directions/a/home.html" target="_blank" rel="noopener"><img data-i="a" src="img/thumb/a-home.jpg" alt="Direction A, Home" width="1000" height="694"></a></figure>
+    <figure><figcaption>B · Flagship <span><a data-full="b" href="img/full/b-home.jpg" target="_blank" rel="noopener">Full size</a></span></figcaption><a class="shot" data-l="b" href="directions/b/home.html" target="_blank" rel="noopener"><img data-i="b" src="img/thumb/b-home.jpg" alt="Direction B, Home" width="1000" height="694"></a></figure>
+    <figure><figcaption>C · Atlas <span><a data-full="c" href="img/full/c-home.jpg" target="_blank" rel="noopener">Full size</a></span></figcaption><a class="shot" data-l="c" href="directions/c/home.html" target="_blank" rel="noopener"><img data-i="c" src="img/thumb/c-home.jpg" alt="Direction C, Home" width="1000" height="694"></a></figure>
+  </div>
+  <p class="cap">Thumbnails show the top of each screen. "Full size" opens the whole screenshot; clicking a thumbnail opens the live HTML mockup.</p>
+</section>
+
+<!-- ============ DIRECTION TEMPLATE x3 ============ -->
+<section id="a" class="dir">
+  <div class="dir-head">
+    <div class="dir-mark a" aria-hidden="true">A</div>
+    <div><p class="eyebrow">Direction A</p><h2>Instrument</h2>
+      <p>RISE as a precision instrument for controlled knowledge, with the calm density of the best modern software tools. An app shell with a persistent sidebar, hairline borders and no shadows, Inter for the work and BW Gradual for names. The register is the hero, and the brand is small and exact.</p></div>
+  </div>
+  <div class="gal" data-dir="a"></div>
+  <div class="notes">
+    <div class="panel"><h3>Why it fits RISE</h3><p>Trust here is a data problem: the number, revision, status and approver need to be seen at once, and A puts them in one crisp token. Document control is dense work, and a split-view app shell is its native form.</p></div>
+    <div class="panel"><h3>How it scales to QMS</h3><p>Best of the three. The QMS queue, a Director's desk, a Maintenance Manager's desk and an audit trail all use the same split view (queue, check panel, routing, keyboard actions) with no new parts. The register-health strip becomes the Master List header.</p></div>
+    <div class="panel pro"><h3>Strengths</h3><ul><li>Fastest to scan: 46px rows, the identity line becomes the table's first four columns.</li><li>Identical layout on every page; only the Workspace group changes by role.</li><li>Keyboard first: ⌘K to any number or term; Confirm, Return, Next from the keyboard.</li></ul></div>
+    <div class="panel con"><h3>Weaknesses</h3><ul><li>Least emotional brand expression. No photography, no hero.</li><li>A permanent sidebar is heavier than a top bar for an occasional field user on desktop.</li><li>It depends on discipline: one careless shadow or oversized card and it looks like generic SaaS.</li></ul></div>
+    <div class="panel full"><h3>Motion</h3><p>No brand entrance on any visit. Hover and selection 150 ms; inspector and drawer slide 200 ms (the only element with a shadow); ⌘K palette 120 ms; one skeleton sweep only if data takes longer than 300 ms; the live dot never pulses.</p></div>
+  </div>
+  <div class="links"><a class="btn" href="directions/a/home.html" target="_blank" rel="noopener">Open A live</a><a class="btn" href="directions/a/components.html" target="_blank" rel="noopener">A system sheet</a></div>
+</section>
+
+<section id="b" class="dir">
+  <div class="dir-head">
+    <div class="dir-mark b" aria-hidden="true">B</div>
+    <div><p class="eyebrow">Direction B</p><h2>Flagship</h2>
+      <p>RISE as TAQA's flagship knowledge product, with the restraint of a premium product page or a top-tier annual report. A deep ink top bar and identity bands give every page weight; WHAT WE KNOW. is set large with the orange full stop; white work surfaces take over straight after. The brand leads and the content follows.</p></div>
+  </div>
+  <div class="gal" data-dir="b"></div>
+  <div class="notes">
+    <div class="panel"><h3>Why it fits RISE</h3><p>Trust as a brand promise. The viewer's ink band works like a document's title page: identity line, then "Approved 28 Aug 2025 by Segment Director, Coiled Tubing" in white, before any scrolling. It gives 5,000 people a product to be proud of.</p></div>
+    <div class="panel"><h3>How it scales to QMS</h3><p>Good, with a density switch. The band carries the queue's state (12 waiting, 6 days oldest, 1 held back) and the queue expands inline. Master List and audit screens would need a compact 56px row token so the flagship scale stays for reading.</p></div>
+    <div class="panel pro"><h3>Strengths</h3><ul><li>Strongest brand presence and the most premium first impression.</li><li>One big idea per screen: the statement, the area, the title, the routing sentence.</li><li>A very small system: two grounds, one shadow, one chamfer per page.</li></ul></div>
+    <div class="panel con"><h3>Weaknesses</h3><ul><li>Lowest density: about nine SOP rows per screen.</li><li>Ink bands cost 280–360px on every work screen (they could collapse to a sticky strip on scroll).</li><li>Photography needs curation, and if the Home treatment spreads it starts to feel like a marketing site. It is also the closest to today's look.</li></ul></div>
+    <div class="panel full"><h3>Motion</h3><p>One entrance on the first Home visit of a session: the two chamfered bars slide in 400 ms and the statement fades up 300 ms, under 700 ms in total, with search typeable from the first frame. Page change 180 ms with the band held still; tile hover lifts 2px in 200 ms; sheets slide 240 ms. No Ken Burns, no loops.</p></div>
+  </div>
+  <div class="links"><a class="btn" href="directions/b/home.html" target="_blank" rel="noopener">Open B live</a><a class="btn" href="directions/b/components.html" target="_blank" rel="noopener">B system sheet</a></div>
+</section>
+
+<section id="c" class="dir">
+  <div class="dir-head">
+    <div class="dir-mark c" aria-hidden="true">C</div>
+    <div><p class="eyebrow">Direction C</p><h2>Atlas</h2>
+      <p>RISE as TAQA's reference library, closer to a technical publisher or a standards body than a dashboard. Structure is the interface: every document has a place, a code and a lineage, and the design makes them visible. White sheets on a light Monument-grey ground, register codes as typographic landmarks, the logo's 45° cut on document sheets and the orange full stop on display headings.</p></div>
+  </div>
+  <div class="gal" data-dir="c"></div>
+  <div class="notes">
+    <div class="panel"><h3>Why it fits RISE</h3><p>RISE exists to answer "is this the revision I can use, and who approved it?". Atlas answers with the document itself: a sheet, a printed-style status stamp, a lineage of approvals and revisions. Crews already think in codes (CTSS, SOP, WI), so finding your way and learning the numbering system become the same thing.</p></div>
+    <div class="panel"><h3>How it scales to QMS</h3><p>Well, by switching patterns rather than styles. The QMS queue is a ledger with ages and type codes; each control check cites its clause (TQ-QHSE-S001 §5.3, rule D1), which suits audits. For heavy triage it should adopt A's 44px compact rows and split view.</p></div>
+    <div class="panel pro"><h3>Strengths</h3><ul><li>Best reading and trust experience: the document reads like a document, status reads like a stamp.</li><li>Makes document control understandable to everyone, not only QMS.</li><li>Distinctive without being loud: no photos, gradients or decoration, three deliberate signatures.</li></ul></div>
+    <div class="panel con"><h3>Weaknesses</h3><ul><li>A quieter brand moment than B; the first impression rests on typography.</li><li>Catalogue entries are about 115px tall, so it is less dense than A for triage.</li><li>It relies on very careful typography and spacing. Done carelessly, it looks plain.</li></ul></div>
+    <div class="panel full"><h3>Motion</h3><p>No entrance animation. Links, rows and buttons change in 160 ms; the document sheet fades in over 200 ms when the preview loads; the contents marker follows the reading position; search results update in place without a layout jump; drawers slide 200 ms.</p></div>
+  </div>
+  <div class="links"><a class="btn" href="directions/c/home.html" target="_blank" rel="noopener">Open C live</a><a class="btn" href="directions/c/components.html" target="_blank" rel="noopener">C system sheet</a></div>
+</section>
+
+<!-- ============ SIDE BY SIDE ============ -->
+<section id="sbs">
+  <div class="sec-h"><h2>Side by side</h2></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th></th><th>A · Instrument</th><th>B · Flagship</th><th>C · Atlas</th></tr></thead>
+    <tbody>
+      <tr><th>Character</th><td>Precise software tool</td><td>Confident corporate flagship</td><td>Authoritative reference library</td></tr>
+      <tr><th>Layout model</th><td>App shell, left sidebar</td><td>Top bar, ink identity bands</td><td>Light top bar, index pages, document sheets</td></tr>
+      <tr><th>Density</th><td>High (46px rows)</td><td>Low (88px rows)</td><td>Medium (catalogue entries; ledgers for QMS)</td></tr>
+      <tr><th>Brand moment</th><td>Small: lockup, WHAT WE KNOW. title</td><td>Large: 104px statement, duotone photo, chamfer bars</td><td>Typographic: masthead, codes, full stops, chamfered sheets</td></tr>
+      <tr><th>Field user finding a procedure</th><td>Fast, if they know the sidebar</td><td>Fast from Home, slower on long lists</td><td>Fast, and they learn the structure as they go</td></tr>
+      <tr><th>Trust at a glance</th><td>Strong: identity token everywhere</td><td>Strong: band reads like a title page</td><td>Strongest: sheet, stamp and lineage</td></tr>
+      <tr><th>QMS and audit screens</th><td>Strongest</td><td>Needs a compact mode</td><td>Good; borrow A's compact split view</td></tr>
+      <tr><th>Phone</th><td>Bottom tab bar, dense</td><td>Ink header, generous</td><td>Identity first, calm</td></tr>
+      <tr><th>Risk</th><td>Looks generic if executed carelessly</td><td>Drifts toward a marketing site</td><td>Looks plain if typography slips</td></tr>
+      <tr><th>Change from today</th><td>Large (new shell)</td><td>Small to medium</td><td>Medium</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ RECOMMENDATION ============ -->
+<section id="recommendation">
+  <div class="verdict">
+    <p class="eyebrow">Recommendation</p>
+    <h2>Build RISE on Atlas, with Instrument's workspaces</h2>
+    <p>Most of RISE's 5,000 users come to read one document and confirm it is the right one. Atlas serves that moment best, gives RISE an identity no other TAQA tool has, and does it with type and structure rather than decoration, which is the restraint you asked for. Its weak spot is heavy triage, and Instrument has already solved that with the same identity line and status language, so the two fit together without a seam.</p>
+    <ol>
+      <li><b>Foundation: C · Atlas.</b> Home, Areas, Browse, the document viewer, Search, Field Glossary, Ask an Expert and Upload.</li>
+      <li><b>Workspaces: A · Instrument's patterns in Atlas's styling.</b> The QMS queue, Master List, Director and Maintenance Manager desks and the audit view use A's 44px compact ledger rows, split view and keyboard actions.</li>
+      <li><b>Motion: Atlas's quiet set.</b> Remove the count-up, photo loop, blobs and page fades. Flagship's brand entrance stays an option to decide later, not a default.</li>
+      <li><b>From B, keep one idea:</b> the viewer states "Approved 28 Aug 2025 by Segment Director, Coiled Tubing" in the first screen, which Atlas already does with its stamp.</li>
+    </ol>
+    <p style="margin-top:16px">If brand impact matters more to you than reading and density, B is the right pick, and it is the smallest change from today. I'd choose A only if RISE becomes mainly a document-control tool for QMS and managers.</p>
+  </div>
+</section>
+
+<!-- ============ NEXT ============ -->
+<section id="next">
+  <div class="sec-h"><h2>What I need from you</h2><span class="eyebrow">Nothing is implemented until you approve</span></div>
+  <div class="next">
+    <div class="panel"><h3>1 · Pick a direction</h3><p>A, B, C, or the recommended C with A's workspaces. Point at anything you want carried across from another direction.</p></div>
+    <div class="panel"><h3>2 · Decide the brand moment</h3><p>Keep RISE quiet (no entrance), or allow B's one-time chamfer-bar entrance on Home, under 700 ms, once per session.</p></div>
+    <div class="panel"><h3>3 · Then I plan the build</h3><p>Once you approve, I'll write an implementation plan: tokens and components first, then page by page behind the existing tests, keeping every workflow and business rule. No code before that plan is approved.</p></div>
+  </div>
+</section>
+
+<footer>
+  RISE · WHAT WE KNOW. · Design exploration prepared 4 Oct 2026. Mockups are static HTML built outside the production app; content and figures come from the live register. TAQA field photography and the RISE logo are used as supplied.
+</footer>
+</main>
+
+<script>
+(function(){
+  var SCREENS=[['home','Home','wide'],['browse','Browse · Coiled Tubing SOPs'],['viewer','Document viewer · WI-003'],['upload','Upload · review & submit'],['qms','QMS workspace (concept)'],['components','System sheet']];
+  var MOB=[['mobile-home','Phone · Home'],['mobile-document','Phone · Document']];
+  document.querySelectorAll('.gal[data-dir]').forEach(function(g){
+    var d=g.getAttribute('data-dir'), h='';
+    SCREENS.forEach(function(s){
+      h+='<figure class="'+(s[2]||'')+'"><a class="shot" href="directions/'+d+'/'+s[0]+'.html" target="_blank" rel="noopener"><img src="img/thumb/'+d+'-'+s[0]+'.jpg" alt="Direction '+d.toUpperCase()+', '+s[1]+'" loading="lazy"></a>'+
+         '<figcaption><b>'+s[1]+'</b><a href="img/full/'+d+'-'+s[0]+'.jpg" target="_blank" rel="noopener">Full screenshot</a></figcaption></figure>';
+    });
+    h+='<div class="wide mobrow">';
+    MOB.forEach(function(s){
+      h+='<figure><a class="shot" href="directions/'+d+'/'+s[0]+'.html" target="_blank" rel="noopener"><img src="img/thumb/'+d+'-'+s[0]+'.jpg" alt="Direction '+d.toUpperCase()+', '+s[1]+'" loading="lazy"></a>'+
+         '<figcaption><b>'+s[1]+'</b><a href="img/full/'+d+'-'+s[0]+'.jpg" target="_blank" rel="noopener">Full screenshot</a></figcaption></figure>';
+    });
+    g.innerHTML=h+'</div>';
+  });
+  var cmp=document.getElementById('cmp');
+  document.querySelectorAll('.cmp-ctl button').forEach(function(b){
+    b.addEventListener('click',function(){
+      var s=b.getAttribute('data-s');
+      document.querySelectorAll('.cmp-ctl button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});
+      cmp.classList.toggle('mob',s.indexOf('mobile')===0);
+      ['a','b','c'].forEach(function(d){
+        var img=cmp.querySelector('img[data-i="'+d+'"]');
+        img.removeAttribute('width'); img.removeAttribute('height');
+        img.src='img/thumb/'+d+'-'+s+'.jpg';
+        cmp.querySelector('a[data-l="'+d+'"]').href='directions/'+d+'/'+s+'.html';
+        cmp.querySelector('a[data-full="'+d+'"]').href='img/full/'+d+'-'+s+'.jpg';
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

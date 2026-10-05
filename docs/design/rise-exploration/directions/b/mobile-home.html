@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RISE · Direction B · Phone home</title>
+<link rel="stylesheet" href="../../kit/fonts.css">
+<link rel="stylesheet" href="rise.css">
+<style>
+  body { background: #fff; }
+  .mh { padding: 24px 20px 28px; position: relative; }
+  .mh .who { display: inline-flex; align-items: center; gap: 6px; font: 500 13px/1 var(--f-ui); color: var(--ink-muted); }
+  .mh .who b { color: #fff; font-weight: 600; }
+  .mh .statement { font-size: 60px; color: #fff; margin-top: 20px; }
+  .mh .purpose { margin: 16px 0 24px; font-size: 16px; line-height: 1.5; color: var(--ink-muted); }
+  .mh .search { height: 56px; padding: 0 16px; border-radius: 12px; gap: 12px; }
+  .mh .search input { font-size: 16px; }
+  .mh .chips { flex-wrap: nowrap; overflow-x: auto; margin: 16px -20px 0; padding: 0 20px; scrollbar-width: none; }
+  .mh .chips .chip-q { flex: none; height: 40px; }
+  .mphoto { position: relative; height: 176px; }
+  .mphoto .duo { position: absolute; inset: 0 0 0 64px; clip-path: polygon(0 0, 100% 0, 100% 100%, 64px 100%, 0 calc(100% - 64px)); }
+  .mphoto .duo img { object-position: 60% 32%; }
+  .mphoto .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,43,50,.7), rgba(0,43,50,0) 55%); }
+  .mphoto .bar { position: absolute; z-index: 2; height: 30px; }
+  .mphoto .bar.o { background: var(--orange); left: 0; top: 20px; width: 150px; clip-path: polygon(0 0, 100% 0, calc(100% - 30px) 100%, 30px 100%); }
+  .mphoto .bar.c { background: var(--cyan); left: 90px; top: 50px; width: 170px; clip-path: polygon(30px 0, calc(100% - 30px) 0, 100% 100%, 0 100%); }
+
+  .sec { padding: 32px 20px 0; }
+  .sec h2 { font: 700 22px/1.25 var(--f-brand); }
+  .sec-hd { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 12px; border-bottom: 1px solid var(--text); }
+  .sec-hd a { font-size: 14px; font-weight: 600; color: var(--teal); }
+
+  .malert { margin: 24px 20px 0; padding: 18px; border-radius: 14px; background: var(--crit-bg); border: 1px solid var(--crit-line); display: grid; grid-template-columns: 40px 1fr; gap: 14px; }
+  .malert .ic { width: 40px; height: 40px; border-radius: 10px; background: var(--orange); color: #fff; display: grid; place-items: center; }
+  .malert h3 { font: 700 18px/1.3 var(--f-brand); margin: 6px 0 10px; }
+  .malert .crit-label { font-size: 11px; }
+  .malert .idl { font-size: 13px; }
+  .malert .docno { font-size: 13px; }
+
+  .ways a { display: grid; grid-template-columns: 44px 1fr 20px; gap: 14px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); min-height: 76px; }
+  .ways .wi { width: 44px; height: 44px; border-radius: 12px; background: var(--teal-tint); color: var(--teal); display: grid; place-items: center; }
+  .ways b { display: block; font: 700 18px/1.25 var(--f-brand); }
+  .ways span.d { display: block; font-size: 14px; color: var(--text-2); line-height: 1.4; margin-top: 2px; }
+  .ways > a > .ico { color: var(--text-3); }
+
+  .mfigs { display: grid; grid-template-columns: 1fr 1fr; }
+  .mfigs div { padding: 20px 0 18px; border-bottom: 1px solid var(--line); }
+  .mfigs div:nth-child(odd) { padding-right: 16px; border-right: 1px solid var(--line); }
+  .mfigs div:nth-child(even) { padding-left: 20px; }
+  .mfigs b { display: block; font: 300 52px/1 var(--f-brand); letter-spacing: -.035em; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .mfigs span { display: block; margin-top: 8px; font: 700 15px/1.3 var(--f-brand); }
+
+  .areas li a { display: flex; justify-content: space-between; align-items: center; min-height: 52px; border-bottom: 1px solid var(--line); font-size: 16px; }
+  .areas li a .n { font-size: 14px; color: var(--text-3); font-variant-numeric: tabular-nums; display: inline-flex; gap: 8px; align-items: center; }
+  .areas li a .n .ico { width: 16px; height: 16px; }
+  .areas .all { margin-top: 16px; width: 100%; height: 48px; }
+
+  .mfoot { margin-top: 48px; background: var(--ink); padding: 32px 20px 40px; color: var(--ink-muted); font-size: 14px; }
+  .mfoot .statement { font-size: 36px; color: #fff; }
+  .mfoot p { margin-top: 16px; }
+  .mfoot b { color: #fff; font-weight: 600; }
+</style>
+</head>
+<body>
+<!--SPRITE--><svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+<symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 4h12v17l-6-4-6 4z"/></symbol>
+<symbol id="i-bookmark-on" viewBox="0 0 24 24"><path d="M6 4h12v17l-6-4-6 4z" fill="currentColor"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
+<symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+<symbol id="i-arrow-l" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+<symbol id="i-chev-r" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+<symbol id="i-chev-d" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.2v.1"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+<symbol id="i-check-c" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.8 2.8L16.2 9.5"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.1"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3v5h5M9 13h6M9 16.5h6"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1"/></symbol>
+<symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.5h16v11H10l-4.5 3.5v-3.5H4z"/><path d="M8 9.5h8M8 12.5h5"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4.5h10.5A3.5 3.5 0 0 1 19 8v12H8.5A3.5 3.5 0 0 1 5 16.5z"/><path d="M5 16.5A3.5 3.5 0 0 1 8.5 13H19M9 8h6"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+<symbol id="i-sort" viewBox="0 0 24 24"><path d="M7 4v16M3.5 16.5 7 20l3.5-3.5M17 20V4M13.5 7.5 17 4l3.5 3.5"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20h-5.5v-6h-5v6H4z"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></symbol>
+<symbol id="i-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 20h1M20 14v1"/></symbol>
+<symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V4h10v5"/><rect x="4" y="9" width="16" height="7.5" rx="1.5"/><path d="M7 14h10v6H7z"/></symbol>
+<symbol id="i-offline" viewBox="0 0 24 24"><path d="M7 18.5a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.4 1.6A3.8 3.8 0 0 1 17.5 18.5"/><path d="M12 11v8M9 16l3 3 3-3"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></symbol>
+<symbol id="i-return" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 5 6v5.5c0 4.3 3 7.8 7 9 4-1.2 7-4.7 7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 4 8.5 4.5L12 13 3.5 8.5z"/><path d="m3.5 12.5 8.5 4.5 8.5-4.5M3.5 16.5 12 21l8.5-4.5"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-pdf" viewBox="0 0 24 24"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3v5h5"/><path d="M8.5 17v-4h1.3a1.2 1.2 0 0 1 0 2.4H8.5M13 13v4h.8a1.6 1.6 0 0 0 1.6-1.6v-.8A1.6 1.6 0 0 0 13.8 13z"/></symbol>
+</svg><!--/SPRITE-->
+<div class="ph">
+  <header class="ph-top">
+    <a class="logo" href="#"><img src="../../kit/brand/rise-lockup-header-reverse.png" alt="RISE"></a>
+    <span class="sp"></span>
+    <a class="up" href="upload.html" aria-label="Upload"><svg class="ico"><use href="#i-upload"/></svg></a>
+    <button class="icon-btn" aria-label="Bookmarks"><svg class="ico"><use href="#i-bookmark"/></svg></button>
+    <button class="icon-btn" aria-label="Notifications, 2 new"><svg class="ico"><use href="#i-bell"/></svg><span class="badge">2</span></button>
+  </header>
+
+  <section class="ink">
+    <div class="mh">
+      <span class="who"><svg class="ico sm"><use href="#i-user"/></svg>Viewing as <b>Employee</b></span>
+      <h1 class="statement">What we<br>know<span class="dot"></span></h1>
+      <p class="purpose">Every procedure, manual and standard TAQA works by. Current, approved, and one search away.</p>
+      <label class="search"><svg class="ico"><use href="#i-search"/></svg><input type="search" placeholder="Title, number or keyword"></label>
+      <div class="chips">
+        <a class="chip-q" href="#">Injector head</a><a class="chip-q" href="#">Permit to Work</a><a class="chip-q" href="#">Emergency disconnect</a><a class="chip-q" href="#">TQ-QHSE-S001</a>
+      </div>
+    </div>
+    <div class="mphoto" aria-hidden="true">
+      <div class="duo"><img src="../../kit/photos/taqa-hero.jpg" alt=""><span class="shade"></span></div>
+      <span class="bar o"></span><span class="bar c"></span>
+    </div>
+  </section>
+
+  <article class="malert">
+    <span class="ic"><svg class="ico"><use href="#i-alert"/></svg></span>
+    <div>
+      <span class="crit-label">Critical alert · Coiled Tubing</span>
+      <h3>New pressure rating for 2&#8209;inch CT string, effective immediately</h3>
+      <div class="idl"><span class="docno">TQ-TWS-CTSS-ALT-002</span><span class="sep"></span><span class="rev">Rev 2.0</span></div>
+    </div>
+  </article>
+
+  <section class="sec">
+    <div class="ways">
+      <a href="browse.html"><span class="wi"><svg class="ico"><use href="#i-grid"/></svg></span><span><b>Browse by Area</b><span class="d">25 areas, Operations and Maintenance</span></span><svg class="ico"><use href="#i-chev-r"/></svg></a>
+      <a href="#"><span class="wi"><svg class="ico"><use href="#i-chat"/></svg></span><span><b>Ask an Expert</b><span class="d">From routine to stopped work</span></span><svg class="ico"><use href="#i-chev-r"/></svg></a>
+      <a href="#"><span class="wi"><svg class="ico"><use href="#i-book"/></svg></span><span><b>Field Glossary</b><span class="d">190+ field terms and abbreviations</span></span><svg class="ico"><use href="#i-chev-r"/></svg></a>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-hd"><h2>The register today</h2></div>
+    <div class="mfigs">
+      <div><b>520</b><span>In force</span></div>
+      <div><b>25</b><span>Areas</span></div>
+      <div><b>33</b><span>Active alerts</span></div>
+      <div><b>14</b><span>Arabic translations</span></div>
+    </div>
+  </section>
+
+  <section class="sec areas">
+    <div class="sec-hd"><h2>Operational segments</h2><a href="#">11</a></div>
+    <ul>
+      <li><a href="#">Drilling Services<span class="n">68<svg class="ico"><use href="#i-chev-r"/></svg></span></a></li>
+      <li><a href="#">Safety Services<span class="n">66<svg class="ico"><use href="#i-chev-r"/></svg></span></a></li>
+      <li><a href="#">Fracturing<span class="n">59<svg class="ico"><use href="#i-chev-r"/></svg></span></a></li>
+      <li><a href="browse.html">Coiled Tubing<span class="n">45<svg class="ico"><use href="#i-chev-r"/></svg></span></a></li>
+      <li><a href="#">Inspection<span class="n">45<svg class="ico"><use href="#i-chev-r"/></svg></span></a></li>
+    </ul>
+    <a class="btn btn-secondary all" href="#">All 25 areas</a>
+  </section>
+
+  <footer class="mfoot">
+    <p class="statement" style="margin:0">What we know<span class="dot"></span></p>
+    <p>Built by <b>TAQA Learning Center</b></p>
+  </footer>
+</div>
+
+<nav class="tabbar" aria-label="Main">
+  <a class="on" href="#"><svg class="ico"><use href="#i-home"/></svg>Home</a>
+  <a href="browse.html"><svg class="ico"><use href="#i-grid"/></svg>Areas</a>
+  <a href="#"><svg class="ico"><use href="#i-search"/></svg>Search</a>
+  <a href="#"><svg class="ico"><use href="#i-book"/></svg>Glossary</a>
+  <a href="#"><svg class="ico"><use href="#i-chat"/></svg>Expert</a>
+</nav>
+</body>
+</html>
