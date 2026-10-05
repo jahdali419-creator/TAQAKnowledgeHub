@@ -57,40 +57,26 @@ mobile-safari (see Engines below). CI runs Chromium only
 
 ## Engines
 
-| Project | Status (1 Oct 2026) |
+| Project | Status (5 Oct 2026, PR 2D) |
 |---|---|
-| `chromium`, `mobile-chrome` | Full suite green; CI runs `chromium` |
-| `firefox`, `webkit`, `mobile-safari` | The **app** passes both workflows when driven directly in Firefox and WebKit. The **test suite** fails in setup on these engines: its fixtures touch `localStorage` and navigate in a way only Chromium tolerates ("navigation interrupted", "The operation is insecure"). Make `tests/helpers/fixtures.js` cross-engine before adding these projects to CI. |
+| `chromium`, `mobile-chrome` | Full suite green (`npm test`); CI runs the full `chromium` suite |
+| `webkit`, `mobile-safari` | The fixtures now work on WebKit: a refused page (TAQA_ROLE.refuse) is detected by its marker, since WebKit leaves it at readyState "loading", and the phone install suggestion is held back unless a test opts in (`test.use({ installPrompt: true })`). CI runs a WebKit / iPhone-engine **smoke gate** (below). Known WebKit-only failures that also fail on main before PR 2D are listed under "WebKit: known failures". |
+| `firefox` | Not run in CI. |
 
-## Other useful commands
+### WebKit: known failures (pre-existing, not in the smoke gate)
 
-```
-npm run test:ui          # Playwright's interactive UI mode, for debugging
-npm run test:chromium    # Chromium desktop only (what CI runs)
-npm run test:firefox     # requires `npx playwright install firefox`
-npm run test:webkit      # requires `npx playwright install webkit`
-npm run test:mobile      # Pixel 7 + iPhone 14 device emulation profiles (iPhone needs WebKit installed)
-npm run test:report      # reopen the last HTML report
-npm run serve            # just run the static server, e.g. to poke around by hand
-```
+Each fails the same way on main before PR 2D (checked on a worktree of 41b982e with the same harness):
 
-To run one file or one test by name:
+| Test | Engine | Why |
+|---|---|---|
+| `support-ticket.spec.js` "Undo removes the last mark, Clear removes all marks" | webkit, mobile-safari | Canvas pixel comparison differs in WebKit's encoder |
+| `doc-identity.spec.js:118` two tabs, same number | webkit, mobile-safari | Two-tab timing in WebKit |
+| `doc-identity.spec.js:87` typed number in use | mobile-safari | Upload step button timing on the iPhone engine |
+| `maintenance-ask-expert.spec.js:58` draft restores the department | webkit, mobile-safari | The department radio is not re-checked from the draft in WebKit |
+| `maintenance-manager.spec.js:492` approver named in the confirmation | webkit, mobile-safari | Upload submit click timing |
+| `offline.spec.js:277, :303` | webkit, mobile-safari | "WebKit encountered an internal error" navigating offline under the service worker (Playwright WebKit) |
 
-```
-npx playwright test tests/dashboard.spec.js
-npx playwright test -g "reject requires a reason"
-```
-
-## Roles under test
-
-There are **five** personas in `roles.js` (`TAQA_ROLE_ORDER`): Employee,
-Segment Director (`owner`), Maintenance Manager (`maintenance`), QMS /
-Document Controller (`qms`) and External Auditor (`auditor`).
-`roles.spec.js` pins each one's exact capabilities, including `submit` and
-`department`. A test that loops over roles should include `maintenance`
-wherever the rule it checks applies to it. Reports written for four roles
-(`docs/QA/QA-RELEASE-REPORT.md`, `docs/QA/RELEASE-QA-E2E.md`) are marked stale;
-the current evidence is `docs/QA/FIVE-ROLE-QA-AUDIT.md`.
+Under heavy local load (6 workers) more WebKit tests time out; all of those pass at normal concurrency (environment, not product).
 
 ## What's covered
 
@@ -170,8 +156,21 @@ Shared helpers live in `tests/helpers/`:
 
 ## CI
 
-`.github/workflows/tests.yml` runs the Chromium suite on every push and
-pull request. It does not yet block the two deploy workflows
+`.github/workflows/tests.yml` runs two jobs in parallel on every push and
+pull request:
+
+- `playwright`: the full Chromium suite (unchanged).
+- `webkit-smoke` (PR 2D, TB-05): the iPhone engine (`mobile-safari`) and
+  desktop WebKit on the specs that are stable there: `smoke`, `navigation`
+  (iPhone engine only), `installed-app`, `phone-reliability`,
+  `release-journey`, `master-list`, `dashboard`. 306 of 306 passed locally
+  at CI concurrency; locally it took 12.5 minutes on 2 workers, and the job
+  runs 4 workers, so expect roughly 7 to 10 minutes plus about 2 minutes to
+  install WebKit, alongside the Chromium job rather than after it. A spec
+  joins this gate only once it is green on WebKit; real iPhone checks stay
+  manual (below).
+
+The Chromium gate is unchanged. It does not yet block the two deploy workflows
 (`pages.yml`, the Azure Static Web Apps workflow) on a green run; that
 needs a branch-protection rule on the repository's default branch
 (Settings -> Branches -> require this workflow's status check), which only
