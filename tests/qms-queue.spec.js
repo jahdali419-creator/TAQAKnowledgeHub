@@ -25,25 +25,27 @@ const SEEDED = [
   { seg: 'qhse', area: 'QHSE' },
   { seg: 'wireline', area: 'Wireline Services, Maintenance', maint: true },
 ];
-const num = (seg) => 'TQ-QQ-' + seg;
+// Valid TQ-QHSE-S001 numbers for each area's SOP (PR 2C-1, PI-14).
+const NUMS = { 'coiled-tubing': 'TQ-TWS-CTSS-SOP-951', drilling: 'TQ-TDS-DSS-SOP-951', qhse: 'TQ-QHSE-SOP-951', wireline: 'TQ-TWS-WS-SOP-951' };
+const num = (seg) => NUMS[seg];
 const title = (seg) => 'QQ ' + seg + ' procedure';
 
 // An Employee files one draft in each of four areas (one a maintenance
 // document), then the browser becomes QMS.
 async function seedAsQms(page, gotoApp) {
   await gotoApp('/index.html');
-  await page.evaluate((seeded) => {
+  await page.evaluate(({ seeded, NUMS }) => {
     localStorage.clear();
     localStorage.setItem('taqa-tour-done', '1');
     localStorage.setItem('taqa-install-dismissed', String(Date.now()));
     TAQA_ROLE.set('employee');
     seeded.forEach((s) => TAQA_STORE.add({
       title: 'QQ ' + s.seg + ' procedure', segment: s.seg, docType: 'sop',
-      docNumber: 'TQ-QQ-' + s.seg, summary: 'Queue regression document.',
+      docNumber: NUMS[s.seg], summary: 'Queue regression document.',
       department: s.maint ? 'maintenance' : null,
     }));
     TAQA_ROLE.set('qms');
-  }, SEEDED);
+  }, { seeded: SEEDED, NUMS });
 }
 
 async function openBell(page) {
@@ -137,10 +139,10 @@ test.describe('QMS "Open your queue" and "+N more" open all QMS work', () => {
     await seedAsQms(page, gotoApp);
     // Put one document at each of the two final-approval desks in Coiled Tubing.
     await page.evaluate(() => {
-      TAQA_STORE.add({ title: 'QQ ct ops final', segment: 'coiled-tubing', docType: 'sop', docNumber: 'TQ-QQ-CT-OPS', summary: 'x' });
-      TAQA_STORE.add({ title: 'QQ ct mx final', segment: 'coiled-tubing', docType: 'sop', docNumber: 'TQ-QQ-CT-MX', summary: 'x', department: 'maintenance' });
-      TAQA_STORE.countersign('TQ-QQ-CT-OPS');
-      TAQA_STORE.countersign('TQ-QQ-CT-MX');
+      TAQA_STORE.add({ title: 'QQ ct ops final', segment: 'coiled-tubing', docType: 'sop', docNumber: 'TQ-TWS-CTSS-SOP-952', summary: 'x' });
+      TAQA_STORE.add({ title: 'QQ ct mx final', segment: 'coiled-tubing', docType: 'sop', docNumber: 'TQ-TWS-CTSS-SOP-953', summary: 'x', department: 'maintenance' });
+      TAQA_STORE.countersign('TQ-TWS-CTSS-SOP-952');
+      TAQA_STORE.countersign('TQ-TWS-CTSS-SOP-953');
     });
     for (const role of ['owner', 'maintenance']) {
       await setRole(role, 'coiled-tubing');
@@ -231,7 +233,7 @@ test.describe('bulk QMS confirm: preview, exclusions, a result per document', ()
   test('the preview lists every document to be confirmed, and names each one left out with the reason', async ({ page, gotoApp, consoleErrors }) => {
     await seedAsQms(page, gotoApp);
     // QHSE's document has already had its QMS check, so it is not eligible.
-    await page.evaluate(() => TAQA_STORE.countersign('TQ-QQ-qhse'));
+    await page.evaluate(() => TAQA_STORE.countersign('TQ-QHSE-SOP-951'));
     let nativeDialog = false;
     page.on('dialog', (d) => { nativeDialog = true; d.dismiss(); });
     await selectInDraftView(page, gotoApp, SEEDED.map((s) => num(s.seg)));
@@ -264,7 +266,7 @@ test.describe('bulk QMS confirm: preview, exclusions, a result per document', ()
     await page.locator('#bulk-dlg-cancel').click();
     await expect(dlg).toBeHidden();
     const stages = await page.evaluate((ns) => ns.map((n) => TAQA_APPROVAL.stageOf(TAQA_STORE.findDoc(n))),
-      ['TQ-QQ-coiled-tubing', 'TQ-QQ-drilling', 'TQ-QQ-wireline']);
+      ['TQ-TWS-CTSS-SOP-951', 'TQ-TDS-DSS-SOP-951', 'TQ-TWS-WS-SOP-951']);
     expect(stages).toEqual(['qms', 'qms', 'qms']);
     // There is no bulk reject anywhere.
     await expect(page.locator('#bulk-bar button', { hasText: /reject/i })).toHaveCount(0);
@@ -279,7 +281,7 @@ test.describe('bulk QMS confirm: preview, exclusions, a result per document', ()
     await page.locator('#bulk-approve').click();
     await expect(page.locator('#bq-in .bq-i')).toHaveCount(3);
     // Rejected elsewhere while the preview was open.
-    await page.evaluate(() => TAQA_STORE.reject('TQ-QQ-drilling', 'Wrong revision, sent back by the suite'));
+    await page.evaluate(() => TAQA_STORE.reject('TQ-TDS-DSS-SOP-951', 'Wrong revision, sent back by the suite'));
     await page.locator('#bulk-dlg-go').click();
 
     await expect(page.locator('#bulk-dlg-h')).toHaveText('2 confirmed, 1 not confirmed');
@@ -289,7 +291,8 @@ test.describe('bulk QMS confirm: preview, exclusions, a result per document', ()
     await expect(res.filter({ hasText: title('wireline') }).locator('.bq-res')).toHaveText(/Confirmed\. Now waiting on the Maintenance Manager's final approval\./);
     const failed = res.filter({ hasText: title('drilling') }).locator('.bq-res');
     await expect(failed).toHaveAttribute('data-ok', 'false');
-    await expect(failed).toContainText('Not confirmed. Sent back to its author');
+    // "Returned", the product's word for it (PR 2C-1, PI-24).
+    await expect(failed).toContainText('Not confirmed. Returned to its author: Wrong revision, sent back by the suite.');
     await expect(page.locator('#bulk-dlg-go')).toBeHidden();
 
     const after = await page.evaluate((ns) => ns.map((n) => { const d = TAQA_STORE.findDoc(n); return [d.status, TAQA_APPROVAL.stageOf(d), !!d.rejected]; }), picks);
@@ -301,7 +304,7 @@ test.describe('bulk QMS confirm: preview, exclusions, a result per document', ()
 
   test('nothing eligible: the dialog names what was left out and offers no confirm', async ({ page, gotoApp }) => {
     await seedAsQms(page, gotoApp);
-    await page.evaluate(() => TAQA_STORE.countersign('TQ-QQ-qhse'));
+    await page.evaluate(() => TAQA_STORE.countersign('TQ-QHSE-SOP-951'));
     await selectInDraftView(page, gotoApp, [num('qhse')]);
     await page.locator('#bulk-approve').click();
     await expect(page.locator('#bulk-dlg-h')).toHaveText('Nothing selected is waiting on the QMS check');

@@ -73,6 +73,11 @@ only ever has the role text.
 | `TAQA_STORE.approve(docNumber, expect)` | `POST /documents/{docNumber}/approve` — `expect = {key, stage}` names the exact record the person reviewed (`TAQA_STORE.recordKey(d)`) and its step; the store refuses with `{ok:false, stale:true, error}` and writes nothing if that is no longer the record waiting (PR 2B). Production: item ID + version with `If-Match`, 409/412 on mismatch. Must be rejected server-side unless the caller's Entra token satisfies `TAQA_APPROVAL.canApprove` for that document (see §3); the front end's check is a UI convenience only, never a security boundary. There is no signer parameter: the signature is the caller's identity. Refused for whoever performed the QMS check on the same document |
 | `TAQA_STORE.countersign(docNumber, expect)` | `POST /documents/{docNumber}/countersign` — same rule, checked against `canCountersign`; same `expect` binding; no signer parameter |
 | `TAQA_STORE.reject(docNumber, reason, expect)` | `POST /documents/{docNumber}/reject` — reason of at least 20 characters; same `expect` binding; no signer parameter |
+| `TAQA_STORE.setStatus(docNumber, 'obsolete', rev, {reason, expect})` | `POST /documents/{itemId}/withdraw` with `If-Match`. Reason of at least 20 characters; `expect = {key, status}` binds it to the record shown, and a mismatch is refused with nothing written (`statusError()` says why). Records `withdrawnBy/At/Date/Reason/FromStatus` and cancels open revisions in the same step (PR 2C-1) |
+| `TAQA_STORE.approve(docNumber, expect, {effectiveDate})` | Final approval. `effectiveDate` (YYYY-MM-DD) defaults to today, never earlier; a later date leaves the version `approved` until a scheduled flow makes it current on that date (PR 2C-1, PI-21) |
+| `TAQA_STORE.numberFormat(segment, docType, fn)`, `numberFormatProblem(rec)` | The TQ-QHSE-S001 5.3 number rule for a new filing (PI-14); the API enforces the same |
+| `TAQA_STORE.related({title, segment, sha256, docNumber})` | Advisory possible duplicates with reasons (PI-13); never blocks |
+| `TAQA_STORE.add({…, resubmitOf: key})` | Files a returned attempt again: same number and revision, next attempt (PI-24) |
 | `TAQA_STORE.recordKey(d)`, `byKey(key)`, `revisionLabel(d)` | A record's permanent identity (`recordId`, or `number@revision` for a shipped row), the record it names, and "Rev 2.0 (attempt 2)". Production: the SharePoint item ID and version |
 | ~~`TAQA_STORE.reset()`~~ | Removed from the API (PI-09). No endpoint may wipe the register |
 | `TAQA_STORE.remove(docNumber)` | Not exposed in any UI today; document lifecycle goes through `status`, not deletion |
@@ -124,6 +129,14 @@ reason the door pill carries that disclaimer.
 15. **Withdrawing the revision in force cancels the open revision** of that document and of its translations, in the same transaction (NEW-02, `BUSINESS-RULES.md` §8): `status = obsolete`, `cancelled = true`, `cancelledReason`, `cancelledBy/At/Date`. A cancelled version can never be checked, approved or made current.
 16. **A returned revision filed again is the same revision, next attempt** (NEW-03, `BUSINESS-RULES.md` §7): its own item/record id and `attempt`; number + revision unique among records not returned.
 17. **Final approval names the file version and its server-computed hash** (PI-12); the client's confirmation dialog is convenience, not the control.
+
+### 3.5 Rules added by Priority 2C-1 (October 2026). PRODUCTION CONTROL REQUIRED
+
+18. **Withdrawal needs a reason and is recorded** (PI-11): who, when, why, previous status, server-side, append-only; check and approval history untouched (`BUSINESS-RULES.md` §8).
+19. **Bulk withdrawal is per exact record** (PI-10): each item names the item ID + version it withdraws; drafts and versions not in force are refused.
+20. **Approval and effective dates are the server's** (PI-21): `approvedDate/At` at final approval; `issueDate` = effective date, default the approval date, never earlier; status `approved` until a scheduled flow promotes it; `nextReviewDate` = effective + cycle. Filings carry no dates.
+21. **Returned filings** (PI-24): status Returned, out of every pending count; filing again reuses the number and revision as the next attempt.
+22. **Number format for new filings** (PI-14) and **file-hash duplicate warnings** (PI-13), as in `BUSINESS-RULES.md` §19.
 
 ### 3.2 Rules added by the Priority 1 integrity remediation (October 2026). PRODUCTION CONTROL REQUIRED
 

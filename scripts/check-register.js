@@ -29,7 +29,7 @@
   'use strict';
 
   var LIVE = { current: 1, 'under-review': 1 };
-  var STATUSES = { current: 1, 'under-review': 1, draft: 1, superseded: 1, obsolete: 1, asset: 1 };
+  var STATUSES = { current: 1, 'under-review': 1, draft: 1, approved: 1, superseded: 1, obsolete: 1, asset: 1 };
 
   function norm(r) { return String(r == null ? '' : r).trim().toLowerCase().replace(/^rev\s+/, '').replace(/^v/, ''); }
   function major(r) { var m = norm(r).match(/^(\d+)/); return m ? parseInt(m[1], 10) : null; }
@@ -73,8 +73,9 @@
       var live = rows.filter(function (d) { return LIVE[d.status]; });
       if (live.length > 1) add('integrity', 'multiple-live-revisions', live[0], n + ' has ' + live.length + ' revisions in force (' +
         live.map(function (d) { return 'Rev ' + revLabel(d.revision); }).join(', ') + '). Only one may be current.');
-      // More than one open revision.
-      var open = rows.filter(function (d) { return d.status === 'draft' && !d.rejected; });
+      // More than one open revision. A revision approved but not yet
+      // effective is still the open one until it takes effect (PI-21).
+      var open = rows.filter(function (d) { return (d.status === 'draft' && !d.rejected) || d.status === 'approved'; });
       if (open.length > 1) add('integrity', 'multiple-open-revisions', open[0], n + ' has ' + open.length + ' revisions in progress. Only one may be open.');
       // A revision still in progress for a document that has been withdrawn:
       // it should have been cancelled with the family (PR 2B, NEW-02).
@@ -89,6 +90,13 @@
     records.forEach(function (d) {
       if (!d) return;
       var n = d.docNumber, rows = n ? fam[n] : [];
+      // Approved for a later date: it must say when it takes effect (PI-21).
+      if (d.status === 'approved' && !d.issueDate)
+        add('integrity', 'approved-without-effective-date', d, n + ' Rev ' + revLabel(d.revision) + ' is approved but records no effective date.');
+      // A withdrawal recorded by RISE says who, when and why (PI-11). Older
+      // withdrawals carry no record at all and are not flagged.
+      if (d.status === 'obsolete' && !d.cancelled && d.withdrawnAt && String(d.withdrawnReason || '').trim().length < 20)
+        add('integrity', 'withdrawal-without-reason', d, n + ' Rev ' + revLabel(d.revision) + ' was withdrawn with no recorded reason.');
       var controlled = !types || !types[d.docType] || types[d.docType].controlled !== false;
 
       // Superseded, but the successor it names is not in the register.
@@ -191,6 +199,8 @@
     var TITLES = {
       'duplicate-number-revision': 'Same number and revision held twice',
       'duplicate-attempt': 'Same attempt at a revision held twice',
+      'approved-without-effective-date': 'Approved revision with no effective date',
+      'withdrawal-without-reason': 'Withdrawal recorded with no reason',
       'open-revision-of-withdrawn-document': 'Revision still in progress for a withdrawn document',
       'open-translation-of-withdrawn-source': 'Translation still in progress for a withdrawn source',
       'multiple-live-revisions': 'More than one revision in force',

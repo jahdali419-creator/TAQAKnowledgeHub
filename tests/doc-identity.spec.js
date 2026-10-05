@@ -48,7 +48,7 @@ async function toReview(page, title) {
 }
 async function withdrawAsQms(page, setRole, n) {
   await setRole('qms', SEG);
-  expect(await page.evaluate((x) => !!TAQA_STORE.setStatus(x, 'obsolete'), n), 'withdrawn ' + n).toBe(true);
+  expect(await page.evaluate((x) => !!TAQA_STORE.setStatus(x, 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' }), n), 'withdrawn ' + n).toBe(true);
   await setRole('employee', SEG);
 }
 async function expectWithdrawnView(page) {
@@ -75,9 +75,10 @@ test.describe('PI-01: one number, one document', () => {
       expect(t.why, t.n).toContain('A number names one document and is never reused');
     }
     // A number filed here earlier is taken too, and the register did not grow.
-    expect(await page.evaluate(() => !!TAQA_STORE.add({ docNumber: 'TQ-ID-S001', title: 'First', segment: 'coiled-tubing', docType: 'sop' }))).toBe(true);
-    expect(await page.evaluate(() => !!TAQA_STORE.add({ docNumber: 'TQ-ID-S001', title: 'Second', segment: 'drilling', docType: 'sop' }))).toBe(false);
-    expect(await page.evaluate(() => TAQA_STORE.all().filter((d) => d.docNumber === 'TQ-ID-S001').length)).toBe(1);
+    expect(await page.evaluate(() => !!TAQA_STORE.add({ docNumber: 'TQ-TWS-CTSS-SOP-985', title: 'First', segment: 'coiled-tubing', docType: 'sop' }))).toBe(true);
+    expect(await page.evaluate(() => !!TAQA_STORE.add({ docNumber: 'TQ-TWS-CTSS-SOP-985', title: 'Second', segment: 'drilling', docType: 'sop' }))).toBe(false);
+    expect(await page.evaluate(() => TAQA_STORE.checkFiling({ docNumber: 'TQ-TWS-CTSS-SOP-985', title: 'Second', segment: 'drilling', docType: 'sop' }))).toContain('A number names one document and is never reused');
+    expect(await page.evaluate(() => TAQA_STORE.all().filter((d) => d.docNumber === 'TQ-TWS-CTSS-SOP-985').length)).toBe(1);
     expect(await count(page)).toBe(before + 1);
     // And a filing with no number at all is refused.
     expect(await page.evaluate(() => TAQA_STORE.add({ title: 'No number', segment: 'coiled-tubing', docType: 'sop' }))).toBeNull();
@@ -96,7 +97,8 @@ test.describe('PI-01: one number, one document', () => {
 
     // Forced past the gate, the submit refuses it and files nothing.
     const before = await count(page);
-    await page.evaluate(() => { document.getElementById('doc-ref-id').value = 'TQ-AUTO-PLACEHOLDER'; });
+    // A free, well-formed number gets it past step 2 (PI-14 checks the form).
+    await page.evaluate(() => { document.getElementById('doc-ref-id').value = 'TQ-TWS-CTSS-SOP-980'; });
     await toReview(page, 'Forced duplicate');
     await page.evaluate((n) => { const f = document.getElementById('doc-ref-id'); f.value = n; f.dataset.autofilled = 'user'; }, LIVE.n);
     await page.click('#submit-btn');

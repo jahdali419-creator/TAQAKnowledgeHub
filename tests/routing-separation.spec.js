@@ -151,58 +151,58 @@ test.describe('PI-31: submitter ≠ QMS checker ≠ final approver', () => {
 
   test('whoever filed a document cannot do its QMS check; the Workbench says why', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, clearAppState, setRole, 'qms');
-    expect(await fileDraft(page, 'TQ-SOD-S001')).toBe(true);
-    expect(await page.evaluate(() => TAQA_APPROVAL.canCountersign(TAQA_STORE.findDoc('TQ-SOD-S001')))).toBe(false);
-    expect((await page.evaluate(() => TAQA_STORE.countersign('TQ-SOD-S001'))).ok).toBe(false);
-    expect((await page.evaluate(() => TAQA_STORE.reject('TQ-SOD-S001', 'Rejecting my own filing here.'))).ok).toBe(false);
-    expect(await rec(page, 'TQ-SOD-S001')).toMatchObject({ status: 'draft', stage: 'qms', cs: null });
-    await gotoApp('/master-list.html?view=register&doc=TQ-SOD-S001');
-    await page.evaluate(() => openDoc(TAQA_STORE.findDoc('TQ-SOD-S001')));
+    expect(await fileDraft(page, 'TQ-TWS-CTSS-SOP-981')).toBe(true);
+    expect(await page.evaluate(() => TAQA_APPROVAL.canCountersign(TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-981')))).toBe(false);
+    expect((await page.evaluate(() => TAQA_STORE.countersign('TQ-TWS-CTSS-SOP-981'))).ok).toBe(false);
+    expect((await page.evaluate(() => TAQA_STORE.reject('TQ-TWS-CTSS-SOP-981', 'Rejecting my own filing here.'))).ok).toBe(false);
+    expect(await rec(page, 'TQ-TWS-CTSS-SOP-981')).toMatchObject({ status: 'draft', stage: 'qms', cs: null });
+    await gotoApp('/master-list.html?view=register&doc=TQ-TWS-CTSS-SOP-981');
+    await page.evaluate(() => openDoc(TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-981')));
     await expect(page.locator('#dw-sep')).toContainText('You filed this document');
     await expect(page.locator('#wb-confirm')).toHaveCount(0);
   });
 
   test('whoever filed a document cannot give it final approval; the desk lists it with the reason; a delegate can', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, clearAppState, setRole, 'owner');
-    expect(await fileDraft(page, 'TQ-SOD-S002')).toBe(true);
+    expect(await fileDraft(page, 'TQ-TWS-CTSS-SOP-982')).toBe(true);
     await setRole('qms', SEG);
-    expect((await page.evaluate(() => TAQA_STORE.countersign('TQ-SOD-S002'))).ok).toBe(true);
+    expect((await page.evaluate(() => TAQA_STORE.countersign('TQ-TWS-CTSS-SOP-982'))).ok).toBe(true);
     await setRole('owner', SEG);
-    expect((await page.evaluate(() => TAQA_STORE.approve('TQ-SOD-S002'))).ok).toBe(false);
-    expect(await rec(page, 'TQ-SOD-S002')).toMatchObject({ status: 'draft', stage: 'director', ap: null });
+    expect((await page.evaluate(() => TAQA_STORE.approve('TQ-TWS-CTSS-SOP-982'))).ok).toBe(false);
+    expect(await rec(page, 'TQ-TWS-CTSS-SOP-982')).toMatchObject({ status: 'draft', stage: 'director', ap: null });
     await gotoApp(`/dashboard.html?id=${SEG}`);
-    await expect(page.locator('#pending-held')).toContainText('TQ-SOD-S002');
+    await expect(page.locator('#pending-held')).toContainText('TQ-TWS-CTSS-SOP-982');
     await expect(page.locator('#pending-held')).toContainText('someone else must give it final approval');
-    await expect(page.locator('.btn-approve[data-store-doc="TQ-SOD-S002"]')).toHaveCount(0);
+    await expect(page.locator('.btn-approve[data-store-doc="TQ-TWS-CTSS-SOP-982"]')).toHaveCount(0);
     // Delegation still works: the delegate is a different person.
     const g = await page.evaluate(() => TAQA_DELEGATION.grant({ to: 'Deputy Director', reason: 'Leave', includesApproval: true,
       until: new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10) }));
     await page.evaluate((id) => TAQA_DELEGATION.actAs(id), g.delegation.id);
-    expect((await page.evaluate(() => TAQA_STORE.approve('TQ-SOD-S002'))).ok).toBe(true);
-    expect(await rec(page, 'TQ-SOD-S002')).toMatchObject({ status: 'current', ap: 'Deputy Director (delegate for Segment Director)' });
+    expect((await page.evaluate(() => TAQA_STORE.approve('TQ-TWS-CTSS-SOP-982'))).ok).toBe(true);
+    expect(await rec(page, 'TQ-TWS-CTSS-SOP-982')).toMatchObject({ status: 'current', ap: 'Deputy Director (delegate for Segment Director)' });
   });
 
   test('the QMS checker cannot approve, and the ordinary three-person path still works', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, clearAppState, setRole, 'employee');
-    expect(await fileDraft(page, 'TQ-SOD-S003')).toBe(true);
+    expect(await fileDraft(page, 'TQ-TWS-CTSS-SOP-983')).toBe(true);
     await setRole('qms', SEG);
-    expect((await page.evaluate(() => TAQA_STORE.countersign('TQ-SOD-S003'))).ok).toBe(true);
-    expect(await page.evaluate(() => TAQA_APPROVAL.separationReason(TAQA_STORE.findDoc('TQ-SOD-S003'), 'owner'))).toBeNull();
+    expect((await page.evaluate(() => TAQA_STORE.countersign('TQ-TWS-CTSS-SOP-983'))).ok).toBe(true);
+    expect(await page.evaluate(() => TAQA_APPROVAL.separationReason(TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-983'), 'owner'))).toBeNull();
     await setRole('owner', SEG);
-    expect((await page.evaluate(() => TAQA_STORE.approve('TQ-SOD-S003'))).ok).toBe(true);
-    expect(await rec(page, 'TQ-SOD-S003')).toMatchObject({ status: 'current', by: 'Employee', cs: 'QMS / Document Controller', ap: 'Segment Director' });
+    expect((await page.evaluate(() => TAQA_STORE.approve('TQ-TWS-CTSS-SOP-983'))).ok).toBe(true);
+    expect(await rec(page, 'TQ-TWS-CTSS-SOP-983')).toMatchObject({ status: 'current', by: 'Employee', cs: 'QMS / Document Controller', ap: 'Segment Director' });
   });
 
   test('bulk confirm leaves out a document the QMS user filed, with the reason', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, clearAppState, setRole, 'qms');
-    await fileDraft(page, 'TQ-SOD-S004');
+    await fileDraft(page, 'TQ-TWS-CTSS-SOP-984');
     await setRole('employee', SEG);
-    await fileDraft(page, 'TQ-SOD-S005');
+    await fileDraft(page, 'TQ-TWS-CTSS-SOP-985');
     await setRole('qms', SEG);
     await gotoApp(`/master-list.html?view=qms&seg=${SEG}`);
-    const r = await page.evaluate(() => { bulkConfirmPreview(['TQ-SOD-S004', 'TQ-SOD-S005'].map((n) => TAQA_STORE.findDoc(n))); return [bulkPending.slice(), document.getElementById('bulk-dlg').textContent]; });
+    const r = await page.evaluate(() => { bulkConfirmPreview(['TQ-TWS-CTSS-SOP-984', 'TQ-TWS-CTSS-SOP-985'].map((n) => TAQA_STORE.findDoc(n))); return [bulkPending.slice(), document.getElementById('bulk-dlg').textContent]; });
     // Each entry names the exact record listed (PR 2B, NEW-01).
-    expect(r[0].map((p) => p.num)).toEqual(['TQ-SOD-S005']);
+    expect(r[0].map((p) => p.num)).toEqual(['TQ-TWS-CTSS-SOP-985']);
     expect(r[1]).toContain('You filed this document');
   });
 });

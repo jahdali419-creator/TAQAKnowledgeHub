@@ -215,6 +215,21 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
   box-shadow:0 8px 32px rgba(0,0,0,0.2);opacity:0;transition:all 0.3s;z-index:9999;pointer-events:none;
   display:flex;align-items:center;gap:10px;}
 .dash-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+/* Withdraw dialog (PI-11): reason required, exact revision named. */
+.wd-dlg{margin:auto;width:min(480px,calc(100% - 32px));padding:22px;border:1px solid var(--border);border-radius:14px;
+  background:var(--bg-white,#fff);color:var(--text);box-shadow:0 18px 50px rgba(0,0,0,.28);}
+.wd-dlg::backdrop{background:rgba(0,20,22,.45);}
+.wd-dlg h2{font-size:16px;font-weight:800;margin:0 0 6px;}
+.wd-dlg p{font-size:13px;line-height:1.5;color:var(--text-muted);margin:0 0 10px;}
+.wd-dlg .wd-doc{font-style:italic;}
+.wd-dlg .wd-open{color:var(--warn-ink,#8a5a00);}
+.wd-dlg label{display:block;font-size:12px;font-weight:700;margin:4px 0;}
+.wd-dlg textarea{width:100%;min-height:80px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:13px;resize:vertical;box-sizing:border-box;}
+.wd-hint{font-size:11.5px;color:var(--text-muted);margin-top:4px;}
+.wd-acts{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+.wd-acts button{min-height:40px;padding:0 16px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text);}
+.wd-acts .wd-go{background:var(--stop-ink,#C8102E);border-color:var(--stop-ink,#C8102E);color:#fff;}
+.wd-acts .wd-go:disabled{opacity:.45;cursor:not-allowed;}
 .dash-toast-dot{width:8px;height:8px;border-radius:50%;background:#00BBB6;flex-shrink:0;}
 
 /* ── Dark Mode ── */
@@ -374,6 +389,19 @@ html[data-taqa-theme="dark"] .pub-table-footer{border-color:#003A3D;background:r
 </div>
 
 <!-- Toast -->
+<dialog id="wd-dlg" class="wd-dlg" aria-labelledby="wd-dlg-h" onclose="wdTarget=null">
+  <h2 id="wd-dlg-h">Withdraw this document?</h2>
+  <p class="wd-doc" id="wd-dlg-doc"></p>
+  <p>It will be marked obsolete and every reader will see "Withdrawn, do not use." It stays in the register with your reason, and its approval history is kept.</p>
+  <p class="wd-open" id="wd-dlg-open" hidden></p>
+  <label for="wd-reason">Reason for withdrawal</label>
+  <textarea id="wd-reason" maxlength="500" placeholder="Why this document is withdrawn" oninput="wdReasonInput()"></textarea>
+  <div class="wd-hint"><span id="wd-count">0</span> / 500, at least 20 characters</div>
+  <div class="wd-acts">
+    <button type="button" class="wd-cancel" onclick="wdClose()">Cancel</button>
+    <button type="button" class="wd-go" id="wd-go" onclick="wdConfirm()" disabled>Withdraw</button>
+  </div>
+</dialog>
 <div class="dash-toast" id="dash-toast" role="status" aria-live="polite">
   <div class="dash-toast-dot"></div>
   <span id="dash-toast-msg">Done</span>
@@ -601,22 +629,55 @@ function removeDoc(btn) {
   const num = btn.dataset.num;
   if (!num || typeof TAQA_STORE === 'undefined') return;
   const row = btn.closest('tr');
-  const title = row.querySelector('.pub-doc-title').textContent.trim();
-  // A revision still in progress is cancelled with it (PR 2B, NEW-02), so
-  // the dialog says so before anything happens.
-  const open = TAQA_STORE.openDraft ? TAQA_STORE.openDraft(num) : null;
-  const openNote = open ? ' ' + TAQA_STORE.revisionLabel(open) + ', which is in progress, will be cancelled with it: ' +
-      'it leaves the approval queues and is kept as history.' : '';
-  if (!confirm('Withdraw "' + title + '"? It will be marked obsolete and ' +
-      'every reader will see "Withdrawn, do not use." It stays in the ' +
-      'register, but leaves this list.' + openNote)) return;
-  const updated = TAQA_STORE.setStatus(num, 'obsolete');
-  if (!updated) { showDocsToast('Could not withdraw this document', '#C8102E'); return; }
-  row.style.opacity = '0.3';
-  row.style.transition = 'opacity 0.3s';
+  const rec = TAQA_STORE.findDoc(num);
+  if (!rec) return;
+  openWithdrawDialog(rec, row, btn);
+}
+
+/* Withdrawing asks for a reason and names the exact revision, and any
+   revision in progress that is cancelled with it, before anything happens
+   (PI-11, NEW-02). The withdrawal is bound to that revision: if it changed
+   meanwhile, nothing is withdrawn and the reason is shown. */
+let wdTarget = null;
+function openWithdrawDialog(rec, row, opener) {
+  const dlg = document.getElementById('wd-dlg');
+  const open = TAQA_STORE.openDraft(rec.docNumber) || (TAQA_STORE.pendingEffective && TAQA_STORE.pendingEffective(rec.docNumber));
+  wdTarget = { num: rec.docNumber, rev: rec.revision, key: TAQA_STORE.recordKey(rec), status: rec.status, row, opener };
+  document.getElementById('wd-dlg-h').textContent = 'Withdraw ' + rec.docNumber + ' ' + TAQA_STORE.revisionLabel(rec) + '?';
+  document.getElementById('wd-dlg-doc').textContent = rec.title || '';
+  document.getElementById('wd-dlg-open').textContent = open
+    ? TAQA_STORE.revisionLabel(open) + (open.status === 'approved' ? ', approved but not yet in effect,' : ', which is in progress,') +
+      ' will be cancelled with it: it never takes effect and is kept as history.' : '';
+  document.getElementById('wd-dlg-open').hidden = !open;
+  const r = document.getElementById('wd-reason');
+  r.value = ''; wdReasonInput();
+  dlg.showModal();
+  r.focus();
+}
+function wdReasonInput() {
+  const v = document.getElementById('wd-reason').value;
+  document.getElementById('wd-count').textContent = v.length;
+  document.getElementById('wd-go').disabled = v.trim().length < 20;
+}
+function wdClose() {
+  const dlg = document.getElementById('wd-dlg');
+  const t = wdTarget; wdTarget = null;
+  if (dlg.open) dlg.close();
+  if (t && t.opener && document.body.contains(t.opener)) t.opener.focus();
+}
+function wdConfirm() {
+  const t = wdTarget;
+  if (!t) return;
+  const reason = document.getElementById('wd-reason').value;
+  if (reason.trim().length < 20) return;
+  const updated = TAQA_STORE.setStatus(t.num, 'obsolete', t.rev, { reason, expect: { key: t.key, status: t.status } });
+  wdClose();
+  if (!updated) { showDocsToast('Not withdrawn. ' + (TAQA_STORE.statusError() || 'You cannot withdraw this document.'), '#C8102E'); initDocPage(); return; }
+  t.row.style.opacity = '0.3';
+  t.row.style.transition = 'opacity 0.3s';
   setTimeout(() => {
     initDocPage();
-    showDocsToast('Withdrawn. Marked obsolete in the register.');
+    showDocsToast('Withdrawn. Marked obsolete in the register, with your reason.');
   }, 300);
 }
 

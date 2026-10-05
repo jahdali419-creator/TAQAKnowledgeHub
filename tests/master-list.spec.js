@@ -129,8 +129,11 @@ test.describe('master-list.html, bulk actions', () => {
     await checkboxes.nth(1).check();
     await expect(page.locator('#bulk-count')).toHaveText('2 documents selected');
 
-    page.once('dialog', (d) => d.accept());
+    // The preview lists both and asks for one reason, recorded on each (PI-10, PI-11).
     await page.locator('#bulk-withdraw').click();
+    await expect(page.locator('#bq-wd .bq-i')).toHaveCount(2);
+    await page.fill('#bq-reason', 'Withdrawn by the bulk-action regression test.');
+    await page.locator('#bulk-dlg-go').click();
     await expect(page.locator('#toast')).toContainText('Withdrew 2 document');
 
     const pickedStatuses = await page.evaluate(

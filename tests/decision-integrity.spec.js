@@ -227,7 +227,7 @@ test.describe('NEW-02: withdrawing a document cancels the revision in progress',
     await p2.evaluate(() => TAQA_ROLE.set('qms'));
     await p2.goto('/documents.html');
     await p2.waitForFunction(() => document.readyState === 'complete');
-    const out = await p2.evaluate((n) => !!TAQA_STORE.setStatus(n, 'obsolete'), DOC);
+    const out = await p2.evaluate((n) => !!TAQA_STORE.setStatus(n, 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' }), DOC);
     expect(out).toBe(true);
     await p2.close();
 
@@ -284,11 +284,10 @@ test.describe('NEW-02: withdrawing a document cancels the revision in progress',
     await setRole('qms', SEG);
     await gotoApp('/documents.html?id=' + SEG);
     const row = page.locator('#pub-docs-body tr', { hasText: DOC }).first();
-    let msg = null;
-    page.once('dialog', (d) => { msg = d.message(); d.dismiss(); });
     await row.locator('.pub-remove-btn').click();
-    await expect.poll(() => msg).toContain('Rev 2.0, which is in progress, will be cancelled with it');
-    // Dismissed: nothing changed.
+    await expect(page.locator('#wd-dlg-open')).toContainText('Rev 2.0, which is in progress, will be cancelled with it');
+    await page.locator('#wd-dlg .wd-cancel').click();
+    // Cancelled: nothing changed.
     expect((await family(page, DOC)).map((d) => [d.rev, d.status])).toEqual([['1.0', 'current'], ['2.0', 'draft']]);
   });
 
@@ -300,7 +299,7 @@ test.describe('NEW-02: withdrawing a document cancels the revision in progress',
     await expect(page.locator('#dw-title')).toHaveText('Revised and waiting on QMS');
 
     const p2 = await otherTab(context);
-    await p2.evaluate((n) => { TAQA_ROLE.set('qms'); TAQA_STORE.setStatus(n, 'obsolete'); }, DOC);
+    await p2.evaluate((n) => { TAQA_ROLE.set('qms'); TAQA_STORE.setStatus(n, 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' }); }, DOC);
     await p2.close();
 
     await page.locator('#wb-confirm').click();
@@ -317,7 +316,7 @@ test.describe('NEW-02: withdrawing a document cancels the revision in progress',
     // The Arabic translation's own next revision, and a revision of the source.
     await fileRevision(page, ar, 'Arabic translation, revised');
     await fileRevision(page, SRC, 'Source, revised');
-    await as(page, 'qms', (s) => TAQA_STORE.setStatus(s, 'obsolete'), SRC);
+    await as(page, 'qms', (s) => TAQA_STORE.setStatus(s, 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' }), SRC);
     const res = await page.evaluate(({ s, ar }) => {
       const open = TAQA_STORE.all().filter((d) => (d.docNumber === s || d.docNumber === ar) && TAQA_APPROVAL.stageOf(d));
       TAQA_ROLE.set('qms');

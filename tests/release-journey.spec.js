@@ -137,7 +137,7 @@ test.describe('the register refuses writes a role does not hold, wherever they c
       const r = await page.evaluate((seg) => {
         const d = TAQA_STORE.all().find((x) => x.segment === seg && x.status === 'current');
         const out = {
-          setStatus: TAQA_STORE.setStatus(d.docNumber, 'obsolete'),
+          setStatus: TAQA_STORE.setStatus(d.docNumber, 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' }),
           patch: TAQA_STORE.patch(d.docNumber, { title: 'tampered' }),
           remove: TAQA_STORE.remove(d.docNumber),
         };
@@ -187,7 +187,7 @@ test.describe('the register refuses writes a role does not hold, wherever they c
     await gotoApp('/index.html');
     const other = await page.evaluate((seg) => {
       const d = TAQA_STORE.all().find((x) => x.segment === seg && x.status === 'current');
-      return { r: TAQA_STORE.setStatus(d.docNumber, 'obsolete'), after: TAQA_STORE.findDoc(d.docNumber).status };
+      return { r: TAQA_STORE.setStatus(d.docNumber, 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' }), after: TAQA_STORE.findDoc(d.docNumber).status };
     }, SEG);
     expect(other.r).toBeNull();
     expect(other.after).toBe('current');
@@ -195,7 +195,7 @@ test.describe('the register refuses writes a role does not hold, wherever they c
     await gotoApp('/index.html');
     const own = await page.evaluate((seg) => {
       const d = TAQA_STORE.all().find((x) => x.segment === seg && x.status === 'current');
-      return !!TAQA_STORE.setStatus(d.docNumber, 'obsolete') && TAQA_STORE.findDoc(d.docNumber).status;
+      return !!TAQA_STORE.setStatus(d.docNumber, 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' }) && TAQA_STORE.findDoc(d.docNumber).status;
     }, SEG);
     expect(own).toBe('obsolete');
   });
@@ -300,7 +300,8 @@ test.describe('on a phone', () => {
     const fits = () => page.evaluate(() => document.querySelector('.upload-card').getBoundingClientRect().right <= innerWidth);
     await gotoApp('/upload.html');
     await page.setInputFiles('#file-input', { name: 'phone.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4\n%%EOF\n') });
-    await expect(page.locator('#hash-status')).toContainText('Unique file');
+    // It says what it checked: no other record carries this file (PI-13).
+    await expect(page.locator('#hash-status')).toContainText('No other record here carries this file');
     expect(await fits()).toBe(true);
     await page.click('#go-2');
     await page.selectOption('#seg-select', SEG);

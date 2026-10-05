@@ -145,7 +145,7 @@ test.describe('form.html', () => {
 
   test('a withdrawn form cannot be filled in or printed', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, setRole, clearAppState, 'qms');
-    const moved = await page.evaluate(() => !!TAQA_STORE.setStatus('TQ-TDS-DSS-F001', 'obsolete'));
+    const moved = await page.evaluate(() => !!TAQA_STORE.setStatus('TQ-TDS-DSS-F001', 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' }));
     expect(moved).toBe(true);
     await setRole('employee', 'coiled-tubing');
     await gotoApp('/form.html?doc=TQ-TDS-DSS-F001');

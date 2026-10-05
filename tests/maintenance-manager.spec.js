@@ -362,19 +362,19 @@ test.describe('managing a document follows its department as well as its area', 
     await setRole('maintenance', SEG);
     expect(await page.evaluate(() => [
       TAQA_STORE.patch('TQ-TWS-CTSS-SOP-971', { summary: 'x' }).ok,   // ops: not theirs
-      !!TAQA_STORE.setStatus('TQ-TWS-CTSS-SOP-971', 'obsolete'),
+      !!TAQA_STORE.setStatus('TQ-TWS-CTSS-SOP-971', 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' }),
       TAQA_STORE.patch('TQ-TWS-CTSS-SOP-972', { summary: 'Reviewed' }).ok,
     ])).toEqual([false, false, true]);
     await setRole('owner', SEG);
     expect(await page.evaluate(() => [
       TAQA_STORE.patch('TQ-TWS-CTSS-SOP-972', { summary: 'x' }).ok,   // maintenance: not theirs
-      !!TAQA_STORE.setStatus('TQ-TWS-CTSS-SOP-972', 'obsolete'),
-      !!TAQA_STORE.setStatus('TQ-TWS-CTSS-SOP-971', 'obsolete'),
+      !!TAQA_STORE.setStatus('TQ-TWS-CTSS-SOP-972', 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' }),
+      !!TAQA_STORE.setStatus('TQ-TWS-CTSS-SOP-971', 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' }),
     ])).toEqual([false, false, true]);
     await setRole('maintenance', SEG);
-    expect(!!(await page.evaluate(() => TAQA_STORE.setStatus('TQ-TWS-CTSS-SOP-972', 'obsolete')))).toBe(true);
+    expect(!!(await page.evaluate(() => TAQA_STORE.setStatus('TQ-TWS-CTSS-SOP-972', 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' })))).toBe(true);
     await setRole('qms', SEG);
-    expect(!!(await page.evaluate(() => TAQA_STORE.setStatus('TQ-TWS-CTSS-MB-973', 'obsolete')))).toBe(true);
+    expect(!!(await page.evaluate(() => TAQA_STORE.setStatus('TQ-TWS-CTSS-MB-973', 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' })))).toBe(true);
   });
 
   test('lifecycle and signature fields stay protected for every manager', async ({ page, gotoApp, setRole, clearAppState }) => {

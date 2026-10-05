@@ -325,6 +325,7 @@ tbody tr[aria-selected="true"]{background:var(--brand-soft);}
 .m-current{--dot:#008675;}
 .m-review{--dot:#FD691D;}
 .m-draft{--dot:#0076A8;border-style:dashed;}
+.m-approved{--dot:#0076A8;}
 .m-superseded,.m-obsolete{--dot:#C8102E;}
 .m-asset{--dot:var(--ink-3);color:var(--ink-3);}
 .cls{font:600 10px/1.3 'BwGradual',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);}
@@ -407,6 +408,8 @@ th.bulk-col,td.bulk-col{width:34px;padding-inline-end:2px;}
 .bq-foot .btn{min-height:38px;padding:0 16px;}
 .bq-go{background:var(--primary);border-color:var(--primary);color:#fff;}
 .bq-go:disabled{opacity:.5;cursor:default;}
+.bq-reason{width:100%;min-height:76px;margin:4px 0 4px;padding:8px 10px;border:1px solid var(--rule-firm);border-radius:var(--r2,8px);
+  font:inherit;font-size:13px;background:var(--paper);color:var(--ink);resize:vertical;}
 @media(max-width:560px){
   #bulk-dlg{width:calc(100% - 24px);max-height:88dvh;}
   .bq-head,.bq-body,.bq-foot{padding-inline:16px;}
@@ -778,7 +781,7 @@ thead th{top:var(--nav-h,64px);}
   <div class="bq-body" id="bulk-dlg-body" aria-live="polite"></div>
   <div class="bq-foot">
     <button type="button" class="btn btn-quiet" id="bulk-dlg-cancel" onclick="bulkDlgClose()">Cancel</button>
-    <button type="button" class="btn bq-go" id="bulk-dlg-go" onclick="bulkConfirmRun()">Confirm</button>
+    <button type="button" class="btn bq-go" id="bulk-dlg-go" onclick="bulkGo()">Confirm</button>
   </div>
 </dialog>
 
@@ -843,10 +846,12 @@ thead th{top:var(--nav-h,64px);}
 const D=TAQA_MASTER_DOCS, L=TAQA_DOC_LOOKUPS, A=TAQA_DOC;
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):null;
-const LABEL={current:'Current','under-review':'Review due',draft:'Draft',superseded:'Superseded',obsolete:'Obsolete',asset:'Asset'};
-// A revision cancelled because its family was withdrawn is stored as obsolete
-// but says what happened to it (PR 2B, NEW-02).
-const statusLabel=d=>d&&d.cancelled?'Cancelled':(LABEL[d.status]||d.status);
+const LABEL={current:'Current','under-review':'Review due',draft:'Draft',approved:'Approved, not yet effective',superseded:'Superseded',obsolete:'Obsolete',asset:'Asset'};
+// What happened to a record, in the words the rest of the product uses: a
+// revision cancelled with its withdrawn family (PR 2B, NEW-02) and a filing
+// returned to its author (PI-24) are stored as obsolete and draft, but they
+// say what they are.
+const statusLabel=d=>!d?'':d.cancelled?'Cancelled':(d.status==='draft'&&d.rejected)?'Returned':(LABEL[d.status]||d.status);
 
 const fs=document.getElementById('f-seg'), ft=document.getElementById('f-type');
 Object.keys(L.segments).sort((a,b)=>L.segments[a].name.localeCompare(L.segments[b].name))
@@ -890,6 +895,7 @@ const CT=[
   {k:'review',     l:'Review due',    f:d=>d.status==='under-review'},
   {k:'draft',      l:'Draft',         f:d=>d.status==='draft'},
   {k:'obsolete',   l:'Withdrawn',     f:d=>d.status==='obsolete'||d.status==='superseded'},
+  {k:'returned',   l:'Returned',      f:d=>d.status==='draft'&&!!d.rejected},
   {k:'overdue',    l:'Review overdue',f:d=>A.overdue(d), flag:'due', control:true, strip:true},
   {k:'provisional',l:'Provisional',   f:d=>d.numberStatus==='provisional', flag:'out', control:true, strip:true},
   {k:'ar',         l:'Arabic',        f:d=>!!d.translationOf,              strip:true},
@@ -1063,7 +1069,7 @@ function render(){
       <td><div class="num${pv?' prov':''}">${esc(d.docNumber||'Not numbered')}</div>${d.legacyId?`<div class="was">was ${esc(d.legacyId)}</div>`:''}</td>
       <td><div class="ttl">${esc(d.title)}${d.language==='ar'?'<span class="ar">AR</span>':''}</div><div class="org">${esc(s.name)}</div></td>
       <td><span class="dat">${esc(d.revision||'n/a')}${d.attempt>1?' <small>(attempt '+esc(d.attempt)+')</small>':''}</span></td>
-      <td><span class="dat${d.issueDate?'':' nil'}">${fmt(d.issueDate)||'Not recorded'}</span></td>
+      <td>${issuedCell(d)}</td>
       <td>${due(d)}</td>
       <td><span class="mark m-${esc(String(d.status).replace('under-review','review'))}">${esc(statusLabel(d))}</span></td>
       <td><span class="cls${d.classification==='restricted'?' hi':''}">${esc(d.classification||'')}</span></td>
@@ -1111,8 +1117,7 @@ function updateBulkBar(){
 
 // Withdraw calls TAQA_STORE.setStatus(), the same call documents.html's
 // single Withdraw button makes, so the register updates for every reader.
-// A selected row that is already withdrawn is left untouched, and the confirm
-// dialog says so before anything happens.
+// It opens a preview first (bulkWithdrawPreview below).
 //
 // Confirm is QMS's own step and only that: it confirms drafts that are
 // waiting on the QMS check and sends each to its named approver. It never
@@ -1121,38 +1126,96 @@ function bulkAction(kind){
   if(!canBulk()||typeof TAQA_STORE==='undefined')return;
   const chosen=Array.from(selectedRows).map(byKey).filter(Boolean);
   if(kind==='approve'){bulkConfirmPreview(chosen);return;}
-  const eligible=chosen.filter(d=>d.status!=='obsolete'&&d.status!=='superseded');
-  const skipped=chosen.length-eligible.length;
-  if(!eligible.length){
-    toast('Nothing selected can be withdrawn. It is already marked obsolete or superseded.');
-    return;
-  }
+  bulkWithdrawPreview(chosen);
+}
+/* ── Bulk withdrawal: one selected row is one exact record (PI-10) ──────
+   Only a revision in force is withdrawn from here, the exact one ticked.
+   A revision in progress, a returned filing or one approved but not yet
+   effective is left out with the reason, never withdrawn as though it were
+   the document in force. The preview lists every revision that will change,
+   including an open revision that is cancelled with its document (NEW-02),
+   and asks for one reason, recorded on each. Each withdrawal is bound to
+   the record listed: one that changed since is refused, not redirected. */
+let bulkWithdrawPending=[];
+function whyNotWithdraw(d){
+  if(d.cancelled)return 'Already cancelled.';
+  if(d.status==='obsolete'||d.status==='superseded')return 'Already '+(d.status==='obsolete'?'withdrawn':'superseded')+'.';
+  if(d.status==='draft'&&d.rejected)return 'A returned filing is history; there is nothing in force to withdraw.';
+  if(d.status==='draft')return 'A revision in progress is not withdrawn from here. It is cancelled if its document is withdrawn, or returned by its checker or approver.';
+  if(d.status==='approved')return 'Approved, not yet effective: it is cancelled if the revision in force is withdrawn.';
+  if(!TAQA_ROLE.canManage(d))return 'You do not manage this document.';
+  return '';
+}
+function bulkWithdrawPreview(chosen){
+  const dlg=document.getElementById('bulk-dlg');
+  const eligible=chosen.filter(d=>!whyNotWithdraw(d));
+  // A ticked open revision whose document is being withdrawn is already
+  // listed under it as cancelled with it, so it is not also "left out".
+  const going=new Set(eligible.map(d=>d.docNumber));
+  const left=chosen.filter(d=>!!whyNotWithdraw(d)&&!((d.status==='draft'&&!d.rejected||d.status==='approved')&&going.has(d.docNumber)));
+  bulkWithdrawPending=eligible.map(d=>({num:d.docNumber,rev:d.revision,key:TAQA_STORE.recordKey(d),status:d.status}));
   const n=eligible.length, s=n===1?'':'s';
-  // skipped is only ever >0 here alongside at least one eligible document, so
-  // the pool being referred to ("the selected documents") always has two or
-  // more in it; only is/are and it/they, tied to skipped itself, need to
-  // agree with how many of those are being left alone.
-  const skipNote=skipped
-    ? ' '+skipped+' of the selected documents '+(skipped===1?'is':'are')+
-      ' already withdrawn and will be left as '+(skipped===1?'it is':'they are')+'.'
-    : '';
-  // Withdrawing a revision in force cancels that document's revision in
-  // progress (PR 2B, NEW-02): said before anything happens.
-  const cancels=eligible.filter(d=>(d.status==='current'||d.status==='under-review')&&TAQA_STORE.openDraft(d.docNumber)).length;
-  const cancelNote=cancels
-    ? ' '+cancels+' revision'+(cancels===1?'':'s')+' in progress will be cancelled with '+(n===1?'it':'them')+': '+
-      (cancels===1?'it leaves':'they leave')+' the approval queues and '+(cancels===1?'is':'are')+' kept as history.'
-    : '';
-  const msg=n+' document'+s+' will be marked obsolete. Every reader will see "Withdrawn, do not use." '+
-      (n===1?'It stays':'They stay')+' in the register, but '+(n===1?'leaves':'leave')+' the live list.'+skipNote+cancelNote;
-  if(!confirm(msg))return;
-  // The revision chosen, not whichever revision of that number is in force.
-  const done=eligible.filter(d=>!!TAQA_STORE.setStatus(d.docNumber,'obsolete',d.revision)).length;
+  dlg.dataset.mode='withdraw';
+  document.getElementById('bulk-dlg-h').textContent=n?'Withdraw '+n+' document'+s:'Nothing selected can be withdrawn';
+  document.getElementById('bulk-dlg-lead').textContent=n
+    ? 'Each revision listed is marked withdrawn. Every reader will see "Withdrawn, do not use." It stays in the register with your reason, and its approval history is kept.'
+    : 'Only a revision in force can be withdrawn here. Nothing has been changed.';
+  const line=d=>{
+    const open=TAQA_STORE.openDraft(d.docNumber)||TAQA_STORE.pendingEffective(d.docNumber);
+    return bulkDocLine(d,`<span class="bq-s">${esc(TAQA_STORE.revisionLabel(d))}, ${esc(statusLabel(d))} &rarr; Withdrawn</span>`+
+      (open?`<span class="bq-s bq-why">${esc(TAQA_STORE.revisionLabel(open))}, ${esc(statusLabel(open))} &rarr; Cancelled with it</span>`:''));
+  };
+  document.getElementById('bulk-dlg-body').innerHTML=
+    (n?`<h3 class="bq-h" id="bq-wd-h">Will be withdrawn (${n})</h3><ul class="bq-list" id="bq-wd" aria-labelledby="bq-wd-h">`+eligible.map(line).join('')+'</ul>'+
+      `<label class="bq-h" for="bq-reason" style="display:block">Reason for withdrawal</label>`+
+      `<textarea id="bq-reason" class="bq-reason" maxlength="500" placeholder="Why these documents are withdrawn (recorded on each)" oninput="bulkReasonInput()"></textarea>`+
+      `<div class="bq-s"><span id="bq-reason-n">0</span> / 500, at least 20 characters</div>`:'')+
+    (left.length?`<h3 class="bq-h" id="bq-out-h">Left out (${left.length})</h3><ul class="bq-list" id="bq-out" aria-labelledby="bq-out-h">`+
+      left.map(d=>bulkDocLine(d,`<span class="bq-s">${esc(TAQA_STORE.revisionLabel(d))}, ${esc(statusLabel(d))}</span><span class="bq-s bq-why">${esc(whyNotWithdraw(d))}</span>`,'bq-out')).join('')+'</ul>':'');
+  const go=document.getElementById('bulk-dlg-go');
+  go.hidden=!n; go.disabled=true;
+  go.textContent='Withdraw '+n+' document'+s;
+  document.getElementById('bulk-dlg-cancel').textContent=n?'Cancel':'Close';
+  dlg.dataset.state='preview';
+  if(!dlg.open)dlg.showModal();
+  (n?document.getElementById('bq-reason'):document.getElementById('bulk-dlg-cancel')).focus();
+}
+function bulkReasonInput(){
+  const v=document.getElementById('bq-reason').value;
+  document.getElementById('bq-reason-n').textContent=v.length;
+  document.getElementById('bulk-dlg-go').disabled=v.trim().length<20;
+}
+function bulkWithdrawRun(){
+  const dlg=document.getElementById('bulk-dlg'), go=document.getElementById('bulk-dlg-go');
+  if(dlg.dataset.state!=='preview'||!bulkWithdrawPending.length)return;
+  const reason=(document.getElementById('bq-reason')||{}).value||'';
+  if(reason.trim().length<20)return;
+  go.disabled=true;
+  const results=bulkWithdrawPending.map(p=>{
+    let r=null;
+    try{r=TAQA_STORE.setStatus(p.num,'obsolete',p.rev,{reason,expect:{key:p.key,status:p.status}});}catch(e){r=null;}
+    const d=TAQA_STORE.byKey(p.key)||{title:p.num,docNumber:p.num,segment:''};
+    const why=r?'':(TAQA_STORE.statusError()||'You cannot withdraw this document.');
+    return {d,ok:!!r,msg:r?'Withdrawn.':'Not withdrawn. '+why};
+  });
+  bulkWithdrawPending=[];
+  const ok=results.filter(r=>r.ok).length, bad=results.length-ok;
+  dlg.dataset.state='done';
+  document.getElementById('bulk-dlg-h').textContent=bad?ok+' withdrawn, '+bad+' not withdrawn':'Withdrew '+ok+' document'+(ok===1?'':'s');
+  document.getElementById('bulk-dlg-lead').textContent=bad?'The ones not withdrawn are unchanged. The reason is given against each one.':'Each one is withdrawn with your reason. Its history is kept.';
+  document.getElementById('bulk-dlg-body').innerHTML=
+    `<ul class="bq-list" id="bq-results" aria-label="Result for each document">`+results.map(r=>
+      bulkDocLine(r.d,`<span class="bq-s bq-res" data-ok="${r.ok}">${r.ok?'&#10003; ':'&#10007; '}${esc(r.msg)}</span>`,r.ok?'bq-ok':'bq-bad')).join('')+'</ul>';
+  go.hidden=true;
+  document.getElementById('bulk-dlg-cancel').textContent='Close';
+  document.getElementById('bulk-dlg-cancel').focus();
   selectedRows.clear();
   renderCuts(); render(); drawSummary();
-  toast('Withdrew '+done+' document'+(done===1?'':'s')+'.');
+  toast(bad?ok+' withdrawn, '+bad+' not withdrawn. See the list for each document.':'Withdrew '+ok+' document'+(ok===1?'':'s')+'.');
 }
-
+function bulkGo(){
+  if(document.getElementById('bulk-dlg').dataset.mode==='withdraw')bulkWithdrawRun(); else bulkConfirmRun();
+}
 /* ── Bulk QMS confirm: preview, then a result for every document ─────────
    QMS may confirm several documents without opening each one, but never
    blind. Before anything happens the dialog lists exactly which documents
@@ -1177,11 +1240,30 @@ function areaOf(d){
 function nextApprover(d){
   return TAQA_APPROVAL.approverFor(d)||'the approver named for its type';
 }
+/* Issued is the date a revision became valid for use, set when it is
+   released (PI-21): a draft has none yet, and an approved revision shows the
+   date it takes effect. */
+function issuedCell(d){
+  if(d.status==='draft')return '<span class="dat nil">Not issued yet</span>';
+  if(d.status==='approved')return `<span class="dat">${esc(fmt(d.issueDate)||'')} <small>(effective)</small></span>`;
+  return `<span class="dat${d.issueDate?'':' nil'}">${fmt(d.issueDate)||'Not recorded'}</span>`;
+}
+/* A withdrawal says what happened: by whom, when, why, and what the record
+   was before (PI-11). A record withdrawn before this was recorded says so
+   rather than inventing it. */
+function withdrawnNote(d){
+  const what=d.cancelled?'Cancelled, never in force.':d.withdrawnFromStatus==='draft'?'Withdrawn before approval, never in force.'
+    :d.withdrawnFromStatus==='approved'?'Withdrawn before it took effect, never in force.':'Withdrawn. Do not use.';
+  const who=d.cancelled?(d.cancelledBy?' By '+esc(d.cancelledBy):'')+(d.cancelledDate?' on '+esc(fmt(d.cancelledDate)):'')
+    :(d.withdrawnBy?' By '+esc(d.withdrawnBy):'')+(d.withdrawnDate?' on '+esc(fmt(d.withdrawnDate)):'');
+  const why=d.cancelled?(d.cancelledReason||''):(d.withdrawnReason||(d.withdrawnAt?'':'Who withdrew it and why was not recorded (withdrawn before RISE kept a record).'));
+  return `<div class="dw-note out" id="dw-withdrawn"><b>${what}</b>${who?' '+who.trim()+'.':''} ${esc(why)}${d.status==='obsolete'&&!d.cancelled&&d.withdrawnFromStatus!=='draft'&&d.withdrawnFromStatus!=='approved'?' Destroy or mark any printed copy.':''}</div>`;
+}
 function whyNotQms(d){
   if(d.cancelled)return d.cancelledReason||'Cancelled, so there is nothing to confirm.';
   if(d.status==='obsolete'||d.status==='superseded')return 'Withdrawn, so there is nothing to confirm.';
   if(d.status!=='draft')return 'Already in force ('+(LABEL[d.status]||d.status)+'), so there is no QMS check to do.';
-  if(d.rejected)return 'Sent back to its author. It comes back to QMS when it is resubmitted.';
+  if(d.rejected)return 'Returned to its author'+(d.rejectedReason?': '+String(d.rejectedReason).replace(/[.\s]+$/,'')+'.':'.')+' A corrected filing comes to QMS as its next attempt.';
   if(TAQA_APPROVAL.stageOf(d)==='director')return 'Already checked by QMS. It is waiting on '+nextApprover(d)+' for final approval.';
   const sep=TAQA_APPROVAL.separationReason&&TAQA_APPROVAL.separationReason(d);
   if(sep)return sep;
@@ -1216,7 +1298,7 @@ function bulkConfirmPreview(chosen){
   go.hidden=!n; go.disabled=false;
   go.textContent='Confirm '+n+' document'+s;
   document.getElementById('bulk-dlg-cancel').textContent=n?'Cancel':'Close';
-  dlg.dataset.state='preview';
+  dlg.dataset.state='preview'; dlg.dataset.mode='confirm';
   if(!dlg.open)dlg.showModal();
   (n?go:document.getElementById('bulk-dlg-cancel')).focus();
 }
@@ -1262,7 +1344,7 @@ function bulkConfirmRun(){
 }
 function bulkDlgClose(){
   const dlg=document.getElementById('bulk-dlg');
-  bulkPending=[];
+  bulkPending=[]; bulkWithdrawPending=[];
   if(dlg.open)dlg.close();
 }
 
@@ -1288,8 +1370,10 @@ function openDoc(d){
   // other document, gets the register record below exactly as before.
   if(TAQA_APPROVAL.canCountersign(d)){wbPaint(d);return;}
   let notes='';
-  if(d.status==='obsolete')notes+='<div class="dw-note out"><b>Withdrawn. Do not use.</b> Destroy or mark any printed copy. Take the current document from SCORE.</div>';
-  else if(d.status==='superseded')notes+=`<div class="dw-note out"><b>Superseded by ${esc(d.supersededBy||'a later revision')}.</b> Use the current revision from SCORE.</div>`;
+  if(d.status==='obsolete')notes+=withdrawnNote(d);
+  else if(d.status==='superseded')notes+=`<div class="dw-note out"><b>Superseded by ${esc(d.supersededBy||'a later revision')}${d.supersededDate?' on '+esc(fmt(d.supersededDate)):''}.</b> Use the current revision from SCORE.</div>`;
+  else if(d.status==='approved')notes+=`<div class="dw-note"><b>Approved, not yet effective.</b> It takes effect on ${esc(fmt(d.issueDate))}; until then the revision in force stays current.</div>`;
+  else if(d.status==='draft'&&d.rejected)notes+=`<div class="dw-note out" id="dw-returned"><b>Returned${d.rejectedBy?' by '+esc(d.rejectedBy):''}${d.rejectedDate?' on '+esc(fmt(d.rejectedDate)):''}.</b> ${esc(d.rejectedReason||'No reason recorded.')} It is history and carries no authority.</div>`;
   else if(d.status==='draft')notes+='<div class="dw-note"><b>Draft.</b> Approval is not complete, so this carries no authority.</div>';
   // QMS opening a document it may not check: say why, rather than leave the
   // Confirm and Reject buttons silently missing (PI-31).
@@ -1365,7 +1449,12 @@ function sameTitleInArea(d){
   const key=String(d.title||'').trim().toLowerCase();
   if(!key)return [];
   return TAQA_STORE.all().filter(x=>x.docNumber!==d.docNumber&&x.segment===d.segment&&
-    String(x.title||'').trim().toLowerCase()===key&&x.status!=='obsolete'&&x.status!=='superseded');
+    String(x.title||'').trim().toLowerCase()===key&&x.status!=='obsolete'&&x.status!=='superseded'&&!(x.status==='draft'&&x.rejected));
+}
+// Earlier attempts at this record that were returned: shown as history, not
+// as a duplicate (PI-24).
+function returnedAttempts(d){
+  return TAQA_STORE.revisionsOf(d.docNumber).filter(x=>x.rejected&&x.status==='draft'&&String(x.revision||'')===String(d.revision||'')&&TAQA_STORE.recordKey(x)!==TAQA_STORE.recordKey(d));
 }
 /* One deliberate action is one decision (PR 2B, PI-07). Focus never lands on
    a decision button by itself: a newly painted document focuses its heading
@@ -1395,6 +1484,7 @@ function wbPaint(d){
     `<div class="wb-pos" id="wb-pos" tabindex="-1">QMS check &middot; ${pos+1} of ${q.length} waiting on QMS</div>`+
     `<div class="dw-note"><b>Waiting on your QMS check.</b> Confirming sends it to ${esc(nextApprover(d))} for final approval. It is not in force until then.</div>`+
     (prov?`<div class="dw-note"><b>Provisional number.</b> ${esc(A.numberNote(d)||'')}</div>`:'')+
+    returnedAttempts(d).map(x=>`<div class="dw-note" id="wb-earlier"><b>Earlier attempt returned${x.rejectedBy?' by '+esc(x.rejectedBy):''}${x.rejectedDate?' on '+esc(fmt(x.rejectedDate)):''}:</b> ${esc(x.rejectedReason||'no reason recorded')}</div>`).join('')+
     (twins.length?`<div class="dw-note out" id="wb-twins"><b>Same title already in this area:</b> ${twins.map(x=>esc(x.docNumber)+' ('+esc(LABEL[x.status]||x.status)+')').join(', ')}. Check this is not a duplicate.</div>`:'')+
     '<div class="dw-s">What to check</div>'+
     dwRow('Number',esc(d.docNumber)+(prov?' (provisional)':''),'TQ-QHSE-S001 5.3',true)+

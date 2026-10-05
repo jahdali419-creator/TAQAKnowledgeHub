@@ -192,7 +192,7 @@ test.describe('translations follow their source', () => {
 
   test('withdrawing a source withdraws its translation with it', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, clearAppState, setRole, 'qms');
-    expect(!!(await page.evaluate((n) => TAQA_STORE.setStatus(n, 'obsolete'), SRC2.n))).toBe(true);
+    expect(!!(await page.evaluate((n) => TAQA_STORE.setStatus(n, 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' }), SRC2.n))).toBe(true);
     expect((await family(page, SRC2.n + '-AR')).map((r) => r.status)).toEqual(['obsolete']);
   });
 });
@@ -205,7 +205,7 @@ test.describe('every action lands on the revision it means', () => {
     await fileRevision(page, DOC.n);
     await setRole('qms', SEG);
     // The open revision, named exactly: the revision in force is untouched.
-    expect(!!(await page.evaluate(({ n, r }) => TAQA_STORE.setStatus(n, 'obsolete', r), { n: DOC.n, r: DOC.next }))).toBe(true);
+    expect(!!(await page.evaluate(({ n, r }) => TAQA_STORE.setStatus(n, 'obsolete', r, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' }), { n: DOC.n, r: DOC.next }))).toBe(true);
     expect((await family(page, DOC.n)).map((r) => [r.rev, r.status])).toEqual([[DOC.rev, 'current'], [DOC.next, 'obsolete']]);
 
     // Again with a fresh revision: by number, it is the revision in force that
@@ -216,13 +216,18 @@ test.describe('every action lands on the revision it means', () => {
     await page.evaluate(() => localStorage.removeItem('taqa-uploads-v1'));
     await fileRevision(page, DOC.n);
     await setRole('qms', SEG);
-    expect(!!(await page.evaluate((n) => TAQA_STORE.setStatus(n, 'obsolete'), DOC.n))).toBe(true);
+    expect(!!(await page.evaluate((n) => TAQA_STORE.setStatus(n, 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' }), DOC.n))).toBe(true);
     expect((await family(page, DOC.n)).map((r) => [r.rev, r.status, r.stage])).toEqual([[DOC.rev, 'obsolete', null], [DOC.next, 'obsolete', null]]);
     expect(await page.evaluate(({ n, r }) => { const d = TAQA_STORE.findRev(n, r); return [!!d.cancelled, d.cancelledReason]; }, { n: DOC.n, r: DOC.next }))
       .toEqual([true, 'Cancelled because the document family was withdrawn.']);
   });
 
-  test('the Master List withdraws the row that was ticked, not its sibling revision', async ({ page, gotoApp, setRole, clearAppState }) => {
+  // One ticked row is one exact record (PR 2C-1, PI-10). Ticking the
+  // revision in progress withdraws nothing as though it were the document
+  // in force: it is left out with the reason. Ticking the revision in force
+  // withdraws exactly that one, and the revision in progress is cancelled
+  // with it (NEW-02), never the other way round.
+  test('the Master List acts on the row that was ticked, never its sibling revision', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, clearAppState, setRole, 'employee');
     await fileRevision(page, DOC.n, DOC.t + ', revised');
     await setRole('qms', SEG);
@@ -232,10 +237,22 @@ test.describe('every action lands on the revision it means', () => {
     await expect(page.locator(`#rows .row-chk[data-key="${DOC.n}|${DOC.rev}"]`)).toHaveCount(1);
     await draftBox.check();
     await expect(page.locator('#bulk-count')).toHaveText('1 document selected');
-    page.once('dialog', (d) => d.accept());
     await page.locator('#bulk-withdraw').click();
+    await expect(page.locator('#bulk-dlg-h')).toHaveText('Nothing selected can be withdrawn');
+    await expect(page.locator('#bq-out')).toContainText('A revision in progress is not withdrawn from here');
+    await page.locator('#bulk-dlg-cancel').click();
+    expect((await family(page, DOC.n)).map((r) => [r.rev, r.status])).toEqual([[DOC.rev, 'current'], [DOC.next, 'draft']]);
+
+    await draftBox.uncheck();
+    await page.locator(`#rows .row-chk[data-key="${DOC.n}|${DOC.rev}"]`).check();
+    await page.locator('#bulk-withdraw').click();
+    await expect(page.locator('#bq-wd')).toContainText('Rev ' + DOC.rev + ', Current → Withdrawn');
+    await expect(page.locator('#bq-wd')).toContainText('Rev ' + DOC.next + ', Draft → Cancelled with it');
+    await page.fill('#bq-reason', 'Withdrawn by the revision-control regression test.');
+    await page.locator('#bulk-dlg-go').click();
     await expect(page.locator('#toast')).toContainText('Withdrew 1 document');
-    expect((await family(page, DOC.n)).map((r) => [r.rev, r.status])).toEqual([[DOC.rev, 'current'], [DOC.next, 'obsolete']]);
+    expect((await family(page, DOC.n)).map((r) => [r.rev, r.status])).toEqual([[DOC.rev, 'obsolete'], [DOC.next, 'obsolete']]);
+    expect(await page.evaluate((n) => TAQA_STORE.findRev(n, '2.0').cancelled, DOC.n)).toBe(true);
   });
 
   test('check and approval by number land on the open revision; search and Your submissions link to it', async ({ page, gotoApp, setRole, clearAppState }) => {

@@ -246,6 +246,8 @@ The evidence points here rather than to the next item on the old roadmap. The tw
 - **PI-07, PI-06, PI-12 (prototype part), NEW-05** and **TB-13** as specified above.
 - **Not in 2B:** the PI-06 number-validation part (PI-14) and the rest of PI-24 stay in 2C; PI-12's file and hash binding is production work.
 
+**Status after PR 2C-1 (owner's decisions of 5 Oct 2026).** PI-11 (withdrawal record and required reason), PI-10 (bulk withdrawal on exact records), PI-21 (approval and effective dates, with a future effective date), PI-24 (Returned state; a returned first issue filed again keeps its number as its next attempt), PI-13 (advisory duplicate warnings with reasons, file fingerprints recorded) and PI-14 (number validation for new filings) are addressed in the prototype; tests in `tests/record-truth.spec.js`, rules in `BUSINESS-RULES.md` §7, §8, §16, §19. NEW-04, PI-32 and PI-54 (delegation) remain for 2C-2.
+
 **After 2B, in this order** (proposed, for your decision later):
 1. **2C: Record truth.** PI-11 withdrawal record and honest trail; PI-10 bulk withdraw over drafts; PI-21 release dates; the rest of PI-24 (Returned state, not pending); PI-13 duplicate detection; PI-14 number validation; NEW-04 delegation-naming guard; PI-32 delegate withdraw/type limits; PI-54.
 2. **2D: Phone and installed-app reliability.** PI-08 drawer close; PI-18 Back; PI-30 update reload; PI-48 offline bars; PI-26 / PI-28 honest offline state; PI-61, PI-51; plus TB-04 / TB-06 tests and adding a WebKit job to CI (TB-05).

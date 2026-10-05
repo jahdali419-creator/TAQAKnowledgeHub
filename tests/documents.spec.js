@@ -351,7 +351,7 @@ test.describe('documents.html, security regression (stored XSS)', () => {
 });
 
 test.describe('documents.html, withdraw', () => {
-  test('withdraw is gated behind confirm(): dismissing leaves the document untouched, accepting withdraws it', async ({
+  test('withdraw is gated behind a dialog asking for a reason: cancelling leaves the document untouched, withdrawing records the reason', async ({
     page,
     gotoApp,
     setRole,
@@ -376,18 +376,13 @@ test.describe('documents.html, withdraw', () => {
     await expect(row).toHaveCount(1);
     const withdrawBtn = row.locator('.pub-remove-btn');
 
-    // Dismiss: nothing should change.
-    let dialogMessage = null;
-    page.once('dialog', (d) => {
-      dialogMessage = d.message();
-      d.dismiss();
-    });
+    // Cancel: nothing should change. The dialog names the exact revision
+    // and asks for a reason (PR 2C-1, PI-11).
     await withdrawBtn.click();
-    await page.waitForTimeout(300);
-    // The confirm() text is built from the doc-title cell's full textContent
-    // (doc number + title, see removeDoc()), so it leads with the doc number.
-    expect(dialogMessage).toContain('Withdraw "TEST-WITHDRAW-001');
-    expect(dialogMessage).toContain('Regression Withdraw Test Document');
+    await expect(page.locator('#wd-dlg-h')).toHaveText('Withdraw TEST-WITHDRAW-001 Rev 1.0?');
+    await expect(page.locator('#wd-dlg-doc')).toHaveText('Regression Withdraw Test Document');
+    await page.locator('#wd-dlg .wd-cancel').click();
+    await expect(page.locator('#wd-dlg')).toBeHidden();
     await expect(row).toHaveCount(1); // still there
     let status = await page.evaluate(() => TAQA_STORE.findDoc('TEST-WITHDRAW-001').status);
     expect(status).toBe('current');
@@ -395,12 +390,15 @@ test.describe('documents.html, withdraw', () => {
     // Accept: the document is withdrawn (status -> obsolete) and the row
     // leaves this "live" list, matching what removeDoc() + buildAllDocs()
     // do in the code (documents.html only shows status current/under-review).
-    page.once('dialog', (d) => d.accept());
     await withdrawBtn.click();
-    await expect(page.locator('#dash-toast-msg')).toHaveText('Withdrawn. Marked obsolete in the register.');
+    await expect(page.locator('#wd-go')).toBeDisabled();             // no reason, no withdrawal
+    await page.fill('#wd-reason', 'Replaced by the revised regression procedure.');
+    await page.locator('#wd-go').click();
+    await expect(page.locator('#dash-toast-msg')).toHaveText('Withdrawn. Marked obsolete in the register, with your reason.');
     await expect(page.locator('#pub-docs-body tr', { hasText: 'Regression Withdraw Test Document' })).toHaveCount(0);
     status = await page.evaluate(() => TAQA_STORE.findDoc('TEST-WITHDRAW-001').status);
     expect(status).toBe('obsolete');
+    expect(await page.evaluate(() => TAQA_STORE.findDoc('TEST-WITHDRAW-001').withdrawnReason)).toBe('Replaced by the revised regression procedure.');
 
     assertNoConsoleErrors(consoleErrors);
   });

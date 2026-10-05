@@ -910,6 +910,15 @@ const docRev = (params.get('rev') || '').replace(/[^A-Za-z0-9.\-]/g,'').slice(0,
 // the desk or the Workbench names the record itself.
 const docRid = (params.get('rid') || '').replace(/[^A-Za-z0-9@.#_\-]/g,'').slice(0,160);
 const _revLabel = r => (typeof TAQA_STORE !== 'undefined' && TAQA_STORE.revisionLabel) ? TAQA_STORE.revisionLabel(r) : 'Rev ' + r.revision;
+// "on 5 Oct 2026 by QMS: <reason>", from the withdrawal record (PI-11). A
+// record withdrawn before RISE kept one says so instead of inventing it.
+const _withdrawnBy = r => r.withdrawnAt
+  ? ' on ' + _fmt(r.withdrawnDate || r.withdrawnAt) + (r.withdrawnBy ? ' by ' + r.withdrawnBy : '') + (r.withdrawnReason ? ': \u201c' + r.withdrawnReason + '\u201d' : '')
+  : ' (who withdrew it and why was not recorded)';
+// Issued is the date the revision became valid for use (PI-21).
+const _issued = r => r.status === 'draft' ? 'Not issued yet'
+  : r.status === 'approved' ? _fmt(r.issueDate) + ' (effective, not yet in force)'
+  : _fmt(r.issueDate);
 function _liveRec(n){
   if (!n) return null;
   if (docRid && typeof TAQA_STORE !== 'undefined' && TAQA_STORE.byKey) {
@@ -1034,8 +1043,12 @@ if (_rec && _rec.title && (!_denied || _ownDraft) && _rec.title !== docTitle) {
 
 if (_denied) {
   const R = TAQA_ROLES[_roleKey];
+  const inForce = (_rec.status === 'approved' && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(_rec.docNumber) : null;
   const reason = _rec.status === 'draft'
     ? 'This document is a draft. It has not completed approval, carries no authority, and is visible only to its owner and the QMS function. API Q2 4.4.3 b).'
+    : _rec.status === 'approved'
+    ? 'This revision is approved and takes effect on ' + esc(_fmt(_rec.issueDate)) + '. Until then it is not in force' +
+      (inForce && (inForce.status === 'current' || inForce.status === 'under-review') ? ': ' + esc(_rec.docNumber) + ' Rev ' + esc(inForce.revision) + ' is the revision to use' : '') + '.'
     : 'This document is classified ' + esc(String(_rec.classification).toUpperCase()) +
       '. Your role (' + esc(R.label) + ') has access to ' + esc(R.classifications.join(', ')) + ' documents. ISO 9001 7.5.3.1 b).';
   /* A draft is withheld because it carries no authority yet, not because the
@@ -1053,7 +1066,8 @@ if (_denied) {
     stat = 'Returned by ' + (_rec.rejectedBy || 'the reviewer');
     body = 'Returned by ' + esc(_rec.rejectedBy || 'the reviewer') +
       (_rec.rejectedDate ? ' on ' + esc(_fmt(_rec.rejectedDate)) : '') +
-      ': “' + esc(_rec.rejectedReason || 'no reason recorded') + '”. Revise it and file it again from Upload.';
+      ': “' + esc(_rec.rejectedReason || 'no reason recorded') + '”. Revise it and ' +
+      '<a href="upload.html?refile=' + encodeURIComponent(TAQA_STORE.recordKey(_rec)) + '">file it again</a> as its next attempt.';
   } else if (isDraft) {
     head = 'Submitted for approval, not in force yet';
     stat = 'Draft · waiting on ' + (waiting || 'approval');
@@ -1092,7 +1106,7 @@ if (_denied) {
     // escaped here; only the markup this page builds (due, score) is not (PI-05).
     num:   cell('Document number', _rec.docNumber ? esc(_rec.docNumber) : null, 'TQ-QHSE-S001 5.3'),
     rev:   cell('Revision',        _rec.revision ? esc(_revLabel(_rec)) : null, 'API Q2 4.4.3 d)'),
-    iss:   cell('Issued',          _fmt(_rec.issueDate), 'API Q2 4.4.3 d)'),
+    iss:   cell('Issued',          _issued(_rec), 'API Q2 4.4.3 d)'),
     appd:  cell('Approved',        _fmt(_rec.approvedDate), 'API Q2 4.4.3 b)'),
     own:   cell('Document owner',  t.owner ? esc(t.owner) : null, 'API Q2 4.4.3 a) · role'),
     appr:  cell('Approval authority', MA.approver(_rec) ? esc(MA.approver(_rec)) : null, 'API Q2 4.4.3 a) · role'),
@@ -1135,7 +1149,10 @@ if (_denied) {
     // (API Q2 4.4.3 c)). An employee sees the same "Current" status a
     // controller sees on the same document the day before it fell due.
     const st = _rec.cancelled               ? ['stop','Cancelled, never in force']
+             : _rec.status === 'obsolete' && (_rec.withdrawnFromStatus === 'draft' || _rec.withdrawnFromStatus === 'approved') ? ['stop','Withdrawn, never in force']
              : _rec.status === 'obsolete'   ? ['stop','Withdrawn, do not use']
+             : _rec.status === 'approved'   ? ['info','Approved, effective ' + _fmt(_rec.issueDate)]
+             : _rec.status === 'draft' && _rec.rejected ? ['warn','Returned, not in force']
              : _rec.status === 'superseded' ? ['warn','Superseded']
              : _rec.status === 'draft'      ? ['info','Draft, not approved']
              :                                ['ok','Current, OK to use'];
@@ -1145,7 +1162,7 @@ if (_denied) {
       '<div class="meta-brief">' +
         item('Status', '<span class="mb-state ' + st[0] + '"><i aria-hidden="true"></i>' + st[1] + '</span>') +
         item('Revision', _rec.revision ? esc(_revLabel(_rec)) : null) +
-        item('Issued', _fmt(_rec.issueDate)) +
+        item('Issued', _issued(_rec)) +
         item('Owner', t.owner ? esc(t.owner) : null) +
       '</div>' +
       '<details class="meta-more">' + FOLD_SUM + '<div class="meta-grid-in">' + fullRecord + '</div></details>';
@@ -1157,12 +1174,25 @@ if (_denied) {
     // A revision in progress when its family was withdrawn (PR 2B, NEW-02).
     B.push(['obsolete','Cancelled. Never in force.',
       (_rec.cancelledReason || 'Cancelled.') + ' It was never approved, carries no authority and cannot be approved now. It is kept as history only.']);
+  else if (_rec.status === 'obsolete' && (_rec.withdrawnFromStatus === 'draft' || _rec.withdrawnFromStatus === 'approved'))
+    // Withdrawn before it was ever in force (PI-11).
+    B.push(['obsolete','Withdrawn. Never in force.',
+      'Withdrawn ' + (_rec.withdrawnFromStatus === 'approved' ? 'before it took effect' : 'before approval') + _withdrawnBy(_rec) +
+      '. It carries no authority and is kept as history only.']);
   else if (_rec.status === 'obsolete')
     B.push(['obsolete','Obsolete. Do not use.',
-      'This document has been withdrawn and must not be used for any activity. Destroy or mark any printed copy. Obtain the current document from SCORE.']);
+      'This document has been withdrawn' + _withdrawnBy(_rec) + ' and must not be used for any activity. Destroy or mark any printed copy. Obtain the current document from SCORE.']);
+  else if (_rec.status === 'approved')
+    B.push(['draft','Approved, not yet effective.',
+      'Approved on ' + _fmt(_rec.approvedDate) + (_rec.approvedBy ? ' by ' + _rec.approvedBy : '') + '. It takes effect on ' + _fmt(_rec.issueDate) +
+      '; until then the revision in force stays current and is the one to use.']);
+  else if (_rec.status === 'draft' && _rec.rejected)
+    B.push(['draft','Returned. Not in force.',
+      'Returned' + (_rec.rejectedBy ? ' by ' + _rec.rejectedBy : '') + (_rec.rejectedDate ? ' on ' + _fmt(_rec.rejectedDate) : '') + ': ' +
+      (_rec.rejectedReason || 'no reason recorded') + '. This attempt is history; a corrected filing is its next attempt.']);
   else if (_rec.status === 'superseded')
     B.push(['superseded','Superseded. A newer revision exists.',
-      'This revision has been replaced by ' + (_rec.supersededBy || 'a later revision') + '. Use the current revision from SCORE.']);
+      'This revision has been replaced by ' + (_rec.supersededBy || 'a later revision') + (_rec.supersededDate ? ' on ' + _fmt(_rec.supersededDate) : '') + '. Use the current revision from SCORE.']);
   else if (_rec.status === 'draft')
     B.push(['draft','Draft. Not approved for use.',
       'This document has not completed approval and carries no authority. It is shown for review only.']);
@@ -1195,9 +1225,11 @@ if (_denied) {
   // API Q2 4.4.3: a withdrawn document must be prevented from unintended use.
   // Downloading, printing or pinning it offline all create an uncontrolled copy,
   // so those actions are disabled rather than merely warned about.
-  if (withdrawn || _rec.status === 'draft') {
+  if (withdrawn || _rec.status === 'draft' || _rec.status === 'approved') {
     var why = _rec.status === 'draft'
       ? 'Not approved for use, so download is disabled'
+      : _rec.status === 'approved'
+      ? 'Not in force until ' + _fmt(_rec.issueDate) + ', so download is disabled'
       : 'Withdrawn document. Download is disabled to prevent an uncontrolled copy.';
     ['dl-btn','pdf-dl-btn','pin-btn','qref-open-btn','print-btn'].forEach(function(id){
       var el = document.getElementById(id);
@@ -1429,6 +1461,16 @@ function renderApprovalTrail() {
     rows.push({icon: iconPending, pending: true, name: _rec.cancelledBy || 'Not recorded',
       role: 'Cancelled, never approved: ' + (_rec.cancelledReason || 'no reason recorded'),
       date: _when(_rec.cancelledAt, _rec.cancelledDate) || 'Not recorded'});
+  } else if (_rec.status === 'obsolete' && (_rec.withdrawnFromStatus === 'draft' || _rec.withdrawnFromStatus === 'approved')) {
+    // Withdrawn before it was in force: only the steps actually taken (PI-11).
+    if (_rec.countersignedBy)
+      rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy, role: 'QMS conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Recorded'});
+    if (_rec.approvedBy)
+      rows.push({icon: iconOk, pending: false, name: _rec.approvedBy, role: 'Final approval · ' + approverRole, date: _when(_rec.approvedAt, _rec.approvedDate) || 'Recorded'});
+  } else if (_rec.status === 'approved') {
+    rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy || 'QMS / Document Controller', role: 'QMS conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Recorded'});
+    rows.push({icon: iconOk, pending: false, name: _rec.approvedBy || approverRole, role: 'Final approval · ' + approverRole, date: _when(_rec.approvedAt, _rec.approvedDate) || 'Recorded'});
+    rows.push({icon: iconPending, pending: true, name: 'Takes effect', role: 'Effective date', date: _fmt(_rec.issueDate)});
   } else if (stage === 'qms') {
     rows.push({icon: iconPending, pending: true, name: 'Awaiting QMS conformance check', role: 'QMS / Document Controller', date: 'Not yet signed'});
     rows.push({icon: iconPending, pending: true, name: 'Awaiting final approval', role: approverRole, date: 'Not yet signed'});
@@ -1439,6 +1481,13 @@ function renderApprovalTrail() {
     rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy || 'QMS / Document Controller', role: 'QMS conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Not recorded'});
     rows.push({icon: iconOk, pending: false, name: _rec.approvedBy || approverRole, role: 'Final approval · ' + approverRole, date: _when(_rec.approvedAt, _rec.approvedDate) || 'Not recorded'});
   }
+  // What happened after release, from the record itself.
+  if (_rec.status === 'superseded' && _rec.supersededDate)
+    rows.push({icon: iconOk, pending: false, name: 'Superseded by ' + (_rec.supersededBy || 'a later revision'), role: 'Replaced', date: _fmt(_rec.supersededDate)});
+  if (_rec.status === 'obsolete' && !_rec.cancelled)
+    rows.push({icon: iconPending, pending: true, name: _rec.withdrawnBy || 'Not recorded',
+      role: 'Withdrawn: ' + (_rec.withdrawnReason || 'reason not recorded'),
+      date: _rec.withdrawnAt ? _when(_rec.withdrawnAt, _rec.withdrawnDate) : 'Not recorded'});
   body.innerHTML = rows.map(function (r) {
     return '<div class="appr-row' + (r.pending ? ' pending' : '') + '">' +
       '<span class="appr-icon">' + r.icon + '</span>' +
@@ -1464,7 +1513,7 @@ document.getElementById('pdf-toolbar-label').textContent = docTitle + '.pdf';
   document.getElementById('pp-seg').textContent = segInfo.name;
   // The cover says plainly when this is not a document in force.
   var st = (_rec && !_denied) ? _rec.status : null;
-  var flag = (st === 'obsolete' && _rec.cancelled) ? ['stop','Cancelled'] : st === 'obsolete' ? ['stop','Withdrawn'] : st === 'superseded' ? ['warn','Superseded'] : st === 'draft' ? ['info','Draft'] : null;
+  var flag = (st === 'obsolete' && _rec.cancelled) ? ['stop','Cancelled'] : st === 'obsolete' ? ['stop','Withdrawn'] : st === 'superseded' ? ['warn','Superseded'] : st === 'draft' ? ['info','Draft'] : st === 'approved' ? ['info','Not yet effective'] : null;
   if (flag) mk.insertAdjacentHTML('afterend', '<span class="pp-flag ' + flag[0] + '">' + flag[1] + '</span>');
   var num = (_rec && _rec.docNumber) || docId || '';
   var rev = (_rec && !_denied && _rec.revision) ? _revLabel(_rec) : '';

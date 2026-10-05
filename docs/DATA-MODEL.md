@@ -40,14 +40,18 @@ What the frontend holds today, where, and what each object should become. No dat
 | `revision` | string | server | |
 | `supersedes`, `supersededBy` | docNumber? | server | Revision chain |
 | `classification` | `internal` / `confidential` / `restricted` | submitter within rules, validated | Policy always `internal` |
-| `status` | `draft` / `current` / `under-review` / `superseded` / `obsolete` | **server** (workflow transitions only) | |
+| `status` | `draft` / `approved` / `current` / `under-review` / `superseded` / `obsolete` | **server** (workflow transitions only) | `approved` = approved, not yet effective (PI-21) |
 | `approvalStage` | `qms` / `director` / null | **server** | Stage `director` = final approval, for both workflows |
-| `issueDate`, `approvedDate`, `nextReviewDate`, `reviewOverdue` | date / bool | **server** | Review date derives from the type's review cycle |
+| `issueDate`, `approvedDate`, `nextReviewDate`, `reviewOverdue` | date / bool | **server** | Set at release, never at filing (PI-21). `issueDate` is the effective date (default the approval date, never earlier); review date = effective + the type's review cycle |
 | `submittedBy`, `submittedAt` | user ref, timestamp | **server** | From the token and server clock |
 | `countersignedBy`, `countersignedAt`, `countersignedDate` | user ref, timestamp | **server** | QMS check |
 | `approvedBy`, `approvedAt` | user ref, timestamp | **server** | Final approval. For a delegate: the delegate, plus a reference to the delegation |
 | `rejected`, `rejectedAtStage`, `rejectedBy`, `rejectedAt`, `rejectedDate`, `rejectedReason` | | **server** (reason from the actor) | |
 | `recordId`, `attempt` | string, number | **server** | PR 2B. Permanent identity of one filing (production: item ID + version) and which attempt at a revision it is; a returned revision filed again is the same revision, next attempt |
+| `withdrawnBy`, `withdrawnAt`, `withdrawnDate`, `withdrawnReason`, `withdrawnFromStatus` | | **server** (reason from the actor) | PR 2C-1, PI-11. The withdrawal event; nothing else on the record changes |
+| `supersededAt`, `supersededDate`, `tookEffectAt` | timestamp / date | **server** | PR 2C-1. When a revision was replaced, and when an approved revision took effect |
+| `files[].sha256` | hex | **server** (computed at upload) | PR 2C-1, PI-13. Exact-file duplicate warning |
+| `resubmitOf` | record key | client names it, **server** validates | PR 2C-1, PI-24. The returned attempt this filing replaces |
 | `cancelled`, `cancelledReason`, `cancelledBy`, `cancelledAt`, `cancelledDate` | | **server** | PR 2B. A revision in progress cancelled because its document family was withdrawn (`status = obsolete`) |
 | `numberStatus` | `conformant` / `provisional` | server | |
 | `files[]` | attachment refs | server | See Attachment |
