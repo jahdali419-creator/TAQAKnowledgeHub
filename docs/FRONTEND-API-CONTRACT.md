@@ -106,8 +106,10 @@ reason the door pill carries that disclaimer.
 | `TAQA_ROLE.canManage(areaId)` | Whether the signed-in user may act as an area's desk (its queue, contributors, published list) |
 | `TAQA_ROLE.canManage(doc)` | Whether the signed-in user may **withdraw** a document or **edit its details**: `PATCH /documents/{docNumber}` and `PATCH …/status` must enforce it. QMS: any document in any area. Otherwise the document's area must be the caller's **and** its department must be: an Operations document is its area's Segment Director's, a maintenance document (department `maintenance`, or type Maintenance Bulletin) is its area's Maintenance Manager's. Another area's Director or Maintenance Manager manages neither. The same split as final approval |
 | `TAQA_APPROVAL.canApprove(doc, roleKey)` / `canCountersign(doc, roleKey)` / `TAQA_STORE.reject(doc, reason)` | The exact rule a `POST /documents/{docNumber}/approve`, `/countersign` or `/reject` endpoint must enforce. **Order matters and was changed this round**: QMS checks conformance first (`countersign`, despite the name — it is a gate, not a co-signature after the fact), then the named approver (Segment Director for an SOP/Standard) gives final approval, and that is what releases the document. Either step can instead reject with a required reason, which sends the draft back to whoever submitted it |
-| `TAQA_DELEGATION.grant(g)` / `.revoke(id)` | `POST /delegations`, `DELETE /delegations/{id}`. The grantor is the caller and the area is the one they hold; a request naming another role or area is refused. Only the grantor, not acting under a delegation, may revoke |
-| `TAQA_DELEGATION.current()` / `.actAs()` | "Acting as" is fully client-side today (a note in the code says so explicitly: "the prototype has no signed-in identity, so acting as a delegate is a..."). A real delegation needs a real record of who granted it, to whom, until when, and with what scope — an audit trail, not a `localStorage` key |
+| `TAQA_DELEGATION.grant(g)` / `.revoke(id)` | `POST /delegations`, `POST /delegations/{id}/revoke` (never a delete: the grant stays as history). The grantor is the caller and the area is the one they hold; a request naming another role, area or department is refused. `g`: `{to, reason (≥ 20), from, until (calendar dates, from ≥ today, ≤ 90 days inclusive), includesApproval, includesManagement, docTypes?}`. Only the grantor, not acting under a delegation, may revoke; revocation records `revokedBy`, `revokedById`, `revokedAt` (PI-32, PI-54) |
+| `TAQA_DELEGATION.state(d)` | `active`, `scheduled`, `expired`, `revoked`, from calendar dates and revocation; the server evaluates it on its business date |
+| `TAQA_ROLE.identity()` | The prototype's actor identity (role and area). Production: the caller's Entra object id, which every signature and separation check uses (NEW-04) |
+| `TAQA_DELEGATION.current()` / `.actAs()` | Valid only in the session that granted it (same role, area and grantor identity). "Acting as" is fully client-side today (a note in the code says so explicitly: "the prototype has no signed-in identity, so acting as a delegate is a..."). A real delegation needs a real record of who granted it, to whom, until when, and with what scope — an audit trail, not a `localStorage` key |
 
 ### 3.1 Rules the API must enforce, decided by the owner (1 Oct 2026)
 
@@ -137,6 +139,15 @@ reason the door pill carries that disclaimer.
 20. **Approval and effective dates are the server's** (PI-21): `approvedDate/At` at final approval; `issueDate` = effective date, default the approval date, never earlier; status `approved` until a scheduled flow promotes it; `nextReviewDate` = effective + cycle. Filings carry no dates.
 21. **Returned filings** (PI-24): status Returned, out of every pending count; filing again reuses the number and revision as the next attempt.
 22. **Number format for new filings** (PI-14) and **file-hash duplicate warnings** (PI-13), as in `BUSINESS-RULES.md` §19.
+
+### 3.6 Delegation integrity (PR 2C-2: NEW-04, PI-32, PI-54). PRODUCTION CONTROL REQUIRED
+
+23. **Identity, not names.** Every signature stores the actor's Entra object id beside the display name (`submittedById`, `countersignedById`, `approvedById`, `rejectedById`, `withdrawnById`, `cancelledById`); separation of duties compares ids only. A grant id identifies a grant, never a person. Where identity is missing, refuse.
+24. **Two delegable permissions.** `includesApproval` and `includesManagement` (edit details and withdraw) are separate and explicit; neither implies the other; a grant with neither field set for management carries none.
+25. **Scope on every delegated call.** Approve, reject, edit and withdraw check the grant's area, department and document types and the grantor's own authority, at the time of the call.
+26. **Dates.** `from` and `until` are dates; `from ≥ today`, `until ≥ from`, at most 90 days counting both; valid through the whole of `until` on the server's business date.
+27. **Revocation** is a state change with `revokedBy` / `revokedById` / `revokedAt`, never a delete; every later call under the grant is refused, including from a stale client.
+28. **The delegate is a real user.** Chosen from Entra ID, distinct from the grantor's object id, and acting by signing in as themselves; the prototype's "Act as this" stand-in must not ship.
 
 ### 3.2 Rules added by the Priority 1 integrity remediation (October 2026). PRODUCTION CONTROL REQUIRED
 

@@ -755,6 +755,7 @@ const TAQA_DELEGATION = {
     try { return localStorage.getItem('taqa-acting-delegation') || null; } catch(e){ return null; }
   },
   actAs(id){
+    _pageGrant = id || null;
     if (id) {
       const d = TAQA_DELEGATION._read().find(x => x.id === id);
       if (!d || !TAQA_DELEGATION.mine(d) || !TAQA_DELEGATION.isActive(d)) return false;
@@ -763,6 +764,11 @@ const TAQA_DELEGATION = {
              : localStorage.removeItem('taqa-acting-delegation'); } catch(e){}
     try { window.dispatchEvent(new CustomEvent('taqa:delegation-changed')); } catch(e){}
     return true;
+  },
+  // Did another tab start or stop acting under a grant since this page
+  // loaded? Then what this page shows is not who is acting any more.
+  contextChanged(){
+    return (TAQA_DELEGATION.actingAs() || null) !== _pageGrant;
   },
   // Was this grant made by the person in this session?
   mine(d){
@@ -780,9 +786,13 @@ const TAQA_DELEGATION = {
   // Acting under a grant that no longer works: revoked, expired or not this
   // session's. Nothing is allowed until the person stops acting under it.
   broken(){
-    return !!TAQA_DELEGATION.actingAs() && !TAQA_DELEGATION.current();
+    return (!!TAQA_DELEGATION.actingAs() && !TAQA_DELEGATION.current()) || TAQA_DELEGATION.contextChanged();
   }
 };
+// The grant this page was acting under when it loaded, or took up itself
+// since: a stale tab is refused rather than switched silently to someone
+// else's authority (PI-32).
+var _pageGrant = TAQA_DELEGATION.actingAs();
 
 /* effective() is what every permission check should ask, rather than reading
    TAQA_ROLES directly: the role's own capabilities, or, while acting under an
