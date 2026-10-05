@@ -39,6 +39,67 @@ function simulateInstalledIphone() {
   });
 }
 
+// The same app turned on its side (PI-52). An iPhone in landscape hides the
+// status bar; the notch and the rounded corners take 47px on each side and
+// the home indicator 21px at the bottom. WebKit exposes them as safe-area
+// insets only when the page is drawn edge to edge; the pages read them
+// through topbar.css's --safe-l / --safe-r / --safe-b, which this sets. The
+// notch side and the home-indicator strip swallow taps here.
+function simulateInstalledIphoneLandscape() {
+  const mm = window.matchMedia.bind(window);
+  window.matchMedia = (q) => (/display-mode:\s*standalone/.test(q)
+    ? { matches: true, media: q, onchange: null, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {}, dispatchEvent() { return false; } }
+    : mm(q));
+  try { Object.defineProperty(navigator, 'standalone', { get: () => true }); } catch (e) {}
+  document.addEventListener('DOMContentLoaded', () => {
+    const m = document.querySelector('meta[name="viewport"]');
+    if (m && /viewport-fit=cover/.test(m.content)) {
+      const st = document.documentElement.style;
+      st.setProperty('--nav-safe', '0px');
+      st.setProperty('--safe-l', '47px');
+      st.setProperty('--safe-r', '47px');
+      st.setProperty('--safe-b', '21px');
+    }
+    const notch = document.createElement('div');
+    notch.id = 'ios-notch';
+    notch.style.cssText = 'position:fixed;top:0;bottom:0;left:0;width:47px;z-index:2147483647;background:transparent;';
+    const home = document.createElement('div');
+    home.id = 'ios-home-indicator';
+    home.style.cssText = 'position:fixed;left:0;right:0;bottom:0;height:21px;z-index:2147483647;background:transparent;';
+    document.body.append(notch, home);
+  });
+}
+
+// Every visible control inside `root` can be tapped where it is drawn:
+// on screen, and the topmost element at its centre is the control itself
+// (not the status bar, the notch, the home indicator or the top bar).
+async function unreachable(page, root) {
+  return page.evaluate((root) => {
+    const box = document.querySelector(root);
+    if (!box) return ['missing ' + root];
+    const bad = [];
+    const name = (el) => (el.id ? '#' + el.id : '') + (el.getAttribute('aria-label') || el.textContent || el.tagName).trim().replace(/\s+/g, ' ').slice(0, 30);
+    const desc = (el) => el ? (el.id || String(el.className).split(' ')[0] || el.tagName) : 'nothing';
+    for (const el of box.querySelectorAll('button, a[href], input:not([type=hidden]), textarea, select')) {
+      const cs = getComputedStyle(el);
+      if (cs.visibility === 'hidden' || cs.display === 'none' || el.closest('[hidden]') || el.disabled) continue;
+      // Inside a closed group (the phone menu's areas): not shown until opened.
+      const det = el.closest('details');
+      if (det && !det.open && !el.closest('summary')) continue;
+      if (!el.getClientRects().length) continue;
+      el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
+      const r = el.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) continue;
+      const x = Math.min(Math.max(r.left + r.width / 2, 0), innerWidth - 1), y = Math.min(Math.max(r.top + r.height / 2, 0), innerHeight - 1);
+      if (r.left + r.width / 2 < 0 || r.top + r.height / 2 < 0 || r.left + r.width / 2 > innerWidth || r.top + r.height / 2 > innerHeight) { bad.push(name(el) + ' off screen'); continue; }
+      const t = document.elementFromPoint(x, y);
+      const lab = el.labels ? [...el.labels] : [];
+      if (!(t === el || el.contains(t) || lab.some((l) => l.contains(t)) || (t && t.closest('label') && t.closest('label').contains(el)))) bad.push(name(el) + ' covered by ' + desc(t));
+    }
+    return bad;
+  }, root);
+}
+
 async function seedQms(page, gotoApp) {
   await gotoApp('/index.html');
   await page.evaluate(() => {
@@ -145,3 +206,39 @@ test.describe('in a phone browser nothing changes', () => {
     }
   });
 });
+
+// PI-08 / PI-61 / PI-52, TB-04: every overlay a person opens in the installed
+// app can be closed and used, upright and on its side. Not only the bell.
+const OVERLAYS = [
+  { name: 'Master List record drawer', path: '/master-list.html', open: (p) => p.evaluate(() => openDetail(0)), root: '#dw' },
+  { name: 'QMS Workbench', path: '/master-list.html?view=qms', open: (p) => p.evaluate(() => wbOpenNum('TQ-TWS-CTSS-SOP-991')), root: '#dw' },
+  { name: 'QMS Workbench, reject reason open', path: '/master-list.html?view=qms', open: async (p) => { await p.evaluate(() => wbOpenNum('TQ-TWS-CTSS-SOP-991')); await p.locator('#wb-reject').click(); }, root: '#dw' },
+  { name: 'segment document panel', path: '/segment.html?id=drilling', open: (p) => p.evaluate(() => openDocModal('Coiled tubing pressure test', 'sop')), root: '#doc-modal-panel' },
+  { name: 'phone menu', path: '/segment.html?id=drilling', open: (p) => p.locator('#nav-hamburger').click(), root: '#nav-mobile-menu' },
+  // On a phone Bookmarks opens from the menu (the bar's own button is hidden).
+  { name: 'bookmarks', path: '/index.html', open: async (p) => { await p.locator('#nav-hamburger').click(); await p.locator('#mm-bm').click(); }, root: '#bm-panel' },
+  { name: 'search filters', path: '/ai-search.html', open: (p) => p.locator('[aria-controls="filters-drawer"]').first().click(), root: '#filters-drawer', phoneOnly: true },
+  { name: 'glossary add a term', path: '/glossary.html', open: (p) => p.locator('[data-add-term]:visible').first().click(), root: '#sb-add' },
+  { name: 'viewer More menu', path: '/viewer.html?doc=TQ-TWS-CTSS-S005', open: (p) => p.locator('#more-btn').click(), root: '#more-menu' },
+  { name: 'viewer Share', path: '/viewer.html?doc=TQ-TWS-CTSS-S005', open: (p) => p.locator('#share-btn').click(), root: '#share-pop' },
+];
+
+for (const orient of [
+  { label: 'upright', sim: simulateInstalledIphone, use: PHONE },
+  { label: 'on its side', sim: simulateInstalledIphoneLandscape, use: { viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true } },
+]) {
+  test.describe(`installed iPhone app ${orient.label}: overlays can be used and closed`, () => {
+    test.use(orient.use);
+    test.beforeEach(async ({ page }) => { await page.addInitScript(orient.sim); });
+    for (const o of OVERLAYS) {
+      test(`${o.name}: every control is clear of the status bar, notch and home indicator`, async ({ page, gotoApp }) => {
+        await seedQms(page, gotoApp);
+        await page.evaluate(() => localStorage.setItem('taqa-install-dismissed', '1'));
+        await gotoApp(o.path);
+        await o.open(page);
+        await page.waitForTimeout(450); // slide-in transitions
+        expect(await unreachable(page, o.root)).toEqual([]);
+      });
+    }
+  });
+}

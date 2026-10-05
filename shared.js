@@ -269,7 +269,7 @@ window.TAQA_NET = (function(){
     'html.taqa-net-on{--net-bar-h:30px;}' +
     '#taqa-net-bar{position:fixed;top:calc(64px + var(--nav-safe,0px));inset-inline:0;z-index:999;height:30px;' +
       'display:none;align-items:center;justify-content:center;gap:7px;' +
-      'padding:0 max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));' +
+      'padding:0 max(12px, var(--safe-r)) 0 max(12px, var(--safe-l));' +
       'background:#3D4F4F;color:#fff;font:600 12px/1.2 Inter,system-ui,sans-serif;}' +
     '#taqa-net-bar span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0;}' +
     '#taqa-net-bar svg{flex-shrink:0;}' +
@@ -381,7 +381,7 @@ window.TAQA_NET = (function(){
   var s = document.createElement('style');
   s.textContent =
     '#sw-update-bar{position:fixed;bottom:0;left:0;right:0;z-index:9996;background:#005D63;' +
-      'padding:10px max(16px, env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px, env(safe-area-inset-left));' +
+      'padding:10px max(16px, var(--safe-r)) calc(10px + var(--safe-b)) max(16px, var(--safe-l));' +
       'display:none;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 12px;font-size:13.5px;font-weight:600;color:#fff;box-shadow:0 -4px 20px rgba(0,93,99,0.35);}' +
     '#sw-update-bar button{background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.4);color:#fff;padding:6px 14px;min-height:36px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}' +
     '#sw-update-bar button:hover{background:rgba(255,255,255,0.35);}' +
@@ -554,9 +554,12 @@ window.addEventListener('pageshow', function(e){
   var s=document.createElement('style');
   s.textContent=
     '.nav-hamburger{display:none;}'+
-    '.nav-mobile-menu{display:none;position:fixed;inset-inline:0;top:var(--nav-h,64px);z-index:998;'+
+    /* Never taller than the screen below the bar, so the last areas can be
+       scrolled to on a short or turned phone (it grew past the bottom edge),
+       and clear of the notch and the home indicator (PI-52). */
+    '.nav-mobile-menu{display:none;position:fixed;inset-inline:0;top:var(--nav-h,64px);z-index:998;max-height:calc(100dvh - var(--nav-h,64px));'+
       'background:var(--tb-solid,#fff);border-bottom:1px solid var(--tb-rule,rgba(117,106,97,.13));'+
-      'padding:6px 16px 28px;box-shadow:0 22px 44px -26px rgba(0,88,90,.28);'+
+      'padding:6px max(16px, var(--safe-r,0px)) calc(28px + var(--safe-b,0px)) max(16px, var(--safe-l,0px));box-shadow:0 22px 44px -26px rgba(0,88,90,.28);'+
       'overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;font-family:"Inter",system-ui,sans-serif;}'+
     '.nav-mobile-menu.open{display:block;}'+
     /* On a tablet the menu drops as a sheet from the end of the bar rather

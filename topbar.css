@@ -12,6 +12,14 @@
      by that inset and keeps its content below the clock; on every other page
      the inset is 0 and nothing changes. */
   --nav-safe:env(safe-area-inset-top, 0px);
+  /* The other three edges, for the same pages (PI-52). On a notched iPhone
+     on its side the notch and the rounded corners take the left and right
+     edges and the home indicator the bottom; anything drawn there pads by
+     these. 0 on every other device and in every page not drawn edge to edge.
+     One name for each, so a test can stand in for the device. */
+  --safe-l:env(safe-area-inset-left, 0px);
+  --safe-r:env(safe-area-inset-right, 0px);
+  --safe-b:env(safe-area-inset-bottom, 0px);
   /* The connectivity bar (shared.js, PI-48) sits directly under the top bar
      while it shows. --nav-h includes it, so everything placed under the top
      bar (sticky tabs, menus, drawers, page padding) moves down with it and
@@ -48,9 +56,15 @@ html[data-taqa-theme="dark"]{
   --tb-shadow:0 22px 44px -22px rgba(0,0,0,0.6),0 2px 6px -2px rgba(0,0,0,0.3);
 }
 
+/* Page content keeps out of the notch on a phone on its side, as Safari does
+   itself for a page that is not drawn edge to edge (0 everywhere else). */
+body{padding-left:var(--safe-l); padding-right:var(--safe-r);}
+/* What is scrolled or tabbed into view stops above the home indicator. */
+html{scroll-padding-bottom:var(--safe-b);}
+
 #navbar{
   position:fixed; top:0; inset-inline:0; z-index:1000;
-  height:calc(64px + var(--nav-safe)); margin:0; padding:var(--nav-safe) max(32px, env(safe-area-inset-right)) 0 max(32px, env(safe-area-inset-left));
+  height:calc(64px + var(--nav-safe)); margin:0; padding:var(--nav-safe) max(32px, var(--safe-r)) 0 max(32px, var(--safe-l));
   /* A 3-column grid, not flex, is what actually centers .nav-links on the
      bar's full width: the brand and the right cluster get equal 1fr tracks,
      so the middle (auto-width) track sits truly in the middle regardless of
@@ -254,7 +268,7 @@ html[data-taqa-theme="dark"] #navbar .nav-cta{border-color:rgba(0,187,182,0.35);
 
 /* Phone and tablet: brand, bell, theme, menu. Everything else is in the menu. */
 @media (max-width:1280px){
-  #navbar{padding:var(--nav-safe) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); gap:8px;
+  #navbar{padding:var(--nav-safe) max(16px, var(--safe-r)) 0 max(16px, var(--safe-l)); gap:8px;
     /* Two tracks, not three: with the links hidden, the three-track grid
        put the right cluster in the middle track, and on a phone the brand
        ran underneath the menu button. */
