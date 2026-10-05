@@ -17,25 +17,27 @@ const DOCS = [
   { seg: 'drilling', area: 'Drilling Services, Operations' },
   { seg: 'wireline', area: 'Wireline Services, Maintenance', maint: true },
 ];
-const num = (seg) => 'TQ-WB-' + seg;
+// Valid TQ-QHSE-S001 numbers for each area's SOP (PR 2C-1, PI-14).
+const NUMS = { 'coiled-tubing': 'TQ-TWS-CTSS-SOP-961', drilling: 'TQ-TDS-DSS-SOP-961', wireline: 'TQ-TWS-WS-SOP-961' };
+const num = (seg) => NUMS[seg];
 const title = (seg) => 'WB ' + seg + ' procedure';
 const REASON = 'Section 4 is missing the isolation steps; add them and resubmit.';
 
 async function seedAsQms(page, gotoApp, extra) {
   await gotoApp('/index.html');
-  await page.evaluate(({ docs, extra }) => {
+  await page.evaluate(({ docs, extra, NUMS }) => {
     localStorage.clear();
     localStorage.setItem('taqa-tour-done', '1');
     localStorage.setItem('taqa-install-dismissed', String(Date.now()));
     TAQA_ROLE.set('employee');
     docs.forEach((s) => TAQA_STORE.add({
-      title: 'WB ' + s.seg + ' procedure', segment: s.seg, docType: 'sop', docNumber: 'TQ-WB-' + s.seg,
+      title: 'WB ' + s.seg + ' procedure', segment: s.seg, docType: 'sop', docNumber: NUMS[s.seg],
       summary: 'Workbench check document for ' + s.seg + '.', department: s.maint ? 'maintenance' : null,
       files: [{ name: s.seg + '.pdf', size: 20480 }],
     }));
     (extra || []).forEach((r) => TAQA_STORE.add(r));
     TAQA_ROLE.set('qms');
-  }, { docs: DOCS, extra });
+  }, { docs: DOCS, extra, NUMS });
 }
 
 const openCheck = (page, gotoApp, seg) => gotoApp('/master-list.html?view=qms&doc=' + num(seg));
@@ -78,7 +80,7 @@ test.describe('getting to the Workbench', () => {
 
   test('a Director\'s bell still opens their own area desk', async ({ page, gotoApp, setRole }) => {
     await seedAsQms(page, gotoApp);
-    await page.evaluate(() => TAQA_STORE.countersign('TQ-WB-coiled-tubing'));
+    await page.evaluate(() => TAQA_STORE.countersign('TQ-TWS-CTSS-SOP-961'));
     await setRole('owner', 'coiled-tubing');
     await gotoApp('/segment.html?id=coiled-tubing');
     await page.locator('#nav-bell').click();
@@ -106,16 +108,16 @@ test.describe('the check panel', () => {
   });
 
   test('a document with the same title already in its area is flagged', async ({ page, gotoApp }) => {
-    await seedAsQms(page, gotoApp, [{ title: 'WB drilling procedure', segment: 'drilling', docType: 'sop', docNumber: 'TQ-WB-drilling-2', summary: 'x' }]);
+    await seedAsQms(page, gotoApp, [{ title: 'WB drilling procedure', segment: 'drilling', docType: 'sop', docNumber: 'TQ-TDS-DSS-SOP-962', summary: 'x' }]);
     await openCheck(page, gotoApp, 'drilling');
     await expect(page.locator('#wb-twins')).toContainText('Same title already in this area');
-    await expect(page.locator('#wb-twins')).toContainText('TQ-WB-drilling-2');
+    await expect(page.locator('#wb-twins')).toContainText('TQ-TDS-DSS-SOP-962');
   });
 
   test('a title carrying markup is shown as text, never run', async ({ page, gotoApp }) => {
     const evil = 'WB <img src=x onerror="window.__wbXss=1">';
-    await seedAsQms(page, gotoApp, [{ title: evil, segment: 'drilling', docType: 'sop', docNumber: 'TQ-WB-XSS', summary: 'x' }]);
-    await gotoApp('/master-list.html?view=qms&doc=TQ-WB-XSS');
+    await seedAsQms(page, gotoApp, [{ title: evil, segment: 'drilling', docType: 'sop', docNumber: 'TQ-TDS-DSS-SOP-963', summary: 'x' }]);
+    await gotoApp('/master-list.html?view=qms&doc=TQ-TDS-DSS-SOP-963');
     await expect(page.locator('#dw-title')).toHaveText(evil);
     expect(await page.evaluate(() => window.__wbXss)).toBeUndefined();
     expect(await page.locator('#dw img').count()).toBe(0);
@@ -184,7 +186,7 @@ test.describe('deciding from the Workbench', () => {
   test('a document that changed after the panel opened is refused, with the reason', async ({ page, gotoApp }) => {
     await seedAsQms(page, gotoApp);
     await openCheck(page, gotoApp, 'drilling');
-    await page.evaluate(() => TAQA_STORE.countersign('TQ-WB-drilling'));
+    await page.evaluate(() => TAQA_STORE.countersign('TQ-TDS-DSS-SOP-961'));
     await page.locator('#wb-confirm').click();
     await expect(page.locator('#wb-res')).toHaveAttribute('data-ok', 'false');
     await expect(page.locator('#wb-res')).toContainText('Not confirmed. Already checked by QMS.');
@@ -194,7 +196,7 @@ test.describe('deciding from the Workbench', () => {
     await seedAsQms(page, gotoApp);
     // Clear everything else waiting on QMS, the shipped register drafts too.
     await page.evaluate(() => TAQA_STORE.all()
-      .filter((d) => TAQA_APPROVAL.stageOf(d) === 'qms' && d.docNumber !== 'TQ-WB-wireline')
+      .filter((d) => TAQA_APPROVAL.stageOf(d) === 'qms' && d.docNumber !== 'TQ-TWS-WS-SOP-961')
       .forEach((d) => TAQA_STORE.countersign(d.docNumber)));
     await openCheck(page, gotoApp, 'wireline');
     await expect(page.locator('#wb-pos')).toHaveText('QMS check · 1 of 1 waiting on QMS');
@@ -220,9 +222,9 @@ test.describe('what does not change', () => {
 
   test('QMS opening a document past the QMS stage gets the record and is told why', async ({ page, gotoApp }) => {
     await seedAsQms(page, gotoApp);
-    await page.evaluate(() => TAQA_STORE.countersign('TQ-WB-drilling'));
+    await page.evaluate(() => TAQA_STORE.countersign('TQ-TDS-DSS-SOP-961'));
     await openCheck(page, gotoApp, 'drilling');
-    await expect(page.locator('#toast')).toContainText('TQ-WB-drilling is no longer waiting on QMS. Already checked by QMS.');
+    await expect(page.locator('#toast')).toContainText('TQ-TDS-DSS-SOP-961 is no longer waiting on QMS. Already checked by QMS.');
     await expect(page.locator('#wb-confirm')).toHaveCount(0);
   });
 

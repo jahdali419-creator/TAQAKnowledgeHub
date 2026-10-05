@@ -646,7 +646,8 @@ function openWithdrawDialog(rec, row, opener) {
   document.getElementById('wd-dlg-h').textContent = 'Withdraw ' + rec.docNumber + ' ' + TAQA_STORE.revisionLabel(rec) + '?';
   document.getElementById('wd-dlg-doc').textContent = rec.title || '';
   document.getElementById('wd-dlg-open').textContent = open
-    ? TAQA_STORE.revisionLabel(open) + ', which is in progress, will be cancelled with it: it leaves the approval queues and is kept as history.' : '';
+    ? TAQA_STORE.revisionLabel(open) + (open.status === 'approved' ? ', approved but not yet in effect,' : ', which is in progress,') +
+      ' will be cancelled with it: it never takes effect and is kept as history.' : '';
   document.getElementById('wd-dlg-open').hidden = !open;
   const r = document.getElementById('wd-reason');
   r.value = ''; wdReasonInput();

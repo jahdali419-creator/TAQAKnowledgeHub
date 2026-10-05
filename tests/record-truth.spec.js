@@ -47,7 +47,7 @@ const as = (page, role, fn, arg) => page.evaluate(({ role, src, arg }) => {
   return new Function('arg', 'return (' + src + ')(arg);')(arg);
 }, { role, src: fn.toString(), arg });
 const fileNew = (page, n, title, extra) => as(page, 'employee', ({ n, title, extra }) => {
-  const d = TAQA_STORE.add(Object.assign({ docNumber: n, title, segment: 'coiled-tubing', docType: 'sop', summary: 'Record truth: ' + title }, extra || {}));
+  const d = TAQA_STORE.add(Object.assign({ docNumber: n, title, segment: 'coiled-tubing', docType: 'sop', revision: '1.0', summary: 'Record truth: ' + title }, extra || {}));
   return d ? { recordId: d.recordId, rev: d.revision, attempt: d.attempt } : null;
 }, { n, title, extra });
 const fileRevision = (page, n, title) => as(page, 'employee', ({ n, title }) => {
@@ -171,15 +171,15 @@ test.describe('C. PI-10: bulk withdrawal acts on the exact revisions ticked', ()
   test.use(DESKTOP);
 
   test('two documents in force (one with an open revision) and a draft are ticked: the preview lists exactly what changes, the draft is left out, a stale row is refused', async ({ page, context, gotoApp, setRole, clearAppState, consoleErrors }) => {
+    test.slow();   // a whole journey through several pages
     await start(page, gotoApp, clearAppState, setRole);
     await fileRevision(page, DOC, 'DOC revised, in progress');        // DOC: Rev 1.0 current + Rev 2.0 open
     await fileRevision(page, DOC3, 'DOC3 revised, in progress');      // DOC3: Rev 3.0 current + Rev 4.0 open
     await setRole('qms', SEG);
-    await gotoApp(`/master-list.html?view=register&seg=${SEG}`);
-    for (const k of [DOC + '|1.0', DOC2 + '|3.0', DOC3 + '|4.0']) {
-      await page.fill('#q', k.split('|')[0]);
-      await page.locator(`#rows .row-chk[data-key="${k}"]`).check();
-    }
+    // One filter shows all three documents; changing the filter would clear a selection.
+    await gotoApp(`/master-list.html?view=register&seg=${SEG}&q=${encodeURIComponent('TQ-TWS-CTSS-SOP-0')}`);
+    for (const k of [DOC + '|1.0', DOC2 + '|3.0', DOC3 + '|4.0']) await page.locator(`#rows .row-chk[data-key="${k}"]`).check();
+    await expect(page.locator('#bulk-count')).toHaveText('3 documents selected');
     await page.locator('#bulk-withdraw').click();
     const dlg = page.locator('#bulk-dlg');
     await expect(dlg).toBeVisible();
@@ -254,6 +254,7 @@ test.describe('D. PI-21: approval and effective dates are the register\'s, per r
   });
 
   test('approved for a later date: Approved, not yet effective until then (the revision in force stays current); on the date it takes effect once, with both dates kept', async ({ page, gotoApp, setRole, clearAppState }) => {
+    test.slow();   // a whole journey through several pages
     await start(page, gotoApp, clearAppState, setRole);
     await fileRevision(page, DOC, 'Rev 2 effective later');
     await check(page, DOC);
@@ -272,7 +273,8 @@ test.describe('D. PI-21: approval and effective dates are the register\'s, per r
     // Employees see only the revision in force; a new revision cannot be filed meanwhile.
     await setRole('employee', SEG);
     await gotoApp('/viewer.html?doc=' + DOC + '&seg=' + SEG);
-    await expect(page.locator('.meta-brief, #meta-grid')).toContainText('Rev 1.0');
+    await expect(page.locator('#meta-grid')).toContainText('Rev 1.0');
+    await expect(page.locator('#meta-grid')).toContainText('Current, OK to use');
     await gotoApp('/viewer.html?doc=' + DOC + '&rev=2.0&seg=' + SEG);
     await expect(page.locator('#lifecycle-banner')).toContainText('takes effect on');
     expect(await fileRevision(page, DOC, 'Another revision meanwhile')).toBeNull();
@@ -315,6 +317,7 @@ test.describe('E. PI-24: a returned attempt is history; the next attempt keeps i
   test.use(DESKTOP);
 
   test('a returned first issue is filed again from "File it again": same number and Rev 1.0, attempt 2; attempt 1 stays returned and is not pending', async ({ page, gotoApp, setRole, clearAppState, consoleErrors }) => {
+    test.slow();   // a whole journey through several pages
     await start(page, gotoApp, clearAppState, setRole);
     const n = 'TQ-TWS-CTSS-SOP-903';
     const one = await fileNew(page, n, 'Returned first issue');
@@ -351,7 +354,7 @@ test.describe('E. PI-24: a returned attempt is history; the next attempt keeps i
     await setRole('qms', SEG);
     await gotoApp(`/master-list.html?view=register&seg=${SEG}`);
     await page.fill('#q', n);
-    await expect(page.locator('#rows tr', { hasText: 'Returned' })).toHaveCount(1);
+    await expect(page.locator('#rows .mark', { hasText: /^Returned$/ })).toHaveCount(1);
     expect(await page.evaluate((n) => TAQA_STORE.rows('awaiting-qms').filter((d) => d.docNumber === n).map((d) => d.attempt), n)).toEqual([2]);
     await check(page, n);
     expect((await approve(page, n)).ok).toBe(true);
@@ -385,6 +388,7 @@ test.describe('F. PI-13: possible duplicates are shown before Submit, with the r
   }
 
   test('the same file as another record: advisory warning before Submit, and the filing still goes through', async ({ page, gotoApp, setRole, clearAppState }) => {
+    test.slow();   // a whole journey through several pages
     await start(page, gotoApp, clearAppState, setRole);
     await toStep3(page, gotoApp, PDF('same'), 'First filing of this file');
     await page.fill('#summary-main', 'First copy.');

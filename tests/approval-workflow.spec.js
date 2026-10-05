@@ -18,12 +18,11 @@
 // picker through the UI.
 const { test, expect, assertNoConsoleErrors } = require('./helpers/fixtures');
 
-function uniqueDocNumber(tag) {
-  return 'TQ-TEST-' + (tag || 'DOC') + '-' + Date.now() + '-' + Math.floor(Math.random() * 100000);
-}
-
 async function addDraft(page, overrides = {}) {
-  const docNumber = overrides.docNumber || uniqueDocNumber();
+  // A valid TQ-QHSE-S001 number for its area and type, the next free one
+  // (PI-14: the register refuses made-up numbers for a new filing).
+  const area = overrides.segment || 'coiled-tubing', type = overrides.docType || 'sop';
+  const docNumber = overrides.docNumber || await page.evaluate(([s, t]) => TAQA_STORE.nextNumber(s, t), [area, type]);
   const rec = Object.assign({
     title: 'Regression Test Draft',
     segment: 'coiled-tubing',

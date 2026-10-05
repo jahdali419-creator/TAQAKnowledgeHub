@@ -147,8 +147,8 @@ TAQA_DOC_LOOKUPS.segments[${JSON.stringify('x"><img src=x onerror="window.__pwn=
       await route.fulfill({ response: res, body });
     });
     await start(page, gotoApp, clearAppState, setRole, 'qms');
-    await page.evaluate((t) => TAQA_STORE.add({ docNumber: 'TQ-PWN-S005', title: 'Workbench ' + t, segment: 'coiled-tubing', docType: 'sop', summary: t }), tag('wb-title'));
-    await gotoApp('/master-list.html?view=qms&doc=TQ-PWN-S005');
+    await page.evaluate((t) => TAQA_STORE.add({ docNumber: 'TQ-TWS-CTSS-SOP-971', title: 'Workbench ' + t, segment: 'coiled-tubing', docType: 'sop', summary: t }), tag('wb-title'));
+    await gotoApp('/master-list.html?view=qms&doc=TQ-TWS-CTSS-SOP-971');
     await expect(page.locator('#dw-title')).toHaveText(/^Workbench <img src=x/);
     // A published SOP's record view draws the type's review cycle and retention.
     await gotoApp('/master-list.html');
@@ -161,7 +161,7 @@ TAQA_DOC_LOOKUPS.segments[${JSON.stringify('x"><img src=x onerror="window.__pwn=
 
   test('Bell, delegation banner and Home desk line: stored delegation and register values stay text', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, clearAppState, setRole, 'employee');
-    await page.evaluate((t) => TAQA_STORE.add({ docNumber: 'TQ-PWN-S006', title: 'Bell ' + t, segment: 'coiled-tubing', docType: 'sop' }), tag('bell-title'));
+    await page.evaluate((t) => TAQA_STORE.add({ docNumber: 'TQ-TWS-CTSS-SOP-972', title: 'Bell ' + t, segment: 'coiled-tubing', docType: 'sop' }), tag('bell-title'));
     await setRole('owner', SEG);
     await page.evaluate((t) => {
       localStorage.setItem('taqa-delegations-v1', JSON.stringify([{
@@ -199,9 +199,9 @@ test.describe('PI-04: a delegation carries its own authority, never more', () =>
 
   async function director(page, gotoApp, clearAppState, setRole) {
     await start(page, gotoApp, clearAppState, setRole, 'employee');
-    await page.evaluate(() => TAQA_STORE.add({ docNumber: 'TQ-DEL-S001', title: 'Delegation target', segment: 'coiled-tubing', docType: 'sop' }));
+    await page.evaluate(() => TAQA_STORE.add({ docNumber: 'TQ-TWS-CTSS-SOP-973', title: 'Delegation target', segment: 'coiled-tubing', docType: 'sop' }));
     await setRole('qms', SEG);
-    expect((await page.evaluate(() => TAQA_STORE.countersign('TQ-DEL-S001'))).ok).toBe(true);
+    expect((await page.evaluate(() => TAQA_STORE.countersign('TQ-TWS-CTSS-SOP-973'))).ok).toBe(true);
     await setRole('owner', SEG);
   }
   const until = () => new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10);
@@ -213,23 +213,23 @@ test.describe('PI-04: a delegation carries its own authority, never more', () =>
     await page.evaluate((id) => TAQA_DELEGATION.actAs(id), g.delegation.id);
     await gotoApp(`/dashboard.html?id=${SEG}`);
     await expect(page.locator('.deleg-bar')).toContainText('without approval');
-    await expect(page.locator('.btn-approve[data-store-doc="TQ-DEL-S001"]')).toHaveCount(0);
-    expect(await page.evaluate(() => TAQA_STORE.approve('TQ-DEL-S001'))).toEqual({ ok: false, error: 'You cannot approve this document.' });
-    expect(await page.evaluate(() => { const d = TAQA_STORE.findDoc('TQ-DEL-S001'); return [d.status, d.approvalStage, d.approvedBy || null]; }))
+    await expect(page.locator('.btn-approve[data-store-doc="TQ-TWS-CTSS-SOP-973"]')).toHaveCount(0);
+    expect(await page.evaluate(() => TAQA_STORE.approve('TQ-TWS-CTSS-SOP-973'))).toEqual({ ok: false, error: 'You cannot approve this document.' });
+    expect(await page.evaluate(() => { const d = TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-973'); return [d.status, d.approvalStage, d.approvedBy || null]; }))
       .toEqual(['draft', 'director', null]);
   });
 
   test('QMS acting under a Director\'s delegation can neither check nor approve', async ({ page, gotoApp, setRole, clearAppState }) => {
     await director(page, gotoApp, clearAppState, setRole);
     const g = await page.evaluate((u) => TAQA_DELEGATION.grant({ to: 'QMS colleague', reason: 'Leave', until: u, includesApproval: true }), until());
-    await page.evaluate(() => TAQA_STORE.add({ docNumber: 'TQ-DEL-S002', title: 'Second target', segment: 'coiled-tubing', docType: 'sop' }));
+    await page.evaluate(() => TAQA_STORE.add({ docNumber: 'TQ-TWS-CTSS-SOP-974', title: 'Second target', segment: 'coiled-tubing', docType: 'sop' }));
     await setRole('qms', SEG);
     await page.evaluate((id) => TAQA_DELEGATION.actAs(id), g.delegation.id);
     const cap = await page.evaluate(() => TAQA_ROLE.effective());
     expect([cap.approve, cap.countersign]).toEqual([false, false]);
-    expect((await page.evaluate(() => TAQA_STORE.approve('TQ-DEL-S001'))).ok).toBe(false);
-    expect((await page.evaluate(() => TAQA_STORE.countersign('TQ-DEL-S002'))).ok).toBe(false);
-    expect(await page.evaluate(() => [TAQA_STORE.findDoc('TQ-DEL-S001').status, TAQA_STORE.findDoc('TQ-DEL-S002').approvalStage]))
+    expect((await page.evaluate(() => TAQA_STORE.approve('TQ-TWS-CTSS-SOP-973'))).ok).toBe(false);
+    expect((await page.evaluate(() => TAQA_STORE.countersign('TQ-TWS-CTSS-SOP-974'))).ok).toBe(false);
+    expect(await page.evaluate(() => [TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-973').status, TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-974').approvalStage]))
       .toEqual(['draft', 'qms']);
   });
 
@@ -247,8 +247,8 @@ test.describe('PI-04: a delegation carries its own authority, never more', () =>
     await director(page, gotoApp, clearAppState, setRole);
     const g = await page.evaluate((u) => TAQA_DELEGATION.grant({ to: 'Deputy', fromName: 'CT Director', reason: 'Leave', until: u, includesApproval: true }), until());
     await page.evaluate((id) => TAQA_DELEGATION.actAs(id), g.delegation.id);
-    expect((await page.evaluate(() => TAQA_STORE.approve('TQ-DEL-S001'))).ok).toBe(true);
-    expect(await page.evaluate(() => TAQA_STORE.findDoc('TQ-DEL-S001').approvedBy)).toBe('Deputy (delegate for CT Director)');
+    expect((await page.evaluate(() => TAQA_STORE.approve('TQ-TWS-CTSS-SOP-973'))).ok).toBe(true);
+    expect(await page.evaluate(() => TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-973').approvedBy)).toBe('Deputy (delegate for CT Director)');
   });
 });
 
@@ -257,7 +257,7 @@ test.describe('PI-09: the register refuses forged lifecycle, identity and author
     await start(page, gotoApp, clearAppState, setRole, 'employee');
     const before = await page.evaluate(() => TAQA_STORE.count('live'));
     const row = await page.evaluate(() => TAQA_STORE.add({
-      docNumber: 'TQ-FRG-S001', title: 'Forged', segment: 'coiled-tubing', docType: 'sop',
+      docNumber: 'TQ-TWS-CTSS-SOP-975', title: 'Forged', segment: 'coiled-tubing', docType: 'sop',
       status: 'current', approvalStage: 'director', approvedBy: 'CEO', approvedDate: '2026-01-01',
       countersignedBy: 'QMS', submittedBy: 'Someone else', submittedAt: '2020-01-01T00:00:00Z', rejected: true, supersededBy: 'X',
     }));
@@ -297,7 +297,7 @@ test.describe('PI-09: the register refuses forged lifecycle, identity and author
     expect(r).toEqual([false, false, false, false, false]);
     expect(await page.evaluate(() => ['TQ-ST-D', 'TQ-ST-C', 'TQ-ST-O'].map((n) => TAQA_STORE.findDoc(n).status)))
       .toEqual(['draft', 'current', 'obsolete']);
-    expect(await page.evaluate(() => !!TAQA_STORE.setStatus('TQ-ST-C', 'obsolete'))).toBe(true);
+    expect(await page.evaluate(() => !!TAQA_STORE.setStatus('TQ-ST-C', 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' }))).toBe(true);
   });
 
   test('editing details cannot renumber, move, retype or re-file a document', async ({ page, gotoApp, setRole, clearAppState, seedRegister }) => {
@@ -315,12 +315,12 @@ test.describe('PI-09: the register refuses forged lifecycle, identity and author
 
   test('a caller cannot choose the name on a signature', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, clearAppState, setRole, 'employee');
-    await page.evaluate(() => TAQA_STORE.add({ docNumber: 'TQ-SG-S001', title: 'Signed', segment: 'coiled-tubing', docType: 'sop' }));
+    await page.evaluate(() => TAQA_STORE.add({ docNumber: 'TQ-TWS-CTSS-SOP-976', title: 'Signed', segment: 'coiled-tubing', docType: 'sop' }));
     await setRole('qms', SEG);
-    await page.evaluate(() => TAQA_STORE.countersign('TQ-SG-S001', 'The CEO'));
+    await page.evaluate(() => TAQA_STORE.countersign('TQ-TWS-CTSS-SOP-976', 'The CEO'));
     await setRole('owner', SEG);
-    await page.evaluate(() => TAQA_STORE.approve('TQ-SG-S001', 'The CEO'));
-    expect(await page.evaluate(() => { const d = TAQA_STORE.findDoc('TQ-SG-S001'); return [d.countersignedBy, d.approvedBy]; }))
+    await page.evaluate(() => TAQA_STORE.approve('TQ-TWS-CTSS-SOP-976', 'The CEO'));
+    expect(await page.evaluate(() => { const d = TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-976'); return [d.countersignedBy, d.approvedBy]; }))
       .toEqual(['QMS / Document Controller', 'Segment Director']);
   });
 
@@ -348,8 +348,8 @@ test.describe('PI-09: the register refuses forged lifecycle, identity and author
 
   test('the register cannot be wiped from a page', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, clearAppState, setRole, 'qms');
-    await page.evaluate(() => TAQA_STORE.add({ docNumber: 'TQ-RS-S001', title: 'Kept', segment: 'coiled-tubing', docType: 'sop' }));
+    await page.evaluate(() => TAQA_STORE.add({ docNumber: 'TQ-TWS-CTSS-SOP-977', title: 'Kept', segment: 'coiled-tubing', docType: 'sop' }));
     expect(await page.evaluate(() => typeof TAQA_STORE.reset)).toBe('undefined');
-    expect(await page.evaluate(() => !!TAQA_STORE.findDoc('TQ-RS-S001'))).toBe(true);
+    expect(await page.evaluate(() => !!TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-977'))).toBe(true);
   });
 });

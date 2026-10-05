@@ -1259,7 +1259,7 @@ function whyNotQms(d){
   if(d.cancelled)return d.cancelledReason||'Cancelled, so there is nothing to confirm.';
   if(d.status==='obsolete'||d.status==='superseded')return 'Withdrawn, so there is nothing to confirm.';
   if(d.status!=='draft')return 'Already in force ('+(LABEL[d.status]||d.status)+'), so there is no QMS check to do.';
-  if(d.rejected)return 'Returned to its author'+(d.rejectedReason?': '+d.rejectedReason:'.')+' A corrected filing comes to QMS as its next attempt.';
+  if(d.rejected)return 'Returned to its author'+(d.rejectedReason?': '+String(d.rejectedReason).replace(/[.\s]+$/,'')+'.':'.')+' A corrected filing comes to QMS as its next attempt.';
   if(TAQA_APPROVAL.stageOf(d)==='director')return 'Already checked by QMS. It is waiting on '+nextApprover(d)+' for final approval.';
   const sep=TAQA_APPROVAL.separationReason&&TAQA_APPROVAL.separationReason(d);
   if(sep)return sep;

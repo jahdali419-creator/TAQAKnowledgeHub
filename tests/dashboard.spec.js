@@ -5,12 +5,11 @@
 // global showToast).
 const { test, expect, assertNoConsoleErrors } = require('./helpers/fixtures');
 
-function uniqueDocNumber(tag) {
-  return 'TQ-TEST-' + (tag || 'DOC') + '-' + Date.now() + '-' + Math.floor(Math.random() * 100000);
-}
-
 async function addDraft(page, overrides = {}) {
-  const docNumber = overrides.docNumber || uniqueDocNumber();
+  // A valid TQ-QHSE-S001 number for its area and type, the next free one
+  // (PI-14: the register refuses made-up numbers for a new filing).
+  const area = overrides.segment || 'coiled-tubing', type = overrides.docType || 'sop';
+  const docNumber = overrides.docNumber || await page.evaluate(([s, t]) => TAQA_STORE.nextNumber(s, t), [area, type]);
   const rec = Object.assign({
     title: 'Dashboard Test Draft',
     segment: 'coiled-tubing',
@@ -134,17 +133,19 @@ test.describe('Similar/duplicate document detection panel', () => {
     const card = page.locator(`[data-store-doc="${docNumber}"]`).first()
       .locator('xpath=ancestor::div[contains(@class,"pending-card")]');
     await expect(card.locator('.dup-sim-panel')).toBeVisible();
-    await expect(card.locator('.dup-sim-hd')).toContainText('Similar documents already in this segment');
+    await expect(card.locator('.dup-sim-hd')).toContainText('Possibly related documents in this area');
     await expect(card.locator('.dup-sim-title').first()).toContainText('Pressure Testing Procedure');
-    await expect(card.locator('.dup-sim-pct').first()).toBeVisible();
+    // Each says why it was flagged, never as a percentage (PR 2C-1, PI-13).
+    await expect(card.locator('.dup-sim-pct').first()).toContainText('Shares the title words: pressure, testing');
+    expect(await card.locator('.dup-sim-panel').innerText()).not.toMatch(/\d+%/);
 
-    // And directly at the source: buildSimilarDocs() itself returns the real
-    // title, confirming it is reading TAQA_STORE's live rows.
+    // And directly at the source: the register's related() returns the real
+    // record, confirming it is reading TAQA_STORE's live rows.
     const similar = await page.evaluate(
-      (t) => buildSimilarDocs(t, 'coiled-tubing', 3),
+      (t) => TAQA_STORE.related({ title: t, segment: 'coiled-tubing', limit: 3 }).map((m) => m.d.title),
       'Pressure Testing Procedure, Revision 2 (Draft)'
     );
-    expect(similar.some((s) => s.title === 'Pressure Testing Procedure')).toBe(true);
+    expect(similar).toContain('Pressure Testing Procedure');
   });
 
   test('a title with no real overlap in the segment surfaces no similar-documents panel', async ({ page, gotoApp, setRole, clearAppState }) => {

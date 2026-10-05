@@ -93,7 +93,7 @@ test.describe('the live register after the release workflow', () => {
       TAQA_STORE.add({ docNumber: 'TQ-TWS-CTSS-SOP-701', title: 'New procedure', segment: 'coiled-tubing', docType: 'sop', summary: 'New.' });
     });
     await setRole('qms', 'coiled-tubing');
-    await page.evaluate(() => { TAQA_STORE.countersign('TQ-TWS-CTSS-SOP-002'); TAQA_STORE.countersign('TQ-TWS-CTSS-SOP-701'); TAQA_STORE.setStatus('TQ-TWS-CTSS-SOP-005', 'obsolete'); });
+    await page.evaluate(() => { TAQA_STORE.countersign('TQ-TWS-CTSS-SOP-002'); TAQA_STORE.countersign('TQ-TWS-CTSS-SOP-701'); TAQA_STORE.setStatus('TQ-TWS-CTSS-SOP-005', 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' }); });
     await setRole('owner', 'coiled-tubing');
     await page.evaluate(() => { TAQA_STORE.approve('TQ-TWS-CTSS-SOP-002'); TAQA_STORE.approve('TQ-TWS-CTSS-SOP-701'); });
     await page.addScriptTag({ path: path.join(__dirname, '../scripts/check-register.js') });

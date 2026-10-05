@@ -45,8 +45,10 @@ async function seedQms(page, gotoApp) {
     localStorage.clear();
     localStorage.setItem('taqa-tour-done', '1');
     TAQA_ROLE.set('employee');
+    // Valid TQ-QHSE-S001 numbers for each area's SOP (PR 2C-1, PI-14).
+    const NUMS = { 'coiled-tubing': 'TQ-TWS-CTSS-SOP-991', drilling: 'TQ-TDS-DSS-SOP-991' };
     ['coiled-tubing', 'drilling'].forEach((s) => TAQA_STORE.add({
-      title: 'APP ' + s + ' procedure', segment: s, docType: 'sop', docNumber: 'TQ-APP-' + s, summary: 'Installed app bell check.',
+      title: 'APP ' + s + ' procedure', segment: s, docType: 'sop', docNumber: NUMS[s], summary: 'Installed app bell check.',
     }));
     TAQA_ROLE.set('qms');
   });

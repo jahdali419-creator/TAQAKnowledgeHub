@@ -352,6 +352,20 @@
     var sep = letter.length > 1 ? '-' : '';
     return { re: new RegExp('^' + escRe(stem + sep) + '\\d{3,}$'), example: stem + sep + '001' };
   }
+  // The next free number for an area and type, as Upload generates it: one
+  // above the highest serial in use under that stem.
+  function nextNumber(segment, docType, issuingFunction) {
+    var f = numberFormat(segment, docType, issuingFunction);
+    if (!f) return null;
+    var stem = f.example.slice(0, -3), max = 0;
+    all().forEach(function (d) {
+      var n = String(d.docNumber || '');
+      if (n.indexOf(stem) !== 0) return;
+      var m = n.slice(stem.length).match(/^(\d+)$/);
+      if (m) max = Math.max(max, parseInt(m[1], 10));
+    });
+    return stem + String(max + 1).padStart(3, '0');
+  }
   function numberFormatProblem(rec) {
     var n = String(rec.docNumber == null ? '' : rec.docNumber);
     if (/\s/.test(n)) return 'A document number has no spaces.';
@@ -486,11 +500,11 @@
     if (Array.isArray(rec.files) && rec.files.length > 1) return 'File one controlled document at a time.';
     if (!normNum(rec.docNumber)) return 'A document number is needed.';
     if (revision || (again && again.prev)) return null;
-    var badNumber = numberFormatProblem(rec);
-    if (badNumber) return badNumber;
     var used = numberInUse(rec.docNumber);
     if (used) return String(rec.docNumber).trim() + ' is already the number of "' + used.title + '" (' +
       (STATUS_WORD[used.status] || used.status) + '). A number names one document and is never reused.';
+    var badNumber = numberFormatProblem(rec);
+    if (badNumber) return badNumber;
     return null;
   }
 
@@ -1043,7 +1057,7 @@
     approve: approve, countersign: countersign, reject: reject, patch: editFields,
     stageOf: stageOf, findDoc: findDoc, actingName: actingName,
     recordKey: recordKey, byKey: byKey, revisionLabel: revisionLabel,
-    numberFormat: numberFormat, numberFormatProblem: numberFormatProblem, related: related,
+    numberFormat: numberFormat, numberFormatProblem: numberFormatProblem, nextNumber: nextNumber, related: related,
     pendingEffective: pendingEffective, localDay: localDay, resubmission: resubmission,
     statusError: function () { return lastStatusError; },
     withdrawnFamily: withdrawnFamily, STALE: STALE, CANCEL_REASON: CANCEL_REASON,
