@@ -49,6 +49,10 @@ test.describe('connectivity: one bar, under the top bar, honest about what it sh
     await context.setOffline(true);
     await expect(page.locator('#taqa-net-bar')).toBeVisible();
     await expect(page.locator('#taqa-net-bar')).toContainText('Offline. Showing copies saved on this device; nothing can be sent');
+    // On a phone the short wording shows, whole: "Nothing can be sent" is never cut off.
+    await expect(page.locator('#taqa-net-bar .nb-s')).toBeVisible();
+    await expect(page.locator('#taqa-net-bar .nb-s')).toHaveText('Offline: saved copies only. Nothing can be sent.');
+    expect(await page.locator('#taqa-net-bar > span').evaluate((e) => e.scrollWidth <= e.clientWidth + 1)).toBe(true);
     // The old three bars are gone for good.
     await expect(page.locator('#offline-banner, #offline-bar, .offline-bar, #taqa-offline-bar')).toHaveCount(0);
 

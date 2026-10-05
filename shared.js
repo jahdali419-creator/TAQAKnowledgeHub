@@ -278,6 +278,9 @@ window.TAQA_NET = (function(){
       'background:#3D4F4F;color:#fff;font:600 12px/1.2 Inter,system-ui,sans-serif;}' +
     '#taqa-net-bar span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0;}' +
     '#taqa-net-bar svg{flex-shrink:0;}' +
+    // A phone gets the short wording, so "nothing can be sent" is never cut off.
+    '#taqa-net-bar .nb-s{display:none;}' +
+    '@media (max-width:600px){#taqa-net-bar .nb-l{display:none;}#taqa-net-bar .nb-s{display:inline;}}' +
     'html.taqa-net-on #taqa-net-bar{display:flex;}' +
     '@media print{#taqa-net-bar{display:none!important;}}' +
     '.taqa-net-refusal{margin:10px 0;padding:10px 12px;border-radius:10px;font-size:13px;line-height:1.45;' +
@@ -298,10 +301,19 @@ window.TAQA_NET = (function(){
     if (state === 'offline') return 'Offline. Showing copies saved on this device; nothing can be sent until you reconnect.';
     return 'RISE cannot be reached. This is the copy saved on this device from ' + when(cachedAt) + '; nothing can be sent.';
   }
+  function shortText(){
+    return state === 'offline' ? 'Offline: saved copies only. Nothing can be sent.' : 'RISE not reached: saved copy. Nothing can be sent.';
+  }
   function paint(){
     var on = state !== 'online';
     document.documentElement.classList.toggle('taqa-net-on', on);
-    if (on) bar.querySelector('span').textContent = text();
+    if (on) {
+      var sp = bar.querySelector('span');
+      sp.textContent = '';
+      var l = document.createElement('span'); l.className = 'nb-l'; l.textContent = text();
+      var sh = document.createElement('span'); sh.className = 'nb-s'; sh.textContent = shortText();
+      sp.appendChild(l); sp.appendChild(sh);
+    }
     if (on && !bar.parentNode && document.body) document.body.appendChild(bar);
     listeners.forEach(function(fn){ try { fn(state); } catch(e){} });
   }
