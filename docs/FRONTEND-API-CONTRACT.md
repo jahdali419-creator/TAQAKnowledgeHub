@@ -70,9 +70,10 @@ only ever has the role text.
 | `TAQA_STORE.add(rec)` | `POST /documents` (draft creation, from `upload.html`). Always creates `status: draft` at stage `qms`; every lifecycle field in the request is ignored and `submittedBy` / `submittedAt` come from the token and the server clock. Refuses a Policy from anyone but QMS, more than one file, a maintenance department outside an operational segment (`BUSINESS-RULES.md` §10), Software / Tool, a filing with no number, and a number already in the register in any area or status (§16), except a **revision**: a filing that names `supersedes` and the number of the document it revises, which the register files as the next revision of that document, at most one open at a time (§8). **In Azure the server allocates the number** |
 | `TAQA_STORE.patch(docNumber, fields)` | `PATCH /documents/{docNumber}`. Allow-list only: `title`, `summary`, `keywords`, `audience`, `related`, `changeNote`, `nextReviewDate`, `reviewOverdue`, `language`. Anything else (number, area, department, type, revision, files, supersedes, classification, any lifecycle field) is refused |
 | `TAQA_STORE.setStatus(docNumber, status, rev?)` | `PATCH /documents/{docNumber}/versions/{rev}/status` — what withdraw calls. Without `rev`, the revision in force; withdrawing or superseding it cascades to its translations in force. Allowed moves only: `obsolete` from anything not already withdrawn, `superseded` from `current` / `under-review`; `current` only through approve. Everything else is refused |
-| `TAQA_STORE.approve(docNumber)` | `POST /documents/{docNumber}/approve` — must be rejected server-side unless the caller's Entra token satisfies `TAQA_APPROVAL.canApprove` for that document (see §3); the front end's check is a UI convenience only, never a security boundary. There is no signer parameter: the signature is the caller's identity. Refused for whoever performed the QMS check on the same document |
-| `TAQA_STORE.countersign(docNumber)` | `POST /documents/{docNumber}/countersign` — same rule, checked against `canCountersign`; no signer parameter |
-| `TAQA_STORE.reject(docNumber, reason)` | `POST /documents/{docNumber}/reject` — reason of at least 20 characters; no signer parameter |
+| `TAQA_STORE.approve(docNumber, expect)` | `POST /documents/{docNumber}/approve` — `expect = {key, stage}` names the exact record the person reviewed (`TAQA_STORE.recordKey(d)`) and its step; the store refuses with `{ok:false, stale:true, error}` and writes nothing if that is no longer the record waiting (PR 2B). Production: item ID + version with `If-Match`, 409/412 on mismatch. Must be rejected server-side unless the caller's Entra token satisfies `TAQA_APPROVAL.canApprove` for that document (see §3); the front end's check is a UI convenience only, never a security boundary. There is no signer parameter: the signature is the caller's identity. Refused for whoever performed the QMS check on the same document |
+| `TAQA_STORE.countersign(docNumber, expect)` | `POST /documents/{docNumber}/countersign` — same rule, checked against `canCountersign`; same `expect` binding; no signer parameter |
+| `TAQA_STORE.reject(docNumber, reason, expect)` | `POST /documents/{docNumber}/reject` — reason of at least 20 characters; same `expect` binding; no signer parameter |
+| `TAQA_STORE.recordKey(d)`, `byKey(key)`, `revisionLabel(d)` | A record's permanent identity (`recordId`, or `number@revision` for a shipped row), the record it names, and "Rev 2.0 (attempt 2)". Production: the SharePoint item ID and version |
 | ~~`TAQA_STORE.reset()`~~ | Removed from the API (PI-09). No endpoint may wipe the register |
 | `TAQA_STORE.remove(docNumber)` | Not exposed in any UI today; document lifecycle goes through `status`, not deletion |
 | `TAQA_STORE.onChange(fn)` | Real time updates. Today it is a `CustomEvent` on `window` (`taqa:register-changed`) fired after any local write, which is how the bell badge and dashboard counters stay live without a reload. A real backend needs an equivalent push (websocket, SignalR, or a poll) so two open tabs/devices do not disagree |
@@ -116,6 +117,13 @@ reason the door pill carries that disclaimer.
 11. **Approval data is keyed by number + revision** (PI-25): the browser overlay is `taqa-status-v2`, `"number@revision"`; the server holds approval state per item version.
 12. **Routing**: department and area defaults come from the user's role and area (PI-16); the server derives the department from the role or claim.
 13. **Register integrity** (PI-53): `scripts/check-register.js` (`TAQA_REGISTER_CHECK.check(records, lookups)` in the browser) is the specification of the integrity rules the migration and the API must hold.
+
+### 3.4 Rules added by Priority 2B (October 2026). PRODUCTION CONTROL REQUIRED
+
+14. **Every decision is bound to the record and step reviewed** (NEW-01). Check, approval and both rejections carry the item ID + version (`If-Match`) and the expected stage; any mismatch is refused with 409/412 and nothing is written (`BUSINESS-RULES.md` §18).
+15. **Withdrawing the revision in force cancels the open revision** of that document and of its translations, in the same transaction (NEW-02, `BUSINESS-RULES.md` §8): `status = obsolete`, `cancelled = true`, `cancelledReason`, `cancelledBy/At/Date`. A cancelled version can never be checked, approved or made current.
+16. **A returned revision filed again is the same revision, next attempt** (NEW-03, `BUSINESS-RULES.md` §7): its own item/record id and `attempt`; number + revision unique among records not returned.
+17. **Final approval names the file version and its server-computed hash** (PI-12); the client's confirmation dialog is convenience, not the control.
 
 ### 3.2 Rules added by the Priority 1 integrity remediation (October 2026). PRODUCTION CONTROL REQUIRED
 
@@ -162,8 +170,10 @@ own local uploads" (`TAQA_STORE.added()`, the same set the register already
 calls `locallyAdded`). The bell shows that browser's own submissions once
 they are decided — `rejected: true` with `rejectedReason`, or `status:
 'current'` for a fresh approval — and lets that person dismiss each one
-(tracked in `localStorage` under `taqa-ack-outcomes-v1`, keyed by
-`docNumber:approved` / `docNumber:rejected`).
+(tracked in `localStorage` under `taqa-ack-outcomes-v2`, keyed by the
+record and outcome, `‹recordKey›:approved` / `‹recordKey›:rejected`, so each
+revision and attempt is told separately; version 1 keys, `docNumber:outcome`,
+are migrated once, PR 2B NEW-05).
 
 **What IT must build for real, once Entra ID identity exists:**
 

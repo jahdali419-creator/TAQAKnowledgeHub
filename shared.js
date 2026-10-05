@@ -1637,11 +1637,47 @@ document.addEventListener('keydown',function(e){
   // A submitter has no account to sign into here, so "notify the uploader"
   // can only mean this browser: the one TAQA_STORE.added() already calls
   // "locallyAdded" everywhere else. Acknowledging an outcome is local too,
-  // by docNumber and which outcome, so an approval and a later rejection of
-  // a resubmission never hide each other.
-  var ACK_KEY = 'taqa-ack-outcomes-v1';
+  // by the exact record and which outcome (PR 2B, NEW-05): seeing Rev 2.0's
+  // approval used to hide Rev 3.0's, because the key was the number alone.
+  // Now each revision, and each attempt at one, is told separately.
+  var ACK_KEY = 'taqa-ack-outcomes-v2', ACK_KEY_V1 = 'taqa-ack-outcomes-v1';
+  function ackKey(d, outcome){
+    var S = (typeof TAQA_STORE !== 'undefined') ? TAQA_STORE : null;
+    var id = (S && S.recordKey) ? S.recordKey(d) : (d.docNumber + '@' + (d.revision || ''));
+    return id + ':' + outcome;
+  }
+  function wasApproved(d){
+    return !d.rejected && !!(d.approvedBy || d.status === 'current' || d.status === 'superseded');
+  }
+  /* Version 1 keys ("number:outcome") are carried over once, each to the
+     first record filed here under that number with that outcome: the one
+     that was showing when it was acknowledged. Later revisions are not
+     covered, so a notice the old key wrongly hid comes back. The version 1
+     list is left as it was and no longer read. */
+  function migrateAcks(){
+    var out = [], old = [];
+    try { old = JSON.parse(localStorage.getItem(ACK_KEY_V1) || '[]'); } catch(e){ old = []; }
+    if (Array.isArray(old) && old.length && typeof TAQA_STORE !== 'undefined') {
+      var rows = TAQA_STORE.added();
+      old.forEach(function(k){
+        var m = String(k).match(/^(.*):(approved|rejected)$/);
+        if (!m) return;
+        var hit = rows.filter(function(d){
+          return d.docNumber === m[1] && (m[2] === 'rejected' ? !!d.rejected : wasApproved(d));
+        })[0];
+        if (hit && out.indexOf(ackKey(hit, m[2])) === -1) out.push(ackKey(hit, m[2]));
+      });
+    }
+    try { localStorage.setItem(ACK_KEY, JSON.stringify(out)); } catch(e){}
+    return out;
+  }
   function acked(){
-    try { return JSON.parse(localStorage.getItem(ACK_KEY) || '[]'); } catch(e){ return []; }
+    try {
+      var raw = localStorage.getItem(ACK_KEY);
+      if (raw === null) return migrateAcks();
+      var v = JSON.parse(raw);
+      return Array.isArray(v) ? v : [];
+    } catch(e){ return []; }
   }
   function ack(key){
     try {
@@ -1695,9 +1731,9 @@ document.addEventListener('keydown',function(e){
     try {
       if (typeof TAQA_STORE !== 'undefined') {
         TAQA_STORE.added().forEach(function(d){
-          if (d.rejected && have.indexOf(d.docNumber + ':rejected') === -1) {
+          if (d.rejected && have.indexOf(ackKey(d, 'rejected')) === -1) {
             mine.push({doc: d, outcome: 'rejected'});
-          } else if (!d.rejected && d.status === 'current' && have.indexOf(d.docNumber + ':approved') === -1) {
+          } else if (!d.rejected && d.status === 'current' && have.indexOf(ackKey(d, 'approved')) === -1) {
             mine.push({doc: d, outcome: 'approved'});
           }
         });
@@ -1705,7 +1741,9 @@ document.addEventListener('keydown',function(e){
     } catch(e){}
     var show = signs || mine.length > 0;
     btn.style.display = show ? '' : 'none';
-    if (!show || !badge) return;
+    // Nothing left to show: empty the menu too, so an acknowledged outcome
+    // does not linger in it behind the hidden bell.
+    if (!show || !badge) { if (menu && !show) { menu.innerHTML = ''; menu.classList.remove('open'); } return; }
     var n = pending.length + mine.length;
     badge.textContent = n > 99 ? '99+' : String(n);
     badge.style.display = n > 0 ? 'flex' : 'none';
@@ -1745,8 +1783,10 @@ document.addEventListener('keydown',function(e){
       ? '<div class="bell-hd">Your submissions</div>' +
         mine.map(function(m){
           var d = m.doc;
-          return '<button type="button" class="bell-i mine-' + m.outcome + '" data-ack="' + esc(d.docNumber + ':' + m.outcome) + '">' +
+          return '<button type="button" class="bell-i mine-' + m.outcome + '" data-ack="' + esc(ackKey(d, m.outcome)) + '">' +
             '<span class="bt">' + esc(d.title) + '</span>' +
+            '<span class="bd">' + esc(d.docNumber) + ' &middot; ' +
+              esc((typeof TAQA_STORE !== 'undefined' && TAQA_STORE.revisionLabel) ? TAQA_STORE.revisionLabel(d) : ('Rev ' + (d.revision || ''))) + '</span>' +
             '<span class="bd">' + (m.outcome === 'rejected'
               ? 'Rejected: ' + esc(d.rejectedReason || 'no reason recorded')
               : 'Approved and published') + '</span></button>';

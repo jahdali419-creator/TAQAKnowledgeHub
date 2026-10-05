@@ -96,6 +96,10 @@ test.describe('one document, every role, through the UI', () => {
     await gotoApp('/dashboard.html?id=' + SEG);
     const dCard = page.locator('.pending-card', { hasText: TITLE });
     await dCard.locator('.btn-approve').click();
+    // Final approval publishes, so it is confirmed once more, naming the
+    // record (PR 2B, PI-12).
+    await expect(page.locator('#approve-modal-rec')).toContainText(N);
+    await page.locator('#approve-modal-confirm').click();
     await expect.poll(() => page.evaluate((n) => TAQA_STORE.findDoc(n).status, N)).toBe('current');
     const released = await page.evaluate((n) => TAQA_STORE.findDoc(n), N);
     expect(released.approvedBy).toBe('Segment Director');

@@ -279,6 +279,9 @@ test.describe('Toast notifications (showDashToast)', () => {
     await setRole('owner', CLEAN_SEGMENT);
     await gotoApp('/dashboard.html?id=' + CLEAN_SEGMENT);
     await page.locator(`[data-store-doc="${dnDirector}"].btn-approve`).click();
+    // Final approval publishes, so it is confirmed once more, naming the
+    // record (PR 2B, PI-12).
+    await page.locator('#approve-modal-confirm').click();
     await expect(page.locator('#dash-toast-msg')).toHaveText('Document approved and published to segment');
   });
 

@@ -130,6 +130,8 @@ Nothing in `roles.js` or `store.js` is a security control. `roles.js` says so in
 ## 5. Concurrency
 Required: optimistic concurrency on every document transition and delegation change. Two users load the same draft; both press Approve or Reject; **only the first valid transition succeeds** and the second gets **409 Conflict** with the current state. ETag / row version / version number are all acceptable. Details: `DATA-MODEL.md` §3. UAT check: `AZURE-UAT-CHECKLIST.md` N7.
 
+**Decisions bind to what was reviewed (PR 2B, `BUSINESS-RULES.md` §18).** Every check, approval and rejection sends the SharePoint item ID and the version the person reviewed, with `If-Match: <ETag>`, plus the stage it was at. The API refuses (409/412) if a different version or record is now waiting, or the stage moved, and writes nothing; the client shows "This document changed after you opened it. Review the current revision before deciding." and reloads. Final approval also binds to the exact file version and a server-computed content hash, and Preview opens that file version. Withdrawing a document cancels its open version (and its translations' open versions) in the same transaction. The prototype's browser-side binding (`recordKey`, `expect`) is a model of this, not a control.
+
 ## 6. Files and attachments
 The prototype records a file's name, size and a browser fingerprint; **the file itself is not stored or downloadable** ("Preview not connected"). Requirements:
 - Authenticated upload; the API decides whether the actor may submit to that area/department.

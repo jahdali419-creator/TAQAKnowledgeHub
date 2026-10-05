@@ -1077,6 +1077,12 @@ function submitUpload(e) {
     if (dz) { dz.style.borderColor = 'var(--stop-ink)'; setTimeout(() => dz.style.borderColor = '', 1800); }
     return;
   }
+  // A document is filed only from the review step, once the record has been
+  // shown (PI-06). All four steps sit in one form, so Enter in a field on an
+  // earlier step used to file the record before anyone had checked it. The
+  // explicit Submit on step 4 is the only way in.
+  if (_step !== 4 || !_reviewShown) return;
+
   // It used to mint a random UPL reference and discard everything typed. The
   // record is assembled here instead, in the shape TAQA_MASTER_DOCS stores, so
   // what the back end has to accept is written down rather than implied.
@@ -1743,7 +1749,19 @@ document.addEventListener('click',function(e){
 /* ── Steps ─────────────────────────────────────────────────────────────
    Four panels, one at a time, each gated on the answers it needs. The bar
    at the top of the page has always shown steps; now it means them. */
-var _step = 1, _maxStep = 1;
+var _step = 1, _maxStep = 1, _reviewShown = false;
+// Enter in a single-line field moves nothing and files nothing before the
+// review step (PI-06). Text areas keep their new lines; buttons, links and
+// checkboxes keep their own Enter; Submit on step 4 files as before.
+document.addEventListener('DOMContentLoaded', function(){
+  var form = document.getElementById('upload-form');
+  if (!form) return;
+  form.addEventListener('keydown', function(e){
+    if (e.key !== 'Enter' || _step === 4) return;
+    var t = e.target;
+    if (t && t.tagName === 'INPUT' && !/^(button|submit|reset|checkbox|radio|file)$/i.test(t.type || '')) e.preventDefault();
+  });
+});
 
 function goStep(n){
   if (n > _step && !stepReady(_step)) return;
@@ -1754,7 +1772,8 @@ function goStep(n){
     if (panel) panel.hidden = (i !== n);
   }
   paintStepBar();
-  if (n === 4) paintRecord();
+  _reviewShown = false;
+  if (n === 4) { paintRecord(); _reviewShown = true; }
   var card = document.querySelector('.upload-card');
   if (card) window.scrollTo({ top: card.offsetTop - 90, behavior: 'smooth' });
 }
@@ -1948,12 +1967,19 @@ function paintMySubmissions(){
             esc(d.rejectedReason || 'no reason recorded') + '\u201D. Revise it and file it again.</span>';
     } else if (d.status === 'current') { st = 'Published'; cls = 'st-live'; }
     else if (d.status === 'superseded') { st = 'Superseded'; cls = 'st-back'; }
+    else if (d.status === 'obsolete' && d.cancelled) {
+      st = 'Cancelled'; cls = 'st-back';
+      why = '<span class="subs-why">' + esc(d.cancelledReason || 'Cancelled.') + '</span>';
+    }
     else if (d.status === 'obsolete') { st = 'Withdrawn'; cls = 'st-back'; }
     else if (stage === 'director') { st = 'Waiting on the Director'; cls = 'st-wait'; }
     else { st = 'Waiting on QMS check'; cls = 'st-wait'; }
     // The exact revision filed, not whichever revision is in force.
+    // and the exact attempt: a returned revision and its re-filing share a
+    // revision label, so the link names the record itself (PR 2B, NEW-03).
     var href = 'viewer.html?doc=' + encodeURIComponent(d.docNumber || '') + '&seg=' + encodeURIComponent(d.segment || '') +
-               (d.revision ? '&rev=' + encodeURIComponent(d.revision) : '');
+               (d.revision ? '&rev=' + encodeURIComponent(d.revision) : '') +
+               (d.recordId ? '&rid=' + encodeURIComponent(d.recordId) : '');
     var when = d.submittedAt ? new Date(d.submittedAt).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'}) : '';
     return '<li class="subs-row"><div class="subs-t"><a href="' + href + '">' + esc(d.title || d.docNumber) + '</a>' +
            '<span class="subs-n">' + esc(d.docNumber || '') + (when ? ' \u00b7 filed ' + esc(when) : '') + '</span></div>' +

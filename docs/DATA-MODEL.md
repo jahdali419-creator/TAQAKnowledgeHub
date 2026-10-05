@@ -47,6 +47,8 @@ What the frontend holds today, where, and what each object should become. No dat
 | `countersignedBy`, `countersignedAt`, `countersignedDate` | user ref, timestamp | **server** | QMS check |
 | `approvedBy`, `approvedAt` | user ref, timestamp | **server** | Final approval. For a delegate: the delegate, plus a reference to the delegation |
 | `rejected`, `rejectedAtStage`, `rejectedBy`, `rejectedAt`, `rejectedDate`, `rejectedReason` | | **server** (reason from the actor) | |
+| `recordId`, `attempt` | string, number | **server** | PR 2B. Permanent identity of one filing (production: item ID + version) and which attempt at a revision it is; a returned revision filed again is the same revision, next attempt |
+| `cancelled`, `cancelledReason`, `cancelledBy`, `cancelledAt`, `cancelledDate` | | **server** | PR 2B. A revision in progress cancelled because its document family was withdrawn (`status = obsolete`) |
 | `numberStatus` | `conformant` / `provisional` | server | |
 | `files[]` | attachment refs | server | See Attachment |
 | *(new)* `version` / `etag` | opaque | **server** | Concurrency token (§3) |
@@ -135,5 +137,5 @@ The SME-to-category mapping is configuration owned by the business / IT implemen
 
 Two people load the same draft and both act. Only the first valid transition may succeed; the second must get a **conflict**, not overwrite it.
 - Every document carries a version token (ETag, row version or equivalent). Every write sends the token it read (`If-Match`). The API applies the transition only if the token and the expected stage still match, atomically, and returns **409 Conflict** (or 412) otherwise.
-- The prototype approximates this by re-reading storage before each write and re-checking the stage (`store.js` `fresh()`), so a stale tab is refused ("You cannot approve this document."). That is a single-browser safeguard, not a substitute.
+- The prototype approximates this by re-reading storage before each write and checking that the record the person reviewed (`expect.key`) is still the one waiting at the stage they saw (`store.js` `decisionTarget`), so a stale tab is refused with "This document changed after you opened it. Review the current revision before deciding." (PR 2B). That is a single-browser safeguard, not a substitute.
 - Delegation revoke/grant and withdrawal need the same protection, and so do glossary review transitions (two SMEs acting on the same pending term).

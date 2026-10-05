@@ -60,6 +60,18 @@
       _added = raw ? JSON.parse(raw) : [];
       if (!Array.isArray(_added)) _added = [];
     } catch (e) { _added = []; }
+    // Rows filed before records had their own id (PR 2B) get one now, worked
+    // out from the row itself so every tab arrives at the same id: number,
+    // revision and, where the same revision was filed more than once, which
+    // filing it was. That order is also the attempt.
+    var seen = {};
+    _added.forEach(function (d) {
+      if (!d || typeof d !== 'object') return;
+      var k = (d.docNumber || '') + '@' + revOf(d).toLowerCase();
+      seen[k] = (seen[k] || 0) + 1;
+      if (!d.recordId) d.recordId = 'L-' + k + (seen[k] > 1 ? '#' + seen[k] : '');
+      if (!d.attempt) d.attempt = seen[k];
+    });
     return _added;
   }
   function save() {
@@ -350,6 +362,17 @@
     // caller's choosing (PI-09). Every lifecycle field is now the store's.
     row.status = 'draft';
     row.approvalStage = 'qms';
+    // Every filing is its own record, for good (PR 2B, NEW-01, NEW-03): a
+    // permanent id that no later filing can share, and, for a revision, which
+    // attempt at that revision it is. A revision returned by QMS or the
+    // approver keeps its revision label as history; filing it again is the
+    // same revision, next attempt (Rev 4.0, attempt 2), never a second record
+    // that claims to be the same one. Decisions name this id, so a click made
+    // on one record can never land on another.
+    row.recordId = newRecordId();
+    row.attempt = 1 + revisionsOf(row.docNumber).filter(function (x) {
+      return x.rejected && sameRev(x.revision, row.revision);
+    }).length;
     row.submittedAt = new Date().toISOString();
     // Who filed it goes on the record at the moment of filing, the same way
     // the two signatures do, and from the signed-in identity, not the caller.
@@ -398,6 +421,12 @@
     // translations with it (PI-34).
     if (wasLive) cascadeToTranslations(cur.docNumber, status,
       'Source ' + cur.docNumber + ' superseded: translation to be re-issued');
+    // Withdrawing the revision in force withdraws the document family. A
+    // revision still in progress, of this document or of its translations,
+    // is cancelled in the same step: it leaves both queues and can never be
+    // checked, approved or put in force, and it stays in the register as
+    // history with the reason (owner's decision for NEW-02, PR 2B).
+    if (wasLive && status === 'obsolete') cancelOpenRevisions(cur.docNumber);
     announce({ action: 'status', docNumber: docNumber, status: status });
     return findRev(cur.docNumber, cur.revision) || cur;
   }
@@ -461,6 +490,31 @@
     var m = String(rev == null ? '' : rev).trim().match(/^(v?)(\d+)(?:\.\d+)?$/i);
     return m ? m[1] + (parseInt(m[2], 10) + 1) + '.0' : '2.0';
   }
+  /* ── Record identity (PR 2B) ───────────────────────────────────────
+     recordKey(d) names one exact record for good: the permanent id a filing
+     gets here, or, for a record shipped with the register (one shipped row
+     per number and revision), its number and revision. byKey() reads it
+     back. A decision carries the key of the record the person was shown,
+     and the register refuses it if that is no longer the record waiting. */
+  function newRecordId() {
+    return 'R-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+  }
+  function recordKey(d) {
+    if (!d) return null;
+    return d.recordId || ((d.docNumber || '') + '@' + revOf(d));
+  }
+  function byKey(key) {
+    if (!key) return null;
+    var hit = null;
+    all().forEach(function (d) { if (!hit && recordKey(d) === key) hit = d; });
+    return hit;
+  }
+  // Rev 4.0, or Rev 4.0 (attempt 2) when an earlier attempt was returned.
+  function revisionLabel(d) {
+    if (!d) return '';
+    if (!revOf(d)) return 'Revision not recorded';
+    return 'Rev ' + revOf(d) + (d.attempt > 1 ? ' (attempt ' + d.attempt + ')' : '');
+  }
   // A translation superseded because its source was revised, waiting to be
   // re-issued as its own next revision.
   function awaitingReissue(d) {
@@ -505,6 +559,55 @@
       });
   }
 
+  var CANCEL_REASON = 'Cancelled because the document family was withdrawn.';
+  function cancelOpenRevisions(docNumber) {
+    var now = new Date().toISOString(), by = actingName();
+    all().filter(function (d) {
+      return d.status === 'draft' && !d.rejected &&
+        (d.docNumber === docNumber || d.translationOf === docNumber);
+    }).forEach(function (d) {
+      write(d, { status: 'obsolete', approvalStage: null, cancelled: true,
+        cancelledReason: CANCEL_REASON, cancelledBy: by, cancelledAt: now,
+        cancelledDate: now.slice(0, 10) });
+    });
+  }
+  /* Whether a draft may still go forward. Cancellation already takes a
+     withdrawn family's open revisions out of the workflow; this is the second
+     lock, for a draft written before cancellation existed or by any other
+     route: a revision whose predecessor has been withdrawn, or a translation
+     whose source family has been withdrawn, never goes forward. */
+  function withdrawnFamily(d) {
+    if (!d) return null;
+    if (d.cancelled) return d.cancelledReason || CANCEL_REASON;
+    var fam = revisionsOf(d.docNumber);
+    var m = String(d.supersedes || '').match(/^Rev\s+(.+)$/);
+    var parent = m ? fam.filter(function (x) { return x !== d && sameRev(x.revision, m[1]); })[0] : null;
+    if (parent && parent.status === 'obsolete')
+      return d.docNumber + ' has been withdrawn, so this revision cannot go forward.';
+    if (d.translationOf) {
+      var src = revisionsOf(d.translationOf);
+      if (src.length && !src.some(function (x) { return isLiveStatus(x.status); }) &&
+          src.some(function (x) { return x.status === 'obsolete' && !x.cancelled; }))
+        return 'Its source ' + d.translationOf + ' has been withdrawn, so this translation cannot go forward.';
+    }
+    return null;
+  }
+
+  /* A decision names the record it was made on (PR 2B, NEW-01). The page
+     passes { key, stage }: the record it showed and the step it was at.
+     Without it the call acts on the number's open revision, as before; with
+     it, the register refuses unless that exact record is still the one
+     waiting, at that step. "Changed after you opened it" is the honest
+     reason, never a role error (PI-49). */
+  var STALE = 'This document changed after you opened it. Review the current revision before deciding.';
+  function decisionTarget(docNumber, expect) {
+    var d = workTarget(docNumber);
+    if (!expect || typeof expect !== 'object' || !expect.key) return { d: d };
+    if (!d || recordKey(d) !== String(expect.key) || (expect.stage && stageOf(d) !== expect.stage))
+      return { d: d, stale: true };
+    return { d: d };
+  }
+
   /* Neither step takes a signer: the name on a signature is always the
      signed-in identity (actingName), never one the caller chooses (PI-09).
 
@@ -515,11 +618,14 @@
      roles.js for why the order is this way round. */
   /* Check, approval and rejection act on the number's open revision (the
      one waiting in the queue), never on the revision in force. */
-  function approve(docNumber) {
+  function approve(docNumber, expect) {
     fresh();
-    var d = workTarget(docNumber);
+    var t = decisionTarget(docNumber, expect), d = t.d;
+    if (t.stale) return { ok: false, stale: true, error: STALE };
     if (!d) return { ok: false, error: 'No such document.' };
     if (typeof TAQA_APPROVAL === 'undefined') return { ok: false, error: 'Rules not loaded.' };
+    var gone = d.status === 'draft' ? withdrawnFamily(d) : null;
+    if (gone) return { ok: false, error: gone };
     if (!TAQA_APPROVAL.canApprove(d)) return { ok: false, error: 'You cannot approve this document.' };
     var now = new Date().toISOString(), today = now.slice(0, 10);
     // Releasing a revision supersedes the one it replaces in the same step,
@@ -542,11 +648,14 @@
     return { ok: true, next: 'released' };
   }
 
-  function countersign(docNumber) {
+  function countersign(docNumber, expect) {
     fresh();
-    var d = workTarget(docNumber);
+    var t = decisionTarget(docNumber, expect), d = t.d;
+    if (t.stale) return { ok: false, stale: true, error: STALE };
     if (!d) return { ok: false, error: 'No such document.' };
     if (typeof TAQA_APPROVAL === 'undefined') return { ok: false, error: 'Rules not loaded.' };
+    var gone = d.status === 'draft' ? withdrawnFamily(d) : null;
+    if (gone) return { ok: false, error: gone };
     if (!TAQA_APPROVAL.canCountersign(d)) return { ok: false, error: 'You cannot countersign this document.' };
     write(d, {
       approvalStage: 'director',
@@ -564,9 +673,10 @@
      it. A reason is required: a submitter who only sees "Rejected" has
      nothing to act on, and neither does anyone reading this later to see
      why a document never made it into the register. */
-  function reject(docNumber, reason) {
+  function reject(docNumber, reason, expect) {
     fresh();
-    var d = workTarget(docNumber);
+    var t = decisionTarget(docNumber, expect), d = t.d;
+    if (t.stale) return { ok: false, stale: true, error: STALE };
     if (!d) return { ok: false, error: 'No such document.' };
     if (typeof TAQA_APPROVAL === 'undefined') return { ok: false, error: 'Rules not loaded.' };
     if (!reason || !String(reason).trim()) return { ok: false, error: 'A reason is required.' };
@@ -618,10 +728,11 @@
 
   var LIFECYCLE = ['status', 'approvalStage', 'approvedBy', 'approvedDate', 'approvedAt',
     'countersignedBy', 'countersignedDate', 'countersignedAt', 'rejected', 'rejectedAtStage',
-    'rejectedBy', 'rejectedReason', 'rejectedDate', 'rejectedAt', 'submittedBy', 'submittedAt'];
+    'rejectedBy', 'rejectedReason', 'rejectedDate', 'rejectedAt', 'submittedBy', 'submittedAt',
+    'cancelled', 'cancelledReason', 'cancelledBy', 'cancelledAt', 'cancelledDate'];
 
   /* Never taken from a caller of add(): the store writes each of these. */
-  var FILED_BY_STORE = LIFECYCLE.concat(['locallyAdded', 'supersededBy']);
+  var FILED_BY_STORE = LIFECYCLE.concat(['locallyAdded', 'supersededBy', 'recordId', 'attempt']);
 
   /* What "edit details" may change: descriptive and review fields only.
      Everything else is identity or authority (number, area, department,
@@ -689,6 +800,8 @@
     setStatus: setStatus, remove: remove,
     approve: approve, countersign: countersign, reject: reject, patch: editFields,
     stageOf: stageOf, findDoc: findDoc, actingName: actingName,
+    recordKey: recordKey, byKey: byKey, revisionLabel: revisionLabel,
+    withdrawnFamily: withdrawnFamily, STALE: STALE, CANCEL_REASON: CANCEL_REASON,
     onChange: onChange, added: load,
     isControlled: isControlled, isLive: isLive,
     EVENT: EVT, KEY: KEY
