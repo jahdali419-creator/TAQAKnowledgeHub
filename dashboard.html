@@ -147,6 +147,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .btn-approve-confirm{flex:1;padding:11px;border-radius:10px;background:var(--primary);color:#fff;border:none;
   font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
 .btn-approve-confirm:hover{opacity:0.9;}
+.btn-approve-confirm:disabled{opacity:.45;cursor:not-allowed;}
+.approve-eff-l{display:block;font-size:12px;font-weight:700;color:var(--text);margin:0 0 4px;}
+.approve-eff{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:13px;
+  background:var(--bg-white);color:var(--text);box-sizing:border-box;}
+.approve-eff-n{font-size:12px !important;margin:6px 0 0 !important;}
 .action-result.show{display:inline;}
 .action-result.approved-txt{color:var(--primary-ink);}
 .action-result.rejected-txt{color:var(--stop-ink);}
@@ -960,25 +965,6 @@ function animateCount(el, target, duration) {
   requestAnimationFrame(step);
 }
 
-function buildSimilarDocs(title, segId, limit) {
-  // Was matching against TAQA_SEGMENTS[segId].docs, a hand-written list of
-  // fabricated titles left over from before the real register existed. A
-  // duplicate check run against fiction can miss a real duplicate and flag
-  // one that was never real, so this reads the actual live documents in
-  // the segment instead, the same source every other count on the page uses.
-  if (typeof TAQA_STORE === 'undefined') return [];
-  const allTitles = TAQA_STORE.rows('live', {segment: segId}).map(d => d.title);
-  const stopW = new Set(['the','a','an','of','in','for','and','or','to','with','at','by','from','on','is','are','its','this','that','was','been']);
-  function kw(s){return s.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(w=>w.length>2&&!stopW.has(w));}
-  const wa = new Set(kw(title));
-  if (!wa.size) return [];
-  return allTitles
-    .map(t => { const wb=new Set(kw(t));const ov=[...wa].filter(w=>wb.has(w)).length;return {title:t,score:ov/Math.max(wa.size,wb.size,1)}; })
-    .filter(r => r.score >= 0.25 && r.title.toLowerCase() !== title.toLowerCase())
-    .sort((a,b) => b.score-a.score)
-    .slice(0, limit||3);
-}
-
 function initDashboard() {
   var esc = function(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
@@ -1048,8 +1034,10 @@ function initDashboard() {
   const MNT = d => typeof TAQA_APPROVAL !== 'undefined' && TAQA_APPROVAL.isMaintenance(d);
   if (MM_DESK && ST) pendingCount = ST.rows('awaiting-director', { segment: dashSegId })
     .filter(d => TAQA_APPROVAL.canApprove(d)).length;
-  const rejectedCount = ST ? ST.rows('pending', { segment: dashSegId })
-    .filter(d => d.rejected && (!MM_DESK || MNT(d))).length : 0;
+  // Returned filings are no longer pending (PI-24), so they are counted
+  // from the register directly.
+  const rejectedCount = ST ? ST.rows('register', { segment: dashSegId })
+    .filter(d => d.status === 'draft' && d.rejected && (!MM_DESK || MNT(d))).length : 0;
   const realPublished = (MM_DESK && ST) ? ST.rows('live', { segment: dashSegId }).filter(MNT).length
     : ST ? ST.area(dashSegId).live
     : ((typeof TAQA_SEGMENTS!=='undefined'&&TAQA_SEGMENTS[dashSegId]&&TAQA_SEGMENTS[dashSegId].docs)
@@ -1157,7 +1145,11 @@ function initDashboard() {
     seg: d.segment || '',
     rev: d.revision || '',
     rid: d.recordId || '',
-    change: revisionChange(d)
+    change: revisionChange(d),
+    // Possible duplicates, with why each was flagged (PI-13): the same file,
+    // the same title in this area, or shared title words. Advice only.
+    related: ST.related({ title: d.title, segment: d.segment, docNumber: d.docNumber, limit: 3,
+                          sha256: (d.files && d.files[0] && d.files[0].sha256) || null })
   }));
   // The queue is the register's drafts. Hand-written example cards used to be
   // appended for a Director; they named documents the register does not hold
@@ -1188,14 +1180,14 @@ function initDashboard() {
         (STAGE === 'qms' ? 'conformance check' : 'final approval') + '.</p></div>';
   } else {
     pendingList.innerHTML = queue.map((p, i) => {
-      const simDocs = buildSimilarDocs(p.title, dashSegId, 3);
-      const simPanel = simDocs.length ? `
+      const rel = p.related || [], sameFile = rel.filter(m => m.sameFile), byTitle = rel.filter(m => !m.sameFile);
+      const simPanel = byTitle.length ? `
         <div class="dup-sim-panel">
-          <div class="dup-sim-hd"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Similar documents already in this segment</div>
-          ${simDocs.map(d=>`<div class="dup-sim-item"><div class="dup-sim-bar-wrap"><div class="dup-sim-bar" style="width:${Math.round(d.score*100)}%"></div></div><div class="dup-sim-title" title="${esc(d.title)}">${esc(d.title)}</div><span class="dup-sim-pct">${Math.round(d.score*100)}% match</span></div>`).join('')}
+          <div class="dup-sim-hd"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Possibly related documents in this area</div>
+          ${byTitle.map(m=>`<div class="dup-sim-item"><div class="dup-sim-title" title="${esc(m.d.title)}">${esc(m.d.docNumber||'')} ${esc(m.d.title)}</div><span class="dup-sim-pct">${esc(m.reasons.join('; '))}</span></div>`).join('')}
         </div>` : '';
-      const exactBanner = p.isExactDup ? `
-        <div class="dup-exact-banner"><span class="dup-exact-badge">EXACT DUPLICATE</span><span class="dup-exact-txt">File fingerprint matches a document already published in this segment. Verify before approving.</span></div>` : '';
+      const exactBanner = sameFile.length ? `
+        <div class="dup-exact-banner"><span class="dup-exact-badge">SAME FILE</span><span class="dup-exact-txt">Its fingerprint matches ${sameFile.map(m=>esc(m.d.docNumber||'')+' \u201c'+esc(m.d.title)+'\u201d').join(', ')}. Check it is not a duplicate before you decide.</span></div>` : '';
       const supersRow = p.change ? `
         <div class="supersedes-row"><span class="supersedes-label">${esc(p.change.label)}</span><span class="supersedes-doc-title" title="${esc(p.change.text)}">${esc(p.change.text)}</span></div>` : '';
       const stepTxt = p.stage === 'qms' ? 'Draft, waiting for your conformance check' : 'Draft, checked by QMS, waiting for your final approval';
@@ -1208,7 +1200,7 @@ function initDashboard() {
         ? `<div class="${typeCls}">${esc(p.type)} &nbsp;<span style="font-family:monospace;font-size:9.5px;font-weight:600;">${esc(p.docId)}</span></div>`
         : `<div class="${typeCls}">${esc(p.type)}</div>`;
       return `
-      <div class="pending-card${p.isExactDup?' dup-flagged':''}" id="pcard-${i+1}">
+      <div class="pending-card${sameFile.length?' dup-flagged':''}" id="pcard-${i+1}">
         <div class="pending-card-top">
           <div class="pending-doc-info">
             ${docTypeLabel}
@@ -1432,6 +1424,9 @@ function ensureApproveModal() {
       '<h3 id="approve-modal-title">Approve and publish?</h3>' +
       '<div class="approve-modal-rec" id="approve-modal-rec"></div>' +
       '<p>Your approval releases this exact revision into the register for everyone in the area.</p>' +
+      '<label class="approve-eff-l" for="approve-modal-eff">Effective from</label>' +
+      '<input type="date" class="approve-eff" id="approve-modal-eff">' +
+      '<p class="approve-eff-n" id="approve-modal-eff-n"></p>' +
       '<div class="reject-modal-actions">' +
         '<button type="button" class="btn-reject-cancel" id="approve-modal-cancel">Cancel</button>' +
         '<button type="button" class="btn-approve-confirm" id="approve-modal-confirm">Approve</button>' +
@@ -1449,10 +1444,12 @@ function ensureApproveModal() {
   document.getElementById('approve-modal-confirm').addEventListener('click', function () {
     const p = approvePending;
     if (!p) return;
+    const eff = document.getElementById('approve-modal-eff').value;
     approvePending = null;
     approveOverlay.classList.remove('open');
-    decideApprove(p.id);
+    decideApprove(p.id, eff);
   });
+  document.getElementById('approve-modal-eff').addEventListener('input', paintEffNote);
 }
 
 function approveDoc(id) {
@@ -1466,11 +1463,28 @@ function approveDoc(id) {
   rec.innerHTML = '<b>' + dEsc(btn.dataset.storeDoc) + '</b> \u00b7 ' + dEsc(btn.dataset.revLabel) + '<br>' +
     dEsc(btn.dataset.docTitle) + (btn.dataset.change ? '<br>' + dEsc(btn.dataset.change) : '');
   document.getElementById('approve-modal-confirm').textContent = 'Approve ' + (btn.dataset.revLabel || '') + ' and publish';
+  // The effective date is when the approved revision becomes valid for use:
+  // today by default, never earlier (owner's decision for PI-21).
+  const eff = document.getElementById('approve-modal-eff'), today = TAQA_STORE.localDay();
+  eff.min = today; eff.value = today;
+  paintEffNote();
   approveOverlay.classList.add('open');
   document.getElementById('approve-modal-cancel').focus();
 }
 
-function decideApprove(id) {
+function paintEffNote() {
+  const eff = document.getElementById('approve-modal-eff'), n = document.getElementById('approve-modal-eff-n');
+  const today = TAQA_STORE.localDay(), v = eff.value || today;
+  const btn = document.getElementById('approve-modal-confirm');
+  if (v < today) { n.textContent = 'The effective date cannot be before today.'; btn.disabled = true; return; }
+  btn.disabled = false;
+  n.textContent = v === today
+    ? 'In force as soon as you approve it.'
+    : 'Approved today, in force from ' + v + '. Until then the revision in force stays current and employees do not see this one.';
+}
+
+function decideApprove(id, effectiveDate) {
+  let takesEffect = null;
   const card = document.getElementById('pcard-' + id);
   const badge = card.querySelector('.pending-status-badge');
   const result = document.getElementById('result-' + id);
@@ -1492,8 +1506,9 @@ function decideApprove(id) {
     // Bound to the record this card showed, at the step it showed (NEW-01).
     const expect = { key: btn.dataset.key, stage: stage };
     const out = stage === 'qms' ? TAQA_STORE.countersign(storeDoc, expect)
-                                : TAQA_STORE.approve(storeDoc, expect);
+                                : TAQA_STORE.approve(storeDoc, expect, { effectiveDate: effectiveDate || undefined });
     if (out && out.stale) { deskStale(out.error); return; }
+    if (out && out.ok && out.effectiveDate) takesEffect = out.effectiveDate;
     if (!out || !out.ok) {
       badge.className = 'pending-status-badge badge-pending';
       badge.textContent = 'Awaiting Review';
@@ -1505,6 +1520,7 @@ function decideApprove(id) {
     const _mnt = TAQA_APPROVAL.isMaintenance((TAQA_STORE.openDraft&&TAQA_STORE.openDraft(storeDoc))||TAQA_STORE.findDoc(storeDoc));
     result.textContent = stage === 'qms'
       ? '✓ Checked. Now with the ' + (_mnt ? 'Maintenance Manager' : 'Director') + ' for final approval'
+      : out.effectiveDate ? '✓ Approved. In force from ' + out.effectiveDate
       : '✓ Approved and published to the segment';
   }
   pendingCount = Math.max(0, pendingCount - 1);
@@ -1513,6 +1529,7 @@ function decideApprove(id) {
   const _mntT = storeDoc && typeof TAQA_STORE !== 'undefined' && TAQA_APPROVAL.isMaintenance((TAQA_STORE.openDraft&&TAQA_STORE.openDraft(storeDoc))||TAQA_STORE.findDoc(storeDoc));
   showDashToast(stage === 'qms'
     ? 'Checked, sent on for the ' + (_mntT ? 'Maintenance Manager' : 'Director') + '\'s final approval'
+    : takesEffect ? 'Approved. In force from ' + takesEffect + '; until then the current revision stays in force'
     : 'Document approved and published to segment', '#00BBB6');
   updateBellCount(-1);
 }

@@ -58,7 +58,7 @@ const TAQA_ROLES = {
     // Wording only: QMS checks first and the Director's approval releases
     // (TAQA_APPROVAL), so the description says it in that order.
     blurb: 'Holds a segment. Gives final approval to its Operations documents once QMS has checked them, and that approval is what publishes them. May delegate the authority for a fixed period.',
-    statuses:        ['current', 'under-review', 'superseded', 'obsolete', 'draft'],
+    statuses:        ['current', 'under-review', 'superseded', 'obsolete', 'draft', 'approved'],
     classifications: ['internal', 'confidential'],
     controlPanel: true,
     export:       false,
@@ -85,7 +85,7 @@ const TAQA_ROLES = {
   maintenance: {
     label: 'Maintenance Manager',
     blurb: 'Heads a segment\'s maintenance department. Approves that department\'s documents, and only those: its maintenance procedures, manuals and checklists. The Segment Director keeps the segment\'s other documents. QMS still checks every one first.',
-    statuses:        ['current', 'under-review', 'superseded', 'obsolete', 'draft'],
+    statuses:        ['current', 'under-review', 'superseded', 'obsolete', 'draft', 'approved'],
     classifications: ['internal', 'confidential'],
     controlPanel: true,
     export:       false,
@@ -105,7 +105,7 @@ const TAQA_ROLES = {
   qms: {
     label: 'QMS / Document Controller',
     blurb: 'Custodian of the register. Checks every document first, the record, the numbering and the revision, before its Segment Director or Maintenance Manager gives final approval. Owns withdrawal, periodic review and the TQ-QHSE-F086 export. Does not give the technical sign-off on another function\'s procedure.',
-    statuses:        ['current', 'under-review', 'superseded', 'obsolete', 'draft'],
+    statuses:        ['current', 'under-review', 'superseded', 'obsolete', 'draft', 'approved'],
     classifications: ['internal', 'confidential', 'restricted'],
     controlPanel: true,
     export:       true,
@@ -125,7 +125,7 @@ const TAQA_ROLES = {
   auditor: {
     label: 'External Auditor',
     blurb: 'Time-boxed read-only access to everything, including the register export. Changes nothing. Granted per audit and revoked on close.',
-    statuses:        ['current', 'under-review', 'superseded', 'obsolete', 'draft'],
+    statuses:        ['current', 'under-review', 'superseded', 'obsolete', 'draft', 'approved'],
     classifications: ['internal', 'confidential', 'restricted'],
     controlPanel: true,
     export:       true,
@@ -252,7 +252,9 @@ const TAQA_ROLE = {
     if (R.statuses.indexOf(doc.status) === -1 && doc.status !== 'asset') return false;
     if (doc.classification && R.classifications.indexOf(doc.classification) === -1) return false;
     // A draft carries no authority (API Q2 4.4.3 b), so an owner sees only their own.
-    if (doc.status === 'draft' && R.scope === 'own' && doc.segment !== TAQA_ROLE.area()) return false;
+    // A revision approved but not yet effective is the same: not in force,
+    // so an employee does not see it, and an owner only in their area (PI-21).
+    if ((doc.status === 'draft' || doc.status === 'approved') && R.scope === 'own' && doc.segment !== TAQA_ROLE.area()) return false;
     return true;
   },
 

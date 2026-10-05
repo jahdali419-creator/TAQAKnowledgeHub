@@ -1733,7 +1733,7 @@ document.addEventListener('keydown',function(e){
         TAQA_STORE.added().forEach(function(d){
           if (d.rejected && have.indexOf(ackKey(d, 'rejected')) === -1) {
             mine.push({doc: d, outcome: 'rejected'});
-          } else if (!d.rejected && d.status === 'current' && have.indexOf(ackKey(d, 'approved')) === -1) {
+          } else if (!d.rejected && (d.status === 'current' || d.status === 'approved') && have.indexOf(ackKey(d, 'approved')) === -1) {
             mine.push({doc: d, outcome: 'approved'});
           }
         });
@@ -1789,6 +1789,7 @@ document.addEventListener('keydown',function(e){
               esc((typeof TAQA_STORE !== 'undefined' && TAQA_STORE.revisionLabel) ? TAQA_STORE.revisionLabel(d) : ('Rev ' + (d.revision || ''))) + '</span>' +
             '<span class="bd">' + (m.outcome === 'rejected'
               ? 'Rejected: ' + esc(d.rejectedReason || 'no reason recorded')
+              : d.status === 'approved' ? 'Approved, in force from ' + esc(d.issueDate || '')
               : 'Approved and published') + '</span></button>';
         }).join('')
       : '';

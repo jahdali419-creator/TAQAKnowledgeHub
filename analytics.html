@@ -560,11 +560,20 @@ document.addEventListener('click',function(e){const a=e.target.closest('a[href]'
       if (d.approvedDate) {
         entries.push({ date: d.approvedDate, action: 'approved', actor: approver + ' (' + segName + ')', doc: d });
       }
-      var released = d.status === 'current' || d.status === 'under-review' || d.status === 'superseded' || d.status === 'obsolete';
+      // A revision withdrawn or cancelled before it was in force was never
+      // released, so the log does not say it was (PI-11).
+      var neverInForce = !!d.cancelled || d.withdrawnFromStatus === 'draft' || d.withdrawnFromStatus === 'approved';
+      var released = !neverInForce && (d.status === 'current' || d.status === 'under-review' || d.status === 'superseded' || d.status === 'obsolete');
       if (d.issueDate && released) {
         entries.push({ date: d.issueDate, action: 'released', actor: 'QMS Document Control', doc: d });
       }
-      if (d.status === 'obsolete' || d.status === 'superseded') {
+      // The withdrawal or replacement as recorded, by whom and when, where the
+      // register has the record (PI-11).
+      if (d.status === 'obsolete' && (d.withdrawnDate || d.cancelledDate)) {
+        entries.push({ date: d.withdrawnDate || d.cancelledDate, action: 'withdrawn', actor: d.withdrawnBy || d.cancelledBy || 'Not recorded', doc: d });
+      } else if (d.status === 'superseded' && d.supersededDate) {
+        entries.push({ date: d.supersededDate, action: 'withdrawn', actor: 'Replaced by ' + (d.supersededBy || 'a later revision'), doc: d });
+      } else if (d.status === 'obsolete' || d.status === 'superseded') {
         // No withdrawal date field exists yet. The review due date is the
         // closest real date on the record to when a withdrawal would have
         // been triggered, so it stands in, but only when that date has

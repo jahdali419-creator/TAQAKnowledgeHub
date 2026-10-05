@@ -305,6 +305,17 @@ html[data-taqa-theme="dark"] .scroll-top-btn{background:rgba(0,35,38,0.92);borde
 .dup-warn-title{font-size:12.5px;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .dup-warn-pct{font-size:10.5px;font-weight:700;color:var(--alert-ink);white-space:nowrap;}
 .dup-warn-note{font-size:11.5px;color:var(--text-muted);margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,184,28,0.18);}
+/* PI-13: advisory, with the reason each was flagged. */
+.dup-hint{margin-top:8px;font-size:12.5px;line-height:1.5;color:var(--warn-ink,#8a5a00);background:rgba(255,184,28,0.09);
+  border:1px solid rgba(255,184,28,0.35);border-radius:9px;padding:8px 12px;}
+.dup-item{display:flex;flex-direction:column;gap:2px;padding:7px 0;border-top:1px solid rgba(0,0,0,0.06);}
+.dup-item:first-child{border-top:none;}
+.dup-item b{font-size:13px;color:var(--text);}
+.dup-item .dup-n{font-family:monospace;font-size:11.5px;color:var(--text-muted);}
+.dup-item .dup-why{font-size:12px;color:var(--warn-ink,#8a5a00);}
+.subs-again{display:inline-block;margin-top:4px;font-size:12px;font-weight:700;color:var(--primary-ink);}
+.refile-note{margin:0 0 14px;padding:10px 14px;border-radius:10px;font-size:13px;line-height:1.5;
+  background:rgba(0,118,168,0.06);border:1px solid rgba(0,118,168,0.25);color:var(--text);}
 .dup-error-panel{background:rgba(200,16,46,0.07);border:1px solid rgba(200,16,46,0.3);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:none;}
 .dup-error-hd{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--stop-ink);margin-bottom:4px;}
 .dup-error-sub{font-size:12px;color:var(--text-muted);line-height:1.5;}
@@ -622,7 +633,8 @@ html[data-taqa-theme="dark"] .policy-rules {
           </div>
         </div>
 
-        <div class="form-group">
+        <div class="refile-note" id="refile-note" hidden></div>
+        <div class="form-group" id="doc-status-group">
           <label class="form-label">Document Status <span>*</span></label>
           <div class="doc-status-toggle">
             <button type="button" class="status-btn active" id="status-new" onclick="setDocStatus('new')">New Document</button>
@@ -675,9 +687,10 @@ html[data-taqa-theme="dark"] .policy-rules {
         <p class="sect-note">This is what a person sees in the library before they open the file, so it is worth getting right.</p>
         <div class="form-group">
           <div class="fl-wrap">
-            <input type="text" class="form-input" id="doc-title-input" placeholder=" " required oninput="runDupChecks()">
+            <input type="text" class="form-input" id="doc-title-input" placeholder=" " required oninput="runDupChecks()" aria-describedby="dup-hint-3">
             <label class="fl-label">Document Title<span class="req">*</span></label>
           </div>
+          <div class="dup-hint" id="dup-hint-3" role="status" hidden></div>
         </div>
         <div class="form-group">
           <label class="form-label">What does this document cover? <span>*</span></label>
@@ -740,17 +753,19 @@ html[data-taqa-theme="dark"] .policy-rules {
       <div class="dup-error-panel" id="dup-error-panel">
         <div class="dup-error-hd">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          Exact duplicate detected
+          Same file already in the register
         </div>
-        <div class="dup-error-sub" id="dup-error-msg">This file's fingerprint matches a document already in the segment. Please verify before submitting.</div>
+        <div class="dup-error-sub" id="dup-error-msg">This file's fingerprint matches another record. Check it is not a duplicate before you file it. If it is a new revision of that document, file it as a revision.</div>
+        <div id="dup-error-list"></div>
       </div>
       <!-- Similar title warning -->
       <div class="dup-warn-panel" id="dup-warn-panel">
         <div class="dup-warn-hd">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          Similar documents found in this segment
+          Possibly related documents in this area
         </div>
         <div id="dup-warn-list"></div>
+        <div class="dup-warn-note">Shown so you can check. They do not stop the filing.</div>
         <div class="dup-warn-note">If this is a revision of one of the above, select <strong>Revision / Update</strong> and choose the document it replaces.</div>
       </div>
 
@@ -1101,7 +1116,7 @@ function submitUpload(e) {
   // assigned number is re-assigned and shown before anything is filed; a
   // number the filer typed is never changed behind their back.
   const refField = document.getElementById('doc-ref-id');
-  if (docStatus !== 'revision' && numberTaken(rec.docNumber)) {
+  if (docStatus !== 'revision' && !refileRec && numberTaken(rec.docNumber)) {
     if (refField && refField.dataset.autofilled !== 'user') {
       const was = rec.docNumber;
       refField.dataset.autofilled = '';
@@ -1172,6 +1187,17 @@ function submitUpload(e) {
   // The fingerprint belonged to the file just filed. Left up, it said
   // "Unique file" under a form asking for a file.
   const hd = document.getElementById('hash-display'); if (hd) hd.style.display = 'none';
+  currentFileHash = null;
+  // A filing made again is done: the form goes back to a new filing.
+  if (refileRec) {
+    refileRec = null;
+    ['doc-type-select','seg-select','policy-fn','dept-maint'].forEach(function(id){ var el = document.getElementById(id); if (el) el.disabled = false; });
+    const g = document.getElementById('doc-status-group'); if (g) g.hidden = false;
+    const rn = document.getElementById('refile-note'); if (rn) rn.hidden = true;
+    history.replaceState(null, '', 'upload.html');
+  }
+  ['dup-error-panel','dup-warn-panel'].forEach(function(id){ const p = document.getElementById(id); if (p) p.style.display = 'none'; });
+  const dh = document.getElementById('dup-hint-3'); if (dh) dh.hidden = true;
   const ref2 = document.getElementById('doc-ref-id');
   if (ref2) { ref2.value = ''; delete ref2.dataset.autofilled; }
   const chip = document.getElementById('numchip');
@@ -1236,7 +1262,7 @@ function buildRecord(){
   due.setMonth(due.getMonth() + (t.reviewCycleMonths || 24));
   const iso = d => d.toISOString().slice(0,10);
   // Only a revision supersedes anything; switching back to "New" leaves no trace.
-  const sup = docStatus === 'revision' ? ((document.getElementById('supersedes-select') || {}).value || null) : null;
+  const sup = (docStatus === 'revision' && !refileRec) ? ((document.getElementById('supersedes-select') || {}).value || null) : null;
   const parent = (sup && typeof TAQA_STORE !== 'undefined' && TAQA_STORE.revisionParent) ? TAQA_STORE.revisionParent(sup) : null;
 
   return {
@@ -1246,11 +1272,9 @@ function buildRecord(){
     segment:        segKey,
     docType:        typeKey,
     scope:          isPolicy ? 'company' : 'area',
-    revision:       parent ? TAQA_STORE.nextRevision(parent.revision) : '1.0',
-    issueDate:      iso(today),
-    approvedDate:   null,                 // set when the approver signs
-    nextReviewDate: iso(due),
-    reviewOverdue:  false,
+    revision:       refileRec ? refileRec.revision : parent ? TAQA_STORE.nextRevision(parent.revision) : '1.0',
+    // Issued (effective) and next review are set by the register when the
+    // approver releases it, never at filing (PI-21).
     status:         'draft',              // API Q2 4.4.3 b): no authority until approved
     supersedes:     sup,
     supersededBy:   null,
@@ -1268,7 +1292,10 @@ function buildRecord(){
     related:        (document.getElementById('related-input') || {}).value.trim() || null,
     changeNote:     (document.getElementById('change-input') || {}).value.trim() || null,
     issuingFunction: isPolicy ? ((document.getElementById('policy-fn') || {}).value || null) : null,
-    files:          selectedFiles.map(f => ({ name:f.name, size:f.size })),
+    files:          selectedFiles.map(f => ({ name:f.name, size:f.size, sha256: currentFileHash || null })),
+    // Filing a returned attempt again: the same number and revision, next
+    // attempt (PI-24, NEW-03).
+    resubmitOf:     refileRec ? TAQA_STORE.recordKey(refileRec) : undefined,
     // Left for the store to stamp from the signed-in identity at filing time
     // (TAQA_STORE.actingName()); in Azure the back end takes it from the token.
     submittedBy:    null
@@ -1446,6 +1473,7 @@ function autoFillRefId(){
   if (!refField) return;
   if (refField.dataset.autofilled === 'user') return;   // a typed number is respected
   if (refField.dataset.autofilled === 'revision') return; // a revision keeps its document's number
+  if (refField.dataset.autofilled === 'refile') return;   // filed again under its own number
   var r = taqaRefId();
   if (!r) {                     // nothing to build one from yet, so say nothing
     refField.value = '';
@@ -1461,6 +1489,47 @@ function autoFillRefId(){
       : '<span class="id-ok">Follows TQ-QHSE-S001. Edit if needed.</span>';
   }
   isAutoFilling = false;
+}
+
+// ── Filing a returned attempt again (PI-24) ──
+// upload.html?refile=<record key> starts from a returned filing: the same
+// number and revision, its area, type and department fixed, the next attempt.
+let refileRec = null;
+function refileAttempt(){
+  if (!refileRec) return 1;
+  return 1 + TAQA_STORE.revisionsOf(refileRec.docNumber).filter(function(x){
+    return x.rejected && String(x.revision || '') === String(refileRec.revision || '');
+  }).length;
+}
+function startRefile(key){
+  var note = document.getElementById('refile-note');
+  var r = TAQA_STORE.byKey(key);
+  var problem = (!r || !r.rejected || r.status !== 'draft') ? 'That filing cannot be filed again: it is not a returned attempt.'
+    : TAQA_STORE.checkFiling({ title: 'again', resubmitOf: key, docNumber: r.docNumber });
+  note.hidden = false;
+  if (problem) { note.textContent = problem; return; }
+  refileRec = r;
+  var ts = document.getElementById('doc-type-select'), ss = document.getElementById('seg-select');
+  ts.value = r.docType; onTypeChange(r.docType);
+  if (r.docType === 'policy') {
+    var fn = document.getElementById('policy-fn'); if (fn && r.issuingFunction) fn.value = r.issuingFunction;
+  } else if (ss.querySelector('option[value="' + String(r.segment || '').replace(/[^a-z0-9-]/gi,'') + '"]')) {
+    ss.value = r.segment; onSegmentChange(r.segment);
+  }
+  var dm = document.getElementById('dept-maint'); if (dm) dm.checked = r.department === 'maintenance';
+  syncDeptRow();
+  var f = document.getElementById('doc-ref-id');
+  f.value = r.docNumber; f.dataset.autofilled = 'refile';
+  var st = document.getElementById('doc-id-status');
+  if (st) st.innerHTML = '<span class="id-ok">Same number and revision: filed again as attempt ' + refileAttempt() + '.</span>';
+  ['doc-type-select','seg-select','policy-fn','dept-maint'].forEach(function(id){ var el = document.getElementById(id); if (el) el.disabled = true; });
+  var g = document.getElementById('doc-status-group'); if (g) g.hidden = true;
+  var t = document.getElementById('doc-title-input'); if (t && !t.value) t.value = r.title || '';
+  var sm = document.getElementById('summary-main'); if (sm && !sm.value) sm.value = r.summary || '';
+  note.innerHTML = '<b>Filing again:</b> ' + esc(r.docNumber) + ' ' + esc(TAQA_STORE.revisionLabel(r)) + ' was returned' +
+    (r.rejectedBy ? ' by ' + esc(r.rejectedBy) : '') + (r.rejectedDate ? ' on ' + esc(r.rejectedDate) : '') + ': \u201C' +
+    esc(r.rejectedReason || 'no reason recorded') + '\u201D. This filing keeps the same number and revision as attempt ' + refileAttempt() +
+    '. The returned attempt stays in the register as history.';
 }
 
 // ── Duplicate Detection ──
@@ -1625,8 +1694,10 @@ function releaseRevisionNumber() {
 
 function checkDocId() {
   const refField = document.getElementById('doc-ref-id');
-  // A revision carries its document's number on purpose.
+  // A revision carries its document's number on purpose, and so does a
+  // returned filing filed again.
   if (docStatus === 'revision' && refField.dataset.autofilled === 'revision') return;
+  if (refField.dataset.autofilled === 'refile') return;
   const refId = refField.value.trim().toUpperCase();
   const statusEl = document.getElementById('doc-id-status');
   // Track manual edits so autoFillRefId won't override the user's own text.
@@ -1644,6 +1715,11 @@ function checkDocId() {
     statusEl.innerHTML = `<span class="id-err">✕ <strong>${esc(refId)}</strong> is already the number of “${esc(used.title)}”. A number names one document and is never reused.</span>`;
     return;
   }
+  const typeNow = (document.getElementById('doc-type-select') || {}).value;
+  const fmtBad = (typeof TAQA_STORE !== 'undefined' && TAQA_STORE.numberFormatProblem) ? TAQA_STORE.numberFormatProblem({
+    docNumber: refField.value, segment: typeNow === 'policy' ? 'company' : currentSegId, docType: typeNow,
+    issuingFunction: typeNow === 'policy' ? ((document.getElementById('policy-fn') || {}).value || null) : null }) : null;
+  if (fmtBad) { statusEl.innerHTML = `<span class="id-err">✕ ${esc(fmtBad)}</span>`; return; }
   if (!currentSegId) { statusEl.innerHTML='<span class="id-warn">⚠ Select a segment to validate the ID</span>'; return; }
   const existingIds = segmentIds(currentSegId);
   const similar = existingIds.filter(id => id !== refId && (id.startsWith(refId.split('-').slice(0,-1).join('-')) || refId.startsWith(id.split('-').slice(0,-1).join('-'))));
@@ -1654,22 +1730,38 @@ function checkDocId() {
   }
 }
 
+/* Possible duplicates, shown where the filer can still act on them: under
+   the title on step 3 and on the review step above Submit (PI-13). Each says
+   why it was flagged. They are advice: the number is the only hard rule. The
+   panels' stylesheet hides them, so they are shown with display:block (an
+   empty inline style left them hidden, which is why nobody ever saw one). */
+let currentFileHash = null;
+function dupItem(m) {
+  const d = m.d;
+  return '<div class="dup-item"><b>' + esc(d.title || '') + '</b><span class="dup-n">' + esc(d.docNumber || '') +
+    (typeof TAQA_STORE !== 'undefined' ? ' \u00b7 ' + esc(TAQA_STORE.revisionLabel(d)) : '') + '</span>' +
+    '<span class="dup-why">' + m.reasons.map(esc).join('; ') + '</span></div>';
+}
 function runDupChecks() {
   const title = (document.getElementById('doc-title-input')?.value||'').trim();
-  const warnPanel = document.getElementById('dup-warn-panel');
-  const warnList = document.getElementById('dup-warn-list');
-  if (!title || !currentSegId) { warnPanel.style.display='none'; return; }
-  const matches = findSimilarTitles(title, currentSegId);
-  if (matches.length) {
-    warnList.innerHTML = matches.map(m => `
-      <div class="dup-warn-item">
-        <div class="dup-warn-bar-wrap"><div class="dup-warn-bar" style="width:${Math.round(m.score*100)}%"></div></div>
-        <div class="dup-warn-title" title="${esc(m.title)}">${esc(m.title)}</div>
-        <span class="dup-warn-pct">${Math.round(m.score*100)}%</span>
-      </div>`).join('');
-    warnPanel.style.display = '';
-  } else {
-    warnPanel.style.display = 'none';
+  const warnPanel = document.getElementById('dup-warn-panel'), warnList = document.getElementById('dup-warn-list');
+  const errPanel = document.getElementById('dup-error-panel'), errList = document.getElementById('dup-error-list');
+  const hint = document.getElementById('dup-hint-3');
+  if (typeof TAQA_STORE === 'undefined' || !TAQA_STORE.related) return;
+  const own = refileRec ? refileRec.docNumber
+    : docStatus === 'revision' ? ((document.getElementById('supersedes-select') || {}).value || null) : null;
+  const all = TAQA_STORE.related({ title: title, segment: currentSegId || null, sha256: currentFileHash, docNumber: own, limit: 6 });
+  const files = all.filter(m => m.sameFile), titles = all.filter(m => !m.sameFile);
+  errPanel.style.display = files.length ? 'block' : 'none';
+  if (errList) errList.innerHTML = files.map(dupItem).join('');
+  warnPanel.style.display = titles.length ? 'block' : 'none';
+  warnList.innerHTML = titles.map(dupItem).join('');
+  if (hint) {
+    hint.hidden = !all.length;
+    hint.textContent = all.length
+      ? (all.length === 1 ? 'Possibly related: ' : all.length + ' possibly related documents, first: ') + (all[0].d.docNumber || '') +
+        ' "' + (all[0].d.title || '') + '" (' + all[0].reasons.join('; ') + '). Check before you file; it does not stop the filing.'
+      : '';
   }
 }
 
@@ -1685,17 +1777,15 @@ async function computeAndCheckHash(file) {
     const hashBuf = await crypto.subtle.digest('SHA-256', buf);
     const hex = Array.from(new Uint8Array(hashBuf)).map(b=>b.toString(16).padStart(2,'0')).join('');
     hashValue.textContent = hex;
-    // Check against stored hashes in localStorage
-    const stored = JSON.parse(localStorage.getItem('taqa-doc-hashes')||'[]');
-    const match = stored.find(h => h.hash === hex);
-    if (match) {
-      hashStatus.innerHTML = `<span class="hash-status-dup">✕ Duplicate, matches "${esc(match.title)}"</span>`;
-      document.getElementById('dup-error-panel').style.display = '';
-      document.getElementById('dup-error-msg').textContent = `File fingerprint matches a document already in the library: "${match.title}"`;
-    } else {
-      hashStatus.innerHTML = '<span class="hash-status-ok">✓ Unique file</span>';
-      document.getElementById('dup-error-panel').style.display = 'none';
-    }
+    // Checked against the fingerprints recorded on the register's records
+    // (PI-13). It used to check a list nothing ever wrote to, so every file
+    // read "Unique".
+    currentFileHash = hex;
+    const same = (typeof TAQA_STORE !== 'undefined' && TAQA_STORE.related) ? TAQA_STORE.related({ sha256: hex }).filter(m => m.sameFile) : [];
+    hashStatus.innerHTML = same.length
+      ? `<span class="hash-status-dup">Same file as ${esc(same[0].d.docNumber || '')} "${esc(same[0].d.title || '')}"</span>`
+      : '<span class="hash-status-ok">No other record here carries this file</span>';
+    runDupChecks();
   } catch(e) {
     hashValue.textContent = 'unavailable';
   }
@@ -1814,6 +1904,11 @@ function stepReady(n){
     if (type === 'bulletin' && !isOperational(seg)) {
       say('hint-2', 'A Maintenance Bulletin is for the maintenance team of an operational segment. Choose an operational segment.'); return false;
     }
+    if (refileRec) {
+      var whyAgain = TAQA_STORE.checkFiling({ title: 'again', resubmitOf: TAQA_STORE.recordKey(refileRec), docNumber: refileRec.docNumber });
+      if (whyAgain) { say('hint-2', whyAgain); return false; }
+      say('hint-2', ''); return true;
+    }
     if (docStatus === 'revision') {
       var supNum = document.getElementById('supersedes-select').value;
       if (!supNum) { say('hint-2', 'Choose the document this revision replaces.'); return false; }
@@ -1839,6 +1934,12 @@ function stepReady(n){
     if (used) {
       say('hint-2', num.trim() + ' is already the number of “' + used.title + '”. Use the number assigned, or another that is not in the register.'); return false;
     }
+    // A number typed by hand must be the number TQ-QHSE-S001 5.3 gives this
+    // area and type (PI-14): no placeholder, no spaces, capitals, the right
+    // area and type code. The generated number always is.
+    var badNum = (typeof TAQA_STORE !== 'undefined' && TAQA_STORE.numberFormatProblem) ? TAQA_STORE.numberFormatProblem({
+      docNumber: num, segment: isPolicy ? 'company' : seg, docType: type, issuingFunction: isPolicy ? fn : null }) : null;
+    if (num && badNum) { say('hint-2', badNum); return false; }
     say('hint-2', ''); return true;
   }
   if (n === 3) {
@@ -1858,6 +1959,7 @@ function editNumber(){
   var f = document.getElementById('doc-ref-id');
   // A revision's number is its document's: it is not edited.
   if (docStatus === 'revision' && f.dataset.autofilled === 'revision') return;
+  if (f.dataset.autofilled === 'refile') return;
   chip.classList.add('editing');
   f.dataset.autofilled = 'user';
   f.focus(); f.select();
@@ -1917,7 +2019,8 @@ function paintRecord(){
     ['Type', esc(t.label || typeKey || ',')+ D()],
     [isPolicy ? 'Scope' : 'Area', esc(e.name || ',') + (isPolicy ? ' ' + D() : '')],
     ['Department', deptMaintenance() ? 'Maintenance' : 'Segment (general)'],
-    ['Revision', (docStatus === 'revision' ? revisionLine() : 'Rev 1.0, first issue') + D()],
+    ['Revision', (refileRec ? 'Rev ' + esc(refileRec.revision || '1.0') + ' (attempt ' + (refileAttempt()) + '), filed again after it was returned' + (refileRec.supersedes ? ', replacing ' + esc(refileRec.supersedes) : '')
+                  : docStatus === 'revision' ? revisionLine() : 'Rev 1.0, first issue') + D()],
     ['Owner', esc(t.owner || ',') + D()],
     // Who will actually give final approval: the desk this filing is routed
     // to after the QMS check (PI-16). Operations → QMS → the area's Segment
@@ -1931,8 +2034,9 @@ function paintRecord(){
                    ', ' + esc(e.name) + '</b>, after the QMS check' +
                    (t.approver && t.approver.trim() !== ',' ? '<span class="warn">The register names: ' + esc(t.approver) + '.</span>' : '')
         : esc(t.approver || ',')) + D()],
+    ['Issued', 'When it is released: the final approval date, or a later effective date the approver sets' + D()],
     ['Review cycle', esc(t.reviewCycleMonths || 24) + ' months' + D()],
-    ['Next review due', fmt(due) + D()],
+    ['Next review due', 'Issued date + ' + esc(t.reviewCycleMonths || 24) + ' months' + D()],
     ['Retention', esc(t.retentionYears || 10) + ' years' + D() +
       '<span class="warn">TQ-QHSE-S001 7.5 says five. API Q2 4.5 requires ten, so ten is used.</span>'],
     ['Classification', isPolicy
@@ -1965,13 +2069,23 @@ function paintMySubmissions(){
       st = 'Returned'; cls = 'st-back';
       why = '<span class="subs-why">Returned by ' + esc(d.rejectedBy || 'the reviewer') + ': \u201C' +
             esc(d.rejectedReason || 'no reason recorded') + '\u201D. Revise it and file it again.</span>';
+      // Filed again as the same revision, next attempt, unless a later
+      // attempt already exists (PI-24).
+      var later = TAQA_STORE.revisionsOf(d.docNumber).some(function(x){
+        return String(x.revision || '') === String(d.revision || '') && (x.attempt || 1) > (d.attempt || 1);
+      });
+      if (!later) why += '<a class="subs-again" href="upload.html?refile=' + encodeURIComponent(TAQA_STORE.recordKey(d)) + '">File it again</a>';
     } else if (d.status === 'current') { st = 'Published'; cls = 'st-live'; }
     else if (d.status === 'superseded') { st = 'Superseded'; cls = 'st-back'; }
     else if (d.status === 'obsolete' && d.cancelled) {
       st = 'Cancelled'; cls = 'st-back';
       why = '<span class="subs-why">' + esc(d.cancelledReason || 'Cancelled.') + '</span>';
     }
-    else if (d.status === 'obsolete') { st = 'Withdrawn'; cls = 'st-back'; }
+    else if (d.status === 'obsolete') {
+      st = 'Withdrawn'; cls = 'st-back';
+      if (d.withdrawnReason) why = '<span class="subs-why">Withdrawn' + (d.withdrawnBy ? ' by ' + esc(d.withdrawnBy) : '') + ': \u201C' + esc(d.withdrawnReason) + '\u201D</span>';
+    }
+    else if (d.status === 'approved') { st = 'Approved, in force from ' + esc(d.issueDate || ''); cls = 'st-wait'; }
     else if (stage === 'director') { st = 'Waiting on the Director'; cls = 'st-wait'; }
     else { st = 'Waiting on QMS check'; cls = 'st-wait'; }
     // The exact revision filed, not whichever revision is in force.
@@ -2034,6 +2148,8 @@ document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById(id);
     if (el) el.addEventListener('input', function(){ stepReady(3); });
   });
+  var rf = qs.get('refile');
+  if (rf && typeof TAQA_STORE !== 'undefined') startRefile(rf.slice(0, 160));
 });
 </script>
 <script src="shared.js"></script>

@@ -145,7 +145,7 @@
 
   /* One array, register first, locally added after, with any approval overlay
      applied. Built fresh each call so a caller can never hold a stale copy. */
-  function all() {
+  function assemble() {
     var o = overrides();
     var shipped = base().map(function (d) {
       var ov = d.docNumber ? o[ovKey(d)] : null;
@@ -157,6 +157,45 @@
     });
     return shipped.concat(load());
   }
+  function all() {
+    var rowsNow = assemble();
+    // A revision approved for a later date takes effect on that date, before
+    // anything is read, so no page ever sees it waiting past its date or two
+    // revisions in force (PI-21).
+    if (!_promoting && rowsNow.some(dueToTakeEffect)) { promoteDue(); rowsNow = assemble(); }
+    return rowsNow;
+  }
+
+  /* ── Taking effect (PI-21, owner's decision of 5 Oct 2026) ────────────
+     Final approval with an effective date later than today leaves the
+     revision "approved": approved, not yet in force, while the revision it
+     replaces stays current. On its effective date it becomes current and the
+     one it replaces superseded, once: the step checks the status before it
+     writes, so a second tab finds it done. Its approval date and its
+     effective (issue) date are never changed by this. In this prototype the
+     step runs when the register is first read on or after the date, in this
+     browser; in production a scheduled server flow does it. */
+  var _promoting = false;
+  function dueToTakeEffect(d) {
+    return d.status === 'approved' && !!d.issueDate && d.issueDate <= localDay();
+  }
+  function promoteDue() {
+    _promoting = true;
+    try {
+      _added = null; _over = null;
+      assemble().filter(dueToTakeEffect).forEach(function (d) { takeEffect(d, new Date().toISOString()); });
+    } finally { _promoting = false; }
+  }
+  function takeEffect(d, now) {
+    var replaced = revisionsOf(d.docNumber).filter(function (x) { return recordKey(x) !== recordKey(d) && isLiveStatus(x.status); });
+    write(d, { status: 'current', tookEffectAt: now });
+    replaced.forEach(function (x) {
+      write(x, { status: 'superseded', supersededBy: 'Rev ' + revOf(d), supersededAt: now, supersededDate: d.issueDate });
+    });
+    if (replaced.length) cascadeToTranslations(d.docNumber, 'superseded',
+      'Source ' + d.docNumber + ' Rev ' + revOf(d) + ': translation to be re-issued');
+    announce({ action: 'patch', docNumber: d.docNumber, fields: { status: 'current' } });
+  }
 
   /* ── Population tests ────────────────────────────────────────────── */
   function isControlled(d) {
@@ -166,7 +205,9 @@
   function isLive(d) {
     return isControlled(d) && (d.status === 'current' || d.status === 'under-review');
   }
-  function isPending(d) { return d.status === 'draft'; }
+  // Waiting for a decision. A returned filing is history, not pending: it
+  // left both queues when it was returned (PI-24).
+  function isPending(d) { return d.status === 'draft' && !d.rejected; }
   /* A draft that shipped in the file carries no stage, so treat it as
      waiting on QMS: that is the first step now, before the Director's
      approval releases it. Otherwise fifteen real drafts would sit in no
@@ -263,7 +304,102 @@
     return hit;
   }
   var STATUS_WORD = { current: 'in force', 'under-review': 'in force, under review', draft: 'a draft',
+                      approved: 'approved, not yet effective',
                       superseded: 'superseded', obsolete: 'withdrawn', asset: 'a software record' };
+
+  /* ── Dates, in the register's own calendar ─────────────────────────────
+     A day here is the local calendar day of whoever is acting, the same day
+     they see on the screen. In production the server's clock and the site's
+     time zone decide (BUSINESS-RULES §19). */
+  function localDay(t) {
+    var d = t ? new Date(t) : new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function addMonths(day, months) {
+    var m = String(day || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return null;
+    var d = new Date(+m[1], +m[2] - 1 + (months || 0), +m[3]);
+    return localDay(d);
+  }
+  function reviewCycle(d) { return (types()[d.docType] || {}).reviewCycleMonths || 24; }
+
+  /* ── Numbering for a new filing (PI-14) ───────────────────────────────
+     TQ-QHSE-S001 5.3, as Upload builds it: TQ-[business unit-]short form-type
+     letter, then the serial. A one-letter code joins the serial directly
+     (S001, P007, F023), a longer one with a hyphen (SOP-001, WI-001). A
+     policy is TQ-<corporate function>-P###. A provisional area or type code
+     is still the number 5.3 gives until QHSE assigns one, so it is valid;
+     a placeholder (###), a space, lower case or another area's or type's
+     code is not. Only a new filing is checked: a revision keeps its
+     document's number, and legacy numbers stay readable as they are. */
+  function escRe(t) { return String(t).replace(/[.*+?^${}()|[\]\\&]/g, '\\$&'); }
+  function numberFormat(segment, docType, issuingFunction) {
+    var T = types()[docType], S = segs();
+    if (!T || !T.letter) return null;
+    if (docType === 'policy') {
+      var fns = Object.keys(S).filter(function (k) { return S[k].group === 'function'; })
+        .map(function (k) { return S[k].spl; });
+      var fn = issuingFunction && fns.indexOf(issuingFunction) !== -1 ? issuingFunction : null;
+      return { re: new RegExp('^TQ-(' + (fn ? escRe(fn) : fns.map(escRe).join('|')) + ')-P\\d{3,}$'),
+               example: 'TQ-' + (fn || 'QHSE') + '-P001' };
+    }
+    var e = S[segment];
+    if (!e) return null;
+    var letter = T.letter;
+    var corporate = !e.bu && (e.group === 'function' || e.group === 'company');
+    if (docType === 'manual' && corporate && T.letterCorporate) letter = T.letterCorporate;
+    var stem = 'TQ-' + (e.bu ? e.bu + '-' : '') + e.spl + '-' + letter;
+    var sep = letter.length > 1 ? '-' : '';
+    return { re: new RegExp('^' + escRe(stem + sep) + '\\d{3,}$'), example: stem + sep + '001' };
+  }
+  function numberFormatProblem(rec) {
+    var n = String(rec.docNumber == null ? '' : rec.docNumber);
+    if (/\s/.test(n)) return 'A document number has no spaces.';
+    if (/#/.test(n)) return n + ' is a placeholder, not a number. Use the number Upload assigns.';
+    if (n !== n.toUpperCase()) return 'A document number is written in capitals (' + n.toUpperCase() + ').';
+    var f = numberFormat(rec.segment, rec.docType, rec.issuingFunction);
+    if (!f) return null;
+    if (!f.re.test(n)) return n + ' is not a TQ-QHSE-S001 number for this area and type. It should look like ' + f.example + '.';
+    return null;
+  }
+
+  /* ── Possible duplicates and related documents (PI-13) ───────────────
+     Advisory only, with the reason each was flagged: the same file (its
+     SHA-256 fingerprint matches one recorded on another record), the same
+     title in the same area, or shared significant title words. Nothing here
+     blocks a filing; the number is the hard rule (filingProblem). The
+     document's own family (its other revisions and attempts) and records
+     that are withdrawn, superseded or returned are not flagged. */
+  var STOP_WORDS = ['the', 'a', 'an', 'of', 'in', 'for', 'and', 'or', 'to', 'with', 'at', 'by', 'from', 'on',
+    'is', 'are', 'its', 'this', 'that', 'was', 'been', 'rev', 'revision', 'version', 'update', 'procedure', 'sop'];
+  function titleWords(t) {
+    return String(t || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/)
+      .filter(function (w) { return w.length > 2 && STOP_WORDS.indexOf(w) === -1; })
+      .filter(function (w, i, a) { return a.indexOf(w) === i; });
+  }
+  function related(q) {
+    q = q || {};
+    var mine = titleWords(q.title), key = String(q.title || '').trim().toLowerCase(), out = [];
+    all().forEach(function (d) {
+      if (!d || d.status === 'obsolete' || d.status === 'superseded' || (d.status === 'draft' && d.rejected)) return;
+      if (q.docNumber && normNum(d.docNumber) === normNum(q.docNumber)) return;
+      var reasons = [], sameFile = false, sameTitle = false, shared = [];
+      if (q.sha256) sameFile = (d.files || []).some(function (f) { return f && f.sha256 === q.sha256; });
+      if (sameFile) reasons.push('Same file: its fingerprint matches this one');
+      if (q.segment && d.segment === q.segment && key) {
+        if (String(d.title || '').trim().toLowerCase() === key) { sameTitle = true; reasons.push('Same title in this area'); }
+        else if (mine.length) {
+          var theirs = titleWords(d.title);
+          shared = mine.filter(function (w) { return theirs.indexOf(w) !== -1; });
+          if (shared.length >= 2 && shared.length / Math.max(mine.length, theirs.length, 1) >= 0.4)
+            reasons.push('Shares the title words: ' + shared.slice(0, 5).join(', '));
+        }
+      }
+      if (reasons.length) out.push({ d: d, reasons: reasons, sameFile: sameFile, sameTitle: sameTitle, shared: shared.length });
+    });
+    out.sort(function (a, b) { return (b.sameFile - a.sameFile) || (b.sameTitle - a.sameTitle) || (b.shared - a.shared); });
+    return out.slice(0, q.limit || 5);
+  }
 
   /* Why a filing would be refused, in words a filer can act on, or null.
      add() refuses exactly these; Upload asks first so it can say why. */
@@ -280,6 +416,9 @@
     var open = openDraft(num);
     if (open) return { problem: 'A revision of ' + num + ' is already in progress (Rev ' + revOf(open) +
       '). Only one revision of a document may be open at a time.' };
+    var waiting = pendingEffective(num);
+    if (waiting) return { problem: num + ' Rev ' + revOf(waiting) + ' is approved and takes effect on ' + waiting.issueDate +
+      '. Only one revision of a document may be open at a time.' };
     if (rec.docType && rec.docType !== parent.docType)
       return { problem: 'A revision keeps its document\'s type. ' + num + ' is a ' + ((types()[parent.docType] || {}).label || parent.docType) + '.' };
     if (rec.segment && rec.segment !== parent.segment)
@@ -289,8 +428,33 @@
     return { parent: parent };
   }
 
+  /* A returned first issue filed again keeps its number and revision: the
+     same revision, next attempt (owner's decision for PI-24, 5 Oct 2026). The
+     filing names the returned attempt it replaces (resubmitOf, its record
+     key); that is the only filing besides a revision that reuses a number.
+     A returned revision is filed again through the revision route, which
+     gives it the same revision and the next attempt (NEW-03). */
+  function resubmission(rec) {
+    if (!rec || !rec.resubmitOf) return null;
+    var prev = byKey(rec.resubmitOf);
+    if (!prev || !prev.rejected || prev.status !== 'draft')
+      return { problem: 'Only a returned filing can be filed again.' };
+    if (rec.docNumber && normNum(rec.docNumber) !== normNum(prev.docNumber))
+      return { problem: 'A filing made again keeps its number, ' + prev.docNumber + '.' };
+    if (prev.supersedes) return { revisionOf: prev };
+    var fam = revisionsOf(prev.docNumber);
+    if (fam.some(function (x) { return !(x.status === 'draft' && x.rejected); }))
+      return { problem: prev.docNumber + ' has a filing in progress or in force already, so the returned attempt is not filed again.' };
+    return { prev: prev };
+  }
+
   function filingProblem(rec) {
     if (!rec || !rec.title) return 'A title is needed.';
+    var again = resubmission(rec);
+    if (again && again.problem) return again.problem;
+    if (again && again.revisionOf) rec = Object.assign({}, rec, { docNumber: again.revisionOf.docNumber, supersedes: again.revisionOf.docNumber });
+    if (again && again.prev) rec = Object.assign({}, rec, { docNumber: again.prev.docNumber, docType: again.prev.docType,
+      segment: again.prev.segment, department: again.prev.department || null });
     var revision = revisionRequest(rec);
     if (revision && revision.problem) return revision.problem;
     // A revision is checked as what it will be: its parent's type, area and
@@ -321,7 +485,9 @@
     // One file is one document (BUSINESS-RULES §7).
     if (Array.isArray(rec.files) && rec.files.length > 1) return 'File one controlled document at a time.';
     if (!normNum(rec.docNumber)) return 'A document number is needed.';
-    if (revision) return null;
+    if (revision || (again && again.prev)) return null;
+    var badNumber = numberFormatProblem(rec);
+    if (badNumber) return badNumber;
     var used = numberInUse(rec.docNumber);
     if (used) return String(rec.docNumber).trim() + ' is already the number of "' + used.title + '" (' +
       (STATUS_WORD[used.status] || used.status) + '). A number names one document and is never reused.';
@@ -335,6 +501,8 @@
   function add(rec) {
     if (filingProblem(rec)) return null;
     fresh();
+    var again = resubmission(rec);
+    if (again && again.revisionOf) rec = Object.assign({}, rec, { docNumber: again.revisionOf.docNumber, supersedes: again.revisionOf.docNumber });
     var revision = revisionRequest(rec);
     var row = {};
     for (var k in rec) if (Object.prototype.hasOwnProperty.call(rec, k) &&
@@ -353,9 +521,21 @@
        'translationOf', 'numberStatus', 'numberNote', 'legacyId'].forEach(function (f) {
         if (p[f] !== undefined) row[f] = p[f]; else delete row[f];
       });
+    } else if (again && again.prev) {
+      // The returned first issue's identity, as a revision carries its
+      // parent's: same number and revision, same document (PI-24).
+      var q = again.prev;
+      row.docNumber = q.docNumber;
+      row.revision = q.revision;
+      ['docType', 'segment', 'department', 'scope', 'classification', 'language',
+       'translationOf', 'numberStatus', 'numberNote', 'legacyId', 'issuingFunction'].forEach(function (f) {
+        if (q[f] !== undefined) row[f] = q[f]; else delete row[f];
+      });
+      row.supersedes = null;
     } else {
       row.supersedes = null;           // only a revision supersedes anything
     }
+    if (again) row.resubmitOf = rec.resubmitOf;
     // A filing is a draft at the QMS check, whatever the caller sent. add()
     // used to keep the caller's status, signatures and filer, so a record
     // could be filed straight into force, "approved" by a name of the
@@ -396,31 +576,62 @@
        superseded   replaced by a newer revision: only a live document
      Nothing else, and nothing out of 'obsolete'.                          */
   var MOVES = {
-    obsolete:   ['draft', 'current', 'under-review', 'superseded'],
+    obsolete:   ['draft', 'approved', 'current', 'under-review', 'superseded'],
     superseded: ['current', 'under-review']
   };
-  function setStatus(docNumber, status, rev) {
+  /* Withdrawal is a permanent event on the record (PI-11): who withdrew it,
+     when, why, and the status it had. Nothing else on the record changes, so
+     its check and approval history stay exactly as they were. A reason is
+     required, with the same floor as a rejection (owner's decision, 5 Oct
+     2026). opts.expect binds the call to the record the person chose, as a
+     decision is bound (PR 2B): {key, status}; a record that changed since is
+     refused, never redirected (PI-10). lastStatusError says why the last
+     call was refused. */
+  var lastStatusError = null;
+  function setStatus(docNumber, status, rev, opts) {
+    lastStatusError = null;
     if (!docNumber) return null;
     fresh();
     if (status === 'current') {
       var r = approve(docNumber);
       return r.ok ? findDoc(docNumber) : null;
     }
+    opts = opts || {};
     // Any other move belongs to whoever manages the document: its Director,
     // its Maintenance Manager or QMS. An Employee or an auditor could
     // withdraw a live procedure from the console before this check.
     // Without a revision named, it is the revision in force that moves.
-    var cur = target(docNumber, rev);
+    var cur = opts.expect && opts.expect.key ? byKey(opts.expect.key) : target(docNumber, rev);
+    if (opts.expect && opts.expect.key &&
+        (!cur || cur.docNumber !== docNumber || (rev !== undefined && !sameRev(cur.revision, rev)) ||
+         (opts.expect.status && cur.status !== opts.expect.status))) {
+      lastStatusError = STALE;
+      return null;
+    }
     if (!cur || !mayManage(cur)) return null;
     if (!Object.prototype.hasOwnProperty.call(MOVES, status) || MOVES[status].indexOf(cur.status) === -1) return null;
-    var wasLive = isLiveStatus(cur.status);
+    var now = new Date().toISOString(), by = actingName();
     var f = { status: status };
-    if (status === 'obsolete') f.approvalStage = null;     // a withdrawn draft leaves both queues
+    if (status === 'obsolete') {
+      var why = String(opts.reason == null ? '' : opts.reason).trim();
+      if (why.length < REASON_MIN) {
+        lastStatusError = 'Give a reason for withdrawing it, at least ' + REASON_MIN + ' characters.';
+        return null;
+      }
+      f.approvalStage = null;                              // a withdrawn draft leaves both queues
+      f.withdrawnFromStatus = cur.status;
+      f.withdrawnBy = by; f.withdrawnAt = now; f.withdrawnDate = localDay(now); f.withdrawnReason = why;
+    } else {
+      f.supersededAt = now; f.supersededDate = localDay(now);
+    }
+    var wasLive = isLiveStatus(cur.status);
     write(cur, f);
     // Withdrawing or superseding the revision in force takes its
     // translations with it (PI-34).
     if (wasLive) cascadeToTranslations(cur.docNumber, status,
-      'Source ' + cur.docNumber + ' superseded: translation to be re-issued');
+      'Source ' + cur.docNumber + ' superseded: translation to be re-issued',
+      status === 'obsolete' ? { withdrawnBy: by, withdrawnAt: now, withdrawnDate: localDay(now),
+        withdrawnReason: 'Withdrawn with its source ' + cur.docNumber + ': ' + f.withdrawnReason } : null);
     // Withdrawing the revision in force withdraws the document family. A
     // revision still in progress, of this document or of its translations,
     // is cancelled in the same step: it leaves both queues and can never be
@@ -440,7 +651,7 @@
      draft, then a returned draft, then a superseded one, then a withdrawn
      one. Every read and every write by number goes through here, so what a
      page shows and what an action changes are always the same record. */
-  var RANK = { current: 0, 'under-review': 0, draft: 1, superseded: 3, obsolete: 4 };
+  var RANK = { current: 0, 'under-review': 0, draft: 1, approved: 1, superseded: 3, obsolete: 4 };
   function rankOf(d) {
     if (d.status === 'draft' && d.rejected) return 2;
     return Object.prototype.hasOwnProperty.call(RANK, d.status) ? RANK[d.status] : 5;
@@ -484,6 +695,13 @@
   }
   // What a check, an approval or a rejection by number acts on.
   function workTarget(docNumber) { return openDraft(docNumber) || findDoc(docNumber); }
+  // A revision approved with a future effective date, waiting to take
+  // effect (PI-21): it is the number's open revision until then.
+  function pendingEffective(docNumber) {
+    var hit = null;
+    all().forEach(function (d) { if (!hit && d.docNumber === docNumber && d.status === 'approved') hit = d; });
+    return hit;
+  }
   /* The next major revision, in the register's own style: 1.0 → 2.0,
      v2.3 → v3.0. Anything unreadable starts again from 2.0. */
   function nextRevision(rev) {
@@ -550,11 +768,16 @@
 
   /* A translation follows its source: when the revision in force is
      superseded or withdrawn, so are the source's translations in force. */
-  function cascadeToTranslations(sourceNumber, status, note) {
+  function cascadeToTranslations(sourceNumber, status, note, extra) {
     all().filter(function (t) { return t.translationOf === sourceNumber && isLiveStatus(t.status); })
       .forEach(function (t) {
         var f = { status: status };
-        if (status === 'superseded') f.supersededBy = note;
+        if (status === 'superseded') {
+          f.supersededBy = note;
+          f.supersededAt = new Date().toISOString(); f.supersededDate = localDay();
+        }
+        if (status === 'obsolete') f.withdrawnFromStatus = t.status;
+        for (var k in (extra || {})) if (Object.prototype.hasOwnProperty.call(extra, k)) f[k] = extra[k];
         write(t, f);
       });
   }
@@ -563,10 +786,10 @@
   function cancelOpenRevisions(docNumber) {
     var now = new Date().toISOString(), by = actingName();
     all().filter(function (d) {
-      return d.status === 'draft' && !d.rejected &&
+      return ((d.status === 'draft' && !d.rejected) || d.status === 'approved') &&
         (d.docNumber === docNumber || d.translationOf === docNumber);
     }).forEach(function (d) {
-      write(d, { status: 'obsolete', approvalStage: null, cancelled: true,
+      write(d, { status: 'obsolete', approvalStage: null, cancelled: true, cancelledFromStatus: d.status,
         cancelledReason: CANCEL_REASON, cancelledBy: by, cancelledAt: now,
         cancelledDate: now.slice(0, 10) });
     });
@@ -618,7 +841,11 @@
      roles.js for why the order is this way round. */
   /* Check, approval and rejection act on the number's open revision (the
      one waiting in the queue), never on the revision in force. */
-  function approve(docNumber, expect) {
+  /* opts.effectiveDate (YYYY-MM-DD): when the approved revision becomes
+     valid for use. It defaults to the approval date and is never earlier
+     (owner's decision for PI-21). The approval date is the system's, never
+     the caller's. */
+  function approve(docNumber, expect, opts) {
     fresh();
     var t = decisionTarget(docNumber, expect), d = t.d;
     if (t.stale) return { ok: false, stale: true, error: STALE };
@@ -627,21 +854,30 @@
     var gone = d.status === 'draft' ? withdrawnFamily(d) : null;
     if (gone) return { ok: false, error: gone };
     if (!TAQA_APPROVAL.canApprove(d)) return { ok: false, error: 'You cannot approve this document.' };
-    var now = new Date().toISOString(), today = now.slice(0, 10);
+    var now = new Date().toISOString(), today = localDay(now);
+    var eff = (opts && opts.effectiveDate) ? String(opts.effectiveDate) : today;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(eff) || addMonths(eff, 0) !== eff)
+      return { ok: false, error: 'The effective date is not a date.' };
+    if (eff < today) return { ok: false, error: 'The effective date cannot be earlier than the approval date (' + today + ').' };
+    var dates = { approvedBy: actingName(), approvedDate: today, approvedAt: now,
+                  issueDate: eff, nextReviewDate: addMonths(eff, reviewCycle(d)), reviewOverdue: false };
+    if (eff > today) {
+      // Approved now, in force from its effective date: the revision it
+      // replaces stays current until then.
+      write(d, Object.assign({ approvalStage: null, status: 'approved' }, dates));
+      announce({ action: 'patch', docNumber: d.docNumber, fields: { status: 'approved' } });
+      return { ok: true, next: 'approved, effective ' + eff, effectiveDate: eff };
+    }
     // Releasing a revision supersedes the one it replaces in the same step,
     // so there is never a moment with two revisions in force (PI-02). The
     // superseded revision keeps every field it had: its approval history is
     // never rewritten. Its translations in force are superseded with it,
     // marked to be re-issued against the new revision (PI-34).
     var replaced = revisionsOf(d.docNumber).filter(function (x) { return x !== d && isLiveStatus(x.status); });
-    write(d, {
-      approvalStage: null, status: 'current',
-      approvedBy: actingName(),
-      approvedDate: today,
-      approvedAt: now,
-      issueDate: d.issueDate || today
+    write(d, Object.assign({ approvalStage: null, status: 'current' }, dates));
+    replaced.forEach(function (x) {
+      write(x, { status: 'superseded', supersededBy: 'Rev ' + revOf(d), supersededAt: now, supersededDate: today });
     });
-    replaced.forEach(function (x) { write(x, { status: 'superseded', supersededBy: 'Rev ' + revOf(d) }); });
     if (replaced.length) cascadeToTranslations(d.docNumber, 'superseded',
       'Source ' + d.docNumber + ' Rev ' + revOf(d) + ': translation to be re-issued');
     announce({ action: 'patch', docNumber: d.docNumber, fields: { status: 'current' } });
@@ -729,10 +965,16 @@
   var LIFECYCLE = ['status', 'approvalStage', 'approvedBy', 'approvedDate', 'approvedAt',
     'countersignedBy', 'countersignedDate', 'countersignedAt', 'rejected', 'rejectedAtStage',
     'rejectedBy', 'rejectedReason', 'rejectedDate', 'rejectedAt', 'submittedBy', 'submittedAt',
-    'cancelled', 'cancelledReason', 'cancelledBy', 'cancelledAt', 'cancelledDate'];
+    'cancelled', 'cancelledReason', 'cancelledBy', 'cancelledAt', 'cancelledDate', 'cancelledFromStatus',
+    'withdrawnBy', 'withdrawnAt', 'withdrawnDate', 'withdrawnReason', 'withdrawnFromStatus',
+    'supersededAt', 'supersededDate', 'tookEffectAt', 'issueDate'];
 
   /* Never taken from a caller of add(): the store writes each of these. */
-  var FILED_BY_STORE = LIFECYCLE.concat(['locallyAdded', 'supersededBy', 'recordId', 'attempt']);
+  /* The dates a record carries are the register's: issued (effective) and
+     next review are set at release, never at filing and never by the filer
+     (PI-21). */
+  var FILED_BY_STORE = LIFECYCLE.concat(['locallyAdded', 'supersededBy', 'recordId', 'attempt',
+    'issueDate', 'nextReviewDate', 'reviewOverdue', 'resubmitOf']);
 
   /* What "edit details" may change: descriptive and review fields only.
      Everything else is identity or authority (number, area, department,
@@ -801,6 +1043,9 @@
     approve: approve, countersign: countersign, reject: reject, patch: editFields,
     stageOf: stageOf, findDoc: findDoc, actingName: actingName,
     recordKey: recordKey, byKey: byKey, revisionLabel: revisionLabel,
+    numberFormat: numberFormat, numberFormatProblem: numberFormatProblem, related: related,
+    pendingEffective: pendingEffective, localDay: localDay, resubmission: resubmission,
+    statusError: function () { return lastStatusError; },
     withdrawnFamily: withdrawnFamily, STALE: STALE, CANCEL_REASON: CANCEL_REASON,
     onChange: onChange, added: load,
     isControlled: isControlled, isLive: isLive,
