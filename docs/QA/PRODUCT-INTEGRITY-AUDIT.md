@@ -1,5 +1,7 @@
 # RISE: Product-Integrity / Real-User Failure Audit
 
+> **Status: HISTORICAL (baseline audit).** Each finding's current status is in `docs/QA/PRODUCT-INTEGRITY-REASSESSMENT-POST-PR29.md`, including the "Status after …" paragraphs for PRs 2B to 2D and the October 2026 integrity close-out.
+
 | | |
 |---|---|
 | **Baseline** | `main` at `12ce777`. This includes PR #23 (global QMS queue, one file per upload, bulk-confirm preview), PR #24 (QMS Workbench) and PR #25 (installed iPhone app status-bar fix). |

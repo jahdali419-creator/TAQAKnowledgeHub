@@ -1,5 +1,7 @@
 # Testing the TAQA Knowledge Hub frontend
 
+> **Status: CURRENT (6 Oct 2026).** Latest measured results and what the tests do not cover: `docs/handover/09-TEST-EVIDENCE.md`.
+
 This is a static HTML/CSS/JS site with no build step and no runtime
 dependencies. Playwright and a small static file server are the only
 dev-time tools, and they exist solely to test the app; nothing here changes

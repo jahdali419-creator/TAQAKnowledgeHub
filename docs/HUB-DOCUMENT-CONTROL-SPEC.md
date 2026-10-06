@@ -1,5 +1,7 @@
 # Knowledge Hub — document control alignment specification
 
+> **Status: HISTORICAL (20 Sep 2026).** The alignment work it proposed was carried out in PRs 2A to 2C (`docs/BUSINESS-RULES.md` §15–§19). Kept as the reasoning behind those rules. Current entry point: `docs/handover/README.md`.
+
 How to change the Knowledge Hub code so it satisfies TQ-QHSE-S001, ISO 9001:2015 §7.5
 and API Spec Q2 3rd Edition §4.4–4.5.
 

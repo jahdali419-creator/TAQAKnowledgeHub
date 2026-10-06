@@ -1,5 +1,7 @@
 # TAQA TechHub: Five-Role QA Audit
 
+> **Status: HISTORICAL (1 Oct 2026).** The five-role audit and the owner's decisions of that date. Later decisions: `docs/RISE-BUSINESS-DECISIONS.md`. Current test evidence: `docs/handover/09-TEST-EVIDENCE.md`.
+
 Date: 1 October 2026. Branch `claude/inspiring-mayer-pm1350` (PR #21, not merged).
 
 | | Commit |

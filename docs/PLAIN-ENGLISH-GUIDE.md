@@ -1,6 +1,6 @@
 # Plain English guide
 
-> **Historical (August 2026).** Written before the two-step release workflow, the five personas and the Azure API approach. Kept as background. For current rules and integration requirements start at `docs/HANDOVER-TO-IT.md`; where this document differs, the handover package wins.
+> **Historical (August 2026).** Written before the two-step release workflow, the five personas and the Azure API approach. Kept as background. For current rules and integration requirements start at `docs/handover/README.md` (status of every document: `docs/handover/DOCUMENT-STATUS.md`); where this document differs, the handover package wins.
 
 TAQA Knowledge Hub: everything explained without jargon
 For Mohammed Al-Jahdali, Maintenance Instructor Lead, TAQA Learning Center
