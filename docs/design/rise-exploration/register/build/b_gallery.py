@@ -168,12 +168,17 @@ section{{padding:46px 0 10px}}.jh{{display:flex;align-items:baseline;gap:18px;pa
 .tbl{{width:100%;border-collapse:collapse;margin-top:18px}}.tbl th{{text-align:left;padding:10px 12px 10px 0;border-bottom:1.5px solid var(--ink);font:500 10.5px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink3)}}
 .tbl td{{padding:12px 12px 12px 0;border-bottom:1px solid var(--rule);vertical-align:top;font-size:14px;color:var(--ink2)}}.tbl td:first-child{{font-weight:600;color:var(--ink);white-space:nowrap}}.tbl td span{{display:inline-block;margin:0 10px 4px 0}}.tbl td span::after{{content:" ·";color:#B3B5AF}}.tbl .n{{font:500 13px/1 var(--mono);text-align:right}}
 .ls div{{display:grid;grid-template-columns:320px 1fr;gap:20px;padding:13px 0;border-bottom:1px solid var(--rule)}}.ls b{{font-weight:600}}.ls span{{color:var(--ink2)}}
+.ba{{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:22px}}.ba figure div{{display:grid;grid-template-columns:1fr 1fr;gap:8px}}.ba img{{width:100%;border:1px solid var(--rule);border-radius:10px}}.ba figcaption{{margin-top:8px;font:500 11.5px/1.3 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}}
+@media (max-width:720px){{.ba{{grid-template-columns:1fr}}}}
 .foot{{padding:40px 0 80px;color:var(--ink3);font-size:13px}}
 @media (max-width:720px){{.w{{padding:0 16px}}h1{{font-size:40px}}.cards{{grid-template-columns:1fr}}.ls div{{grid-template-columns:1fr;gap:4px}}.tbl td:nth-child(2){{display:none}}.jh h2{{font-size:26px}}}}
 </style></head><body><div class="w">
 <header class="top"><p class="lab">RISE · TAQA knowledge · approved design language</p><h1>RISE — Register <span>across the whole product.</span></h1>
 <p class="s">{len(ALL)} screens, each at desktop 1440×900 and phone 390×844, built from the live register (585 records) with the live business rules. Role-aware: an Employee never sees QMS or Manager items. Anything not built today is tagged <span class="pp">proposed</span>. Design exploration only: nothing here touches the live application.</p></header>
-<nav class="jn">{nav}<a href="#inv">Inventory</a><a href="#nd">Not yet designed</a><a href="#od">Open decisions</a></nav>
+<nav class="jn"><a href="#ba">Phone before / after</a>{nav}<a href="#inv">Inventory</a><a href="#nd">Not yet designed</a><a href="#od">Open decisions</a></nav>
+<section id="ba"><div class="jh"><h2>Phone, before and after</h2><span>calm pass</span></div>
+<p class="jd">Feedback: too much text on the phone, and every screen looked the same. Now the top bar names the screen and gives a way back; labels, hints, side panels and second sentences stay on desktop; each kind of screen keeps one signature: the search line, the area switch, the coloured answer card, the step count, the waiting count.</p>
+<div class="ba">{"".join(f'<figure><div><img src="shots/before/{n}-m.jpg" alt="{t} before"><img src="shots/{n}-m.jpg" alt="{t} after"></div><figcaption>{t} · before → after</figcaption></figure>' for n, t in (("document", "Document"), ("area", "Coiled Tubing"), ("upload-where", "Upload step 2"), ("search-results", "Search results")))}</div></section>
 {secs}
 <section id="inv"><div class="jh"><h2>Page inventory &amp; coverage</h2><span>{len(ALL)} screens · {len(ALL)} desktop · {len(ALL)} phone</span></div>
 <table class="tbl"><thead><tr><th>Journey</th><th>Screens</th><th>Desktop</th><th>Phone</th></tr></thead><tbody>{inv}</tbody></table></section>

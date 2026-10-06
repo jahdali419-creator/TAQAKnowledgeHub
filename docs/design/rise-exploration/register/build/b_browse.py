@@ -142,7 +142,7 @@ def fam(g, title):
     rows = ''.join(f'<a href="{"area.html" if k == "coiled-tubing" else "#"}"{" class=mine" if k == "coiled-tubing" else ""}><b>{SEGS[k]["name"]}</b><span class="tg">{TAG.get(k, "")}{" · provisional" if SEGS[k]["provisional"] else ""}</span><span class="n">{count_for(k)}</span></a>' for k in ks)
     return f'<div><p class="grph"><b>{title}</b><span>{len(ks)}</span></p><div class="alist">{rows}</div></div>'
 a_body = f'''<header class="phead"><div class="meta"><span class="lab">Areas</span><span class="lab"><b>{len(EMP) if False else len(inforce())}</b> documents in force · <b>25</b> areas</span></div>
-  <h1 class="t0">Every area, <span class="m">one register.</span></h1><p class="sub">Your area is marked. Counts are documents in force you can open.</p></header>
+  <h1 class="t0">Every area<span class="m phx">, one register.</span></h1><p class="sub">Your area is marked. Counts are documents in force you can open.</p></header>
 <a class="polrow" href="area-policies.html"><span class="lab">Company Wide</span><b>Company policies</b><span class="tg">Apply to everyone · signed by the CEO</span><span class="n">{count_for("company")}</span></a>
 <div class="g3" style="margin-top:12px">{fam("segment", "Operational segments")}{fam("function", "Corporate functions")}{fam("product", "Products &amp; Technology")}</div>'''
 page('areas.html', 'RISE · Areas', a_body, 'areas')

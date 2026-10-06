@@ -38,11 +38,11 @@ start = f'''<header class="phead" style="padding-bottom:6px"><div class="meta"><
 <p class="try">Try <a href="search-number.html">WI-003</a><a href="search-results.html">pressure</a><a href="search-typing.html">inject</a><a href="search-superseded.html">TQ-TWS-CTSS-SOP-003</a><span class="enter">Press <kbd>↵</kbd> to search · <kbd>/</kbd> from any page</span></p>
 {scope}
 <div class="g84" style="margin-top:60px"><div>
-  {sech('How search reads what you type')}
+  <div class="dk-only">{sech('How search reads what you type')}
   {kv([("Looks in", "Title, register number, area name, type"), ("Matches", "The whole phrase you type", "", "“pressure test” finds titles containing exactly that"),
        ("Shows", "Documents in force only", "", "Superseded and withdrawn documents are left out"),
        ("Exception", "A full superseded number", "", "Shown as a red “do not use” card, so an old reference is caught")], 'c2')}
-  <p class="small" style="margin-top:16px">Search does not read inside documents or expand abbreviations. For a term, use the <a class="lnk" href="glossary.html">Field Glossary</a>.</p>
+  </div><p class="small" style="margin-top:16px">Search does not read inside documents or expand abbreviations. For a term, use the <a class="lnk" href="glossary.html">Field Glossary</a>.</p>
 </div><aside class="aside">
   {sech('Or go straight to an area')}
   <div class="idx">{areas_q}<a href="areas.html">All 25 areas<span>→</span></a></div>

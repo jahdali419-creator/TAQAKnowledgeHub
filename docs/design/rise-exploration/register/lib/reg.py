@@ -35,6 +35,7 @@ ICON = {
  'saved': 'M6 3h12v18l-6-4.2L6 21z',
  'more': 'M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z',
  'bell': 'M12 3a6 6 0 0 0-6 6v4l-2 3v1h16v-1l-2-3V9a6 6 0 0 0-6-6zm-2 16a2 2 0 0 0 4 0z',
+ 'back': 'M15.4 4.6 8 12l7.4 7.4-1.4 1.4L5.2 12l8.8-8.8z',
  'lock': 'M7 10V7a5 5 0 0 1 10 0v3h1.5v11h-13V10zm2 0h6V7a3 3 0 0 0-6 0z',
 }
 def ico(name, cls=''):
@@ -51,7 +52,31 @@ def set_roles(r): ROLES.update(r)
 NAV_MAIN = [('home', 'Home', 'home.html'), ('areas', 'Areas', 'areas.html'), ('saved', 'Saved', 'saved.html'),
             ('ask', 'Ask an Expert', 'ask.html'), ('glossary', 'Field Glossary', 'glossary.html')]
 
-def nav(active, role):
+# Phone top bar: where you are, and the way back (phone only; desktop keeps the text navigation).
+def ptitle(name):
+    n = name.replace('.html', '')
+    fixed = {'areas': ('Areas', 'home.html'), 'area-policies': ('Company policies', 'areas.html'),
+             'document': ('WI-003', 'area.html'), 'document-controller': ('WI-003', 'area.html'), 'document-share': ('WI-003', 'document.html'),
+             'document-qrc': ('WI-003', 'document.html'), 'document-form': ('F001', 'area.html'), 'form': ('F001 · fill in', 'document-form.html'),
+             'document-superseded': ('SOP-003', 'area.html'), 'document-withdrawn': ('SOP-012', 'area.html'), 'document-draft': ('Your filing', 'upload-done.html'),
+             'document-returned': ('Your filing', 'notifications.html'), 'document-notyet': ('S005', 'desk.html'), 'document-unavailable': ('Document', 'home.html'),
+             'document-denied': ('Document', 'area.html'), 'glossary-term': ('BOP', 'glossary.html'), 'upload-done': ('Filed', 'home.html'),
+             'upload-acting': ('Upload', 'desk.html'), 'states': ('States', 'home.html'), 'system': ('Design system', 'home.html'),
+             'acting-broken': ('Delegation', 'home.html')}
+    if n in fixed: return fixed[n]
+    if n.startswith('home'): return None
+    step = {'upload': 1, 'upload-file': 1, 'upload-file-error': 1, 'upload-where': 2, 'upload-where-error': 2, 'upload-maint': 2, 'upload-policy': 2,
+            'upload-again': 2, 'upload-what': 3, 'upload-review': 4}
+    if n in step: return (f'Upload · {step[n]} of 4', 'more.html')
+    pre = [('search', 'Search', 'home.html'), ('area', 'Coiled Tubing', 'areas.html'), ('saved', 'Saved', 'home.html'), ('notifications', 'Notifications', 'more.html'),
+           ('more', 'More', 'home.html'), ('account', 'Account', 'more.html'), ('ask', 'Ask an Expert', 'more.html'), ('glossary', 'Field Glossary', 'more.html'),
+           ('master', 'Master List', 'more-qms.html'), ('workbench', 'QMS check', 'more-qms.html'), ('desk', 'Approvals', 'more-director.html'),
+           ('manage', 'Manage', 'more-director.html'), ('delegation', 'Delegation', 'account-director.html'), ('refuse', 'Not for your role', 'home.html')]
+    for k, t, b in pre:
+        if n.startswith(k): return (t, b)
+    return None
+
+def nav(active, role, pt=None):
     R = ROLES[role]
     links = ''.join(f'<a href="{h}"{" class=on aria-current=page" if k == active else ""}>{t}</a>' for k, t, h in NAV_MAIN)
     if R['control']:
@@ -60,6 +85,7 @@ def nav(active, role):
     up = '<a class="up" href="upload.html">Upload</a>' if R['upload'] else ''
     return f'''<div class="wrap"><header class="nav">
     <a class="logo" href="home.html" aria-label="RISE home"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE" width="69" height="26"></a>
+    {f'<a class="pback" href="{pt[1]}" aria-label="Back">{ico("back")}</a><span class="ptl">{pt[0]}</span>' if pt else ''}
     <nav class="links" aria-label="Main">{links}</nav>
     <span class="sp"></span>
     <div class="tools">
@@ -92,9 +118,9 @@ def page(name, title, body, active='home', role='employee', acting=None, dock_ac
 <title>{e(title)}</title>
 <link rel="stylesheet" href="../css/register.css">
 </head>
-<body>
+<body{' class="pt"' if ptitle(name) else ''}>
 {acting_bar(acting) if acting else ""}
-{nav(active, role)}
+{nav(active, role, ptitle(name))}
 <main class="wrap">
 {body}
 <div class="page-end"></div>
@@ -147,8 +173,12 @@ def kv(pairs, cls=''):
         out += f'<div><span>{k}</span><b class="{c}">{v}</b>{f"<small>{sm}</small>" if sm else ""}</div>'
     return f'<div class="kv {cls}">{out}</div>'
 
+def lead(text):
+    """Bold lead stays on the phone; the rest of the sentence is desktop detail (except crimson banners)."""
+    i = text.find('</b>')
+    return text if i < 0 or not text[i + 4:].strip() else text[:i + 4] + f'<span class="bx">{text[i + 4:]}</span>'
 def note(kind, text, go='', href='#'):
-    return f'<div class="bnr {kind}"><span class="ic"></span><div>{text}</div>{f"<a class=go href={href}>{go}</a>" if go else "<span></span>"}</div>'
+    return f'<div class="bnr {kind}"><span class="ic"></span><div>{lead(text)}</div>{f"<a class=go href={href}>{go}</a>" if go else "<span></span>"}</div>'
 
 def phead(meta_l, meta_r, title, sub='', crumb=None):
     left = crumb if crumb else meta_l

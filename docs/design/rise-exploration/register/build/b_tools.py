@@ -27,7 +27,7 @@ def ghead(val=None, ph='BOP, CT, ROP, WOB…'):
     q = (f'<div class="q md"><span class="val">{val}</span><span class="caret"></span><a class="clr" href="glossary.html">Clear</a></div>' if val
          else f'<div class="q md"><span class="w">Look up</span><span class="caret"></span><span class="ph">{ph}</span></div>')
     return f'''<header class="phead" style="padding-bottom:4px"><div class="meta"><span class="lab">Field Glossary</span><span class="lab"><b>254</b> terms · <b>11</b> categories</span></div>
-  <h1 class="t1">Know the language. <span class="m">Work with confidence.</span></h1></header>
+  <h1 class="t1 dk-only">Know the language. <span class="m">Work with confidence.</span></h1></header>
   {q}'''
 
 cats = '<nav class="fbar" style="margin-top:20px"><span>Field</span><a class="on" href="glossary.html">All <b>254</b></a>' + ''.join(f'<a href="#">{v} <b>{CNT[k]}</b></a>' for k, v in CATL.items()) + '</nav>'

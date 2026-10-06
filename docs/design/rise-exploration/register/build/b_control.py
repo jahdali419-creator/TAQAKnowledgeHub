@@ -96,7 +96,7 @@ def master(role, name, sel_rows=0, overlay=''):
     rows = ''.join(mrow(r, i < sel_rows, ck) for i, r in enumerate(sample))
     exp = '<a class="btn" href="#">Export F086 (CSV)</a>'
     body = f'''<header class="phead"><div class="meta"><span class="lab">Document control · TQ-QHSE-S001</span><span class="lab"><b>{len(INF)}</b> in force · <b>{len(ALL)}</b> in the register · 25 areas</span></div>
-  <h1 class="t1">Master Document List <span class="m">every controlled document, one list.</span></h1>
+  <h1 class="t1">Master Document List <span class="m phx">every controlled document, one list.</span></h1>
   <p class="sub">Number, revision, owner, issue date and review date on every record, so the current revision can be confirmed before a job starts.{" You read everything and change nothing." if role == "auditor" else ""}</p>
   <div class="stats"><div><b class="sp">{overdue}</b><span>Reviews overdue</span></div><div><b>{prov}</b><span>Waiting on a short form</span></div><div><b>{len(drafts)}</b><span>In draft</span></div><div><b>{ar}</b><span>Arabic versions</span></div></div></header>
 <div style="display:grid;grid-template-columns:220px minmax(0,1fr);column-gap:40px" class="ml">

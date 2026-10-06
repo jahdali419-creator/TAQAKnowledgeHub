@@ -92,7 +92,7 @@ def doc(name, r, kind, role='employee', banners='', status=('Current, OK to use'
     page(name, f'RISE · {crumb_title or r["title"]}', body, 'areas', role, acting=acting, dock_active='areas')
 
 def banner(kind, title, text):
-    return f'<div class="bnr {kind}" style="margin-top:24px"><span class="ic"></span><div><b>{title}</b> {text}</div><span></span></div>'
+    return f'<div class="bnr {kind}" style="margin-top:24px"><span class="ic"></span><div><b>{title}</b><span class="bx"> {text}</span></div><span></span></div>'
 
 # 1 · current (Employee)
 doc('document.html', WI3, 'cur')
