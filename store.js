@@ -284,6 +284,7 @@
      and its title is never listed. This is the prototype filtering its own
      demonstration data in the browser, not security; in production the
      server trims what it returns (Microsoft 365 permission trimming). */
+  var NUMBER_REFUSED = 'This number cannot be used. Choose another number or contact QMS.';
   function readable(d) {
     return typeof TAQA_ROLE === 'undefined' || TAQA_ROLE.canSee(d, TAQA_ROLE.current());
   }
@@ -543,6 +544,10 @@
     if (!normNum(rec.docNumber)) return 'A document number is needed.';
     if (revision || (again && again.prev)) return null;
     var used = numberInUse(rec.docNumber);
+    // A number held by a document this person may not open is refused in
+    // words that say nothing about it: not that it exists, nor its title,
+    // area or classification (BD-09). The refusal itself still stands.
+    if (used && !readable(used) && !used.locallyAdded) return NUMBER_REFUSED;
     if (used) return String(rec.docNumber).trim() + ' is already the number of "' + used.title + '" (' +
       (STATUS_WORD[used.status] || used.status) + '). A number names one document and is never reused.';
     var badNumber = numberFormatProblem(rec);
@@ -1145,7 +1150,7 @@
     writeError: function () { return lastWriteError; }, notSent: notSent,
     withdrawnFamily: withdrawnFamily, STALE: STALE, CANCEL_REASON: CANCEL_REASON,
     onChange: onChange, added: load,
-    isControlled: isControlled, isLive: isLive, readable: readable, classOpen: classOpen,
+    isControlled: isControlled, isLive: isLive, readable: readable, classOpen: classOpen, NUMBER_REFUSED: NUMBER_REFUSED,
     EVENT: EVT, KEY: KEY
   };
 })(typeof window !== 'undefined' ? window : this);

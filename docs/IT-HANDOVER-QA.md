@@ -145,6 +145,6 @@ Section numbers refer to `docs/handover/`.
 - **Status:** Production test required.
 
 ### 21. What does the Download button on a document page do?
-- **Simple answer for Mohammed:** Today it says "Download request sent to document administrator", but nothing is sent and no file exists. That is a known prototype defect, recorded but not fixed in this phase. In production, Download must give the approved file version or say plainly why it can't.
+- **Simple answer for Mohammed:** In this preview it says "Download is not connected in this preview": no file is stored and nothing is requested. (It used to claim a request had been sent; fixed on 6 Oct 2026, NEW-13.) In production, Download must give the approved file version or say plainly why it can't.
 - **Technical detail for IT:** `viewer.html` `requestAccess()`, wired to `#dl-btn` and `#pdf-dl-btn`, shows a toast only. Recorded as NEW-13 in `docs/QA/PRODUCT-INTEGRITY-REASSESSMENT-POST-PR29.md`. Production download is part of file storage (IT-02, IT-08).
-- **Status:** IT to decide (production download). The prototype defect is recorded as NEW-13.
+- **Status:** Answered (prototype wording fixed). IT to decide (production download).

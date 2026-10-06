@@ -268,7 +268,7 @@ The evidence points here rather than to the next item on the old roadmap. The tw
 - **PI-23:** the document page, share link, QR code and bookmark take the area from the record; nothing is guessed when a link names neither a number nor an area.
 - **PI-27:** decided by BD-03 and closed in the prototype: lists, counts, search, bookmarks, the desk, Upload's messages and the document page show only what the role may open. **PRODUCTION CONTROL REQUIRED** (server-side permission trimming). Open: classification at upload, and access for the approver of a restricted document (`BUSINESS-RULES.md` §21).
 
-**Found during the handover review (6 Oct 2026), not fixed in this phase:**
+**Found during the handover review (6 Oct 2026). Fixed in the safety close-out of the same day (`tests/integrity-closeout.spec.js`): Download now says "Download is not connected in this preview. No file was downloaded and nothing was requested."**
 - **NEW-13 (P2):** the document page's Download button (`#dl-btn`, `#pdf-dl-btn` → `requestAccess()`) shows "Download request sent to document administrator." Nothing is sent and no file exists, so this is a false success. Fix (A): say that no file is connected in this preview and nothing was requested. *Production:* Download serves the approved file version (`docs/handover/16-OPEN-IT-DECISIONS.md` IT-08).
 
 **After 2B, in this order** (proposed, for your decision later):

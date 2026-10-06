@@ -1,6 +1,6 @@
 # TechHub business rules
 
-> **Status: CURRENT, authoritative for rules (6 Oct 2026).** The owner's decisions are recorded in `docs/RISE-BUSINESS-DECISIONS.md` (BD-01 to BD-07), which wins if the two differ. Where a "Production" note here names a mechanism (SharePoint item IDs, If-Match, an API, a flow), it is an example of how the rule could be enforced; **IT chooses the mechanism** (`docs/handover/16-OPEN-IT-DECISIONS.md`). IT entry point: `docs/handover/README.md`.
+> **Status: CURRENT, authoritative for rules (6 Oct 2026).** The owner's decisions are recorded in `docs/RISE-BUSINESS-DECISIONS.md` (BD-01 to BD-09), which wins if the two differ. Where a "Production" note here names a mechanism (SharePoint item IDs, If-Match, an API, a flow), it is an example of how the rule could be enforced; **IT chooses the mechanism** (`docs/handover/16-OPEN-IT-DECISIONS.md`). IT entry point: `docs/handover/README.md`.
 
 The authoritative statement of how documents move through TechHub, for the team building the Azure back end. It describes the **current code** (`roles.js`, `store.js` and the pages that call them) including the owner's decisions of 1 October 2026 (`docs/QA/FIVE-ROLE-QA-AUDIT.md` §13). Section 12 lists every place where the code and the documentation disagree; nothing there was silently resolved. Sections 13 (Field Glossary) and 14 (Segment membership) are **target production requirements** set by the owner that the prototype does not implement.
 
@@ -523,7 +523,7 @@ On the document page, a number the role may not open reads exactly as a number t
 
 In the prototype, an Employee is told 352 documents are in force (QMS and auditors 520). A count of drafts waiting names no document, so it is trimmed by classification only: an Employee is told how many internal drafts are waiting, never about restricted ones.
 
-Uniqueness is still checked against the whole register: a number used by a restricted document is refused at Upload as "already in use in the register", without naming it.
+Uniqueness is still checked against the whole register. A number used by a document the filer may not open is refused in neutral words that reveal nothing about it: "This number cannot be used. Choose another number or contact QMS." (BD-09, 6 Oct 2026). Possible-duplicate advice never mentions such a document.
 
 *Prototype:* this is the browser filtering its own demonstration data (`TAQA_STORE.readable`, `TAQA_ROLE.canSee`). **It is not security.** The whole prototype register (`documents-master.js`) is still delivered to, and cached on, every device.
 
@@ -531,7 +531,7 @@ Uniqueness is still checked against the whole register: a number used by a restr
 
 **Open business confirmations from PI-27:**
 1. **Classification at upload.** Upload always files `internal` and `en`. QMS must decide who sets the classification and language at filing, and whether there is a default. This is not invented here.
-2. **Approving a restricted document.** The approval queue shows a document to its area approver, whatever its classification. A Segment Director's role does not include `restricted`, so a restricted Operations document reaches a desk whose holder cannot open it from the document page. QMS and the business must confirm whether the area approver of a restricted document is granted access to it, or who approves it instead.
+2. **Approving a restricted document: decided (BD-08, 6 Oct 2026).** Final approval goes only to an approver cleared for the document's classification. The route (Segment Director / Maintenance Manager) is unchanged, but the individual acting in it, a delegate included, must be cleared. With no eligible approver the workflow is blocked and escalated for an authorised approver to be assigned under the production governance process; classification is not bypassed and QMS does not become the final approver. *Prototype:* clearance is the role's classification list, so a Restricted document at final approval is blocked ("waiting on an authorised final approver, escalated") and is not shown to the Director or Maintenance Manager. **PRODUCTION CONTROL REQUIRED**; the clearance and assignment mechanism is IT's decision.
 
 **Withdrawn documents by exact number (PI-22).** Searching the exact number or legacy ID (in any letter case) of a superseded or withdrawn document shows that document, marked:
 - "Superseded. Do not use." or "Withdrawn. Do not use.";
@@ -548,3 +548,5 @@ A partial number never brings a withdrawn document into the results. Permissions
 - an Employee has no bell.
 
 The desk's own access check is unchanged.
+
+**Download in the preview (NEW-13, 6 Oct 2026).** The document page's Download says "Download is not connected in this preview. No file was downloaded and nothing was requested." It used to say a request had been sent, when nothing was. *Production:* Download serves the approved file version (IT-08).

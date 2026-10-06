@@ -301,7 +301,7 @@ test.describe('on a phone', () => {
     await gotoApp('/upload.html');
     await page.setInputFiles('#file-input', { name: 'phone.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4\n%%EOF\n') });
     // It says what it checked: no other record carries this file (PI-13).
-    await expect(page.locator('#hash-status')).toContainText('No other record here carries this file');
+    await expect(page.locator('#hash-status')).toContainText('No other record you can open carries this file');
     expect(await fits()).toBe(true);
     await page.click('#go-2');
     await page.selectOption('#seg-select', SEG);

@@ -1618,8 +1618,12 @@ function shareDoc() {
   if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(docUrl).then(done, fallback);
   else fallback();
 }
+// No file is stored in this preview and nothing is requested from anyone, so
+// Download says exactly that rather than claiming a request was sent (NEW-13).
+// Production serves the approved file version (handover 16, IT-08).
+const DOWNLOAD_NOT_CONNECTED = 'Download is not connected in this preview. No file was downloaded and nothing was requested.';
 function requestAccess() {
-  if(window.showToast) window.showToast('Download request sent to document administrator.', 'info');
+  if(window.showToast) window.showToast(DOWNLOAD_NOT_CONNECTED, 'info');
 }
 
 // Read progress bar

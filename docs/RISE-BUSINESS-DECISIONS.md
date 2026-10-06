@@ -33,6 +33,8 @@ For example, "Two people must not approve the same controlled step, and a second
 | BD-05 | Offline: read offline, send online | Approved | 6 Oct 2026 | Yes: IT and Cybersecurity (what may be cached) |
 | BD-06 | Field Glossary: the technical SME owns meaning; QMS/admin owns governance | Approved | 6 Oct 2026 | Yes: business, to name the SMEs per category |
 | BD-07 | Sequencing: lock decisions → close narrow integrity findings → M365/IT handover → then reassess premium design and the full QMS Dashboard | Approved | 6 Oct 2026 | No |
+| BD-08 | Final approval of a Restricted / Confidential document goes only to an approver cleared to open it; otherwise the workflow is blocked and escalated | Approved | 6 Oct 2026 | Yes: IT (clearance and assignment mechanism); governance process for assigning an authorised approver |
+| BD-09 | Document-number validation never reveals that a Restricted / Confidential document exists | Approved | 6 Oct 2026 | Yes: IT (number allocation mechanism) |
 
 ---
 
@@ -92,7 +94,15 @@ No CEO, QHSE Manager or SME final-approval route is invented. Where a document t
 **What it means for the prototype.**
 - The prototype already routes this way (`roles.js` `TAQA_APPROVAL`; `docs/BUSINESS-RULES.md` §2, §4, §17).
 - Separation of duties is already enforced in the prototype: the filer, the QMS checker and the final approver must be three different people (§12 #8).
-- Upload and the type table still *display* the unconfirmed per-type approver names beside the real route (PI-15, partially fixed). That display is recorded here as **requires QMS / business confirmation**. It is outside the four findings closed in October 2026 and is not changed by them.
+- Five places still *display* the unconfirmed per-type approver names beside the real route (PI-15, partially fixed):
+  1. Upload's confirmation;
+  2. the document-type table;
+  3. the document page's "Approval authority" cell;
+  4. the Master List record drawer;
+  5. the **F086 register export's "Approver Role" column**.
+
+  That display is recorded here as **requires QMS / business confirmation**. It is outside the four findings closed in October 2026 and is not changed by them.
+- *Correction, 6 Oct 2026 (approved by Mohammed):* this note first said "Upload and the type table" (two places). There are five, as listed above. Factual correction only; BD-02 itself is unchanged.
 
 **What it means for production.**
 - The production workflow implements these two routes only.
@@ -148,7 +158,7 @@ No CEO, QHSE Manager or SME final-approval route is invented. Where a document t
 **IT / QMS confirmation still needed.** Yes:
 - IT and Cybersecurity choose and configure the mechanism.
 - QMS confirms the **classification policy at upload**. Who sets the classification, and is there a default? Today the prototype's Upload always files `internal`; see PI-27.
-- QMS / business confirm **who approves a restricted document**. Under BD-02 the area approver is a Segment Director, whose role does not include `restricted`. Is that approver granted access to that document, or does another approver act? See `docs/BUSINESS-RULES.md` §21.
+- **Who approves a restricted document:** answered by **BD-08** (6 Oct 2026). Only an approver cleared for the classification; otherwise blocked and escalated.
 
 ---
 
@@ -277,6 +287,76 @@ Premium design and the full QMS Dashboard are **not** started now.
 **Related findings and rules.** Dashboard-fold candidates PI-19, PI-20, PI-43, PI-45, NEW-07, NEW-09, NEW-10 stay open (`docs/QA/PRODUCT-INTEGRITY-REASSESSMENT-POST-PR29.md`).
 
 **IT / QMS confirmation still needed.** No.
+
+---
+
+## BD-08 Final approval of a Restricted or Confidential document
+
+**Decision.**
+- A Restricted or Confidential document is never sent for final approval to a person who is not permitted to open it.
+- The final-approval roles stay as in BD-02: Operations → Segment Director; Maintenance → Maintenance Manager. The individual acting in that role, a delegate included, must also be permitted for the document's classification.
+- If no eligible final approver exists:
+  - classification is not bypassed;
+  - QMS does not become the final approver merely to let the workflow continue;
+  - the workflow is blocked and escalated until an authorised approver is assigned under the production governance process.
+
+**Business reason.** An approver who cannot open a document cannot judge it, and would either approve it unseen or be given access the classification forbids. Neither is acceptable for a controlled document.
+
+**What it means for the prototype.**
+- `TAQA_APPROVAL.canApprove` refuses a role not cleared for the classification, and `TAQA_STORE.approve` refuses with it.
+- The approver's desk, bell and Home count do not list or count such a document.
+- The document shows as waiting on "an authorised final approver (escalated …)" to those who may see it: QMS, the auditor and its filer.
+- In the prototype, clearance is the role's classification list. Segment Directors and Maintenance Managers hold `internal` and `confidential`, so a Restricted document reaching final approval is always blocked and escalated in the prototype.
+- This is browser behaviour over demonstration data, not security.
+
+**What it means for production.**
+- **PRODUCTION CONTROL REQUIRED.** The server checks the individual approver's clearance for the classification before routing and at approval, and holds the item in an escalated state when nobody eligible exists.
+- How Microsoft 365 records clearance and assigns an authorised approver is **IT's decision**.
+- The governance process that names that approver is the business's (QMS).
+
+**Owner.** Mohammed (the rule); QMS (assignment governance); IT (mechanism).
+
+**Status.** Approved. Answers BC-06.
+
+**Date approved.** 6 October 2026.
+
+**Related findings and rules.** BD-02, BD-03; BC-06; PI-27; `docs/BUSINESS-RULES.md` §21.
+
+**IT / QMS confirmation still needed.** Yes:
+- IT: the clearance and assignment mechanism;
+- QMS: the escalation and assignment procedure.
+
+---
+
+## BD-09 Document-number validation does not reveal Restricted or Confidential documents
+
+**Decision.**
+- An unauthorised user must not learn from document-number validation that a Restricted or Confidential document exists.
+- A clash with such a document is refused in neutral words: "This number cannot be used. Choose another number or contact QMS."
+- The refusal never reveals:
+  - that the document exists;
+  - its title;
+  - its area;
+  - its classification;
+  - any other metadata.
+
+**Business reason.** Confirming that a restricted number exists is itself disclosure (BD-03).
+
+**What it means for the prototype.**
+- Upload, and the register's own filing check, use the neutral wording when the clashing record is one the person may not open. Uniqueness is still enforced against the whole register.
+- Possible-duplicate advice (same file, similar title) never mentions a document the filer may not open; that advice never stops a filing.
+
+**What it means for production.** Preferably the platform allocates controlled document numbers authoritatively rather than relying on user-chosen numbers. How is **IT's decision**.
+
+**Owner.** Mohammed (the rule); IT (mechanism).
+
+**Status.** Approved. Answers BC-13.
+
+**Date approved.** 6 October 2026.
+
+**Related findings and rules.** BD-03; BC-13, BC-17; `docs/BUSINESS-RULES.md` §16, §21.
+
+**IT / QMS confirmation still needed.** Yes: IT, for number allocation.
 
 ---
 

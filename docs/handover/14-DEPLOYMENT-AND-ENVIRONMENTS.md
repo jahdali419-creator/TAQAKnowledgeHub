@@ -6,12 +6,12 @@
 
 - The repository's `main` branch deploys automatically to an **Azure Static Web App** and to **GitHub Pages** on every merge.
 - Every push and pull request runs the automated tests in GitHub Actions (`tests.yml`):
-  - the `playwright` job: the full suite on desktop Chromium, including the register-data check (`scripts/check-register.js` via `register-integrity.spec.js`);
+  - the `playwright` job: the full suite on desktop Chromium, including the register-data check (`scripts/check-register.js` via `register-integrity.spec.js`), with a 30-minute job limit (raised from 20 on 6 Oct 2026; the suite takes 16 to 19 minutes);
   - the `webkit-smoke` job: a smoke set on the iPhone engine (`mobile-safari`) and desktop WebKit.
 - **The result blocks nothing.** No branch-protection rule requires these checks, so a failing run does not stop a merge or a deployment (`tests.yml` header; `docs/TESTING.md`). Commits have also been pushed to `main` directly, without a pull request.
 - The Azure workflow also builds a preview site for each pull request against `main`.
 - There is **no separate test / UAT or production environment, and no release approval between a merge and the live sites**. The live sites are the prototype's demonstration environment, not production.
-- The service worker's cache name (`CACHE` in `service-worker.js`, `taqa-hub-v108` at this handover) is bumped on every release, so devices pick up the new version.
+- The service worker's cache name (`CACHE` in `service-worker.js`, `taqa-hub-v109` after the safety close-out of 6 Oct 2026) is bumped on every release, so devices pick up the new version.
 
 ## Required (business requirement; IT decides how)
 
