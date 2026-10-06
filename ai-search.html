@@ -515,6 +515,8 @@ html[data-taqa-theme="dark"] .filters-clear-btn:hover{border-color:rgba(0,187,18
 /* ── Real result / source cards (search results, honest empty state) ── */
 .source-card{cursor:pointer;}
 .result-note{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.result-note-withdrawn{color:var(--stop-ink,#C8102E);font-size:12.5px;line-height:1.45;}
+.result-note-withdrawn b{font-weight:700;}
 .empty-state-suggest{margin-top:2px;}
 .empty-state-suggest button{
   background:none;border:none;padding:0;color:var(--primary-ink);font-weight:600;
@@ -790,7 +792,7 @@ document.addEventListener('click',function(e){
   // area still waiting on QHSE, so it said 24 while the master list said 26.
   // Both now count every area that holds documents.
   function paint(){
-    var n = TAQA_STORE.count('live');
+    var n = TAQA_STORE.count('visible');
     var areas = Object.keys(TAQA_DOC_LOOKUPS.segments)
       .filter(function(k){ return TAQA_STORE.area(k).live > 0; }).length;
     var a = document.getElementById('ai-doc-n'); if (a) a.textContent = n;
@@ -1032,6 +1034,64 @@ document.addEventListener('click',function(e){
     '</a>';
   }
 
+  /* An exact document number or legacy ID whose record is withdrawn (PI-22).
+     Withdrawn records stay out of the search pool (TQ-QHSE-S001 4.6), but
+     someone holding an old printed copy who types its number must be told
+     what it is, not "check the document number". Only an exact number or
+     legacy-ID match does this, and only for a record this role may open:
+     a restricted withdrawn record stays not found for an Employee (BD-03).
+     Nothing here is shown as current. Where the register names a successor
+     it holds no record of, it says so and points at SCORE (BD-01). */
+  function exactWithdrawn(q){
+    var k=String(q||'').trim().toUpperCase();
+    if(!k||typeof TAQA_STORE==='undefined')return [];
+    var ok=function(d){ return !TAQA_STORE.readable||TAQA_STORE.readable(d); };
+    var all=TAQA_STORE.all();
+    var hits=all.filter(function(d){
+      return (String(d.docNumber||'').toUpperCase()===k||String(d.legacyId||'').toUpperCase()===k)&&ok(d);
+    });
+    if(!hits.length)return [];
+    var nums={};hits.forEach(function(d){ if(d.docNumber)nums[d.docNumber]=1; });
+    var out=[];
+    Object.keys(nums).forEach(function(n){
+      var fam=all.filter(function(d){ return d.docNumber===n&&ok(d); });
+      // A revision this role may open that is in force: search already shows it.
+      if(fam.some(function(d){ return d.status==='current'||d.status==='under-review'; }))return;
+      var w=fam.filter(function(d){ return d.status==='superseded'||d.status==='obsolete'; })
+        .sort(function(a,b){ return parseFloat(b.revision||0)-parseFloat(a.revision||0); })[0];
+      if(w)out.push(w);
+    });
+    return out;
+  }
+  function withdrawnCardHTML(d){
+    var S=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.segments)||{};
+    var sn=(S[d.segment]&&S[d.segment].name)||d.segment||'';
+    var rev=(TAQA_STORE.revisionLabel?TAQA_STORE.revisionLabel(d):'Rev '+(d.revision||''));
+    var state=d.status==='superseded'?'Superseded':(d.cancelled?'Cancelled':'Withdrawn');
+    var next=d.status==='superseded'
+      ? (d.supersededBy
+          ? 'The register names '+esc(d.supersededBy)+' as its replacement but holds no record of it here. Verify the current revision in SCORE before use.'
+          : 'The register holds no revision of it in force. Verify the current revision in SCORE before use.')
+      : 'It is no longer in force and has no replacement in the register. Check with QMS or SCORE before relying on any copy.';
+    var href='viewer.html?doc='+encodeURIComponent(d.docNumber||'')+(d.revision?'&rev='+encodeURIComponent(d.revision):'')+
+      '&seg='+encodeURIComponent(d.segment||'')+'&type='+encodeURIComponent(d.docType||'');
+    return '<a class="source-card source-card-withdrawn" href="'+href+'" data-withdrawn="'+esc(d.status)+'">'+
+      '<div class="source-card-bar" style="background:var(--stop-ink,#C8102E)"></div>'+
+      '<div class="source-card-body">'+
+        '<div class="source-card-title">'+esc(d.title)+'</div>'+
+        '<div class="source-card-meta"><span class="source-card-seg">'+esc(sn)+' · '+esc(d.docNumber||'')+' · '+esc(rev)+'</span></div>'+
+        '<div class="result-note result-note-withdrawn"><b>'+state+'. Do not use.</b> This document exists, but the matching revision is '+state.toLowerCase()+'. '+next+'</div>'+
+      '</div>'+
+      '<span class="source-card-arrow">›</span>'+
+    '</a>';
+  }
+  function withdrawnBlock(list){
+    if(!list.length)return '';
+    return '<div class="sources-block withdrawn-block">'+
+      '<div class="sources-label">Withdrawn, not in force</div>'+
+      '<div class="sources-list">'+list.map(withdrawnCardHTML).join('')+'</div></div>';
+  }
+
   function renderEmptyState(q){
     var qText=q?' match "<strong>'+esc(q)+'</strong>"':' match the selected filters';
     return '<div class="welcome-state">'+
@@ -1046,6 +1106,15 @@ document.addEventListener('click',function(e){
     if(!chatLog)return;
     if(!window.TAQA_SEARCH_INDEX){chatLog.innerHTML=welcomeHTML;return;}
     var results=searchDocs(q);
+    var gone=exactWithdrawn(q);
+    if(!results.length&&gone.length){
+      chatLog.innerHTML=(q?'<div class="msg-user"><div class="bubble">'+esc(q)+'</div></div>':'')+
+        '<div class="msg-ai"><div class="msg-ai-avatar">✦</div><div class="bubble">'+
+        '<h4>Search Results</h4><p>No document in force matches "'+esc(q)+'". '+
+        (gone.length===1?'One withdrawn document carries this number:':'Withdrawn documents carry this number:')+'</p>'+
+        withdrawnBlock(gone)+'</div></div>';
+      return;
+    }
     if(!results.length){ chatLog.innerHTML=renderEmptyState(q); return; }
     var shown=results.slice(0,RESULT_CAP);
     var bits=filterSummary();
@@ -1057,6 +1126,7 @@ document.addEventListener('click',function(e){
       '<h4>Search Results</h4>'+
       '<p>'+results.length+' document'+(results.length===1?'':'s')+' in the register match '+qLine+filterLine+'.'+
       (results.length>RESULT_CAP?' Showing the first '+RESULT_CAP+'; narrow the search or add a filter for fewer, more exact matches.':'')+'</p>'+
+      withdrawnBlock(gone)+
       '<div class="sources-block">'+
         '<div class="sources-label">'+results.length+' Document'+(results.length===1?'':'s')+'</div>'+
         '<div class="sources-list">'+shown.map(resultCardHTML).join('')+'</div>'+

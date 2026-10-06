@@ -464,7 +464,9 @@ function buildAllDocs(segId) {
   // the area's Operations documents; a Maintenance Manager its maintenance
   // documents (TAQA_ROLE.canManage with the record).
   return TAQA_STORE.rows('live', { segment: segId })
-    .filter(d => typeof TAQA_ROLE === 'undefined' || TAQA_ROLE.canManage(d))
+    // canManage decides authority; canSee decides whether the title may be
+    // shown at all: a Director does not see restricted documents (BD-03, PI-27).
+    .filter(d => typeof TAQA_ROLE === 'undefined' || (TAQA_ROLE.canManage(d) && TAQA_ROLE.canSee(d)))
     .map(d => {
       const due = d.nextReviewDate ? new Date(d.nextReviewDate) : null;
       const late = due && !isNaN(due) ? Math.floor((Date.now() - due) / 86400000) : null;

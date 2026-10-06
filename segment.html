@@ -1480,6 +1480,10 @@ const SEGMENTS = {
     var nStd = 0, nPol = 0;
     TAQA_STORE.all().forEach(function(d){
       if (d.segment !== id) return;
+      // Only what this reader may open is listed or counted: a restricted
+      // title is not shown to an Employee, even marked as locked (BD-03,
+      // PI-27). Browser filtering of demonstration data, not security.
+      if (TAQA_STORE.readable && !TAQA_STORE.readable(d)) return;
       var live = TAQA_STORE.isLive(d),
           asset = !TAQA_STORE.isControlled(d) && d.status !== 'obsolete';
       if (!live && !asset) return;
@@ -1613,7 +1617,11 @@ if (!SEG_KNOWN) document.documentElement.classList.add('seg-unknown');
 (function(){
   if (typeof TAQA_STORE === 'undefined') return;
   function paintPending(){
-    var n = TAQA_STORE.count('pending', { segment: segId }),
+    // Counted by classification for this reader, plus their own filings (in
+    // the prototype, filed from this browser): no restricted draft is counted
+    // for an Employee (BD-03, PI-27).
+    var n = TAQA_STORE.rows('pending', { segment: segId }).filter(function(d){
+          return !TAQA_STORE.classOpen || TAQA_STORE.classOpen(d) || d.locallyAdded; }).length,
         w = document.getElementById('seg-pending-wrap'),
         v = document.getElementById('seg-pending');
     if (!w || !v) return;

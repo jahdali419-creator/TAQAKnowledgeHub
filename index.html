@@ -2192,8 +2192,10 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
   // how this page came to claim ten segments while the register held eleven.
   // They are now whatever the register says they are.
   function paint(){
-  var totalDocs  = S.count('live');
-  var totalAlert = S.count('live', { docType:'alert' });
+  // What this reader may open, not the whole register: an Employee is not
+  // told about restricted documents they cannot open (BD-03, PI-27).
+  var totalDocs  = S.count('visible');
+  var totalAlert = S.count('visible', { docType:'alert' });
   var segN = S.areasIn('segment').length,
       fnN  = S.areasIn('function').length,
       ptN  = S.areasIn('product').length;
@@ -2228,7 +2230,7 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
     else if (t.indexOf('Technology') !== -1) set(val, ptN);
     else if (t.indexOf('Segment') !== -1)    set(val, segN);
     else if (t.indexOf('Alert') !== -1)      set(val, totalAlert);
-    else if (t.indexOf('Approval') !== -1)   set(val, S.count('pending'));
+    else if (t.indexOf('Approval') !== -1)   set(val, S.rows('pending').filter(S.classOpen).length);
   });
 
   var cc = document.querySelector('.cmd-header-count');
@@ -2297,7 +2299,7 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
   // counts without a reload.
   function groups(){
     var ST = (typeof TAQA_STORE !== 'undefined') ? TAQA_STORE : null,
-        controlled = ST ? ST.rows('live') : D.filter(A.controlled);
+        controlled = ST ? ST.rows('visible') : D.filter(A.controlled);
     var out = {};
     ORDER.forEach(function(k){
       var m = META[k];

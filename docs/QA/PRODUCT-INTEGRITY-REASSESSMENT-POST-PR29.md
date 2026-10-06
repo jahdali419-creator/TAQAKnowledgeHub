@@ -260,6 +260,12 @@ The evidence points here rather than to the next item on the old roadmap. The tw
 - **PI-52:** side and bottom insets on drawers, menus, bars and sheets; content keeps out of the notch. Simulated; *real iPhone check required.*
 - **TB-04:** the installed-app test covers every overlay, upright and on its side. **TB-05 / TB-06:** see `docs/TESTING.md` (WebKit smoke job, service-worker and back-forward tests).
 
+**Status after the integrity close-out (owner's decisions BD-01 to BD-07, 6 Oct 2026).** Addressed in the prototype, with tests in `tests/integrity-closeout.spec.js` and the rules in `BUSINESS-RULES.md` §21:
+- **PI-17:** "Open your queue" opens the signer's own desk (or the delegated area's) from any page; the desk's own access check is unchanged.
+- **PI-22:** an exact number or legacy ID of a superseded or withdrawn document shows that document marked "Superseded / Withdrawn. Do not use.", naming a successor only where one exists and pointing to SCORE otherwise; permission-trimmed.
+- **PI-23:** the document page, share link, QR code and bookmark take the area from the record; nothing is guessed when a link names neither a number nor an area.
+- **PI-27:** decided by BD-03 and closed in the prototype: lists, counts, search, bookmarks, the desk, Upload's messages and the document page show only what the role may open. **PRODUCTION CONTROL REQUIRED** (server-side permission trimming). Open: classification at upload, and access for the approver of a restricted document (`BUSINESS-RULES.md` §21).
+
 **After 2B, in this order** (proposed, for your decision later):
 1. **2C: Record truth.** PI-11 withdrawal record and honest trail; PI-10 bulk withdraw over drafts; PI-21 release dates; the rest of PI-24 (Returned state, not pending); PI-13 duplicate detection; PI-14 number validation; NEW-04 delegation-naming guard; PI-32 delegate withdraw/type limits; PI-54.
 2. **2D: Phone and installed-app reliability.** PI-08 drawer close; PI-18 Back; PI-30 update reload; PI-48 offline bars; PI-26 / PI-28 honest offline state; PI-61, PI-51; plus TB-04 / TB-06 tests and adding a WebKit job to CI (TB-05).

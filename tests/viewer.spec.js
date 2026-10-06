@@ -90,16 +90,15 @@ test.describe('missing/malformed params and unknown doc/segment combinations', (
     consoleErrors,
   }) => {
     // This is the "wrong-segment fault" shape: a document opened through a
-    // link that names the wrong (or a made-up) segment. byNumber() still
-    // finds the real record (viewer.html trusts the doc number over the seg
-    // param for identity), so the record itself renders correctly; only the
-    // segment badge/breadcrumb reflect the unknown segId, and safely so.
+    // link that names the wrong (or a made-up) segment. The number finds the
+    // real record, and the record's own area wins over the link's: the
+    // breadcrumb goes to the document's area, not the made-up one (PI-23).
     await gotoApp('/index.html');
     await setRole('qms', 'coiled-tubing');
     await gotoApp(urlFor({ ...DOC_CURRENT, seg: 'not-a-real-segment' }));
     await expect(page.locator('#doc-title')).toHaveText(DOC_CURRENT.title);
     await expect(page.locator('#meta-grid')).toContainText(DOC_CURRENT.doc);
-    await expect(page.locator('#bc-seg')).toHaveAttribute('href', /^segment\.html\?id=not-a-real-segment/);
+    await expect(page.locator('#bc-seg')).toHaveAttribute('href', new RegExp('^segment\\.html\\?id=' + DOC_CURRENT.seg + '(&|$)'));
     assertNoConsoleErrors(consoleErrors);
   });
 

@@ -892,7 +892,12 @@ function setMenuNote(text){
 }
 
 const params = new URLSearchParams(location.search);
-const segId = (params.get('seg') || 'drilling').replace(/[^a-z0-9-]/g,'').slice(0,60) || 'drilling';
+// The area a link names is only what the linking page thought it was. The
+// record's own area wins once the record is known (below), and a link that
+// names neither is never given a guessed one: this used to default to
+// Drilling, so a doc-only link, its breadcrumb, Related list, share link and
+// QR code all said Drilling whatever the document was (PI-23).
+const _segParam = (params.get('seg') || '').replace(/[^a-z0-9-]/g,'').slice(0,60);
 let docTitle = decodeURIComponent(params.get('title') || 'Document').replace(/<[^>]*>/g,'').trim().slice(0,300) || 'Document';
 // '#' is allowed: a placeholder number such as TQ-QHSE-P### is still the
 // number on the record, and stripping it made the record unfindable (PI-03).
@@ -934,9 +939,28 @@ function _liveRec(n){
   if (hit) return hit;
   return (typeof TAQA_DOC !== 'undefined') ? (TAQA_DOC.byNumber(n) || TAQA_DOC.byLegacy(n)) : null;
 }
-const _typeRec = _liveRec(docId);
+// Role check. Demonstration only. The back end must refuse to RETURN a record
+// the caller may not see, rather than relying on the page to hide it. roles.js.
+const _roleKey = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE.current() : null;
+/* A record whose classification this role may not open is not shown at all,
+   not even as locked: no title, area, number from the register or any other
+   field. The page reads exactly as it does for a number the register does
+   not hold (BD-03, PI-27). Their own filing (in the prototype, filed from
+   this browser) is the one exception. This is browser filtering of
+   demonstration data; in production the server does not return the record
+   (Microsoft 365 permission trimming). */
+function _clsHidden(r){
+  if (!r || !_roleKey || r.locallyAdded || !r.classification || typeof TAQA_ROLES === 'undefined') return false;
+  var R = TAQA_ROLES[_roleKey];
+  return !!R && R.classifications.indexOf(r.classification) === -1;
+}
+const _numRec = _liveRec(docId);
+const _typeRec = _clsHidden(_numRec) ? null : _numRec;
 const docType = (_typeRec && _typeRec.docType) || (params.get('type') || 'sop').replace(/[^a-z0-9-]/g,'').slice(0,20) || 'sop';
-const segInfo = SEGS[segId] || {name:'TAQA',tag:'Segment'};
+// A number that resolves gives the area; otherwise the link's own area, if
+// it is a real one; otherwise none ("Area not recorded").
+const segId = (_typeRec && _typeRec.segment) || (SEGS[_segParam] ? _segParam : '');
+const segInfo = SEGS[segId] || {name:'Area not recorded',tag:''};
 const typeColor = TYPE_COLORS[docType] || TYPE_COLORS.sop;
 const typeText = TYPE_TC[docType] || TYPE_TC.sop;
 const typeBorder = TYPE_BC[docType] || TYPE_BC.sop;
@@ -951,13 +975,13 @@ document.getElementById('bc-seg').textContent = segInfo.name;
 // register's own lookup table (TAQA_DOC_LOOKUPS.segments), so this used to
 // route a company policy's breadcrumb to master-list.html instead, which
 // is QMS/auditor only, refusing an employee who just wanted to go back.
-document.getElementById('bc-seg').href = 'segment.html?id=' + segId;
+document.getElementById('bc-seg').href = segId ? 'segment.html?id=' + segId : 'index.html';
 document.getElementById('bc-title').textContent = docTitle.length > 50 ? docTitle.slice(0,50)+'…' : docTitle;
 
 // The breadcrumb's area link is the way back, so it returns to the tab
 // this type is listed under. Pluralising the type once sent a Standard to
 // tab=standards and software to tab=softwares, neither of which exists.
-if (segId !== 'company') {
+if (segId && segId !== 'company') {
   document.getElementById('bc-seg').href = 'segment.html?id=' + segId + '&tab=' +
     (({sop:'sops',form:'forms',bulletin:'bulletins',manual:'manuals',standard:'policies',policy:'policies',alert:'alerts',lesson:'lessons',software:'software'})[docType] || 'all');
 }
@@ -966,7 +990,7 @@ if (segId !== 'company') {
 // so that is where the breadcrumb goes back to. Read once the record is known.
 function _maintBack(){
   try {
-    if (segId === 'company' || typeof _rec === 'undefined' || !_rec ||
+    if (!segId || segId === 'company' || typeof _rec === 'undefined' || !_rec ||
         (_rec.department !== 'maintenance' && _rec.docType !== 'bulletin')) return;
     const bc = document.getElementById('bc-seg');
     bc.href = bc.getAttribute('href') + '&dept=maintenance';
@@ -1008,12 +1032,25 @@ const _bare = docTitle.replace(/^((?:TQ|TAQA)-[^\s]+|[A-Z][A-Z0-9]*-\d+)\s+/, ''
    opened from Home, a bookmark or a QR code showed "Current, OK to use"
    (PI-03). Nothing found means "not in the register", never a guess. */
 function _byTitle(){
+  // A title alone is not an identity: without an area it finds nothing
+  // rather than borrowing a record from wherever the title happens to be.
+  if (!segId) return null;
   var all = (typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.all() : MD;
   var live = function(d){ return d.status === 'current' || d.status === 'under-review'; };
   var hits = all.filter(function(d){ return d.segment === segId && (d.title === docTitle || d.title === _bare); });
   return hits.filter(live)[0] || hits[0] || null;
 }
-const _rec = MA ? (docId ? _liveRec(docId) : _byTitle()) : null;
+const _found = MA ? (docId ? _numRec : _byTitle()) : null;
+const _rec = _clsHidden(_found) ? null : _found;
+// A link whose record is not shown (not in the register, or not open to this
+// role) does not repeat the title the link carried as if it were confirmed,
+// and the two cases read the same.
+if (!_rec) {
+  docTitle = 'Document';
+  document.title = docTitle + ', RISE';
+  document.getElementById('doc-title').textContent = docTitle;
+  document.getElementById('bc-title').textContent = docTitle;
+}
 _maintBack();
 
 const _narrow = window.matchMedia('(max-width:768px)');
@@ -1026,9 +1063,6 @@ function cell(label, value, clause, extraCls){
     (clause ? '<div class="meta-clause">' + clause + '</div>' : '') + '</div>';
 }
 
-// Role check. Demonstration only. The back end must refuse to RETURN a record
-// the caller may not see, rather than relying on the page to hide it. roles.js.
-const _roleKey = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE.current() : null;
 const _denied = _rec && _roleKey && !TAQA_ROLE.canSee(_rec, _roleKey);
 
 /* The register names the document; a link's title= is only what the linking
@@ -1258,14 +1292,14 @@ if (_denied) {
     cell('Document owner', null, 'API Q2 4.4.3 a)');
   document.getElementById('lifecycle-banner').innerHTML =
     '<div class="lcb lcb-prov"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12.5"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
-    '<div><b>Not in the Master Document List</b><span class="n">This document has no entry in the register, so its revision, approval and review status cannot be confirmed here. ' +
-    'Check <a href="master-list.html">the register</a> or SCORE before using it.</span></div></div>';
+    '<div><b>Not in the Master Document List available to your role</b><span class="n">RISE has no document matching this link that your role can open, so its revision, approval and review status cannot be confirmed here. ' +
+    'Check the number, ask the QMS function if you believe you need access, and check SCORE before using any copy.</span></div></div>';
 }
 
 // Summary
 // A reader the role check turned away keeps the refusal, not the record.
 if (!_denied) document.getElementById('doc-summary').innerHTML = docControlLine(_rec, {noRev:true}) ||
-  'The register holds no control record for this document.';
+  'No control record available to your role.';
 
 // ── Version history & approval trail ───────────────────────────────────────
 // PLACEHOLDER DATA. TQ-QHSE-S001 5.4 and API Q2 4.4.3 d) expect a controlled
@@ -1525,16 +1559,22 @@ document.getElementById('pdf-toolbar-label').textContent = docTitle + '.pdf';
 })();
 
 // Share: the link and its QR code live in the Share popover.
-let docUrl = location.origin + location.pathname.replace(/viewer\.html.*/,'') + 'viewer.html?seg=' + encodeURIComponent(segId) + '&type=' + encodeURIComponent(docType) + '&title=' + encodeURIComponent(docTitle);
 // The share link, its QR code and an offline pin name the document by its
 // number, the one thing that identifies it, even when this page was reached
-// by title alone (PI-03).
+// by title alone (PI-03), and carry the record's own area and type, never a
+// guessed one (PI-23). A link with no area says none.
+let docUrl = location.origin + location.pathname.replace(/viewer\.html.*/,'') + 'viewer.html?' +
+  (segId ? 'seg=' + encodeURIComponent(segId) + '&' : '') + 'type=' + encodeURIComponent(docType) + '&title=' + encodeURIComponent(docTitle);
 const _docNum = (_rec && _rec.docNumber) || docId;
 if (_docNum) docUrl += '&doc=' + encodeURIComponent(_docNum);
-// A revision other than the one in force is shared as that revision.
-if (_rec && _docNum && typeof TAQA_STORE !== 'undefined' && TAQA_STORE.findDoc(_docNum) &&
-    String(TAQA_STORE.findDoc(_docNum).revision || '') !== String(_rec.revision || '') && _rec.revision)
-  docUrl += '&rev=' + encodeURIComponent(_rec.revision);
+// A revision other than the one in force is shared as that revision, and a
+// link that named one exact record (a returned attempt shares its revision
+// label with the next) keeps naming it.
+const _keyOf = r => (r && typeof TAQA_STORE !== 'undefined' && TAQA_STORE.recordKey) ? TAQA_STORE.recordKey(r) : null;
+const _inForce = (_rec && _docNum && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(_docNum) : null;
+const _isDefault = !!(_rec && _inForce && _keyOf(_inForce) === _keyOf(_rec));
+if (_rec && _rec.revision && _inForce && !_isDefault) docUrl += '&rev=' + encodeURIComponent(_rec.revision);
+if (_rec && docRid && !_isDefault && _keyOf(_rec) === docRid) docUrl += '&rid=' + encodeURIComponent(docRid);
 document.getElementById('qr-img').src = window.TAQA_QR ? window.TAQA_QR(docUrl, 4) : '';
 document.getElementById('share-url').textContent = docUrl;
 document.getElementById('share-url').title = docUrl;

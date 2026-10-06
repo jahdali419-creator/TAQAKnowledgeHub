@@ -1052,11 +1052,21 @@ window.addEventListener('pageshow', function(e){
      this carried a title only, and still match by area and title. */
   function bmResolve(bare,segId){
     if(typeof TAQA_STORE==='undefined'||!bare) return '';
-    var hits=TAQA_STORE.all().filter(function(d){return d.segment===segId&&d.title===bare&&d.docNumber;});
+    var hits=TAQA_STORE.all().filter(function(d){return d.segment===segId&&d.title===bare&&d.docNumber&&(!TAQA_STORE.readable||TAQA_STORE.readable(d));});
     var live=hits.filter(function(d){return d.status==='current'||d.status==='under-review';});
     var d=live[0]||hits[0]; return d?d.docNumber:'';
   }
   function bmNumOf(i){ return (i && (i.num || bmNum(i.title))) || ''; }
+  /* A bookmark to a document this role may not open is not listed or
+     counted: its title is not shown, even saved (BD-03, PI-27). It is kept
+     on the device, so it comes back for a role that may open it. */
+  function bmShown(i){
+    if(typeof TAQA_STORE==='undefined'||!TAQA_STORE.readable) return true;
+    var n=bmNumOf(i);
+    var recs=n?TAQA_STORE.all().filter(function(d){return d.docNumber===n;})
+              :TAQA_STORE.all().filter(function(d){return d.segment===i.segId&&d.title===bmBare(i.title);});
+    return !recs.length||recs.some(TAQA_STORE.readable);
+  }
   function bmSame(i,title,segId,num){
     var a=bmNumOf(i), b=num||bmNum(title);
     if(a&&b) return a===b;
@@ -1078,7 +1088,7 @@ window.addEventListener('pageshow', function(e){
     has:function(title,segId,num){
       return load().some(function(i){return bmSame(i,title,segId,num);});
     },
-    getAll:function(){return load();}
+    getAll:function(){return load().filter(bmShown);}
   };
   /* The list opens from the Bookmarks button in the top bar and hangs under
      it. It used to open from a round button floating over every page, which
@@ -1809,9 +1819,17 @@ document.addEventListener('keydown',function(e){
       window.scrollTo({top: Math.max(0, q.getBoundingClientRect().top + window.pageYOffset - off), behavior: still ? 'auto' : 'smooth'});
       return;
     }
-    // Leaving from a segment page keeps that segment's desk, not the
-    // reader's own default one.
-    var id = /segment\.html/.test(location.pathname) ? new URLSearchParams(location.search).get('id') : null;
+    // The bell counts what this signer may decide, which is in the area they
+    // hold (or hold a delegation for), so the queue is that area's desk. It
+    // used to take the area of the page being read, which sent a Director
+    // reading another area's page to a desk that refused them (PI-17). A
+    // segment page's own area is used only where this person may open its
+    // desk; the desk's own check still decides.
+    var R = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE : null;
+    var cap = (R && R.effective) ? R.effective() : null;
+    var pageId = /segment\.html/.test(location.pathname) ? new URLSearchParams(location.search).get('id') : null;
+    var id = (cap && cap.scope !== 'all' && cap.ownSegment) ? cap.ownSegment
+           : (pageId && R && R.canOpenDesk && R.canOpenDesk(pageId)) ? pageId : null;
     location.href = 'dashboard.html' + (id ? '?id=' + encodeURIComponent(id) : '');
   }
 
