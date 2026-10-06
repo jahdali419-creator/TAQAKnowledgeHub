@@ -360,6 +360,13 @@ Premium design and the full QMS Dashboard are **not** started now.
 
 ---
 
+## Open items recorded by the owner
+
+- **BC-12: OPEN, POTENTIAL PUBLIC INFORMATION EXPOSURE** (6 Oct 2026).
+  - **Treatment:** only the generated labels and control fields of the prototype register are confirmed as demonstration data. Every other register title is treated as potentially sensitive until TAQA confirms otherwise. None is reclassified as safe on assumption.
+  - **Kept private:** the review, the containment plan and the confirmation questions are held by the Product Owner, not in this repository.
+  - **Owner's approval required:** no repository-visibility change, site takedown, deletion or history rewrite is made without the owner's explicit approval.
+
 ## Change control for this register
 
 - A new decision gets the next ID (BD-08, …), with every field above, and is approved by Mohammed.
