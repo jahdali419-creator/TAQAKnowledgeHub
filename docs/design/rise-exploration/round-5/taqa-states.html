@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RISE N States</title>
+<link rel="stylesheet" href="../kit/fonts.css">
+<style>/* RISE round 5 comparison (mobile first). Layout: one wide review column (~1320px); each screen shows J, K, L side by side, desktop row then mobile row; assessment cards close the page. */
+:root{
+  --ground:#F2F4F3; --sheet:#FFFFFF; --ink:#0B2A30; --ink-2:#3C5459; --ink-3:#5C6F73;
+  --rule:#D8DEDD; --chip:#E6EBEA; --teal:#005D63; --cyan:#00ADC2; --signal-a:#FD691D; --signal-b:#C8102E;
+  --frame:#0B2A30; --ok:#167A4A; --warn:#8A5800; --bad:#A3222B;
+  --shadow:0 1px 2px rgba(0,43,50,.06),0 18px 36px -22px rgba(0,43,50,.45);
+  --logo-l:block; --logo-d:none;
+  --display:'BwGradual','Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --text:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#0A1A1D; --sheet:#10262A; --ink:#E4EEEE; --ink-2:#B5C6C8; --ink-3:#8FA3A6;
+  --rule:#22393D; --chip:#18322F; --teal:#5FC2C4; --cyan:#22C3D6; --frame:#2A4950;
+  --ok:#5CC491; --warn:#E6B55A; --bad:#F08A90;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 18px 36px -22px rgba(0,0,0,.7); --logo-l:none; --logo-d:block; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#0A1A1D; --sheet:#10262A; --ink:#E4EEEE; --ink-2:#B5C6C8; --ink-3:#8FA3A6;
+  --rule:#22393D; --chip:#18322F; --teal:#5FC2C4; --cyan:#22C3D6; --frame:#2A4950;
+  --ok:#5CC491; --warn:#E6B55A; --bad:#F08A90;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 18px 36px -22px rgba(0,0,0,.7); --logo-l:none; --logo-d:block; color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 16px/1.6 var(--text);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1320px;margin:0 auto;padding-inline:24px}
+@media (max-width:560px){.wrap{padding-inline:16px}}
+a{color:var(--teal)}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:6px}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:-.02em;margin:0;text-wrap:balance}
+p,ul{margin:0}
+img{display:block;max-width:100%}
+.eyebrow{font:600 12px/1 var(--text);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.logo-l{display:var(--logo-l)}.logo-d{display:var(--logo-d)}
+
+.mast{padding-block:44px 32px}
+.mast-top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:44px}
+.mast-top img{height:34px;width:auto}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px dashed var(--rule);border-radius:999px;font:600 12px/1 var(--text);color:var(--ink-2)}
+.badge i{width:7px;height:7px;border-radius:50%;background:linear-gradient(90deg,var(--signal-a),var(--signal-b))}
+.mast h1{font-size:clamp(40px,7vw,84px);line-height:.98;letter-spacing:-.035em;margin:14px 0 20px}
+.lede{font-size:19px;line-height:1.55;color:var(--ink-2);max-width:62ch}
+.same{margin-top:22px;font-size:14.5px;color:var(--ink-3);max-width:90ch}
+.c-let{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:12px;background:var(--ink);color:var(--ground);font:800 22px/1 var(--display)}
+.c-let.sm{width:28px;height:28px;border-radius:8px;font-size:14px;margin-right:10px;vertical-align:middle}
+
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ground);border-block:1px solid var(--rule)}
+.tabs .wrap{display:flex;gap:6px;overflow-x:auto;padding-block:10px;scrollbar-width:none}
+.tabs a{flex:none;padding:7px 14px;border-radius:999px;color:var(--ink-2);text-decoration:none;font:500 14px/1.2 var(--text)}
+.tabs a:hover{background:var(--chip);color:var(--ink)}
+
+
+.legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:30px}
+.legend a{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:center;padding:14px 16px;border-radius:12px;background:var(--sheet);border:1px solid var(--rule);text-decoration:none;color:var(--ink)}
+.legend b{font:700 17px/1.2 var(--display)}
+.legend small{grid-column:2;color:var(--ink-3);font-size:13.5px}
+.legend .lt{grid-row:1/3}
+@media (max-width:820px){.legend{grid-template-columns:1fr}}
+.lt{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--ground);font:800 13px/1 var(--display);margin-right:8px;flex:none}
+.lt.big{width:48px;height:48px;border-radius:12px;font-size:24px;margin:0}
+.scr{padding-block:64px 8px;border-bottom:1px solid var(--rule)}
+.scr-h h2{font-size:clamp(28px,3.6vw,40px);margin-bottom:18px}
+.row-l{font:600 12px/1 var(--text);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:22px 0 12px}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:start}
+.row3 figure{margin:0;min-width:0}
+.row3 figcaption{display:flex;align-items:center;margin-top:10px;font:600 14px/1.3 var(--text);color:var(--ink)}
+.screen{display:block;border-radius:10px;overflow:hidden;border:1px solid var(--rule);box-shadow:var(--shadow);aspect-ratio:1440/900;background:var(--sheet)}
+.phone{display:block;border-radius:26px;overflow:hidden;border:5px solid var(--frame);background:var(--frame);box-shadow:var(--shadow);aspect-ratio:390/844}
+.screen img,.phone img{width:100%;height:100%;object-fit:cover;object-position:top}
+.row3.mb figure{max-width:300px;justify-self:center;width:100%}
+@media (max-width:900px){.row3.dk{grid-template-columns:1fr}.row3.mb{grid-template-columns:repeat(3,220px);overflow-x:auto;padding-bottom:6px}.row3.mb figure{justify-self:start}}
+.plain{padding-block:64px 24px}
+.plain h2{font-size:clamp(28px,3.4vw,38px);margin-bottom:20px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+@media (max-width:1000px){.cards{grid-template-columns:1fr}}
+.card{background:var(--sheet);border:1px solid var(--rule);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card header{display:flex;gap:14px;align-items:center;margin-bottom:8px}
+.card h3{font-size:22px;line-height:1.15}
+.card .nav{font-size:13.5px;color:var(--ink-3)}
+.card h4{margin:12px 0 2px;font:600 12px/1.2 var(--text);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.card p{color:var(--ink-2);font-size:15px;line-height:1.55}
+.scores{margin-top:auto;padding-top:16px;border-top:1px solid var(--rule);display:grid;gap:10px}
+.card h4+p{margin-bottom:2px}
+.sc{display:grid;grid-template-columns:150px minmax(0,1fr) 28px;align-items:center;gap:10px;font-size:14px;color:var(--ink-2)}
+.sc .bar{height:8px;border-radius:99px;background:var(--chip);overflow:hidden}
+.sc .bar i{display:block;height:100%;border-radius:99px;background:var(--teal)}
+.sc b{font:700 19px/1 var(--display);color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+.note{margin-top:18px;font-size:14.5px;color:var(--ink-3);max-width:80ch}
+footer{padding-block:48px 64px;color:var(--ink-3);font-size:14px}
+
+.dir{padding-block:72px 28px;border-bottom:1px solid var(--rule)}
+.d-head{display:flex;gap:18px;align-items:center;margin-bottom:26px}
+.d-head h2{font-size:clamp(30px,4.2vw,46px);line-height:1.02;margin-top:4px}
+.navl{font-size:14.5px;color:var(--ink-3);margin-top:6px}
+.phones{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
+.desks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin-top:34px}
+.phones figure,.desks figure{margin:0;position:relative;min-width:0}
+.phones figcaption,.desks figcaption{margin-top:10px;font:500 13.5px/1.35 var(--text);color:var(--ink-2)}
+.num{position:absolute;top:-10px;left:-10px;z-index:2;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:var(--ground);font:700 12px/1 var(--text)}
+@media (max-width:900px){.phones{grid-template-columns:repeat(4,230px);overflow-x:auto;padding:10px 0 8px 10px}.desks{grid-template-columns:1fr}}
+.assess{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:36px;margin-top:40px}
+@media (max-width:900px){.assess{grid-template-columns:1fr}}
+.assess h3{font:600 12px/1.2 var(--text);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:18px 0 8px}
+.assess h3:first-child{margin-top:0}
+.assess p{color:var(--ink-2);font-size:15.5px;line-height:1.55}
+.phil{font:400 21px/1.45 var(--display)!important;color:var(--ink)!important;letter-spacing:-.01em}
+.better{list-style:none;padding:0;margin:0;display:grid;gap:9px}
+.better li{position:relative;padding-left:22px;color:var(--ink-2);font-size:15px;line-height:1.5}
+.better li::before{content:"";position:absolute;left:2px;top:.55em;width:9px;height:9px;border-radius:50%;background:var(--teal)}
+.scores{margin-top:22px;padding:18px;border:1px solid var(--rule);border-radius:14px;background:var(--sheet);display:grid;gap:11px}
+.sc{grid-template-columns:190px minmax(0,1fr) 28px}
+@media (max-width:420px){.sc{grid-template-columns:130px minmax(0,1fr) 24px}}
+.seg{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.seg button{font:500 14px/1 var(--text);padding:10px 16px;border-radius:999px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink-2);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+.seg button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.crit{display:grid;gap:12px;max-width:80ch}
+.crit p{color:var(--ink-2);line-height:1.6}
+.crit b{color:var(--ink)}
+
+.why{max-width:760px;font-size:17px;line-height:1.55;color:var(--ink-2);margin-top:6px}
+.why b{color:var(--ink)}
+.dials{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.dials span{display:inline-flex;align-items:baseline;gap:8px;padding:8px 14px;border:1px solid var(--rule);border-radius:999px;background:var(--sheet);font-size:14px;color:var(--ink-2)}
+.dials b{font-size:17px;color:var(--ink)}
+.dials s{color:var(--ink-3)}
+.pair{display:grid;grid-template-columns:300px minmax(0,1fr);gap:40px;align-items:start;margin:18px 0 34px}
+.pair figcaption,.row2 figcaption{margin-top:10px;font-size:14px;color:var(--ink-2)}
+.row2{display:grid;gap:28px;margin:10px 0 30px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.row2 figure:last-child figcaption{color:var(--teal);font-weight:600}
+.mv{display:grid;grid-template-columns:320px minmax(0,1fr);gap:48px;align-items:start;margin-top:18px}
+.mv .phone video{display:block;width:100%;height:100%;object-fit:cover}
+.steps{counter-reset:s;display:flex;flex-direction:column;gap:14px;margin-top:4px}
+.steps li{counter-increment:s;list-style:none;display:grid;grid-template-columns:34px 1fr;gap:12px;font-size:16.5px;line-height:1.5;color:var(--ink-2)}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--chip);color:var(--ink);font-weight:700;font-size:14px}
+.steps b{color:var(--ink)}
+.rules{width:100%;border-collapse:collapse;margin-top:14px;font-size:15.5px;line-height:1.45}
+.rules th,.rules td{text-align:left;vertical-align:top;padding:14px 16px 14px 0;border-top:1px solid var(--rule)}
+.rules th{width:30%;color:var(--ink);font-weight:700}
+@media (max-width:900px){.pair,.mv{grid-template-columns:1fr}.pair .phone,.mv .phone{max-width:300px}.row2{grid-template-columns:1fr}}
+@media (max-width:700px){.rules tr{display:block;border-top:1px solid var(--rule);padding:12px 0}.rules th,.rules td{display:block;width:auto;border:0;padding:3px 0}}
+</style>
+</head>
+<body>
+<header class="wrap mast">
+  <div class="mast-top"><img class="logo-l" src="../kit/brand/rise-lockup-header.png" alt="RISE" width="320" height="120"><img class="logo-d" src="../kit/brand/rise-lockup-header-reverse.png" alt="RISE" width="320" height="120"><span class="badge"><i></i>Design exploration · not implemented</span></div>
+  <p class="eyebrow">Round 5 · Applying the design-taste skill</p>
+  <h1>N + TAQA, with real-life states and motion</h1>
+  <p class="why">The earlier mockups showed only the moment when everything has loaded. Here, N + TAQA also covers the moments people actually meet on the job: waiting for results, an empty list, a locked file, and no signal on site. Taps get physical feedback, and desktop Home becomes an uneven tile grid led by the safety alert.</p>
+  <div class="dials"><span>Layout variance <b>4</b> <s>8</s></span><span>Motion <b>3</b> <s>6</s></span><span>Density <b>6</b> <s>4</s></span><span>RISE setting, with the skill default crossed out</span></div>
+</header>
+<nav class="tabs" aria-label="Sections"><div class="wrap"><a href="#motion">Motion</a><a href="#home">Desktop Home</a><a href="#search-loading">Loading</a><a href="#saved-empty">Empty</a><a href="#document-restricted">Restricted</a><a href="#document-offline">Offline</a><a href="#took">What I took</a></div></nav>
+<main class="wrap">
+<section class="scr" id="motion">
+  <div class="scr-h"><h2>See it move · phone, 23 seconds</h2></div>
+  <div class="mv">
+    <figure><span class="phone"><video src="shots/nst-motion-phone.webm" autoplay muted loop playsinline aria-label="Screen recording of the phone prototype"></video></span><figcaption>Recorded from the HTML prototype</figcaption></figure>
+    <ol class="steps">
+      <li><span><b>Home.</b> Sections rise in, top to bottom, once. Pressing the ALT-002 safety card shrinks it slightly.</span></li>
+      <li><span><b>Search “pressure test”.</b> Grey placeholder rows first, then the 17 results ripple in without the page jumping.</span></li>
+      <li><span><b>Press a result.</b> The row tints while your finger is down.</span></li>
+      <li><span><b>WI-003, tap Save.</b> The bookmark pops and a confirmation slides up: “Removed from Saved”, then “Saved. WI-003 is in your Saved list.”</span></li>
+      <li><span><b>Offline, then Saved (empty).</b> The two other states, as they appear on the phone.</span></li>
+      <li><span>Phones set to <b>reduce motion</b> get no movement at all; every page is also complete without JavaScript.</span></li>
+    </ol>
+  </div>
+</section>
+<section class="scr" id="home">
+  <div class="scr-h"><h2>Desktop Home · even columns → uneven tile grid</h2></div>
+  <p class="why">The safety alert gets the largest tile, with its two actions on the tile itself. “Continue reading” sits beside it in TAQA teal. The phone keeps N’s single column.</p>
+  <div class="row2"><figure><a class="screen" href="n-taqa/home.html"><img src="shots/nt-home-desktop.jpg" alt="Before · N + TAQA" loading="lazy" width="1440" height="900"></a><figcaption>Before · N + TAQA</figcaption></figure><figure><a class="screen" href="n-states/home.html"><img src="shots/nst-home-desktop.jpg" alt="After · tile grid" loading="lazy" width="1440" height="900"></a><figcaption>After · tile grid</figcaption></figure></div>
+</section>
+<section class="scr st" id="search-loading">
+  <div class="scr-h"><h2>Loading · Search “pressure test”</h2></div>
+  <p class="why">Grey rows shaped exactly like the results, plus one plain line: “Searching 520 documents in force”. The layout does not jump when results arrive, and nothing spins.</p>
+  <div class="pair"><figure><a class="phone" href="n-states/search-loading.html"><img src="shots/nst-search-loading-phone.jpg" alt="Mobile · 390 × 844" loading="lazy" width="780" height="1688"></a><figcaption>Mobile · 390 × 844</figcaption></figure><figure><a class="screen" href="n-states/search-loading.html"><img src="shots/nst-search-loading-desktop.jpg" alt="Desktop · 1440 × 900" loading="lazy" width="1440" height="900"></a><figcaption>Desktop · 1440 × 900</figcaption></figure></div>
+</section><section class="scr st" id="saved-empty">
+  <div class="scr-h"><h2>Empty · Saved, before anything is saved</h2></div>
+  <p class="why">An empty list that teaches: what Saved is for, how to save (open a document, tap Save), two ways forward, and the documents you opened recently, each with a Save button.</p>
+  <div class="pair"><figure><a class="phone" href="n-states/saved-empty.html"><img src="shots/nst-saved-empty-phone.jpg" alt="Mobile · 390 × 844" loading="lazy" width="780" height="1688"></a><figcaption>Mobile · 390 × 844</figcaption></figure><figure><a class="screen" href="n-states/saved-empty.html"><img src="shots/nst-saved-empty-desktop.jpg" alt="Desktop · 1440 × 900" loading="lazy" width="1440" height="900"></a><figcaption>Desktop · 1440 × 900</figcaption></figure></div>
+</section><section class="scr st" id="document-restricted">
+  <div class="scr-h"><h2>Restricted · SOP-010 Fishing Operations SOP</h2></div>
+  <p class="why">The record stays open to every employee (number, revision, Current, issue date). Only the file is locked: a blurred cover, one clear request to QMS, and a reason field with its label above it.</p>
+  <div class="pair"><figure><a class="phone" href="n-states/document-restricted.html"><img src="shots/nst-document-restricted-phone.jpg" alt="Mobile · 390 × 844" loading="lazy" width="780" height="1688"></a><figcaption>Mobile · 390 × 844</figcaption></figure><figure><a class="screen" href="n-states/document-restricted.html"><img src="shots/nst-document-restricted-desktop.jpg" alt="Desktop · 1440 × 900" loading="lazy" width="1440" height="900"></a><figcaption>Desktop · 1440 × 900</figcaption></figure></div>
+</section><section class="scr st" id="document-offline">
+  <div class="scr-h"><h2>Offline · WI-003 pinned on the device</h2></div>
+  <p class="why">A dark bar says what happened. Trust changes from “Current” to “Current when last checked” with the time, the ALT-002 safety warning stays, and what needs a connection is greyed with a short reason.</p>
+  <div class="pair"><figure><a class="phone" href="n-states/document-offline.html"><img src="shots/nst-document-offline-phone.jpg" alt="Mobile · 390 × 844" loading="lazy" width="780" height="1688"></a><figcaption>Mobile · 390 × 844</figcaption></figure><figure><a class="screen" href="n-states/document-offline.html"><img src="shots/nst-document-offline-desktop.jpg" alt="Desktop · 1440 × 900" loading="lazy" width="1440" height="900"></a><figcaption>Desktop · 1440 × 900</figcaption></figure></div>
+</section>
+<section class="plain" id="took">
+  <h2>What I took from the skill</h2>
+  <table class="rules"><tbody><tr><th>Designed states</th><td>Loading, empty, restricted and offline screens for every key place, instead of showing only the “everything loaded” moment.</td></tr><tr><th>Press feedback</th><td>Buttons and cards shrink slightly (to 97–98%) while pressed, rows tint, and tab icons dip. You feel the tap even with gloves.</td></tr><tr><th>One short reveal</th><td>Lists appear top to bottom, 40 ms apart, once. Only transform and opacity are animated, so it stays smooth on older phones.</td></tr><tr><th>Uneven tile grid on desktop Home</th><td>The safety alert gets the biggest tile, “Continue reading” sits beside it in TAQA teal, and figures, changes, Saved and Tools fill the rest.</td></tr><tr><th>Quality checks</th><td>No pure black, no glows, shadows tinted teal, a label above every input, no emoji, and real data only.</td></tr></tbody></table>
+  <h2 style="margin-top:44px">What I left out, and why</h2>
+  <div class="crit"><p><b>Its fonts (Geist, Satoshi).</b> TAQA’s brand requires BW Gradual and Somar, and the brand wins. BW Gradual is already not Inter, so the skill’s real concern is met.</p><p><b>The flashy effects.</b> Endless animations, magnetic buttons, particle bursts, scrambling text, frosted glass, tilting cards and moving gradients would distract from a safety-critical document.</p><p><b>Its default dials.</b> The skill defaults to layout variance 8, motion 6 and density 4. For RISE I used 4, 3 and 6: ordered, calm and informative.</p><p><b>React, Tailwind and Framer.</b> Those only apply when the real app is built. These are static design mockups.</p></div>
+</section>
+<p class="note">Same real content as round 5. “Checked today 05:40” and the empty Saved list are example states. N and N + TAQA are untouched; nothing is implemented in the live RISE application, and no winner is chosen.</p>
+</main>
+<footer class="wrap">RISE design exploration · round 5 · N + TAQA + states · Built by TAQA Learning Center · branch design/rise-exploration</footer>
+</body>
+</html>

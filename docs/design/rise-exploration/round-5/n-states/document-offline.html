@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RISE · WI-003 · offline</title>
+<link rel="stylesheet" href="../n-taqa/n.css">
+<link rel="stylesheet" href="states.css">
+<script src="motion.js" defer></script>
+<style>
+
+.dview{display:none}
+@media (min-width:1024px){
+  .panes{grid-template-columns:360px 1fr}
+  .pane.list .back{margin-top:14px}
+  .dview{display:block}
+  .phone-doc{display:none}
+  .outline .h2{font-size:18px}
+  .outline .toc li{min-height:46px;font-size:15px}
+  .outline .toc li.on{background:#fff;margin:0 -28px;padding:0 28px;box-shadow:inset 3px 0 0 var(--teal)}
+  .pane.detail .notice{margin-top:18px}
+  .sheet .lines div.f span:first-child::before{content:"";display:inline-block;width:7px;height:7px;background:var(--alert);transform:rotate(45deg);margin-right:8px;vertical-align:1px}
+}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="4.6" fill="currentColor" opacity=".32"/><path fill="currentColor" fill-rule="evenodd" d="M10.5 3.5a7 7 0 1 0 0 14 7 7 0 1 0 0-14zm0 2.4a4.6 4.6 0 1 1 0 9.2 4.6 4.6 0 1 1 0-9.2z"/><path fill="currentColor" d="m15 13.4 5.6 5.6-1.8 1.8-5.6-5.6z"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3 2.8 10.3l1.3 1.6.9-.7V20h5.2v-5.5h3.6V20H19v-8.8l.9.7 1.3-1.6z"/><rect x="10.2" y="14.5" width="3.6" height="5.5" fill="currentColor" opacity=".32"/></symbol>
+<symbol id="i-areas" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.6" fill="currentColor"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="1.6" fill="currentColor" opacity=".32"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="1.6" fill="currentColor" opacity=".32"/><rect x="13" y="13" width="7.5" height="7.5" rx="1.6" fill="currentColor"/></symbol>
+<symbol id="i-saved" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M6 3.5h12v17l-6-4.2-6 4.2z"/><path fill="currentColor" d="M6 3.5h12v3.5H6z"/></symbol>
+<symbol id="i-saved-f" viewBox="0 0 24 24"><path fill="currentColor" d="M6 3.5h12v17l-6-4.2-6 4.2z"/></symbol>
+<symbol id="i-ask" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M3.5 4.5h17v11.5H11l-5 4v-4H3.5z"/><circle cx="8" cy="10.3" r="1.5" fill="currentColor"/><circle cx="12" cy="10.3" r="1.5" fill="currentColor"/><circle cx="16" cy="10.3" r="1.5" fill="currentColor"/></symbol>
+<symbol id="i-glossary" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M6.8 4H19.5v14H6.8z"/><path fill="currentColor" d="M4.5 5.7A2.2 2.2 0 0 1 6.7 3.5H8v15H6.7a2.2 2.2 0 0 0 0 4.4h12.8V20.6H6.7a.6.6 0 0 1 0-1.2h12.8v-1.4H8z"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path fill="currentColor" d="M10.8 16h2.4V7.8l3 3 1.7-1.7L12 3.2 6.1 9.1l1.7 1.7 3-3z"/><rect x="4" y="18" width="16" height="2.8" rx="1.2" fill="currentColor" opacity=".32"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3a6 6 0 0 0-6 6v6.2L4 18h16l-2-2.8V9a6 6 0 0 0-6-6z"/><path fill="currentColor" opacity=".32" d="M9.5 19.5h5a2.5 2.5 0 0 1-5 0z"/></symbol>
+<symbol id="i-chev-r" viewBox="0 0 24 24"><path fill="currentColor" d="M8.6 5.4 10.4 3.6 18.8 12l-8.4 8.4-1.8-1.8L15.2 12z"/></symbol>
+<symbol id="i-chev-l" viewBox="0 0 24 24"><path fill="currentColor" d="M15.4 5.4 13.6 3.6 5.2 12l8.4 8.4 1.8-1.8L8.8 12z"/></symbol>
+<symbol id="i-chev-d" viewBox="0 0 24 24"><path fill="currentColor" d="M5.4 8.6 3.6 10.4 12 18.8l8.4-8.4-1.8-1.8L12 15.2z"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M7.6 10.5V8a4.4 4.4 0 0 1 8.8 0v2.5h-2.3V8a2.1 2.1 0 0 0-4.2 0v2.5z"/><rect x="5" y="10" width="14" height="10.5" rx="2.2" fill="currentColor"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path fill="currentColor" d="M10.8 3.5h2.4v8.2l3-3 1.7 1.7L12 16.3l-5.9-5.9 1.7-1.7 3 3z"/><rect x="4" y="18" width="16" height="2.8" rx="1.2" fill="currentColor" opacity=".32"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M5 10.5h3V19h8v-8.5h3V22H5z"/><path fill="currentColor" d="M10.8 15h2.4V7.6l2.6 2.6 1.7-1.7L12 3 6.5 8.5l1.7 1.7 2.6-2.6z"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/></g></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M3.5 6.3h17v2.4h-17zM3.5 15.3h17v2.4h-17z"/><circle cx="15" cy="7.5" r="2.8" fill="currentColor"/><circle cx="9" cy="16.5" r="2.8" fill="currentColor"/></symbol>
+<symbol id="i-arrow-r" viewBox="0 0 24 24"><path fill="currentColor" d="M4 10.8h11.4l-4.2-4.2 1.7-1.7L20 12l-7.1 7.1-1.7-1.7 4.2-4.2H4z"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path fill="currentColor" d="M6.3 4.6 12 10.3l5.7-5.7 1.7 1.7-5.7 5.7 5.7 5.7-1.7 1.7-5.7-5.7-5.7 5.7-1.7-1.7 5.7-5.7-5.7-5.7z"/></symbol>
+<symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="currentColor"/><path fill="currentColor" opacity=".32" d="M4 21a8 8 0 0 1 16 0z"/></symbol>
+<symbol id="i-wrench" viewBox="0 0 24 24"><path fill="currentColor" d="M14.7 6.3a4 4 0 0 0-5.2 5.2L4.8 16.2a1.6 1.6 0 0 0 2.3 2.3l4.7-4.7a4 4 0 0 0 5.2-5.2l-2.4 2.4-2.1-.4-.4-2.1z"/><circle cx="15.2" cy="8.8" r="1.3" fill="currentColor" opacity=".32"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M6 3h8l5 5v13H6z"/><path fill="currentColor" d="M14 3l5 5h-5z"/><rect x="8.5" y="11.5" width="8" height="2" rx="1" fill="currentColor"/><rect x="8.5" y="15.5" width="5.5" height="2" rx="1" fill="currentColor"/></symbol>
+<symbol id="i-cube" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="m12 3 8 4.5-8 4.5-8-4.5z"/><path fill="currentColor" d="M4 8.6l7.2 4v8.7L4 17.3z"/><path fill="currentColor" opacity=".65" d="M20 8.6l-7.2 4v8.7l7.2-4z"/></symbol>
+<symbol id="i-offline" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M7 19h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.6 9.6 4.75 4.75 0 0 0 7 19z"/><path fill="currentColor" d="M4.2 3.1 20.9 19.8l-1.4 1.4L2.8 4.5z"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4a8 8 0 1 0 7.75 10h-2.1A6 6 0 1 1 12 6c1.6 0 3.05.63 4.12 1.65L13.5 10.3H20V3.8l-2.45 2.45A7.97 7.97 0 0 0 12 4z"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path fill="currentColor" d="M9.5 16.2 5.3 12l-1.4 1.4 5.6 5.6 11-11-1.4-1.4z"/></symbol>
+<symbol id="s-cur" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7.5" fill="currentColor"/><path d="m4.8 8.2 2.2 2.2 4.2-4.4" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="s-due" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 3.2a4.8 4.8 0 0 1 0 9.6z" fill="currentColor"/></symbol>
+<symbol id="s-sup" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m4 12 8-8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="s-alert" viewBox="0 0 16 16"><path d="M8 1.2 15.4 14.2H.6z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/><path d="M8 6v3.6" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><circle cx="8" cy="11.9" r="1" fill="#fff"/></symbol>
+</defs>
+</svg>
+
+<div class="app off">
+<nav class="rail" aria-label="Main">
+  <a class="mark" href="home.html" aria-label="RISE home"><img src="../../kit/brand/rise-icon.png" alt="RISE"></a>
+  <a data-k="home" class="it" href="home.html"><svg class="ic"><use href="#i-home"/></svg>Home</a>
+  <a data-k="search" class="it" href="search.html"><svg class="ic"><use href="#i-search"/></svg>Search</a>
+  <a data-k="areas" class="it on" aria-current="page" href="../n-taqa/area.html"><svg class="ic"><use href="#i-areas"/></svg>Areas</a>
+  <a data-k="saved" class="it" href="#"><svg class="ic"><use href="#i-saved"/></svg>Saved</a>
+  <span class="sep"></span>
+  <a data-k="ask" class="it" href="#"><svg class="ic"><use href="#i-ask"/></svg>Ask</a>
+  <a data-k="glossary" class="it" href="#"><svg class="ic"><use href="#i-glossary"/></svg>Glossary</a>
+  <a data-k="upload" class="it" href="#"><svg class="ic"><use href="#i-upload"/></svg>Upload</a>
+  <span class="grow"></span>
+  <a class="me" href="#" aria-label="Faisal Al-Ghamdi, account">FA</a>
+</nav>
+
+<header class="cmd">
+  <a class="mark" href="home.html" aria-label="RISE home"><img src="../../kit/brand/rise-icon.png" alt="RISE"></a>
+  <label class="field"><svg class="ic-s"><use href="#i-search"/></svg><span class="ph">Search in WI-003</span><span class="kbd">/</span></label>
+  <div class="desk-tools">
+    <span class="role"><i></i>Viewing as <b>Employee</b></span>
+    <a class="bellb" href="#" aria-label="Notifications, new"><svg class="ic"><use href="#i-bell"/></svg><span class="dot"></span></a>
+  </div>
+  <a class="me" href="#" aria-label="Account, notifications and role: Employee">FA<span class="dot"></span></a>
+</header>
+<div class="offline" role="status"><svg><use href="#i-offline"/></svg><span><b>No connection.</b> Showing the copy pinned on this device.</span><a href="#">Retry</a></div>
+<main>
+<div class="panes">
+
+<!-- list pane (desktop): outline + related. On the phone it holds the whole document view. -->
+<div class="pane list">
+  <a class="back" href="../n-taqa/area.html"><svg class="ic-s"><use href="#i-chev-l"/></svg>Manuals&nbsp;<span>· Coiled Tubing</span></a>
+
+  <div class="phone-doc" data-reveal>
+    <section class="plate" aria-label="Document identity">
+      <p class="top"><span>Manual · Operations</span><span class="pre">TQ-TWS-CTSS</span></p>
+      <div class="idrow">
+        <p class="no">WI<span class="hy">-</span>003</p>
+        <div class="rev"><small>REV</small><b>4.0</b></div>
+      </div>
+      <h1 class="ttl">Injector Head Operations Manual</h1>
+      <div class="signal cached">
+        <span class="tile"><svg><use href="#s-cur"/></svg></span>
+        <div class="w"><b>Current when last checked</b><span>Pinned copy · Rev 4.0 · checked today 05:40</span></div>
+      </div>
+      <div class="cycle" aria-label="Review cycle: 13 of 36 months elapsed">
+        <div class="bar"><i style="width:36.5%"></i><em style="left:36.5%"></em></div>
+        <div class="lb"><div><b>30 Aug 2025</b>Effective</div><div><b>30 Aug 2028</b>Next review</div></div>
+      </div>
+    </section>
+
+    <a class="notice" href="#">
+      <svg class="a"><use href="#s-alert"/></svg>
+      <span class="tx"><b>ALT-002</b> changes the limits in <b>§5 Operating limits</b><span>Active alert · 13 Apr 2026</span></span>
+      <svg class="ic-s"><use href="#i-chev-r"/></svg>
+    </a>
+
+    <p class="inline-err"><svg><use href="#i-offline"/></svg><span>Couldn’t check RISE for a newer revision. The ALT-002 warning above was saved with this copy.<a href="#">Retry</a></span></p>
+
+    <p class="summary">How to rig up, operate, monitor and shut down the CT injector head safely: chain tension, gripper block inspection, traction pressure limits, and what to do on a chain slip.</p>
+
+    <section class="mod" aria-labelledby="rec">
+      <div class="mod-h"><h2 class="h2" id="rec">Record</h2></div>
+      <dl class="spec">
+        <dt>New in Rev 4.0</dt><dd>Traction pressure limits for 2-inch string</dd>
+        <dt>Owner</dt><dd>Coiled Tubing segment</dd>
+        <dt>Approved</dt><dd>28 Aug 2025<small>Segment Director, Coiled Tubing</small></dd>
+        <dt>Access</dt><dd>Internal · English</dd>
+      </dl>
+      <a class="more-d" href="#"><svg class="ic-s"><use href="#i-chev-d"/></svg>Type, area, review cycle</a>
+    </section>
+
+    <section class="mod" aria-labelledby="toc">
+      <div class="mod-h"><h2 class="h2" id="toc">Contents</h2><span class="ct">8</span></div>
+      <ol class="toc">
+        <li><span class="n">1</span><span>Scope</span><span></span></li>
+        <li><span class="n">2</span><span>Injector head components</span><span></span></li>
+        <li><span class="n">3</span><span>Pre-job inspection</span><span></span></li>
+        <li><span class="n">4</span><span>Chain tension and traction pressure</span><span></span></li>
+        <li class="flag"><span class="n">5</span><span>Operating limits (2-inch string)</span><span class="f"><svg><use href="#s-alert"/></svg>ALT-002</span></li>
+        <li><span class="n">6</span><span>Chain slip response</span><span></span></li>
+        <li><span class="n">7</span><span>Shutdown and isolation</span><span></span></li>
+        <li><span class="n">A</span><span>Inspection record (F001)</span><span></span></li>
+      </ol>
+    </section>
+
+    <section class="mod" aria-labelledby="hist">
+      <div class="mod-h"><h2 class="h2" id="hist">History</h2><span class="ct">4 revs</span></div>
+      <ol class="tl hist">
+        <li><span class="d"><b>30 Aug</b><span>2025</span></span>
+          <div><p class="t">Rev 4.0 <span class="sig cur" style="margin-left:8px"><svg><use href="#s-cur"/></svg>Current</span></p>
+          <p class="what"><b>Changed:</b> traction pressure limits for 2-inch string</p>
+          <div class="sub">
+            <div><b>19 Aug</b><span>Filed · Khalid Al-Otaibi, CT Engineer</span></div>
+            <div><b>24 Aug</b><span>QMS check · QMS Document Control</span></div>
+            <div><b>28 Aug</b><span>Final approval · Segment Director, Coiled Tubing</span></div>
+          </div></div></li>
+        <li class="sup"><span class="d"><b>11 Mar</b><span>2024</span></span><div><p class="t">Rev 3.0 <span class="sig sup" style="margin-left:8px"><svg><use href="#s-sup"/></svg>Superseded</span></p></div></li>
+        <li class="sup"><span class="d"><b>02 Feb</b><span>2023</span></span><div><p class="t">Rev 2.0 <span class="sig sup" style="margin-left:8px"><svg><use href="#s-sup"/></svg>Superseded</span></p></div></li>
+        <li class="sup"><span class="d"><b>14 Jan</b><span>2022</span></span><div><p class="t">Rev 1.0 <span class="sig sup" style="margin-left:8px"><svg><use href="#s-sup"/></svg>Superseded</span></p><p class="what">Earlier files: current revision only</p></div></li>
+      </ol>
+    </section>
+
+    <section class="mod dim-w" aria-labelledby="rel">
+      <div class="mod-h"><h2 class="h2" id="rel">Related</h2><span class="ct">4</span></div><p class="offnote"><svg><use href="#i-offline"/></svg>Opens when you’re back online</p><div class="dim">
+      <a class="ix" href="#"><span class="code"><b>ALT</b><span>002</span></span><span><span class="t">New pressure rating for 2-inch CT string</span><span class="m"><span class="sig alt"><svg><use href="#s-alert"/></svg>Changes §5</span><span class="lk"><svg><use href="#i-lock"/></svg></span></span></span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+      <a class="ix" href="#"><span class="code"><b>F</b><span>001</span></span><span><span class="t">Pre-Job Safety Checklist</span><span class="m"><span>Appendix A</span><span class="rv">Rev 4.0</span></span></span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+      <a class="ix" href="#"><span class="code"><b>WI</b><span>005</span></span><span><span class="t">CT String Inspection Manual</span><span class="m"><span class="rv">Rev 3.0</span></span></span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+      <a class="ix" href="#"><span class="code"><b>SOP</b><span>006</span></span><span><span class="t">CT Unit Rig-Up &amp; Rig-Down</span><span class="m"><span class="sig due"><svg><use href="#s-due"/></svg>Review due</span><span class="lk"><svg><use href="#i-lock"/></svg></span></span></span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+    </div></section>
+
+    <section class="mod" aria-labelledby="exp">
+      <div class="mod-h"><h2 class="h2" id="exp">Ask about this manual</h2></div>
+      <div class="expert">
+        <div class="who"><span class="ico"><svg class="ic-s"><use href="#i-person"/></svg></span><div><b>Coiled Tubing expert</b><span>Answers by role, routed by area</span></div></div>
+        <q>Chain slip on the injector at 4,200 ft — can we continue at reduced traction pressure?</q>
+        <a class="btn sec dim" href="#" aria-disabled="true"><svg class="ic-s"><use href="#i-ask"/></svg>Ask an Expert · needs connection</a>
+      </div>
+    </section>
+  </div>
+
+  <!-- desktop outline -->
+  <div class="dview outline">
+    <section class="mod" style="margin-top:20px">
+      <div class="mod-h"><h2 class="h2">Contents</h2><span class="ct">8</span></div>
+      <ol class="toc">
+        <li class="on"><span class="n">1</span><span>Scope</span><span></span></li>
+        <li><span class="n">2</span><span>Injector head components</span><span></span></li>
+        <li><span class="n">3</span><span>Pre-job inspection</span><span></span></li>
+        <li><span class="n">4</span><span>Chain tension and traction pressure</span><span></span></li>
+        <li class="flag"><span class="n">5</span><span>Operating limits (2-inch string)</span><span class="f"><svg><use href="#s-alert"/></svg>ALT-002</span></li>
+        <li><span class="n">6</span><span>Chain slip response</span><span></span></li>
+        <li><span class="n">7</span><span>Shutdown and isolation</span><span></span></li>
+        <li><span class="n">A</span><span>Inspection record (F001)</span><span></span></li>
+      </ol>
+    </section>
+    <section class="mod">
+      <div class="mod-h"><h2 class="h2">Related</h2><span class="ct">4</span></div><p class="offnote"><svg><use href="#i-offline"/></svg>Opens when you’re back online</p><div class="dim">
+      <a class="ix" href="#"><span class="code"><b>ALT</b><span>002</span></span><span><span class="t">New pressure rating for 2-inch CT string</span><span class="m"><span class="sig alt"><svg><use href="#s-alert"/></svg>Changes §5</span><span class="lk"><svg><use href="#i-lock"/></svg></span></span></span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+      <a class="ix" href="#"><span class="code"><b>F</b><span>001</span></span><span><span class="t">Pre-Job Safety Checklist</span><span class="m"><span>Appendix A</span><span class="rv">Rev 4.0</span></span></span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+      <a class="ix" href="#"><span class="code"><b>WI</b><span>005</span></span><span><span class="t">CT String Inspection Manual</span><span class="m"><span class="rv">Rev 3.0</span></span></span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+      <a class="ix" href="#"><span class="code"><b>SOP</b><span>006</span></span><span><span class="t">CT Unit Rig-Up &amp; Rig-Down</span><span class="m"><span class="sig due"><svg><use href="#s-due"/></svg>Review due</span><span class="lk"><svg><use href="#i-lock"/></svg></span></span></span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+    </div></section>
+  </div>
+</div>
+
+<!-- detail pane (desktop) -->
+<div class="pane detail dview" aria-label="Document">
+  <div class="dplate">
+    <p class="pre"><span>TQ-TWS-CTSS</span><b>Manual</b><b>Coiled Tubing · Operations</b></p>
+    <h1 class="no">WI<span class="hy">-</span>003</h1>
+    <div class="mid"><p class="ttl">Injector Head Operations Manual</p><p class="sub">Internal · English · Owner: Coiled Tubing segment</p></div>
+    <div class="rev"><small>REV</small><b>4.0</b></div>
+  </div>
+  <div class="dsignal cached">
+    <span class="tile"><svg><use href="#s-cur"/></svg></span>
+    <div class="w"><b>Current when last checked</b><span>Pinned copy on this device · Rev 4.0 · checked with RISE today 05:40</span></div>
+    <div class="acts">
+      <a class="btn pri" href="#"><svg class="ic-s"><use href="#i-doc"/></svg>Open pinned copy</a>
+      <button class="btn icon on" type="button" data-save aria-pressed="true" aria-label="Save"><svg class="ic-s o"><use href="#i-saved"/></svg><svg class="ic-s f"><use href="#i-saved-f"/></svg></button>
+      <a class="btn icon" href="#" aria-label="Share"><svg class="ic-s"><use href="#i-share"/></svg></a>
+      <a class="btn icon" href="#" aria-label="More: quick reference card, pin offline, print"><svg class="ic-s"><use href="#i-more"/></svg></a>
+    </div>
+  </div>
+  <a class="notice" href="#">
+    <svg class="a"><use href="#s-alert"/></svg>
+    <span class="tx"><b>ALT-002</b> New pressure rating for 2-inch CT string changes the limits in <b>§5 Operating limits</b><span>Active alert · 13 Apr 2026 · Confidential, request access through QMS</span></span>
+    <svg class="ic-s"><use href="#i-chev-r"/></svg>
+  </a>
+  <p class="inline-err"><svg><use href="#i-offline"/></svg><span>Couldn’t check RISE for a newer revision. The ALT-002 warning above was saved with this copy.<a href="#">Retry</a></span></p>
+  <div class="split">
+    <div>
+      <div class="preview">
+        <div class="sheet">
+          <p class="hd"><span>TQ-TWS-CTSS-WI-003</span><span>REV 4.0</span></p>
+          <h4>Injector Head Operations Manual</h4>
+          <p class="sm">Coiled Tubing · Operations · Effective 30 Aug 2025</p>
+          <div class="lines">
+            <div><span>1 Scope</span></div>
+            <div><span>2 Injector head components</span></div>
+            <div><span>3 Pre-job inspection</span></div>
+            <div><span>4 Chain tension and traction pressure</span></div>
+            <div class="f"><span>5 Operating limits (2-inch string)</span><span>ALT-002</span></div>
+            <div><span>6 Chain slip response</span></div>
+            <div><span>7 Shutdown and isolation</span></div>
+            <div><span>Appendix A Inspection record (F001)</span></div>
+          </div>
+          <p class="ft"><span>Internal</span><span>Approved 28 Aug 2025</span></p>
+        </div>
+      </div>
+      <p class="pv-cap"><span>Pinned copy · Rev 4.0 · readable offline</span><span>Quick reference card · Sunlight mode in More</span></p>
+    </div>
+    <div class="side">
+      <section class="mod">
+        <div class="mod-h"><h2 class="h2">Review cycle</h2><span class="ct">36 mo</span></div>
+        <div class="cycle" style="margin:0;padding:10px 0 0">
+          <div class="bar"><i style="width:36.5%"></i><em style="left:36.5%"></em></div>
+          <div class="lb"><div><b>30 Aug 2025</b>Effective</div><div><b>30 Aug 2028</b>Next review</div></div>
+        </div>
+      </section>
+      <section class="mod">
+        <div class="mod-h"><h2 class="h2">Record</h2></div>
+        <dl class="spec">
+          <dt>New in 4.0</dt><dd>Traction pressure limits for 2-inch string</dd>
+          <dt>Owner</dt><dd>Coiled Tubing segment</dd>
+          <dt>Equipment</dt><dd>Injector head · CT string (2-inch)<small>Proposed tags</small></dd>
+        </dl>
+      </section>
+      <section class="mod">
+        <div class="mod-h"><h2 class="h2">History</h2><span class="ct">4 revs</span></div>
+        <ol class="tl hist">
+          <li><span class="d"><b>30 Aug</b><span>2025</span></span><div><p class="t">Rev 4.0 <span class="sig cur" style="margin-left:6px"><svg><use href="#s-cur"/></svg>Current</span></p>
+            <div class="sub"><div><b>19 Aug</b><span>Filed · Khalid Al-Otaibi</span></div><div><b>24 Aug</b><span>QMS check</span></div><div><b>28 Aug</b><span>Final approval</span></div></div></div></li>
+          <li class="sup"><span class="d"><b>11 Mar</b><span>2024</span></span><div><p class="t">Rev 3.0 <span class="sig sup" style="margin-left:6px"><svg><use href="#s-sup"/></svg>Superseded</span></p></div></li>
+          <li class="sup"><span class="d"><b>02 Feb</b><span>2023</span></span><div><p class="t">Rev 2.0</p></div></li>
+          <li class="sup"><span class="d"><b>14 Jan</b><span>2022</span></span><div><p class="t">Rev 1.0</p><p class="what">Earlier files: current revision only</p></div></li>
+        </ol>
+      </section>
+      <section class="mod">
+        <div class="expert">
+          <div class="who"><span class="ico"><svg class="ic-s"><use href="#i-person"/></svg></span><div><b>Coiled Tubing expert</b><span>Ask about this manual</span></div></div>
+          <a class="btn sec dim" href="#" aria-disabled="true"><svg class="ic-s"><use href="#i-ask"/></svg>Ask an Expert · needs connection</a>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+</div>
+</main>
+<div class="actbar">
+  <a class="btn pri" href="#"><svg class="ic-s"><use href="#i-doc"/></svg>Open pinned copy</a>
+  <button class="btn icon on" type="button" data-save aria-pressed="true" aria-label="Save"><svg class="ic-s o"><use href="#i-saved"/></svg><svg class="ic-s f"><use href="#i-saved-f"/></svg></button>
+  <a class="btn icon" href="#" aria-label="Share"><svg class="ic-s"><use href="#i-share"/></svg></a>
+  <a class="btn icon" href="#" aria-label="More"><svg class="ic-s"><use href="#i-more"/></svg></a>
+</div>
+</div>
+<div class="toast" role="status" aria-live="polite"><svg><use href="#i-check"/></svg><span></span></div>
+</body>
+</html>
