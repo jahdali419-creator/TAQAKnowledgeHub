@@ -26,6 +26,7 @@ function computeBaseline() {
 
   const docs = ctx.__docs;
   const lookups = ctx.__lookups;
+  const roles = loadRoles();
 
   const byStatus = {};
   docs.forEach((d) => {
@@ -38,7 +39,25 @@ function computeBaseline() {
     (d) => d.status !== 'obsolete' && d.status !== 'superseded' && !!d.reviewOverdue
   );
 
+  // What a role may open of the live population (BD-03, PI-27): the live
+  // statuses are open to every role, so the classification decides. Read
+  // from roles.js itself, not restated here.
+  const openTo = (role) => (d) => (roles[role].classifications || []).indexOf(d.classification) !== -1;
+  const liveCountFor = Object.fromEntries(Object.keys(roles).map((r) => [r, live.filter(openTo(r)).length]));
+  const countsByAreaFor = (role) => Object.fromEntries(
+    Object.keys(lookups.segments).map((id) => [id, live.filter((d) => d.segment === id && openTo(role)(d)).length])
+  );
+
+  const liveFor = (role) => live.filter(openTo(role));
+  // Drafts waiting on a decision, counted by classification for a role.
+  const pendingCountFor = Object.fromEntries(Object.keys(roles).map((r) => [r,
+    docs.filter((d) => d.status === 'draft' && !d.rejected && openTo(r)(d)).length]));
+
   return {
+    liveCountFor,
+    liveFor,
+    pendingCountFor,
+    countsByAreaFor,
     totalRegisterRecords: docs.length,
     byStatus,
     liveCount: live.length,
@@ -63,6 +82,21 @@ function computeBaseline() {
       ])
     ),
   };
+}
+
+// roles.js runs in the browser; a stub of the few browser objects it touches
+// at load is enough to read its role table.
+function loadRoles() {
+  const mem = {};
+  const ls = { getItem: (k) => (k in mem ? mem[k] : null), setItem: (k, v) => { mem[k] = String(v); }, removeItem: (k) => { delete mem[k]; } };
+  const ctx = {
+    console, localStorage: ls, sessionStorage: ls, addEventListener() {},
+    location: { search: '', pathname: '/' }, document: { addEventListener() {}, readyState: 'complete' },
+  };
+  ctx.window = ctx;
+  vm.createContext(ctx);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'roles.js'), 'utf8') + '\n;globalThis.__roles = TAQA_ROLES;', ctx, { filename: 'roles.js' });
+  return JSON.parse(JSON.stringify(ctx.__roles));
 }
 
 module.exports = { computeBaseline };

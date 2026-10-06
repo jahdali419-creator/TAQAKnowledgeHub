@@ -1574,10 +1574,17 @@ function numberTaken(n) {
   var k = String(n).trim().toUpperCase();
   return registerDocs().find(function(d){ return String(d.docNumber || '').toUpperCase() === k; }) || null;
 }
+/* May this person be shown this record's title and number? What their role
+   may open, and their own filings (in the prototype, filed from this
+   browser). Uniqueness is still checked against the whole register; only
+   what is said about a clash is trimmed (BD-03, PI-27). */
+function seeable(d) {
+  return !!d && (typeof TAQA_STORE === 'undefined' || !TAQA_STORE.readable || TAQA_STORE.readable(d) || !!d.locallyAdded);
+}
 function areaDocs(segId) {
   if (!segId) return [];
   return registerDocs().filter(function(d){
-    return d.segment === segId && d.docType !== 'software' &&
+    return d.segment === segId && d.docType !== 'software' && seeable(d) &&
            d.status !== 'obsolete' && d.status !== 'superseded';
   });
 }
@@ -1652,11 +1659,11 @@ function revisionCandidates() {
   const dept = deptMaintenance() ? 'maintenance' : null;
   const nums = {};
   registerDocs().forEach(function(d){
-    if (d.docNumber && d.segment === area && d.docType === type) nums[d.docNumber] = true;
+    if (d.docNumber && d.segment === area && d.docType === type && seeable(d)) nums[d.docNumber] = true;
   });
   return Object.keys(nums).map(function(n){
     const p = TAQA_STORE.revisionParent(n);
-    if (!p) return null;
+    if (!p || !seeable(p)) return null;
     if (type !== 'bulletin' && (p.department || null) !== dept) return null;
     return { num: n, title: p.title, rev: p.revision || '', reissue: p.status === 'superseded',
              busy: !!TAQA_STORE.openDraft(n) };
@@ -1732,7 +1739,9 @@ function checkDocId() {
   // warned: the filing still went through.
   const used = numberTaken(refId);
   if (used) {
-    statusEl.innerHTML = `<span class="id-err">✕ <strong>${esc(refId)}</strong> is already the number of “${esc(used.title)}”. A number names one document and is never reused.</span>`;
+    statusEl.innerHTML = seeable(used)
+      ? `<span class="id-err">✕ <strong>${esc(refId)}</strong> is already the number of “${esc(used.title)}”. A number names one document and is never reused.</span>`
+      : `<span class="id-err">✕ <strong>${esc(refId)}</strong> is already in use in the register. A number names one document and is never reused.</span>`;
     return;
   }
   const typeNow = (document.getElementById('doc-type-select') || {}).value;
@@ -1758,6 +1767,9 @@ function checkDocId() {
 let currentFileHash = null;
 function dupItem(m) {
   const d = m.d;
+  // A record this person may not open is named by nothing but the fact.
+  if (!seeable(d)) return '<div class="dup-item"><b>A document you cannot open</b>' +
+    '<span class="dup-why">' + m.reasons.map(esc).join('; ') + '</span></div>';
   return '<div class="dup-item"><b>' + esc(d.title || '') + '</b><span class="dup-n">' + esc(d.docNumber || '') +
     (typeof TAQA_STORE !== 'undefined' ? ' \u00b7 ' + esc(TAQA_STORE.revisionLabel(d)) : '') + '</span>' +
     '<span class="dup-why">' + m.reasons.map(esc).join('; ') + '</span></div>';
@@ -1771,17 +1783,22 @@ function runDupChecks() {
   const own = refileRec ? refileRec.docNumber
     : docStatus === 'revision' ? ((document.getElementById('supersedes-select') || {}).value || null) : null;
   const all = TAQA_STORE.related({ title: title, segment: currentSegId || null, sha256: currentFileHash, docNumber: own, limit: 6 });
-  const files = all.filter(m => m.sameFile), titles = all.filter(m => !m.sameFile);
+  // The same file is a hard stop whoever holds it; a similar title is only
+  // advice, so one the filer may not see is not mentioned at all.
+  const files = all.filter(m => m.sameFile), titles = all.filter(m => !m.sameFile && seeable(m.d));
+  const named = files.concat(titles).filter(m => seeable(m.d));
   errPanel.style.display = files.length ? 'block' : 'none';
   if (errList) errList.innerHTML = files.map(dupItem).join('');
   warnPanel.style.display = titles.length ? 'block' : 'none';
   warnList.innerHTML = titles.map(dupItem).join('');
   if (hint) {
-    hint.hidden = !all.length;
-    hint.textContent = all.length
-      ? (all.length === 1 ? 'Possibly related: ' : all.length + ' possibly related documents, first: ') + (all[0].d.docNumber || '') +
-        ' "' + (all[0].d.title || '') + '" (' + all[0].reasons.join('; ') + '). Check before you file; it does not stop the filing.'
-      : '';
+    const n = files.length + titles.length;
+    hint.hidden = !n;
+    hint.textContent = !n ? ''
+      : named.length
+      ? (n === 1 ? 'Possibly related: ' : n + ' possibly related documents, first: ') + (named[0].d.docNumber || '') +
+        ' "' + (named[0].d.title || '') + '" (' + named[0].reasons.join('; ') + '). Check before you file; it does not stop the filing.'
+      : 'A document you cannot open carries this same file. Check with QMS before you file.';
   }
 }
 
@@ -1803,7 +1820,9 @@ async function computeAndCheckHash(file) {
     currentFileHash = hex;
     const same = (typeof TAQA_STORE !== 'undefined' && TAQA_STORE.related) ? TAQA_STORE.related({ sha256: hex }).filter(m => m.sameFile) : [];
     hashStatus.innerHTML = same.length
-      ? `<span class="hash-status-dup">Same file as ${esc(same[0].d.docNumber || '')} "${esc(same[0].d.title || '')}"</span>`
+      ? (seeable(same[0].d)
+        ? `<span class="hash-status-dup">Same file as ${esc(same[0].d.docNumber || '')} "${esc(same[0].d.title || '')}"</span>`
+        : '<span class="hash-status-dup">Same file as a document already in the register</span>')
       : '<span class="hash-status-ok">No other record here carries this file</span>';
     runDupChecks();
   } catch(e) {
@@ -1954,7 +1973,8 @@ function stepReady(n){
     }
     var num = numField.value || '';
     if (used) {
-      say('hint-2', num.trim() + ' is already the number of “' + used.title + '”. Use the number assigned, or another that is not in the register.'); return false;
+      say('hint-2', num.trim() + (seeable(used) ? ' is already the number of “' + used.title + '”' : ' is already in use in the register') +
+        '. Use the number assigned, or another that is not in the register.'); return false;
     }
     // A number typed by hand must be the number TQ-QHSE-S001 5.3 gives this
     // area and type (PI-14): no placeholder, no spaces, capitals, the right

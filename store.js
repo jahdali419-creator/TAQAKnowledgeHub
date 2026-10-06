@@ -279,12 +279,28 @@
   /* ── Per area ────────────────────────────────────────────────────────
      One call returns everything a segment page needs, so the page never
      counts anything itself.                                             */
+  /* The figures are what the signed-in role may open (BD-03, PI-27): a
+     restricted document an Employee cannot open is not counted for them,
+     and its title is never listed. This is the prototype filtering its own
+     demonstration data in the browser, not security; in production the
+     server trims what it returns (Microsoft 365 permission trimming). */
+  function readable(d) {
+    return typeof TAQA_ROLE === 'undefined' || TAQA_ROLE.canSee(d, TAQA_ROLE.current());
+  }
+  // A count of work in progress (drafts waiting on QMS or approval) names no
+  // document, so it is trimmed by classification only: an Employee is told
+  // how many internal drafts are waiting, never about restricted ones.
+  function classOpen(d) {
+    if (typeof TAQA_ROLE === 'undefined' || !d.classification) return true;
+    var R = TAQA_ROLE.def(TAQA_ROLE.current());
+    return !!R && R.classifications.indexOf(d.classification) !== -1;
+  }
   function area(id) {
-    var live = rows('live', { segment: id });
+    var live = rows('visible', { segment: id });
     var byType = {};
     live.forEach(function (d) { byType[d.docType] = (byType[d.docType] || 0) + 1; });
     var assets = all().filter(function (d) {
-      return d.segment === id && !isControlled(d) && d.status !== 'obsolete';
+      return d.segment === id && !isControlled(d) && d.status !== 'obsolete' && readable(d);
     });
     var info = segs()[id] || {};
     return {
@@ -294,7 +310,7 @@
       live: live.length,
       byType: byType,
       assets: assets.length,
-      pending: rows('pending', { segment: id }).length,
+      pending: rows('pending', { segment: id }).filter(classOpen).length,
       overdue: live.filter(function (d) { return !!d.reviewOverdue; }).length,
       docs: live
     };
@@ -1129,7 +1145,7 @@
     writeError: function () { return lastWriteError; }, notSent: notSent,
     withdrawnFamily: withdrawnFamily, STALE: STALE, CANCEL_REASON: CANCEL_REASON,
     onChange: onChange, added: load,
-    isControlled: isControlled, isLive: isLive,
+    isControlled: isControlled, isLive: isLive, readable: readable, classOpen: classOpen,
     EVENT: EVT, KEY: KEY
   };
 })(typeof window !== 'undefined' ? window : this);

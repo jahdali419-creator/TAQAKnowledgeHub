@@ -243,7 +243,9 @@ test.describe('Homepage counts come from the register, not a hardcoded number', 
     // paint() (index.html's own script) runs synchronously via
     // TAQA_STORE.onChange, setting data-target before the counter
     // animation starts, so this does not need to wait for the animation.
-    expect(await target('Documents')).toBe(String(baseline.liveCount));
+    // Home opens as an Employee, who is told only about documents they may
+    // open: no restricted or confidential document is counted (BD-03, PI-27).
+    expect(await target('Documents')).toBe(String(baseline.liveCountFor.employee));
     expect(await target('Operational Segments')).toBe(String(segN));
     expect(await target('Corporate Functions')).toBe(String(fnN));
     expect(await target('Products & Technology')).toBe(String(ptN));
@@ -259,7 +261,7 @@ test.describe('Homepage counts come from the register, not a hardcoded number', 
     await gotoApp('/index.html');
 
     const baseline = computeBaseline();
-    const { byGroup, liveAlertCount } = loadRegisterDetail();
+    const { byGroup } = loadRegisterDetail();
     const segN = (byGroup.segment || []).length;
 
     async function rowTarget(label) {
@@ -267,10 +269,11 @@ test.describe('Homepage counts come from the register, not a hardcoded number', 
       return row.locator('[data-target]').getAttribute('data-target');
     }
 
-    expect(await rowTarget('Documents in Force')).toBe(String(baseline.liveCount));
+    // As an Employee (Home's default role): what they may open (BD-03, PI-27).
+    expect(await rowTarget('Documents in Force')).toBe(String(baseline.liveCountFor.employee));
     expect(await rowTarget('Business Segments')).toBe(String(segN));
-    expect(await rowTarget('Active Technical Alerts')).toBe(String(liveAlertCount));
-    expect(await rowTarget('Awaiting QMS Approval')).toBe(String(baseline.draftCount));
+    expect(await rowTarget('Active Technical Alerts')).toBe(String(baseline.liveFor('employee').filter((d) => d.docType === 'alert').length));
+    expect(await rowTarget('Awaiting QMS Approval')).toBe(String(baseline.pendingCountFor.employee));
   });
 });
 

@@ -951,7 +951,8 @@ function activityFrom(id){
     var y = Math.round(days/365); return y + ' year' + (y===1?'':'s') + ' ago';
   };
   var rows = TAQA_STORE.all()
-    .filter(function(d){ return d.segment === id; })
+    // Only what this person may open is named here (BD-03, PI-27).
+    .filter(function(d){ return d.segment === id && (!TAQA_STORE.readable || TAQA_STORE.readable(d)); })
     .map(function(d){
       var draft = d.status === 'draft';
       var over  = (typeof TAQA_DOC !== 'undefined') && TAQA_DOC.overdue(d);
@@ -1072,8 +1073,8 @@ function initDashboard() {
   // Returned filings are no longer pending (PI-24), so they are counted
   // from the register directly.
   const rejectedCount = ST ? ST.rows('register', { segment: dashSegId })
-    .filter(d => d.status === 'draft' && d.rejected && (!MM_DESK || MNT(d))).length : 0;
-  const realPublished = (MM_DESK && ST) ? ST.rows('live', { segment: dashSegId }).filter(MNT).length
+    .filter(d => d.status === 'draft' && d.rejected && (!MM_DESK || MNT(d)) && ST.readable(d)).length : 0;
+  const realPublished = (MM_DESK && ST) ? ST.rows('visible', { segment: dashSegId }).filter(MNT).length
     : ST ? ST.area(dashSegId).live
     : ((typeof TAQA_SEGMENTS!=='undefined'&&TAQA_SEGMENTS[dashSegId]&&TAQA_SEGMENTS[dashSegId].docs)
     ?Object.values(TAQA_SEGMENTS[dashSegId].docs).reduce((s,a)=>s+(Array.isArray(a)?a.length:0),0)
@@ -1193,7 +1194,7 @@ function initDashboard() {
 
   const pendingList = document.getElementById('pending-list');
   if (!MINE) {
-    var waiting = ST.count('awaiting-director', { segment: dashSegId });
+    var waiting = ST.rows('awaiting-director', { segment: dashSegId }).filter(ST.classOpen).length;
     pendingList.innerHTML = '<div class="empty-pending"><div class="empty-pending-icon">\u25CF</div>' +
       '<h3>Not your area</h3><p>You hold ' + esc(TAQA_ROLE.areaName(CAP.ownSegment)) +
       '. ' + esc(dash.name) + ' has its own ' + esc(TAQA_ROLE.areaTitle(dashSegId).toLowerCase()) +

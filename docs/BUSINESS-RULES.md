@@ -503,3 +503,46 @@ From `docs/QA/PRODUCT-INTEGRITY-REASSESSMENT-POST-PR29.md` (PI-08, PI-18, PI-26,
 **Critical is not an emergency channel (owner's decision A).** Choosing Critical shows, and a Critical question repeats: "This form is not an emergency channel. If anyone is in danger or a hazard is uncontrolled, stop work and follow your site emergency response procedure. Contact your supervisor or site HSE immediately." It invents no phone numbers and is not a replacement for TAQA's approved emergency procedure. *Production:* TAQA-approved emergency wording and contacts must replace or supplement this text (owner: QHSE).
 
 **Phone and installed app (PI-08, PI-61, PI-52, PI-51, PI-18).** In the installed iPhone app every drawer, panel, menu and sheet keeps its controls clear of the status bar, the notch and the home indicator, upright and on its side; the Master List and Workbench drawer also closes from a Close button at the bottom on a phone. Paging a document list lands its first row just below the bar and the tabs, with focus on the list. Back restores a usable page. The install suggestion appears on Home only, when nothing is in progress, and says what offline really gives: pages already opened stay readable; nothing can be sent offline.
+
+## 21. Visibility, identity and queues (integrity close-out, October 2026)
+
+From `docs/QA/PRODUCT-INTEGRITY-REASSESSMENT-POST-PR29.md` (PI-17, PI-22, PI-23, PI-27). The owner's decisions are in `docs/RISE-BUSINESS-DECISIONS.md` (BD-01 to BD-07). No approval, revision, delegation or numbering rule changes.
+
+**Restricted and confidential documents (PI-27, BD-03).** A user who may not open a document because of its classification sees neither its title nor its metadata, not even as a locked item. Lists, counts and search contain only what the user may open:
+- Home ("Documents in Force", alerts, area counts);
+- area pages (lists, tab counts, waiting count);
+- search and its document count;
+- the area desk's activity list and counts;
+- the withdraw list;
+- bookmarks;
+- Upload's possible-duplicate, number-in-use and same-file messages.
+
+On the document page, a number the role may not open reads exactly as a number the register does not hold: "Not in the Master Document List available to your role", with no title, area or other field.
+
+In the prototype, an Employee is told 352 documents are in force (QMS and auditors 520). A count of drafts waiting names no document, so it is trimmed by classification only: an Employee is told how many internal drafts are waiting, never about restricted ones.
+
+Uniqueness is still checked against the whole register: a number used by a restricted document is refused at Upload as "already in use in the register", without naming it.
+
+*Prototype:* this is the browser filtering its own demonstration data (`TAQA_STORE.readable`, `TAQA_ROLE.canSee`). **It is not security.** The whole prototype register (`documents-master.js`) is still delivered to, and cached on, every device.
+
+**PRODUCTION CONTROL REQUIRED:** Microsoft 365 / server-side permission trimming and sensitivity/access enforcement are authoritative. The server never returns a record, title or count the user may not see. IT and Cybersecurity choose the mechanism.
+
+**Open business confirmations from PI-27:**
+1. **Classification at upload.** Upload always files `internal` and `en`. QMS must decide who sets the classification and language at filing, and whether there is a default. This is not invented here.
+2. **Approving a restricted document.** The approval queue shows a document to its area approver, whatever its classification. A Segment Director's role does not include `restricted`, so a restricted Operations document reaches a desk whose holder cannot open it from the document page. QMS and the business must confirm whether the area approver of a restricted document is granted access to it, or who approves it instead.
+
+**Withdrawn documents by exact number (PI-22).** Searching the exact number or legacy ID (in any letter case) of a superseded or withdrawn document shows that document, marked:
+- "Superseded. Do not use." or "Withdrawn. Do not use.";
+- "This document exists, but the matching revision is superseded";
+- where the register names a successor it holds no record of (for example "Rev 4.0"), it says so and says to verify the current revision in SCORE (BD-01).
+
+A partial number never brings a withdrawn document into the results. Permissions apply: a restricted withdrawn document stays not found for an Employee. The card opens that exact revision, and the page shows the withdrawn banner. Nothing makes an old revision look current. *Production:* a real revision chain links each revision to its successor.
+
+**The document page names the record's own area (PI-23).** When a link's number resolves, the record's area and type are used: the breadcrumb, the badges, Related, the share link, the QR code, the bookmark and the offline pin. The area named in the link is not used. A link with no number and no area guesses nothing ("Area not recorded"; a title alone is not an identity). The share link and QR carry the record's number and area. When the record is not the revision in force, they also carry its revision (and the exact record, when the link named one). *Production:* links resolve an immutable document / family / revision identity (SharePoint item ID or equivalent; IT to decide).
+
+**"Open your queue" (PI-17, BD-02).** The bell's "Open your queue" opens the desk of the area the signer holds, or holds a delegation for, from any page:
+- a Segment Director or Maintenance Manager reading another area's page reaches their own desk, which lists what the badge counted;
+- QMS opens the company-wide "Waiting on QMS" view;
+- an Employee has no bell.
+
+The desk's own access check is unchanged.

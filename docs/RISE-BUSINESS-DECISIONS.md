@@ -148,6 +148,7 @@ No CEO, QHSE Manager or SME final-approval route is invented. Where a document t
 **IT / QMS confirmation still needed.** Yes:
 - IT and Cybersecurity choose and configure the mechanism.
 - QMS confirms the **classification policy at upload**. Who sets the classification, and is there a default? Today the prototype's Upload always files `internal`; see PI-27.
+- QMS / business confirm **who approves a restricted document**. Under BD-02 the area approver is a Segment Director, whose role does not include `restricted`. Is that approver granted access to that document, or does another approver act? See `docs/BUSINESS-RULES.md` §21.
 
 ---
 
