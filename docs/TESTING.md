@@ -57,40 +57,26 @@ mobile-safari (see Engines below). CI runs Chromium only
 
 ## Engines
 
-| Project | Status (1 Oct 2026) |
+| Project | Status (5 Oct 2026, PR 2D) |
 |---|---|
-| `chromium`, `mobile-chrome` | Full suite green; CI runs `chromium` |
-| `firefox`, `webkit`, `mobile-safari` | The **app** passes both workflows when driven directly in Firefox and WebKit. The **test suite** fails in setup on these engines: its fixtures touch `localStorage` and navigate in a way only Chromium tolerates ("navigation interrupted", "The operation is insecure"). Make `tests/helpers/fixtures.js` cross-engine before adding these projects to CI. |
+| `chromium`, `mobile-chrome` | Full suite green (`npm test`); CI runs the full `chromium` suite |
+| `webkit`, `mobile-safari` | The fixtures now work on WebKit: a refused page (TAQA_ROLE.refuse) is detected by its marker, since WebKit leaves it at readyState "loading", and the phone install suggestion is held back unless a test opts in (`test.use({ installPrompt: true })`). CI runs a WebKit / iPhone-engine **smoke gate** (below). Known WebKit-only failures that also fail on main before PR 2D are listed under "WebKit: known failures". |
+| `firefox` | Not run in CI. |
 
-## Other useful commands
+### WebKit: known failures (pre-existing, not in the smoke gate)
 
-```
-npm run test:ui          # Playwright's interactive UI mode, for debugging
-npm run test:chromium    # Chromium desktop only (what CI runs)
-npm run test:firefox     # requires `npx playwright install firefox`
-npm run test:webkit      # requires `npx playwright install webkit`
-npm run test:mobile      # Pixel 7 + iPhone 14 device emulation profiles (iPhone needs WebKit installed)
-npm run test:report      # reopen the last HTML report
-npm run serve            # just run the static server, e.g. to poke around by hand
-```
+Each fails the same way on main before PR 2D (checked on a worktree of 41b982e with the same harness):
 
-To run one file or one test by name:
+| Test | Engine | Why |
+|---|---|---|
+| `support-ticket.spec.js` "Undo removes the last mark, Clear removes all marks" | webkit, mobile-safari | Canvas pixel comparison differs in WebKit's encoder |
+| `doc-identity.spec.js:118` two tabs, same number | webkit, mobile-safari | Two-tab timing in WebKit |
+| `doc-identity.spec.js:87` typed number in use | mobile-safari | Upload step button timing on the iPhone engine |
+| `maintenance-ask-expert.spec.js:58` draft restores the department | webkit, mobile-safari | The department radio is not re-checked from the draft in WebKit |
+| `maintenance-manager.spec.js:492` approver named in the confirmation | webkit, mobile-safari | Upload submit click timing |
+| `offline.spec.js:277, :303` | webkit, mobile-safari | "WebKit encountered an internal error" navigating offline under the service worker (Playwright WebKit) |
 
-```
-npx playwright test tests/dashboard.spec.js
-npx playwright test -g "reject requires a reason"
-```
-
-## Roles under test
-
-There are **five** personas in `roles.js` (`TAQA_ROLE_ORDER`): Employee,
-Segment Director (`owner`), Maintenance Manager (`maintenance`), QMS /
-Document Controller (`qms`) and External Auditor (`auditor`).
-`roles.spec.js` pins each one's exact capabilities, including `submit` and
-`department`. A test that loops over roles should include `maintenance`
-wherever the rule it checks applies to it. Reports written for four roles
-(`docs/QA/QA-RELEASE-REPORT.md`, `docs/QA/RELEASE-QA-E2E.md`) are marked stale;
-the current evidence is `docs/QA/FIVE-ROLE-QA-AUDIT.md`.
+Under heavy local load (6 workers) more WebKit tests time out; all of those pass at normal concurrency (environment, not product).
 
 ## What's covered
 
@@ -109,6 +95,8 @@ Each file under `tests/` maps to one page or one cross-cutting concern:
 | `search.spec.js` | ai-search.html: keyword search, filters, safety disclaimer |
 | `dashboard.spec.js` | dashboard.html: the approval desk UI, toasts, contributors |
 | `approval-workflow.spec.js` | the real two-step QMS-then-approver release flow, end to end |
+| `phone-reliability.spec.js` | PR 2D: one connectivity bar under the top bar, honest "offline" / "cannot be reached" and "last synced" (PI-26, PI-48); every register change refused offline with nothing written and nothing typed lost, in Upload, the Workbench and the withdraw dialog (PI-28); a deploy (bumped cache) mid-Upload and mid-rejection on a private copy of the site with the service worker on: nothing reloads, the update waits, warns, and applies only on a safe page or by choice (PI-30); the pager on a phone (PI-51); the install sheet on idle Home only; Back restore (PI-18) |
+| `installed-app.spec.js` | the installed iPhone app, simulated (status bar upright; notch, side insets and home indicator on its side): the bell on every page, and every overlay (record drawer, Workbench, segment panel, phone menu, bookmarks, search filters, glossary drawer, viewer menus) usable and closable (PI-08, PI-61, PI-52, TB-04) |
 | `delegation-integrity.spec.js` | PR 2C-2: actor identities and conservative separation of duties (NEW-04); approval and Manage documents as separate permissions in all four combinations, scope on every delegated action, calendar-date validity in UTC+3, revocation evidence and stale tabs (PI-32); grant evidence and validation, legacy grants (PI-54); PI-31 direct and delegated for the Director and the Maintenance Manager |
 | `record-truth.spec.js` | PR 2C-1: withdrawal record and reason (PI-11), bulk withdrawal on exact records with stale refusal (PI-10), approval and effective dates including a future effective date on a pinned clock (PI-21), returned attempts and filing again (PI-24), duplicate warnings with reasons (PI-13), number validation for new filings (PI-14) |
 | `decision-integrity.spec.js` | PR 2B: stale desk, Workbench and bulk decisions refused with nothing written (NEW-01); withdrawal cancels the open revision and its translations' (NEW-02); a returned revision filed again is the same revision, next attempt (NEW-03); held / rapid Enter and double-click in the Workbench (PI-07); Upload Enter before the review step (PI-06); the approver's card, Preview and final confirmation (PI-12); per-revision bell memory and its migration (NEW-05) |
@@ -120,7 +108,7 @@ Each file under `tests/` maps to one page or one cross-cutting concern:
 | `numbering.spec.js` | TQ-QHSE-S001 5.3 numbering from upload |
 | `roles.spec.js` | the role/permission matrix and delegation logic, independent of any page |
 | `upload.spec.js` | upload.html: the submission wizard, file-type/size security checks |
-| `support-ticket.spec.js` | support-ticket.html: form validation, photo annotation, ticket refs |
+| `support-ticket.spec.js` | support-ticket.html: form validation, photo annotation; "not sent" with no ticket number, the text kept and copyable; Critical shows the emergency wording |
 | `glossary.spec.js` | glossary.html: term search, submission, persistence, escaping |
 | `analytics.spec.js` | analytics.html: local usage stats, trend charts, no-overclaim wording |
 | `bookmarks.spec.js` | the shared bookmarks feature across pages, per-device isolation |
@@ -168,8 +156,21 @@ Shared helpers live in `tests/helpers/`:
 
 ## CI
 
-`.github/workflows/tests.yml` runs the Chromium suite on every push and
-pull request. It does not yet block the two deploy workflows
+`.github/workflows/tests.yml` runs two jobs in parallel on every push and
+pull request:
+
+- `playwright`: the full Chromium suite (unchanged).
+- `webkit-smoke` (PR 2D, TB-05): the iPhone engine (`mobile-safari`) and
+  desktop WebKit on the specs that are stable there: `smoke`, `navigation`
+  (iPhone engine only), `installed-app`, `phone-reliability`,
+  `release-journey`, `master-list`, `dashboard`. 306 of 306 passed locally
+  at CI concurrency; locally it took 12.5 minutes on 2 workers, and the job
+  runs 4 workers, so expect roughly 7 to 10 minutes plus about 2 minutes to
+  install WebKit, alongside the Chromium job rather than after it. A spec
+  joins this gate only once it is green on WebKit; real iPhone checks stay
+  manual (below).
+
+The Chromium gate is unchanged. It does not yet block the two deploy workflows
 (`pages.yml`, the Azure Static Web Apps workflow) on a green run; that
 needs a branch-protection rule on the repository's default branch
 (Settings -> Branches -> require this workflow's status check), which only
@@ -194,3 +195,14 @@ where they matter, rather than worked around silently:
   specific offline-fallback scenario in `offline.spec.js`. That test
   detects the exact failure signature this causes and skips with a clear
   reason rather than failing red or silently dropping the coverage.
+
+## Real iPhone checks (cannot be automated here)
+
+Playwright drives Chromium and a desktop WebKit build. It cannot run an installed iPhone app, Safari's own back-forward cache, the real notch and home indicator, or a real network dropping. `installed-app.spec.js` simulates the status bar and the landscape insets; `phone-reliability.spec.js` drives the service worker in Chromium. These must be checked by hand on a real iPhone before production (the PR 2D report lists the steps):
+
+- Installed app (Add to Home Screen), upright and on its side: the Master List record drawer and Workbench close from the × and from the bottom Close; the segment document panel's × works; the phone menu scrolls to its last area; nothing sits under the notch or the home indicator.
+- Back from a document to a segment page, and from Master List to Home: the page is visible and takes taps.
+- Airplane mode while reading: one bar under the top bar; a document already opened still reads; Upload, approve, reject and withdraw say "Not sent" and keep what was typed; back online, the same action goes through.
+- A captive or dead Wi-Fi (connected but no internet): the bar says "RISE cannot be reached" within a few seconds of opening a page.
+- A deploy while Upload is at step 3: no reload; "New version available" appears; "Update now" warns; "Keep working" keeps the form.
+- Ask Expert: "Not sent" wording, nothing cleared, "Copy question" pastes into Mail or Teams; Critical shows the emergency wording.

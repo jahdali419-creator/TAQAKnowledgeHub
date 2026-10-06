@@ -128,6 +128,7 @@ html.seg-unknown #breadcrumb-tab,html.seg-unknown .bc-sep:has(+ #breadcrumb-tab)
 html.seg-unknown .content-outer{padding-top:32px;}
 
 /* ── Tab Navigation ── */
+.docs-grid[tabindex="-1"]:focus{outline:none;}
 .tabs-outer{padding:10px 48px;max-width:none;margin:0;position:sticky;top:var(--nav-h,64px);z-index:500;background:var(--dark);border-bottom:1px solid var(--glass-border);box-shadow:0 2px 8px rgba(0,0,0,0.04);}
 .tabs-outer .tabs{max-width:1104px;margin:0 auto;}
 html[data-taqa-theme="dark"] .tabs-outer{background:#001314;}
@@ -576,6 +577,9 @@ html[data-taqa-theme="dark"] .scroll-top-btn{background:rgba(0,35,38,0.92);borde
   overflow:hidden;
 }
 .doc-modal-panel.open{transform:translateX(0);}
+/* Installed iPhone app: the header and its × sit below the status bar, the
+   footer above the home indicator, and the edge clear of the notch (PI-61, PI-52). */
+.doc-modal-panel{padding-top:var(--nav-safe,0px);padding-bottom:var(--safe-b,0px);padding-right:var(--safe-r,0px);}
 .doc-modal-header{
   padding:28px 28px 20px;border-bottom:1px solid var(--glass-border);
   display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-shrink:0;
@@ -2038,9 +2042,31 @@ function goPage(type,page){
   url.searchParams.set('tab',type);
   url.searchParams.set('page',page+1);
   history.replaceState({},'',url.toString());
-  const listEl=document.getElementById('list-'+type);
-  if(listEl){const y=listEl.getBoundingClientRect().top+window.scrollY-90;window.scrollTo({top:Math.max(0,y),behavior:'smooth'});}
   _renderPage(type);
+  // The new page's first row goes just below the bar and the sticky tabs,
+  // measured after it is drawn (PI-51). It used to start a smooth scroll to
+  // a fixed 90px before drawing; the redraw cut the scroll short and on an
+  // iPhone the list landed at the bottom or under the tabs. Focus follows,
+  // so a keyboard or screen reader continues from the new page.
+  const listEl=document.getElementById('list-'+type);
+  if(!listEl)return;
+  // Focus goes first: in WebKit a focus after the smooth scroll began cut
+  // the scroll short, which is the landing-at-the-bottom fault itself.
+  if(!listEl.hasAttribute('tabindex'))listEl.setAttribute('tabindex','-1');
+  listEl.focus({preventScroll:true});
+  const covered=()=>{
+    const tabs=document.querySelector('.tabs-outer');
+    return tabs&&getComputedStyle(tabs).position==='sticky'
+      ?(parseFloat(getComputedStyle(tabs).top)||0)+tabs.offsetHeight
+      :(window.TAQA_TOP?TAQA_TOP():64);
+  };
+  const target=()=>Math.max(0,listEl.getBoundingClientRect().top+window.scrollY-covered()-8);
+  requestAnimationFrame(()=>{
+    const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({top:target(),behavior:reduce?'auto':'smooth'});
+    // If anything still cut it short, land it exactly.
+    setTimeout(()=>{ if(Math.abs(window.scrollY-target())>24)window.scrollTo({top:target(),behavior:'auto'}); },700);
+  });
 }
 
 // ── Tab Switching ──

@@ -139,6 +139,32 @@
     });
   } catch (e) {}
 
+  // Back from the back-forward cache (shared.js, PI-18): this page slept
+  // through any change, so re-read and let its painters catch up.
+  try {
+    root.addEventListener('taqa:resume', function () { fresh(); announce({ action: 'external' }); });
+  } catch (e) {}
+
+  /* ── No false success (PI-28) ─────────────────────────────────────────
+     A change that production must send to the server is refused while the
+     page knows it cannot reach it: offline, or the server did not answer
+     (TAQA_NET, shared.js). Nothing is written locally, so no record looks
+     submitted, checked, approved, returned, withdrawn or edited when it was
+     not; the page keeps what was entered and says why. PRODUCTION: success
+     only after the Microsoft 365 / server response. */
+  var lastWriteError = null;
+  function notSent() {
+    var n = root.TAQA_NET;
+    if (n && n.canWrite && !n.canWrite()) {
+      // Perhaps RISE is back: ask now, so the next try can go through.
+      if (n.state && n.state() === 'unreachable' && n.probe) n.probe();
+      return n.why();
+    }
+    if (!n && typeof navigator !== 'undefined' && navigator.onLine === false)
+      return 'Not sent: you are offline. Nothing was saved to the register. Try again when you are connected.';
+    return null;
+  }
+
   function announce(detail) {
     try { root.dispatchEvent(new CustomEvent(EVT, { detail: detail || {} })); } catch (e) {}
   }
@@ -513,6 +539,8 @@
      shape, so nothing downstream can tell a submitted document from one that
      shipped with the file.                                                */
   function add(rec) {
+    lastWriteError = notSent();
+    if (lastWriteError) return null;
     if (filingProblem(rec)) return null;
     fresh();
     var again = resubmission(rec);
@@ -604,7 +632,8 @@
      call was refused. */
   var lastStatusError = null;
   function setStatus(docNumber, status, rev, opts) {
-    lastStatusError = null;
+    lastStatusError = notSent();
+    if (lastStatusError) return null;
     if (!docNumber) return null;
     fresh();
     if (status === 'current') {
@@ -862,6 +891,8 @@
      (owner's decision for PI-21). The approval date is the system's, never
      the caller's. */
   function approve(docNumber, expect, opts) {
+    var off = notSent();
+    if (off) return { ok: false, offline: true, error: off };
     fresh();
     var t = decisionTarget(docNumber, expect), d = t.d;
     if (t.stale) return { ok: false, stale: true, error: STALE };
@@ -901,6 +932,8 @@
   }
 
   function countersign(docNumber, expect) {
+    var off = notSent();
+    if (off) return { ok: false, offline: true, error: off };
     fresh();
     var t = decisionTarget(docNumber, expect), d = t.d;
     if (t.stale) return { ok: false, stale: true, error: STALE };
@@ -927,6 +960,8 @@
      nothing to act on, and neither does anyone reading this later to see
      why a document never made it into the register. */
   function reject(docNumber, reason, expect) {
+    var off = notSent();
+    if (off) return { ok: false, offline: true, error: off };
     fresh();
     var t = decisionTarget(docNumber, expect), d = t.d;
     if (t.stale) return { ok: false, stale: true, error: STALE };
@@ -1029,6 +1064,8 @@
 
   /* The patch other pages can call: the area's manager editing details only. */
   function editFields(docNumber, fields, rev) {
+    var off = notSent();
+    if (off) return { ok: false, offline: true, error: off };
     fresh();
     var d = target(docNumber, rev);
     if (!d || !fields) return { ok: false, error: 'No such document.' };
@@ -1046,6 +1083,7 @@
   }
 
   function remove(docNumber) {
+    if (notSent()) return false;
     fresh();
     var d = findDoc(docNumber);
     if (!d || !mayManage(d)) return false;
@@ -1088,6 +1126,7 @@
     numberFormat: numberFormat, numberFormatProblem: numberFormatProblem, nextNumber: nextNumber, related: related,
     pendingEffective: pendingEffective, localDay: localDay, resubmission: resubmission,
     statusError: function () { return lastStatusError; },
+    writeError: function () { return lastWriteError; }, notSent: notSent,
     withdrawnFamily: withdrawnFamily, STALE: STALE, CANCEL_REASON: CANCEL_REASON,
     onChange: onChange, added: load,
     isControlled: isControlled, isLive: isLive,

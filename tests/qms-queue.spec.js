@@ -328,7 +328,7 @@ test.describe('bulk QMS confirm: preview, exclusions, a result per document', ()
 });
 
 test.describe('installed app (display-mode: standalone), phone', () => {
-  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, installPrompt: true });
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
       const mm = window.matchMedia.bind(window);

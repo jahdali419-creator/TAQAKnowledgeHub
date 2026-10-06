@@ -30,6 +30,21 @@ const IGNORABLE_CONSOLE_PATTERNS = [
 ];
 
 exports.test = base.test.extend({
+  // The phone-browser install suggestion (shared.js) is product behaviour
+  // with its own tests. Everywhere else it is held back, as a person who has
+  // dismissed it sees the app: on a slow WebKit run it otherwise opened on
+  // Home mid-test and covered the menu (TB-05 triage, PR 2D). A test about
+  // the suggestion opts in with `test.use({ installPrompt: true })`.
+  installPrompt: [false, { option: true }],
+  page: async ({ page, installPrompt }, use) => {
+    if (!installPrompt) {
+      await page.addInitScript(() => {
+        try { localStorage.setItem('taqa-install-dismissed', String(Date.now())); } catch (e) {}
+      });
+    }
+    await use(page);
+  },
+
   consoleErrors: async ({ page }, use) => {
     const errors = [];
     page.on('pageerror', (err) => errors.push(`pageerror: ${err.message}`));
@@ -50,7 +65,14 @@ exports.test = base.test.extend({
         if (!/Timeout .*exceeded/.test(String(err && err.message))) throw err;
         // Fall through to the readyState poll below, see file header.
       }
-      await page.waitForFunction(() => document.readyState === 'complete', { timeout: 15_000 });
+      // A refused page (TAQA_ROLE.refuse, the Master List gate) ends with
+      // window.stop(); WebKit then stays at readyState "loading" for good,
+      // so the refusal's own marker, set once the page is drawn, counts.
+      await page.waitForFunction(() => document.readyState === 'complete' ||
+        document.documentElement.hasAttribute('data-taqa-refused'),
+        // A timer, not animation frames: WebKit draws no frames in a page
+        // that window.stop() ended, so frame polling never re-checks.
+        { timeout: 15_000, polling: 100 });
       // A hair of settle time: the app's own role-repaint / analytics-ping
       // listeners can still be mid-flight the instant readyState flips, and
       // an `evaluate()` that lands in that window intermittently throws

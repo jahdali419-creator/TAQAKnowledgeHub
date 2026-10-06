@@ -670,6 +670,9 @@ function wdConfirm() {
   if (!t) return;
   const reason = document.getElementById('wd-reason').value;
   if (reason.trim().length < 20) return;
+  // Offline: keep the dialog and the reason; say so in it (PI-28).
+  const dlg = document.getElementById('wd-dlg');
+  if (window.TAQA_NET && TAQA_NET.hold(dlg, dlg.querySelector('.wd-acts'))) return;
   const updated = TAQA_STORE.setStatus(t.num, 'obsolete', t.rev, { reason, expect: { key: t.key, status: t.status } });
   wdClose();
   if (!updated) { showDocsToast('Not withdrawn. ' + (TAQA_STORE.statusError() || 'You cannot withdraw this document.'), '#C8102E'); initDocPage(); return; }

@@ -355,6 +355,12 @@ test.describe('on a phone', () => {
     expect(b.x + b.width).toBeLessThanOrEqual(360);
   });
 
+});
+
+// The install suggestion itself (held back elsewhere by the fixture).
+test.describe('on a phone, the install suggestion', () => {
+  test.use({ viewport: { width: 360, height: 800 }, isMobile: true, hasTouch: true, installPrompt: true });
+
   test('the install prompt waits for the welcome tour instead of covering it', async ({ page, gotoApp, clearAppState }) => {
     await gotoApp('/index.html');
     await clearAppState();

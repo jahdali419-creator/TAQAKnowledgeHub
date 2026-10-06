@@ -28,7 +28,7 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 <noscript></noscript>
 <style>
 :root{
-  --side-safe:max(env(safe-area-inset-left), env(safe-area-inset-right));
+  --side-safe:max(var(--safe-l), var(--safe-r));
   --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
   --dark:#F4F4F3;--glass:rgba(255,255,255,0.88);--glass-2:rgba(255,255,255,0.98);
   --glass-border:rgba(0,0,0,0.08);--text:#1E1C1A;--text-muted:#524D48;
@@ -52,6 +52,9 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 }
 *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
 @keyframes pageFadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+/* The viewer keeps its own side insets (--side-safe on its content and its
+   bars), so the page-wide inset in topbar.css would double them. */
+html body{padding-left:0;padding-right:0;}
 body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;animation:pageFadeIn 0.4s cubic-bezier(.4,0,.2,1);}
 .btn{padding:8px 18px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
   transition:all 0.25s;border:none;font-family:'Inter',sans-serif;text-decoration:none;
@@ -355,7 +358,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .bc{padding-block:12px 0;padding-inline:max(16px, var(--side-safe));}
   .doc-view{padding-block:14px 32px;padding-inline:max(16px, var(--side-safe));}
   /* Room under everything for the action bar, safe area included. */
-  .page-wrapper{padding-bottom:calc(var(--bar-h) + env(safe-area-inset-bottom));}
+  .page-wrapper{padding-bottom:calc(var(--bar-h) + var(--safe-b));}
   .doc-header{padding:20px 20px 16px;border-radius:18px;}
   .doc-header-top{gap:14px;margin-bottom:18px;}
   .doc-type-icon-lg{width:44px;height:44px;border-radius:12px;font-size:10px;}
@@ -388,7 +391,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   /* The action bar, under the thumb. The same four controls as the desktop row. */
   .doc-actions{position:fixed;inset-inline:0;bottom:0;z-index:900;flex-wrap:nowrap;gap:6px;
     display:grid;grid-template-columns:minmax(0,1.45fr) repeat(3,minmax(0,1fr));
-    padding-block:8px calc(8px + env(safe-area-inset-bottom));padding-inline:max(12px, var(--side-safe));
+    padding-block:8px calc(8px + var(--safe-b));padding-inline:max(12px, var(--side-safe));
     background:var(--sheet);border-top:1px solid var(--hair);box-shadow:0 -10px 28px -18px rgba(0,40,42,0.35);}
   .act{min-height:48px;padding:0 6px;border-color:transparent;font-size:11.5px;flex-direction:column;gap:4px;border-radius:12px;}
   .act svg{width:20px;height:20px;}
@@ -401,7 +404,7 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
   .act:focus-visible{outline-offset:-3px;}
 
   /* Popovers become sheets resting on the bar. */
-  .pop{position:fixed;top:auto;left:auto;inset-inline:max(12px, var(--side-safe));bottom:calc(var(--bar-h) + env(safe-area-inset-bottom) + 8px);
+  .pop{position:fixed;top:auto;left:auto;inset-inline:max(12px, var(--side-safe));bottom:calc(var(--bar-h) + var(--safe-b) + 8px);
     width:auto;max-height:calc(100dvh - var(--bar-h) - 96px);overflow:auto;
     transform:translateY(8px);transform-origin:bottom center;border-radius:18px;}
   [dir="rtl"] .pop{transform-origin:bottom center;}
@@ -419,11 +422,12 @@ body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
 
   /* shared.js pins the toast and the back-to-top button to the bottom edge,
      which the bar now occupies, so both step up above it. */
-  .toast-wrap{bottom:calc(var(--bar-h) + env(safe-area-inset-bottom) + 14px)!important;}
-  #back-to-top{bottom:calc(var(--bar-h) + env(safe-area-inset-bottom) + 14px)!important;}
-  /* The same for the offline banner and the update bar shared.js pins to the
-     bottom edge: they rest on the action bar instead of covering it. */
-  #offline-banner,#sw-update-bar{bottom:calc(var(--bar-h) + env(safe-area-inset-bottom))!important;}
+  .toast-wrap{bottom:calc(var(--bar-h) + var(--safe-b) + 14px)!important;}
+  #back-to-top{bottom:calc(var(--bar-h) + var(--safe-b) + 14px)!important;}
+  /* The same for the update bar shared.js pins to the bottom edge: it rests
+     on the action bar instead of covering it, so its own safe-area padding
+     is not needed there. */
+  #sw-update-bar{bottom:calc(var(--bar-h) + var(--safe-b))!important;padding-bottom:10px!important;}
   /* A transform on body would make it the bar's containing block while the
      page fades in, so on a phone the entrance is opacity only. */
   body{animation-name:pageFadeInFlat;}
@@ -1627,18 +1631,36 @@ function renderRelated(){
 setTimeout(renderRelated, 600);
 
 // ── Last synced indicator ──
-(function(){
+/* From TAQA_NET (shared.js): "last synced" is only ever the time this device
+   last really heard from RISE, and a copy from this device says so. It used
+   to read navigator.onLine, which says nothing about the server (PI-26). */
+function syncText(short) {
+  var N = window.TAQA_NET, st = N ? N.state() : (navigator.onLine === false ? 'offline' : 'online');
+  if (st === 'offline') return short ? 'Offline copy' : 'Offline: the copy saved on this device';
+  if (st === 'unreachable') {
+    var d = N.cachedAt() ? new Date(N.cachedAt()) : null;
+    var when = d && !isNaN(d) ? d.toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+    return short ? 'Saved copy' : 'RISE not reached: the copy saved on this device' + (when ? ' from ' + when : '');
+  }
   var ts = null;
   try { ts = localStorage.getItem('taqa-last-sync'); } catch(e) {}
+  if (!ts) return '';
+  var mins = Math.round((Date.now() - parseInt(ts, 10)) / 60000);
+  if (short) return mins < 2 ? 'Synced just now' : mins < 60 ? 'Synced ' + mins + 'm ago' : 'Synced ' + Math.round(mins/60) + 'h ago';
+  if (mins < 2) return 'Last synced: just now';
+  if (mins < 60) return 'Last synced: ' + mins + ' minutes ago';
+  if (mins < 1440) return 'Last synced: ' + Math.round(mins/60) + ' hours ago';
+  return 'Last synced: ' + Math.round(mins/1440) + ' days ago';
+}
+(function(){
   var el = document.getElementById('sync-note');
   if (!el) return;
-  if (!ts) { el.textContent = navigator.onLine ? 'Synced now' : 'Offline'; return; }
-  var mins = Math.round((Date.now() - parseInt(ts, 10)) / 60000);
-  if (mins < 2) el.textContent = 'Last synced: just now';
-  else if (mins < 60) el.textContent = 'Last synced: ' + mins + ' minutes ago';
-  else if (mins < 1440) el.textContent = 'Last synced: ' + Math.round(mins/60) + ' hours ago';
-  else el.textContent = 'Last synced: ' + Math.round(mins/1440) + ' days ago';
-  if (!navigator.onLine) el.textContent += ' · Offline mode';
+  function paint(){ el.textContent = syncText(false); }
+  paint();
+  // shared.js loads after this script: repaint when it has decided, and on
+  // every change after that.
+  window.addEventListener('taqa:net', paint);
+  document.addEventListener('DOMContentLoaded', paint);
 })();
 
 // ── Pin for offline ──
@@ -1714,13 +1736,8 @@ function showQuickRef() {
     (_rec && MA.scoreUrl(_rec) ? ' \u00b7 ' + esc(_rec.docNumber) : '');
 
   // Last synced in toolbar
-  var syncTs = null;
-  try { syncTs = localStorage.getItem('taqa-last-sync'); } catch(e) {}
-  var syncEl = document.getElementById('qref-sync-text');
-  if (syncTs) {
-    var m = Math.round((Date.now() - parseInt(syncTs,10)) / 60000);
-    syncEl.textContent = m < 2 ? 'Synced just now' : m < 60 ? 'Synced ' + m + 'm ago' : 'Synced ' + Math.round(m/60) + 'h ago';
-  }
+  var syncEl = document.getElementById('qref-sync-text'), syncT = syncText(true);
+  if (syncT) syncEl.textContent = syncT;
 
   // Focus moves into the dialog and comes back to whoever opened it. The menu
   // item that did is hidden once the menu closes, so the way back is More.

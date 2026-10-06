@@ -316,6 +316,9 @@ TAQA_ROLE.refuse = function(title, why){
     location.reload();
   });
   document.body.style.background = bg;
+  // Marks the page as refused: window.stop() below leaves WebKit's
+  // readyState at "interactive" for good, so a test cannot wait for "complete".
+  document.documentElement.setAttribute('data-taqa-refused', '');
   if (window.stop) window.stop();
 };
 
@@ -626,6 +629,9 @@ const TAQA_DELEGATION = {
      asked for, and neither can exceed what the grantor holds. */
   grant(g){
     g = g || {};
+    // Not sent while the server cannot be reached (PI-28, shared.js TAQA_NET).
+    if (typeof window !== 'undefined' && window.TAQA_NET && !window.TAQA_NET.canWrite())
+      return { ok:false, offline:true, error: window.TAQA_NET.why() };
     const me = TAQA_ROLE.current();
     const fromRole = g.fromRole || me;
     const grantor = TAQA_ROLES[fromRole];
@@ -726,6 +732,8 @@ const TAQA_DELEGATION = {
      who and when; the grant itself is never changed or deleted, so it stays
      in the history as evidence (PI-32). The page asks first. */
   revoke(id){
+    if (typeof window !== 'undefined' && window.TAQA_NET && !window.TAQA_NET.canWrite())
+      return { ok:false, offline:true, error: window.TAQA_NET.why() };
     const all = TAQA_DELEGATION._read();
     const hit = all.find(d => d.id === id);
     if (!hit) return { ok:false, error:'No such delegation.' };

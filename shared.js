@@ -223,57 +223,330 @@ window.showToast=function(msg,type){
   });
 })();
 
-// ── Offline banner ──
-(function(){
-  var s=document.createElement('style');
-  s.textContent=
-    '#offline-banner{position:fixed;bottom:0;left:0;right:0;z-index:9995;background:#002D30;border-top:1px solid rgba(245,158,11,0.3);padding:10px 24px;display:none;align-items:center;justify-content:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.8);font-weight:500;}'+
-    '#offline-banner a{color:#00BBB6;text-decoration:none;font-weight:600;}';
-  document.head.appendChild(s);
-  var banner=document.createElement('div');
-  banner.id='offline-banner';
-  banner.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFB81C" stroke-width="2" stroke-linecap="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>You\'re offline, viewing cached content. <a href="#" onclick="location.reload();return false;">Retry</a>';
-  document.body.appendChild(banner);
-  window.addEventListener('offline',function(){banner.style.display='flex';});
-  window.addEventListener('online',function(){banner.style.display='none';if(window.showToast)window.showToast('Back online!');});
-  if(!navigator.onLine)banner.style.display='flex';
+// ── Work in progress (PI-30) ──
+/* Is the person in the middle of something a reload would destroy? A page
+   says so for what only it knows (an Upload with a file chosen), and anything
+   open on screen counts on its own: a dialog, a decision panel, typed text.
+   Used before applying an update; never to block anything else. */
+window.TAQA_WORK = (function(){
+  var keys = {};
+  function visible(el){ return !!(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length)); }
+  return {
+    set: function(key, on){ if (on) keys[key] = true; else delete keys[key]; },
+    busy: function(){
+      for (var k in keys) if (keys[k]) return true;
+      if (document.querySelector('dialog[open]')) return true;
+      var open = document.querySelectorAll('.open[role="dialog"], [aria-modal="true"].open, .modal-overlay.open, .reject-overlay.open, .approve-overlay.open');
+      for (var i = 0; i < open.length; i++) if (visible(open[i])) return true;
+      // Any field a person types into (text, no type, email, tel, number,
+      // date and the like), and a chosen file. Search boxes do not count.
+      var typed = document.querySelectorAll('textarea, input:not([type]), input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="url"], input[type="date"], input[type="file"]');
+      for (var j = 0; j < typed.length; j++) {
+        var t = typed[j];
+        if (t.id === 'q' || (t.classList && t.classList.contains('nav-search-input'))) continue;
+        if (t.closest && t.closest('#navbar, .bm-panel, .search, [role="search"]')) continue;
+        if (t.type === 'file' ? (t.files && t.files.length) : (String(t.value || '').trim() && t.defaultValue !== t.value && visible(t))) return true;
+      }
+      return false;
+    }
+  };
 })();
 
-// ── SW update notification ──
-(function(){
-  if(!('serviceWorker' in navigator)) return;
-  var s=document.createElement('style');
-  s.textContent=
-    '#sw-update-bar{position:fixed;bottom:0;left:0;right:0;z-index:9996;background:#005D63;padding:11px 20px;display:none;align-items:center;justify-content:center;gap:12px;font-size:13.5px;font-weight:600;color:#fff;box-shadow:0 -4px 20px rgba(0,93,99,0.35);}'+
-    '#sw-update-bar button{background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.4);color:#fff;padding:6px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}'+
-    '#sw-update-bar button:hover{background:rgba(255,255,255,0.35);}';
-  document.head.appendChild(s);
-  var bar=document.createElement('div');
-  bar.id='sw-update-bar';
-  bar.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.68-7.58"/></svg> New version available, <button id="sw-reload-btn">Update now</button>';
-  document.body.appendChild(bar);
-  navigator.serviceWorker.addEventListener('controllerchange', function(){
-    window.location.reload();
+// ── Connectivity: one honest bar (PI-26, PI-28, PI-48) ──
+/* What the reader is looking at, and whether a change can be sent.
+     online       the page came from the server
+     offline      the device says it has no network
+     unreachable  the device says online, but this page or the register came
+                  from the copy saved on this device: the server did not
+                  answer in time (a captive portal, a dead link on a rig)
+   One compact bar directly under the top bar says which. While it shows,
+   --nav-h grows by its height (topbar.css), so sticky tabs, menus and drawers
+   move down with it: it never covers the bell, the menu or an action. "Last
+   synced" is written only when the page really came from the server, never
+   from navigator.onLine. Nothing that needs the server is sent while the
+   state is not "online" (TAQA_STORE refuses it and says so). */
+window.TAQA_NET = (function(){
+  var state = (navigator.onLine === false) ? 'offline' : 'online', cachedAt = null, listeners = [], answered = false;
+  // While RISE cannot be reached, ask again on a timer (20s, backing off to
+  // 60s), when the person comes back to the tab, and when a change is
+  // refused, so a link that recovers is noticed without a reload. Only a
+  // real answer from the server turns the state back to "online".
+  var retry = null, retryMs = 20000, probing = null;
+  var css = document.createElement('style');
+  css.textContent =
+    'html.taqa-net-on{--net-bar-h:30px;}' +
+    '#taqa-net-bar{position:fixed;top:calc(64px + var(--nav-safe,0px));inset-inline:0;z-index:999;height:30px;' +
+      'display:none;align-items:center;justify-content:center;gap:7px;' +
+      'padding:0 max(12px, var(--safe-r)) 0 max(12px, var(--safe-l));' +
+      'background:#3D4F4F;color:#fff;font:600 12px/1.2 Inter,system-ui,sans-serif;}' +
+    '#taqa-net-bar span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0;}' +
+    '#taqa-net-bar svg{flex-shrink:0;}' +
+    // A phone gets the short wording, so "nothing can be sent" is never cut off.
+    '#taqa-net-bar .nb-s{display:none;}' +
+    '@media (max-width:600px){#taqa-net-bar .nb-l{display:none;}#taqa-net-bar .nb-s{display:inline;}}' +
+    'html.taqa-net-on #taqa-net-bar{display:flex;}' +
+    '@media print{#taqa-net-bar{display:none!important;}}' +
+    '.taqa-net-refusal{margin:10px 0;padding:10px 12px;border-radius:10px;font-size:13px;line-height:1.45;' +
+      'color:#7A0A1C;background:#FDEDEF;border:1px solid rgba(200,16,46,0.25);}' +
+    'html[data-taqa-theme="dark"] .taqa-net-refusal{color:#FFD1D6;background:rgba(200,16,46,0.18);border-color:rgba(255,138,148,0.35);}';
+  document.head.appendChild(css);
+  var bar = document.createElement('div');
+  bar.id = 'taqa-net-bar';
+  bar.setAttribute('role', 'status');
+  bar.setAttribute('aria-live', 'polite');
+  bar.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFB81C" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg><span></span>';
+  function when(d){
+    var t = d ? new Date(d) : null;
+    if (!t || isNaN(t)) return 'an earlier visit';
+    return t.toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  }
+  function text(){
+    if (state === 'offline') return 'Offline. Showing copies saved on this device; nothing can be sent until you reconnect.';
+    return 'RISE cannot be reached. This is the copy saved on this device from ' + when(cachedAt) + '; nothing can be sent.';
+  }
+  function shortText(){
+    return state === 'offline' ? 'Offline. Nothing can be sent.' : 'RISE not reached. Nothing can be sent.';
+  }
+  var painted = null;
+  function paint(){
+    var on = state !== 'online';
+    // Redrawn only when the words change, so a screen reader is not told the
+    // same thing again at every re-check.
+    var key = on ? state + '|' + cachedAt : '';
+    if (key === painted && (!on || bar.parentNode)) { listeners.forEach(function(fn){ try { fn(state); } catch(e){} }); return; }
+    painted = key;
+    document.documentElement.classList.toggle('taqa-net-on', on);
+    if (on) {
+      var sp = bar.querySelector('span');
+      sp.textContent = '';
+      var l = document.createElement('span'); l.className = 'nb-l'; l.textContent = text();
+      var sh = document.createElement('span'); sh.className = 'nb-s'; sh.textContent = shortText();
+      sp.appendChild(l); sp.appendChild(sh);
+    }
+    if (on && !bar.parentNode && document.body) document.body.appendChild(bar);
+    listeners.forEach(function(fn){ try { fn(state); } catch(e){} });
+  }
+  function schedule(){
+    if (retry) return;
+    retry = setTimeout(function(){
+      retry = null;
+      if (state === 'online') return;
+      if (document.visibilityState !== 'hidden') probe();
+      retryMs = Math.min(retryMs * 1.5, 60000);
+      schedule();
+    }, retryMs);
+  }
+  function set(next, date, unconfirmed){
+    if (next === 'unreachable' && date) cachedAt = date;
+    var was = state; state = next;
+    if (next === 'online') { if (retry) clearTimeout(retry); retry = null; retryMs = 20000; }
+    else if (next === 'unreachable') schedule();
+    if (next === 'online' && !unconfirmed) { try { localStorage.setItem('taqa-last-sync', Date.now().toString()); } catch(e){} }
+    paint();
+    // For scripts that ran before this file (the viewer's sync note).
+    try { window.dispatchEvent(new CustomEvent('taqa:net', { detail: { state: state } })); } catch(e){}
+    if (was !== 'online' && next === 'online' && window.showToast) {
+      // The page on screen may still be the saved copy: say so.
+      window.showToast(cachedAt || was === 'unreachable' ? 'RISE is reachable again. Reload this page for the current copy.' : 'Back online');
+    }
+  }
+  // Is the server really there? A tiny request that the service worker never
+  // answers from its cache.
+  function probe(){
+    if (navigator.onLine === false) { set('offline'); return Promise.resolve(false); }
+    if (probing) return probing;   // one question at a time
+    var ctl = ('AbortController' in window) ? new AbortController() : null;
+    var timer = setTimeout(function(){ if (ctl) ctl.abort(); }, 8000);
+    probing = fetch('manifest.json?probe=' + Date.now(), { cache: 'no-store', signal: ctl ? ctl.signal : undefined })
+      .then(function(r){ clearTimeout(timer); probing = null; if (!r.ok) throw new Error('status'); set('online'); return true; })
+      .catch(function(){ clearTimeout(timer); probing = null; set(navigator.onLine === false ? 'offline' : 'unreachable', cachedAt); return false; });
+    return probing;
+  }
+  document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState === 'visible' && state !== 'online') probe();
   });
-  navigator.serviceWorker.ready.then(function(reg){
+  window.addEventListener('offline', function(){ set('offline'); });
+  window.addEventListener('online', function(){ probe(); });
+  // How this page was served: the service worker answers once it controls
+  // the page. A page it did not serve came from the network.
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.addEventListener('message', function(e){
+      if (!e.data || e.data.type !== 'SERVED') return;
+      answered = true;
+      if (e.data.how && e.data.how.cache) set(navigator.onLine === false ? 'offline' : 'unreachable', e.data.how.date);
+      else if (state !== 'offline') set('online');
+    });
+    try { navigator.serviceWorker.controller.postMessage({ type: 'HOW_SERVED' }); } catch(e){}
+    // A worker from before this release does not answer: then it is the
+    // device's word, as before, until a probe or a write says otherwise.
+    setTimeout(function(){ if (!answered && state === 'online') set('online', null, true); }, 1500);
+  } else if (state === 'online') {
+    set('online');
+  }
+  if (document.body) paint(); else document.addEventListener('DOMContentLoaded', paint);
+  return {
+    state: function(){ return state; },
+    cachedAt: function(){ return cachedAt; },
+    // Can a change be sent now? Only when the page knows the server answered.
+    canWrite: function(){ return state === 'online' && navigator.onLine !== false; },
+    why: function(){
+      return state === 'offline'
+        ? 'Not sent: you are offline. Nothing was saved to the register. What you entered is still here; try again when you are connected.'
+        : 'Not sent: RISE cannot be reached. Nothing was saved to the register. What you entered is still here; try again when the connection is back.';
+    },
+    probe: probe,
+    onChange: function(fn){ listeners.push(fn); },
+    // Before a decision that closes a dialog or replaces a panel: when it
+    // cannot be sent, say so in place (before `before`, or at the top of
+    // `where`) and return true, so the caller stops with the dialog still
+    // open and the typed reason still in it. Clears the note once it can.
+    hold: function(where, before){
+      if (!this.canWrite() && state === 'unreachable') probe();   // perhaps it is back: the next try will know
+      if (!where) return !this.canWrite();
+      var old = where.querySelector('.taqa-net-refusal');
+      if (this.canWrite()) { if (old) old.remove(); return false; }
+      var p = old || document.createElement('p');
+      p.className = 'taqa-net-refusal';
+      p.setAttribute('role', 'alert');
+      p.textContent = this.why();
+      if (!old) { if (before && before.parentNode) before.parentNode.insertBefore(p, before); else where.insertBefore(p, where.firstChild); }
+      return true;
+    }
+  };
+})();
+
+// How much of the top of the screen the bar (and the connectivity bar under
+// it) covers, measured, for code that scrolls something into view below it
+// (PI-51). It is taller in the installed app and while the connectivity bar
+// shows, so a fixed number lands content under it.
+window.TAQA_TOP = function(){
+  var b = 0, n = document.getElementById('navbar'), t = document.getElementById('taqa-net-bar');
+  if (n) b = Math.max(b, n.getBoundingClientRect().bottom);
+  if (t && document.documentElement.classList.contains('taqa-net-on')) b = Math.max(b, t.getBoundingClientRect().bottom);
+  return b || 64;
+};
+
+// ── New version (PI-30) ──
+/* A new release never reloads a page on its own. The service worker waits
+   (service-worker.js); this page then either
+     - applies it quietly when the page has just loaded and nothing is in
+       progress: the next page the person opens uses it, nothing reloads; or
+     - shows "New version available" and reloads only when the person taps
+       "Update now", warning first if something is in progress, with a way to
+       keep working.
+   The first install takes control without any reload. Another tab updating
+   does not reload this one. */
+(function(){
+  if (!('serviceWorker' in navigator)) return;
+  var s = document.createElement('style');
+  s.textContent =
+    '#sw-update-bar{position:fixed;bottom:0;left:0;right:0;z-index:9996;background:#005D63;' +
+      'padding:10px max(16px, var(--safe-r)) calc(10px + var(--safe-b)) max(16px, var(--safe-l));' +
+      'display:none;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 12px;font-size:13.5px;font-weight:600;color:#fff;box-shadow:0 -4px 20px rgba(0,93,99,0.35);}' +
+    '#sw-update-bar button{background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.4);color:#fff;padding:6px 14px;min-height:44px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}' +
+    '#sw-update-bar button:hover{background:rgba(255,255,255,0.35);}' +
+    '#sw-update-bar button:focus-visible{outline:2px solid #fff;outline-offset:2px;}';
+  document.head.appendChild(s);
+  var bar = document.createElement('div');
+  bar.id = 'sw-update-bar';
+  bar.setAttribute('role', 'status');
+  document.body.appendChild(bar);
+  var reloadAsked = false;
+  // A test may set window.__taqaSwDebug = [] to see which way an update went.
+  function trace(m){ try { if (window.__taqaSwDebug) window.__taqaSwDebug.push(m + '@' + Math.round(performance.now())); } catch(e){} }
+  function show(){
+    trace('show');
+    bar.innerHTML = '<span>New version available.</span> <button type="button" id="sw-reload-btn">Update now</button>';
+    bar.style.display = 'flex';
+  }
+  function warn(){
+    bar.innerHTML = '<span>Updating reloads this page and loses what is in progress here.</span> ' +
+      '<button type="button" id="sw-reload-anyway">Reload anyway</button> <button type="button" id="sw-later">Keep working</button>';
+    var later = document.getElementById('sw-later'); if (later) later.focus();
+  }
+  function apply(reg){
+    reloadAsked = true;
+    if (reg && reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+    else window.location.reload();
+  }
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    // Only the tab that asked reloads. A first install, or another tab's
+    // update, changes the controller here too, and must not touch this page.
+    trace('controllerchange');
+    if (reloadAsked) { window.location.reload(); return; }
+    // Applied elsewhere (or quietly here): nothing is waiting any more.
+    navigator.serviceWorker.getRegistration().then(function(r){ if (!r || !r.waiting) bar.style.display = 'none'; });
+  });
+  // The worker's answer to the quiet apply: offer "Update now" only if it
+  // did not apply (another RISE window is open).
+  navigator.serviceWorker.addEventListener('message', function(e){
+    if (e.data && e.data.type === 'QUIET') trace('quiet-reply:' + e.data.applied);
+    if (e.data && e.data.type === 'QUIET' && !e.data.applied) show();
+  });
+  navigator.serviceWorker.getRegistration().then(function(reg){
+    if (!reg) return;
+    function waitingFound(){
+      trace('waiting-found:' + document.readyState + ':busy=' + TAQA_WORK.busy());
+      if (!navigator.serviceWorker.controller) return;   // first install: nothing to replace
+      // Once that worker is no longer waiting (applied here, in another tab,
+      // or by the browser when the last old page closed), the notice is
+      // stale: take it away.
+      var w = reg.waiting;
+      if (w && !w.__taqaWatched) {
+        w.__taqaWatched = true;
+        w.addEventListener('statechange', function(){
+          trace('waiting-state:' + w.state);
+          if (w.state !== 'installed' && reg.waiting !== w && !reloadAsked) bar.style.display = 'none';
+        });
+      }
+      // Still being drawn: decide once the page is there (this used to fall
+      // through to the notice whenever the check answered early).
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', waitingFound, { once: true });
+        return;
+      }
+      // Just loaded, nothing in progress: apply it quietly, without a reload.
+      if (performance.now() < 4000 && !TAQA_WORK.busy()) {
+        // Applied only if this is the only RISE window (service-worker.js);
+        // otherwise it keeps waiting, and "Update now" is offered.
+        trace('quiet-sent');
+        reg.waiting.postMessage({ type: 'SKIP_WAITING_IF_ALONE' });
+        // If no answer comes, say so after a while rather than never.
+        setTimeout(function(){ if (reg.waiting && bar.style.display !== 'flex') show(); }, 8000);
+        return;
+      }
+      show();
+    }
+    if (reg.waiting) waitingFound();
     reg.addEventListener('updatefound', function(){
-      var nw=reg.installing;
+      var nw = reg.installing;
+      if (!nw) return;
       nw.addEventListener('statechange', function(){
-        if(nw.state==='installed' && navigator.serviceWorker.controller){
-          bar.style.display='flex';
-        }
+        if (nw.state === 'installed' && reg.waiting) waitingFound();
       });
     });
-  });
-  document.addEventListener('click',function(e){
-    if(e.target && e.target.id==='sw-reload-btn'){
-      navigator.serviceWorker.ready.then(function(reg){
-        if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
-        else window.location.reload();
-      });
-    }
+    bar.addEventListener('click', function(e){
+      var id = e.target && e.target.id;
+      if (id === 'sw-reload-btn') { if (TAQA_WORK.busy()) warn(); else apply(reg); }
+      else if (id === 'sw-reload-anyway') apply(reg);
+      else if (id === 'sw-later') { show(); var b = document.getElementById('sw-reload-btn'); if (b) b.focus(); }
+    });
   });
 })();
+
+// ── Back and Forward (PI-18) ──
+/* A page restored from the back-forward cache comes back exactly as it was
+   left, including the fade-out added when a link was followed: it showed as
+   a blank page that took no taps. Restore it visible and interactive, and
+   tell the page's listeners the register may have moved on meanwhile. */
+window.addEventListener('pageshow', function(e){
+  document.body && document.body.classList.remove('page-exit');
+  if (e.persisted) {
+    try { window.dispatchEvent(new CustomEvent('taqa:resume')); } catch(err){}
+    // Restored after time away: ask again whether RISE is there.
+    if (window.TAQA_NET) TAQA_NET.probe();
+  }
+});
 
 // ── The top bar ──
 /* One bar for the whole site. Every page carries the same <nav id="navbar">
@@ -377,9 +650,11 @@ window.showToast=function(msg,type){
   var s=document.createElement('style');
   s.textContent=
     '.nav-hamburger{display:none;}'+
+    /* Clear of the notch and the home indicator on a turned phone (PI-52).
+       Its height is set where it opens, below the bar. */
     '.nav-mobile-menu{display:none;position:fixed;inset-inline:0;top:var(--nav-h,64px);z-index:998;'+
       'background:var(--tb-solid,#fff);border-bottom:1px solid var(--tb-rule,rgba(117,106,97,.13));'+
-      'padding:6px 16px 28px;box-shadow:0 22px 44px -26px rgba(0,88,90,.28);'+
+      'padding:6px max(16px, var(--safe-r,0px)) calc(28px + var(--safe-b,0px)) max(16px, var(--safe-l,0px));box-shadow:0 22px 44px -26px rgba(0,88,90,.28);'+
       'overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;font-family:"Inter",system-ui,sans-serif;}'+
     '.nav-mobile-menu.open{display:block;}'+
     /* On a tablet the menu drops as a sheet from the end of the bar rather
@@ -490,7 +765,8 @@ window.showToast=function(msg,type){
   function setMenu(open){
     var m=document.getElementById('nav-mobile-menu'); if(!m) return;
     if(open){
-      var t=navEl?Math.round(navEl.getBoundingClientRect().bottom):64;
+      // Below the bar and the connectivity bar under it, when that shows (PR 2D).
+      var t=window.TAQA_TOP?Math.round(TAQA_TOP()):(navEl?Math.round(navEl.getBoundingClientRect().bottom):64);
       var sheet=window.matchMedia&&window.matchMedia('(min-width:641px)').matches;
       if(sheet) t+=8;
       m.style.top=t+'px';
@@ -582,7 +858,7 @@ window.showToast=function(msg,type){
     '#pwa-sheet{position:fixed;bottom:0;left:0;right:0;z-index:99998;'+
     'background:rgba(255,255,255,0.99);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);'+
     'border-top:1px solid rgba(0,0,0,0.07);border-radius:24px 24px 0 0;'+
-    'padding:16px 24px 36px;box-shadow:0 -8px 40px rgba(0,0,0,0.18);'+
+    'padding:16px 24px calc(28px + var(--safe-b,0px));box-shadow:0 -8px 40px rgba(0,0,0,0.18);'+
     'transform:translateY(100%);transition:transform 0.4s cubic-bezier(.32,1.12,.64,1);pointer-events:none;}'+
     '#pwa-sheet.pwa-open{transform:translateY(0);pointer-events:auto;}'+
     'html[data-taqa-theme="dark"] #pwa-sheet{background:rgba(0,35,38,0.99);border-color:rgba(255,255,255,0.07);}'+
@@ -634,7 +910,7 @@ window.showToast=function(msg,type){
     '<div class="pwa-row">'+APP_ICON+
       '<div class="pwa-text-block">'+
         '<div class="pwa-title">Install RISE</div>'+
-        '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
+        '<div class="pwa-sub">Opens like an app. Pages you have opened stay readable offline; nothing can be sent offline.</div>'+
       '</div>'+
     '</div>'+
     '<div class="pwa-steps">'+
@@ -650,7 +926,7 @@ window.showToast=function(msg,type){
     '<div class="pwa-row">'+APP_ICON+
       '<div class="pwa-text-block">'+
         '<div class="pwa-title">Install RISE</div>'+
-        '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
+        '<div class="pwa-sub">Opens like an app. Pages you have opened stay readable offline; nothing can be sent offline.</div>'+
       '</div>'+
     '</div>'+
     '<div class="pwa-steps">'+
@@ -667,7 +943,7 @@ window.showToast=function(msg,type){
     '<div class="pwa-row">'+APP_ICON+
       '<div class="pwa-text-block">'+
         '<div class="pwa-title">Install RISE</div>'+
-        '<div class="pwa-sub">Access all TAQA documents offline, anytime.</div>'+
+        '<div class="pwa-sub">Opens like an app. Pages you have opened stay readable offline; nothing can be sent offline.</div>'+
       '</div>'+
     '</div>'+
     '<button class="pwa-install-btn" id="pwa-install-btn">Install App</button>'+
@@ -690,6 +966,9 @@ window.showToast=function(msg,type){
     var tourOn=false;
     try{ tourOn=!!document.getElementById('tc-skip')&&!localStorage.getItem('taqa-tour-done'); }catch(e){}
     if(tourOn){ setTimeout(showSheet,1500); return; }
+    // Not over anything the person has started or opened since the page
+    // loaded: typed text, a chosen file, an open dialog, drawer or menu.
+    if((window.TAQA_WORK&&TAQA_WORK.busy())||document.querySelector('.nav-mobile-menu.open,.bell-menu.open,.bm-panel.open,.dw.open,.doc-modal-panel.open'))return;
     sheet.classList.add('pwa-open');
     overlay.classList.add('pwa-open');
   }
@@ -706,6 +985,10 @@ window.showToast=function(msg,type){
   var onForm = /support-ticket|upload/.test(location.pathname) ||
                !!document.querySelector('form .form-card, form .upload-form-card');
   if (onForm) return;
+  // Offered on Home only. On a task page (the Workbench, an approval desk, the
+  // Master List, a document) it slid over the controls being used (PR 2D).
+  var home = /(^|\/)(index\.html)?$/.test(location.pathname);
+  if (!home) return;
 
   if(isIPhone){
     // Show to all iPhone users, Safari gets install steps, others get "open in Safari" guidance
@@ -993,32 +1276,6 @@ document.addEventListener('keydown',function(e){
 })();
 
 
-// ── Offline indicator banner ──
-(function(){
-  var s=document.createElement('style');
-  s.textContent=
-    '#offline-bar{position:fixed;top:var(--nav-h,64px);left:0;right:0;z-index:999;background:rgba(61,84,84,0.93);'+
-    'color:#fff;font-size:12.5px;font-weight:500;text-align:center;font-family:"Inter",sans-serif;'+
-    'max-height:0;overflow:hidden;padding:0 36px;transition:max-height 0.3s ease,padding 0.3s ease;}'+
-    '#offline-bar.show{max-height:40px;padding:7px 36px;}'+
-    '#offline-bar .ob-x{position:absolute;right:10px;top:50%;transform:translateY(-50%);'+
-    'background:none;border:none;color:rgba(255,255,255,0.7);font-size:15px;cursor:pointer;padding:4px;line-height:1;}';
-  document.head.appendChild(s);
-  var bar=document.createElement('div');bar.id='offline-bar';
-  bar.innerHTML='You are offline. You can still read documents you opened before.'+
-    '<button class="ob-x" aria-label="Dismiss">×</button>';
-  document.body.appendChild(bar);
-  bar.querySelector('.ob-x').addEventListener('click',function(){bar.classList.remove('show');});
-  function upd(){
-    bar.classList.toggle('show',!navigator.onLine);
-    if(navigator.onLine){try{localStorage.setItem('taqa-last-sync',Date.now().toString());}catch(e){}}
-  }
-  window.addEventListener('online',upd);
-  window.addEventListener('offline',upd);
-  if(navigator.onLine){try{localStorage.setItem('taqa-last-sync',Date.now().toString());}catch(e){}}
-  upd();
-})();
-
 // ── Pin management ──
 (function(){
   var KEY='taqa-pins';
@@ -1094,12 +1351,13 @@ document.addEventListener('keydown',function(e){
     loadDraft();
     document.addEventListener('input', saveDraft);
     document.addEventListener('change', saveDraft);
-    // Clear draft on successful submit
-    var forms=document.querySelectorAll('form');
-    forms.forEach(function(form){
-      form.addEventListener('submit', function(){
-        try{ localStorage.removeItem(KEY); }catch(e){}
-      });
+    // The draft is cleared only when the page says the work really went
+    // through ('taqa:draft-done'). It used to go on the form's submit
+    // event, which also fires when nothing is sent: an Upload refused
+    // offline, or an Ask Expert question that has nowhere to go, then came
+    // back empty after a reload (PR 2D, no lost work).
+    window.addEventListener('taqa:draft-done', function(){
+      try{ localStorage.removeItem(KEY); }catch(e){}
     });
   });
 })();
@@ -1354,53 +1612,6 @@ document.addEventListener('keydown',function(e){
   function go(){ build(); banner(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go);
   else go();
-})();
-
-/* ──────────────────────────────────────────────────────────────────────────
-   Offline banner
-   ──────────────────────────────────────────────────────────────────────────
-   The service worker already caches the shell for offline reading. This is
-   the honest label for it: when the network drops, say so and say what the
-   reader is looking at, instead of letting a page go quietly stale.
-   ────────────────────────────────────────────────────────────────────────── */
-(function () {
-  if (document.getElementById('taqa-offline-bar')) return;
-
-  var css = document.createElement('style');
-  css.textContent =
-    '.offline-bar{position:sticky;top:0;z-index:2500;display:flex;align-items:center;gap:8px;' +
-      'justify-content:center;padding:7px 14px;background:#524D48;color:#fff;' +
-      'font-size:12px;font-weight:600;text-align:center;}' +
-    '.offline-bar svg{flex-shrink:0;}';
-  document.head.appendChild(css);
-
-  var ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-    'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-    '<path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>' +
-    '<path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/>' +
-    '<path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>' +
-    '<line x1="12" y1="20" x2="12.01" y2="20"/></svg>';
-
-  var bar = null;
-  function show() {
-    if (bar) return;
-    bar = document.createElement('div');
-    bar.id = 'taqa-offline-bar';
-    bar.className = 'offline-bar';
-    bar.innerHTML = ICON + '<span>You are offline. Showing the last cached copy of this page.</span>';
-    document.body.insertBefore(bar, document.body.firstChild);
-  }
-  function hide() {
-    if (!bar) return;
-    bar.remove(); bar = null;
-  }
-
-  window.addEventListener('online', hide);
-  window.addEventListener('offline', show);
-  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', show);
-    else show();
-  }
 })();
 
 /* ──────────────────────────────────────────────────────────────────────────
