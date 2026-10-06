@@ -1,5 +1,7 @@
 # TechHub Azure UAT checklist
 
+> **Status: CURRENT (6 Oct 2026).** The detailed checks behind the User Acceptance Testing plan in `docs/handover/10-UAT-PLAN.md`. Real-iPhone checks are recorded separately (`docs/handover/11-REAL-IPHONE-UAT.md`).
+
 **Not for now.** Mohammed and IT run this **after** Azure integration, in the UAT environment, with real Entra accounts. Each line passes only if it is observed, not assumed. Record the account used, the document number and the result.
 
 Test accounts needed (one real user each): Employee who is a member of segment **A, Operations** · Employee who is a member of segment **A, Maintenance** · Employee who is a member of segment **B** · two spare employee accounts with no membership (**P** and **Q**) · an employee with **no** operational-segment membership (**N**) · QMS · Segment Director of area **A** · Segment Director of area **B** · Maintenance Manager of segment **A** · Maintenance Manager of segment **B** · Auditor · a delegate · a glossary SME for category **X** (for example Drilling) · a glossary SME for a different category **Y**.

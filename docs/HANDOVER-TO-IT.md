@@ -1,5 +1,7 @@
 # TechHub: handover to IT
 
+> **Status: MERGED INTO NEW HANDOVER PACK (6 Oct 2026).** The IT entry point is now **`docs/handover/README.md`**. This page is kept as the 1 October 2026 handover record. Its test figures and open-decision list are out of date (current: `docs/handover/09-TEST-EVIDENCE.md`, `16-OPEN-IT-DECISIONS.md`, `17-OPEN-BUSINESS-CONFIRMATIONS.md`). Its "Azure API + database" design is one option, not a decision: the architecture is IT's (`docs/handover/16-OPEN-IT-DECISIONS.md` IT-01). Business decisions: `docs/RISE-BUSINESS-DECISIONS.md`.
+
 **Start here.** This is the entry point for the TAQA IT team taking over TechHub (the TAQA Knowledge Hub) for Azure integration. It is short on purpose and points to the detailed documents.
 
 | | |

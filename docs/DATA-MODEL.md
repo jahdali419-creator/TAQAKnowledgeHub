@@ -1,5 +1,7 @@
 # TechHub data model: prototype objects and their Azure equivalents
 
+> **Status: CURRENT, as the field-level reference (6 Oct 2026).** Plain-language summary: `docs/handover/06-DATA-MODEL.md`. Which store holds each entity is IT's decision (`docs/handover/16-OPEN-IT-DECISIONS.md` IT-02).
+
 What the frontend holds today, where, and what each object should become. No database product is prescribed; the entities are logical. Field names are the prototype's, so the API can return the same shape and the pages need the least change.
 
 **Server-owned** means the browser may display or propose the value but the API must set it: from the authenticated identity, the server clock, or the workflow transition. A value the browser sends for a server-owned field must be ignored or rejected.

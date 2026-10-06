@@ -1,5 +1,7 @@
 # TAQA Knowledge Hub, Frontend QA & Release Report
 
+> **Status: HISTORICAL.** Current test evidence: `docs/handover/09-TEST-EVIDENCE.md`.
+
 > **STALE: four-role evidence (re-audited 1 Oct 2026).** Its "Role Coverage" section says "All four roles"; the app now has five, including the **Maintenance Manager**. Its test counts (357) and its role statements are history, not current evidence. Current evidence: `FIVE-ROLE-QA-AUDIT.md`.
 >
 > **Superseded counts.** The end-to-end role audit of 30 Sept 2026 (`RELEASE-QA-E2E.md`) re-ran the suite and found and fixed workflow, permission and phone-layout defects. Use its measured results, not the test counts below.

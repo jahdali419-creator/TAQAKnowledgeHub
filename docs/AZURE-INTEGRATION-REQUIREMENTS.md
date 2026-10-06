@@ -1,5 +1,7 @@
 # Azure integration requirements
 
+> **Status: CURRENT, as a detailed reference (6 Oct 2026). Summary merged into the new handover pack.** For the capability-by-capability requirements, start at `docs/handover/07-M365-PRODUCTION-REQUIREMENTS.md`. This page keeps the detail on configuration, Entra mapping, the frontend/backend boundary, routing, the PWA and error states. Its architecture diagram (frontend → Azure API → database) is **one option, not a decision**: the architecture is IT's (`docs/handover/16-OPEN-IT-DECISIONS.md`). SCORE remains the system of record (BD-01).
+
 What the IT team must build or decide to turn the TechHub prototype into a system real employees use. Rules: `BUSINESS-RULES.md`. Endpoints: `API-REQUIREMENTS.md`. Entities: `DATA-MODEL.md`. Findings below were measured on 1 October 2026 (`docs/QA/FIVE-ROLE-QA-AUDIT.md`, and the handover audit in `HANDOVER-TO-IT.md` §8).
 
 ---

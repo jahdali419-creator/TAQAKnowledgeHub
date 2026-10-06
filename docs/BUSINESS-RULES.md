@@ -1,5 +1,7 @@
 # TechHub business rules
 
+> **Status: CURRENT, authoritative for rules (6 Oct 2026).** The owner's decisions are recorded in `docs/RISE-BUSINESS-DECISIONS.md` (BD-01 to BD-07), which wins if the two differ. Where a "Production" note here names a mechanism (SharePoint item IDs, If-Match, an API, a flow), it is an example of how the rule could be enforced; **IT chooses the mechanism** (`docs/handover/16-OPEN-IT-DECISIONS.md`). IT entry point: `docs/handover/README.md`.
+
 The authoritative statement of how documents move through TechHub, for the team building the Azure back end. It describes the **current code** (`roles.js`, `store.js` and the pages that call them) including the owner's decisions of 1 October 2026 (`docs/QA/FIVE-ROLE-QA-AUDIT.md` §13). Section 12 lists every place where the code and the documentation disagree; nothing there was silently resolved. Sections 13 (Field Glossary) and 14 (Segment membership) are **target production requirements** set by the owner that the prototype does not implement.
 
 > In the prototype every rule below runs in the browser and can be bypassed with the developer console. In production each one must be enforced by the API from the signed-in identity. See `AZURE-INTEGRATION-REQUIREMENTS.md` §4.

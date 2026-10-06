@@ -1,5 +1,7 @@
 # TAQA Knowledge Hub: End-to-End Role Journey, Release QA
 
+> **Status: HISTORICAL.** Current test evidence: `docs/handover/09-TEST-EVIDENCE.md`.
+
 > **STALE: four-role evidence (re-audited 1 Oct 2026).** This report tested four personas: Employee, QMS, Segment Director and Auditor. The app now has **five**: the **Maintenance Manager** was added, with its own approval path for maintenance department documents and Maintenance Bulletins. The journey, the permission matrix (section 3), the direct-address table and the test totals below (760 tests, commit base `9ca5e4e`) **do not describe the current design and must not be cited as current evidence**. The current evidence is `FIVE-ROLE-QA-AUDIT.md`. The defect history in section 7 stays valid as history.
 
 Date of testing: 30 September 2026. Code under test: branch `claude/inspiring-mayer-pm1350`, based on `main` at `9ca5e4e`, plus the fixes listed in section 7.

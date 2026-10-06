@@ -1,5 +1,7 @@
 # RISE: Product-Integrity Reassessment after PR #29
 
+> **Status: CURRENT.** The per-finding table shows each finding's status at the reassessment. Later PRs are recorded in the "Status after …" paragraphs further down. Read both.
+
 | | |
 |---|---|
 | **Baseline** | `main` at `d501f50` (merge of PR #29). The live Azure and GitHub Pages sites both serve cache `taqa-hub-v103`, and `store.js`, `roles.js`, `upload.html` and `master-list.html` are byte-identical to `main`. |
@@ -265,6 +267,9 @@ The evidence points here rather than to the next item on the old roadmap. The tw
 - **PI-22:** an exact number or legacy ID of a superseded or withdrawn document shows that document marked "Superseded / Withdrawn. Do not use.", naming a successor only where one exists and pointing to SCORE otherwise; permission-trimmed.
 - **PI-23:** the document page, share link, QR code and bookmark take the area from the record; nothing is guessed when a link names neither a number nor an area.
 - **PI-27:** decided by BD-03 and closed in the prototype: lists, counts, search, bookmarks, the desk, Upload's messages and the document page show only what the role may open. **PRODUCTION CONTROL REQUIRED** (server-side permission trimming). Open: classification at upload, and access for the approver of a restricted document (`BUSINESS-RULES.md` §21).
+
+**Found during the handover review (6 Oct 2026), not fixed in this phase:**
+- **NEW-13 (P2):** the document page's Download button (`#dl-btn`, `#pdf-dl-btn` → `requestAccess()`) shows "Download request sent to document administrator." Nothing is sent and no file exists, so this is a false success. Fix (A): say that no file is connected in this preview and nothing was requested. *Production:* Download serves the approved file version (`docs/handover/16-OPEN-IT-DECISIONS.md` IT-08).
 
 **After 2B, in this order** (proposed, for your decision later):
 1. **2C: Record truth.** PI-11 withdrawal record and honest trail; PI-10 bulk withdraw over drafts; PI-21 release dates; the rest of PI-24 (Returned state, not pending); PI-13 duplicate detection; PI-14 number validation; NEW-04 delegation-naming guard; PI-32 delegate withdraw/type limits; PI-54.

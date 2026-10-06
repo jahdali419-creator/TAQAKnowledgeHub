@@ -1,5 +1,7 @@
 # TechHub API requirements (proposed starting contract)
 
+> **Status: CURRENT, as a candidate contract only (6 Oct 2026).** It describes the requests a custom API *would* need **if IT chooses one**. Whether SharePoint / Power Automate are enough, or an API is needed, is IT's decision (`docs/handover/16-OPEN-IT-DECISIONS.md` IT-01). The rules it encodes stay authoritative in `docs/BUSINESS-RULES.md` and `docs/RISE-BUSINESS-DECISIONS.md`. Start at `docs/handover/README.md`.
+
 A starting contract for the Azure team, derived from what the frontend does today. It is not a finished API design: names, paging, and versioning are IT's to decide. Rules are in `BUSINESS-RULES.md`; entities in `DATA-MODEL.md`. `docs/FRONTEND-API-CONTRACT.md` maps each prototype JavaScript function to these endpoints.
 
 ## Conventions

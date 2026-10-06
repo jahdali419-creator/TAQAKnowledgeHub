@@ -1,5 +1,7 @@
 # Frontend API contract
 
+> **Status: CURRENT, as a reference map (6 Oct 2026).** It maps each prototype JavaScript function to a candidate request, which applies only if IT chooses a custom API (`docs/handover/16-OPEN-IT-DECISIONS.md` IT-01). Its older references to `AZURE-MIGRATION-RAFA.md` are historical.
+
 > **Current endpoint contract: `docs/API-REQUIREMENTS.md`.** This file stays as the map from each prototype JavaScript function to its future endpoint; rules: `docs/BUSINESS-RULES.md`.
 
 What the browser code actually calls today, as a reference for whoever wires

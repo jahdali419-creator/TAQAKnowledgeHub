@@ -1,5 +1,7 @@
 # TQ-QHSE-S001 Document Management Standard — gap analysis
 
+> **Status: CURRENT, as background (20 Sep 2026).** A review of TQ-QHSE-S001 against ISO 9001 and API Q2, for QHSE. It is not a RISE requirement in itself. RISE's rules are in `docs/BUSINESS-RULES.md`.
+
 Review of **TQ-QHSE-S001 Document Management Standard, V3.0, 22 July 2024**
 against **ISO 9001:2015** and **API Specification Q2, 3rd Edition (September 2026)**.
 
