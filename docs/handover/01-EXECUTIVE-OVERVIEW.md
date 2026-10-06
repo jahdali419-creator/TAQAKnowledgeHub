@@ -39,7 +39,7 @@ It is **not** the official system of record. **SCORE remains TAQA's authoritativ
   - classification-trimmed visibility;
   - honest offline behaviour (nothing is sent offline).
 - **An integrity audit and reassessment** with every finding tracked (`docs/QA/`).
-- **The seven business decisions locked** (BD-01 to BD-07, 6 October 2026).
+- **The business decisions locked** (BD-01 to BD-07, 6 October 2026; BD-08 and BD-09 added the same day).
 
 ## What production needs
 

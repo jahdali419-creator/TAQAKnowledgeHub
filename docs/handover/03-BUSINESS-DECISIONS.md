@@ -11,6 +11,8 @@ The authoritative register is **`docs/RISE-BUSINESS-DECISIONS.md`**. Each decisi
 | BD-05 | **Read offline, send online.** Offline reading only of content approved for caching. Nothing authoritative is queued | No offline write queue without a new decision. Decide the caching policy (with Cybersecurity) |
 | BD-06 | **Field Glossary:** the technical SME approves or rejects the meaning. QMS / admin manages duplicates, categories, lifecycle and withdrawal | The workflow needs an SME per category (named by the business) |
 | BD-07 | **Sequencing:** decisions → narrow integrity close-out → this handover → only then premium design or the full QMS Dashboard | No design or dashboard work is in scope of this handover |
+| BD-08 | **Restricted / Confidential final approval:** only an approver cleared for the classification; otherwise the workflow is blocked and escalated, and QMS does not step in | Check the individual approver's clearance on the server; hold and escalate when nobody is eligible. How clearance and assignment work in Microsoft 365 is IT's decision |
+| BD-09 | **Number validation reveals nothing** about a Restricted / Confidential document: "This number cannot be used. Choose another number or contact QMS." | Preferably allocate numbers on the platform; the mechanism is IT's decision |
 
 ## Ownership boundary
 

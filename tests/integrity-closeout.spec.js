@@ -346,7 +346,8 @@ test.describe('PI-27: titles and counts are what the reader may open', () => {
       checkDocId();
       return document.getElementById('doc-id-status').textContent;
     }, RESTRICTED.n);
-    expect(msg).toContain('already in use in the register');
+    // BD-09: neutral words, nothing about the document (not even that it exists).
+    expect(msg.trim()).toBe('✕ This number cannot be used. Choose another number or contact QMS.');
     expect(msg).not.toContain(RESTRICTED.t);
     // A number this person may see is still named.
     const own = await page.evaluate((n) => {
@@ -356,5 +357,84 @@ test.describe('PI-27: titles and counts are what the reader may open', () => {
       return document.getElementById('doc-id-status').textContent;
     }, SOP011.n);
     expect(own).toContain(SOP011.t);
+  });
+});
+
+// ── Safety close-out (6 Oct 2026): BD-08, BD-09, NEW-13 ───────────────────
+test.describe('BD-08: a Restricted document is never sent for final approval to someone not cleared for it', () => {
+  const R_DRAFT = 'TQ-TWS-WSS-WI-010';   // shipped draft, restricted, Well Safety (operational segment)
+  const C_DRAFT = 'TQ-QHSE-S003';        // shipped draft, confidential, QHSE
+
+  async function qmsChecks(page, gotoApp, clearAppState, setRole, n, area) {
+    await start(page, gotoApp, clearAppState, setRole, 'qms', area);
+    const r = await page.evaluate((x) => TAQA_STORE.countersign(x), n);
+    expect(r && r.ok, 'QMS check of ' + n).toBe(true);
+  }
+
+  test('after the QMS check, a restricted draft waits, escalated: the Director is not cleared, cannot approve it and is not shown it', async ({ page, gotoApp, setRole, clearAppState, consoleErrors }) => {
+    await qmsChecks(page, gotoApp, clearAppState, setRole, R_DRAFT, 'well-safety');
+    // Those who may see it are told it is blocked and escalated.
+    expect(await page.evaluate((x) => TAQA_APPROVAL.waitingOn(TAQA_STORE.findDoc(x)), R_DRAFT)).toMatch(/authorised final approver.*escalated/);
+    expect(await page.evaluate((x) => TAQA_APPROVAL.approvalBlocked(TAQA_STORE.findDoc(x)), R_DRAFT)).toBe(true);
+    // QMS does not become the final approver.
+    expect(await page.evaluate((x) => TAQA_APPROVAL.canApprove(TAQA_STORE.findDoc(x)), R_DRAFT)).toBe(false);
+    // The area's Director: not cleared, so not routed to them, and the register refuses.
+    await setRole('owner', 'well-safety');
+    await gotoApp('/dashboard.html?id=well-safety');
+    expect(await page.evaluate((x) => TAQA_APPROVAL.canApprove(TAQA_STORE.findDoc(x)), R_DRAFT)).toBe(false);
+    const out = await page.evaluate((x) => TAQA_STORE.approve(x), R_DRAFT);
+    expect(out.ok).toBe(false);
+    expect(await page.evaluate((x) => TAQA_STORE.findDoc(x).status, R_DRAFT)).toBe('draft');
+    await expect(page.locator('body')).not.toContainText(R_DRAFT);
+    const badge = await page.locator('#bell-badge').textContent().catch(() => '');
+    expect(badge || '').not.toMatch(/[1-9]/);
+    assertNoConsoleErrors(consoleErrors);
+  });
+
+  test('a confidential draft still goes to its area approver, who is cleared for confidential: the route is unchanged', async ({ page, gotoApp, setRole, clearAppState }) => {
+    await qmsChecks(page, gotoApp, clearAppState, setRole, C_DRAFT, 'qhse');
+    expect(await page.evaluate((x) => TAQA_APPROVAL.approvalBlocked(TAQA_STORE.findDoc(x)), C_DRAFT)).toBe(false);
+    await setRole('owner', 'qhse');
+    await gotoApp('/index.html');
+    expect(await page.evaluate((x) => TAQA_APPROVAL.canApprove(TAQA_STORE.findDoc(x)), C_DRAFT)).toBe(true);
+    const out = await page.evaluate((x) => TAQA_STORE.approve(x), C_DRAFT);
+    expect(out.ok).toBe(true);
+  });
+
+  test('clearance is checked per role, from roles.js: Directors and Maintenance Managers are cleared for internal and confidential, not restricted', async ({ page, gotoApp }) => {
+    await gotoApp('/index.html');
+    const c = await page.evaluate(() => ['owner', 'maintenance', 'employee'].map((r) =>
+      ['internal', 'confidential', 'restricted'].map((k) => TAQA_APPROVAL.cleared({ classification: k }, r))));
+    expect(c).toEqual([[true, true, false], [true, true, false], [true, false, false]]);
+  });
+});
+
+test.describe('BD-09: number validation reveals nothing about a document the filer may not open', () => {
+  const NEUTRAL = 'This number cannot be used. Choose another number or contact QMS.';
+  test('the register refuses a restricted number in neutral words for an Employee; QMS is still told which document holds it', async ({ page, gotoApp, setRole, clearAppState }) => {
+    await start(page, gotoApp, clearAppState, setRole, 'employee');
+    const rec = (n) => ({ title: 'Probe', segment: CT, docType: 'sop', docNumber: n, summary: 'x' });
+    const emp = await page.evaluate((r) => TAQA_STORE.checkFiling(r), rec(RESTRICTED.n));
+    expect(emp).toBe(NEUTRAL);
+    for (const leak of [RESTRICTED.t, 'restricted', 'Restricted', 'Coiled Tubing', 'already']) expect(emp).not.toContain(leak);
+    // The refusal still stands: nothing is filed.
+    expect(await page.evaluate((r) => TAQA_STORE.add(r), rec(RESTRICTED.n))).toBeFalsy();
+    // A number the filer may open is still explained.
+    expect(await page.evaluate((r) => TAQA_STORE.checkFiling(r), rec(SOP011.n))).toContain(SOP011.t);
+    await setRole('qms', CT);
+    expect(await page.evaluate((r) => TAQA_STORE.checkFiling(r), rec(RESTRICTED.n))).toContain(RESTRICTED.t);
+  });
+});
+
+test.describe('NEW-13: Download says honestly that it is not connected', () => {
+  test('Download on a current document says "not connected" and never claims a request was sent', async ({ page, gotoApp, setRole, clearAppState, consoleErrors }) => {
+    await start(page, gotoApp, clearAppState, setRole, 'employee');
+    await gotoApp('/viewer.html?doc=' + encodeURIComponent(SOP011.n));
+    await expect(page.locator('#dl-btn')).not.toHaveAttribute('aria-disabled', 'true');
+    await page.locator('#dl-btn').click();
+    const toast = page.locator('#toast-wrap .toast').last();
+    await expect(toast).toContainText('Download is not connected in this preview');
+    await expect(page.locator('#toast-wrap')).not.toContainText(/request sent|sent to/i);
+    assertNoConsoleErrors(consoleErrors);
   });
 });

@@ -419,6 +419,28 @@ const TAQA_APPROVAL = {
   // Who is named as approver for this document's type, verbatim from the
   // register. The back end resolves this to a person through Entra ID; here it
   // is the text the standard uses.
+  /* May the person in this role open a document of this classification at
+     all? Final approval goes only to someone who may (BD-08, 6 Oct 2026):
+     the route stays the area's Segment Director or Maintenance Manager, but
+     the individual acting in it, a delegate included, must also be cleared
+     for the classification. In the prototype clearance is the role's
+     classification list; in production it is the person's, from Microsoft
+     365 (IT decides how). */
+  cleared(doc, roleKey){
+    if (!doc || !doc.classification) return true;
+    const R = TAQA_ROLE.def(roleKey);
+    return !!R && R.classifications.indexOf(doc.classification) !== -1;
+  },
+  /* A document at final approval that no approver for its route is cleared
+     to open. It is not sent to anyone who may not open it, QMS does not
+     step in as final approver, and classification is not bypassed: the
+     workflow waits, escalated, until an authorised approver is assigned
+     under the production governance process (BD-08). */
+  approvalBlocked(doc){
+    if (TAQA_APPROVAL.stageOf(doc) !== 'director') return false;
+    return !TAQA_APPROVAL.cleared(doc, TAQA_APPROVAL.isMaintenance(doc) ? 'maintenance' : 'owner');
+  },
+
   approverFor(doc){
     if (TAQA_APPROVAL.isMaintenance(doc)) return 'Maintenance Manager';
     const t = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.types[doc.docType]) || {};
@@ -503,6 +525,8 @@ const TAQA_APPROVAL = {
     if (TAQA_APPROVAL.stageOf(doc) !== 'director') return false;
     const cap = TAQA_ROLE.effective(roleKey);
     if (!cap.approve) return false;
+    // Never to someone not cleared for the document's classification (BD-08).
+    if (!TAQA_APPROVAL.cleared(doc, roleKey)) return false;
     // Scope: a Director signs for their own segment and nobody else's.
     if (cap.scope !== 'all' && doc.segment !== cap.ownSegment) return false;
     // A delegation may be narrowed to certain document types.
@@ -528,6 +552,9 @@ const TAQA_APPROVAL = {
   waitingOn(doc){
     const st = TAQA_APPROVAL.stageOf(doc);
     if (st === 'qms') return 'QMS conformance check';
+    if (st === 'director' && TAQA_APPROVAL.approvalBlocked(doc))
+      return 'an authorised final approver (escalated: no approver for this route may open ' +
+        String(doc.classification) + ' documents; one must be assigned)';
     if (st === 'director')
       return TAQA_APPROVAL.approverFor(doc) || 'the approver named for this type';
     return null;

@@ -19,7 +19,11 @@ const { test, expect, DESKTOP } = require('./helpers/fixtures');
 
 const SEG = 'coiled-tubing';
 const DOC = { n: 'TQ-TWS-CTSS-SOP-007', t: 'Nitrogen Injection SOP', rev: '1.0', next: '2.0' };
-const SRC = { n: 'TQ-TWS-CTSS-SOP-002', rev: '2.0', next: '3.0' };          // has an Arabic translation
+// An Internal document with an Arabic translation. It was SOP-002, which is
+// Restricted: since BD-08 (6 Oct 2026) a Director is not cleared to approve
+// a Restricted revision, so that release is blocked and escalated, which is
+// tested in integrity-closeout.spec.js. This test is about translations.
+const SRC = { n: 'TQ-TWS-CTSS-SOP-009', rev: '3.0', next: '4.0' };          // has an Arabic translation
 const SRC2 = { n: 'TQ-TWS-CTSS-SOP-005' };                                  // has one too
 const GONE = { n: 'TQ-TWS-CTSS-SOP-012' };                                  // withdrawn
 
