@@ -3,120 +3,146 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>RISE · Home</title>
+<title>RISE · WI-003 Injector Head Operations Manual</title>
 <link rel="stylesheet" href="l.css">
 <style>
-/* ---------- home (mobile first) ---------- */
-.mast{padding:var(--s6) 0 var(--s5)}
-.mast .eyebrow b{color:var(--ink);font-weight:600}
-.mast h1{font-size:34px;margin-top:var(--s3)}
-.mast h1 em{font-style:normal;color:var(--teal)}
-.hsearch{margin-top:var(--s5)}
-.hsearch form{display:flex;align-items:center;gap:10px;height:52px;padding:0 6px 0 14px;background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);color:var(--ink-3)}
-.hsearch form:focus-within{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,93,99,.12)}
-.hsearch input{flex:1;min-width:0;border:0;outline:0;background:none;font:400 16px var(--text);color:var(--ink)}
-.hsearch input::placeholder{color:var(--ink-3)}
-.hsearch .btn{height:40px;padding:0 14px}
-.hsearch p{margin-top:var(--s2);font-size:13.5px;color:var(--ink-3)}
-.hsearch p a{color:var(--teal);font-weight:500;margin-left:4px}
+/* ---------- document (mobile first) ---------- */
+.dbar{position:sticky;top:0;z-index:15;background:rgba(247,246,242,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--rule)}
+.dbar__in{display:flex;align-items:center;gap:var(--s3);height:56px}
+.dbar__id{display:flex;align-items:center;gap:10px;min-width:0;font-size:13.5px;color:var(--ink-2)}
+.dbar__id b{font-weight:600;color:var(--ink);white-space:nowrap}
+.dbar__id .long{display:none}
+.dbar__act{margin-left:auto;display:flex;align-items:center;gap:4px;margin-right:-8px}
+.dbar__act .btn--line,.dbar__act .lbl{display:none}
+.dbar .btn--saved{height:40px;padding:0 10px}
+.dbar .btn--primary{height:40px;padding:0 12px}
 
-/* lead */
-.lead{border-top:2px solid var(--ink);padding-top:var(--s4)}
-.lead__grid{display:grid;grid-template-columns:1fr;gap:var(--s5)}
-.lead__cover{display:none}
-.lead h2{font-size:30px;margin-top:var(--s3)}
-.lead h2 a:hover{color:var(--teal)}
-.lead__dek{margin-top:var(--s3);font-size:17px;line-height:1.6;color:var(--ink-2)}
-.lead__dek b{color:var(--ink);font-weight:600}
-.lead__meta{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin-top:var(--s4);padding-top:var(--s3);border-top:1px solid var(--rule-2);font-size:13.5px;color:var(--ink-3)}
-.lead__act{display:flex;flex-direction:column;gap:var(--s2);margin-top:var(--s5)}
-.lead__act .btn{width:100%}
-.lead__note{font-size:13px;color:var(--ink-3);display:flex;gap:6px;align-items:flex-start}
-.lead__note .i{margin-top:1px;width:15px;height:15px}
-.affects{display:flex;gap:var(--s3);align-items:center;margin-top:var(--s5);padding:var(--s3) var(--s4);background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--teal);border-radius:var(--r-sm)}
-.affects b{font-weight:600}
-.affects span{font-size:14px;color:var(--ink-2);line-height:1.45}
-.affects .i{color:var(--teal)}
+.crumb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding-top:var(--s5);font-size:13.5px;color:var(--ink-3)}
+.crumb a{color:var(--teal);font-weight:500}
+.crumb .i{width:13px;height:13px}
 
-.side{margin-top:var(--s8)}
-.side-alert{padding:var(--s3) 0 var(--s4);border-bottom:1px solid var(--rule-2)}
-.side-alert .kicker{color:var(--ink-3)}
-.side-alert h3{font:700 17px/1.3 var(--display);margin:6px 0 8px}
-.side-alert .doc-row__m{gap:4px 10px}
-.side-more{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:var(--s4) 0;border-bottom:1px solid var(--rule-2);font-size:14.5px}
-.side-more b{font:300 30px/1 var(--display);color:var(--ink);margin-right:10px;letter-spacing:-.02em}
-.side-more span{display:flex;align-items:center;color:var(--ink-2)}
-.expert{display:flex;gap:var(--s3);align-items:flex-start;padding:var(--s4) 0}
-.expert__ic{width:40px;height:40px;border-radius:50%;background:var(--tint);display:grid;place-items:center;color:var(--teal);flex:none}
-.expert b{display:block;font-weight:600}
-.expert p{font-size:14px;color:var(--ink-2)}
-.expert .link{font-size:14px;margin-top:6px}
+.mh{padding-top:var(--s3)}
+.mh h1{font-size:32px;margin-top:var(--s2)}
+.mh__id{margin-top:var(--s3);display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--ink-3)}
+.mh__id .num{color:var(--ink);font-weight:600}
 
-/* what changed */
-.changed{margin-top:var(--s10)}
-.ch{display:grid;grid-template-columns:64px 1fr;gap:var(--s3);padding:var(--s4) 0;border-bottom:1px solid var(--rule-2)}
-.ch__date{font:300 26px/1 var(--display);letter-spacing:-.02em;color:var(--ink)}
-.ch__date small{display:block;font:500 12px/1.3 var(--text);letter-spacing:.04em;color:var(--ink-3);margin-top:5px;text-transform:uppercase}
-.ch__type{font:600 11.5px/1.2 var(--text);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
-.ch__t{display:block;font:700 17px/1.3 var(--display);margin:4px 0 6px}
-.ch__t:hover{color:var(--teal);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
-.ch__what{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:var(--ink);margin-top:6px}
-.ch__what i{width:7px;height:7px;border-radius:50%;background:var(--teal)}
-.ch__what--new i{background:var(--orange)}
-.ch--alert .ch__t{color:var(--ink)}
-.ch__flag{display:inline-flex;align-items:center;gap:4px;margin-left:8px;font:600 11px/1 var(--text);letter-spacing:.06em;text-transform:uppercase;color:#9A3600;vertical-align:2px}
+.use{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin-top:var(--s5);padding:var(--s4);background:var(--ok-bg);border:1px solid #BFDCCB;border-radius:var(--r-lg)}
+.use > .i{width:26px;height:26px;color:var(--ok);grid-row:span 2}
+.use h2{font:700 18px/1.3 var(--display);color:#0F5233}
+.use p{font-size:14.5px;line-height:1.55;color:#1E4A36}
+.use p b{font-weight:600}
 
-/* elsewhere */
-.else{margin-top:var(--s10)}
-.else__item{display:grid;grid-template-columns:76px 1fr;gap:var(--s4);align-items:start}
-.else__item h3{font:700 18px/1.3 var(--display);margin:4px 0 8px}
-.idx{margin-top:var(--s8)}
-.idx li{display:flex;justify-content:space-between;align-items:center;min-height:44px;border-bottom:1px solid var(--rule-2);font-size:15px}
-.idx li span{color:var(--ink-3);font-variant-numeric:tabular-nums;font-size:14px}
-.idx li a{display:flex;justify-content:space-between;align-items:center;width:100%;min-height:44px}
-.idx li a:hover{color:var(--teal)}
-.idx .you{font:600 11px/1 var(--text);letter-spacing:.06em;text-transform:uppercase;color:var(--teal);margin-left:8px}
+.viewer{margin-top:var(--s5);background:#E6EAE9;border-radius:var(--r-lg);overflow:hidden;display:grid;grid-template-columns:112px 1fr;gap:var(--s4);padding:var(--s4);align-items:center}
+.viewer__bar{display:none;align-items:center;gap:8px;height:48px;padding:0 8px 0 14px;font-size:13.5px;color:var(--ink-2);background:#DCE2E1}
+.viewer__bar b{font-weight:600;color:var(--ink)}
+.viewer__bar .sp{margin-left:auto}
+.viewer__page{padding:0}
+.viewer__cap{font-size:13.5px;color:var(--ink-2);line-height:1.5}
+.viewer__cap b{display:block;color:var(--ink);font-weight:600;font-size:15px}
+.viewer__foot{display:flex;flex-direction:column;gap:12px}
+.viewer__foot .btn{width:100%;padding:0 12px}
+.stage__more{display:none}
 
-/* shelf strip */
-.shelf{margin-top:var(--s10);background:var(--surface);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:var(--s6) 0}
-.shelf__grid{display:grid;gap:var(--s6)}
-.shelf h2{font:700 15px/1.2 var(--display);display:flex;justify-content:space-between;align-items:baseline}
-.shelf h2 a{font:600 13.5px var(--text);color:var(--teal)}
-.mini{display:grid;grid-template-columns:36px 1fr;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--rule-2)}
-.mini:last-child{border-bottom:0}
-.mini b{display:block;font:600 15px/1.3 var(--text)}
-.mini span{font-size:12.5px;color:var(--ink-3);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.shelf ul{margin-top:var(--s2)}
+.acts{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:var(--s3)}
+.acts a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:60px;border-radius:var(--r);font:500 12.5px/1.2 var(--text);color:var(--ink-2)}
+.acts a .i{width:22px;height:22px;color:var(--ink)}
+.acts a.on{color:var(--teal);font-weight:600}
+.acts a.on .i{color:var(--teal)}
+.acts a:hover{background:var(--rule-2)}
+
+.alertnote{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin-top:var(--s5);padding:var(--s4);background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--orange);border-radius:var(--r-sm)}
+.alertnote > .i{width:22px;height:22px;color:#B23C00;grid-row:span 3}
+.alertnote h3{font:700 16.5px/1.3 var(--display)}
+.alertnote p{font-size:14px;color:var(--ink-2)}
+.alertnote p b{font-weight:600;color:var(--ink)}
+.alertnote .row{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;margin-top:4px}
+
+.facts{margin-top:var(--s6);display:grid;grid-template-columns:1fr 1fr;border-top:2px solid var(--ink)}
+.facts div{padding:12px 12px 12px 0;border-bottom:1px solid var(--rule-2)}
+.facts dt{font:600 11px/1.3 var(--text);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.facts dd{font-size:15px;font-weight:500;margin-top:4px;line-height:1.4}
+.facts dd small{display:block;font-size:12.5px;color:var(--ink-3);font-weight:400}
+
+.blk{margin-top:var(--s10)}
+.summary p.lede{font-size:18px;line-height:1.65;color:var(--ink)}
+.changed{margin-top:var(--s4);padding-left:var(--s4);border-left:2px solid var(--teal)}
+.changed .eyebrow{color:var(--teal)}
+.changed p:last-child{font-weight:600;margin-top:4px}
+
+.toc li a{display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:8px;min-height:50px;padding:8px 0;border-bottom:1px solid var(--rule-2)}
+.toc li a:hover .t{color:var(--teal)}
+.toc .n{font:300 20px/1 var(--display);color:var(--ink-3)}
+.toc .t{font-weight:500}
+.toc .flag{display:inline-flex;align-items:center;gap:5px;font:600 12px/1.2 var(--text);color:#9A3600;text-align:right}
+.toc .flag .i{width:14px;height:14px}
+.toc li.hot a{background:linear-gradient(90deg,rgba(253,88,5,.06),transparent 70%)}
+.toc li.hot .n{color:#B23C00}
+.toc .sub{display:block;font-size:12.5px;color:var(--ink-3);font-weight:400}
+
+.trail{position:relative}
+.trail li{position:relative;display:grid;grid-template-columns:28px 1fr;gap:12px;padding-bottom:var(--s5)}
+.trail li::before{content:"";position:absolute;left:13px;top:24px;bottom:0;width:2px;background:var(--rule)}
+.trail li:last-child::before{display:none}
+.trail .dot{width:28px;height:28px;border-radius:50%;background:var(--surface);border:2px solid var(--teal);display:grid;place-items:center;color:var(--teal)}
+.trail .dot .i{width:14px;height:14px;stroke-width:2.2}
+.trail li:last-child .dot{background:var(--ok);border-color:var(--ok);color:#fff}
+.trail b{display:block;font-weight:600}
+.trail p{font-size:14px;color:var(--ink-3)}
+
+.hist{width:100%;border-collapse:collapse;font-size:14.5px}
+.hist th{text-align:left;font:600 11px/1 var(--text);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:0 8px 8px 0;border-bottom:1px solid var(--rule)}
+.hist td{padding:12px 8px 12px 0;border-bottom:1px solid var(--rule-2)}
+.hist .muted{color:var(--muted);display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:500}
+.hist .muted i{width:10px;height:10px;border:1.5px solid var(--muted);border-radius:2px;display:inline-block}
+.hist td:last-child{color:var(--ink-3);font-size:13px}
+.inset{margin-top:var(--s4);display:flex;gap:12px;align-items:flex-start;padding:var(--s3) var(--s4);border:1px dashed var(--rule);border-radius:var(--r);font-size:13.5px;color:var(--ink-2)}
+.inset .eyebrow{display:block;margin-bottom:4px}
+.inset .ban{display:inline-block;margin-top:4px;padding:4px 8px;background:#EDEFEF;border-left:3px solid var(--muted);font-weight:500;color:var(--ink)}
+
+.rel li a{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--rule-2)}
+.rel li a b{display:block;font:700 16px/1.3 var(--display)}
+.rel li a:hover b{color:var(--teal)}
+.rel li a span.m{font-size:13px;color:var(--ink-3);display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:2px}
+
+.ask{padding:var(--s5);background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-lg)}
+.ask__h{display:flex;gap:12px;align-items:center}
+.ask__ic{width:40px;height:40px;border-radius:50%;background:var(--tint);display:grid;place-items:center;color:var(--teal);flex:none}
+.ask__h b{display:block;font-weight:600}
+.ask__h span{font-size:13.5px;color:var(--ink-3)}
+.ask q{display:block;margin-top:var(--s4);padding:var(--s3) var(--s4);background:var(--paper);border-radius:var(--r);font-size:15px;color:var(--ink-2);quotes:none}
+.ask .btn{margin-top:var(--s3);width:100%}
+.equip{margin-top:var(--s5);display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;color:var(--ink-3)}
 
 @media (min-width:1024px){
-  .grid12{display:grid;grid-template-columns:repeat(12,1fr);column-gap:32px}
-  .mast{padding:var(--s10) 0 var(--s8);align-items:end}
-  .mast__t{grid-column:1/9}
-  .mast h1{font-size:60px;margin-top:var(--s4);max-width:15ch}
-  .hsearch{grid-column:9/13;margin-top:0;padding-bottom:6px}
-  .hsearch form{height:56px}
-
-  .main-a{grid-column:1/9}
-  .main-b{grid-column:9/13}
-  .lead{padding-top:var(--s6)}
-  .lead__grid{grid-template-columns:236px 1fr;gap:var(--s8)}
-  .lead__cover{display:block}
-  .lead h2{font-size:42px;margin-top:var(--s3);font-weight:300;letter-spacing:-.02em;line-height:1.08}
-  .lead__dek{font-size:18px;max-width:58ch}
-  .lead__act{flex-direction:row;align-items:center;gap:var(--s4)}
-  .lead__act .btn{width:auto}
-  .side{margin-top:0;border-top:2px solid var(--ink);padding-top:var(--s3)}
-  .changed{margin-top:var(--s12)}
-  .ch{grid-template-columns:96px 1fr 210px;gap:var(--s6);padding:18px 0}
-  .ch__date{font-size:30px}
-  .ch__what{margin-top:0;align-self:start;padding-top:20px}
-  .ch__t{font-size:19px}
-  .else{margin-top:var(--s12)}
-  .else__item{grid-template-columns:92px 1fr}
-  .shelf{margin-top:var(--s12);padding:var(--s8) 0}
-  .shelf__grid{grid-template-columns:1fr 1fr;gap:var(--s12)}
-  .shelf ul{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s5)}
-  .mini{border-bottom:0;padding:var(--s2) 0;align-items:start;grid-template-columns:44px 1fr}
+  .dbar__in{height:60px}
+  .dbar__id .long{display:inline}
+  .dbar__act{gap:8px;margin-right:0}
+  .dbar__act .btn--line,.dbar__act .lbl{display:inline-flex}
+  .dbar .btn--saved{height:40px;padding:0 14px}
+  .dbar .btn--primary,.dbar .btn--line{height:40px;padding:0 14px;font-size:14px}
+  .layout{display:grid;grid-template-columns:repeat(12,1fr);column-gap:32px;align-items:start}
+  .crumb{grid-column:1/-1;padding-top:var(--s6)}
+  .head{grid-column:7/13;grid-row:2;margin-top:var(--s5)}
+  .stage{grid-column:1/7;grid-row:2/4;position:sticky;top:76px;margin-top:var(--s5)}
+  .viewer{margin-top:0;display:block;padding:0}
+  .viewer__bar{display:flex}
+  .stage__more{display:flex;gap:var(--s6);margin-top:var(--s3);font-size:14px;font-weight:500}
+  .stage__more a{display:inline-flex;align-items:center;gap:6px;color:var(--ink-2);min-height:36px}
+  .stage__more a:hover{color:var(--teal)}
+  .stage__more span{color:var(--ink-3);font-weight:400}
+  .viewer__page{padding:28px 0;display:flex;justify-content:center}
+  .viewer__page .cover{width:auto;height:calc(100vh - 350px);min-height:440px;max-width:100%}
+  .viewer__foot{display:none}
+  .col{grid-column:7/13;grid-row:3}
+  .mh{padding-top:0}
+  .mh h1{font-size:48px;line-height:1.08;letter-spacing:-.015em}
+  .facts{grid-template-columns:repeat(3,1fr)}
+  .acts{display:none}
+  .blk{margin-top:var(--s12)}
+  .summary p.lede{font-size:19px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:var(--s8)}
+  .two .blk{margin-top:var(--s12)}
+  .ask .btn{width:auto}
 }
 </style>
 </head>
@@ -217,7 +243,7 @@
     <form class="top-search" action="search.html" role="search">
       <svg class="i"><use href="#i-search"/></svg>
       <label class="sr" for="q-top">Search RISE</label>
-      <input id="q-top" name="q" type="search" placeholder="Search titles, numbers, terms" value="">
+      <input id="q-top" name="q" type="search" placeholder="Search the register" value="">
     </form>
     <div class="top__tools">
       <a class="btn btn--line btn--sm" href="#"><svg class="i"><use href="#i-upload"/></svg>Upload</a>
@@ -235,164 +261,162 @@
 </header>
 
 
+<div class="dbar" role="region" aria-label="Document actions">
+  <div class="wrap dbar__in">
+    <div class="dbar__id">
+      <b>WI-003</b><span class="long">Injector Head Operations Manual</span><span>Rev 4.0</span>
+      <span class="st st--current"><svg class="i"><use href="#i-current"/></svg>Current</span>
+    </div>
+    <div class="dbar__act">
+      <a class="btn btn--saved" href="#" aria-pressed="true" aria-label="Saved. Remove from saved"><svg class="i"><use href="#i-bookmark-fill"/></svg><span class="lbl">Saved</span></a>
+      <a class="btn btn--line" href="#"><svg class="i"><use href="#i-share"/></svg>Share</a>
+      <a class="btn btn--line" href="#" aria-label="More: quick reference card, pin offline, print"><svg class="i"><use href="#i-more"/></svg>More</a>
+      <a class="btn btn--primary" href="#" aria-label="Download PDF"><svg class="i"><use href="#i-download"/></svg><span class="lbl">Download PDF</span></a>
+    </div>
+  </div>
+</div>
+
 <main id="main">
-  <div class="wrap">
-    <section class="mast grid12">
-      <div class="mast__t">
-        <p class="eyebrow">Tuesday 6 October 2026 <span class="sep">/</span> <b>Faisal Al-Ghamdi</b> · Field Supervisor · Coiled Tubing, Operations</p>
-        <h1 class="display">The most important knowledge for your work, <em>today</em>.</h1>
+  <div class="wrap layout">
+    <nav class="crumb" aria-label="Breadcrumb"><a href="area.html">Coiled Tubing</a><svg class="i"><use href="#i-chev-r"/></svg><a href="area.html">Manuals</a><svg class="i"><use href="#i-chev-r"/></svg><span aria-current="page">WI-003</span></nav>
+
+    <div class="head">
+      <header class="mh">
+        <p class="kicker">Manual · Coiled Tubing · Operations</p>
+        <h1 class="title">Injector Head Operations Manual</h1>
+        <p class="mh__id"><span class="num">TQ-TWS-CTSS-WI-003</span><span>Rev 4.0</span><span>English</span><span>Internal</span></p>
+      </header>
+
+      <div class="use" role="status">
+        <svg class="i"><use href="#i-current"/></svg>
+        <h2>Current: this is the revision to use.</h2>
+        <p><b>Rev 4.0</b>, effective <b>30 Aug 2025</b>. Approved 28 Aug 2025 by the Segment Director, Coiled Tubing. Next review 30 Aug 2028.</p>
       </div>
-      <div class="hsearch">
-        <form action="search.html" role="search">
-          <svg class="i"><use href="#i-search"/></svg>
-          <label class="sr" for="q-home">Search the register</label>
-          <input id="q-home" name="q" type="search" placeholder="Search 520 documents in force">
-          <button class="btn btn--primary" type="submit">Search</button>
-        </form>
-        <p>Try <a href="search.html">pressure test</a> <a href="#">WI-003</a> <a href="#">BOP</a></p>
+    </div>
+
+    <!-- the document itself -->
+    <section class="stage" aria-label="Document preview">
+      <div class="viewer">
+        <div class="viewer__bar"><b>Cover</b><span>· English · PDF</span><span class="sp"></span>
+          <a class="icon-btn" href="#" aria-label="Print"><svg class="i"><use href="#i-print"/></svg></a>
+          <a class="icon-btn" href="#" aria-label="Open full screen"><svg class="i"><use href="#i-open"/></svg></a></div>
+        <div class="viewer__page">
+          <div class="cover"><div class="cover__band"></div><div class="cover__in">
+            <div class="cover__head"><img src="../../kit/brand/rise-icon.png" alt=""><span>TAQA · Controlled document</span><span>Internal</span></div>
+            <div class="cover__type">Manual</div>
+            <div class="cover__title">Injector Head Operations Manual</div>
+            <div class="cover__num">TQ-TWS-CTSS-WI-003 · Coiled Tubing · Operations</div>
+            <div class="cover__rule"></div>
+            <div class="cover__lines"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <dl class="cover__meta"><div><dt>Revision</dt><dd>4.0</dd></div><div><dt>Effective</dt><dd>30 Aug 2025</dd></div><div><dt>Approved by</dt><dd>Segment Director, CT</dd></div></dl>
+            <div class="cover__foot"><span>Owner: Coiled Tubing segment</span><span>Next review 30 Aug 2028</span></div>
+          </div></div>
+        </div>
+        <div class="viewer__foot">
+          <p class="viewer__cap"><b>Rev 4.0 · PDF</b>English · Internal · opens in the document viewer</p>
+          <a class="btn btn--primary" href="#"><svg class="i"><use href="#i-open"/></svg>Open document</a>
+        </div>
       </div>
+      <p class="stage__more"><a href="#"><svg class="i i--sm"><use href="#i-file"/></svg>Quick reference card <span>Sunlight mode</span></a><a href="#"><svg class="i i--sm"><use href="#i-pin"/></svg>Pin offline</a><a href="#"><svg class="i i--sm"><use href="#i-print"/></svg>Print</a></p>
     </section>
 
-    <div class="grid12">
-      <!-- LEAD -->
-      <article class="lead main-a" aria-labelledby="lead-t">
-        <div class="lead__grid">
-          <a class="lead__cover" href="#" aria-hidden="true" tabindex="-1">
-            <div class="cover cover--alt"><div class="cover__band"></div><div class="cover__in">
-              <div class="cover__head"><img src="../../kit/brand/rise-icon.png" alt=""><span>TAQA</span><span>Confidential</span></div>
-              <div class="cover__type">Technical alert</div>
-              <div class="cover__title">New pressure rating for 2-inch CT string</div>
-              <div class="cover__num">TQ-TWS-CTSS-ALT-002</div>
-              <div class="cover__lock"><svg class="i"><use href="#i-lock"/></svg>Access restricted</div>
-              <dl class="cover__meta"><div><dt>Rev</dt><dd>2.0</dd></div><div><dt>Issued</dt><dd>13 Apr 2026</dd></div><div><dt>Area</dt><dd>CT</dd></div></dl>
-            </div></div>
-          </a>
-          <div>
-            <p class="kicker">Active technical alert · Coiled Tubing</p>
-            <h2 class="display" id="lead-t"><a href="#">New pressure rating for 2-inch CT string, effective immediately</a></h2>
-            <p class="lead__dek">This alert changes the operating limits in <b>section 5 of the Injector Head Operations Manual</b> (WI-003). Check the limits before your next job on a 2-inch string.</p>
-            <div class="lead__meta">
-              <span class="num">TQ-TWS-CTSS-ALT-002</span><span>Rev 2.0</span><span>Issued 13 Apr 2026</span>
-              <span class="st st--current"><svg class="i"><use href="#i-current"/></svg>Current</span>
-              <span class="cls"><svg class="i"><use href="#i-lock"/></svg>Confidential</span>
-            </div>
-            <div class="lead__act">
-              <a class="btn btn--primary" href="document.html">Open WI-003, section 5<svg class="i"><use href="#i-arrow"/></svg></a>
-              <a class="btn btn--line" href="#"><svg class="i"><use href="#i-lock"/></svg>Request access to the alert</a>
-            </div>
-            <p class="lead__note" style="margin-top:10px"><svg class="i"><use href="#i-lock"/></svg>The alert is Confidential: access restricted, request access through QMS. WI-003 is Internal and open to you.</p>
-          </div>
-        </div>
-      </article>
+    <div class="col">
 
-      <aside class="side main-b" aria-label="Also in your area">
-        <p class="eyebrow">Also active in Coiled Tubing</p>
-        <div class="side-alert">
-          <h3><a href="#">Chemical compatibility update for H2S environments</a></h3>
-          <div class="doc-row__m"><span class="num">ALT-003</span><span>Rev 2.0</span>
-            <span class="st st--due"><svg class="i"><use href="#i-due"/></svg>Review due</span></div>
-        </div>
-        <a class="side-more" href="#"><span><b>33</b>active technical alerts across TAQA</span><svg class="i i--sm"><use href="#i-chev-r"/></svg></a>
-        <div class="expert">
-          <span class="expert__ic"><svg class="i"><use href="#i-expert"/></svg></span>
-          <div><b>Coiled Tubing expert</b><p>A question about the new 2-inch limits? Ask the person who owns the answer.</p>
-          <a class="link" href="#">Ask an Expert<svg class="i i--xs"><use href="#i-arrow"/></svg></a></div>
+      <nav class="acts" aria-label="Document actions">
+        <a class="on" href="#" aria-pressed="true"><svg class="i"><use href="#i-bookmark-fill"/></svg>Saved</a>
+        <a href="#"><svg class="i"><use href="#i-download"/></svg>Download</a>
+        <a href="#"><svg class="i"><use href="#i-share"/></svg>Share</a>
+        <a href="#"><svg class="i"><use href="#i-more"/></svg>More</a>
+      </nav>
+
+      <aside class="alertnote" aria-label="Associated technical alert">
+        <svg class="i"><use href="#i-alert"/></svg>
+        <p class="eyebrow">Associated technical alert · 13 Apr 2026</p>
+        <h3><a href="#">New pressure rating for 2-inch CT string, effective immediately</a></h3>
+        <div>
+          <p>ALT-002 <b>changes the limits in section 5</b> of this manual. Read the two together.</p>
+          <p class="row"><span class="num">TQ-TWS-CTSS-ALT-002 · Rev 2.0</span><span class="cls"><svg class="i"><use href="#i-lock"/></svg>Confidential · request access through QMS</span></p>
         </div>
       </aside>
 
-      <!-- WHAT CHANGED -->
-      <section class="changed main-a" aria-labelledby="ch-h">
-        <div class="sec-h"><h2 id="ch-h">What changed in Coiled Tubing</h2><a class="link" href="area.html">Coiled Tubing section<svg class="i i--xs"><use href="#i-arrow"/></svg></a></div>
-        <ol>
-          <li class="ch">
-            <p class="ch__date tnum">16 <small>May 2026</small></p>
-            <div><p class="ch__type">Lessons Learned</p><a class="ch__t" href="#">Lessons from coiled tubing fishing operation</a>
-              <div class="doc-row__m"><span class="num">TQ-TWS-CTSS-LL-003</span><span>Rev 4.0</span><span class="st st--current"><svg class="i"><use href="#i-current"/></svg>Current</span></div></div>
-            <p class="ch__what"><i></i>Revised to Rev 4.0</p>
-          </li>
-          <li class="ch">
-            <p class="ch__date tnum">14 <small>May 2026</small></p>
-            <div><p class="ch__type">SOP</p><a class="ch__t" href="#">Fishing Operations SOP</a>
-              <div class="doc-row__m"><span class="num">TQ-TWS-CTSS-SOP-010</span><span>Rev 3.0</span><span class="st st--current"><svg class="i"><use href="#i-current"/></svg>Current</span><span class="cls"><svg class="i"><use href="#i-lock"/></svg>Restricted</span></div></div>
-            <p class="ch__what"><i></i>Revised to Rev 3.0</p>
-          </li>
-          <li class="ch ch--alert">
-            <p class="ch__date tnum">13 <small>Apr 2026</small></p>
-            <div><p class="ch__type">Technical alert<span class="ch__flag"><svg class="i i--xs"><use href="#i-alert"/></svg>Active</span></p><a class="ch__t" href="#">New pressure rating for 2-inch CT string</a>
-              <div class="doc-row__m"><span class="num">TQ-TWS-CTSS-ALT-002</span><span>Rev 2.0</span><span class="st st--current"><svg class="i"><use href="#i-current"/></svg>Current</span><span class="cls"><svg class="i"><use href="#i-lock"/></svg>Confidential</span></div></div>
-            <p class="ch__what"><i></i>Changes WI-003 §5 limits</p>
-          </li>
-          <li class="ch">
-            <p class="ch__date tnum">07 <small>Feb 2026</small></p>
-            <div><p class="ch__type">SOP</p><a class="ch__t" href="#">Nitrogen Injection SOP</a>
-              <div class="doc-row__m"><span class="num">TQ-TWS-CTSS-SOP-007</span><span>Rev 1.0</span><span class="st st--current"><svg class="i"><use href="#i-current"/></svg>Current</span><span class="ar"><svg class="i i--xs"><use href="#i-globe"/></svg>Arabic</span></div></div>
-            <p class="ch__what ch__what--new"><i></i>First issue, Rev 1.0</p>
-          </li>
-          <li class="ch">
-            <p class="ch__date tnum">29 <small>Jan 2026</small></p>
-            <div><p class="ch__type">Manual</p><a class="ch__t" href="#">Data Acquisition Manual</a>
-              <div class="doc-row__m"><span class="num">TQ-TWS-CTSS-WI-008</span><span>Rev 2.0</span><span class="st st--current"><svg class="i"><use href="#i-current"/></svg>Current</span><span class="cls"><svg class="i"><use href="#i-lock"/></svg>Restricted</span></div></div>
-            <p class="ch__what"><i></i>Revised to Rev 2.0</p>
-          </li>
-          <li class="ch">
-            <p class="ch__date tnum">10 <small>Jan 2026</small></p>
-            <div><p class="ch__type">SOP</p><a class="ch__t" href="#">Logging While CT SOP</a>
-              <div class="doc-row__m"><span class="num">TQ-TWS-CTSS-SOP-011</span><span>Rev 3.0</span><span class="st st--current"><svg class="i"><use href="#i-current"/></svg>Current</span><span class="ar"><svg class="i i--xs"><use href="#i-globe"/></svg>Arabic</span></div></div>
-            <p class="ch__what"><i></i>Revised to Rev 3.0</p>
-          </li>
+      <dl class="facts">
+        <div><dt>Type</dt><dd>Manual<small>36-month review cycle</small></dd></div>
+        <div><dt>Status</dt><dd><span class="st st--current"><svg class="i"><use href="#i-current"/></svg>Current</span></dd></div>
+        <div><dt>Revision</dt><dd>Rev 4.0</dd></div>
+        <div><dt>Effective</dt><dd>30 Aug 2025<small>Approved 28 Aug 2025</small></dd></div>
+        <div><dt>Next review</dt><dd>30 Aug 2028</dd></div>
+        <div><dt>Classification</dt><dd>Internal</dd></div>
+        <div><dt>Owner</dt><dd>Coiled Tubing segment</dd></div>
+        <div><dt>Final approver</dt><dd>Segment Director, Coiled Tubing</dd></div>
+        <div><dt>Area</dt><dd><a class="link" href="area.html" style="font-weight:500">Coiled Tubing</a><small>Operations · English</small></dd></div>
+      </dl>
+
+      <section class="blk summary" aria-labelledby="su-h">
+        <div class="sec-h"><h2 id="su-h">Summary</h2></div>
+        <p class="lede">How to rig up, operate, monitor and shut down the CT injector head safely: chain tension, gripper block inspection, traction pressure limits, and what to do on a chain slip.</p>
+        <div class="changed"><p class="eyebrow">What changed in Rev 4.0</p><p>Traction pressure limits for 2-inch string</p></div>
+      </section>
+
+      <section class="blk" aria-labelledby="co-h">
+        <div class="sec-h"><h2 id="co-h">Contents</h2><span class="meta">7 sections and 1 appendix</span></div>
+        <ol class="toc">
+          <li><a href="#"><span class="n">1</span><span class="t">Scope</span></a></li>
+          <li><a href="#"><span class="n">2</span><span class="t">Injector head components</span></a></li>
+          <li><a href="#"><span class="n">3</span><span class="t">Pre-job inspection</span></a></li>
+          <li><a href="#"><span class="n">4</span><span class="t">Chain tension and traction pressure</span></a></li>
+          <li class="hot"><a href="#"><span class="n">5</span><span class="t">Operating limits (2-inch string)<span class="sub">Revised in Rev 4.0</span></span><span class="flag"><svg class="i"><use href="#i-alert"/></svg>Changed by ALT-002</span></a></li>
+          <li><a href="#"><span class="n">6</span><span class="t">Chain slip response</span></a></li>
+          <li><a href="#"><span class="n">7</span><span class="t">Shutdown and isolation</span></a></li>
+          <li><a href="#"><span class="n">A</span><span class="t">Inspection record<span class="sub">Appendix A · uses F001 Pre-Job Safety Checklist</span></span></a></li>
         </ol>
       </section>
 
-      <aside class="main-b">
-        <section class="else" aria-labelledby="el-h">
-          <div class="sec-h sec-h--light"><h2 id="el-h">Elsewhere in TAQA</h2></div>
-          <div class="else__item">
-            <div class="cover cover--std cover--thumb"><div class="cover__band"></div><div class="cover__in">
-              <div class="cover__head"><img src="../../kit/brand/rise-icon.png" alt=""></div>
-              <div class="cover__type">Standard</div><div class="cover__title">High Pressure Operations</div></div></div>
-            <div>
-              <p class="ch__type">Standard · Fracturing</p>
-              <h3><a href="#">High Pressure Operations Standard</a></h3>
-              <div class="doc-row__m"><span class="num">TQ-TWS-FS-S002</span><span>Rev 2.0</span><span>18 Aug 2026</span>
-              <span class="cls"><svg class="i"><use href="#i-lock"/></svg>Restricted</span></div>
-            </div>
-          </div>
+      <div class="two">
+        <section class="blk" aria-labelledby="ap-h">
+          <div class="sec-h"><h2 id="ap-h">Approval</h2></div>
+          <ol class="trail">
+            <li><span class="dot"><svg class="i"><use href="#i-upload"/></svg></span><div><b>Filed</b><p>19 Aug 2025 · Khalid Al-Otaibi, CT Engineer</p></div></li>
+            <li><span class="dot"><svg class="i"><use href="#i-file"/></svg></span><div><b>QMS check</b><p>24 Aug 2025 · QMS Document Control</p></div></li>
+            <li><span class="dot"><svg class="i"><use href="#i-user"/></svg></span><div><b>Final approval</b><p>28 Aug 2025 · Segment Director, Coiled Tubing</p></div></li>
+            <li><span class="dot"><svg class="i"><use href="#i-current"/></svg></span><div><b>Current</b><p>From 30 Aug 2025</p></div></li>
+          </ol>
         </section>
-        <section class="idx" aria-labelledby="ix-h">
-          <div class="sec-h sec-h--light"><h2 id="ix-h">Areas</h2><a class="link" href="area.html#index">All 25<svg class="i i--xs"><use href="#i-arrow"/></svg></a></div>
-          <ul>
-            <li><a href="area.html"><span style="color:var(--ink)">Coiled Tubing<em class="you">Your area</em></span><span>45</span></a></li>
-            <li><a href="#"><span style="color:var(--ink)">Fracturing</span><span>59</span></a></li>
-            <li><a href="#"><span style="color:var(--ink)">Wireline Services</span><span>29</span></a></li>
-            <li><a href="#"><span style="color:var(--ink)">Well Testing</span><span>32</span></a></li>
-            <li><a href="#"><span style="color:var(--ink)">QHSE</span><span>58</span></a></li>
-          </ul>
+        <section class="blk" aria-labelledby="hi-h">
+          <div class="sec-h"><h2 id="hi-h">History</h2></div>
+          <table class="hist">
+            <thead><tr><th>Rev</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody>
+              <tr><td><b>4.0</b></td><td><span class="st st--current"><svg class="i"><use href="#i-current"/></svg>Current</span></td><td>30 Aug 2025</td></tr>
+              <tr><td>3.0</td><td><span class="muted"><i></i>Superseded</span></td><td>11 Mar 2024</td></tr>
+              <tr><td>2.0</td><td><span class="muted"><i></i>Superseded</span></td><td>02 Feb 2023</td></tr>
+              <tr><td>1.0</td><td><span class="muted"><i></i>Superseded</span></td><td>14 Jan 2022</td></tr>
+            </tbody>
+          </table>
+          <p class="meta" style="margin-top:10px">Employees see the current revision only; earlier files stay with QMS.</p>
         </section>
-      </aside>
+      </div>
+      <div class="inset"><div><span class="eyebrow">If an old link opens Rev 3.0</span>RISE shows, before anything else: <span class="ban">Superseded. A newer revision exists: Rev 4.0</span></div></div>
+
+      <section class="blk" aria-labelledby="re-h">
+        <div class="sec-h"><h2 id="re-h">Related documents</h2></div>
+        <ul class="rel">
+          <li><a href="#"><span class="tt tt--alt" aria-hidden="true">ALT</span><span><b>New pressure rating for 2-inch CT string</b><span class="m">ALT-002 · Associated alert, changes section 5 <span class="cls"><svg class="i"><use href="#i-lock"/></svg>Confidential</span></span></span></a></li>
+          <li><a href="#"><span class="tt tt--form" aria-hidden="true">F</span><span><b>Pre-Job Safety Checklist</b><span class="m">F001 · Rev 4.0 · Appendix A</span></span></a></li>
+          <li><a href="#"><span class="tt" aria-hidden="true">WI</span><span><b>CT String Inspection Manual</b><span class="m">WI-005 · Rev 3.0</span></span></a></li>
+          <li><a href="#"><span class="tt tt--sop" aria-hidden="true">SOP</span><span><b>CT Unit Rig-Up &amp; Rig-Down</b><span class="m">SOP-006 · Rev 4.0 <span class="st st--due"><svg class="i"><use href="#i-due"/></svg>Review due</span><span class="cls"><svg class="i"><use href="#i-lock"/></svg>Restricted</span></span></span></a></li>
+        </ul>
+        <p class="equip">Equipment <span class="tag tag--prop">Injector head</span><span class="tag tag--prop">CT string (2-inch)</span><span>Proposed tags</span></p>
+      </section>
+
+      <section class="blk" aria-labelledby="as-h">
+        <div class="ask">
+          <div class="ask__h"><span class="ask__ic"><svg class="i"><use href="#i-expert"/></svg></span><div><b id="as-h">Ask the Coiled Tubing expert</b><span>Questions about this manual go to the area expert.</span></div></div>
+          <q>Chain slip on the injector at 4,200 ft — can we continue at reduced traction pressure?</q>
+          <a class="btn btn--line" href="#">Ask an Expert<svg class="i"><use href="#i-arrow"/></svg></a>
+        </div>
+      </section>
     </div>
   </div>
-
-  <!-- SAVED / RECENT -->
-  <section class="shelf" aria-label="Your saved and recently opened">
-    <div class="wrap shelf__grid">
-      <div>
-        <h2>Your saved <a href="#">All saved</a></h2>
-        <ul>
-          <li><a class="mini" href="document.html"><div class="cover cover--thumb"><div class="cover__band"></div><div class="cover__in"><div class="cover__head"><img src="../../kit/brand/rise-icon.png" alt=""></div></div></div><div><b>Injector Head Operations Manual</b><span class="num">WI-003 · Rev 4.0</span></div></a></li>
-          <li><a class="mini" href="#"><div class="cover cover--form cover--thumb"><div class="cover__band"></div><div class="cover__in"><div class="cover__head"><img src="../../kit/brand/rise-icon.png" alt=""></div></div></div><div><b>Pre-Job Safety Checklist</b><span class="num">F001 · Rev 4.0</span></div></a></li>
-          <li><a class="mini" href="#"><div class="cover cover--sop cover--thumb"><div class="cover__band"></div><div class="cover__in"><div class="cover__head"><img src="../../kit/brand/rise-icon.png" alt=""></div></div></div><div><b>Acid Stimulation SOP</b><span class="num">SOP-009 · Rev 3.0</span></div></a></li>
-        </ul>
-      </div>
-      <div>
-        <h2>Recently opened <a href="#">History</a></h2>
-        <ul>
-          <li><a class="mini" href="document.html"><div class="cover cover--thumb"><div class="cover__band"></div><div class="cover__in"><div class="cover__head"><img src="../../kit/brand/rise-icon.png" alt=""></div></div></div><div><b>Injector Head Operations Manual</b><span class="num">WI-003 · Rev 4.0</span></div></a></li>
-          <li><a class="mini" href="#"><div class="cover cover--sop cover--thumb"><div class="cover__band"></div><div class="cover__in"><div class="cover__head"><img src="../../kit/brand/rise-icon.png" alt=""></div></div></div><div><b>Pressure Testing Procedure</b><span class="num">SOP-005 · Rev 2.0 <svg class="i i--xs" aria-label="Restricted"><use href="#i-lock"/></svg></span></div></a></li>
-          <li><a class="mini" href="#"><div class="cover cover--alt cover--thumb"><div class="cover__band"></div><div class="cover__in"><div class="cover__head"><img src="../../kit/brand/rise-icon.png" alt=""></div></div></div><div><b>New pressure rating for 2-inch CT string</b><span class="num">ALT-002 · Rev 2.0 <svg class="i i--xs" aria-label="Confidential"><use href="#i-lock"/></svg></span></div></a></li>
-        </ul>
-      </div>
-    </div>
-  </section>
 </main>
 
 <footer class="foot">
