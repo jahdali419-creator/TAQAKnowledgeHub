@@ -29,6 +29,16 @@ CHG = [('16 May', 'LL-003', 'Lessons from coiled tubing fishing operation', 0, '
 rows = ''.join(f'<a href="#" class="{h}"><span class="d">{d}</span><span class="c">{c}</span><span class="t">{t}{LOCK if l else ""}</span>'
                f'<span class="a">Coiled Tubing</span><span class="r">Rev {r}</span><span class="st {s}">{w}</span></a>' for d, c, t, l, r, s, w, h in CHG)
 
+ALR = [('13 Apr', 'ALT-002', 'New pressure rating for 2-inch CT string, effective immediately', 1, '2.0', 'alt', 'Active alert', 'hot'),
+       ('06 Jun', 'ALT-003', 'Chemical compatibility update for H2S environments', 0, '2.0', 'due', 'Review due', '')]
+alert_rows = ''.join(f'<a href="#" class="{h}"><span class="d">{d}</span><span class="c">{c}</span><span class="t">{t}{LOCK if l else ""}</span>'
+               f'<span class="a">Coiled Tubing</span><span class="r">Rev {r}</span><span class="st {s}">{w}</span></a>' for d, c, t, l, r, s, w, h in ALR)
+WI3 = [('TQ-TWS-CTSS-WI-003', 'Injector Head Operations Manual', 'Coiled Tubing · your area', 1),
+       ('TQ-TWS-WS-WI-003', 'PCE Maintenance Manual', 'Wireline Services', 0),
+       ('TQ-TWS-FS-WI-003', 'High-Pressure Iron Manual', 'Fracturing', 0),
+       ('TQ-SS-WI-003', 'Toolstring Make-Up and Inspection', 'Slickline', 0),
+       ('TQ-TWS-WIS-WI-003', 'BOP System Inspection Manual', 'Inspection', 0)]
+wi3 = ''.join(f'<a href="#"{" class=mine" if m else ""}><span class="c">{n}</span><span class="t">{t}</span><span class="a">{a}</span></a>' for n, t, a, m in WI3)
 recent = sorted(INF, key=lambda r: r['issueDate'], reverse=True)[:5]
 tick = ''.join(f'<span class="it"><span class="ar">↘</span> {dt.date.fromisoformat(r["issueDate"]).strftime("%d %b")} '
                f'<b{" class=x" if r["docType"] == "alert" else ""}>{short(r["docNumber"])}</b> {r["title"]} · {segname(r["segment"])}</span>' for r in recent)
@@ -55,12 +65,13 @@ html = f'''<!doctype html>
       <span class="role">Employee</span>
       <a class="bell" href="#" aria-label="Notifications, 1 new">{BELL}<i></i></a>
       <a class="av" href="#" aria-label="Faisal Al-Ghamdi, account">FA</a>
+      <a class="psearch" href="#search" aria-label="Search"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M10.5 4a6.5 6.5 0 0 1 5.2 10.4l4.4 4.4-1.4 1.4-4.4-4.4A6.5 6.5 0 1 1 10.5 4zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z"/></svg></a>
     </div>
   </header>
 </div>
 <main class="wrap grid">
   <section class="left" aria-labelledby="q">
-    <p class="meta"><span>RISE <b>/</b> TAQA knowledge</span><span><b>{len(INF)}</b> in force · <b>{AREAS}</b> areas · register 06 Oct 2026</span></p>
+    <p class="meta"><span>RISE <b>/</b> TAQA knowledge</span><span><b>{len(INF)}</b> in force · <b>{AREAS}</b> areas<span class="dkonly"> · register 06 Oct 2026</span></span></p>
     <p class="kick">Tuesday 6 October · <b>Coiled Tubing</b>, Operations</p>
     <label class="q" id="q"><span class="w">Search</span><span class="caret" aria-hidden="true"></span><span class="ph">by number or name</span></label>
     <p class="try">Try <a href="#">WI-003</a><a href="#">Coiled Tubing</a><a href="#">pressure test</a><a href="#">injector head</a><span class="enter">Press <kbd>↵</kbd> to search · <kbd>/</kbd> from anywhere</span></p>
@@ -78,13 +89,14 @@ html = f'''<!doctype html>
     </nav>
 
     <nav class="tabs" aria-label="Your knowledge">
-      <a class="on" href="#">Changed in Coiled Tubing<sup>6</sup></a>
-      <a href="#">Alerts<sup>2</sup><span class="al" aria-label="includes an active alert"></span></a>
+      <a class="on" href="#changed" data-tab="changed">Changed in Coiled Tubing<sup>6</sup></a>
+      <a href="#alerts" data-tab="alerts">Alerts<sup>2</sup><span class="al" aria-label="includes an active alert"></span></a>
       <a href="#">Saved<sup>3</sup></a>
       <a href="#">Recently opened<sup>3</sup></a>
       <a class="more" href="#">View all →</a>
     </nav>
-    <div class="reg">{rows}</div>
+    <div class="reg" data-panel="changed">{rows}</div>
+    <div class="reg" data-panel="alerts" hidden>{alert_rows}</div>
   </section>
 
   <aside class="right" aria-label="Continue reading">
@@ -113,7 +125,32 @@ html = f'''<!doctype html>
     <p class="help">Stuck? <a href="#">Ask the Coiled Tubing expert</a> or look up a term in the <a href="#">Field Glossary</a>.</p>
   </aside>
 </main>
+<nav class="dock" aria-label="Main">
+  <a class="on" href="home.html" aria-current="page"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20h-5.5v-5.5h-5V20H4z"/></svg>Home</a>
+  <a href="#search"><svg viewBox="0 0 24 24"><path d="M10.5 4a6.5 6.5 0 0 1 5.2 10.4l4.4 4.4-1.4 1.4-4.4-4.4A6.5 6.5 0 1 1 10.5 4zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z"/></svg>Search</a>
+  <a href="#"><svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z"/></svg>Areas</a>
+  <a href="#"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4.2L6 21z"/></svg>Saved</a>
+  <a href="#menu"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>More</a>
+</nav>
+<div class="sheet-bg" data-sheet="menu" hidden></div>
+<section class="sheet" data-sheet="menu" hidden aria-label="More">
+  <span class="grab"></span>
+  <p class="lab"><span>Faisal Al-Ghamdi</span><span>Employee</span></p>
+  <a href="#">Ask an Expert<span>Coiled Tubing expert</span></a>
+  <a href="#">Field Glossary<span>190+ terms</span></a>
+  <a href="#">Upload a document<span>Filed for QMS check</span></a>
+  <a href="#">Notifications<span class="n">1 new</span></a>
+  <p class="lab note">Master List and QMS Workspace appear here for QMS roles</p>
+</section>
+<section class="srch" data-sheet="search" hidden aria-label="Search">
+  <div class="sq"><span class="w">WI-003</span><span class="caret"></span><a class="x" href="#">Cancel</a></div>
+  <p class="lab"><span>Document number</span><span>10 areas use WI-003</span></p>
+  <div class="hits">{wi3}</div>
+  <p class="more2">5 more WI-003 documents in other areas →</p>
+  <p class="lab" style="margin-top:22px"><span>Press ↵ for full results</span></p>
+</section>
 <footer class="foot" aria-label="Recently published across TAQA"><div class="wrap"><span class="h">Across TAQA</span>{tick}</div></footer>
+<script src="home.js"></script>
 </body>
 </html>'''
 open(os.path.join(HERE, 'home.html'), 'w').write(html)

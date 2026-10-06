@@ -9,3 +9,4 @@ Design exploration only, on `design/rise-exploration`. Nothing implemented.
 - Compositions considered and rejected: a centred command bar (generic), an app shell with spaces sidebar and an
   assistant panel (another sidebar; misrepresents deterministic search). Chosen: asymmetric 8/4 editorial index.
 - New kit font: IBM Plex Mono 400/500/600 (SIL OFL 1.1) in `../kit/fonts/`, declared in `../kit/fonts.css` as 'PlexMono'.
+- `phone.html` (built by `build-phone.py`): the direction, named **Register**, on a phone (390 × 844): six screens from `home.html`'s phone layout. `home.js` switches the register tabs and opens the phone sheets (#alerts, #search, #menu).
