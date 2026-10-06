@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RISE · Coiled Tubing</title>
+<link rel="stylesheet" href="n.css">
+<style>
+.crumb{display:flex;align-items:center;gap:2px;height:40px;margin-left:-6px;font:500 15px/1 var(--text);color:var(--teal)}
+.pane.detail{display:none}
+.tbl{display:none}
+@media (min-width:1024px){
+  .pane.detail{display:block}
+  .pane.list .crumb{margin-top:14px}
+  .tbl{display:block}
+  .pane.list{display:flex;flex-direction:column}
+  .pane.list .mod-sh{order:1}.pane.list .mod-al{order:2}.pane.list .mod-ask{order:3}
+  .pane.list .crumb,.pane.list .aplate{order:0}
+  .tbl .hd,.tbl a{display:grid;grid-template-columns:96px minmax(0,1fr) 84px 140px 132px 24px;align-items:center;column-gap:16px}
+  .tbl .hd{padding:0 12px 10px;border-bottom:1px solid var(--line);font:500 13.5px/1 var(--text);color:var(--ink3)}
+  .tbl a{min-height:56px;padding:0 12px;border-bottom:1px solid var(--line);font:500 16px/1.3 var(--text)}
+  .tbl a:hover{background:var(--sub)}
+  .tbl a.cur{background:var(--teal-wash)}
+  .tbl .c{font:700 16px/1 var(--display);color:var(--teal-ink);font-variant-numeric:tabular-nums}
+  .tbl .r{font-variant-numeric:tabular-nums;color:var(--ink2)}
+  .tbl .s svg{color:var(--teal)}
+  .tbl .end{color:var(--line2)}
+  .dhead{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:22px}
+  .dhead .kicker{margin-bottom:6px}
+  .dhead .h1{font-size:36px}
+  .dhead .h1 span{color:var(--ink3);font-weight:400;margin-left:10px;font-variant-numeric:tabular-nums}
+  .dcols{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:8px}
+  .dcols .mod{margin-top:36px}
+}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="4.6" fill="currentColor" opacity=".32"/><path fill="currentColor" fill-rule="evenodd" d="M10.5 3.5a7 7 0 1 0 0 14 7 7 0 1 0 0-14zm0 2.4a4.6 4.6 0 1 1 0 9.2 4.6 4.6 0 1 1 0-9.2z"/><path fill="currentColor" d="m15 13.4 5.6 5.6-1.8 1.8-5.6-5.6z"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3 2.8 10.3l1.3 1.6.9-.7V20h5.2v-5.5h3.6V20H19v-8.8l.9.7 1.3-1.6z"/><rect x="10.2" y="14.5" width="3.6" height="5.5" fill="currentColor" opacity=".32"/></symbol>
+<symbol id="i-areas" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.6" fill="currentColor"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="1.6" fill="currentColor" opacity=".32"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="1.6" fill="currentColor" opacity=".32"/><rect x="13" y="13" width="7.5" height="7.5" rx="1.6" fill="currentColor"/></symbol>
+<symbol id="i-saved" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M6 3.5h12v17l-6-4.2-6 4.2z"/><path fill="currentColor" d="M6 3.5h12v3.5H6z"/></symbol>
+<symbol id="i-saved-f" viewBox="0 0 24 24"><path fill="currentColor" d="M6 3.5h12v17l-6-4.2-6 4.2z"/></symbol>
+<symbol id="i-ask" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M3.5 4.5h17v11.5H11l-5 4v-4H3.5z"/><circle cx="8" cy="10.3" r="1.5" fill="currentColor"/><circle cx="12" cy="10.3" r="1.5" fill="currentColor"/><circle cx="16" cy="10.3" r="1.5" fill="currentColor"/></symbol>
+<symbol id="i-glossary" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M6.8 4H19.5v14H6.8z"/><path fill="currentColor" d="M4.5 5.7A2.2 2.2 0 0 1 6.7 3.5H8v15H6.7a2.2 2.2 0 0 0 0 4.4h12.8V20.6H6.7a.6.6 0 0 1 0-1.2h12.8v-1.4H8z"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path fill="currentColor" d="M10.8 16h2.4V7.8l3 3 1.7-1.7L12 3.2 6.1 9.1l1.7 1.7 3-3z"/><rect x="4" y="18" width="16" height="2.8" rx="1.2" fill="currentColor" opacity=".32"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3a6 6 0 0 0-6 6v6.2L4 18h16l-2-2.8V9a6 6 0 0 0-6-6z"/><path fill="currentColor" opacity=".32" d="M9.5 19.5h5a2.5 2.5 0 0 1-5 0z"/></symbol>
+<symbol id="i-chev-r" viewBox="0 0 24 24"><path fill="currentColor" d="M8.6 5.4 10.4 3.6 18.8 12l-8.4 8.4-1.8-1.8L15.2 12z"/></symbol>
+<symbol id="i-chev-l" viewBox="0 0 24 24"><path fill="currentColor" d="M15.4 5.4 13.6 3.6 5.2 12l8.4 8.4 1.8-1.8L8.8 12z"/></symbol>
+<symbol id="i-chev-d" viewBox="0 0 24 24"><path fill="currentColor" d="M5.4 8.6 3.6 10.4 12 18.8l8.4-8.4-1.8-1.8L12 15.2z"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M7.6 10.5V8a4.4 4.4 0 0 1 8.8 0v2.5h-2.3V8a2.1 2.1 0 0 0-4.2 0v2.5z"/><rect x="5" y="10" width="14" height="10.5" rx="2.2" fill="currentColor"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path fill="currentColor" d="M10.8 3.5h2.4v8.2l3-3 1.7 1.7L12 16.3l-5.9-5.9 1.7-1.7 3 3z"/><rect x="4" y="18" width="16" height="2.8" rx="1.2" fill="currentColor" opacity=".32"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M5 10.5h3V19h8v-8.5h3V22H5z"/><path fill="currentColor" d="M10.8 15h2.4V7.6l2.6 2.6 1.7-1.7L12 3 6.5 8.5l1.7 1.7 2.6-2.6z"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/></g></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M3.5 6.3h17v2.4h-17zM3.5 15.3h17v2.4h-17z"/><circle cx="15" cy="7.5" r="2.8" fill="currentColor"/><circle cx="9" cy="16.5" r="2.8" fill="currentColor"/></symbol>
+<symbol id="i-arrow-r" viewBox="0 0 24 24"><path fill="currentColor" d="M4 10.8h11.4l-4.2-4.2 1.7-1.7L20 12l-7.1 7.1-1.7-1.7 4.2-4.2H4z"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path fill="currentColor" d="M6.3 4.6 12 10.3l5.7-5.7 1.7 1.7-5.7 5.7 5.7 5.7-1.7 1.7-5.7-5.7-5.7 5.7-1.7-1.7 5.7-5.7-5.7-5.7z"/></symbol>
+<symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="currentColor"/><path fill="currentColor" opacity=".32" d="M4 21a8 8 0 0 1 16 0z"/></symbol>
+<symbol id="i-wrench" viewBox="0 0 24 24"><path fill="currentColor" d="M14.7 6.3a4 4 0 0 0-5.2 5.2L4.8 16.2a1.6 1.6 0 0 0 2.3 2.3l4.7-4.7a4 4 0 0 0 5.2-5.2l-2.4 2.4-2.1-.4-.4-2.1z"/><circle cx="15.2" cy="8.8" r="1.3" fill="currentColor" opacity=".32"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M6 3h8l5 5v13H6z"/><path fill="currentColor" d="M14 3l5 5h-5z"/><rect x="8.5" y="11.5" width="8" height="2" rx="1" fill="currentColor"/><rect x="8.5" y="15.5" width="5.5" height="2" rx="1" fill="currentColor"/></symbol>
+<symbol id="i-cube" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="m12 3 8 4.5-8 4.5-8-4.5z"/><path fill="currentColor" d="M4 8.6l7.2 4v8.7L4 17.3z"/><path fill="currentColor" opacity=".65" d="M20 8.6l-7.2 4v8.7l7.2-4z"/></symbol>
+<symbol id="s-cur" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7.5" fill="currentColor"/><path d="m4.8 8.2 2.2 2.2 4.2-4.4" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="s-due" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 3.2a4.8 4.8 0 0 1 0 9.6z" fill="currentColor"/></symbol>
+<symbol id="s-sup" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m4 12 8-8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="s-alert" viewBox="0 0 16 16"><path d="M8 1.2 15.4 14.2H.6z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/><path d="M8 6v3.6" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><circle cx="8" cy="11.9" r="1" fill="#fff"/></symbol>
+</defs>
+</svg>
+
+<div class="app">
+<nav class="rail" aria-label="Main">
+  <a class="mark" href="home.html" aria-label="RISE home"><img src="../../kit/brand/rise-icon.png" alt="RISE"></a>
+  <a data-k="home" class="it" href="home.html"><svg class="ic"><use href="#i-home"/></svg>Home</a>
+  <a data-k="search" class="it" href="search.html"><svg class="ic"><use href="#i-search"/></svg>Search</a>
+  <a data-k="areas" class="it on" aria-current="page" href="area.html"><svg class="ic"><use href="#i-areas"/></svg>Areas</a>
+  <a data-k="saved" class="it" href="#"><svg class="ic"><use href="#i-saved"/></svg>Saved</a>
+  <span class="sep"></span>
+  <a data-k="ask" class="it" href="#"><svg class="ic"><use href="#i-ask"/></svg>Ask</a>
+  <a data-k="glossary" class="it" href="#"><svg class="ic"><use href="#i-glossary"/></svg>Glossary</a>
+  <a data-k="upload" class="it" href="#"><svg class="ic"><use href="#i-upload"/></svg>Upload</a>
+  <span class="grow"></span>
+  <a class="me" href="#" aria-label="Faisal Al-Ghamdi, account">FA</a>
+</nav>
+
+<header class="cmd">
+  <a class="mark" href="home.html" aria-label="RISE home"><img src="../../kit/brand/rise-icon.png" alt="RISE"></a>
+  <label class="field"><svg class="ic-s"><use href="#i-search"/></svg><span class="ph">Search in Coiled Tubing</span><span class="kbd">/</span></label>
+  <div class="desk-tools">
+    <span class="role"><i></i>Viewing as <b>Employee</b></span>
+    <a class="bellb" href="#" aria-label="Notifications, new"><svg class="ic"><use href="#i-bell"/></svg><span class="dot"></span></a>
+  </div>
+  <a class="me" href="#" aria-label="Account, notifications and role: Employee">FA<span class="dot"></span></a>
+</header>
+
+<main>
+<div class="panes">
+<div class="pane list">
+  <a class="crumb" href="#"><svg class="ic-s"><use href="#i-chev-l"/></svg>All areas</a>
+  <section class="aplate">
+    <p class="top"><svg class="ic-xs"><use href="#i-areas"/></svg>Operational segment · your area<span class="pre">CTSS</span></p>
+    <h1 class="h1">Coiled Tubing</h1>
+    <div class="seg" role="tablist"><span class="on" role="tab" aria-selected="true">Operations <i>39</i></span><span role="tab">Maintenance</span></div>
+    <div class="figs">
+      <div><b>36</b><span>In force</span></div>
+      <div><b class="o">2</b><span>Active alerts</span></div>
+      <div><b>45</b><span>In register</span></div>
+    </div>
+  </section>
+
+  <section class="mod mod-al" aria-labelledby="al">
+    <div class="mod-h"><h2 class="h2" id="al">Active alerts</h2><span class="ct">2</span></div>
+    <a class="ix" href="#">
+      <span class="code"><b>ALT</b><span>002</span></span>
+      <span><span class="t">New pressure rating for 2-inch CT string, effective immediately</span>
+        <span class="m"><span class="sig alt"><svg><use href="#s-alert"/></svg>13 Apr 2026</span><span class="rv">Rev 2.0</span><span class="lk"><svg><use href="#i-lock"/></svg>Confidential</span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+    <a class="ix" href="#">
+      <span class="code"><b>ALT</b><span>003</span></span>
+      <span><span class="t">Chemical compatibility update for H2S environments</span>
+        <span class="m"><span class="sig due"><svg><use href="#s-due"/></svg>Review due</span><span class="rv">Rev 2.0</span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+  </section>
+
+  <section class="mod mod-sh" aria-labelledby="sh">
+    <div class="mod-h"><h2 class="h2" id="sh">Shelves</h2><span class="ct">36</span></div>
+    <nav class="shelves" aria-label="Shelves">
+      <a href="#"><b>15</b><span>SOPs</span></a>
+      <a class="on" href="#" aria-current="true"><b>8</b><span>Manuals</span></a>
+      <a href="#"><b>5</b><span>Standards</span></a>
+      <a href="#"><b>4</b><span>Lessons learned</span></a>
+      <a href="#"><b>2</b><span>Forms &amp; checklists</span></a>
+      <a href="#"><b>2</b><span>Alerts</span><svg class="al"><use href="#s-alert"/></svg></a>
+    </nav>
+  </section>
+
+  <section class="mod ph-only" aria-labelledby="mn">
+    <div class="mod-h"><h2 class="h2" id="mn">Manuals</h2><span class="ct">8</span></div>
+    <a class="ix" href="#"><span class="code"><b>WI</b><span>001</span></span><span><span class="t">CT Unit Maintenance Manual v3.2</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 1.0</span></span></span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+    <a class="ix" href="document.html"><span class="code"><b>WI</b><span>003</span></span><span><span class="t">Injector Head Operations Manual</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 4.0</span><span class="lk" style="color:var(--teal)"><svg><use href="#i-saved-f"/></svg>Saved</span></span></span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+    <a class="ix" href="#"><span class="code"><b>WI</b><span>004</span></span><span><span class="t">Control Cabin Systems Manual</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 4.0</span><span class="lk"><svg><use href="#i-lock"/></svg></span></span></span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+    <a class="ix" href="#"><span class="code"><b>WI</b><span>005</span></span><span><span class="t">CT String Inspection Manual</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 3.0</span></span></span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+    <a class="ix" href="#"><span class="code"><b>WI</b><span>006</span></span><span><span class="t">Crane &amp; Rigging Safety Manual</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 3.0</span></span></span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+    <a class="ix" href="#"><span class="code"><b>WI</b><span>007</span></span><span><span class="t">Chemical Handling Manual</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 2.0</span></span></span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+    <a class="ix" href="#"><span class="code"><b>WI</b><span>008</span></span><span><span class="t">Data Acquisition Manual</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 2.0</span><span class="lk"><svg><use href="#i-lock"/></svg></span></span></span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+    <a class="ix" href="#"><span class="code"><b>WI</b><span>009</span></span><span><span class="t">CT Wellhead Equipment Manual</span><span class="m"><span class="sig due"><svg><use href="#s-due"/></svg>Review due</span><span class="rv">Rev 1.0</span></span></span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+  </section>
+
+  <section class="mod mod-ask" aria-labelledby="ask">
+    <div class="mod-h"><h2 class="h2" id="ask">Ask</h2></div>
+    <a class="lnk" href="#"><span class="ico"><svg class="ic-s"><use href="#i-person"/></svg></span><span class="tx"><b>Coiled Tubing expert</b><span>Operations questions</span></span><svg class="ic-s"><use href="#i-chev-r"/></svg></a>
+    <a class="lnk" href="#"><span class="ico"><svg class="ic-s"><use href="#i-wrench"/></svg></span><span class="tx"><b>Coiled Tubing Maintenance Manager</b><span>Maintenance questions</span></span><svg class="ic-s"><use href="#i-chev-r"/></svg></a>
+  </section>
+
+  <section class="mod ph-only" aria-labelledby="eq">
+    <div class="mod-h"><h2 class="h2" id="eq">By equipment</h2><span class="tag">Proposed</span></div>
+    <div class="eq"><span class="n"><svg><use href="#i-cube"/></svg>Injector head</span><span class="c"><span>WI-003</span></span></div>
+    <div class="eq"><span class="n"><svg><use href="#i-cube"/></svg>CT string</span><span class="c"><span>WI-005</span><span>ALT-002</span><span>LL-002</span></span></div>
+    <div class="eq"><span class="n"><svg><use href="#i-cube"/></svg>CT unit</span><span class="c"><span>SOP-006</span><span>WI-001</span><span>LL-001</span></span></div>
+    <div class="eq"><span class="n"><svg><use href="#i-cube"/></svg>BHA</span><span class="c"><span>SOP-002</span></span></div>
+    <div class="eq"><span class="n"><svg><use href="#i-cube"/></svg>Control cabin</span><span class="c"><span>WI-004</span></span></div>
+    <div class="eq"><span class="n"><svg><use href="#i-cube"/></svg>Wellhead equipment</span><span class="c"><span>WI-009</span></span></div>
+  </section>
+
+  <section class="mod ph-only" aria-labelledby="sw">
+    <div class="mod-h"><h2 class="h2" id="sw">Software</h2><span class="tag">Not controlled</span></div>
+    <div class="soft">
+      <div>Orion CT Control System<span>v2.3</span></div>
+      <div>WellPlan CT Simulator<span>v4.1</span></div>
+      <div>CoilScan Inspection Reporter<span>v1.8</span></div>
+    </div>
+  </section>
+</div>
+
+<div class="pane detail" aria-label="Manuals shelf">
+  <div class="dhead">
+    <div><p class="kicker">Coiled Tubing · Operations</p><h2 class="h1">Manuals<span>8</span></h2></div>
+    <a class="fbtn" href="#"><svg><use href="#i-sliders"/></svg>Sort · Number</a>
+  </div>
+  <div class="tbl" role="table">
+    <div class="hd" role="row"><span>Number</span><span>Title</span><span>Revision</span><span>Status</span><span>Access</span><span></span></div>
+    <a href="#"><span class="c">WI-001</span><span>CT Unit Maintenance Manual v3.2</span><span class="r">Rev 1.0</span><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="lk">Internal</span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+    <a class="cur" href="document.html"><span class="c">WI-003</span><span>Injector Head Operations Manual</span><span class="r">Rev 4.0</span><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="lk">Internal</span><svg class="ic-s end" style="color:var(--teal)"><use href="#i-saved-f"/></svg></a>
+    <a href="#"><span class="c">WI-004</span><span>Control Cabin Systems Manual</span><span class="r">Rev 4.0</span><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="lk"><svg><use href="#i-lock"/></svg>Restricted</span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+    <a href="#"><span class="c">WI-005</span><span>CT String Inspection Manual</span><span class="r">Rev 3.0</span><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="lk">Internal</span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+    <a href="#"><span class="c">WI-006</span><span>Crane &amp; Rigging Safety Manual</span><span class="r">Rev 3.0</span><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="lk">Internal</span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+    <a href="#"><span class="c">WI-007</span><span>Chemical Handling Manual</span><span class="r">Rev 2.0</span><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="lk">Internal</span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+    <a href="#"><span class="c">WI-008</span><span>Data Acquisition Manual</span><span class="r">Rev 2.0</span><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="lk"><svg><use href="#i-lock"/></svg>Restricted</span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+    <a href="#"><span class="c">WI-009</span><span>CT Wellhead Equipment Manual</span><span class="r">Rev 1.0</span><span class="sig due"><svg><use href="#s-due"/></svg>Review due</span><span class="lk">Internal</span><svg class="ic-s end"><use href="#i-chev-r"/></svg></a>
+  </div>
+  <p style="margin-top:12px;font:400 14px/1.4 var(--text);color:var(--ink3)"><svg class="ic-xs" style="vertical-align:-3px;margin-right:4px"><use href="#i-lock"/></svg>Restricted items: request access through QMS</p>
+
+  <div class="dcols">
+    <section class="mod" aria-labelledby="eqd">
+      <div class="mod-h"><h2 class="h2" id="eqd">By equipment</h2><span class="tag">Proposed</span></div>
+      <div class="eq"><span class="n"><svg><use href="#i-cube"/></svg>Injector head</span><span class="c"><span>WI-003</span></span></div>
+      <div class="eq"><span class="n"><svg><use href="#i-cube"/></svg>CT string</span><span class="c"><span>WI-005</span><span>ALT-002</span><span>LL-002</span></span></div>
+      <div class="eq"><span class="n"><svg><use href="#i-cube"/></svg>CT unit</span><span class="c"><span>SOP-006</span><span>WI-001</span><span>LL-001</span></span></div>
+      <div class="eq"><span class="n"><svg><use href="#i-cube"/></svg>BHA</span><span class="c"><span>SOP-002</span></span></div>
+      <div class="eq"><span class="n"><svg><use href="#i-cube"/></svg>Control cabin</span><span class="c"><span>WI-004</span></span></div>
+      <div class="eq"><span class="n"><svg><use href="#i-cube"/></svg>Wellhead equipment</span><span class="c"><span>WI-009</span></span></div>
+    </section>
+    <div>
+      <section class="mod" aria-labelledby="ltd">
+        <div class="mod-h"><h2 class="h2" id="ltd">Latest issues</h2><span class="ct">2026</span></div>
+        <ol class="tl">
+          <li><span class="d"><b>16</b><span>May</span></span><a href="#"><span class="t">Lessons from coiled tubing fishing operation</span><span class="m"><span class="cd">LL-003</span><span>Rev 4.0</span></span></a></li>
+          <li><span class="d"><b>14</b><span>May</span></span><a href="#"><span class="t">Fishing Operations SOP</span><span class="m"><span class="cd">SOP-010</span><span>Rev 3.0</span></span></a></li>
+          <li class="hot"><span class="d"><b>13</b><span>Apr</span></span><a href="#"><span class="t">New pressure rating for 2-inch CT string</span><span class="m"><span class="cd">ALT-002</span><span>Rev 2.0</span></span></a></li>
+        </ol>
+      </section>
+      <section class="mod" aria-labelledby="swd">
+        <div class="mod-h"><h2 class="h2" id="swd">Software</h2><span class="tag">Not controlled</span></div>
+        <div class="soft">
+          <div>Orion CT Control System<span>v2.3</span></div>
+          <div>WellPlan CT Simulator<span>v4.1</span></div>
+          <div>CoilScan Inspection Reporter<span>v1.8</span></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+</div>
+</main>
+<nav class="tabbar" aria-label="Main">
+  <a data-k="home" href="home.html"><svg class="ic"><use href="#i-home"/></svg>Home</a>
+  <a data-k="areas" class="on" aria-current="page" href="area.html"><svg class="ic"><use href="#i-areas"/></svg>Areas</a>
+  <a data-k="saved" href="#"><svg class="ic"><use href="#i-saved"/></svg>Saved</a>
+  <a data-k="ask" href="#"><svg class="ic"><use href="#i-ask"/></svg>Ask</a>
+</nav>
+
+</div>
+</body>
+</html>

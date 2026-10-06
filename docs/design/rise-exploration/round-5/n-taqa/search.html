@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RISE · Search · pressure test</title>
+<link rel="stylesheet" href="n.css">
+<style>
+.top-hit .mini .m{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.top-hit .yours{display:flex;align-items:center;gap:8px;margin-bottom:10px;font:600 14px/1.2 var(--text);color:var(--teal-ink)}
+.top-hit .yours i{width:8px;height:8px;border-radius:2px;background:var(--teal);transform:rotate(45deg)}
+.top-hit .yours em{font-style:normal;font-weight:500;color:var(--ink3);margin-left:auto}
+.pane.detail{display:none}
+@media (min-width:1024px){
+  .pane.detail{display:block}
+  .pane.list .sbar{padding-top:18px}
+  .pane.list .tabs{margin:0 -28px;padding:0 28px}
+  .sbar .count{font-size:24px}
+}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="4.6" fill="currentColor" opacity=".32"/><path fill="currentColor" fill-rule="evenodd" d="M10.5 3.5a7 7 0 1 0 0 14 7 7 0 1 0 0-14zm0 2.4a4.6 4.6 0 1 1 0 9.2 4.6 4.6 0 1 1 0-9.2z"/><path fill="currentColor" d="m15 13.4 5.6 5.6-1.8 1.8-5.6-5.6z"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3 2.8 10.3l1.3 1.6.9-.7V20h5.2v-5.5h3.6V20H19v-8.8l.9.7 1.3-1.6z"/><rect x="10.2" y="14.5" width="3.6" height="5.5" fill="currentColor" opacity=".32"/></symbol>
+<symbol id="i-areas" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.6" fill="currentColor"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="1.6" fill="currentColor" opacity=".32"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="1.6" fill="currentColor" opacity=".32"/><rect x="13" y="13" width="7.5" height="7.5" rx="1.6" fill="currentColor"/></symbol>
+<symbol id="i-saved" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M6 3.5h12v17l-6-4.2-6 4.2z"/><path fill="currentColor" d="M6 3.5h12v3.5H6z"/></symbol>
+<symbol id="i-saved-f" viewBox="0 0 24 24"><path fill="currentColor" d="M6 3.5h12v17l-6-4.2-6 4.2z"/></symbol>
+<symbol id="i-ask" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M3.5 4.5h17v11.5H11l-5 4v-4H3.5z"/><circle cx="8" cy="10.3" r="1.5" fill="currentColor"/><circle cx="12" cy="10.3" r="1.5" fill="currentColor"/><circle cx="16" cy="10.3" r="1.5" fill="currentColor"/></symbol>
+<symbol id="i-glossary" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M6.8 4H19.5v14H6.8z"/><path fill="currentColor" d="M4.5 5.7A2.2 2.2 0 0 1 6.7 3.5H8v15H6.7a2.2 2.2 0 0 0 0 4.4h12.8V20.6H6.7a.6.6 0 0 1 0-1.2h12.8v-1.4H8z"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path fill="currentColor" d="M10.8 16h2.4V7.8l3 3 1.7-1.7L12 3.2 6.1 9.1l1.7 1.7 3-3z"/><rect x="4" y="18" width="16" height="2.8" rx="1.2" fill="currentColor" opacity=".32"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3a6 6 0 0 0-6 6v6.2L4 18h16l-2-2.8V9a6 6 0 0 0-6-6z"/><path fill="currentColor" opacity=".32" d="M9.5 19.5h5a2.5 2.5 0 0 1-5 0z"/></symbol>
+<symbol id="i-chev-r" viewBox="0 0 24 24"><path fill="currentColor" d="M8.6 5.4 10.4 3.6 18.8 12l-8.4 8.4-1.8-1.8L15.2 12z"/></symbol>
+<symbol id="i-chev-l" viewBox="0 0 24 24"><path fill="currentColor" d="M15.4 5.4 13.6 3.6 5.2 12l8.4 8.4 1.8-1.8L8.8 12z"/></symbol>
+<symbol id="i-chev-d" viewBox="0 0 24 24"><path fill="currentColor" d="M5.4 8.6 3.6 10.4 12 18.8l8.4-8.4-1.8-1.8L12 15.2z"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M7.6 10.5V8a4.4 4.4 0 0 1 8.8 0v2.5h-2.3V8a2.1 2.1 0 0 0-4.2 0v2.5z"/><rect x="5" y="10" width="14" height="10.5" rx="2.2" fill="currentColor"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path fill="currentColor" d="M10.8 3.5h2.4v8.2l3-3 1.7 1.7L12 16.3l-5.9-5.9 1.7-1.7 3 3z"/><rect x="4" y="18" width="16" height="2.8" rx="1.2" fill="currentColor" opacity=".32"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M5 10.5h3V19h8v-8.5h3V22H5z"/><path fill="currentColor" d="M10.8 15h2.4V7.6l2.6 2.6 1.7-1.7L12 3 6.5 8.5l1.7 1.7 2.6-2.6z"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/></g></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M3.5 6.3h17v2.4h-17zM3.5 15.3h17v2.4h-17z"/><circle cx="15" cy="7.5" r="2.8" fill="currentColor"/><circle cx="9" cy="16.5" r="2.8" fill="currentColor"/></symbol>
+<symbol id="i-arrow-r" viewBox="0 0 24 24"><path fill="currentColor" d="M4 10.8h11.4l-4.2-4.2 1.7-1.7L20 12l-7.1 7.1-1.7-1.7 4.2-4.2H4z"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path fill="currentColor" d="M6.3 4.6 12 10.3l5.7-5.7 1.7 1.7-5.7 5.7 5.7 5.7-1.7 1.7-5.7-5.7-5.7 5.7-1.7-1.7 5.7-5.7-5.7-5.7z"/></symbol>
+<symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="currentColor"/><path fill="currentColor" opacity=".32" d="M4 21a8 8 0 0 1 16 0z"/></symbol>
+<symbol id="i-wrench" viewBox="0 0 24 24"><path fill="currentColor" d="M14.7 6.3a4 4 0 0 0-5.2 5.2L4.8 16.2a1.6 1.6 0 0 0 2.3 2.3l4.7-4.7a4 4 0 0 0 5.2-5.2l-2.4 2.4-2.1-.4-.4-2.1z"/><circle cx="15.2" cy="8.8" r="1.3" fill="currentColor" opacity=".32"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="M6 3h8l5 5v13H6z"/><path fill="currentColor" d="M14 3l5 5h-5z"/><rect x="8.5" y="11.5" width="8" height="2" rx="1" fill="currentColor"/><rect x="8.5" y="15.5" width="5.5" height="2" rx="1" fill="currentColor"/></symbol>
+<symbol id="i-cube" viewBox="0 0 24 24"><path fill="currentColor" opacity=".32" d="m12 3 8 4.5-8 4.5-8-4.5z"/><path fill="currentColor" d="M4 8.6l7.2 4v8.7L4 17.3z"/><path fill="currentColor" opacity=".65" d="M20 8.6l-7.2 4v8.7l7.2-4z"/></symbol>
+<symbol id="s-cur" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7.5" fill="currentColor"/><path d="m4.8 8.2 2.2 2.2 4.2-4.4" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="s-due" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 3.2a4.8 4.8 0 0 1 0 9.6z" fill="currentColor"/></symbol>
+<symbol id="s-sup" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m4 12 8-8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="s-alert" viewBox="0 0 16 16"><path d="M8 1.2 15.4 14.2H.6z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/><path d="M8 6v3.6" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><circle cx="8" cy="11.9" r="1" fill="#fff"/></symbol>
+</defs>
+</svg>
+
+<div class="app">
+<nav class="rail" aria-label="Main">
+  <a class="mark" href="home.html" aria-label="RISE home"><img src="../../kit/brand/rise-icon.png" alt="RISE"></a>
+  <a data-k="home" class="it" href="home.html"><svg class="ic"><use href="#i-home"/></svg>Home</a>
+  <a data-k="search" class="it on" aria-current="page" href="search.html"><svg class="ic"><use href="#i-search"/></svg>Search</a>
+  <a data-k="areas" class="it" href="area.html"><svg class="ic"><use href="#i-areas"/></svg>Areas</a>
+  <a data-k="saved" class="it" href="#"><svg class="ic"><use href="#i-saved"/></svg>Saved</a>
+  <span class="sep"></span>
+  <a data-k="ask" class="it" href="#"><svg class="ic"><use href="#i-ask"/></svg>Ask</a>
+  <a data-k="glossary" class="it" href="#"><svg class="ic"><use href="#i-glossary"/></svg>Glossary</a>
+  <a data-k="upload" class="it" href="#"><svg class="ic"><use href="#i-upload"/></svg>Upload</a>
+  <span class="grow"></span>
+  <a class="me" href="#" aria-label="Faisal Al-Ghamdi, account">FA</a>
+</nav>
+
+<header class="cmd">
+  <a class="mark" href="home.html" aria-label="RISE home"><img src="../../kit/brand/rise-icon.png" alt="RISE"></a>
+  <label class="field on"><svg class="ic-s"><use href="#i-search"/></svg><span class="val">pressure test</span><a class="clear" href="#" aria-label="Clear search"><svg class="ic-s"><use href="#i-x"/></svg></a></label>
+  <div class="desk-tools">
+    <span class="role"><i></i>Viewing as <b>Employee</b></span>
+    <a class="bellb" href="#" aria-label="Notifications, new"><svg class="ic"><use href="#i-bell"/></svg><span class="dot"></span></a>
+  </div>
+  <a class="me" href="#" aria-label="Account, notifications and role: Employee">FA<span class="dot"></span></a>
+</header>
+
+<main>
+<div class="panes">
+<div class="pane list">
+
+  <nav class="tabs" aria-label="Result type">
+    <a class="on" href="#">All <i>17</i></a>
+    <a href="#">SOPs <i>6</i></a>
+    <a href="#">Manuals <i>3</i></a>
+    <a href="#">Standards <i>3</i></a>
+    <a href="#">Lessons <i>3</i></a>
+    <a href="#">Alerts <i>2</i></a>
+  </nav>
+
+  <div class="sbar">
+    <p class="count">17<span>in force</span></p>
+    <a class="fbtn" href="#"><svg><use href="#i-sliders"/></svg>Area · Status</a>
+  </div>
+
+  <section class="top-hit">
+    <p class="yours"><i></i>Your area first <em>Coiled Tubing</em></p>
+    <a class="mini" href="#">
+      <span class="r1"><span class="no">SOP<span class="hy">-</span>005</span><span class="rv">Rev 2.0</span><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span></span>
+      <span class="t" style="display:block">Pressure Testing Procedure</span>
+      <span class="m"><span>Issued 12 Jun 2025</span><span class="lk"><svg><use href="#i-lock"/></svg>Restricted</span><span class="ar">AR</span></span>
+    </a>
+  </section>
+
+  <section class="grp">
+    <div class="grp-h"><h3>Procedures</h3><span class="ct">5 more</span></div>
+    <a class="ix sel" href="#">
+      <span class="code"><b>SOP</b><span>003</span></span>
+      <span><span class="t">Iron Pressure Test</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 4.0</span><span>Fracturing</span><span class="ar">AR</span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+    <a class="ix" href="#">
+      <span class="code"><b>SOP</b><span>005</span></span>
+      <span><span class="t">Pressure Test SOP</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 1.0</span><span>Cementing</span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+    <a class="ix" href="#">
+      <span class="code"><b>SOP</b><span>004</span></span>
+      <span><span class="t">Pressure Test Inspection SOP</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 3.0</span><span>Inspection</span><span class="lk"><svg><use href="#i-lock"/></svg></span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+    <a class="ix" href="#">
+      <span class="code"><b>SOP</b><span>004</span></span>
+      <span><span class="t">Pressure Buildup Test SOP</span><span class="m"><span class="sig due"><svg><use href="#s-due"/></svg>Review due</span><span class="rv">Rev 3.0</span><span>Well Testing</span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+    <a class="ix" href="#">
+      <span class="code"><b>SOP</b><span>007</span></span>
+      <span><span class="t">Pressure Control Equipment Check</span><span class="m"><span class="sig due"><svg><use href="#s-due"/></svg>Review due</span><span class="rv">Rev 2.0</span><span>Wireline Services</span><span class="lk"><svg><use href="#i-lock"/></svg></span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+  </section>
+
+  <section class="grp">
+    <div class="grp-h"><h3>Work instructions &amp; manuals</h3><span class="ct">3</span></div>
+    <a class="ix" href="#">
+      <span class="code"><b>WI</b><span>004</span></span>
+      <span><span class="t">Pressure Gauge Calibration Manual</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 3.0</span><span>Well Testing</span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+    <a class="ix" href="#">
+      <span class="code"><b>WI</b><span>003</span></span>
+      <span><span class="t">High-Pressure Iron Manual</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 1.0</span><span>Fracturing</span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+    <a class="ix" href="#">
+      <span class="code"><b>WI</b><span>006</span></span>
+      <span><span class="t">BOP Testing Manual</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 1.0</span><span>Drilling Services</span><span class="lk"><svg><use href="#i-lock"/></svg></span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+  </section>
+
+  <section class="grp">
+    <div class="grp-h"><h3>Standards</h3><span class="ct">3</span></div>
+    <a class="ix" href="#">
+      <span class="code"><b>S</b><span>002</span></span>
+      <span><span class="t">BOP Testing Standard</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 2.0</span><span>Safety Services</span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+    <a class="ix" href="#">
+      <span class="code"><b>S</b><span>002</span></span>
+      <span><span class="t">High Pressure Operations Standard</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 2.0</span><span>Fracturing</span><span class="lk"><svg><use href="#i-lock"/></svg></span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+    <a class="ix" href="#">
+      <span class="code"><b>S</b><span>003</span></span>
+      <span><span class="t">Pressure Control Standard</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 2.0</span><span>Wireline Services</span><span class="lk"><svg><use href="#i-lock"/></svg></span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+  </section>
+
+  <section class="grp">
+    <div class="grp-h"><h3>Lessons learned</h3><span class="ct">3</span></div>
+    <a class="ix" href="#">
+      <span class="code"><b>LL</b><span>005</span></span>
+      <span><span class="t">Pressure integrity test failure, field findings</span><span class="m"><span class="sig due"><svg><use href="#s-due"/></svg>Review due</span><span class="rv">Rev 4.0</span><span>Coiled Tubing</span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+    <a class="ix" href="#">
+      <span class="code"><b>LL</b><span>005</span></span>
+      <span><span class="t">Wellhead pressure anomaly, identification and mitigation</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 4.0</span><span>Fracturing</span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+    <a class="ix" href="#">
+      <span class="code"><b>LL</b><span>004</span></span>
+      <span><span class="t">Float collar failure, pre-job testing enhancement</span><span class="m"><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span><span class="rv">Rev 4.0</span><span>Cementing</span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+  </section>
+
+  <section class="grp">
+    <div class="grp-h"><h3>Technical alerts</h3><span class="ct">2</span></div>
+    <a class="ix" href="#">
+      <span class="code"><b>ALT</b><span>002</span></span>
+      <span><span class="t">New pressure rating for 2-inch CT string, effective immediately</span><span class="m"><span class="sig alt"><svg><use href="#s-alert"/></svg>Active alert</span><span class="rv">Rev 2.0</span><span>Coiled Tubing</span><span class="lk"><svg><use href="#i-lock"/></svg></span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+    <a class="ix" href="#">
+      <span class="code"><b>ALT</b><span>002</span></span>
+      <span><span class="t">Separator pressure rating update, verify all units before deployment</span><span class="m"><span class="sig alt"><svg><use href="#s-alert"/></svg>Active alert</span><span class="rv">Rev 4.0</span><span>Well Testing</span><span class="lk"><svg><use href="#i-lock"/></svg></span></span></span>
+      <svg class="ic-s end"><use href="#i-chev-r"/></svg>
+    </a>
+  </section>
+
+  <section class="mod">
+    <div class="mod-h"><h2 class="h2">Field Glossary</h2><span class="ct">1</span></div>
+    <div class="term">
+      <p class="k"><b>BOP</b><span>Blowout Preventer</span><em>Well Control</em></p>
+      <p>A large specialised valve installed at the wellhead that can be closed to prevent uncontrolled flow of formation fluids (kick) to surface during drilling or well intervention.</p>
+    </div>
+  </section>
+
+  <section class="mod">
+    <div class="mod-h"><h2 class="h2">Ask an expert</h2><span class="ct">3</span></div>
+    <a class="lnk" href="#"><span class="ico"><svg class="ic-s"><use href="#i-person"/></svg></span><span class="tx"><b>Coiled Tubing expert</b><span>Your area</span></span><svg class="ic-s"><use href="#i-chev-r"/></svg></a>
+    <a class="lnk" href="#"><span class="ico"><svg class="ic-s"><use href="#i-person"/></svg></span><span class="tx"><b>Fracturing expert</b></span><svg class="ic-s"><use href="#i-chev-r"/></svg></a>
+    <a class="lnk" href="#"><span class="ico"><svg class="ic-s"><use href="#i-person"/></svg></span><span class="tx"><b>Well Testing expert</b></span><svg class="ic-s"><use href="#i-chev-r"/></svg></a>
+  </section>
+
+  <section class="mod">
+    <div class="mod-h"><h2 class="h2">Areas with matches</h2><span class="ct">8</span></div>
+    <div class="areas-list">
+      <a class="me-a" href="area.html">Coiled Tubing</a><a href="#">Fracturing</a>
+      <a href="#">Cementing</a><a href="#">Well Testing</a>
+      <a href="#">Wireline Services</a><a href="#">Drilling Services</a>
+      <a href="#">Safety Services</a><a href="#">Inspection</a>
+    </div>
+  </section>
+
+  <div class="foot-notes">
+    <a href="#"><svg><use href="#i-search"/></svg><span class="sp">More partial matches</span><svg><use href="#i-chev-r"/></svg></a>
+    <p><svg><use href="#s-sup"/></svg>2 not in force are hidden</p>
+    <p><svg><use href="#i-lock"/></svg>Locked items: request access through QMS</p>
+  </div>
+</div>
+
+<div class="pane detail" aria-label="Selected document">
+  <div class="dplate">
+    <p class="pre"><span>TQ-TWS-FS</span><b>Procedure (SOP)</b><b>Fracturing</b></p>
+    <p class="no">SOP<span class="hy">-</span>003</p>
+    <div class="mid"><p class="ttl">Iron Pressure Test</p><p class="sub">Internal · English, Arabic version available</p></div>
+    <div class="rev"><small>REV</small><b>4.0</b></div>
+  </div>
+  <div class="dsignal">
+    <span class="tile"><svg><use href="#s-cur"/></svg></span>
+    <div class="w"><b>Current</b><span>Issued 14 Apr 2025 · in force</span></div>
+    <div class="acts">
+      <a class="btn pri" href="#"><svg class="ic-s"><use href="#i-arrow-r"/></svg>Open</a>
+      <a class="btn icon" href="#" aria-label="Save"><svg class="ic-s"><use href="#i-saved"/></svg></a>
+      <a class="btn icon" href="#" aria-label="Share"><svg class="ic-s"><use href="#i-share"/></svg></a>
+    </div>
+  </div>
+  <div class="split">
+    <div>
+      <div class="preview">
+        <div class="sheet">
+          <p class="hd"><span>TQ-TWS-FS-SOP-003</span><span>REV 4.0</span></p>
+          <h4>Iron Pressure Test</h4>
+          <p class="sm">Standard operating procedure · Fracturing</p>
+          <div class="bars"><i class="h"></i><i style="width:100%"></i><i style="width:94%"></i><i style="width:71%"></i><i class="h"></i><i style="width:100%"></i><i style="width:88%"></i><i style="width:96%"></i><i style="width:52%"></i></div>
+          <p class="ft"><span>Internal</span><span>Issued 14 Apr 2025</span></p>
+        </div>
+      </div>
+      <p class="pv-cap"><span>Page 1 · first-page preview</span><span>Arabic version: TQ-TWS-FS-SOP-003-AR</span></p>
+    </div>
+    <div class="side">
+      <section class="mod">
+        <div class="mod-h"><h2 class="h2">Record</h2></div>
+        <dl class="spec">
+          <dt>Number</dt><dd>TQ-TWS-FS-SOP-003</dd>
+          <dt>Type</dt><dd>Procedure (SOP)</dd>
+          <dt>Area</dt><dd>Fracturing</dd>
+          <dt>Revision</dt><dd>Rev 4.0</dd>
+          <dt>Status</dt><dd><span class="sig cur"><svg><use href="#s-cur"/></svg>Current</span></dd>
+          <dt>Issued</dt><dd>14 Apr 2025</dd>
+          <dt>Access</dt><dd>Internal</dd>
+          <dt>Language</dt><dd>English<small>Arabic version available</small></dd>
+        </dl>
+      </section>
+      <section class="mod">
+        <div class="mod-h"><h2 class="h2">Why it matched</h2></div>
+        <p style="font-size:15px;line-height:1.5;color:var(--ink2)">Title contains <b style="color:var(--ink)">pressure</b> and <b style="color:var(--ink)">test</b>.</p>
+      </section>
+    </div>
+  </div>
+</div>
+</div>
+</main>
+<nav class="tabbar" aria-label="Main">
+  <a data-k="home" href="home.html"><svg class="ic"><use href="#i-home"/></svg>Home</a>
+  <a data-k="areas" href="area.html"><svg class="ic"><use href="#i-areas"/></svg>Areas</a>
+  <a data-k="saved" href="#"><svg class="ic"><use href="#i-saved"/></svg>Saved</a>
+  <a data-k="ask" href="#"><svg class="ic"><use href="#i-ask"/></svg>Ask</a>
+</nav>
+
+</div>
+</body>
+</html>
