@@ -6,6 +6,9 @@ from reg import REG_ROOT, e
 
 P = 'proposed'
 J = [
+ ('Landing', 'The front door: what RISE is, shown before sign-in and to anyone new to it.', [
+   ('landing.html', 'Landing page', 'Thesis, live search answer, real screens and figures, three ways in, file-to-force, five roles.', 'new'),
+ ]),
  ('Employee', 'Find the right document and know it is the one to use.', [
    ('home.html', 'Home', 'Employee. Continue reading, changed in my area, alerts, saved. 352 in force.', ''),
    ('home-director.html', 'Home · Segment Director', 'Same page trimmed for the role: 423 in force, confidential alert note, “Your desk” line.', ''),

@@ -1,0 +1,225 @@
+"""Landing page: RISE's front door, the page shown before sign-in and to anyone being introduced to RISE.
+Register language, more expressive: one big thesis, the search line that answers “can I use it?”, real screens, real figures."""
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'lib'))
+from reg import *
+
+EMP = inforce('employee')
+recent = sorted(INF, key=lambda r: r['issueDate'], reverse=True)[:8]
+tick = ''.join(f'<span><i class="{"al" if r["docType"] == "alert" else ""}"></i>{d(r["issueDate"], "%d %b")} <b>{short(r["docNumber"])}</b> {r["title"]} · {segname(r["segment"])}</span>' for r in recent)
+S3, S12 = BYNUM['TQ-TWS-CTSS-SOP-003'], BYNUM['TQ-TWS-CTSS-SOP-012']
+
+html = f'''<!doctype html>
+<html lang="en" dir="ltr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RISE · TAQA knowledge</title>
+<link rel="stylesheet" href="../css/register.css">
+<style>
+/* Layout: one thesis line across the page, the live answer under it, then the product shown as it is — real screens, real numbers. */
+html{{overflow-x:clip}}
+.ln{{--deep:#0E1A19;overflow-x:clip}}
+.ln .demo .ans{{border:0;border-radius:14px;background:#E6F1EC;padding:20px 22px 20px 48px}}
+.ln .demo .ans::before{{left:20px;top:29px}}
+.ln .demo .ans .lab{{display:none}}
+.ln .demo .ans h2{{margin-top:0}}
+.ln .lnav{{display:flex;align-items:center;gap:34px;height:76px}}
+.ln .lnav img{{height:28px;width:auto}}
+.ln .lnav nav{{display:flex;gap:26px;font:500 14px/1 var(--ui);color:var(--ink2)}}
+.ln .lnav .sp{{flex:1}}
+.ln .hero{{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:56px;align-items:end;padding:60px 0 0}}
+.ln .kick{{font:500 12px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);display:flex;gap:10px;align-items:center}}
+.ln .kick i{{width:7px;height:7px;border-radius:50%;background:var(--spark)}}
+.ln h1{{margin-top:26px;font:700 clamp(46px,7.4vw,108px)/.96 var(--display);letter-spacing:-.045em;text-wrap:balance}}
+.ln h1 span{{display:block;font-weight:300;color:var(--ink4)}}
+.ln .lede{{margin-top:26px;max-width:46ch;font:400 19px/1.55 var(--ui);color:var(--ink2)}}
+.ln .demo{{margin-top:38px;max-width:640px}}
+.ln .demo .q{{margin-top:0}}
+.ln .demo .q .val{{font-size:52px}}
+.ln .demo .ans{{margin-top:18px;transition:opacity .45s ease,transform .45s ease}}
+.ln .demo .ans.wait{{opacity:0;transform:translateY(8px)}}
+.ln .demo .rline{{margin-top:12px}}
+.ln .ctas{{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}}
+.ln .ctas .btn{{height:50px;padding:0 24px;font-size:15.5px}}
+.ln .stage{{position:relative;height:640px}}
+.ln .stage .lap{{position:absolute;right:-180px;top:20px;width:760px;border-radius:10px;border:1px solid var(--rule2);box-shadow:0 40px 90px -50px rgba(17,32,31,.55);overflow:hidden;background:var(--sheet)}}
+.ln .stage .lap img{{width:100%;display:block}}
+.ln .phone{{border-radius:34px;padding:9px;background:var(--deep);box-shadow:0 50px 90px -40px rgba(17,32,31,.65)}}
+.ln .phone img{{display:block;width:100%;border-radius:26px}}
+.ln .stage .phone{{position:absolute;left:0;bottom:0;width:270px}}
+.ln .ticker{{margin-top:70px;border-top:1.5px solid var(--ink);border-bottom:1px solid var(--rule);overflow:hidden;white-space:nowrap}}
+.ln .ticker .row{{display:inline-flex;gap:46px;padding:15px 0;animation:tick 60s linear infinite;font:500 12.5px/1 var(--mono);letter-spacing:.03em;color:var(--ink2)}}
+.ln .ticker b{{color:var(--ink);font-weight:600;margin:0 6px}}
+.ln .ticker i{{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ok);margin-right:10px;vertical-align:1px}}
+.ln .ticker i.al{{background:var(--crim);border-radius:1px;transform:rotate(45deg)}}
+@keyframes tick{{to{{transform:translateX(-50%)}}}}
+.ln .figs{{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--rule)}}
+.ln .figs div{{padding:34px 24px 30px 0}}
+.ln .figs div + div{{padding-left:24px;border-left:1px solid var(--rule)}}
+.ln .figs b{{display:block;font:700 64px/1 var(--display);letter-spacing:-.04em;font-variant-numeric:tabular-nums}}
+.ln .figs span{{display:block;margin-top:10px;font:500 11.5px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}}
+.ln .sec{{padding:110px 0 0}}
+.ln .sec .lab{{display:block}}
+.ln .sec h2{{margin-top:16px;max-width:20ch;font:700 clamp(34px,4.4vw,60px)/1.02 var(--display);letter-spacing:-.035em;text-wrap:balance}}
+.ln .sec h2 span{{font-weight:300;color:var(--ink4)}}
+.ln .ways{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;margin-top:46px}}
+.ln .way{{display:grid;grid-template-rows:auto 1fr;gap:20px}}
+.ln .way .shot{{border-radius:16px;overflow:hidden;background:var(--tint);padding:26px 26px 0;height:400px}}
+.ln .way .shot .phone{{width:78%;margin:0 auto;border-radius:30px 30px 0 0;padding:8px 8px 0}}
+.ln .way .shot .phone img{{border-radius:22px 22px 0 0}}
+.ln .way h3{{font:700 26px/1.1 var(--display);letter-spacing:-.02em}}
+.ln .way p{{margin-top:8px;font:400 15.5px/1.5 var(--ui);color:var(--ink2);max-width:36ch}}
+.ln .way a.go{{display:inline-block;margin-top:12px;font:500 14px/1 var(--ui);border-bottom:1px solid var(--rule2);padding-bottom:2px}}
+.ln .answers{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:46px}}
+.ln .answers .card{{display:grid;gap:14px;align-content:start}}
+.ln .answers .rline{{font-size:11.5px}}
+.ln .answers .ans{{border-top:0;border-bottom:0;padding:22px 22px 22px 48px;border-radius:14px;background:#E6F1EC}}
+.ln .answers .ans::before{{left:20px;top:31px}}
+.ln .answers .ans.sup{{background:var(--tint)}} .ln .answers .ans.sup::before{{top:37px}}
+.ln .answers .ans.al{{background:var(--crim-50)}}
+.ln .answers .ans h2{{margin-top:0;font-size:24px}}
+.ln .answers .ans .lab{{display:none}}
+.ln .flow{{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:46px;border-top:1.5px solid var(--ink)}}
+.ln .flow div{{position:relative;padding:26px 24px 0 0}}
+.ln .flow div::before{{content:"";position:absolute;top:-6px;left:0;width:10px;height:10px;border-radius:50%;background:var(--paper);border:1.5px solid var(--ink)}}
+.ln .flow div:last-child::before{{background:var(--ok);border-color:var(--ok)}}
+.ln .flow .n{{font:500 12px/1 var(--mono);color:var(--spark)}}
+.ln .flow b{{display:block;margin-top:12px;font:700 22px/1.15 var(--display);letter-spacing:-.015em}}
+.ln .flow p{{margin-top:8px;font:400 14.5px/1.5 var(--ui);color:var(--ink2);max-width:28ch}}
+.ln .note3{{margin-top:22px;font:500 12px/1.5 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}}
+.ln .site{{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:56px;align-items:center;margin-top:10px}}
+.ln .site .trio{{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:end}}
+.ln .site .trio .phone:nth-child(2){{transform:translateY(-36px)}}
+.ln .site ul{{margin-top:26px;display:grid;gap:0}}
+.ln .site li{{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:15px 0;border-bottom:1px solid var(--rule);font:400 15.5px/1.45 var(--ui);color:var(--ink2)}}
+.ln .site li:first-child{{border-top:1px solid var(--rule)}}
+.ln .site li b{{font:500 11.5px/1.6 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}}
+.ln .roles{{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin-top:46px;border-top:1px solid var(--rule)}}
+.ln .roles div{{padding:22px 20px 22px 0;border-bottom:1px solid var(--rule)}}
+.ln .roles div + div{{padding-left:20px;border-left:1px solid var(--rule)}}
+.ln .roles b{{display:block;font:500 19px/1.2 var(--display)}}
+.ln .roles p{{margin-top:8px;font:400 14px/1.5 var(--ui);color:var(--ink2)}}
+.ln .end{{margin-top:120px;background:var(--deep);color:#F3F1EC;border-radius:24px;padding:80px 64px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:40px;align-items:end}}
+.ln .end h2{{font:700 clamp(40px,6vw,88px)/.98 var(--display);letter-spacing:-.045em}}
+.ln .end h2 span{{display:block;font-weight:300;color:#6F7C79}}
+.ln .end .btn.pri{{background:var(--spark);border-color:var(--spark);color:#fff;height:54px;padding:0 28px;font-size:16px}}
+.ln .end small{{display:block;margin-top:14px;font:500 11.5px/1.4 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:#8B9794}}
+.ln .lfoot{{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:30px 0 50px;font:500 11.5px/1.4 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--ink3)}}
+@media (prefers-reduced-motion:reduce){{.ln .ticker .row{{animation:none}}.ln .demo .ans{{transition:none}}}}
+@media (max-width:1100px){{.ln .stage .lap{{display:none}}.ln .stage{{height:auto}}.ln .stage .phone{{position:static;width:300px;margin:0 auto}}}}
+@media (max-width:720px){{
+  .ln .lnav{{height:62px}} .ln .lnav nav{{display:none}} .ln .lnav img{{height:23px}}
+  .ln .hero{{grid-template-columns:1fr;gap:40px;padding-top:26px}}
+  .ln h1{{font-size:46px;margin-top:18px}}
+  .ln .lede{{font-size:16.5px;margin-top:16px}}
+  .ln .demo .q .val{{font-size:36px}}
+  .ln .ctas .btn{{flex:1}}
+  .ln .stage .phone{{width:240px}}
+  .ln .ticker{{margin-top:46px}}
+  .ln .figs{{grid-template-columns:1fr 1fr}}
+  .ln .figs div,.ln .figs div + div{{padding:22px 12px 20px 0;border-left:0}}
+  .ln .figs div:nth-child(even){{padding-left:16px;border-left:1px solid var(--rule)}}
+  .ln .figs div:nth-child(-n+2){{border-bottom:1px solid var(--rule)}}
+  .ln .figs b{{font-size:42px}}
+  .ln .sec{{padding-top:70px}}
+  .ln .sec h2{{font-size:32px}}
+  .ln .ways,.ln .answers,.ln .flow,.ln .site,.ln .roles{{grid-template-columns:1fr}}
+  .ln .ways{{gap:40px;margin-top:30px}}
+  .ln .way .shot{{height:330px}}
+  .ln .way p,.ln .flow p,.ln .roles p,.ln .site ul{{display:none}}
+  .ln .answers{{margin-top:30px;gap:14px}}
+  .ln .flow{{border-top:0;border-left:1.5px solid var(--ink);margin-left:5px}}
+  .ln .flow div{{padding:0 0 26px 24px}} .ln .flow div::before{{top:4px;left:-6px}}
+  .ln .flow b{{margin-top:6px;font-size:20px}}
+  .ln .site .trio{{gap:10px}} .ln .site .trio .phone{{padding:5px;border-radius:22px}} .ln .site .trio .phone img{{border-radius:18px}}
+  .ln .roles div,.ln .roles div + div{{padding:16px 0;border-left:0}}
+  .ln .end{{margin-top:80px;padding:44px 24px;grid-template-columns:1fr;border-radius:20px}}
+  .ln .end h2{{font-size:42px}}
+  .ln .end .btn.pri{{width:100%}}
+}}
+</style></head>
+<body class="ln">
+<div class="wrap">
+<header class="lnav"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE" width="74" height="28">
+  <nav aria-label="What is in RISE"><a href="#ways">Find</a><a href="#know">Know</a><a href="#flow">Publish</a><a href="#roles">Roles</a></nav>
+  <span class="sp"></span><a class="btn pri sm" href="home.html">Sign in with TAQA</a></header>
+
+<section class="hero">
+  <div>
+    <p class="kick"><i></i>RISE · TAQA knowledge</p>
+    <h1>The right document. <span>The current revision.</span></h1>
+    <p class="lede">Every procedure, work instruction, standard and alert TAQA controls, with its revision, owner and status. One search away, on the rig or at the desk.</p>
+    <div class="demo" aria-label="Example search">
+      <div class="q"><span class="val" id="tq">WI-003</span><span class="caret"></span></div>
+      <p class="rline"><b>TQ-TWS-CTSS-WI-003</b><span>Rev 4.0</span><span>Coiled Tubing</span></p>
+      <section class="ans ok" id="ta"><p class="lab">Can I use it?</p><h2>Yes. Use this document.</h2><p>Rev 4.0 is the approved revision in force.</p></section>
+    </div>
+    <div class="ctas"><a class="btn pri" href="home.html">Open RISE</a><a class="btn" href="#ways">See how it works</a></div>
+  </div>
+  <div class="stage" aria-hidden="true">
+    <div class="lap"><img src="../shots/document-d.jpg" alt=""></div>
+    <div class="phone"><img src="../shots/home-m.jpg" alt=""></div>
+  </div>
+</section>
+</div>
+
+<div class="ticker" aria-label="Recently issued across TAQA"><div class="row">{tick}{tick}</div></div>
+
+<div class="wrap">
+<div class="figs"><div><b>{len(INF)}</b><span>Controlled documents in force</span></div><div><b>25</b><span>Areas, from Coiled Tubing to QHSE</span></div>
+  <div><b>254</b><span>Field terms in the glossary</span></div><div><b>{sum(1 for r in REG if r["language"] == "ar")}</b><span>Documents in Arabic</span></div></div>
+
+<section class="sec" id="ways"><span class="lab">Three ways in</span><h2>Find it by number, by area, <span>or ask a person.</span></h2>
+  <div class="ways">
+    <div class="way"><div class="shot"><div class="phone"><img src="../shots/search-number-m.jpg" alt="WI-003 found in 8 areas"></div></div>
+      <div><h3>Search</h3><p>Type a number or a title. WI-003 is used in eight areas; the full register number tells you which is yours.</p><a class="go" href="search-number.html">Try WI-003 →</a></div></div>
+    <div class="way"><div class="shot"><div class="phone"><img src="../shots/area-m.jpg" alt="Coiled Tubing area"></div></div>
+      <div><h3>Browse an area</h3><p>Your area’s procedures, manuals, standards, forms, alerts and lessons, on one page.</p><a class="go" href="area.html">Open Coiled Tubing →</a></div></div>
+    <div class="way"><div class="shot"><div class="phone"><img src="../shots/ask-m.jpg" alt="Ask an Expert"></div></div>
+      <div><h3>Ask an Expert</h3><p>Stuck in the field? Send the problem, with a marked-up photo, to the expert for your area.</p><a class="go" href="ask.html">Ask a question →</a></div></div>
+  </div></section>
+
+<section class="sec" id="know"><span class="lab">Know before you use it</span><h2>Every record answers one question <span>first.</span></h2>
+  <div class="answers">
+    <div class="card"><p class="rline"><b>TQ-TWS-CTSS-WI-003</b><span>Rev 4.0</span></p><section class="ans ok"><p class="lab">Can I use it?</p><h2>Yes. Use this document.</h2><p>Injector Head Operations Manual</p></section></div>
+    <div class="card"><p class="rline"><b>{S3["docNumber"]}</b><span>Rev {S3["revision"]}</span></p><section class="ans sup"><p class="lab">Can I use it?</p><h2>No. Superseded.</h2><p>{S3["title"]} · replaced by {S3["supersededBy"]}</p></section></div>
+    <div class="card"><p class="rline"><b>{S12["docNumber"]}</b><span>Rev {S12["revision"]}</span></p><section class="ans al"><p class="lab">Can I use it?</p><h2>No. Withdrawn.</h2><p>{S12["title"]} · do not use</p></section></div>
+  </div></section>
+
+<section class="sec" id="flow"><span class="lab">From file to force</span><h2>Nothing is in force <span>until three people have signed.</span></h2>
+  <div class="flow">
+    <div><span class="n">1</span><b>File it</b><p>Upload the file. RISE assigns the controlled number and shows who will sign.</p></div>
+    <div><span class="n">2</span><b>QMS check</b><p>QMS checks the record and the numbering, or returns it with a reason.</p></div>
+    <div><span class="n">3</span><b>Final approval</b><p>The Segment Director, or the Maintenance Manager for maintenance, approves it.</p></div>
+    <div><span class="n">4</span><b>In force</b><p>It appears in the area library. The revision it replaces is marked superseded.</p></div>
+  </div>
+  <p class="note3">Submitter, QMS checker and final approver are always three different people.</p></section>
+
+<section class="sec"><div class="site">
+  <div><span class="lab">Built for site</span><h2>Readable in the sun. <span>Ready offline.</span></h2>
+    <ul><li><b>Offline</b>Every page you have opened stays readable without signal.</li><li><b>Sunlight Mode</b>A high-contrast quick reference card for outdoor use.</li><li><b>QR codes</b>Scan a printed copy to check it is still the current revision.</li></ul></div>
+  <div class="trio"><div class="phone"><img src="../shots/document-m.jpg" alt="Document on a phone"></div><div class="phone"><img src="../shots/document-qrc-m.jpg" alt="Quick reference card"></div><div class="phone"><img src="../shots/search-superseded-m.jpg" alt="Superseded number caught"></div></div>
+</div></section>
+
+<section class="sec" id="roles"><span class="lab">One register, five roles</span><h2>Each person sees <span>what their role allows.</span></h2>
+  <div class="roles">
+    <div><b>Employee</b><p>Reads every internal document and files new ones.</p></div>
+    <div><b>Segment Director</b><p>Gives final approval to the area’s documents and manages them.</p></div>
+    <div><b>Maintenance Manager</b><p>Approves the segment’s maintenance documents and bulletins.</p></div>
+    <div><b>QMS</b><p>Checks every filing and keeps the Master Document List.</p></div>
+    <div><b>External Auditor</b><p>Reads everything, changes nothing.</p></div>
+  </div></section>
+
+<section class="end"><div><h2>Knowledge is better together. <span>Every answer, within reach.</span></h2></div>
+  <div><a class="btn pri" href="home.html">Open RISE</a><small>Sign in with your TAQA account</small></div></section>
+<footer class="lfoot"><span>RISE · TAQA Learning Center</span><span>Design exploration · not the live application</span></footer>
+</div>
+<script>
+(function(){{
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var t=document.getElementById('tq'), a=document.getElementById('ta'), word='WI-003', i=0;
+  a.classList.add('wait'); t.textContent='';
+  setTimeout(function step(){{ t.textContent=word.slice(0,++i); if(i<word.length) setTimeout(step,140); else setTimeout(function(){{a.classList.remove('wait')}},380); }},500);
+}})();
+</script>
+</body></html>'''
+open(os.path.join(PAGES, 'landing.html'), 'w').write(html)
+print('landing ok')
