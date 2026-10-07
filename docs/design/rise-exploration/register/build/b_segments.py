@@ -75,7 +75,7 @@ def seg_page(key):
       {f'<div class="dk-only"><b>{days}</b><span>days since last issue</span></div>' if days is not None else ''}</div>
     {seg_switch}
   </div>
-  <div class="mark" aria-hidden="true"><span class="code">{code}</span><span class="num">{numline}</span></div>
+  <div class="mark ph" aria-hidden="true"><img src="../img/{photo_of(key)}" alt=""><span class="code">{code}</span><span class="num">{numline}</span></div>
 </header>
 {strip(vis)}
 {prov}

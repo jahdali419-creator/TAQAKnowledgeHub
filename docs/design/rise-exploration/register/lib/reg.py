@@ -292,3 +292,31 @@ _g0 = _G.find('const BUILT_IN = ['); _g1 = _G.find('\n];', _g0)
 GLOSS = []
 for _m in re.finditer(r"\{((?:abbr|term):'(?:[^'\\]|\\.)*'.*?)\},?\s*$", _G[_g0:_g1], re.M):
     GLOSS.append({k: v.replace("\\'", "'") for k, v in re.findall(r"(\w+):'((?:[^'\\]|\\.)*)'", _m.group(1))})
+
+# ── photos: the live app's own TAQA photography (segment.html SEGMENT_IMAGES), family photo as fallback ──
+FAM_PHOTO = {'company': 'taqa-hero.webp', 'segment': 'taqa-hero-5.jpeg', 'function': 'taqa-hero-3.jpeg', 'product': 'taqa-hero-4.jpg'}
+SEG_PHOTO = {'coiled-tubing': 'taqa-hero-5.jpeg', 'fracturing': 'taqa-hero-3.jpeg', 'cementing': 'taqa-hero-2.jpg', 'drilling': 'taqa-hero.webp',
+             'wireline': 'taqa-hero-4.jpg', 'inspection': 'taqa-hero-4.jpg', 'well-safety': 'taqa-hero.webp', 'qhse': 'taqa-hero-3.jpeg',
+             'hr': 'taqa-hero-4.jpg', 'well-testing': 'taqa-hero-3.jpeg', 'cybersecurity': 'taqa-hero.webp'}
+def photo_of(key):
+    return SEG_PHOTO.get(key) or FAM_PHOTO[SEGS[key]['group']]
+FAM_TITLE = {'segment': ('Operational segments', 'The business: service lines that deliver the work'),
+             'function': ('Corporate functions', 'The functions that run the company'),
+             'product': ('Products & Technology', 'Centres of Excellence, the technical home of each discipline')}
+def explore(role='employee', home='coiled-tubing', head=True):
+    vis = inforce(role)
+    def cnt(k): return sum(1 for r in vis if r['segment'] == k)
+    def alerts(k): return sum(1 for r in vis if r['segment'] == k and r['docType'] == 'alert')
+    cols = ''
+    for g in ('segment', 'function', 'product'):
+        ks = sorted([k for k, s in SEGS.items() if s['group'] == g], key=lambda k: SEGS[k]['name'])
+        total = sum(cnt(k) for k in ks); t, sub = FAM_TITLE[g]
+        rows = ''.join(f'<a href="seg-{k}.html"{" class=mine" if k == home else ""}><b>{SEGS[k]["name"]}</b><span class="cd">{SEGS[k]["spl"]}</span>'
+                       f'<span class="n">{cnt(k)}{"<i class=al title=alerts></i>" if alerts(k) else ""}</span></a>' for k in ks)
+        cols += f'''<div class="famcol"><a class="fph" href="#"><img src="../img/{FAM_PHOTO[g]}" alt="{t}" loading="lazy"><span class="cap"><b>{t}</b><span>{len(ks)} areas · {total} documents</span></span></a>
+  <p class="fsub">{sub}</p><div class="frows">{rows}</div></div>'''
+    pol = cnt('company')
+    top = (f'<div class="exh"><span class="lab">Explore TAQA</span><h2>Every area, <span>by family.</span></h2></div>' if head else '')
+    return f'''<section class="explore">{top}
+<a class="polband" href="seg-company.html"><img src="../img/{FAM_PHOTO["company"]}" alt="TAQA crew on site" loading="lazy"><span class="pt"><span class="lab">Company Wide</span><b>Company policies</b><span>Signed by the CEO. Every segment, function and centre follows them.</span></span><span class="pn">{pol}<small>policies</small></span></a>
+<div class="famgrid">{cols}</div></section>'''

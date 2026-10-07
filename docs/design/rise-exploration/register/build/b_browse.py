@@ -143,7 +143,6 @@ def fam(g, title):
     return f'<div><p class="grph"><b>{title}</b><span>{len(ks)}</span></p><div class="alist">{rows}</div></div>'
 a_body = f'''<header class="phead"><div class="meta"><span class="lab">Areas</span><span class="lab"><b>{len(EMP) if False else len(inforce())}</b> documents in force · <b>25</b> areas</span></div>
   <h1 class="t0">Every area<span class="m phx">, one register.</span></h1><p class="sub">Your area is marked. Counts are documents in force you can open.</p></header>
-<a class="polrow" href="area-policies.html"><span class="lab">Company Wide</span><b>Company policies</b><span class="tg">Apply to everyone · signed by the CEO</span><span class="n">{count_for("company")}</span></a>
-<div class="g3" style="margin-top:12px">{fam("segment", "Operational segments")}{fam("function", "Corporate functions")}{fam("product", "Products &amp; Technology")}</div>'''
+{explore(head=False)}'''
 page('areas.html', 'RISE · Areas', a_body, 'areas')
 print('browse ok', len(vis), len(dvis))

@@ -60,6 +60,7 @@ def home(role, name, desk_line=''):
   </aside>
   <footer class="foot" aria-label="Recently published across TAQA"><div class="wrap"><span class="h">Across TAQA</span>{tick}</div></footer>
 </div>'''
+    body += explore(role)
     page(name, 'RISE · Home', body, 'home', role, script=SCRIPT)
     return len(vis), len(ct)
 
