@@ -65,6 +65,8 @@ def ptitle(name):
              'acting-broken': ('Delegation', 'home.html')}
     if n in fixed: return fixed[n]
     if n.startswith('home'): return None
+    if n.startswith('seg-'): return (SEGS[n[4:]]['name'], 'areas.html')
+    if n == 'segments': return ('All areas', 'areas.html')
     step = {'upload': 1, 'upload-file': 1, 'upload-file-error': 1, 'upload-where': 2, 'upload-where-error': 2, 'upload-maint': 2, 'upload-policy': 2,
             'upload-again': 2, 'upload-what': 3, 'upload-review': 4}
     if n in step: return (f'Upload · {step[n]} of 4', 'more.html')
