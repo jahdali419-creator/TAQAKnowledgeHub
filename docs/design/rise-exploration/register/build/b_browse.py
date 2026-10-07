@@ -138,11 +138,12 @@ page('area-policies.html', 'RISE · Company policies', p_body, 'areas')
 
 # Areas index: Company policies, then the three families as register columns
 def fam(g, title):
-    ks = sorted([k for k, s in SEGS.items() if s['group'] == g] + (['geothermal-coe'] if False else []), key=lambda k: SEGS[k]['name'])
-    rows = ''.join(f'<a href="{"area.html" if k == "coiled-tubing" else "#"}"{" class=mine" if k == "coiled-tubing" else ""}><b>{SEGS[k]["name"]}</b><span class="tg">{TAG.get(k, "")}{" · provisional" if SEGS[k]["provisional"] else ""}</span><span class="n">{count_for(k)}</span></a>' for k in ks)
-    return f'<div><p class="grph"><b>{title}</b><span>{len(ks)}</span></p><div class="alist">{rows}</div></div>'
-a_body = f'''<header class="phead"><div class="meta"><span class="lab">Areas</span><span class="lab"><b>{len(EMP) if False else len(inforce())}</b> documents in force · <b>25</b> areas</span></div>
+    ks = sorted([k for k, s in SEGS.items() if s['group'] == g], key=lambda k: SEGS[k]['name'])
+    rows = ''.join(f'<a href="seg-{k}.html"{" class=mine" if k == "coiled-tubing" else ""}><b>{SEGS[k]["name"]}</b><span class="tg">{TAG.get(k, "")}{" · provisional" if SEGS[k]["provisional"] else ""}</span><span class="n">{count_for(k)}</span></a>' for k in ks)
+    return f'<div id="{g}">{plate(FAM_PHOTO[g], PHOTO_CAP[FAM_PHOTO[g]], "sm")}<p class="grph"><b>{title}</b><span>{len(ks)}</span></p><div class="alist">{rows}</div></div>'
+a_body = f'''<header class="phead"><div class="meta"><span class="lab">Areas</span><span class="lab"><b>{len(inforce())}</b> documents in force · <b>25</b> areas</span></div>
   <h1 class="t0">Every area<span class="m phx">, one register.</span></h1><p class="sub">Your area is marked. Counts are documents in force you can open.</p></header>
-{explore(head=False)}'''
+<a class="polrow" href="seg-company.html"><span class="lab">Company Wide</span><b>Company policies</b><span class="tg">Apply to everyone · signed by the CEO</span><span class="n">{count_for("company")}</span></a>
+<div class="g3" style="margin-top:28px">{fam("segment", "Operational segments")}{fam("function", "Corporate functions")}{fam("product", "Products &amp; Technology")}</div>'''
 page('areas.html', 'RISE · Areas', a_body, 'areas')
 print('browse ok', len(vis), len(dvis))
