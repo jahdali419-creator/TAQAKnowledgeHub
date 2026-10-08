@@ -1,0 +1,86 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RISE · Night Shift</title><link rel="stylesheet" href="../../kit/fonts.css"><style>
+:root{--bg:#070D0D;--panel:#0F1918;--line:rgba(255,255,255,.09);--fg:#F2F5F3;--mute:#8FA09C;--teal:#00BFB2;--spark:#FF6720;--crim:#E8324A;--ok:#3CD69B;
+--display:'BwGradual',Inter,sans-serif;--ui:Inter,system-ui,sans-serif;--mono:'PlexMono',ui-monospace,monospace}
+*{box-sizing:border-box;margin:0;padding:0}html{overflow-x:clip}body{background:var(--bg);color:var(--fg);font:400 15px/1.5 var(--ui);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}svg{width:20px;height:20px;flex:none}
+.w{width:1280px;max-width:calc(100% - 48px);margin:0 auto}
+.hero{position:relative;min-height:760px;display:flex;flex-direction:column;overflow:hidden}
+.hero .bg{position:absolute;inset:0;background:url(../img/taqa-hero-5.jpeg) center 40%/cover;transform:scale(1.06);animation:drift 28s ease-in-out infinite alternate}
+.hero .bg::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 70% 10%,rgba(7,13,13,.25),rgba(7,13,13,.86) 60%,var(--bg) 100%),linear-gradient(to bottom,rgba(7,13,13,.55),transparent 30%)}
+@keyframes drift{to{transform:scale(1.14) translate(-1.5%,-1%)}}
+.nav{position:relative;z-index:2;display:flex;align-items:center;gap:34px;height:84px}
+.nav img{height:28px;filter:brightness(0) invert(1)}.nav .links{display:flex;gap:28px;font:500 14px/1 var(--ui);color:#C9D3D0}.nav .links a.on{color:#fff}
+.nav .sp{flex:1}.nav .av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.12);backdrop-filter:blur(10px);font:600 12px var(--ui)}
+.nav .bell{position:relative;color:#C9D3D0}.nav .bell i{position:absolute;top:-2px;right:-3px;width:7px;height:7px;border-radius:50%;background:var(--spark)}
+.hc{position:relative;z-index:2;margin-top:auto;padding-bottom:70px}
+.kick{display:inline-flex;align-items:center;gap:10px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.06);backdrop-filter:blur(12px);font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#D7E0DD}
+.kick i{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px var(--ok)}
+h1{margin-top:22px;font:700 clamp(54px,8vw,124px)/.92 var(--display);letter-spacing:-.05em;max-width:12ch}
+h1 span{background:linear-gradient(90deg,#fff,var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sbox{margin-top:34px;max-width:760px;padding:10px;border:1px solid rgba(255,255,255,.14);border-radius:22px;background:rgba(15,25,24,.55);backdrop-filter:blur(18px);box-shadow:0 40px 90px -30px rgba(0,0,0,.8)}
+.sline{display:flex;align-items:center;gap:14px;padding:12px 16px}.sline svg{width:26px;height:26px;color:var(--teal)}
+.sline .v{font:600 34px/1 var(--display);letter-spacing:-.02em}.sline .c{width:3px;height:34px;background:var(--spark);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}.sline kbd{margin-left:auto;font:500 12px var(--mono);padding:6px 9px;border:1px solid var(--line);border-radius:8px;color:var(--mute)}
+.ans{display:flex;align-items:center;gap:16px;margin:4px 6px 6px;padding:16px 18px;border-radius:14px;background:linear-gradient(90deg,rgba(60,214,155,.16),rgba(60,214,155,.04));border:1px solid rgba(60,214,155,.25);transition:opacity .4s,transform .4s}
+.ans.wait{opacity:0;transform:translateY(8px)}.ans .dot{width:12px;height:12px;border-radius:50%;background:var(--ok);box-shadow:0 0 16px var(--ok)}
+.ans b{font:700 19px/1.2 var(--display)}.ans span{display:block;margin-top:3px;font:500 12px/1 var(--mono);color:#B6C6C1;letter-spacing:.04em}.ans .go{margin-left:auto;color:var(--ok)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.chips a{padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.05);font:500 13.5px/1 var(--ui);color:#D7E0DD}
+.stats{display:flex;gap:44px;margin-top:40px}.stats b{display:block;font:700 40px/1 var(--display);letter-spacing:-.03em}.stats span{font:500 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.sec{padding:90px 0 0}.sh{display:flex;align-items:baseline;gap:16px}.sh h2{font:700 36px/1 var(--display);letter-spacing:-.03em}.sh span{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}.sh a{margin-left:auto;color:var(--teal);font:500 14px var(--ui)}
+.bento{display:grid;grid-template-columns:1.25fr 1fr 1fr;grid-template-rows:260px 220px;gap:16px;margin-top:26px}
+.tile{position:relative;border-radius:22px;border:1px solid var(--line);background:var(--panel);padding:26px;overflow:hidden;transition:transform .25s,border-color .25s}
+.tile:hover{transform:translateY(-3px);border-color:rgba(0,191,178,.4)}
+.tile .lab{font:500 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.tile h3{margin-top:12px;font:700 28px/1.05 var(--display);letter-spacing:-.025em}
+.tile .big{font:700 64px/1 var(--display);letter-spacing:-.04em}
+.t-ct{grid-row:span 2;background:url(../img/taqa-hero-3.jpeg) center/cover;display:flex;flex-direction:column;justify-content:flex-end}
+.t-ct::before{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(7,13,13,.95),rgba(7,13,13,.2) 55%)}
+.t-ct > *{position:relative}.t-ct .row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}.t-ct .row span{padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.1);backdrop-filter:blur(8px);font:500 12.5px var(--ui)}
+.t-al{background:radial-gradient(120% 120% at 0% 0%,rgba(232,50,74,.28),var(--panel) 60%);border-color:rgba(232,50,74,.35)}
+.t-al .lab{color:#FF8A9A}.t-al svg{color:var(--crim);width:28px;height:28px}.t-al h3{font-size:22px}.t-al .m{margin-top:10px;font:500 12px var(--mono);color:#C9A3AA}
+.t-sv .big{color:var(--teal)}.t-sv p,.t-gl p{margin-top:8px;color:var(--mute)}
+.t-gl{background:radial-gradient(110% 110% at 100% 100%,rgba(0,191,178,.2),var(--panel) 60%)}.t-gl .abbr{font:600 46px/1 var(--mono);letter-spacing:-.04em;color:#fff}.t-gl .def{margin-top:10px;font:400 14px/1.5 var(--ui);color:#B6C6C1}
+.t-ask{background:linear-gradient(135deg,var(--spark),#FF8B4D);color:#1A0B03;border:0}.t-ask .lab{color:rgba(26,11,3,.65)}.t-ask h3{font-size:30px}.t-ask .go{position:absolute;right:24px;bottom:24px;width:48px;height:48px;border-radius:50%;background:#1A0B03;color:#fff;display:grid;place-items:center}
+.list{margin-top:26px;display:grid;gap:10px}
+.doc{display:grid;grid-template-columns:110px minmax(0,1fr) 190px 110px;align-items:center;gap:16px;padding:18px 22px;border-radius:16px;border:1px solid var(--line);background:var(--panel);transition:border-color .2s,background .2s}
+.doc:hover{border-color:rgba(0,191,178,.45);background:#122120}.doc .n{font:600 13px var(--mono);color:var(--teal)}.doc b{font:600 16.5px/1.3 var(--ui)}.doc .m{font:500 12px var(--mono);color:var(--mute)}
+.doc .ok{justify-self:end;display:inline-flex;align-items:center;gap:8px;font:500 13px var(--ui);color:var(--ok)}.doc .ok i{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok)}
+.tick{margin-top:90px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;white-space:nowrap}
+.tick div{display:inline-flex;gap:54px;padding:18px 0;animation:tk 50s linear infinite;font:500 13px var(--mono);color:#B6C6C1}
+.tick em{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:12px;vertical-align:1px}.tick em.al{background:var(--crim);border-radius:1px;transform:rotate(45deg)}
+@keyframes tk{to{transform:translateX(-50%)}}
+.foot{display:flex;justify-content:space-between;padding:34px 0 60px;font:500 11.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+@media (prefers-reduced-motion:reduce){.hero .bg,.tick div,.sline .c{animation:none}}
+@media (max-width:720px){
+ .w{max-width:calc(100% - 32px)}.nav{height:64px}.nav .links,.nav .bell{display:none}.nav img{height:22px}
+ .hero{min-height:auto}.hc{padding:40px 0 40px}h1{font-size:50px}.sbox{border-radius:18px}.sline .v{font-size:26px}.sline kbd{display:none}
+ .ans b{font-size:16px}.chips a:nth-child(n+4){display:none}.stats{display:grid;grid-template-columns:1fr 1fr;gap:18px}.stats b{font-size:30px}.stats span{display:block;margin-top:6px}
+ .sec{padding-top:56px}.sh{flex-wrap:wrap}.sh span{display:none}.sh h2{font-size:26px}.bento{grid-template-columns:1fr 1fr;grid-template-rows:auto}.t-ct{grid-column:span 2;grid-row:auto;min-height:260px}
+ .tile{padding:20px;border-radius:18px}.tile .big{font-size:46px}.t-al,.t-ask{grid-column:span 2}.t-gl .abbr{font-size:34px}
+ .doc{grid-template-columns:1fr auto;gap:6px 12px;padding:16px}.doc .n{grid-column:1}.doc .ok{grid-column:2;grid-row:1}.doc b{grid-column:1/-1}.doc .m{grid-column:1/-1}
+ .tick{margin-top:56px}
+}
+</style></head><body><header class="hero"><div class="bg"></div>
+<div class="w nav"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE"><nav class="links"><a class="on" href="#">Home</a><a href="areas.html">Areas</a><a href="saved.html">Saved</a><a href="ask.html">Ask an Expert</a><a href="glossary.html">Field Glossary</a></nav>
+<span class="sp"></span><a class="bell" href="notifications.html"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2 22 20H2zm-1 7v5h2V9zm0 7v2h2v-2z"/></svg><i></i></a><span class="av">FA</span></div>
+<div class="w hc"><span class="kick"><i></i>Register live · 352 documents in force</span>
+<h1>Every answer, <span>within reach.</span></h1>
+<div class="sbox"><div class="sline"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.5 4a6.5 6.5 0 0 1 5.2 10.4l4.4 4.4-1.4 1.4-4.4-4.4A6.5 6.5 0 1 1 10.5 4zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z"/></svg><span class="v" id="tq">WI-003</span><span class="c"></span><kbd>/ to search</kbd></div>
+<a class="ans" id="ta" href="document.html"><span class="dot"></span><span><b>Injector Head Operations Manual</b><span>TQ-TWS-CTSS-WI-003 · REV 4.0 · CURRENT, OK TO USE</span></span><span class="go"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M13 5l7 7-7 7-1.4-1.4 4.6-4.6H4v-2h12.2l-4.6-4.6z"/></svg></span></a></div>
+<div class="chips"><a href="search-results.html">pressure</a><a href="search-typing.html">inject</a><a href="seg-coiled-tubing.html">Coiled Tubing</a><a href="glossary.html">H2S</a></div>
+<div class="stats"><div><b>352</b><span>In force</span></div><div><b>25</b><span>Areas</span></div><div><b>20</b><span>Active alerts</span></div><div><b>254</b><span>Field terms</span></div></div></div></header>
+<main class="w">
+<section class="sec"><div class="sh"><h2>Your Coiled Tubing</h2><span>Tuesday 6 October</span><a href="seg-coiled-tubing.html">Open area →</a></div>
+<div class="bento">
+ <a class="tile t-ct" href="seg-coiled-tubing.html"><span class="lab">Your area · Operations</span><h3 style="font-size:44px">Coiled Tubing</h3><div class="row"><span>23 in force</span><span>8 SOPs</span><span>6 manuals</span><span>1 alert</span></div></a>
+ <a class="tile t-al" href="#"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2 22 20H2zm-1 7v5h2V9zm0 7v2h2v-2z"/></svg><p class="lab" style="margin-top:14px">Technical alert · ALT-003</p><h3>Chemical compatibility update for H2S environments</h3><p class="m">Rev 2.0 · Coiled Tubing</p></a>
+ <a class="tile t-sv" href="saved.html"><span class="lab">Saved on this device</span><p class="big" style="margin-top:14px">3</p><p>WI-003 · F001 · SOP-009</p></a>
+ <a class="tile t-gl" href="glossary-term.html"><span class="lab">Field Glossary · term of the day</span><p class="abbr" style="margin-top:14px">BOP</p><p class="def">Blowout Preventer. A large specialised valve installed at the wellhead that can be closed to prevent uncontroll…</p></a>
+ <a class="tile t-ask" href="ask.html"><span class="lab">Stuck on site?</span><h3>Ask the Coiled Tubing Expert</h3><span class="go"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M13 5l7 7-7 7-1.4-1.4 4.6-4.6H4v-2h12.2l-4.6-4.6z"/></svg></span></a>
+</div></section>
+<section class="sec"><div class="sh"><h2>Changed in your area</h2><span>Newest first</span><a href="seg-coiled-tubing.html">View all →</a></div><div class="list"><a class="doc" href="document.html"><span class="n">LL-003</span><b>Lessons from coiled tubing fishing operation</b><span class="m">Rev 4.0 · 16 May 2026</span><span class="ok"><i></i>Current</span></a><a class="doc" href="document.html"><span class="n">SOP-007</span><b>Nitrogen Injection SOP</b><span class="m">Rev 1.0 · 07 Feb 2026</span><span class="ok"><i></i>Current</span></a><a class="doc" href="document.html"><span class="n">SOP-011</span><b>Logging While CT SOP</b><span class="m">Rev 3.0 · 10 Jan 2026</span><span class="ok"><i></i>Current</span></a><a class="doc" href="document.html"><span class="n">WI-003</span><b>Injector Head Operations Manual</b><span class="m">Rev 4.0 · 30 Aug 2025</span><span class="ok"><i></i>Current</span></a><a class="doc" href="document.html"><span class="n">F001</span><b>Pre-Job Safety Checklist</b><span class="m">Rev 4.0 · 20 Jul 2025</span><span class="ok"><i></i>Current</span></a></div></section>
+</main>
+<div class="tick" aria-label="Across TAQA"><div><span><em class="al"></em>ALT-005 · New SIMOPS restriction near active completions · Safety Services</span><span><em class=""></em>M007 · HR Systems (HRMS) User Manual · Human Resources</span><span><em class=""></em>SOP-002 · Access Control Request Procedure · Governance, Risk & Compliance</span><span><em class=""></em>LL-003 · Recruitment timeline reduction, structured interview process adopted · Human Resources</span><span><em class=""></em>S005 · Waste Management Standard · QHSE</span><span><em class=""></em>SOP-010 · Acid Pre-Flush SOP · Fracturing</span><span><em class="al"></em>ALT-005 · New SIMOPS restriction near active completions · Safety Services</span><span><em class=""></em>M007 · HR Systems (HRMS) User Manual · Human Resources</span><span><em class=""></em>SOP-002 · Access Control Request Procedure · Governance, Risk & Compliance</span><span><em class=""></em>LL-003 · Recruitment timeline reduction, structured interview process adopted · Human Resources</span><span><em class=""></em>S005 · Waste Management Standard · QHSE</span><span><em class=""></em>SOP-010 · Acid Pre-Flush SOP · Fracturing</span></div></div>
+<footer class="w foot"><span>RISE · TAQA knowledge</span><span>Direction A · Night Shift · design exploration</span></footer><script>(function(){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;var t=document.getElementById('tq'),a=document.getElementById('ta'),w='WI-003',i=0;
+a.classList.add('wait');t.textContent='';setTimeout(function s(){t.textContent=w.slice(0,++i);if(i<w.length)setTimeout(s,130);else setTimeout(function(){a.classList.remove('wait')},350)},700)})();</script></body></html>

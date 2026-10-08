@@ -6,6 +6,10 @@ from reg import REG_ROOT, e
 
 P = 'proposed'
 J = [
+ ('Bold homepage directions', 'Surprise me: two bold takes on Home, real data and TAQA photos.', [
+   ('bold-night.html', 'A · Night Shift', 'Dark and cinematic: moving photo, glass search with the live answer, bento cards, glowing status.', 'new'),
+   ('bold-day.html', 'B · Daylight', 'Bright and modern: big type, pill search, floating cards on the photo, soft tiles.', 'new'),
+ ]),
  ('Landing', 'The front door: what RISE is, shown before sign-in and to anyone new to it.', [
    ('landing.html', 'Landing page', 'Thesis, live search answer, real screens and figures, three ways in, file-to-force, five roles.', 'new'),
  ]),
