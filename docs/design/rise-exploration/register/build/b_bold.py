@@ -255,10 +255,10 @@ cssHero = '''
 # ── All of TAQA, calm: one big photo, the three families in one organised panel ──
 import b_segments as SG
 _n = lambda g: sum(1 for k in SG.ALLK if SEGS[k]['group'] == g)
-_FAM3 = [('segment', 'Operational segments', 'Coiled Tubing, Drilling, Fracturing and more', '#segment'),
-         ('product', 'Products &amp; Technology', 'Edmonton, Stavanger and Aberdeen', '#product'),
-         ('function', 'Corporate functions', 'QHSE, HR, Finance, IT and more', '#function')]
-_rows = ''.join(f'''<a href="areas.html{h}"><span class="k">0{i + 1}</span><b>{t}</b><span class="s">{sub}</span><span class="c">{_n(g)} areas <i>→</i></span></a>''' for i, (g, t, sub, h) in enumerate(_FAM3))
+_FAM3 = [('segment', 'Operational segments', 'Coiled Tubing, Drilling, Fracturing and more', 'family-segments.html'),
+         ('product', 'Products &amp; Technology', 'Edmonton, Stavanger and Aberdeen', 'family-products.html'),
+         ('function', 'Corporate functions', 'QHSE, HR, Finance, IT and more', 'family-functions.html')]
+_rows = ''.join(f'''<a href="{h}"><span class="k">0{i + 1}</span><b>{t}</b><span class="s">{sub}</span><span class="c">{_n(g)} areas</span></a>''' for i, (g, t, sub, h) in enumerate(_FAM3))
 ALLSEC = f'''<section class="sec" id="all"><div class="one"><div class="ph" role="img" aria-label="TAQA crew on site"></div>
 <div class="cap"><span>One TAQA</span><h2>Three families,<br>one register.</h2></div>
 <nav class="three">{_rows}</nav></div></section>'''

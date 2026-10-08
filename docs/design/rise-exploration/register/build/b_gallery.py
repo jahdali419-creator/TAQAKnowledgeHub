@@ -8,6 +8,9 @@ P = 'proposed'
 J = [
  ('Bold homepage directions', 'Surprise me: two bold takes on Home, real data and TAQA photos.', [
    ('bold-mix.html', 'Chosen · Night Shift hero + Daylight cards', 'Your pick: the dark moving-photo hero with the live search answer, then bright rounded cards and the list.', 'new'),
+   ('family-segments.html', 'Family · Operational segments', 'Opens from the Home photo panel: one big photo, then the 11 segments in one clean list.', 'new'),
+   ('family-products.html', 'Family · Products & Technology', 'The three Centres of Excellence: Edmonton, Stavanger and Aberdeen.', 'new'),
+   ('family-functions.html', 'Family · Corporate functions', 'The 10 corporate functions in one clean list.', 'new'),
    ('bold-night.html', 'A · Night Shift', 'Dark and cinematic: moving photo, glass search with the live answer, bento cards, glowing status.', 'new'),
    ('bold-day.html', 'B · Daylight', 'Bright and modern: big type, pill search, floating cards on the photo, soft tiles.', 'new'),
  ]),
