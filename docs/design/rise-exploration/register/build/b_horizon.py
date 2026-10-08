@@ -12,7 +12,7 @@ AREAS = [(SEGS[k]['spl'], SEGS[k]['name']) for k in SEGS if k != 'company']
 tick = ''.join(f'<span><b>{c}</b>{n}</span>' for c, n in AREAS)
 WI3 = BYNUM['TQ-TWS-CTSS-WI-003']; S3 = BYNUM['TQ-TWS-CTSS-SOP-003']
 FAN = [('seg-wireline.jpg', 'Wireline'), ('seg-qhse.jpg', 'QHSE'), ('taqa-hero.webp', 'Coiled Tubing'), ('seg-pt-intervention-coe.jpg', 'Stavanger'), ('seg-marine-services.jpg', 'Marine')]
-fan = ''.join(f'<figure class="f f{i}"><img src="../img/{im}" alt="{cap}"><figcaption>{cap}</figcaption></figure>' for i, (im, cap) in enumerate(FAN))
+fan = ''.join(f'<figure class="f f{i}"><img src="../img/tone/{im}" alt="{cap}"><figcaption>{cap}</figcaption></figure>' for i, (im, cap) in enumerate(FAN))
 
 def words(text, cls=''):
     return ' '.join(f'<span class="wd {cls}"><span style="--d:{i}">{w}</span></span>' for i, w in enumerate(text.split()))
@@ -242,11 +242,11 @@ html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name
 <div class="bento">
  <div class="b s4"><h3>Current or not, at a glance</h3><p>Every document tells you if you can use it, before you open it.</p>
   <div class="flip"><div class="card a"><span class="dot"></span><span><b>Current, OK to use</b><small>WI-003 · REV {WI3["revision"]}</small></span></div><div class="card z"><span class="dot"></span><span><b>Superseded, do not use</b><small>SOP-003 · REV {S3["revision"]}</small></span></div></div></div>
- <div class="b s2 r2 ph"><img src="../img/seg-well-testing.jpg" alt="Well Testing crew"><div class="tx"><h3>All 25 areas</h3><p>Segments, functions and Centres of Excellence.</p></div></div>
+ <div class="b s2 r2 ph"><img src="../img/tone/seg-well-testing.jpg" alt="Well Testing crew"><div class="tx"><h3>All 25 areas</h3><p>Segments, functions and Centres of Excellence.</p></div></div>
  <div class="b s2 dark"><h3>Ask an Expert</h3><div class="chat"><span class="me">Pressure dropped to 900 psi on unit 3</span><span>Check WI-003 §4.2 first. Calling you now.</span></div></div>
  <div class="b s2"><h3>Field Glossary</h3><div class="term">BOP<small>Blowout Preventer · 1 of {len(GLOSS)} terms</small></div></div>
  <div class="b s3"><h3>English and Arabic</h3><div class="arb">إجراء التشغيل القياسي للحقن بالنيتروجين<small>SOP-007 · AR</small></div></div>
- <div class="b s3 ph"><img src="../img/seg-marine-services.jpg" alt="Marine Services vessel"><div class="tx"><h3>Offline, offshore</h3><p>Saved documents open without a signal.</p></div></div>
+ <div class="b s3 ph"><img src="../img/tone/seg-marine-services.jpg" alt="Marine Services vessel"><div class="tx"><h3>Offline, offshore</h3><p>Saved documents open without a signal.</p></div></div>
 </div></section>
 
 <section class="close"><div class="w cl"><h2 class="rv">Know it’s <em>current.</em></h2>

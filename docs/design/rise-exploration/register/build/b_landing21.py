@@ -29,7 +29,7 @@ def img_of(k):
     f = f'seg-{k}.jpg'
     return f if os.path.exists(os.path.join(REG_ROOT, 'img', f)) else 'taqa-hero-2.jpg'
 HAND = ['coiled-tubing', 'wireline', 'fracturing', 'well-testing', 'marine-services', 'pt-drilling-coe', 'geothermal-coe']
-cards = [{'id': k, 'src': f'../img/{img_of(k)}', 'title': SEGS[k]['name'].replace(' Center of Excellence', ''), 'desc': SG.META.get(k, ('', ''))[1], 'n': count_for(k), 'h': f'seg-{k}.html'} for k in HAND]
+cards = [{'id': k, 'src': f'../img/tone/{img_of(k)}', 'title': SEGS[k]['name'].replace(' Center of Excellence', ''), 'desc': SG.META.get(k, ('', ''))[1], 'n': count_for(k), 'h': f'seg-{k}.html'} for k in HAND]
 CARDS = json.dumps(cards, ensure_ascii=False)
 tick = ''.join(f'<li><b>{SEGS[k]["spl"]}</b>{SEGS[k]["name"]}</li>' for k in SG.ALLK if k != 'company')
 
@@ -329,10 +329,10 @@ html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name
 <section class="w sec" id="inside" aria-labelledby="ih"><div class="rv"><p class="eb mono"><i></i>Inside RISE</p><h2 class="h2" id="ih">Built for site, <em>not the desk.</em></h2></div>
 <div class="bento">
  <div class="sp s4"><h3>Current or not, before you open it</h3><p>The status travels with the document everywhere it appears.</p><div class="vis pillrow"><span class="c"><i></i>Current, OK to use</span><span class="x"><i></i>Superseded, do not use</span></div></div>
- <div class="sp s2 ph"><img src="../img/seg-wireline.jpg" alt="Wireline crew at work" loading="lazy"><div class="sh"></div><div class="tx"><h3>25 areas</h3><p>Segments, functions and Centres of Excellence.</p></div></div>
+ <div class="sp s2 ph"><img src="../img/tone/seg-wireline.jpg" alt="Wireline crew at work" loading="lazy"><div class="sh"></div><div class="tx"><h3>25 areas</h3><p>Segments, functions and Centres of Excellence.</p></div></div>
  <div class="sp s2"><h3>Field Glossary</h3><div class="vis"><span class="big">BOP</span><p>Blowout Preventer · 1 of {len(GLOSS)} terms</p></div></div>
  <div class="sp s2"><h3>English and Arabic</h3><div class="vis"><p class="arb">إجراء التشغيل القياسي للحقن بالنيتروجين</p><p class="mono" style="text-align:right;margin-top:6px">SOP-007 · AR</p></div></div>
- <div class="sp s2 ph"><img src="../img/seg-marine-services.jpg" alt="Marine services vessel at sea" loading="lazy"><div class="sh"></div><div class="tx"><h3>Offline, offshore</h3><p>Saved documents open without a signal.</p></div></div>
+ <div class="sp s2 ph"><img src="../img/tone/seg-marine-services.jpg" alt="Marine services vessel at sea" loading="lazy"><div class="sh"></div><div class="tx"><h3>Offline, offshore</h3><p>Saved documents open without a signal.</p></div></div>
 </div></section>
 
 <div class="mq" aria-label="All areas"><div class="track"><ul>{tick}{tick}</ul></div><button type="button" aria-pressed="false">Pause</button></div>

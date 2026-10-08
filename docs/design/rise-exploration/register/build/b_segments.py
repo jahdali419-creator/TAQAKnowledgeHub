@@ -95,18 +95,21 @@ def seg_page(key):
     return key, name, fam, vis, alerts, code
 
 ALLK = ['company'] + [k for f in ('segment', 'function', 'product') for k in sorted([k for k, s in SEGS.items() if s['group'] == f], key=lambda k: SEGS[k]['name'])]
-built = [seg_page(k) for k in ALLK]
+# Importing this module (b_seg2, b_family, b_bold, b_landing21 reuse META/ALLK…) must not rewrite pages:
+# the old seg-* template and the board are written only when this file is run directly.
+if __name__ == '__main__':
+    built = [seg_page(k) for k in ALLK]
 
-# board: every area at a glance, each with its own code and library strip
-def tile(b):
-    key, name, fam, vis, alerts, code = b
-    al = f' · <em>{len(alerts)} alert{"s" if len(alerts) != 1 else ""}</em>' if alerts else ''
-    return (f'<a class="tile" href="seg-{key}.html"><span class="tc">{code}</span><b>{name}</b><span class="tf">{FAMILY[fam]}</span>'
-            f'{strip(vis, big=False)}<span class="tn"><b>{len(vis)}</b> in force{al}</span></a>')
-board = f'''<header class="phead"><div class="meta"><span class="lab">Areas · every landing page</span><span class="lab"><b>25</b> areas · one template</span></div>
-  <h1 class="t0">Twenty-five areas. <span class="m phx">Each with its own signature.</span></h1>
-  <p class="sub">The same landing page for every area, filled from the register. What tells them apart is real: the area’s register code, and the mix of its library, drawn to scale.</p></header>
-<div class="legend2">{"".join(f'<span><i class="t-{k}"></i>{SHORT[k]}</span>' for k in ORDER)}<span class="sp"></span></div>
-{"".join(f'<p class="grph" style="margin-top:34px"><b>{t}</b><span>{len([b for b in built if b[2] == g])}</span></p><div class="tiles">{"".join(tile(b) for b in built if b[2] == g)}</div>' for g, t in (("company", "Company Wide"), ("segment", "Operational segments"), ("function", "Corporate functions"), ("product", "Products &amp; Technology")))}'''
-page('segments.html', 'RISE · All area landings', board, 'areas', dock_active='areas')
-print('segments', len(built))
+    # board: every area at a glance, each with its own code and library strip
+    def tile(b):
+        key, name, fam, vis, alerts, code = b
+        al = f' · <em>{len(alerts)} alert{"s" if len(alerts) != 1 else ""}</em>' if alerts else ''
+        return (f'<a class="tile" href="seg-{key}.html"><span class="tc">{code}</span><b>{name}</b><span class="tf">{FAMILY[fam]}</span>'
+                f'{strip(vis, big=False)}<span class="tn"><b>{len(vis)}</b> in force{al}</span></a>')
+    board = f'''<header class="phead"><div class="meta"><span class="lab">Areas · every landing page</span><span class="lab"><b>25</b> areas · one template</span></div>
+      <h1 class="t0">Twenty-five areas. <span class="m phx">Each with its own signature.</span></h1>
+      <p class="sub">The same landing page for every area, filled from the register. What tells them apart is real: the area’s register code, and the mix of its library, drawn to scale.</p></header>
+    <div class="legend2">{"".join(f'<span><i class="t-{k}"></i>{SHORT[k]}</span>' for k in ORDER)}<span class="sp"></span></div>
+    {"".join(f'<p class="grph" style="margin-top:34px"><b>{t}</b><span>{len([b for b in built if b[2] == g])}</span></p><div class="tiles">{"".join(tile(b) for b in built if b[2] == g)}</div>' for g, t in (("company", "Company Wide"), ("segment", "Operational segments"), ("function", "Corporate functions"), ("product", "Products &amp; Technology")))}'''
+    page('segments.html', 'RISE · All area landings', board, 'areas', dock_active='areas')
+    print('segments', len(built))

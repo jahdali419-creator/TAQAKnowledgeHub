@@ -150,7 +150,7 @@ def page(name, title, body, active='home', role='employee', acting=None, dock_ac
 </head>
 <body class="nv{' pt' if ptitle(name) else ''}">
 {acting_bar(acting) if acting else ""}
-<section class="nvx{'' if hero else ' bare'}"><div class="bg" style="background-image:url(../img/{hero_img(name)})"></div>
+<section class="nvx{'' if hero else ' bare'}"><div class="bg" style="background-image:url(../img/tone/{hero_img(name)})"></div>
 {nav(active, role, ptitle(name))}
 {f'<div class="wrap nvh">{hero}</div>' if hero else ''}
 </section>
@@ -337,7 +337,7 @@ FAM_TITLE = {'segment': ('Operational segments', 'The business: service lines th
 PHOTO_CAP = {'taqa-hero.webp': 'TAQA crew on site', 'taqa-hero-2.jpg': 'Maintenance on a unit', 'taqa-hero-3.jpeg': 'Inspection in the workshop',
              'taqa-hero-4.jpg': 'Crew with the AZR Technologies unit', 'taqa-hero-5.jpeg': 'Coiled tubing control cabin', 'product-centre.webp': 'Precision parts, checked by hand'}
 def plate(img, cap, cls=''):
-    return f'<figure class="plate {cls}"><img src="../img/{img}" alt="{cap}" loading="lazy"><figcaption>{cap}</figcaption></figure>'
+    return f'<figure class="plate {cls}"><img src="../img/tone/{img}" alt="{cap}" loading="lazy"><figcaption>{cap}</figcaption></figure>'
 FAM_LINE = {'segment': 'Operational segments', 'function': 'Corporate functions', 'product': 'Products & Technology'}
 def explore(role='employee', home='coiled-tubing', head=True):
     """Home: the three families as calm register rows, one photo plate each. Full lists live on Areas."""

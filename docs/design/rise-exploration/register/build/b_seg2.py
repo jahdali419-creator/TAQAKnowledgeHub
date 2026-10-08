@@ -72,7 +72,7 @@ def page_html(key):
     sub = f'{tag}{" · " + s["splName"] if s.get("splName") and s["splName"] != name and key != "company" else ""}'
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RISE · {name}</title><link rel="stylesheet" href="../../kit/fonts.css"><link rel="stylesheet" href="../css/nova.css"></head><body>
-<header class="mx sg"><div class="bg" style="background-image:url(../img/{ph})"></div>
+<header class="mx sg"><div class="bg" style="background-image:url(../img/tone/{ph})"></div>
 <div class="w hn"><a href="bold-mix.html"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE"></a><nav class="links"><a href="bold-mix.html">Home</a><a class="on" href="segments.html">Areas</a><a href="saved.html">Saved</a><a href="ask.html">Ask</a><a href="glossary.html">Glossary</a></nav>
 <span class="sp"></span><a class="up" href="upload.html">Upload</a><span class="av">FA</span></div>
 <div class="w sgh"><div class="sgl">
@@ -81,7 +81,7 @@ def page_html(key):
   <div class="meta"><span class="code">{code}</span><span class="numl">{num}-…</span>{f'<span class="upd">Updated {days} days ago</span>' if days is not None else ''}</div>
   {switch}{prov}
 </div>
-<figure class="sgp"><img src="../img/{ph}" alt="{name}"{f' style="object-position:{POS[key]}"' if key in POS else ""}><figcaption><span>{code}</span>{name}</figcaption></figure></div></header>
+<figure class="sgp"><img src="../img/tone/{ph}" alt="{name}"{f' style="object-position:{POS[key]}"' if key in POS else ""}><figcaption><span>{code}</span>{name}</figcaption></figure></div></header>
 <main class="w">
 <div class="mxstats"><div class="stats">{tiles}</div></div>
 <section class="sec"><div class="sh"><div><h2>Important now</h2><p>{name} · {"Operations · " if fam == "segment" else ""}Tuesday 6 October</p></div></div>{now}{contrib}</section>

@@ -106,7 +106,7 @@ def build(g, slug, title, desc, hero):
     for k in keys:
         s = SEGS[k]; tag = S.META.get(k, ('', ''))[0]
         im = img_of(k) if g != 'function' else None
-        pic = f'<span class="th" style="background-image:url(../img/{im})"></span>' if im else f'<span class="bd">{s["spl"]}</span>'
+        pic = f'<span class="th" style="background-image:url(../img/tone/{im})"></span>' if im else f'<span class="bd">{s["spl"]}</span>'
         if g == 'product': sub = f'{tag} · Centre of Excellence'
         elif g == 'function': sub = tag if tag.lower() not in (s['name'].lower(), s['spl'].lower()) else 'Corporate function'
         else: sub = f'{tag} · {s["spl"]}'
@@ -119,14 +119,14 @@ def build(g, slug, title, desc, hero):
         im = img_of(k) if (g != 'function' or k in ('qhse', 'learning-center', 'geothermal-coe')) else None
         name = s_['name'].replace(' Center of Excellence', '') if g == 'product' else s_['name']
         on = ' on' if i == 0 else ''
-        bgst = f' style="--img:url(../img/{im})"' if im else ''
+        bgst = f' style="--img:url(../img/tone/{im})"' if im else ''
         you = '<span class="you">Your area</span>' if k == 'coiled-tubing' else ''
         sl += f'''<a class="it{on}{'' if im else ' np'}" href="seg-{k}.html" data-i="{i}"{bgst}><span class="i">{i + 1:02d}</span><b>{name}{you}</b><span class="c">{count_for(k)}</span></a>'''
-        art = f'<span class="ph" style="background-image:url(../img/{im})"></span>' if im else f'<span class="ty">{s_["spl"]}</span>'
+        art = f'<span class="ph" style="background-image:url(../img/tone/{im})"></span>' if im else f'<span class="ty">{s_["spl"]}</span>'
         pn += f'''<div class="pn{on}{'' if im else ' np'}" data-i="{i}">{art}<div class="pc"><span class="tg">{tag}</span><h2>{name}</h2><p>{desc_}</p>
   <div class="ft"><span><b>{count_for(k)}</b> documents in force</span><a href="seg-{k}.html">Open {name}</a></div></div></div>'''
     others = ''.join(f'<a href="family-{sl}.html">{t}</a>' for gg, sl, t, *_ in FAMS if gg != g)
-    body = f'''<header class="mx fh"><div class="bg" style="background-image:url(../img/{hero})"></div>
+    body = f'''<header class="mx fh"><div class="bg" style="background-image:url(../img/tone/{hero})"></div>
 <div class="w hn"><a href="bold-mix.html"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE"></a><nav class="links"><a href="bold-mix.html">Home</a><a class="on" href="areas.html">Areas</a><a href="saved.html">Saved</a><a href="ask.html">Ask</a><a href="glossary.html">Glossary</a></nav>
 <span class="sp"></span><a class="up" href="upload.html">Upload</a><span class="av">FA</span></div>
 <div class="w hc"><a class="crumbp" href="bold-mix.html#all">← Home <i>·</i> One TAQA</a>
