@@ -49,7 +49,7 @@ ROLES = {
 }
 def set_roles(r): ROLES.update(r)
 
-NAV_MAIN = [('home', 'Home', 'home.html'), ('areas', 'Areas', 'areas.html'), ('saved', 'Saved', 'saved.html'),
+NAV_MAIN = [('home', 'Home', 'bold-mix.html'), ('areas', 'Areas', 'areas.html'), ('saved', 'Saved', 'saved.html'),
             ('ask', 'Ask an Expert', 'ask.html'), ('glossary', 'Field Glossary', 'glossary.html')]
 
 # Phone top bar: where you are, and the way back (phone only; desktop keeps the text navigation).
@@ -86,7 +86,7 @@ def nav(active, role, pt=None):
             f'<a class="ctl{" on" if k == active else ""}" href="{h}"{" aria-current=page" if k == active else ""}>{t}{f"<sup>{n}</sup>" if n else ""}</a>' for k, t, h, n in R['control'])
     up = '<a class="up" href="upload.html">Upload</a>' if R['upload'] else ''
     return f'''<div class="wrap"><header class="nav">
-    <a class="logo" href="home.html" aria-label="RISE home"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE" width="69" height="26"></a>
+    <a class="logo" href="bold-mix.html" aria-label="RISE home"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE" width="69" height="26"></a>
     {f'<a class="pback" href="{pt[1]}" aria-label="Back">{ico("back")}</a><span class="ptl">{pt[0]}</span>' if pt else ''}
     <nav class="links" aria-label="Main">{links}</nav>
     <span class="sp"></span>
@@ -101,7 +101,7 @@ def nav(active, role, pt=None):
 
 def dock(active, role):
     R = ROLES[role]
-    items = [('home', 'Home', 'home.html', 'home'), ('search', 'Search', 'search.html', 'search'), ('areas', 'Areas', 'areas.html', 'areas'),
+    items = [('home', 'Home', 'bold-mix.html', 'home'), ('search', 'Search', 'search.html', 'search'), ('areas', 'Areas', 'areas.html', 'areas'),
              ('saved', 'Saved', 'saved.html', 'saved'), ('more', 'More', {'owner': 'more-director.html', 'qms': 'more-qms.html'}.get(role, 'more.html'), 'more')]
     dot = any(n for *_, n in R['control'])
     return '<nav class="dock" aria-label="Main">' + ''.join(
@@ -111,7 +111,34 @@ def acting_bar(a):
     return f'''<div class="acting" role="status"><div class="wrap"><i></i><span>Acting for <b>{a["for"]}</b></span><span class="mute dk-only">{a["perm"]}</span>
   <span class="mute">until {a["until"]}</span><span class="sp"></span><span class="mute dk-only">Signed in as {a["me"]}</span><a href="{a.get("stop", "#")}">Stop acting</a></div></div>'''
 
+# Hero photo per screen family (the chosen style: dark photo hero on top, bright cards below)
+HERO_IMG = [('search', 'seg-wireline.jpg'), ('document', 'seg-coiled-tubing.jpg'), ('form', 'seg-coiled-tubing.jpg'), ('area', 'seg-coiled-tubing.jpg'),
+            ('upload', 'seg-pt-intervention-coe.jpg'), ('glossary', 'seg-learning-center.jpg'), ('ask', 'seg-qhse.jpg'), ('saved', 'seg-drilling.jpg'),
+            ('notifications', 'seg-fracturing.jpg'), ('desk', 'seg-inspection.jpg'), ('manage', 'seg-inspection.jpg'), ('delegation', 'seg-inspection.jpg'),
+            ('master', 'seg-pt-completions-coe.jpg'), ('workbench', 'seg-pt-completions-coe.jpg'), ('account', 'seg-marine-services.jpg'),
+            ('more', 'seg-marine-services.jpg'), ('segments', 'seg-geothermal-coe.jpg'), ('home', 'taqa-hero.webp')]
+def hero_img(name):
+    for k, f in HERO_IMG:
+        if name.startswith(k): return f
+    return 'taqa-hero-3.jpeg'
+_PHEAD = re.compile(r'<header class="phead[^"]*".*?</header>', re.S)
+_FOLLOW = re.compile(r'\s*(<div class="q[^"]*".*?</div>|<p class="try".*?</p>|<nav class="fbar".*?</nav>|<div class="steps".*?</div>|<nav class="steps".*?</nav>)', re.S)
+def split_hero(body):
+    """What sits in the dark hero: everything before <!--/hero-->, else the first page header."""
+    if '<!--/hero-->' in body:
+        h, b = body.split('<!--/hero-->', 1); return h, b
+    m = _PHEAD.search(body)
+    if m and m.start() < 400:
+        end = m.end()
+        while True:  # the search line, its hints and the type filter ride along in the hero
+            n = _FOLLOW.match(body, end)
+            if not n: break
+            end = n.end()
+        return body[:end], body[end:]
+    return '', body
+
 def page(name, title, body, active='home', role='employee', acting=None, dock_active=None, overlays='', script=''):
+    hero, rest = split_hero(body)
     html = f'''<!doctype html>
 <html lang="en" dir="ltr">
 <head>
@@ -119,12 +146,16 @@ def page(name, title, body, active='home', role='employee', acting=None, dock_ac
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{e(title)}</title>
 <link rel="stylesheet" href="../css/register.css">
+<link rel="stylesheet" href="../css/nova-skin.css">
 </head>
-<body{' class="pt"' if ptitle(name) else ''}>
+<body class="nv{' pt' if ptitle(name) else ''}">
 {acting_bar(acting) if acting else ""}
+<section class="nvx{'' if hero else ' bare'}"><div class="bg" style="background-image:url(../img/{hero_img(name)})"></div>
 {nav(active, role, ptitle(name))}
+{f'<div class="wrap nvh">{hero}</div>' if hero else ''}
+</section>
 <main class="wrap">
-{body}
+{rest}
 <div class="page-end"></div>
 </main>
 {dock(dock_active or active, role)}
