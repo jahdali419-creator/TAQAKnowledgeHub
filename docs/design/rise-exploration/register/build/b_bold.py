@@ -217,3 +217,53 @@ bodyB = f'''<div class="w nav"><img src="../../kit/brand/rise-lockup-header.png"
 </main><footer class="w foot"><span>RISE · TAQA knowledge</span><span>Direction B · Daylight · design exploration</span></footer>'''
 open(os.path.join(PAGES, 'bold-day.html'), 'w').write(shell('RISE · Daylight', cssB, bodyB, TYPE_SCRIPT))
 print('bold ok')
+
+# ════════════════ MIX · Night Shift hero + Daylight body (chosen) ════════════════
+cssHero = '''
+.mx{position:relative;min-height:720px;display:flex;flex-direction:column;overflow:hidden;background:#070D0D;color:#F2F5F3;border-radius:0 0 36px 36px}
+.mx .bg{position:absolute;inset:0;background:url(../img/taqa-hero-5.jpeg) center 40%/cover;transform:scale(1.06);animation:drift 28s ease-in-out infinite alternate}
+.mx .bg::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 70% 10%,rgba(7,13,13,.25),rgba(7,13,13,.86) 62%,#070D0D 100%),linear-gradient(to bottom,rgba(7,13,13,.55),transparent 30%)}
+@keyframes drift{to{transform:scale(1.14) translate(-1.5%,-1%)}}
+.mx .hn{position:relative;z-index:2;display:flex;align-items:center;gap:30px;height:84px}
+.mx .hn img{height:28px;filter:brightness(0) invert(1)}
+.mx .hn .links{display:flex;gap:6px;padding:5px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(14px)}
+.mx .hn .links a{padding:9px 16px;border-radius:999px;font:500 14px/1 var(--ui);color:#C9D3D0}.mx .hn .links a.on{background:#fff;color:#0E1B1A}
+.mx .hn .sp{flex:1}.mx .hn .up{padding:11px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);font:500 14px var(--ui);color:#fff}
+.mx .hn .av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#00BFB2;color:#062221;font:700 13px var(--ui)}
+.mx .hc{position:relative;z-index:2;margin-top:auto;padding:0 0 64px}
+.mx .kick{display:inline-flex;align-items:center;gap:10px;padding:8px 14px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(255,255,255,.06);backdrop-filter:blur(12px);font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#D7E0DD}
+.mx .kick i{width:7px;height:7px;border-radius:50%;background:#3CD69B;box-shadow:0 0 12px #3CD69B}
+.mx h1{margin-top:22px;font:700 clamp(54px,8vw,120px)/.92 var(--display);letter-spacing:-.05em;max-width:12ch}
+.mx h1 span{background:linear-gradient(90deg,#fff,#00BFB2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mx .sbox{margin-top:32px;max-width:760px;padding:10px;border:1px solid rgba(255,255,255,.14);border-radius:22px;background:rgba(15,25,24,.55);backdrop-filter:blur(18px);box-shadow:0 40px 90px -30px rgba(0,0,0,.8)}
+.mx .sline{display:flex;align-items:center;gap:14px;padding:12px 16px}.mx .sline svg{width:26px;height:26px;color:#00BFB2}
+.mx .sline .v{font:600 34px/1 var(--display);letter-spacing:-.02em}.mx .sline .c{width:3px;height:34px;background:#FF6720;animation:blink 1s steps(1) infinite}
+.mx .sline kbd{margin-left:auto;font:500 12px var(--mono);padding:6px 9px;border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#8FA09C}
+.mx .ans{display:flex;align-items:center;gap:16px;margin:4px 6px 6px;padding:16px 18px;border-radius:14px;background:linear-gradient(90deg,rgba(60,214,155,.16),rgba(60,214,155,.04));border:1px solid rgba(60,214,155,.25);transition:opacity .4s,transform .4s}
+.mx .ans.wait{opacity:0;transform:translateY(8px)}.mx .ans .dot{width:12px;height:12px;border-radius:50%;background:#3CD69B;box-shadow:0 0 16px #3CD69B}
+.mx .ans b{font:700 19px/1.2 var(--display)}.mx .ans span span{display:block;margin-top:3px;font:500 12px/1 var(--mono);color:#B6C6C1;letter-spacing:.04em}.mx .ans .go{margin-left:auto;color:#3CD69B}
+.mx .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.mx .chips a{padding:9px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);font:500 13.5px/1 var(--ui);color:#D7E0DD}
+.mxstats{position:relative;z-index:3;margin-top:-44px}
+@media (prefers-reduced-motion:reduce){.mx .bg,.mx .sline .c{animation:none}}
+@media (max-width:720px){
+ .mx{min-height:auto;border-radius:0 0 26px 26px}.mx .hn{height:64px}.mx .hn .links,.mx .hn .up{display:none}.mx .hn img{height:22px}
+ .mx .hc{padding:36px 0 70px}.mx h1{font-size:48px}.mx .sline .v{font-size:26px}.mx .sline kbd{display:none}.mx .ans b{font-size:16px}.mx .chips a:nth-child(n+4){display:none}
+ .mxstats{margin-top:-40px}
+}
+'''
+start = bodyB.find('<div class="stats">')
+stats_end = bodyB.find('</div></div>', start) + len('</div></div>')
+statsB = bodyB[start:stats_end]
+rest = bodyB[bodyB.find('<section class="sec">'):].replace('Direction B · Daylight · design exploration', 'Home · Night Shift hero + Daylight cards · design exploration')
+bodyM = f'''<header class="mx"><div class="bg"></div>
+<div class="w hn"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE"><nav class="links"><a class="on" href="#">Home</a><a href="areas.html">Areas</a><a href="saved.html">Saved</a><a href="ask.html">Ask</a><a href="glossary.html">Glossary</a></nav>
+<span class="sp"></span><a class="up" href="upload.html">Upload</a><span class="av">FA</span></div>
+<div class="w hc"><span class="kick"><i></i>Register live · {len(EMP)} documents in force</span>
+<h1>Every answer, <span>within reach.</span></h1>
+<div class="sbox"><div class="sline">{ic("search")}<span class="v" id="tq">WI-003</span><span class="c"></span><kbd>/ to search</kbd></div>
+<a class="ans" id="ta" href="document.html"><span class="dot"></span><span><b>Injector Head Operations Manual</b><span>TQ-TWS-CTSS-WI-003 · REV 4.0 · CURRENT, OK TO USE</span></span><span class="go">{ic("arrow")}</span></a></div>
+<div class="chips"><a href="search-results.html">pressure</a><a href="search-typing.html">inject</a><a href="seg-coiled-tubing.html">Coiled Tubing</a><a href="glossary.html">H2S</a></div></div></header>
+<main class="w"><div class="mxstats">{statsB}</div>
+{rest}'''
+open(os.path.join(PAGES, 'bold-mix.html'), 'w').write(shell('RISE · Home', cssB + cssHero, bodyM, TYPE_SCRIPT))
+print('mix ok')

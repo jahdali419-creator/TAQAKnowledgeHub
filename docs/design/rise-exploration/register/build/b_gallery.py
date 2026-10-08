@@ -7,6 +7,7 @@ from reg import REG_ROOT, e
 P = 'proposed'
 J = [
  ('Bold homepage directions', 'Surprise me: two bold takes on Home, real data and TAQA photos.', [
+   ('bold-mix.html', 'Chosen · Night Shift hero + Daylight cards', 'Your pick: the dark moving-photo hero with the live search answer, then bright rounded cards and the list.', 'new'),
    ('bold-night.html', 'A · Night Shift', 'Dark and cinematic: moving photo, glass search with the live answer, bento cards, glowing status.', 'new'),
    ('bold-day.html', 'B · Daylight', 'Bright and modern: big type, pill search, floating cards on the photo, soft tiles.', 'new'),
  ]),
