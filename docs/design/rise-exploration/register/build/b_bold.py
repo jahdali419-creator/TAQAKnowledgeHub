@@ -252,31 +252,39 @@ cssHero = '''
 }
 '''
 
-# ── All of TAQA, calm: one card per family (user found the full grid too busy) ──
+# ── All of TAQA, calm: one big photo, the three families in one organised panel ──
 import b_segments as SG
 _n = lambda g: sum(1 for k in SG.ALLK if SEGS[k]['group'] == g)
-_docs = lambda g: sum(count_for(k) for k in SG.ALLK if SEGS[k]['group'] == g)
-_FAM3 = [('segment', 'Operational segments', 'seg-coiled-tubing.jpg', 'Coiled Tubing · Drilling · Fracturing · Wireline and more', '#segment'),
-         ('product', 'Products &amp; Technology', 'seg-pt-drilling-coe.jpg', 'Edmonton · Stavanger · Aberdeen', '#product'),
-         ('function', 'Corporate functions', 'seg-qhse.jpg', 'QHSE · HR · Finance · IT and more', '#function')]
-_cards = ''.join(f'''<a class="f3" href="areas.html{h}" style="background-image:url(../img/{img})"><span class="n">{_n(g)}</span>
-  <span class="tx"><b>{t}</b><span>{sub}</span><span class="dc">{_docs(g)} documents in force</span></span><span class="arr">→</span></a>''' for g, t, img, sub, h in _FAM3)
-ALLSEC = f'''<section class="sec" id="all"><div class="sh"><div><h2>All of TAQA</h2><p>Three families · 25 areas</p></div></div>
-<div class="f3s">{_cards}</div></section>'''
+_FAM3 = [('segment', 'Operational segments', 'Coiled Tubing, Drilling, Fracturing and more', '#segment'),
+         ('product', 'Products &amp; Technology', 'Edmonton, Stavanger and Aberdeen', '#product'),
+         ('function', 'Corporate functions', 'QHSE, HR, Finance, IT and more', '#function')]
+_rows = ''.join(f'''<a href="areas.html{h}"><span class="k">0{i + 1}</span><b>{t}</b><span class="s">{sub}</span><span class="c">{_n(g)} areas <i>→</i></span></a>''' for i, (g, t, sub, h) in enumerate(_FAM3))
+ALLSEC = f'''<section class="sec" id="all"><div class="one"><div class="ph" role="img" aria-label="TAQA crew on site"></div>
+<div class="cap"><span>One TAQA</span><h2>Three families,<br>one register.</h2></div>
+<nav class="three">{_rows}</nav></div></section>'''
 cssAll = """
-.f3s{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
-.f3{position:relative;display:flex;flex-direction:column;justify-content:flex-end;min-height:420px;padding:28px;border-radius:28px;overflow:hidden;background:#0E1B1A center/cover;color:#fff;isolation:isolate;transition:transform .3s,box-shadow .3s}
-.f3::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,rgba(7,13,13,.96) 12%,rgba(7,13,13,.55) 50%,rgba(7,13,13,.25) 72%,rgba(7,13,13,.6))}
-.f3:hover{transform:translateY(-6px);box-shadow:0 40px 70px -40px rgba(14,27,26,.7)}
-.f3 .n{position:absolute;top:24px;left:28px;font:700 64px/1 var(--display);letter-spacing:-.05em}
-.f3 b{display:block;font:700 30px/1.05 var(--display);letter-spacing:-.03em}
-.f3 .tx > span{display:block;margin-top:10px;font:400 15px/1.45 var(--ui);color:#D3DEDB;max-width:28ch}
-.f3 .tx .dc{margin-top:16px;font:500 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:#8FE3D8}
-.f3 .arr{position:absolute;right:24px;bottom:28px;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#0E1B1A;font:600 18px var(--ui)}
+.one{position:relative;border-radius:32px;overflow:hidden;background:#0E1B1A}
+.one .ph{height:600px;background:url(../img/taqa-hero.webp) center 30%/cover}
+.one::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,rgba(7,13,13,.55),rgba(7,13,13,0) 38%,rgba(7,13,13,0) 55%,rgba(7,13,13,.7))}
+.one .cap{position:absolute;z-index:2;top:40px;left:44px;color:#fff}
+.one .cap span{font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#8FE3D8}
+.one .cap h2{margin-top:12px;font:700 52px/1 var(--display);letter-spacing:-.04em}
+.three{position:absolute;z-index:2;left:20px;right:20px;bottom:20px;display:grid;grid-template-columns:repeat(3,1fr);border-radius:22px;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
+.three a{display:flex;flex-direction:column;gap:6px;padding:26px 28px;border-left:1px solid var(--line);transition:background .2s}
+.three a:first-child{border-left:0}.three a:hover{background:rgba(229,244,242,.7)}
+.three .k{font:600 12px var(--mono);color:var(--teal);letter-spacing:.08em}
+.three b{font:700 24px/1.1 var(--display);letter-spacing:-.025em}
+.three .s{color:var(--mute);font-size:14px}
+.three .c{margin-top:8px;display:flex;align-items:center;gap:8px;font:600 14px var(--ui);color:var(--ink)}
+.three .c i{font-style:normal;color:var(--teal)}
 @media (max-width:720px){
- .f3s{grid-template-columns:1fr;gap:12px;margin-top:20px}
- .f3{min-height:220px;padding:20px;border-radius:24px}.f3 .n{top:18px;left:20px;font-size:44px}.f3 b{font-size:24px}
- .f3 .tx > span{font-size:14px}.f3 .arr{right:18px;bottom:20px;width:40px;height:40px}
+ .one{border-radius:24px;background:none;overflow:visible}.one::after{display:none}
+ .one .ph{height:260px;border-radius:24px}
+ .one .cap{top:22px;left:22px}.one .cap h2{font-size:32px}
+ .one .ph{position:relative}.one .ph::after{content:"";position:absolute;inset:0;border-radius:24px;background:linear-gradient(to bottom,rgba(7,13,13,.6),rgba(7,13,13,0) 60%)}
+ .three{position:static;grid-template-columns:1fr;margin-top:12px;background:#fff;border:1px solid var(--line);box-shadow:none;border-radius:22px}
+ .three a{border-left:0;border-top:1px solid var(--line);padding:18px 20px}.three a:first-child{border-top:0}
+ .three b{font-size:20px}.three .s{font-size:13.5px}
 }
 """
 start = bodyB.find('<div class="stats">')
