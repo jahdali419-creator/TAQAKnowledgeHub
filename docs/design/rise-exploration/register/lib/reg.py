@@ -115,7 +115,7 @@ def acting_bar(a):
 HERO_IMG = [('search', 'seg-wireline.jpg'), ('document', 'seg-coiled-tubing.jpg'), ('form', 'seg-coiled-tubing.jpg'), ('area', 'seg-coiled-tubing.jpg'),
             ('upload', 'seg-pt-intervention-coe.jpg'), ('glossary', 'seg-learning-center.jpg'), ('ask', 'seg-qhse.jpg'), ('saved', 'seg-drilling.jpg'),
             ('notifications', 'seg-fracturing.jpg'), ('desk', 'seg-inspection.jpg'), ('manage', 'seg-inspection.jpg'), ('delegation', 'seg-inspection.jpg'),
-            ('master', 'seg-pt-completions-coe.jpg'), ('workbench', 'seg-pt-completions-coe.jpg'), ('account', 'seg-marine-services.jpg'),
+            ('master', 'seg-pt-drilling-coe.jpg'), ('workbench', 'seg-pt-drilling-coe.jpg'), ('account', 'seg-marine-services.jpg'),
             ('more', 'seg-marine-services.jpg'), ('segments', 'seg-geothermal-coe.jpg'), ('home', 'taqa-hero.webp')]
 def hero_img(name):
     for k, f in HERO_IMG:

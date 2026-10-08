@@ -6,9 +6,10 @@ import b_segments as S  # noqa: reuses META, LABEL, EXPERT, CONTRIB, FAMILY, ORD
 from reg import *
 
 PHOTO = {k: f'seg-{k}.jpg' for k in ['wireline', 'pt-intervention-coe', 'drilling', 'qhse', 'coiled-tubing', 'inspection', 'fracturing',
-                                       'learning-center', 'cementing', 'pt-drilling-coe', 'pt-completions-coe', 'well-testing', 'well-safety',
+                                       'learning-center', 'cementing', 'pt-drilling-coe', 'well-testing', 'well-safety',
                                        'slickline', 'well-completions', 'marine-services', 'geothermal-coe']}
 PHOTO['company'] = 'taqa-hero.webp'
+PHOTO['pt-completions-coe'] = 'taqa-hero-2.jpg'  # the Aberdeen photo sent was the Stavanger team photo; placeholder until a real one
 # the user's rule: areas with no photo of their own use the Well Completions photo
 FALLBACK = {'segment': 'seg-well-completions.jpg', 'function': 'seg-well-completions.jpg', 'product': 'seg-well-completions.jpg', 'company': 'taqa-hero.webp'}
 POS = {'pt-drilling-coe': '80% 20%'}  # keep the Cougar sign clear of the caption chip
