@@ -264,8 +264,13 @@ ALLSEC = f'''<section class="sec" id="all"><div class="one"><div class="ph" role
 <nav class="three">{_rows}</nav></div></section>'''
 cssAll = """
 .one{position:relative;border-radius:32px;overflow:hidden;background:#0E1B1A}
-.one .ph{height:600px;background:url(../img/taqa-hero.webp) center 30%/cover}
-.one::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,rgba(7,13,13,.55),rgba(7,13,13,0) 38%,rgba(7,13,13,0) 55%,rgba(7,13,13,.7))}
+.one .ph{position:relative;height:600px;overflow:hidden}
+.one .ph::before{content:"";position:absolute;inset:0;background:url(../img/taqa-hero.webp) center 30%/cover;transform-origin:60% 40%;animation:kb 26s ease-in-out infinite alternate;will-change:transform}
+.one .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(7,13,13,.78),rgba(7,13,13,.35) 40%,rgba(7,13,13,.45) 62%,rgba(7,13,13,.88)),linear-gradient(90deg,rgba(0,88,90,.35),rgba(0,88,90,0) 60%)}
+@keyframes kb{0%{transform:scale(1.02) translate(0,0)}100%{transform:scale(1.16) translate(-2.5%,-1.5%)}}
+.one .cap{animation:rise 1s cubic-bezier(.2,.7,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+@media (prefers-reduced-motion:reduce){.one .ph::before,.one .cap{animation:none}}
 .one .cap{position:absolute;z-index:2;top:40px;left:44px;color:#fff}
 .one .cap span{font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#8FE3D8}
 .one .cap h2{margin-top:12px;font:700 52px/1 var(--display);letter-spacing:-.04em}
@@ -278,10 +283,9 @@ cssAll = """
 .three .c{margin-top:8px;display:flex;align-items:center;gap:8px;font:600 14px var(--ui);color:var(--ink)}
 .three .c i{font-style:normal;color:var(--teal)}
 @media (max-width:720px){
- .one{border-radius:24px;background:none;overflow:visible}.one::after{display:none}
- .one .ph{height:260px;border-radius:24px}
+ .one{border-radius:24px;background:none;overflow:visible}
+ .one .ph{height:280px;border-radius:24px}
  .one .cap{top:22px;left:22px}.one .cap h2{font-size:32px}
- .one .ph{position:relative}.one .ph::after{content:"";position:absolute;inset:0;border-radius:24px;background:linear-gradient(to bottom,rgba(7,13,13,.6),rgba(7,13,13,0) 60%)}
  .three{position:static;grid-template-columns:1fr;margin-top:12px;background:#fff;border:1px solid var(--line);box-shadow:none;border-radius:22px}
  .three a{border-left:0;border-top:1px solid var(--line);padding:18px 20px}.three a:first-child{border-top:0}
  .three b{font-size:20px}.three .s{font-size:13.5px}
