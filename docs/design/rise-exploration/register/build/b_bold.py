@@ -252,70 +252,31 @@ cssHero = '''
 }
 '''
 
-# ── All of TAQA: the three families on Home (segments with photos, product centres, corporate functions) ──
+# ── All of TAQA, calm: one card per family (user found the full grid too busy) ──
 import b_segments as SG
-def _img(k):
-    if k == 'pt-completions-coe': return 'taqa-hero-2.jpg'
-    f = f'seg-{k}.jpg'
-    return f if os.path.exists(os.path.join(REG_ROOT, 'img', f)) else 'seg-well-completions.jpg'
-_by = lambda g: sorted([k for k in SG.ALLK if SEGS[k]['group'] == g], key=lambda k: (k != 'coiled-tubing', -count_for(k)))
-_segs, _funcs, _prods = _by('segment'), _by('function'), _by('product')
-_seg_t = ''.join(f'''<a class="at{" me" if k == "coiled-tubing" else ""}" href="seg-{k}.html" style="background-image:url(../img/{_img(k)})"><span class="ac">{SEGS[k]["spl"]}</span>
-  {"<span class=you>Your area</span>" if k == "coiled-tubing" else ""}<b>{SEGS[k]["name"]}</b><span class="an">{count_for(k)} in force</span></a>''' for k in _segs)
-_prod_t = ''.join(f'''<a class="pc" href="seg-{k}.html"><span class="pi" style="background-image:url(../img/{_img(k)})"></span><span class="pt"><span class="loc">{SG.META[k][0]}</span>
-  <b>{SEGS[k]["name"].replace(" Center of Excellence", "")}</b><span class="sub">Centre of Excellence · {count_for(k)} in force</span></span><span class="arr">→</span></a>''' for k in _prods)
-_fn_t = ''.join(f'''<a class="fc" href="seg-{k}.html"><span class="fb">{SEGS[k]["spl"]}</span><b>{SEGS[k]["name"]}</b><span class="fn">{count_for(k)}</span></a>''' for k in _funcs)
-ALLSEC = f'''<section class="sec" id="all"><div class="sh"><div><h2>All of TAQA</h2><p>25 areas · {len(EMP)} documents in force</p></div><a href="segments.html">Area board</a></div>
-<nav class="fam"><a href="#ops"><b>{len(_segs)}</b>Operational segments</a><a href="#prd"><b>{len(_prods)}</b>Product centres</a><a href="#fun"><b>{len(_funcs)}</b>Corporate functions</a><a href="seg-company.html"><b>{count_for("company")}</b>Company policies</a></nav>
-<div class="grp" id="ops"><div class="gh"><span class="gk">01</span><h3>Operational segments</h3><p>The service lines that deliver the work in the field</p></div><div class="ats">{_seg_t}</div></div>
-<div class="grp" id="prd"><div class="gh"><span class="gk">02</span><h3>Products &amp; Technology</h3><p>Centres of Excellence that design and build TAQA’s tools</p></div><div class="pcs">{_prod_t}</div></div>
-<div class="grp" id="fun"><div class="gh"><span class="gk">03</span><h3>Corporate functions</h3><p>The teams that support every segment</p></div><div class="fcs">{_fn_t}</div></div>
-<a class="pol" href="seg-company.html"><span class="pb">POL</span><span><b>Company-wide policies</b><span>{count_for("company")} policies signed by the CEO · apply to everyone</span></span><span class="arr">→</span></a>
-</section>'''
+_n = lambda g: sum(1 for k in SG.ALLK if SEGS[k]['group'] == g)
+_docs = lambda g: sum(count_for(k) for k in SG.ALLK if SEGS[k]['group'] == g)
+_FAM3 = [('segment', 'Operational segments', 'seg-coiled-tubing.jpg', 'Coiled Tubing · Drilling · Fracturing · Wireline and more', '#segment'),
+         ('product', 'Products &amp; Technology', 'seg-pt-drilling-coe.jpg', 'Edmonton · Stavanger · Aberdeen', '#product'),
+         ('function', 'Corporate functions', 'seg-qhse.jpg', 'QHSE · HR · Finance · IT and more', '#function')]
+_cards = ''.join(f'''<a class="f3" href="areas.html{h}" style="background-image:url(../img/{img})"><span class="n">{_n(g)}</span>
+  <span class="tx"><b>{t}</b><span>{sub}</span><span class="dc">{_docs(g)} documents in force</span></span><span class="arr">→</span></a>''' for g, t, img, sub, h in _FAM3)
+ALLSEC = f'''<section class="sec" id="all"><div class="sh"><div><h2>All of TAQA</h2><p>Three families · 25 areas</p></div></div>
+<div class="f3s">{_cards}</div></section>'''
 cssAll = """
-.fam{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
-.fam a{display:inline-flex;align-items:center;gap:10px;padding:10px 18px 10px 10px;border-radius:999px;background:#fff;border:1px solid var(--line);font:500 14.5px var(--ui)}
-.fam a b{min-width:34px;height:34px;padding:0 8px;border-radius:999px;display:grid;place-items:center;background:var(--tealbg);color:var(--teal);font:700 15px var(--display)}
-.fam a:hover{border-color:var(--teal2)}
-.grp{margin-top:44px;scroll-margin-top:20px}
-.gh{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}.gh .gk{font:600 12px var(--mono);color:var(--teal);letter-spacing:.06em}
-.gh h3{font:700 28px/1 var(--display);letter-spacing:-.03em}.gh p{color:var(--mute);font-size:14.5px}
-.ats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px}
-.at{position:relative;display:flex;flex-direction:column;justify-content:flex-end;min-height:210px;padding:18px;border-radius:22px;overflow:hidden;background:#0E1B1A center/cover;color:#fff;isolation:isolate;transition:transform .25s,box-shadow .25s}
-.at::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,rgba(7,13,13,.92) 8%,rgba(7,13,13,.35) 55%,rgba(7,13,13,.08))}
-.at:hover{transform:translateY(-4px);box-shadow:0 30px 50px -30px rgba(14,27,26,.6)}
-.at.me{grid-column:span 2}.at.me b{font-size:34px}
-.at .ac{position:absolute;top:14px;left:14px;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.92);color:#0E1B1A;font:600 11px var(--mono)}
-.at .you{position:absolute;top:14px;right:14px;padding:6px 11px;border-radius:999px;background:var(--teal2);color:#062221;font:600 12px var(--ui)}
-.at b{font:700 22px/1.08 var(--display);letter-spacing:-.02em}.at .an{margin-top:6px;font:500 12.5px var(--mono);color:#C9D6D2}
-.pcs{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
-.pc{display:flex;flex-direction:column;border-radius:24px;background:#fff;border:1px solid var(--line);overflow:hidden;position:relative;transition:transform .25s,box-shadow .25s}
-.pc:hover{transform:translateY(-4px);box-shadow:0 30px 50px -34px rgba(14,27,26,.45)}
-.pc .pi{height:220px;background:center/cover}
-.pc .pt{display:flex;flex-direction:column;gap:6px;padding:20px 72px 22px 22px}
-.pc .loc{align-self:flex-start;padding:5px 10px;border-radius:999px;background:var(--tealbg);color:var(--teal);font:600 11.5px var(--mono);letter-spacing:.03em}
-.pc b{font:700 24px/1.1 var(--display);letter-spacing:-.025em}.pc .sub{color:var(--mute);font-size:13.5px}
-.pc .arr,.pol .arr{position:absolute;right:20px;bottom:22px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#fff;font:600 16px var(--ui)}
-.fcs{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:20px}
-.fc{position:relative;display:flex;flex-direction:column;gap:14px;min-height:132px;padding:18px;border-radius:20px;background:#fff;border:1px solid var(--line);transition:border-color .2s,transform .2s}
-.fc:hover{border-color:var(--teal2);transform:translateY(-2px)}
-.fc .fb{align-self:flex-start;padding:7px 10px;border-radius:12px;background:#F1F0EB;font:600 11.5px var(--mono);color:var(--ink)}
-.fc b{margin-top:auto;font:600 16px/1.25 var(--ui)}.fc .fn{position:absolute;top:16px;right:18px;font:700 22px/1 var(--display);color:var(--teal)}
-.pol{position:relative;display:flex;align-items:center;gap:18px;margin-top:18px;padding:20px 80px 20px 20px;border-radius:22px;background:var(--ink);color:#fff}
-.pol .pb{flex:none;width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:var(--teal2);color:#062221;font:700 12px var(--mono)}
-.pol b{display:block;font:700 22px/1.1 var(--display)}.pol span span{display:block;margin-top:4px;color:#B9C6C2;font-size:14px}
-.pol .arr{bottom:auto;top:50%;transform:translateY(-50%);background:#fff;color:var(--ink)}
+.f3s{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+.f3{position:relative;display:flex;flex-direction:column;justify-content:flex-end;min-height:420px;padding:28px;border-radius:28px;overflow:hidden;background:#0E1B1A center/cover;color:#fff;isolation:isolate;transition:transform .3s,box-shadow .3s}
+.f3::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,rgba(7,13,13,.96) 12%,rgba(7,13,13,.55) 50%,rgba(7,13,13,.25) 72%,rgba(7,13,13,.6))}
+.f3:hover{transform:translateY(-6px);box-shadow:0 40px 70px -40px rgba(14,27,26,.7)}
+.f3 .n{position:absolute;top:24px;left:28px;font:700 64px/1 var(--display);letter-spacing:-.05em}
+.f3 b{display:block;font:700 30px/1.05 var(--display);letter-spacing:-.03em}
+.f3 .tx > span{display:block;margin-top:10px;font:400 15px/1.45 var(--ui);color:#D3DEDB;max-width:28ch}
+.f3 .tx .dc{margin-top:16px;font:500 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:#8FE3D8}
+.f3 .arr{position:absolute;right:24px;bottom:28px;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#0E1B1A;font:600 18px var(--ui)}
 @media (max-width:720px){
- #all .sh a{display:none}
- .fam{flex-wrap:nowrap;overflow-x:auto;margin:18px -16px 0;padding:0 16px 4px;scrollbar-width:none}.fam::-webkit-scrollbar{display:none}
- .fam a{flex:none;padding:8px 14px 8px 8px;font-size:13.5px}.fam a b{min-width:30px;height:30px;font-size:14px}
- .gh h3{font-size:23px}.gh p{display:none}
- .ats,.pcs{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;margin:16px -16px 0;padding:0 16px 6px;scrollbar-width:none}
- .ats::-webkit-scrollbar,.pcs::-webkit-scrollbar{display:none}
- .at{flex:0 0 62%;min-height:200px;scroll-snap-align:start}.at.me{flex-basis:78%}.at.me b{font-size:26px}.at b{font-size:20px}
- .pc{flex:0 0 78%;scroll-snap-align:start}.pc .pi{height:160px}.pc b{font-size:20px}
- .fcs{grid-template-columns:1fr 1fr;gap:8px}.fc{min-height:92px;padding:12px 14px;gap:8px}.fc .fb{padding:5px 8px;font-size:10.5px}.fc b{font-size:14.5px}.fc .fn{font-size:19px;top:14px;right:14px}
- .pol{padding:16px 64px 16px 16px}.pol b{font-size:18px}.pol .pb{width:44px;height:44px}.pol .arr{right:14px}
+ .f3s{grid-template-columns:1fr;gap:12px;margin-top:20px}
+ .f3{min-height:220px;padding:20px;border-radius:24px}.f3 .n{top:18px;left:20px;font-size:44px}.f3 b{font-size:24px}
+ .f3 .tx > span{font-size:14px}.f3 .arr{right:18px;bottom:20px;width:40px;height:40px}
 }
 """
 start = bodyB.find('<div class="stats">')
