@@ -7,6 +7,7 @@ from reg import REG_ROOT, e
 P = 'proposed'
 J = [
  ('Bold homepage directions', 'Surprise me: two bold takes on Home, real data and TAQA photos.', [
+   ('landing-21.html', 'Landing · built with 21st.dev + UI UX Pro Max', '21st Horizon Glow Hero and Card Hand Gallery ported; working command search over the real register; spotlight bento; pausable area marquee.', 'new'),
    ('landing-horizon.html', 'Landing · Horizon (surprise)', 'Inspired by 21st.dev, Supahero, Motion and Refero: glowing horizon hero, live search answers, fanned photos, motion everywhere.', 'new'),
    ('bold-mix.html', 'Chosen · Night Shift hero + Daylight cards', 'Your pick: the dark moving-photo hero with the live search answer, then bright rounded cards and the list.', 'new'),
    ('family-segments.html', 'Family · Operational segments', 'Opens from the Home photo panel: one big photo, then the 11 segments in one clean list.', 'new'),
