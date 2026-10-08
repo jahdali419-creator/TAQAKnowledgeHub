@@ -7,6 +7,7 @@ from reg import REG_ROOT, e
 P = 'proposed'
 J = [
  ('Bold homepage directions', 'Surprise me: two bold takes on Home, real data and TAQA photos.', [
+   ('landing-horizon.html', 'Landing · Horizon (surprise)', 'Inspired by 21st.dev, Supahero, Motion and Refero: glowing horizon hero, live search answers, fanned photos, motion everywhere.', 'new'),
    ('bold-mix.html', 'Chosen · Night Shift hero + Daylight cards', 'Your pick: the dark moving-photo hero with the live search answer, then bright rounded cards and the list.', 'new'),
    ('family-segments.html', 'Family · Operational segments', 'Opens from the Home photo panel: one big photo, then the 11 segments in one clean list.', 'new'),
    ('family-products.html', 'Family · Products & Technology', 'The three Centres of Excellence: Edmonton, Stavanger and Aberdeen.', 'new'),

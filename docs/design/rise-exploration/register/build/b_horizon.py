@@ -1,0 +1,259 @@
+"""Landing page · "Horizon". A surprise direction drawn from four references the user named:
+21st.dev (glowing planet-horizon hero, fanned image cards), Supahero (big confident hero type),
+Motion (spring word reveals, ticker, mono-label feature grid, bold colour block) and Refero (search box with answer rows).
+Real register data, TAQA photography. Design exploration only."""
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'lib'))
+from reg import *
+
+EMP = inforce('employee')
+N_ALERT = sum(r['docType'] == 'alert' for r in EMP)
+AREAS = [(SEGS[k]['spl'], SEGS[k]['name']) for k in SEGS if k != 'company']
+tick = ''.join(f'<span><b>{c}</b>{n}</span>' for c, n in AREAS)
+WI3 = BYNUM['TQ-TWS-CTSS-WI-003']; S3 = BYNUM['TQ-TWS-CTSS-SOP-003']
+FAN = [('seg-wireline.jpg', 'Wireline'), ('seg-qhse.jpg', 'QHSE'), ('taqa-hero.webp', 'Coiled Tubing'), ('seg-pt-intervention-coe.jpg', 'Stavanger'), ('seg-marine-services.jpg', 'Marine')]
+fan = ''.join(f'<figure class="f f{i}"><img src="../img/{im}" alt="{cap}"><figcaption>{cap}</figcaption></figure>' for i, (im, cap) in enumerate(FAN))
+
+def words(text, cls=''):
+    return ' '.join(f'<span class="wd {cls}"><span style="--d:{i}">{w}</span></span>' for i, w in enumerate(text.split()))
+
+CSS = '''
+:root{--night:#030807;--ink:#0E1B1A;--mute:#6B7774;--line:#E7E5DF;--teal:#00585A;--teal2:#00BFB2;--spark:#FF6720;--ok:#3CD69B;--crim:#C8102E;
+--display:'BwGradual',Inter,sans-serif;--ui:Inter,system-ui,sans-serif;--mono:'PlexMono',ui-monospace,monospace;--spring:cubic-bezier(.34,1.56,.64,1);--out:cubic-bezier(.2,.7,.2,1)}
+*{box-sizing:border-box;margin:0;padding:0}html{overflow-x:clip;background:var(--night)}
+body{background:#FAFAF7;color:var(--ink);font:400 16px/1.5 var(--ui);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}img{display:block;max-width:100%}
+.w{width:1240px;max-width:calc(100% - 48px);margin:0 auto}
+.mono{font:500 11.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase}
+
+/* ── HERO · the horizon ── */
+.hz{position:relative;min-height:1180px;overflow:hidden;background:var(--night);color:#EEF3F1;isolation:isolate}
+.hz .stars{position:absolute;inset:0;z-index:-2;background-image:radial-gradient(1px 1px at 20px 30px,rgba(255,255,255,.55),transparent),radial-gradient(1px 1px at 140px 90px,rgba(255,255,255,.35),transparent),radial-gradient(1.5px 1.5px at 260px 160px,rgba(143,227,216,.5),transparent),radial-gradient(1px 1px at 330px 40px,rgba(255,255,255,.3),transparent);background-size:360px 220px;mask-image:linear-gradient(to bottom,#000 10%,transparent 62%);animation:tw 9s ease-in-out infinite alternate}
+@keyframes tw{to{opacity:.45}}
+.hz .grid{position:absolute;inset:0;z-index:-2;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(70% 55% at 50% 30%,#000,transparent)}
+.arc{position:absolute;z-index:-1;left:50%;top:880px;width:2600px;height:2600px;margin-left:-1300px;border-radius:50%;background:radial-gradient(60% 6% at 50% 0%,rgba(0,191,178,.25),transparent),#020605;
+ box-shadow:0 -1px 0 rgba(160,255,240,.95),0 -8px 30px rgba(0,191,178,.65),0 -50px 120px rgba(0,191,178,.35),0 -160px 260px rgba(0,88,90,.45);animation:rise 1.8s var(--out) both .2s}
+.arc::before{content:"";position:absolute;left:50%;top:-6px;width:520px;height:14px;margin-left:-260px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,180,120,.95),rgba(255,103,32,.55) 45%,transparent);filter:blur(4px);animation:core 5s ease-in-out infinite alternate}
+@keyframes rise{from{transform:translateY(160px);opacity:0}}
+@keyframes core{to{width:760px;margin-left:-380px;opacity:.75}}
+.nav{position:relative;z-index:5;display:flex;align-items:center;gap:28px;height:88px}
+.nav img{height:28px;filter:brightness(0) invert(1)}
+.nav nav{display:flex;gap:4px;padding:5px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(14px)}
+.nav nav a{padding:9px 16px;border-radius:999px;font:500 14px/1 var(--ui);color:#B8C6C2;transition:color .2s,background .2s}.nav nav a:hover{color:#fff;background:rgba(255,255,255,.07)}
+.nav .sp{flex:1}
+.nav .si{display:inline-flex;align-items:center;gap:10px;padding:11px 18px;border-radius:999px;background:#fff;color:var(--ink);font:600 14px var(--ui)}
+.nav .si i{width:14px;height:14px;display:grid;grid-template-columns:1fr 1fr;gap:1.5px}.nav .si i b{background:#00585A}.nav .si i b:nth-child(2){background:#00BFB2}.nav .si i b:nth-child(3){background:#FF6720}.nav .si i b:nth-child(4){background:#7FA8A6}
+.hc{position:relative;z-index:3;text-align:center;padding-top:92px}
+.pill{display:inline-flex;align-items:center;gap:10px;padding:8px 16px 8px 10px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);font:500 13px var(--ui);color:#CFDAD7;animation:fade .8s var(--out) both}
+.pill b{padding:4px 9px;border-radius:999px;background:rgba(60,214,155,.15);color:var(--ok);font:600 11px var(--mono);letter-spacing:.08em}
+.pill i{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px var(--ok);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.4}}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}}
+h1{margin:30px auto 0;font:700 clamp(54px,7.4vw,112px)/.92 var(--display);letter-spacing:-.055em;max-width:12ch}
+.wd{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em}
+.wd > span{display:inline-block;transform:translateY(110%) rotate(6deg);animation:wup .9s var(--spring) forwards;animation-delay:calc(.35s + var(--d) * .09s)}
+@keyframes wup{to{transform:none}}
+.wd.g > span{background:linear-gradient(100deg,#fff 10%,#8FE3D8 55%,#00BFB2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{margin:26px auto 0;max-width:52ch;font:400 19px/1.55 var(--ui);color:#A9B9B5;animation:fade 1s var(--out) both 1.1s}
+/* search box with answers (Refero-style) */
+.cmd{position:relative;margin:44px auto 0;max-width:720px;text-align:left;border-radius:22px;padding:8px;background:rgba(12,22,21,.72);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(20px);box-shadow:0 50px 120px -40px rgba(0,191,178,.35),0 30px 60px -30px rgba(0,0,0,.8);animation:fade 1s var(--out) both 1.3s}
+.cmd .in{display:flex;align-items:center;gap:14px;padding:14px 16px}
+.cmd .in svg{width:22px;height:22px;color:var(--teal2);flex:none}
+.cmd .q{font:600 24px/1 var(--display);letter-spacing:-.02em;color:#fff;min-height:24px}
+.cmd .car{width:2px;height:26px;background:var(--spark);animation:bl 1s steps(1) infinite}@keyframes bl{50%{opacity:0}}
+.cmd .modes{margin-left:auto;display:flex;gap:6px}
+.cmd .modes span{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);font:500 11.5px var(--mono);color:#93A39F}.cmd .modes span.on{background:rgba(0,191,178,.14);border-color:rgba(0,191,178,.4);color:#8FE3D8}
+.cmd .res{border-top:1px solid rgba(255,255,255,.08);padding:6px}
+.cmd .r{display:flex;align-items:center;gap:14px;padding:12px 12px;border-radius:14px;transition:background .2s,opacity .4s,transform .4s var(--out)}
+.cmd .r:hover{background:rgba(255,255,255,.05)}
+.cmd .r .ar{color:#5E716C;font:500 16px var(--mono)}
+.cmd .r b{font:600 15.5px var(--ui);color:#fff}.cmd .r small{display:block;margin-top:3px;font:500 11.5px var(--mono);letter-spacing:.04em;color:#8A9B97}
+.cmd .r .st{margin-left:auto;display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;font:600 12px var(--ui);white-space:nowrap}
+.cmd .r .st i{width:7px;height:7px;border-radius:50%}
+.st.ok{background:rgba(60,214,155,.12);color:var(--ok)}.st.ok i{background:var(--ok)}
+.st.no{background:rgba(200,16,46,.16);color:#FF8A9B}.st.no i{background:#FF4D6A;border-radius:1px;transform:rotate(45deg)}
+.cmd.wait .r{opacity:0;transform:translateY(8px)}
+.ctas{display:flex;justify-content:center;gap:12px;margin-top:30px;animation:fade 1s var(--out) both 1.5s}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:15px 24px;border-radius:999px;font:600 15px var(--ui);transition:transform .25s var(--spring),box-shadow .25s}
+.btn:hover{transform:translateY(-2px) scale(1.02)}
+.btn.w1{background:#fff;color:var(--ink);box-shadow:0 20px 50px -20px rgba(0,191,178,.6)}
+.btn.g1{border:1px solid rgba(255,255,255,.18);color:#fff;background:rgba(255,255,255,.04)}
+/* ticker of all areas, under the horizon */
+.tick{position:absolute;z-index:3;left:0;right:0;bottom:46px;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.tick .row{display:flex;gap:44px;width:max-content;animation:mq 60s linear infinite}
+.tick span{display:inline-flex;align-items:center;gap:12px;font:500 15px var(--ui);color:#7F928D;white-space:nowrap}
+.tick span b{padding:5px 8px;border-radius:8px;border:1px solid rgba(255,255,255,.12);font:600 11px var(--mono);color:#B8C6C2}
+@keyframes mq{to{transform:translateX(-50%)}}
+.tick-l{position:absolute;z-index:3;left:0;right:0;bottom:96px;text-align:center;color:#5E716C}
+
+/* ── FAN of photos (21st image fan) ── */
+.sec{padding:130px 0 0}
+.eyebrow{display:flex;align-items:center;gap:10px;color:var(--teal)}.eyebrow i{width:18px;height:1px;background:var(--teal)}
+.h2{margin-top:18px;font:700 clamp(40px,5vw,72px)/.98 var(--display);letter-spacing:-.045em;max-width:16ch}
+.h2 em{font-style:normal;color:var(--teal)}
+.sub2{margin-top:18px;max-width:54ch;font-size:18px;color:var(--mute)}
+.fanw{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:60px;align-items:center}
+.fan{position:relative;height:520px}
+.f{position:absolute;left:50%;top:50%;width:230px;height:310px;margin:-155px 0 0 -115px;border-radius:24px;overflow:hidden;background:#0E1B1A;box-shadow:0 40px 80px -40px rgba(14,27,26,.6);border:5px solid #fff;transition:transform 1.1s var(--spring),box-shadow .3s}
+.f img{width:100%;height:100%;object-fit:cover}
+.f figcaption{position:absolute;left:12px;bottom:12px;padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.92);font:600 12px var(--ui)}
+.fan:not(.in) .f{transform:none}
+.fan.in .f0{transform:translateX(-220px) rotate(-14deg) translateY(36px)}
+.fan.in .f1{transform:translateX(-112px) rotate(-7deg) translateY(10px)}
+.fan.in .f2{transform:translateY(-16px) scale(1.06);z-index:3}
+.fan.in .f3{transform:translateX(112px) rotate(7deg) translateY(10px);z-index:2}
+.fan.in .f4{transform:translateX(220px) rotate(14deg) translateY(36px);z-index:1}
+.fan .f1{z-index:2}
+.fan .f:hover{box-shadow:0 60px 90px -40px rgba(0,88,90,.7)}
+.nums{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);margin-top:90px}
+.nums div{padding:28px 24px 0 0}
+.nums b{display:block;font:700 72px/1 var(--display);letter-spacing:-.05em}
+.nums b em{font-style:normal;color:var(--teal)}
+.nums span{display:block;margin-top:10px;color:var(--mute)}
+
+/* ── Motion-style technical strip ── */
+.strip{margin-top:130px;background:var(--night);color:#E8EFED;padding:90px 0}
+.strip .top{display:flex;justify-content:space-between;align-items:end;gap:30px;flex-wrap:wrap}
+.strip h2{font:700 clamp(36px,4.4vw,60px)/1 var(--display);letter-spacing:-.04em;max-width:15ch}
+.strip h2 em{font-style:normal;color:var(--teal2)}
+.cols{display:grid;grid-template-columns:repeat(5,1fr);margin-top:56px;border:1px solid rgba(255,255,255,.1);border-radius:4px}
+.cols div{padding:26px 22px 30px;border-left:1px solid rgba(255,255,255,.1);transition:background .3s}
+.cols div:first-child{border-left:0}.cols div:hover{background:rgba(0,191,178,.06)}
+.cols .mono{color:var(--teal2)}.cols .mono b{color:#5E716C;font-weight:500;margin-right:8px}
+.cols p{margin-top:16px;color:#A3B2AE;font-size:14.5px;line-height:1.55}
+.ticker2{display:flex;justify-content:space-between;margin-top:22px;color:#5E716C}
+
+/* ── bento (live components) ── */
+.bento{display:grid;grid-template-columns:repeat(6,1fr);grid-auto-rows:240px;gap:16px;margin-top:56px}
+.b{position:relative;overflow:hidden;border-radius:26px;background:#fff;border:1px solid var(--line);padding:28px;transition:transform .35s var(--spring),box-shadow .35s}
+.b:hover{transform:translateY(-4px);box-shadow:0 40px 60px -40px rgba(14,27,26,.4)}
+.b h3{font:700 26px/1.08 var(--display);letter-spacing:-.025em}.b p{margin-top:8px;color:var(--mute);font-size:15px;max-width:34ch}
+.b.s4{grid-column:span 4}.b.s2{grid-column:span 2}.b.s3{grid-column:span 3}.b.r2{grid-row:span 2}
+.b.dark{background:#0B1615;border-color:#0B1615;color:#EEF3F1}.b.dark p{color:#93A39F}
+.b.ph{padding:0;color:#fff;border:0}.b.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--out)}
+.b.ph:hover img{transform:scale(1.05)}
+.b.ph::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(3,8,7,.92),rgba(3,8,7,.1) 60%)}
+.b.ph .tx{position:absolute;z-index:2;left:28px;right:28px;bottom:26px}.b.ph p{color:#CFDAD7}
+.flip{position:absolute;left:28px;right:28px;bottom:28px;height:74px;perspective:900px}
+.flip .card{position:absolute;inset:0;display:flex;align-items:center;gap:14px;padding:0 18px;border-radius:18px;backface-visibility:hidden;transition:transform .9s var(--spring)}
+.flip .a{background:#E3F4EC;color:#1D7A5E}.flip .z{background:#FCECEE;color:var(--crim);transform:rotateX(180deg)}
+.flip.on .a{transform:rotateX(-180deg)}.flip.on .z{transform:none}
+.flip b{font:700 17px/1.2 var(--display)}.flip small{display:block;font:500 11.5px var(--mono);letter-spacing:.04em;opacity:.8;margin-top:3px}
+.flip .dot{width:12px;height:12px;border-radius:50%;background:currentColor;flex:none}.flip .z .dot{border-radius:2px;transform:rotate(45deg)}
+.chat{position:absolute;left:28px;right:28px;bottom:26px;display:flex;flex-direction:column;gap:8px}
+.chat span{align-self:flex-start;max-width:85%;padding:10px 14px;border-radius:16px 16px 16px 4px;background:rgba(255,255,255,.08);font-size:14px;color:#DDE7E4;opacity:0;transform:translateY(8px);transition:.6s var(--out)}
+.chat span.me{align-self:flex-end;border-radius:16px 16px 4px 16px;background:var(--teal2);color:#04211F}
+.b.in .chat span{opacity:1;transform:none}.b.in .chat span:nth-child(2){transition-delay:.6s}.b.in .chat span:nth-child(3){transition-delay:1.2s}
+.term{position:absolute;left:28px;bottom:24px;font:700 84px/1 var(--display);letter-spacing:-.05em;color:var(--teal)}
+.term small{display:block;font:500 13px var(--ui);letter-spacing:0;color:var(--mute);margin-top:6px}
+.arb{direction:rtl;font:600 22px/1.4 'Noto Sans Arabic',Tahoma,sans-serif;color:var(--ink);position:absolute;right:28px;bottom:28px;left:28px;text-align:right}
+.arb small{display:block;direction:ltr;text-align:right;font:500 11.5px var(--mono);color:var(--mute);letter-spacing:.06em}
+
+/* ── closing block (Motion colour block, in TAQA teal) ── */
+.close{margin-top:130px;background:var(--teal);color:#fff;padding:90px 0 0;overflow:hidden}
+.close .cl{display:grid;grid-template-columns:minmax(0,1fr) 460px;gap:40px;align-items:end}
+.close h2{font:700 clamp(56px,8vw,128px)/.9 var(--display);letter-spacing:-.055em}
+.close h2 em{font-style:normal;color:#8FE3D8}
+.close .card{background:#04211F;border-radius:6px;padding:30px;margin-bottom:90px}
+.close .card .mono{color:#8FE3D8}.close .card p{margin-top:14px;color:#B8CFCB}
+.close .card .btn{margin-top:22px;background:#fff;color:var(--ink)}
+.close .big{margin-top:40px;font:700 clamp(80px,17vw,260px)/.78 var(--display);letter-spacing:-.06em;color:rgba(255,255,255,.08);white-space:nowrap}
+footer{background:var(--teal);color:#A9D2CD;padding:0 0 40px}footer .w{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+
+/* reveal on scroll */
+.rv{opacity:0;transform:translateY(28px);transition:opacity .9s var(--out),transform .9s var(--out)}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.wd > span{transform:none}.rv{opacity:1;transform:none}.cmd.wait .r{opacity:1;transform:none}}
+
+@media (max-width:820px){
+ .w{max-width:calc(100% - 32px)}
+ .nav{height:68px}.nav nav{display:none}.nav img{height:23px}.nav .si{padding:9px 14px;font-size:13px}
+ .hz{min-height:1060px}.hc{padding-top:48px}h1{font-size:52px}.lede{font-size:16px}
+ .arc{top:860px}
+ .cmd{margin-top:30px}.cmd .r{flex-wrap:wrap;gap:8px 12px}.cmd .r .st{margin-left:28px}.cmd .modes{display:none}.cmd .q{font-size:20px}.cmd .r .st{padding:5px 9px;font-size:11px}.cmd .r small{display:none}
+ .ctas{flex-direction:column;align-items:stretch}.btn{justify-content:center}
+ .tick{bottom:30px}.tick-l{bottom:74px}
+ .sec{padding-top:90px}.fanw{grid-template-columns:1fr}.fan{height:420px}
+ .f{width:190px;height:260px;margin:-130px 0 0 -95px;border-width:4px}
+ .f{width:170px;height:236px;margin:-118px 0 0 -85px}
+ .fan.in .f0{transform:translateX(-96px) rotate(-12deg) translateY(30px)}.fan.in .f1{transform:translateX(-50px) rotate(-6deg) translateY(8px)}
+ .fan.in .f3{transform:translateX(50px) rotate(6deg) translateY(8px)}.fan.in .f4{transform:translateX(96px) rotate(12deg) translateY(30px)}
+ .nums{grid-template-columns:1fr 1fr;margin-top:40px}.nums b{font-size:48px}
+ .strip{margin-top:90px;padding:64px 0}.cols{grid-template-columns:1fr}.cols div{border-left:0;border-top:1px solid rgba(255,255,255,.1)}.cols div:first-child{border-top:0}
+ .ticker2{display:none}
+ .bento{grid-template-columns:1fr;grid-auto-rows:220px}.b.s4,.b.s2,.b.s3{grid-column:auto}.b.r2{grid-row:span 1}
+ .close{margin-top:90px;padding-top:64px}.close .cl{grid-template-columns:1fr}.close .card{margin-bottom:40px}
+}
+'''
+
+SVG_S = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.5 4a6.5 6.5 0 0 1 5.2 10.4l4.4 4.4-1.4 1.4-4.4-4.4A6.5 6.5 0 1 1 10.5 4zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z"/></svg>'
+
+JS = '''(function(){
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.25});
+document.querySelectorAll('.rv,.fan,.b').forEach(function(el){io.observe(el)});
+/* count up */
+var co=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;var el=e.target,to=+el.dataset.n,t0=null;co.unobserve(el);
+ function f(t){if(!t0)t0=t;var p=Math.min(1,(t-t0)/1400),v=Math.round(to*(1-Math.pow(1-p,3)));el.firstChild.nodeValue=v;if(p<1)requestAnimationFrame(f)}requestAnimationFrame(f)})},{threshold:.5});
+document.querySelectorAll('[data-n]').forEach(function(el){co.observe(el)});
+/* status flip */
+var fl=document.querySelector('.flip');if(fl)setInterval(function(){fl.classList.toggle('on')},2600);
+/* typed search with answers */
+var Q=[['WI-003',0],['SOP-003',1]],q=document.getElementById('q'),cmd=document.querySelector('.cmd'),R=document.querySelectorAll('.cmd .r'),k=0;
+function show(n){R.forEach(function(r,i){r.style.display=(i==n)?'flex':'none'})}
+function run(){var s=Q[k][0],i=0;cmd.classList.add('wait');q.textContent='';
+ var t=setInterval(function(){q.textContent=s.slice(0,++i);if(i>=s.length){clearInterval(t);show(Q[k][1]);setTimeout(function(){cmd.classList.remove('wait')},250);
+  setTimeout(function(){k=(k+1)%Q.length;run()},3800)}},110)}
+if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){show(0)}else{setTimeout(run,1500)}
+})();'''
+
+html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RISE · TAQA knowledge</title><link rel="stylesheet" href="../../kit/fonts.css"><style>{CSS}</style></head><body>
+<section class="hz"><div class="stars"></div><div class="grid"></div><div class="arc"></div>
+<div class="w nav"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE"><nav><a href="#how">How it works</a><a href="segments.html">Areas</a><a href="glossary.html">Field Glossary</a><a href="ask.html">Ask an Expert</a></nav>
+<span class="sp"></span><a class="si" href="bold-mix.html"><i><b></b><b></b><b></b><b></b></i>Sign in with TAQA account</a></div>
+<div class="w hc"><span class="pill"><b>LIVE</b><i></i>{len(EMP)} controlled documents in force today</span>
+<h1>{words("The right document,")} {words("before the job starts.", "g")}</h1>
+<p class="lede">RISE is TAQA’s single register of procedures, manuals, standards and alerts. Search a number, see if it’s current, and get to work.</p>
+<div class="cmd wait"><div class="in">{SVG_S}<span class="q" id="q"></span><span class="car"></span><span class="modes"><span class="on">Number</span><span>Title</span><span>Area</span></span></div>
+<div class="res">
+ <a class="r" href="document.html"><span class="ar">↳</span><span><b>{WI3["title"]}</b><small>{WI3["docNumber"]} · REV {WI3["revision"]} · COILED TUBING</small></span><span class="st ok"><i></i>Current, OK to use</span></a>
+ <a class="r" href="search-superseded.html" style="display:none"><span class="ar">↳</span><span><b>{S3["title"]}</b><small>{S3["docNumber"]} · REV {S3["revision"]} · REPLACED</small></span><span class="st no"><i></i>Superseded, do not use</span></a>
+</div></div>
+<div class="ctas"><a class="btn w1" href="bold-mix.html">Open RISE</a><a class="btn g1" href="#how">See how it works</a></div></div>
+<p class="tick-l mono">25 areas · one register</p>
+<div class="tick"><div class="row">{tick}{tick}</div></div>
+</section>
+
+<section class="w sec" id="how"><div class="fanw"><div class="rv"><p class="eyebrow mono"><i></i>Built from the field</p>
+<h2 class="h2">Made for the people <em>who do the work.</em></h2><p class="sub2">From the wireline truck to the Stavanger workshop, every crew reads from the same approved page.</p></div>
+<div class="fan">{fan}</div></div>
+<div class="nums rv"><div><b data-n="{len(EMP)}">0</b><span>Documents in force</span></div><div><b data-n="25">0</b><span>Areas across TAQA</span></div><div><b data-n="{len(GLOSS)}">0</b><span>Field terms explained</span></div><div><b data-n="{N_ALERT}">0</b><span>Active technical alerts</span></div></div>
+</section>
+
+<section class="strip"><div class="w"><div class="top rv"><h2>One number. <em>One answer.</em> Every time.</h2><p class="mono" style="color:#5E716C">The register rules · TQ-QHSE-S001</p></div>
+<div class="cols rv"><div><p class="mono"><b>01</b>Current only</p><p>Search shows what is in force. Old revisions never reach the field.</p></div>
+<div><p class="mono"><b>02</b>One number</p><p>Every document keeps one controlled number for its whole life.</p></div>
+<div><p class="mono"><b>03</b>Offline ready</p><p>Saved documents open on site with no signal, and say when they last synced.</p></div>
+<div><p class="mono"><b>04</b>Ask an expert</p><p>Send a field problem with a marked-up photo to the right person.</p></div>
+<div><p class="mono"><b>05</b>Two languages</p><p>English and Arabic copies stay linked, so both change together.</p></div></div>
+<div class="ticker2 mono"><span>Procedures</span><span>Manuals</span><span>Standards</span><span>Alerts</span><span>Lessons</span><span>Forms</span><span>Policies</span></div></div></section>
+
+<section class="w sec"><div class="rv"><p class="eyebrow mono"><i></i>Inside RISE</p><h2 class="h2">Answers that <em>move with you.</em></h2></div>
+<div class="bento">
+ <div class="b s4"><h3>Current or not, at a glance</h3><p>Every document tells you if you can use it, before you open it.</p>
+  <div class="flip"><div class="card a"><span class="dot"></span><span><b>Current, OK to use</b><small>WI-003 · REV {WI3["revision"]}</small></span></div><div class="card z"><span class="dot"></span><span><b>Superseded, do not use</b><small>SOP-003 · REV {S3["revision"]}</small></span></div></div></div>
+ <div class="b s2 r2 ph"><img src="../img/seg-well-testing.jpg" alt="Well Testing crew"><div class="tx"><h3>All 25 areas</h3><p>Segments, functions and Centres of Excellence.</p></div></div>
+ <div class="b s2 dark"><h3>Ask an Expert</h3><div class="chat"><span class="me">Pressure dropped to 900 psi on unit 3</span><span>Check WI-003 §4.2 first. Calling you now.</span></div></div>
+ <div class="b s2"><h3>Field Glossary</h3><div class="term">BOP<small>Blowout Preventer · 1 of {len(GLOSS)} terms</small></div></div>
+ <div class="b s3"><h3>English and Arabic</h3><div class="arb">إجراء التشغيل القياسي للحقن بالنيتروجين<small>SOP-007 · AR</small></div></div>
+ <div class="b s3 ph"><img src="../img/seg-marine-services.jpg" alt="Marine Services vessel"><div class="tx"><h3>Offline, offshore</h3><p>Saved documents open without a signal.</p></div></div>
+</div></section>
+
+<section class="close"><div class="w cl"><h2 class="rv">Know it’s <em>current.</em></h2>
+<div class="card rv"><p class="mono">TAQA · Internal</p><p>Sign in with your TAQA account. Everything you need for the job, approved and in force.</p><a class="btn" href="bold-mix.html">Open RISE</a></div></div>
+<div class="w big" aria-hidden="true">RISE</div></section>
+<footer><div class="w mono"><span>RISE · TAQA knowledge</span><span>Landing · Horizon · design exploration</span></div></footer>
+<script>{JS}</script>
+</body></html>'''
+open(os.path.join(PAGES, 'landing-horizon.html'), 'w').write(html)
+print('horizon ok')
