@@ -5,12 +5,13 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'lib'))
 import b_segments as S  # noqa: reuses META, LABEL, EXPERT, CONTRIB, FAMILY, ORDER (and builds the old pages, which we overwrite)
 from reg import *
 
-PHOTO = {'wireline': 'seg-wireline.jpg', 'pt-intervention-coe': 'seg-pt-intervention-coe.jpg', 'drilling': 'seg-drilling.jpg', 'qhse': 'seg-qhse.jpg',
-         'coiled-tubing': 'seg-coiled-tubing.jpg', 'inspection': 'seg-inspection.jpg', 'fracturing': 'seg-fracturing.jpg',
-         'learning-center': 'seg-learning-center.jpg', 'cementing': 'seg-cementing.jpg',
-         'pt-drilling-coe': 'product-centre.webp', 'pt-completions-coe': 'product-centre.webp', 'company': 'taqa-hero.webp',
-         'well-safety': 'taqa-hero-5.jpeg', 'well-testing': 'taqa-hero-3.jpeg', 'hr': 'taqa-hero-4.jpg', 'cybersecurity': 'taqa-hero-4.jpg'}
-FALLBACK = {'segment': 'taqa-hero-2.jpg', 'function': 'taqa-hero-3.jpeg', 'product': 'product-centre.webp', 'company': 'taqa-hero.webp'}
+PHOTO = {k: f'seg-{k}.jpg' for k in ['wireline', 'pt-intervention-coe', 'drilling', 'qhse', 'coiled-tubing', 'inspection', 'fracturing',
+                                       'learning-center', 'cementing', 'pt-drilling-coe', 'pt-completions-coe', 'well-testing', 'well-safety',
+                                       'slickline', 'well-completions', 'marine-services', 'geothermal-coe']}
+PHOTO['company'] = 'taqa-hero.webp'
+# the user's rule: areas with no photo of their own use the Well Completions photo
+FALLBACK = {'segment': 'seg-well-completions.jpg', 'function': 'seg-well-completions.jpg', 'product': 'seg-well-completions.jpg', 'company': 'taqa-hero.webp'}
+POS = {'pt-drilling-coe': '80% 20%'}  # keep the Cougar sign clear of the caption chip
 def photo(k): return PHOTO.get(k) or FALLBACK[SEGS[k]['group']]
 TODAY = dt.date(2026, 10, 7)
 ICON = {'search': 'M10.5 4a6.5 6.5 0 0 1 5.2 10.4l4.4 4.4-1.4 1.4-4.4-4.4A6.5 6.5 0 1 1 10.5 4zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z',
@@ -79,7 +80,7 @@ def page_html(key):
   <div class="meta"><span class="code">{code}</span><span class="numl">{num}-…</span>{f'<span class="upd">Updated {days} days ago</span>' if days is not None else ''}</div>
   {switch}{prov}
 </div>
-<figure class="sgp"><img src="../img/{ph}" alt="{name}"><figcaption><span>{code}</span>{name}</figcaption></figure></div></header>
+<figure class="sgp"><img src="../img/{ph}" alt="{name}"{f' style="object-position:{POS[key]}"' if key in POS else ""}><figcaption><span>{code}</span>{name}</figcaption></figure></div></header>
 <main class="w">
 <div class="mxstats"><div class="stats">{tiles}</div></div>
 <section class="sec"><div class="sh"><div><h2>Important now</h2><p>{name} · {"Operations · " if fam == "segment" else ""}Tuesday 6 October</p></div></div>{now}{contrib}</section>
