@@ -20,7 +20,7 @@ ICON = {'search': 'M10.5 4a6.5 6.5 0 0 1 5.2 10.4l4.4 4.4-1.4 1.4-4.4-4.4A6.5 6.
         'chat': 'M4 4h16v12H8l-4 4z', 'ok': 'M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'}
 def ic(n): return f'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="{ICON[n]}"/></svg>'
 MK = {'sop': 'SOP', 'manual': 'WI', 'standard': 'ST', 'form': 'FRM', 'alert': 'ALT', 'lesson': 'LL', 'policy': 'POL'}
-TINT = {'sop': ('#E5F4F2', '#00585A'), 'manual': ('#EAF0FB', '#2F5DA8'), 'standard': ('#F1EEF9', '#5B47A8'), 'form': ('#FFF4E5', '#A86200'),
+TINT = {'sop': ('#E5F4F2', '#00585A'), 'manual': ('#EAF0FB', '#2F5DA8'), 'standard': ('#F1EEF9', '#5B47A8'), 'form': ('#FFF4E5', '#8A4F00'),
         'alert': ('#FCECEE', '#C8102E'), 'lesson': ('#EEF6E9', '#3F7A2A'), 'policy': ('#F2F1EC', '#4A5553')}
 
 CSS = open(os.path.join(REG_ROOT, 'css', 'nova.css')).read() if os.path.exists(os.path.join(REG_ROOT, 'css', 'nova.css')) else ''
@@ -73,8 +73,7 @@ def page_html(key):
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RISE · {name}</title><link rel="stylesheet" href="../../kit/fonts.css"><link rel="stylesheet" href="../css/nova.css"></head><body>
 <header class="mx sg"><div class="bg" style="background-image:url(../img/tone/{ph})"></div>
-<div class="w hn"><a href="bold-mix.html"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE"></a><nav class="links"><a href="bold-mix.html">Home</a><a class="on" href="segments.html">Areas</a><a href="saved.html">Saved</a><a href="ask.html">Ask</a><a href="glossary.html">Glossary</a></nav>
-<span class="sp"></span><a class="up" href="upload.html">Upload</a><span class="av">FA</span></div>
+{nova_nav("areas")}
 <div class="w sgh"><div class="sgl">
   <a class="crumbp" href="segments.html">← Areas <i>·</i> {S.FAMILY[fam]}</a>
   <h1>{name}</h1><p class="tagl">{sub}</p><p class="desc">{desc}</p>

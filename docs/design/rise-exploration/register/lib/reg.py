@@ -85,8 +85,10 @@ def nav(active, role, pt=None):
         links += '<span class="sep" aria-hidden="true"></span>' + ''.join(
             f'<a class="ctl{" on" if k == active else ""}" href="{h}"{" aria-current=page" if k == active else ""}>{t}{f"<sup>{n}</sup>" if n else ""}</a>' for k, t, h, n in R['control'])
     up = '<a class="up" href="upload.html">Upload</a>' if R['upload'] else ''
+    hm = 'bold-mix-director.html' if role in ('owner', 'delegate') else 'bold-mix.html'
+    links = links.replace('href="bold-mix.html"', f'href="{hm}"')
     return f'''<div class="wrap"><header class="nav">
-    <a class="logo" href="bold-mix.html" aria-label="RISE home"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE" width="69" height="26"></a>
+    <a class="logo" href="{hm}" aria-label="RISE home"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE" width="69" height="26"></a>
     {f'<a class="pback" href="{pt[1]}" aria-label="Back">{ico("back")}</a><span class="ptl">{pt[0]}</span>' if pt else ''}
     <nav class="links" aria-label="Main">{links}</nav>
     <span class="sp"></span>
@@ -99,9 +101,37 @@ def nav(active, role, pt=None):
     </div>
   </header></div>'''
 
+def nova_nav(active, role='employee'):
+    """The one top bar for pages built on nova.css (Home, family and area pages): same links, labels and tools as nav()."""
+    R = ROLES[role]
+    links = ''.join(f'<a href="{h}"{" class=on aria-current=page" if k == active else ""}>{t}</a>' for k, t, h in NAV_MAIN)
+    if R['control']:
+        links += ''.join(f'<a class="ctl" href="{h}">{t}{f"<sup>{n}</sup>" if n else ""}</a>' for k, t, h, n in R['control'])
+    bell = 'notifications-director.html' if role in ('owner', 'delegate') else 'notifications.html'
+    acct = 'account-director.html' if role == 'owner' else 'account.html'
+    hm = 'bold-mix-director.html' if role in ('owner', 'delegate') else 'bold-mix.html'
+    links = links.replace('href="bold-mix.html"', f'href="{hm}"')
+    return f'''<div class="w hn"><a class="lg" href="{hm}" aria-label="RISE home"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE" width="74" height="28"></a>
+<nav class="links" aria-label="Main">{links}</nav><span class="sp"></span>
+<a class="k" href="search.html">Search <kbd>⌘K</kbd></a>{'<a class="up" href="upload.html">Upload</a>' if R['upload'] else ''}
+<a class="ps" href="search.html" aria-label="Search">{ico("search")}</a><a class="bell" href="{bell}" aria-label="Notifications, new">{ico("bell")}<i></i></a>
+<a class="av" href="{acct}" aria-label="{R["who"]}, account">{R["init"]}</a></div>'''
+NOVA_NAV_CSS = """
+.mx .hn{gap:22px}.mx .hn .lg{display:flex}
+.mx .hn .links a{white-space:nowrap}.mx .hn .links:has(.ctl) a{padding:9px 12px}.mx .hn .links a.ctl{color:#C9D3D0}.mx .hn .links sup{margin-left:4px;font:600 10px var(--mono);color:#FFB08A}
+.mx .hn .k{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);font:500 14px var(--ui);color:#E6ECEA}
+.mx .hn .k kbd{font:500 11px var(--mono);padding:3px 6px;border:1px solid rgba(255,255,255,.2);border-radius:6px;color:#C9D3D0;background:none}
+.mx .hn .up{display:inline-flex;align-items:center;min-height:40px;padding:0 16px;border-radius:999px;background:#00BFB2;border-color:#00BFB2;color:#062221;font-weight:600}
+.mx .hn .bell,.mx .hn .ps{position:relative;display:grid;place-items:center;width:40px;height:40px;color:#E6ECEA}
+.mx .hn .bell svg,.mx .hn .ps svg{width:18px;height:18px}.mx .hn .bell i{position:absolute;top:9px;right:9px;width:7px;height:7px;border-radius:50%;background:#FF6720}
+.mx .hn .ps{display:none}
+.mx .hn .av{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#00BFB2;color:#062221;font:700 13px var(--ui)}
+@media (max-width:900px){.mx .hn .links,.mx .hn .k,.mx .hn .up{display:none}.mx .hn .ps{display:grid}.mx .hn{gap:6px}}
+"""
+
 def dock(active, role):
     R = ROLES[role]
-    items = [('home', 'Home', 'bold-mix.html', 'home'), ('search', 'Search', 'search.html', 'search'), ('areas', 'Areas', 'areas.html', 'areas'),
+    items = [('home', 'Home', 'bold-mix-director.html' if role in ('owner', 'delegate') else 'bold-mix.html', 'home'), ('search', 'Search', 'search.html', 'search'), ('areas', 'Areas', 'areas.html', 'areas'),
              ('saved', 'Saved', 'saved.html', 'saved'), ('more', 'More', {'owner': 'more-director.html', 'qms': 'more-qms.html'}.get(role, 'more.html'), 'more')]
     dot = any(n for *_, n in R['control'])
     return '<nav class="dock" aria-label="Main">' + ''.join(
@@ -127,6 +157,10 @@ def split_hero(body):
     """What sits in the dark hero: everything before <!--/hero-->, else the first page header."""
     if '<!--/hero-->' in body:
         h, b = body.split('<!--/hero-->', 1); return h, b
+    b0 = body.lstrip()
+    if b0.startswith('<div class="refuse">'):  # short message screens: the whole message sits on the photo
+        e = b0.index('</div></div>') + len('</div></div>')
+        return b0[:e], b0[e:]
     m = _PHEAD.search(body)
     if m and m.start() < 400:
         end = m.end()
@@ -163,6 +197,7 @@ def page(name, title, body, active='home', role='employee', acting=None, dock_ac
 {f"<script>{script}</script>" if script else ""}
 </body>
 </html>'''
+    html = re.sub(r'class="([^"]*\b(?:dis|off)\b[^"]*)"', r'class="\1" aria-disabled="true"', html)  # inactive buttons say so
     open(os.path.join(PAGES, name), 'w').write(html)
     return name
 

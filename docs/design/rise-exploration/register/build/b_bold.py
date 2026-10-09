@@ -123,7 +123,7 @@ open(os.path.join(PAGES, 'bold-night.html'), 'w').write(shell('RISE · Night Shi
 
 # ════════════════ B · DAYLIGHT ════════════════
 cssB = '''
-:root{--bg:#FAFAF7;--card:#FFFFFF;--ink:#0E1B1A;--mute:#6B7774;--line:#E7E5DF;--teal:#00585A;--teal2:#00BFB2;--tealbg:#E5F4F2;--spark:#FF6720;--sparkbg:#FFEFE6;--crim:#C8102E;--crimbg:#FCECEE;--ok:#1D7A5E;
+:root{--bg:#FAFAF7;--card:#FFFFFF;--ink:#0E1B1A;--mute:#5E6A67;--line:#E7E5DF;--teal:#00585A;--teal2:#00BFB2;--tealbg:#E5F4F2;--spark:#FF6720;--sparkbg:#FFEFE6;--crim:#C8102E;--crimbg:#FCECEE;--ok:#1D7A5E;
 --display:'BwGradual',Inter,sans-serif;--ui:Inter,system-ui,sans-serif;--mono:'PlexMono',ui-monospace,monospace}
 *{box-sizing:border-box;margin:0;padding:0}html{overflow-x:clip}body{background:var(--bg);color:var(--ink);font:400 15px/1.5 var(--ui);-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}svg{width:20px;height:20px;flex:none}
@@ -171,7 +171,7 @@ h1 em{font-style:normal;color:var(--teal)}
 .doc:hover{background:#FBFBF8}.doc .t{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--tealbg);color:var(--teal);font:600 10.5px var(--mono)}
 .doc .n{font:600 13px var(--mono);color:var(--mute)}.doc b{font:600 16px/1.3 var(--ui)}.doc .m{font:500 12.5px var(--mono);color:var(--mute)}.doc .ok{justify-self:end;padding:6px 12px;border-radius:999px;background:#E3F4EC;color:var(--ok);font:600 12.5px var(--ui)}
 .band{margin-top:80px;border-radius:32px;background:var(--ink);color:#fff;padding:56px;display:grid;grid-template-columns:1fr auto;gap:30px;align-items:center}
-.band h2{font:700 54px/1 var(--display);letter-spacing:-.04em}.band h2 em{font-style:normal;color:var(--teal2)}.band a{padding:16px 28px;border-radius:999px;background:var(--spark);color:#fff;font:600 16px var(--ui)}
+.band h2{font:700 54px/1 var(--display);letter-spacing:-.04em}.band h2 em{font-style:normal;color:var(--teal2)}.band a{padding:16px 28px;border-radius:999px;background:var(--spark);color:#0E1B1A;font:600 16px var(--ui)}
 .foot{display:flex;justify-content:space-between;padding:30px 0 50px;font:500 11.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
 @media (prefers-reduced-motion:reduce){.float,.pill .c{animation:none}}
 @media (max-width:720px){
@@ -298,8 +298,7 @@ rest = bodyB[bodyB.find('<section class="sec">'):].replace('Direction B · Dayli
 rest = rest.replace('<section class="sec"><div class="sh"><div><h2>Changed', ALLSEC + '\n<section class="sec"><div class="sh"><div><h2>Changed', 1)
 rest = rest.replace('href="areas.html"><span class="ic">', 'href="#all"><span class="ic">', 1)
 bodyM = f'''<header class="mx"><div class="bg"></div>
-<div class="w hn"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE"><nav class="links"><a class="on" href="#">Home</a><a href="areas.html">Areas</a><a href="saved.html">Saved</a><a href="ask.html">Ask</a><a href="glossary.html">Glossary</a></nav>
-<span class="sp"></span><a class="up" href="upload.html">Upload</a><span class="av">FA</span></div>
+{nova_nav("home")}
 <div class="w hc"><span class="kick"><i></i>Register live · {len(EMP)} documents in force</span>
 <h1>Every answer, <span>within reach.</span></h1>
 <div class="sbox"><div class="sline">{ic("search")}<span class="v" id="tq">WI-003</span><span class="c"></span><kbd>/ to search</kbd></div>
@@ -307,5 +306,27 @@ bodyM = f'''<header class="mx"><div class="bg"></div>
 <div class="chips"><a href="search-results.html">pressure</a><a href="search-typing.html">inject</a><a href="seg-coiled-tubing.html">Coiled Tubing</a><a href="glossary.html">H2S</a></div></div></header>
 <main class="w"><div class="mxstats">{statsB}</div>
 {rest}'''
-open(os.path.join(PAGES, 'bold-mix.html'), 'w').write(shell('RISE · Home', cssB + cssHero + cssAll, bodyM, TYPE_SCRIPT))
+open(os.path.join(PAGES, 'bold-mix.html'), 'w').write(shell('RISE · Home', cssB + cssHero + cssAll + NOVA_NAV_CSS, bodyM, TYPE_SCRIPT))
 print('mix ok')
+
+# ── Home for the Segment Director (same design, their desk first) ──
+OWN = inforce('owner')
+waiting = 1; overdue = sum(1 for r in OWN if r['segment'] == 'coiled-tubing' and r.get('reviewOverdue'))
+cssDesk = """
+.deskc{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:22px;align-items:center;margin-top:28px;padding:24px 26px;border-radius:24px;background:#0E1B1A;color:#fff}
+.deskc .ic{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;background:#00BFB2;color:#062221;font:700 22px var(--display)}
+.deskc .m{font:600 11.5px var(--mono);letter-spacing:.08em;color:#8FE3D8}.deskc b{display:block;margin-top:6px;font:700 24px/1.15 var(--display);letter-spacing:-.02em}
+.deskc span.s{display:block;margin-top:6px;color:#B9C6C2;font-size:14.5px}
+.deskc .acts{display:flex;gap:10px;flex-wrap:wrap}.deskc .acts a{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:999px;font:600 14px var(--ui)}
+.deskc .acts .p{background:#fff;color:#0E1B1A}.deskc .acts .g{border:1px solid rgba(255,255,255,.22)}
+@media (max-width:720px){.deskc{grid-template-columns:auto 1fr}.deskc .acts{grid-column:1/-1}.deskc b{font-size:20px}}
+"""
+deskcard = (f'<section class="sec" style="padding-top:56px"><div class="sh"><div><h2>Your desk</h2><p>Segment Director · Coiled Tubing</p></div><a href="desk.html">Open the desk</a></div>'
+            f'<div class="deskc"><span class="ic">{waiting}</span><span><span class="m">WAITING FOR YOUR SIGN-OFF</span><b>CT Asset Management Standard</b>'
+            f'<span class="s">TQ-TWS-CTSS-S005 · Rev 1.0 · checked by QMS · {overdue} more documents past review in Coiled Tubing</span></span>'
+            f'<span class="acts"><a class="p" href="desk.html">Review and approve</a><a class="g" href="manage.html">Manage documents</a></span></div></section>')
+_mark = '<main class="w"><div class="mxstats">' + statsB + '</div>'
+assert _mark in bodyM
+bodyD = bodyM.replace(nova_nav("home"), nova_nav("home", "owner")).replace(_mark, _mark + deskcard, 1).replace('Good morning, Faisal', 'Good morning')
+open(os.path.join(PAGES, 'bold-mix-director.html'), 'w').write(shell('RISE · Home · Director', cssB + cssHero + cssAll + NOVA_NAV_CSS + cssDesk, bodyD, TYPE_SCRIPT))
+print('director home ok')

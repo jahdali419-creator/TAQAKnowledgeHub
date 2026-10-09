@@ -1,9 +1,9 @@
 """Landing page built with 21st.dev components + UI UX Pro Max guidance.
 
 21st.dev (via the 21st MCP, code retrieved): Horizon Glow Hero (ruixen.ui) and Card Hand Gallery (ruixen.ui),
-ported from React/motion to plain HTML/CSS/JS for the static prototype. Command Search (arihantcodes) and Spotlight
-(kevingirelli) were found in the catalogue but their code was over the free daily limit, so they are built from their
-published descriptions. UI UX Pro Max: Real-Time/Operations landing pattern (hero with live preview > metrics > how it
+ported from React/motion to plain HTML/CSS/JS for the static prototype. Command Search (arihantcodes): code retrieved later and its behaviour matched (typewriter timing, wrap-around
+keys, spring highlight, amber match, empty state, key hints). Spotlight (kevingirelli) is still over the free daily
+limit, so it is built from its published description. UI UX Pro Max: Real-Time/Operations landing pattern (hero with live preview > metrics > how it
 works > CTA), honest "live" labelling with a snapshot time, pause control on the marquee, no scroll-jacking, reduced
 motion renders the final state, 44px targets, visible focus. Colours and type are TAQA's, not the skill's suggestion.
 Design exploration only."""
@@ -97,20 +97,21 @@ a{color:inherit;text-decoration:none}img{display:block;max-width:100%}button{fon
 .cs input::placeholder{color:#6F827D;font-weight:500}
 .cs kbd{font:500 11.5px var(--mono);padding:5px 8px;border:1px solid rgba(255,255,255,.14);border-radius:7px;color:var(--fg3)}
 .cs .list{position:relative;max-height:236px;overflow:auto;border-top:1px solid rgba(255,255,255,.08);padding:6px;scrollbar-width:thin}
-.cs .hl{position:absolute;left:6px;right:6px;top:0;height:0;border-radius:12px;background:rgba(0,191,178,.12);border:1px solid rgba(0,191,178,.3);transition:transform .28s var(--spring),height .2s;pointer-events:none}
+.cs .hl{position:absolute;left:6px;right:6px;top:0;height:0;border-radius:12px;background:rgba(0,191,178,.12);border:1px solid rgba(0,191,178,.3);transition:transform .32s cubic-bezier(.3,1.35,.5,1),height .2s,opacity .2s;pointer-events:none}
 .cs .grp{padding:10px 12px 4px;color:var(--fg3)}
 .cs .it{position:relative;display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 12px;border-radius:12px}
 .cs .it .tg{flex:none;min-width:52px;padding:4px 7px;border-radius:7px;background:rgba(255,255,255,.06);font:600 10.5px var(--mono);color:var(--mint);text-align:center}
 .cs .it b{display:block;font:600 15px/1.3 var(--ui);color:#fff}.cs .it small{display:block;margin-top:2px;font:500 11.5px var(--mono);color:var(--fg3);letter-spacing:.02em}
-.cs .it mark{background:none;color:var(--mint);box-shadow:inset 0 -2px 0 rgba(255,103,32,.8)}
+.cs .it mark{background:rgba(255,193,71,.2);color:#FFE3A6;border-radius:3px;padding:0 1px}
+.cs .it .tg{transition:transform .3s var(--spring)}.cs .it.on .tg{transform:translateX(2px)}
 .cs .st{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:7px;padding:5px 10px;border-radius:999px;font:600 12px var(--ui)}
 .cs .st i{width:7px;height:7px;border-radius:50%;background:currentColor}
 .cs .st.cur{background:rgba(60,214,155,.12);color:var(--ok)}
 .cs .st.alt{background:rgba(200,16,46,.18);color:#FF9AA9}.cs .st.alt i{border-radius:1px;transform:rotate(45deg)}
 .cs .st.sup{background:rgba(200,16,46,.18);color:#FF9AA9}.cs .st.sup i{border-radius:0;height:2px;width:9px}
-.cs .empty{padding:18px 12px;color:var(--fg2);font-size:14.5px}
+.cs .empty{display:flex;flex-direction:column;align-items:center;gap:6px;padding:30px 12px 26px;text-align:center;color:var(--fg2);font-size:14.5px;animation:emp .25s ease-out}.cs .empty svg{width:22px;height:22px;color:var(--fg3)}.cs .empty b{color:#fff}.cs .empty .tip{color:var(--fg3);font-size:13px}@keyframes emp{from{opacity:0;transform:translateY(6px)}}
 .cs .foot{display:flex;gap:14px;align-items:center;padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);color:var(--fg3);font:500 11.5px var(--mono)}
-.cs .foot span:last-child{margin-left:auto}
+.cs .foot span:last-child{margin-left:auto}.cs .foot kbd{display:inline-grid;place-items:center;min-width:22px;height:22px;margin-right:3px;padding:0 5px;border-radius:6px;border:1px solid rgba(255,255,255,.16);font:500 11px var(--mono);color:var(--fg2)}
 .hcta{display:flex;gap:10px;margin-top:22px;opacity:0;animation:fade .8s ease 2s forwards}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 24px;border-radius:999px;font:600 15px var(--ui);transition:transform .25s var(--spring)}
 .btn:hover{transform:translateY(-2px)}
@@ -236,26 +237,27 @@ function render(q){q=(q||'').trim();var h='',n=0;items=[];
  if(D.length){h+='<p class="grp mono">Documents</p>';D.forEach(function(d){h+=add('<a class="it" href="'+d.h+'"><span class="tg">'+esc(d.m)+'</span><span><b>'+mk(d.t,q)+'</b><small>'+mk(d.n,q)+' · Rev '+d.r+' · '+esc(d.a)+'</small></span><span class="st '+d.st+'"><i></i>'+STW[d.st]+'</span></a>')})}
  if(A.length){h+='<p class="grp mono">Areas</p>';A.forEach(function(a){h+=add('<a class="it" href="seg-'+a.k+'.html"><span class="tg">'+esc(a.c)+'</span><span><b>'+mk(a.n,q)+'</b><small>'+a.m+' documents in force</small></span></a>')})}
  if(G.length){h+='<p class="grp mono">Field Glossary</p>';G.forEach(function(g){h+=add('<a class="it" href="glossary-term.html"><span class="tg">'+esc(g.a)+'</span><span><b>'+mk(g.f,q)+'</b><small>Term</small></span></a>')})}
- if(!items.length)h='<p class="empty">No document in force matches “'+esc(q)+'”. Try a number such as WI-003.</p>';
+ if(!items.length)h='<div class="empty"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.5 4a6.5 6.5 0 0 1 5.2 10.4l4.4 4.4-1.4 1.4-4.4-4.4A6.5 6.5 0 1 1 10.5 4zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z"/></svg><p>No document in force matches <b>“'+esc(q)+'”</b></p><p class="tip">Try a number such as WI-003.</p></div>';
  list.innerHTML='<div class="hl" id="chl" aria-hidden="true"></div>'+h;hl=document.getElementById('chl');sel=0;move();
  live.textContent=items.length?items.length+' results':'No results';}
-function move(){var el=document.getElementById('ci'+sel);if(!el){hl.style.height='0';return}
+function move(){var el=document.getElementById('ci'+sel);list.querySelectorAll('.it.on').forEach(function(x){x.classList.remove('on');x.setAttribute('aria-selected','false')});if(!el){hl.style.height='0';hl.style.opacity='0';return}el.classList.add('on');el.setAttribute('aria-selected','true');hl.style.opacity='1';
  hl.style.height=el.offsetHeight+'px';hl.style.transform='translateY('+el.offsetTop+'px)';inp.setAttribute('aria-activedescendant','ci'+sel);
  if(!typing)el.scrollIntoView({block:'nearest'})}
 inp.addEventListener('input',function(){typing=false;render(inp.value)});
 inp.addEventListener('focus',function(){typing=false});
-inp.addEventListener('keydown',function(e){if(e.key=='ArrowDown'){sel=Math.min(items.length-1,sel+1);move();e.preventDefault()}
- else if(e.key=='ArrowUp'){sel=Math.max(0,sel-1);move();e.preventDefault()}
+inp.addEventListener('keydown',function(e){if(e.key=='ArrowDown'){if(items.length){sel=(sel+1)%items.length;move()}e.preventDefault()}
+ else if(e.key=='ArrowUp'){if(items.length){sel=(sel-1+items.length)%items.length;move()}e.preventDefault()}
  else if(e.key=='Enter'){var el=document.getElementById('ci'+sel);if(el)location.href=el.getAttribute('href')}});
 list.addEventListener('mousemove',function(e){var it=e.target.closest('.it');if(it){var i=+it.id.slice(2);if(i!=sel){sel=i;move()}}});
 document.addEventListener('keydown',function(e){if(e.key=='/'&&document.activeElement!=inp){e.preventDefault();inp.focus()}});
 render('');
-/* types sample queries until the person takes over */
-var Q=['WI-003','pressure','H2S','SOP-003','Coiled'],qi=0;
-function demo(){if(!typing)return;var s=Q[qi],i=0;inp.value='';
- var t=setInterval(function(){if(!typing){clearInterval(t);return}inp.value=s.slice(0,++i);render(inp.value);
-  if(i>=s.length){clearInterval(t);setTimeout(function(){if(!typing)return;qi=(qi+1)%Q.length;demo()},2600)}},95)}
-if(!RM)setTimeout(demo,2300);else{inp.value='WI-003';render('WI-003')}
+/* Typewriter from 21st Command Search: types (170ms), holds 2.8s, deletes (80ms), 1s gap; only while on screen */
+var Q=['WI-003','pressure','H2S','SOP-003','Coiled'],qi=0,vis=true,tm=null;
+new IntersectionObserver(function(es){vis=es[0].isIntersecting},{rootMargin:'-10% 0px'}).observe(inp);
+function step(s,i,dir){if(!typing)return;if(!vis){tm=setTimeout(function(){step(s,i,dir)},400);return}
+ if(dir>0){inp.value=s.slice(0,i);render(inp.value);if(i<s.length){tm=setTimeout(function(){step(s,i+1,1)},170)}else{tm=setTimeout(function(){step(s,i-1,-1)},2800)}}
+ else{inp.value=s.slice(0,i);render(inp.value);if(i>0){tm=setTimeout(function(){step(s,i-1,-1)},80)}else{qi=(qi+1)%Q.length;tm=setTimeout(function(){step(Q[qi],1,1)},1000)}}}
+if(!RM)setTimeout(function(){step(Q[0],1,1)},2300);else{inp.value='WI-003';render('WI-003')}
 
 /* ── Card Hand Gallery ── */
 var C=__CARDS__,fan=document.getElementById('fan'),ttl=document.getElementById('httl'),ds=document.getElementById('hds'),act=0,hov=-1,els=[];
@@ -308,10 +310,10 @@ html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name
  <div class="disk"><div class="orb"></div></div><div class="edge"><div class="orb"></div></div></div>
 <div class="hcopy"><p class="eyebrow"><i></i>{len(EMP)} controlled documents in force</p>
 <h1 id="ht">The right document, <em>before the job starts.</em></h1>
-<div class="cs" role="combobox" aria-expanded="true" aria-haspopup="listbox" aria-owns="cl"><label for="cq">{SVG_S}<span class="sr">Search the register</span>
+<div class="cs" role="combobox" aria-expanded="true" aria-haspopup="listbox" aria-owns="cl" aria-controls="cl"><label for="cq">{SVG_S}<span class="sr">Search the register</span>
 <input id="cq" type="text" autocomplete="off" spellcheck="false" placeholder="Search a number, title or area" aria-autocomplete="list" aria-controls="cl"><kbd>/</kbd></label>
 <div class="list" id="cl" role="listbox" aria-label="Results"></div>
-<div class="foot"><span>↑↓ to move</span><span>↵ to open</span><span>Prototype data · register snapshot 06 Oct 2026</span></div><p class="sr" id="clive" aria-live="polite"></p></div>
+<div class="foot"><span><kbd>↑</kbd><kbd>↓</kbd> Navigate</span><span><kbd>↵</kbd> Open</span><span>Prototype data · register snapshot 06 Oct 2026</span></div><p class="sr" id="clive" aria-live="polite"></p></div>
 <div class="hcta"><a class="btn lt" href="bold-mix.html">Open RISE</a><a class="btn gh" href="#how">How it works</a></div></div>
 </section>
 <section class="metrics" aria-label="The register in numbers"><div class="w"><div><b data-n="{len(EMP)}">{len(EMP)}</b><span>Documents in force</span></div><div><b data-n="25">25</b><span>Areas across TAQA</span></div>

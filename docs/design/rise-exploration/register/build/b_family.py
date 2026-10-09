@@ -53,11 +53,11 @@ CSS = '''
 CSS += """
 .sx{position:relative;z-index:3;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:40px;margin-top:-36px;padding:34px;border-radius:30px;background:#fff;border:1px solid var(--line);box-shadow:0 30px 60px -40px rgba(14,27,26,.45)}
 .sl{display:flex;flex-direction:column;justify-content:center}
-.sl .it{position:relative;display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:baseline;gap:14px;padding:13px 4px;border-bottom:1px solid var(--line);color:#A9B2AF;transition:color .3s,padding .3s}
+.sl .it{position:relative;display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:baseline;gap:14px;padding:13px 4px;border-bottom:1px solid var(--line);color:#5E6A67;transition:color .3s,padding .3s}
 .sl .it:last-child{border-bottom:0}
-.sl .i{font:600 12px var(--mono);letter-spacing:.06em;color:#C5CCC9;transition:color .3s}
+.sl .i{font:600 12px var(--mono);letter-spacing:.06em;color:#636F6C;transition:color .3s}
 .sl b{font:700 clamp(24px,2.3vw,34px)/1.1 var(--display);letter-spacing:-.03em}
-.sl .c{justify-self:end;font:600 14px var(--mono);color:#C5CCC9;transition:color .3s}
+.sl .c{justify-self:end;font:600 14px var(--mono);color:#636F6C;transition:color .3s}
 .sl .you{display:inline-block;margin-left:12px;vertical-align:6px;padding:4px 10px;border-radius:999px;background:var(--tealbg);color:var(--teal);font:600 11.5px var(--ui)}
 .sl .it.on{color:var(--ink);padding-left:18px}.sl .it.on .i{color:var(--teal)}.sl .it.on .c{color:var(--teal)}
 .sl .it::before{content:"";position:absolute;left:0;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:var(--spark);opacity:0;transform:scale(.4);transition:.3s}
@@ -124,11 +124,10 @@ def build(g, slug, title, desc, hero):
         sl += f'''<a class="it{on}{'' if im else ' np'}" href="seg-{k}.html" data-i="{i}"{bgst}><span class="i">{i + 1:02d}</span><b>{name}{you}</b><span class="c">{count_for(k)}</span></a>'''
         art = f'<span class="ph" style="background-image:url(../img/tone/{im})"></span>' if im else f'<span class="ty">{s_["spl"]}</span>'
         pn += f'''<div class="pn{on}{'' if im else ' np'}" data-i="{i}">{art}<div class="pc"><span class="tg">{tag}</span><h2>{name}</h2><p>{desc_}</p>
-  <div class="ft"><span><b>{count_for(k)}</b> documents in force</span><a href="seg-{k}.html">Open {name}</a></div></div></div>'''
+  <div class="ft"><span><b>{count_for(k)}</b> documents in force</span><a href="seg-{k}.html" tabindex="-1">Open {name}</a></div></div></div>'''
     others = ''.join(f'<a href="family-{sl}.html">{t}</a>' for gg, sl, t, *_ in FAMS if gg != g)
     body = f'''<header class="mx fh"><div class="bg" style="background-image:url(../img/tone/{hero})"></div>
-<div class="w hn"><a href="bold-mix.html"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE"></a><nav class="links"><a href="bold-mix.html">Home</a><a class="on" href="areas.html">Areas</a><a href="saved.html">Saved</a><a href="ask.html">Ask</a><a href="glossary.html">Glossary</a></nav>
-<span class="sp"></span><a class="up" href="upload.html">Upload</a><span class="av">FA</span></div>
+{nova_nav("areas")}
 <div class="w hc"><a class="crumbp" href="bold-mix.html#all">← Home <i>·</i> One TAQA</a>
 <h1>{title}</h1><p class="d">{desc}</p><p class="m"><b>{len(keys)}</b> areas · <b>{docs}</b> documents in force</p></div></header>
 <main class="w"><div class="sx"><nav class="sl" aria-label="{title}">{sl}</nav><div class="spn" aria-hidden="true">{pn}</div></div>

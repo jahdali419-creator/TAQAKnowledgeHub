@@ -44,9 +44,12 @@ def actions(disabled=None, reason='', form=False, saved=True):
     return html
 
 def preview(r, live=True):
-    return f'''<div class="pvw"><div class="hd"><span>PDF document</span><span>{r["docNumber"]} · Rev {r["revision"]}</span></div>
-  <div class="ph"><b>Preview not connected</b><p>{r["title"]} · {segname(r["segment"])}</p><p class="small">The full preview appears here once document storage is connected. Download the file to read it offline.</p>
-  {'<a class="btn sm" href="#">Download PDF</a>' if live else ''}</div></div>'''
+    href = 'document-read.html' if r['docNumber'] == 'TQ-TWS-CTSS-WI-003' else '#'
+    return f'''<div class="pvw rdr"><div class="hd"><span>Read the document</span><span>{r["docNumber"]} · Rev {r["revision"]}</span></div>
+  <div class="rdb"><a class="cover" href="{href}" aria-label="Open {r["title"]} in the reader"><span class="ch"><span>TAQA</span><span>{short(r["docNumber"])}</span></span>
+   <b>{r["title"]}</b><span class="cl"></span><span class="cl s"></span><span class="cl"></span><span class="cl m"></span><span class="cf">Rev {r["revision"]} · Page 1</span></a>
+  <div class="rdt"><b>Read it here, on any screen</b><p>Contents to jump between sections, the changes in Rev {r["revision"]} marked, find in document, and a high-contrast mode for bright sunlight.</p>
+  {f'<a class="btn pri" href="{href}">Open the reader</a>' if live else '<span class="small">Not available for this document.</span>'}</div></div></div>'''
 
 def related(r, role='employee'):
     rel = [x for x in inforce(role) if x['segment'] == r['segment'] and x['docType'] == r['docType'] and x['docNumber'] != r['docNumber'] and not x.get('translationOf')][:4]
@@ -153,7 +156,7 @@ p = os.path.join(PAGES, 'document-qrc.html'); h = open(p).read().replace('</main
 
 # 11 · Share (QR) popover
 share = '''<div class="scrim"></div><section class="dlg" role="dialog" aria-label="Share this document"><p class="lab">Share this document</p>
-  <div class="qrbox" aria-label="QR code"></div><p class="body" style="margin-top:16px">Scan with a phone or tablet to open this document there, or copy the link.</p>
+  <div class="qrbox" role="img" aria-label="QR code for this document"></div><p class="body" style="margin-top:16px">Scan with a phone or tablet to open this document there, or copy the link.</p>
   <div class="g75" style="column-gap:10px;margin-top:14px"><div class="in ro code">rise.taqa.com/viewer?doc=TQ-TWS-CTSS-WI-003</div><a class="btn" href="#">Copy link</a></div>
   <div class="acts"><a class="btn pri" href="document.html">Done</a></div></section>'''
 doc('document-share.html', WI3, 'cur')

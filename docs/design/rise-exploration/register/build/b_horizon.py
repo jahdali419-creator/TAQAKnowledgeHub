@@ -18,7 +18,7 @@ def words(text, cls=''):
     return ' '.join(f'<span class="wd {cls}"><span style="--d:{i}">{w}</span></span>' for i, w in enumerate(text.split()))
 
 CSS = '''
-:root{--night:#030807;--ink:#0E1B1A;--mute:#6B7774;--line:#E7E5DF;--teal:#00585A;--teal2:#00BFB2;--spark:#FF6720;--ok:#3CD69B;--crim:#C8102E;
+:root{--night:#030807;--ink:#0E1B1A;--mute:#5E6A67;--line:#E7E5DF;--teal:#00585A;--teal2:#00BFB2;--spark:#FF6720;--ok:#3CD69B;--crim:#C8102E;
 --display:'BwGradual',Inter,sans-serif;--ui:Inter,system-ui,sans-serif;--mono:'PlexMono',ui-monospace,monospace;--spring:cubic-bezier(.34,1.56,.64,1);--out:cubic-bezier(.2,.7,.2,1)}
 *{box-sizing:border-box;margin:0;padding:0}html{overflow-x:clip;background:var(--night)}
 body{background:#FAFAF7;color:var(--ink);font:400 16px/1.5 var(--ui);-webkit-font-smoothing:antialiased}

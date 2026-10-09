@@ -10,9 +10,9 @@ FIN = os.path.abspath(os.path.join(REG, '..', 'final'))
 sys.path.insert(0, os.path.join(REG, 'lib'))
 from reg import SEGS
 
-RENAME = {'bold-mix': 'home', 'landing-21': 'landing'}
+RENAME = {'bold-mix-director': 'home-director', 'bold-mix': 'home', 'landing-21': 'landing'}
 # old or alternative screens that are not part of the chosen design → where their links should land instead
-DROP = {'home': 'home', 'home-director': 'home', 'landing': 'landing', 'landing-horizon': 'landing', 'bold-day': 'home',
+DROP = {'home': 'home', 'landing': 'landing', 'landing-horizon': 'landing', 'bold-day': 'home',
         'bold-night': 'home', 'states': 'home', 'system': 'home'}
 
 G = [  # (section id, title, intro, [(page, label, note)])
@@ -33,7 +33,8 @@ G = [  # (section id, title, intro, [(page, label, note)])
   ('search', 'Search', ''), ('search-typing', 'Search · typing', ''), ('search-results', 'Search · results', ''),
   ('search-number', 'Search · a number', 'WI-003 in every area that uses it.'), ('search-filters', 'Search · filters', ''),
   ('search-none', 'Search · nothing found', ''), ('search-superseded', 'Search · old number', 'Shown as “do not use”.'),
-  ('document', 'Document', 'Current, OK to use.'), ('document-superseded', 'Document · superseded', ''),
+  ('document', 'Document', 'Current, OK to use, with the way into the reader.'),
+  ('document-read', 'Document reader', 'Contents, changes in Rev 4.0 marked, find, text size, sunlight mode.'), ('document-superseded', 'Document · superseded', ''),
   ('document-withdrawn', 'Document · withdrawn', ''), ('document-notyet', 'Document · not yet in force', ''),
   ('document-form', 'Form record', ''), ('form', 'Form · fill in', ''), ('document-share', 'Share', ''), ('document-qrc', 'Quick reference', ''),
   ('document-denied', 'No access', ''), ('document-unavailable', 'Unavailable', '')]),
@@ -50,11 +51,16 @@ G = [  # (section id, title, intro, [(page, label, note)])
   ('upload-review', 'Upload · check the record', ''), ('upload-done', 'Upload · filed', ''), ('document-draft', 'Your filing · draft', ''),
   ('document-returned', 'Your filing · returned', '')]),
  ('director', 'Segment Director', 'Approvals, managing documents and delegation.', [
+  ('bold-mix-director', 'Home · Segment Director', 'Same Home, with the desk first: what waits for sign-off.'),
   ('desk', 'Approvals desk', ''), ('desk-approve', 'Approve', ''), ('desk-reject', 'Return with a reason', ''), ('desk-approved', 'Approved', ''),
   ('desk-maint', 'Maintenance desk', ''), ('desk-delegate', 'Acting for the Director', ''), ('manage', 'Manage documents', ''),
   ('manage-withdraw', 'Withdraw a document', ''), ('delegation', 'Delegation', ''), ('delegation-new', 'New delegation', ''),
   ('delegation-revoke', 'Revoke a delegation', ''), ('area-director', 'Area · director view', ''), ('notifications-director', 'Waiting for your signature', ''),
   ('account-director', 'Account · director', ''), ('more-director', 'More · director', ''), ('upload-acting', 'Upload while acting', ''), ('acting-broken', 'Delegation ended', '')]),
+ ('states', 'Loading, offline and errors', 'What RISE shows while it works, without a signal, and when the register is down.', [
+  ('state-loading', 'Loading results', 'The page keeps its shape while results arrive.'),
+  ('state-offline', 'Offline on site', 'Saved documents still open; the rest says it needs a connection.'),
+  ('state-error', 'Register unavailable', 'What still works, a retry countdown, and who to call.')]),
  ('qms', 'QMS and audit', 'Document control: the Master List and the QMS check.', [
   ('master', 'Master List', ''), ('master-record', 'Master record', ''), ('master-bulk', 'Bulk actions', ''), ('master-auditor', 'Master List · auditor', ''),
   ('workbench', 'QMS check', ''), ('workbench-done', 'QMS check · passed', ''), ('workbench-reject', 'QMS check · returned', ''),
@@ -66,14 +72,14 @@ SEG_KEYS = [k for k in ['coiled-tubing', 'wireline', 'drilling', 'fracturing', '
             'finance', 'it', 'supply-chain', 'legal', 'learning-center', 'commercial', 'geothermal-coe', 'company']]
 KEEP = [p for _, _, _, items in G for p, *_ in items] + [f'seg-{k}' for k in SEG_KEYS] + ['segments']
 ENH = [
- ('Finish the two screens that still look half-converted', 'The Director’s own Home and the three “not part of your role” pages only got a thin dark bar. Give them the full photo top like every other screen.'),
- ('Arabic, right to left', 'Every screen is English only. RISE serves Arabic readers and keeps Arabic copies of documents, so the key screens (Home, Search, Document, an area) need an Arabic version with Somar type and mirrored layout.'),
- ('One navigation everywhere', 'Home, the area pages and the family pages use a slightly different top bar from the rest (“Ask” vs “Ask an Expert”, search button missing). Make it one bar with the same links in the same order.'),
- ('Reading a document on site', 'The document page shows a “preview not connected” box. Design the real reader: page view, jump to a section, “what changed in this revision” highlighted, and readable in sunlight.'),
- ('Loading, offline and error states', 'Show what a screen looks like while it loads, when the phone has no signal, and when the register cannot be reached, in the new style.'),
- ('Real photos for the support functions', 'HR, Finance, IT, Legal, Supply Chain, Commercial and Aberdeen still use stand-in pictures.'),
- ('Use the full 21st components', 'The command search and spotlight cards were rebuilt by hand from their descriptions. Swap in the real 21st code once the daily download limit allows.'),
- ('Accessibility check', 'Check text contrast on the toned photos, keyboard order in Search and Upload, and every screen with motion turned off.'),
+ ('Done · Director’s Home and the message screens', 'The Director now has the same Home with their desk first. “Not part of your role” and “Delegation ended” sit on the full photo top.'),
+ ('Done · One top bar everywhere', 'Home, the family pages and the 25 area pages now use the same bar as every other screen: Home, Areas, Saved, Ask an Expert, Field Glossary, Search, Upload, notifications.'),
+ ('Done · Document reader', 'Contents with the current section marked, the changes in Rev 4.0 highlighted, find in document, text size and a high-contrast sunlight mode.'),
+ ('Done · Loading, offline and error states', 'Results loading in place, offline on site with saved documents still open, and the register being unreachable.'),
+ ('Done · Accessibility pass', 'Automated check of every screen for contrast, names on buttons and links, image text and keyboard focus, with the problems fixed.'),
+ ('Waiting · Real photos for the support functions', 'HR, Finance, IT, Legal, Supply Chain, Commercial and Aberdeen still use stand-in pictures until real ones are sent.'),
+ ('Done · Real 21st Command Search', 'Its code was retrieved and the landing search now behaves like it: types and deletes sample searches only while on screen, arrow keys wrap around, a spring highlight, amber match marks, a clear empty state and key hints.'),
+ ('Waiting · 21st Spotlight code', 'The free 21st plan allows two code downloads a day. The spotlight tiles stay hand-built from its description until the next download.'),
 ]
 
 def rewire(html):
@@ -122,7 +128,7 @@ def gallery(prefix):
     tiles = ''.join(f'<a class="tile" href="{prefix}pages/seg-{k}.html"><img src="{prefix}shots/seg-{k}-d.jpg" alt="{SEGS[k]["name"]}" loading="lazy" width="1440" height="900"><span><b>{SEGS[k]["name"]}</b><i>{SEGS[k]["spl"]}</i></span></a>' for k in SEG_KEYS)
     secs += f'<section class="sec" id="all-areas"><header class="sh"><h2>Every area page</h2><p>The same page for all 25 areas, filled from the register.</p><span class="ct">25 screens</span></header><div class="tiles">{tiles}</div></section>'
     enh = ''.join(f'<li><b>{a}</b><p>{b}</p></li>' for a, b in ENH)
-    secs += f'<section class="sec" id="next"><header class="sh"><h2>Where we can enhance</h2><p>In the order I would take them.</p></header><ol class="enh">{enh}</ol></section>'
+    secs += f'<section class="sec" id="next"><header class="sh"><h2>Enhancements</h2><p>What was done in this round, and what is still waiting.</p></header><ol class="enh">{enh}</ol></section>'
     total = sum(len(i) for *_, i in G) + 25
     return f'''<title>RISE · Chosen design</title>
 <link rel="stylesheet" href="{prefix}../kit/fonts.css">
