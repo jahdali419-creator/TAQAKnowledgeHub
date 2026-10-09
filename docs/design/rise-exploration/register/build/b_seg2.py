@@ -87,7 +87,7 @@ def page_html(key):
 <section class="sec"><div class="sh"><div><h2>The library</h2><p>{len(vis)} documents in force, by type</p></div><a href="#">Search {name}</a></div><div class="libs">{cards}</div></section>
 {f'<section class="sec"><div class="sh"><div><h2>Recently issued</h2><p>Newest first · in force</p></div><a href="#">View all</a></div><div class="list">{rows}</div></section>' if recent else ''}
 <section class="band"><div><p class="k">A question about {name}?</p><h2>{ask_t}</h2><p class="s">{ask_s}</p></div><a href="ask.html">Ask an Expert</a></section>
-</main><footer class="w foot"><span>RISE · TAQA knowledge</span><span>{name} · design exploration</span></footer>
+</main><footer class="w foot"><span>RISE · TAQA knowledge</span></footer>
 <nav class="dockn"><a href="bold-mix.html">Home</a><a href="search.html">Search</a><a class="on" href="segments.html">Areas</a><a href="saved.html">Saved</a><a href="more.html">More</a></nav>
 </body></html>'''
 

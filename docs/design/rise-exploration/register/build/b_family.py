@@ -132,7 +132,7 @@ def build(g, slug, title, desc, hero):
 <h1>{title}</h1><p class="d">{desc}</p><p class="m"><b>{len(keys)}</b> areas · <b>{docs}</b> documents in force</p></div></header>
 <main class="w"><div class="sx"><nav class="sl" aria-label="{title}">{sl}</nav><div class="spn" aria-hidden="true">{pn}</div></div>
 <div class="oth">Other families{others}</div></main>
-<footer class="w foot"><span>RISE · TAQA knowledge</span><span>{title.replace("&amp;", "&")} · design exploration</span></footer>
+<footer class="w foot"><span>RISE · TAQA knowledge</span></footer>
 <nav class="dockn"><a href="bold-mix.html">Home</a><a href="search.html">Search</a><a class="on" href="areas.html">Areas</a><a href="saved.html">Saved</a><a href="more.html">More</a></nav>'''
     html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RISE · {title.replace("&amp;", "&")}</title><link rel="stylesheet" href="../../kit/fonts.css"><link rel="stylesheet" href="../css/nova.css"><style>{CSS}</style></head><body>

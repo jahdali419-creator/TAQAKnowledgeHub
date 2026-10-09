@@ -1,6 +1,6 @@
 """Two bold homepage directions ("surprise me"): A · Night Shift (dark, cinematic) and B · Daylight (bright, modern).
 Real register data and TAQA's own photography; design exploration only."""
-import sys, os
+import sys, os, re
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'lib'))
 from reg import *
 
@@ -295,6 +295,43 @@ start = bodyB.find('<div class="stats">')
 stats_end = bodyB.find('</div></div>', start) + len('</div></div>')
 statsB = bodyB[start:stats_end]
 rest = bodyB[bodyB.find('<section class="sec">'):].replace('Direction B · Daylight · design exploration', 'Home · Night Shift hero + Daylight cards · design exploration')
+
+# ── Home, “Good morning” rebuilt: your area with its whole photo, then one calm list (user: the card grid felt messy) ──
+_g0 = rest.index('<div class="grid">'); _g1 = rest.index('</div></section>', _g0)
+TODAY = f'''<div class="today"><a class="mine" href="seg-coiled-tubing.html"><img src="../img/tone/taqa-hero-5.jpeg" alt="Coiled Tubing crew at the unit" loading="lazy">
+<span class="mt"><span class="chips"><span>Your area</span><span>{len(CT)} in force</span></span><b>Coiled Tubing</b><span class="d">Procedures, manuals, standards, forms, alerts and lessons for every CT unit.</span><span class="open">Open Coiled Tubing</span></span></a>
+<nav class="qlist" aria-label="For you today">
+ <a class="al" href="#"><span class="ic">{ic("alert")}</span><span class="tx"><b>{ALERT["title"]}</b><span>Technical alert · {short(ALERT["docNumber"])} · read before the next job</span></span><span class="chev">›</span></a>
+ <a href="saved.html"><span class="ic">{ic("book")}</span><span class="tx"><b>Saved</b><span>3 documents ready offline</span></span><span class="chev">›</span></a>
+ <a href="ask.html"><span class="ic">{ic("chat")}</span><span class="tx"><b>Ask an Expert</b><span>Coiled Tubing Expert · send a field problem</span></span><span class="chev">›</span></a>
+ <a href="glossary-term.html"><span class="ic gl">{BOP["abbr"]}</span><span class="tx"><b>{BOP["full"]}</b><span>Field Glossary · term of the day</span></span><span class="chev">›</span></a>
+ <a href="areas.html"><span class="ic">{ic("layers")}</span><span class="tx"><b>All 25 areas</b><span>Segments, functions and Centres of Excellence</span></span><span class="chev">›</span></a>
+</nav></div>'''
+rest = rest[:_g0] + TODAY + rest[_g1 + len('</div>'):]
+rest = rest.replace('<a href="seg-coiled-tubing.html">Open your area</a></div>\n<div class="today">', '</div>\n<div class="today">', 1).replace('<a href="seg-coiled-tubing.html">Open your area</a></div><div class="today">', '</div><div class="today">', 1)
+rest = re.sub(r'<section class="band">.*?</section>', '', rest, count=1, flags=re.S)
+rest = re.sub(r'<footer class="w foot">.*?</footer>', '<footer class="w foot"><span>RISE · TAQA knowledge</span></footer>', rest, count=1, flags=re.S)
+cssToday = """
+.today{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;margin-top:28px;align-items:start}
+.mine{display:flex;flex-direction:column;border-radius:24px;background:#fff;border:1px solid var(--line);overflow:hidden;transition:box-shadow .25s}
+.mine:hover{box-shadow:0 30px 50px -34px rgba(14,27,26,.45)}
+.mine img{width:100%;aspect-ratio:3/2;object-fit:cover}
+.mine .mt{display:flex;flex-direction:column;gap:8px;padding:20px 22px 22px}
+.mine .chips{display:flex;gap:8px;flex-wrap:wrap}.mine .chips span{padding:6px 11px;border-radius:999px;background:var(--tealbg);color:var(--teal);font:600 12.5px var(--ui)}
+.mine b{font:700 30px/1.05 var(--display);letter-spacing:-.03em}.mine .d{color:var(--mute);font-size:15px}
+.mine .open{align-self:flex-start;margin-top:6px;display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:999px;background:var(--ink);color:#fff;font:600 14px var(--ui)}
+.qlist{display:flex;flex-direction:column;border-radius:24px;background:#fff;border:1px solid var(--line);overflow:hidden}
+.qlist a{display:grid;grid-template-columns:46px minmax(0,1fr) auto;gap:14px;align-items:center;min-height:76px;padding:12px 18px;border-top:1px solid var(--line);transition:background .2s}
+.qlist a:first-child{border-top:0}.qlist a:hover{background:#F6F8F7}
+.qlist .ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--tealbg);color:var(--teal)}.qlist .ic svg{width:21px;height:21px}
+.qlist .ic.gl{font:700 12px var(--mono)}
+.qlist .al .ic{background:var(--crimbg);color:var(--crim)}.qlist .al b{color:#7A0B1D}
+.qlist b{display:block;font:600 16px/1.3 var(--ui)}.qlist .tx span{display:block;margin-top:3px;color:var(--mute);font-size:13.5px}
+.qlist .chev{font:400 26px/1 var(--ui);color:#9AA3A0}
+@media (max-width:720px){.today{grid-template-columns:1fr;gap:12px}.mine{border-radius:20px}.mine b{font-size:26px}.qlist{border-radius:20px}.qlist a{min-height:68px;padding:10px 14px;gap:12px}.qlist b{font-size:15px}}
+.foot{justify-content:flex-start}
+"""
+
 rest = rest.replace('<section class="sec"><div class="sh"><div><h2>Changed', ALLSEC + '\n<section class="sec"><div class="sh"><div><h2>Changed', 1)
 rest = rest.replace('href="areas.html"><span class="ic">', 'href="#all"><span class="ic">', 1)
 bodyM = f'''<header class="mx"><div class="bg"></div>
@@ -306,7 +343,7 @@ bodyM = f'''<header class="mx"><div class="bg"></div>
 <div class="chips"><a href="search-results.html">pressure</a><a href="search-typing.html">inject</a><a href="seg-coiled-tubing.html">Coiled Tubing</a><a href="glossary.html">H2S</a></div></div></header>
 <main class="w"><div class="mxstats">{statsB}</div>
 {rest}'''
-open(os.path.join(PAGES, 'bold-mix.html'), 'w').write(shell('RISE · Home', cssB + cssHero + cssAll + NOVA_NAV_CSS, bodyM, TYPE_SCRIPT))
+open(os.path.join(PAGES, 'bold-mix.html'), 'w').write(shell('RISE · Home', cssB + cssHero + cssAll + NOVA_NAV_CSS + cssToday, bodyM, TYPE_SCRIPT))
 print('mix ok')
 
 # ── Home for the Segment Director (same design, their desk first) ──
@@ -328,5 +365,5 @@ deskcard = (f'<section class="sec" style="padding-top:56px"><div class="sh"><div
 _mark = '<main class="w"><div class="mxstats">' + statsB + '</div>'
 assert _mark in bodyM
 bodyD = bodyM.replace(nova_nav("home"), nova_nav("home", "owner")).replace(_mark, _mark + deskcard, 1).replace('Good morning, Faisal', 'Good morning')
-open(os.path.join(PAGES, 'bold-mix-director.html'), 'w').write(shell('RISE · Home · Director', cssB + cssHero + cssAll + NOVA_NAV_CSS + cssDesk, bodyD, TYPE_SCRIPT))
+open(os.path.join(PAGES, 'bold-mix-director.html'), 'w').write(shell('RISE · Home · Director', cssB + cssHero + cssAll + NOVA_NAV_CSS + cssToday + cssDesk, bodyD, TYPE_SCRIPT))
 print('director home ok')

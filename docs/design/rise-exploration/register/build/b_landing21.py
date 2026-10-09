@@ -341,7 +341,7 @@ html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name
 
 <section class="close" aria-labelledby="ch"><div class="w"><div class="row"><h2 class="rv" id="ch">Know it’s <em>current.</em></h2>
 <div class="card2 rv"><p class="mono">TAQA · Internal</p><p>Sign in with your TAQA account. Everything you need for the job, approved and in force.</p><a class="btn" href="bold-mix.html">Open RISE</a></div></div>
-<footer class="mono"><span>RISE · TAQA knowledge</span><span>Built with 21st.dev components · UI UX Pro Max · design exploration</span></footer></div></section>
+<footer class="mono"><span>RISE · TAQA knowledge</span></footer></div></section>
 </main>
 <script>{JS}</script>
 </body></html>'''
