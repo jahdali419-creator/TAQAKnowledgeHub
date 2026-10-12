@@ -37,7 +37,7 @@ a{color:inherit;text-decoration:none}img{display:block;max-width:100%}
 @keyframes rise{from{transform:translateY(160px);opacity:0}}
 @keyframes core{to{width:760px;margin-left:-380px;opacity:.75}}
 .nav{position:relative;z-index:5;display:flex;align-items:center;gap:28px;height:88px}
-.nav img{height:28px;filter:brightness(0) invert(1)}
+.nav img{height:28px;width:auto}
 .nav nav{display:flex;gap:4px;padding:5px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(14px)}
 .nav nav a{padding:9px 16px;border-radius:999px;font:500 14px/1 var(--ui);color:#B8C6C2;transition:color .2s,background .2s}.nav nav a:hover{color:#fff;background:rgba(255,255,255,.07)}
 .nav .sp{flex:1}
@@ -209,7 +209,7 @@ if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){show(0)}else{s
 html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RISE · TAQA knowledge</title><link rel="stylesheet" href="../../kit/fonts.css"><style>{CSS}</style></head><body>
 <section class="hz"><div class="stars"></div><div class="grid"></div><div class="arc"></div>
-<div class="w nav"><img src="../../kit/brand/rise-lockup-header.png" alt="RISE"><nav><a href="#how">How it works</a><a href="segments.html">Areas</a><a href="glossary.html">Field Glossary</a><a href="ask.html">Ask an Expert</a></nav>
+<div class="w nav"><img src="../../kit/brand/rise-lockup-header-reverse.png" alt="RISE"><nav><a href="#how">How it works</a><a href="segments.html">Areas</a><a href="glossary.html">Field Glossary</a><a href="ask.html">Ask an Expert</a></nav>
 <span class="sp"></span><a class="si" href="bold-mix.html"><i><b></b><b></b><b></b><b></b></i>Sign in with TAQA account</a></div>
 <div class="w hc"><span class="pill"><b>LIVE</b><i></i>{len(EMP)} controlled documents in force today</span>
 <h1>{words("The right document,")} {words("before the job starts.", "g")}</h1>

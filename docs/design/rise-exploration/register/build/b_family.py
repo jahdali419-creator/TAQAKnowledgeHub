@@ -135,7 +135,7 @@ def build(g, slug, title, desc, hero):
 <footer class="w foot"><span>RISE · TAQA knowledge</span></footer>
 <nav class="dockn"><a href="bold-mix.html">Home</a><a href="search.html">Search</a><a class="on" href="areas.html">Areas</a><a href="saved.html">Saved</a><a href="more.html">More</a></nav>'''
     html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RISE · {title.replace("&amp;", "&")}</title><link rel="stylesheet" href="../../kit/fonts.css"><link rel="stylesheet" href="../css/nova.css"><style>{CSS}</style></head><body>
+<title>RISE · {title.replace("&amp;", "&")}</title><link rel="stylesheet" href="../../kit/fonts.css"><link rel="stylesheet" href="../css/nova.css"><style>{CSS}</style><link rel="stylesheet" href="../css/calm.css"></head><body>
 {body}
 <script>{JS}</script>
 </body></html>'''

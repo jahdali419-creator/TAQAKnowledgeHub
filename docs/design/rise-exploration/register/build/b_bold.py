@@ -23,9 +23,9 @@ SVG = {
 }
 def ic(n, c=''): return f'<svg class="{c}" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="{SVG[n]}"/></svg>'
 
-def shell(title, css, body, script=''):
+def shell(title, css, body, script='', calm=True):
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{title}</title><link rel="stylesheet" href="../../kit/fonts.css"><style>{css}</style></head><body>{body}{f"<script>{script}</script>" if script else ""}</body></html>'''
+<title>{title}</title><link rel="stylesheet" href="../../kit/fonts.css"><style>{css}</style>{'<link rel="stylesheet" href="../css/calm.css">' if calm else ''}</head><body>{body}{f"<script>{script}</script>" if script else ""}</body></html>'''
 
 rowsA = ''.join(f'<a class="doc" href="document.html"><span class="n">{short(r["docNumber"])}</span><b>{r["title"]}</b><span class="m">Rev {r["revision"]} · {d(r["issueDate"])}</span><span class="ok"><i></i>Current</span></a>' for r in CHANGED)
 tickA = ''.join(f'<span><em class="{"al" if r["docType"] == "alert" else ""}"></em>{short(r["docNumber"])} · {r["title"]} · {segname(r["segment"])}</span>' for r in ACROSS)
@@ -119,7 +119,7 @@ bodyA = f'''<header class="hero"><div class="bg"></div>
 </main>
 <div class="tick" aria-label="Across TAQA"><div>{tickA}{tickA}</div></div>
 <footer class="w foot"><span>RISE · TAQA knowledge</span><span>Direction A · Night Shift · design exploration</span></footer>'''
-open(os.path.join(PAGES, 'bold-night.html'), 'w').write(shell('RISE · Night Shift', cssA, bodyA, TYPE_SCRIPT))
+open(os.path.join(PAGES, 'bold-night.html'), 'w').write(shell('RISE · Night Shift', cssA, bodyA, TYPE_SCRIPT, calm=False))
 
 # ════════════════ B · DAYLIGHT ════════════════
 cssB = '''
@@ -215,7 +215,7 @@ bodyB = f'''<div class="w nav"><img src="../../kit/brand/rise-lockup-header.png"
 <section class="sec"><div class="sh"><div><h2>Changed in Coiled Tubing</h2><p>Newest first · in force</p></div><a href="seg-coiled-tubing.html">View all</a></div><div class="list">{rowsB}</div></section>
 <section class="band"><h2>Knowledge is better <em>together.</em></h2><a href="ask.html">Ask an Expert</a></section>
 </main><footer class="w foot"><span>RISE · TAQA knowledge</span><span>Direction B · Daylight · design exploration</span></footer>'''
-open(os.path.join(PAGES, 'bold-day.html'), 'w').write(shell('RISE · Daylight', cssB, bodyB, TYPE_SCRIPT))
+open(os.path.join(PAGES, 'bold-day.html'), 'w').write(shell('RISE · Daylight', cssB, bodyB, TYPE_SCRIPT, calm=False))
 print('bold ok')
 
 # ════════════════ MIX · Night Shift hero + Daylight body (chosen) ════════════════

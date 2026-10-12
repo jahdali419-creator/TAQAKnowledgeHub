@@ -71,7 +71,7 @@ def page_html(key):
     contrib = (f'<p class="contrib">Contributors · {S.CONTRIB[key]}</p>' if key in S.CONTRIB else '')
     sub = f'{tag}{" · " + s["splName"] if s.get("splName") and s["splName"] != name and key != "company" else ""}'
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RISE · {name}</title><link rel="stylesheet" href="../../kit/fonts.css"><link rel="stylesheet" href="../css/nova.css"></head><body>
+<title>RISE · {name}</title><link rel="stylesheet" href="../../kit/fonts.css"><link rel="stylesheet" href="../css/nova.css"><link rel="stylesheet" href="../css/calm.css"></head><body>
 <header class="mx sg"><div class="bg" style="background-image:url(../img/tone/{ph})"></div>
 {nova_nav("areas")}
 <div class="w sgh"><div class="sgl">

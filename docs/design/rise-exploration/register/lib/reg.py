@@ -181,6 +181,7 @@ def page(name, title, body, active='home', role='employee', acting=None, dock_ac
 <title>{e(title)}</title>
 <link rel="stylesheet" href="../css/register.css">
 <link rel="stylesheet" href="../css/nova-skin.css">
+<link rel="stylesheet" href="../css/calm.css">
 </head>
 <body class="nv{' pt' if ptitle(name) else ''}">
 {acting_bar(acting) if acting else ""}
