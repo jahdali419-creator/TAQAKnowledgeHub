@@ -1,6 +1,6 @@
 """Separate the chosen design from the explorations.
 
-Copies only the screens in the chosen style (dark photo hero + bright rounded cards, TAQA teal photo tone) into
+Copies only the screens in the chosen style (calm light layout, colour RISE logo, TAQA teal photo tone) into
 docs/design/rise-exploration/final/, gives them clean names (home.html, landing.html), rewires every link so nothing
 points back into the explorations, and writes a gallery of just this design. The explorations stay untouched in
 register/ and the round folders. Run after the other builders and gshoot2.js. Design exploration only."""
@@ -18,7 +18,7 @@ DROP = {'home': 'home', 'landing': 'landing', 'landing-horizon': 'landing', 'bol
 G = [  # (section id, title, intro, [(page, label, note)])
  ('front', 'Front door', 'What people see first: the landing page before sign-in, then Home.', [
   ('landing-21', 'Landing', 'Horizon hero, working search over the register, card fan of areas.'),
-  ('bold-mix', 'Home', 'Dark hero with the live answer, then your area, the three families and what changed.')]),
+  ('bold-mix', 'Home', 'Search first, then today’s list, your area, the three families and what changed.')]),
  ('areas', 'Areas', 'One TAQA, three families, 25 areas. Every area photo shares the TAQA teal tone.', [
   ('family-segments', 'Operational segments', 'Showcase: large list, one photo that changes per area.'),
   ('family-products', 'Products & Technology', 'Edmonton, Stavanger and Aberdeen.'),

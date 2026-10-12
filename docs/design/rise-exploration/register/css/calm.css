@@ -250,3 +250,53 @@ body.nv{--paper:#F6F7F7;--sheet:#FFFFFF;--tint:#F2F5F4;--rule:#E3E8E7;--rule2:#D
 .plate img{border-radius:8px}
 #all .one .ph{background:#0E1B1A}
 .tabs a sup{color:var(--c-ink2)!important}
+
+/* ── 9 · clarity pass ─────────────────────────────────────────────
+   Feedback: “still confusion in the pages”. Rules applied everywhere:
+   a) one typeface for words; the mono face only for document numbers and keys
+   b) no ALL-CAPS labels: small grey sentence-case labels instead
+   c) one title per page, one colour (no grey half-sentences, no repeated page name above it)
+   d) one button shape (8px corners) and one pill shape for status only
+   e) prototype notes (“proposed …”) hidden behind a Design notes switch */
+
+/* a + b: labels */
+.lab,.acting .wrap,.role,.type,.kv span,.steps,.route span,.tbl th,.fbar,.menu a span,.grph,.recent li span,.stats span,.gst,.cls,
+.supcard .hd,.bdg,.fold summary span,.pvw .hd,.qrc .pill,.qrc .chips i,.morel a span,.gh em,.gx .cat,.fsn em,.recrows span,
+.sl-hero .tagl,.sl-hero .facts span,.sl-hero .mark .num,.lib .leg,.tile .tf,.polline .n,.famrow .yours,.plate figcaption,.hband figcaption,
+.sg .tagl,.band .k,.foot,.fh .k,.fh .m,.fl .n span,.pn .tg,.kick,.mx .kick,.sh span,.tile .lab,#all .one .cap span,#all .three .k,.deskc .m,
+.idx a span,.qv a span,.grant .ev,.mini span,.alist a .n,.polrow .n,.rec small,.docacts .sync,.nt .w,.legend2,.now .alc .d,.alertc .m,
+.reg .d,.hist .d,.tbl td.d,.p0 .hd,.paper .hd,.ck,.sech sup,.tabs a sup,.lib .tg,.doc .m,.three .k,.stat span,
+.sk-note,.rbar .lab,.rtoc .lab{
+  font-family:var(--ui)!important;text-transform:none!important;letter-spacing:0!important;font-variant-numeric:tabular-nums}
+.lab,.kv span,.grph,.supcard .hd,.pvw .hd,.p0 .hd,.paper .hd,.fh .k,.sg .tagl,.kick,.mx .kick,#all .one .cap span,.deskc .m,.alertc .m,.fold summary span{font-size:12.5px!important;font-weight:500!important}
+.kv span,.tbl th{color:var(--c-mute)!important}
+.grph{font-size:13px!important;font-weight:600!important;color:var(--c-ink)!important}.grph b{font-weight:600!important}
+.tbl th{font-size:12px!important;font-weight:600!important}
+.foot{font-size:12px!important;color:var(--c-mute)!important}
+/* c: titles */
+.t0 .m,.t1 .m,.t2 .m,.nvx .t1 .m,.nvx .t0 .m,.nvx .refuse .t0 .m{color:inherit!important;font-weight:inherit!important}
+.nvx .phead .meta > .lab{display:none!important}
+.nvx .phead .meta:not(:has(> :not(.lab))){display:none!important}
+.nvx .phead .meta{margin-bottom:6px}
+/* d: one button shape */
+.btn,.nvx .btn,.sh a,.oth a,.pn .ft a,.mine .open,.bnr .go,.docacts a,.docacts button{border-radius:var(--c-rs)!important}
+.btn{min-height:36px!important;padding:0 14px!important;font-size:13.5px!important}
+.sech{margin-bottom:2px}
+/* e: prototype notes behind a switch (bottom-left) */
+.dn-t{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.dn-l{position:fixed;left:16px;bottom:16px;z-index:80;display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border-radius:999px;
+  background:#fff;border:1px solid var(--c-line2);box-shadow:0 4px 14px -6px rgba(15,31,30,.25);font:500 12px var(--ui);color:var(--c-ink2);cursor:pointer}
+.dn-l::before{content:"";width:24px;height:14px;border-radius:999px;background:var(--c-line2);box-shadow:inset -10px 0 0 2px #fff;transition:.2s}
+.dn-t:checked + .dn-l::before{background:#B4460F;box-shadow:inset 10px 0 0 2px #fff}
+.dn-t:focus-visible + .dn-l{outline:2px solid var(--c-teal);outline-offset:2px}
+body:not(:has(.dn-t:checked)) .prop,body:not(:has(.dn-t:checked)) :is(p,div,li):has(> .prop:first-child){display:none!important}
+.dn-t:checked ~ * .prop,body:has(.dn-t:checked) .prop{border-color:#B4460F!important;color:#8A3A0C!important;background:#FFF4EC}
+@media (max-width:900px){.dn-l{bottom:92px;left:12px}}
+/* Home: the four big counts were noise for someone at work (the live count is already in the line above the title) */
+.mx ~ main .mxstats,.w > .mxstats{display:none!important}
+.mx ~ main .mxstats + *{margin-top:0}
+/* search fields read as one placeholder: “| Search by number or title” */
+.nvx .q{gap:6px}
+.nvx .q .caret{order:-1}
+.nvx .q .w:has(~ .ph){color:var(--c-mute)!important;font-weight:400!important}
+.t0 .cnt,.t1 .cnt{display:inline-grid;place-items:center;min-width:28px;height:24px;padding:0 8px;margin-left:6px;vertical-align:5px;border-radius:999px;background:var(--c-tealbg);color:var(--c-teal);font:600 13px/1 var(--ui);letter-spacing:0}

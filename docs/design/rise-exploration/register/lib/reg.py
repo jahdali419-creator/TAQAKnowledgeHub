@@ -171,6 +171,30 @@ def split_hero(body):
         return body[:end], body[end:]
     return '', body
 
+# Page titles say what the page is, in one colour (user: “confusion in the pages”). Slogans and grey half-titles are folded away.
+_PLAIN = [
+    (r'Every area<span class="m phx">, one register\.</span>', 'Areas'),
+    (r'Twenty-five areas\. <span class="m phx">Each with its own signature\.</span>', 'All areas'),
+    (r'Know the language\. <span class="m">Work with confidence\.</span>', 'Field Glossary'),
+    (r'Master Document List <span class="m phx">[^<]*</span>', 'Master Document List'),
+    (r'Operations documents <span class="m">you manage\.</span>', 'Manage Operations documents'),
+    (r'Delegate your authority <span class="m">[^<]*</span>', 'Delegate your authority'),
+    (r'Not in the Master Document List <span class="m">available to your role\.</span>', 'Not available to your role'),
+    (r'Nothing can be done<br><span class="m">under this delegation\.</span>', 'Nothing can be done under this delegation'),
+    (r'You’re offline\. <span class="m">[^<]*</span>', 'You’re offline'),
+    (r'We can’t reach the register <span class="m">right now\.</span>', 'We can’t reach the register right now'),
+    (r'BOP <span class="m">Blowout Preventer</span>', 'BOP · Blowout Preventer'),
+    (r'Sent\. <span class="m">[^<]*</span>', 'Sent to the expert'),
+    (r'(\S[^<>]*?) <span class="m">before final approval\.</span>', r'\1'),
+    (r'(<h1 class="t0"[^>]*>[^<]*?) <span class="m">(\d+)</span>', r'\1 <span class="cnt">\2</span>'),
+]
+def plain_titles(html):
+    for a, b in _PLAIN:
+        html = re.sub(a, b, html)
+    # anything left: fold the grey half into the title as plain words
+    return re.sub(r'(<h[12] class="t[012][^"]*"[^>]*>[^<]*(?:<br>)?[^<]*)<span class="m(?: phx)?">([^<]*)</span>', r'\1\2', html)
+
+DN_SWITCH = '<input type="checkbox" id="dnotes" class="dn-t"><label for="dnotes" class="dn-l">Design notes</label>\n'
 def page(name, title, body, active='home', role='employee', acting=None, dock_active=None, overlays='', script=''):
     hero, rest = split_hero(body)
     html = f'''<!doctype html>
@@ -199,6 +223,9 @@ def page(name, title, body, active='home', role='employee', acting=None, dock_ac
 </body>
 </html>'''
     html = re.sub(r'class="([^"]*\b(?:dis|off)\b[^"]*)"', r'class="\1" aria-disabled="true"', html)  # inactive buttons say so
+    html = plain_titles(html)
+    if 'class="prop"' in html:  # prototype notes sit behind a switch
+        html = html.replace('</body>', DN_SWITCH + '</body>', 1)
     open(os.path.join(PAGES, name), 'w').write(html)
     return name
 
