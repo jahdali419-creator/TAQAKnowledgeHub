@@ -31,6 +31,22 @@ jobs:
                const coredemo = require('@actions/core')
                return await coredemo.getIDToken()
            result-encoding: string
+      - name: Assemble the website files
+        # Publish only what the website serves. Project documents, tests,
+        # scripts and tooling stay in the repository and are not deployed.
+        shell: bash
+        run: |
+          mkdir -p _site
+          git ls-files -z \
+            | grep -zvE '^(docs|tests|scripts|holding|config|\.github|\.claude)/|^(README\.md|SECURITY\.md|package\.json|package-lock\.json|playwright\.config\.js|\.gitignore)$' \
+            | xargs -0 cp --parents -t _site
+          for f in index.html staticwebapp.config.json documents-master.js service-worker.js; do
+            test -f "_site/$f" || { echo "Missing $f in the website files"; exit 1; }
+          done
+          for d in docs tests scripts holding config .github .claude; do
+            test ! -e "_site/$d" || { echo "$d must not be deployed"; exit 1; }
+          done
+          echo "Website files: $(find _site -type f | wc -l)"
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -39,7 +55,7 @@ jobs:
           action: "upload"
           ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
           # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "holding" # Temporary: serve only the holding page (restore "/" to bring the preview back)
+          app_location: "_site" # The website files assembled above (set "holding" to show the holding page instead)
           api_location: "" # Api source code path - optional
           output_location: "." # Built app content directory - optional
           skip_app_build: true
