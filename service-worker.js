@@ -1,4 +1,4 @@
-const CACHE = 'taqa-hub-v109';
+const CACHE = 'taqa-hub-v110';
 
 // Detect base path automatically, works on GitHub Pages and Azure
 const BASE = self.location.pathname.replace('service-worker.js', '');
@@ -30,6 +30,9 @@ const CORE = [
   BASE + 'upload.html',
   BASE + 'support-ticket.html',
   BASE + 'analytics.html',
+  // Recognition: points and levels for released work (demo).
+  BASE + 'recognition.html',
+  BASE + 'recognition.js',
   BASE + 'qrcode.js',
   BASE + 'qr.js',
   BASE + 'techhub.css',

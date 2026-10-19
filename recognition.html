@@ -1,0 +1,374 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-taqa-theme="light">
+<head>
+<meta charset="UTF-8">
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>/* Installed app on an iPhone: the status bar is drawn over the page, and iOS keeps taps in that strip for itself, so the bell and the other controls under it could not be tapped. Drawing edge to edge (viewport-fit=cover) turns on the bar's safe-area padding in topbar.css, which drops them below the status bar. A browser tab is left exactly as it was. */(function(){try{if(navigator.standalone||matchMedia('(display-mode: standalone)').matches){var m=document.querySelector('meta[name="viewport"]');if(m&&!/viewport-fit/.test(m.content))m.content+=', viewport-fit=cover';}}catch(e){}})();</script>
+<title>My Contributions, RISE</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#005D63">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RISE">
+<meta name="application-name" content="RISE">
+<link rel="apple-touch-icon" href="icons/rise-apple-touch-icon.png">
+<link rel="icon" href="icons/rise-favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="icons/rise-favicon-16.png" type="image/png" sizes="16x16">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* My contributions: one reading column. The level and the rule card sit
+   side by side on a desk screen and stack on a phone; the area lists run
+   full width below them. */
+:root{
+  --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;
+  --dark:#F4F4F3;--paper:#FFFFFF;--inset:#F7F6F4;
+  --line:rgba(117,106,97,0.18);--line-soft:rgba(117,106,97,0.10);
+  --text:#1E1C1A;--text-muted:#5F564F;--text-light:#756A61;
+  --fill:#E7F3F3;--fill-strong:#005D63;
+  --glass:#FFFFFF;--glass-border:rgba(117,106,97,0.18);
+}
+html[data-taqa-theme="dark"]{
+  --primary-ink:#00BBB6;--dark:#001314;--paper:#002326;--inset:#001C1E;
+  --line:rgba(0,187,182,0.20);--line-soft:rgba(0,187,182,0.10);
+  --text:#C7DBDD;--text-muted:#9CC0C2;--text-light:#7FAFB2;
+  --fill:rgba(0,187,182,0.12);--fill-strong:#00BBB6;
+  --glass:#002326;--glass-border:rgba(0,187,182,0.20);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;}
+html[data-taqa-theme="dark"] body{background:#001314;}
+.page-wrapper{padding-top:var(--nav-h,64px);min-height:100vh;display:flex;flex-direction:column;}
+.skip{position:absolute;left:-9999px;top:auto;}
+.skip:focus{left:16px;top:calc(var(--nav-h,64px) + 8px);z-index:10001;background:var(--paper);color:var(--primary-ink);padding:8px 14px;border-radius:8px;border:1px solid var(--line);}
+main{max-width:1060px;margin:0 auto;width:100%;padding:32px 40px 80px;display:grid;gap:28px;}
+
+.rc-head .eyebrow{font:700 11px/1 'Inter',sans-serif;letter-spacing:1.4px;text-transform:uppercase;color:var(--primary-ink);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.rc-head .eyebrow svg{width:16px;height:16px;}
+.rc-head h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:30px;font-weight:800;letter-spacing:-.4px;color:var(--text);margin-bottom:6px;text-wrap:balance;}
+.rc-head p{font-size:14.5px;line-height:1.6;color:var(--text-muted);max-width:68ch;}
+
+.rc-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:22px 24px;min-width:0;}
+.card h2{font-family:'BwGradual','Urbanist',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:14px;}
+.sub{font-size:13px;color:var(--text-light);line-height:1.5;}
+
+/* Level */
+.lv-top{display:flex;align-items:center;gap:16px;margin-bottom:18px;}
+.lv-mark{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:var(--fill);color:var(--primary-ink);flex:none;}
+.lv-mark svg{width:30px;height:30px;}
+.lv-name{font-family:'BwGradual','Urbanist',sans-serif;font-size:24px;font-weight:800;color:var(--text);line-height:1.15;}
+.lv-pts{font-size:14px;color:var(--text-muted);margin-top:3px;font-variant-numeric:tabular-nums;}
+.lv-bar{height:10px;border-radius:999px;background:var(--fill);overflow:hidden;margin:4px 0 8px;}
+.lv-bar span{display:block;height:100%;border-radius:999px;background:var(--fill-strong);}
+.lv-next{font-size:13.5px;color:var(--text-muted);}
+.ladder{list-style:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:20px;}
+.ladder li{border-top:3px solid var(--line);padding-top:8px;min-width:0;}
+.ladder li.got{border-top-color:var(--fill-strong);}
+.ladder li.here{border-top-color:var(--fill-strong);}
+.ladder .ln{font-size:12px;font-weight:600;color:var(--text);line-height:1.25;}
+.ladder li:not(.got) .ln{color:var(--text-light);font-weight:500;}
+.ladder .lp{font-size:11.5px;color:var(--text-light);font-variant-numeric:tabular-nums;margin-top:2px;}
+.ladder li.here .ln::after{content:" (you)";font-weight:500;color:var(--primary-ink);}
+
+/* Rules */
+.rules{width:100%;border-collapse:collapse;font-size:14px;}
+.rules td{padding:10px 0;border-bottom:1px solid var(--line-soft);vertical-align:top;}
+.rules td.pt{text-align:right;font-weight:700;color:var(--primary-ink);white-space:nowrap;padding-left:14px;font-variant-numeric:tabular-nums;}
+.rules tr:last-child td{border-bottom:0;}
+.rules .zero td.pt{color:var(--text-light);}
+.rule-note{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--inset);font-size:13px;line-height:1.55;color:var(--text-muted);}
+
+/* Lists */
+.list{list-style:none;}
+.list li{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line-soft);min-width:0;}
+.list li:last-child{border-bottom:0;}
+.rank{width:28px;flex:none;font-weight:800;font-size:15px;color:var(--primary-ink);text-align:center;font-variant-numeric:tabular-nums;}
+.who{flex:1 1 auto;min-width:0;}
+.who .nm{font-size:14.5px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.who .nm span.t{min-width:0;overflow-wrap:anywhere;}
+.who .mt{font-size:12.5px;color:var(--text-light);margin-top:3px;}
+.pts{flex:none;font-weight:700;font-size:15px;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.chip{display:inline-block;padding:2px 8px;border-radius:999px;font:600 10.5px/1.5 'Inter',sans-serif;letter-spacing:.3px;border:1px solid var(--line);color:var(--text-muted);white-space:nowrap;}
+.chip.ex{text-transform:uppercase;letter-spacing:.5px;}
+.chip.you{border-color:var(--fill-strong);color:var(--primary-ink);}
+.chip.lvl{background:var(--fill);border-color:transparent;color:var(--primary-ink);}
+.list li.mine{background:var(--fill);margin:0 -12px;padding-left:12px;padding-right:12px;border-radius:10px;border-bottom-color:transparent;}
+.empty{font-size:14px;color:var(--text-muted);line-height:1.6;padding:6px 0;}
+.empty a,.foot a{color:var(--primary-ink);font-weight:600;}
+
+.board-tools{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin-bottom:10px;}
+.board-tools label{font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:8px;min-width:0;max-width:100%;}
+.board-tools label[for="rc-area"] select{flex:1 1 auto;min-width:0;}
+.board-tools select{font:500 14px 'Inter',sans-serif;color:var(--text);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 12px;min-height:40px;max-width:100%;}
+.board-tools input[type=checkbox]{width:18px;height:18px;accent-color:var(--fill-strong);}
+.card-hd{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px;margin-bottom:12px;}
+.card-hd h2{margin:0;}
+
+/* Areas */
+.bars{list-style:none;display:grid;gap:10px;}
+.bars li{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr) auto;align-items:center;gap:12px;font-size:13.5px;}
+.bars a{color:var(--text);text-decoration:none;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bars a:hover{color:var(--primary-ink);text-decoration:underline;}
+.bars .tr{height:10px;border-radius:999px;background:var(--fill);overflow:hidden;}
+.bars .tr span{display:block;height:100%;background:var(--fill-strong);border-radius:999px;}
+.bars .v{font-weight:700;font-variant-numeric:tabular-nums;color:var(--text);white-space:nowrap;}
+.bars li.mine a{color:var(--primary-ink);}
+
+.foot{font-size:13px;line-height:1.6;color:var(--text-light);max-width:80ch;}
+a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;}
+
+@media(max-width:860px){.rc-grid{grid-template-columns:minmax(0,1fr);}}
+@media(max-width:640px){
+  main{padding:22px 16px 60px;gap:20px;}
+  .rc-head h1{font-size:24px;}
+  .card{padding:18px 16px;border-radius:14px;}
+  .ladder{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;}
+  .ladder .ln{font-size:11px;}
+  .board-tools label[for="rc-area"]{width:100%;}
+  .bars li{grid-template-columns:minmax(0,1fr) auto;}
+  .bars .tr{grid-column:1 / -1;order:3;}
+  .list li.mine{margin:0 -8px;padding-left:8px;padding-right:8px;}
+}
+@media print{nav,#nav-mobile-menu{display:none!important;}}
+</style>
+<link rel="stylesheet" href="techhub.css">
+<link rel="stylesheet" href="topbar.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="page-wrapper">
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+  <a href="index.html" class="nav-brand">
+    <img src="assets/brand/rise-lockup-header.png" alt="RISE" class="nav-logo nav-logo-light" width="320" height="120">
+    <img src="assets/brand/rise-lockup-header-reverse.png" alt="RISE" class="nav-logo nav-logo-dark" width="320" height="120">
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
+    <li><a href="ai-search.html">Document Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
+  <div class="nav-right">
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<main id="main" tabindex="-1">
+  <header class="rc-head">
+    <div class="eyebrow" id="rc-eyebrow">RISE Recognition</div>
+    <h1 id="rc-title">My contributions</h1>
+    <p id="rc-lede">Points for work that passed QMS and approval, so only released documents count. In this preview your points are saved in this browser only.</p>
+  </header>
+
+  <div class="rc-grid">
+    <section class="card" id="rc-level" aria-labelledby="rc-level-h">
+      <h2 id="rc-level-h">Your level</h2>
+      <div id="rc-level-body"></div>
+    </section>
+
+    <section class="card" id="rc-rules" aria-labelledby="rc-rules-h">
+      <h2 id="rc-rules-h">How points are earned</h2>
+      <table class="rules">
+        <tbody id="rc-rules-body"></tbody>
+      </table>
+      <p class="rule-note">Only work that QMS checked and the approver released counts. Uploading alone earns nothing, so a level cannot be reached with duplicates or rushed files.</p>
+    </section>
+  </div>
+
+  <section class="card" id="rc-mine" aria-labelledby="rc-mine-h">
+    <div class="card-hd"><h2 id="rc-mine-h">Your released work</h2><span class="sub" id="rc-mine-sum"></span></div>
+    <ul class="list" id="rc-mine-list"></ul>
+  </section>
+
+  <section class="card" id="board" aria-labelledby="rc-board-h">
+    <div class="card-hd"><h2 id="rc-board-h">Top contributors this month</h2><span class="sub" id="rc-month"></span></div>
+    <div class="board-tools">
+      <label for="rc-area">Area <select id="rc-area"></select></label>
+      <label id="rc-hide-wrap" for="rc-hide"><input type="checkbox" id="rc-hide"> Hide my name from other people</label>
+    </div>
+    <ol class="list" id="rc-board-list"></ol>
+    <p class="sub" id="rc-board-note"></p>
+  </section>
+
+  <section class="card" id="rc-areas" aria-labelledby="rc-areas-h">
+    <div class="card-hd"><h2 id="rc-areas-h">Contributions by area this month</h2><span class="sub">Points earned in each area. For managers comparing teams.</span></div>
+    <ol class="bars" id="rc-areas-list"></ol>
+  </section>
+
+  <p class="foot">Entries marked <span class="chip ex">Example</span> are made up to show how the lists look; they are not real people and never count in the register. In production, points come from TAQA sign-in and the shared register, so they are the same on every device. Whether a level links to appraisal is a decision for HR.</p>
+</main>
+
+<footer style="height:4px;position:relative;margin-top:auto;"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:#005D63;"></div></footer>
+</div>
+
+<script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script src="store.js"></script>
+<script src="shared.js"></script>
+<script src="recognition.js"></script>
+<script>
+(function () {
+  'use strict';
+  var R = window.TAQA_RECOGNITION;
+  if (!R) return;
+  var esc = R.esc, $ = function (id) { return document.getElementById(id); };
+  var role = TAQA_ROLE.current(), earner = R.canEarn();
+  var L = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.segments) || {};
+
+  function monthLabel(m) {
+    var p = String(m).split('-');
+    return new Date(+p[0], +p[1] - 1, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  }
+  function dayLabel(d) {
+    var p = String(d || '').split('-');
+    return p.length === 3 ? new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+  }
+  function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
+  function breakdown(b) {
+    var out = [];
+    if (b.document) out.push(plural(b.document, 'document', 'documents'));
+    if (b.overdue) out.push(plural(b.overdue, 'overdue update', 'overdue updates'));
+    if (b.lesson) out.push(plural(b.lesson, 'lesson or alert', 'lessons or alerts'));
+    return out.join(' · ');
+  }
+
+  /* Rules */
+  $('rc-rules-body').innerHTML =
+    '<tr><td>A document you filed is released</td><td class="pt">' + R.POINTS.document + '</td></tr>' +
+    '<tr><td>You brought an overdue document up to date with a new revision</td><td class="pt">' + R.POINTS.overdue + '</td></tr>' +
+    '<tr><td>Your Lesson Learned or Technical Alert is released</td><td class="pt">' + R.POINTS.lesson + '</td></tr>' +
+    '<tr class="zero"><td>Your filing is returned or rejected</td><td class="pt">0</td></tr>';
+
+  /* Level */
+  function paintLevel() {
+    var box = $('rc-level-body');
+    if (!earner) {
+      $('rc-title').textContent = 'Contributions';
+      $('rc-level-h').textContent = 'Points and levels';
+      box.innerHTML = '<p class="empty">' + (role === 'auditor'
+        ? 'An auditor reads the register and files nothing, so there is no level for this view. Every area’s list is below.'
+        : 'QMS checks and releases other people’s work, so QMS earns no points in this preview. Every area’s list is below.') + '</p>' + ladder(-1);
+      return;
+    }
+    var pts = R.pointsOf(), lv = R.levelFor(pts);
+    var from = lv.level ? lv.level.min : 0, to = lv.next ? lv.next.min : pts;
+    var pct = lv.next ? Math.max(4, Math.round((pts - from) / (to - from) * 100)) : 100;
+    box.innerHTML =
+      '<div class="lv-top"><div class="lv-mark">' + R.MEDAL + '</div><div>' +
+        '<div class="lv-name">' + esc(lv.level ? lv.level.name : 'No level yet') + '</div>' +
+        '<div class="lv-pts">' + plural(pts, 'point', 'points') + ' · ' + esc(R.labelFor(R.me())) + '</div></div></div>' +
+      '<div class="lv-bar" role="progressbar" aria-label="Progress to the next level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><span style="width:' + pct + '%"></span></div>' +
+      '<p class="lv-next">' + (lv.next
+        ? '<b>' + lv.toNext + ' more points</b> to reach ' + esc(lv.next.name) + '.'
+        : 'You have reached the top level.') +
+        (pts === 0 ? ' File a document in <a href="upload.html">Upload</a>; it counts once QMS checks it and it is released.' : '') + '</p>' +
+      ladder(lv.index);
+  }
+  function ladder(here) {
+    return '<ol class="ladder" aria-label="Levels">' + R.LEVELS.map(function (l, i) {
+      return '<li class="' + (i <= here ? 'got' : '') + (i === here ? ' here' : '') + '"><div class="ln">' + esc(l.name) + '</div><div class="lp">' + l.min + ' pts</div></li>';
+    }).join('') + '</ol>';
+  }
+
+  /* Your released work */
+  function paintMine() {
+    var list = $('rc-mine-list'), sum = $('rc-mine-sum');
+    if (!earner) { $('rc-mine').hidden = true; return; }
+    var rows = R.contributions();
+    sum.textContent = rows.length ? plural(rows.length, 'item', 'items') + ' · ' + R.pointsOf() + ' points' : '';
+    if (!rows.length) {
+      list.innerHTML = '<li class="empty">Nothing released yet. When a document you filed is checked by QMS and released by its approver, it shows here with its points.</li>';
+      return;
+    }
+    list.innerHTML = rows.map(function (c) {
+      var d = c.doc, open = TAQA_STORE.readable(d);
+      var title = open ? d.title : 'A document you filed (restricted)';
+      return '<li><div class="who"><div class="nm"><span class="t">' + esc(title) + '</span></div>' +
+        '<div class="mt">' + esc(c.docNumber) + ' Rev ' + esc(c.revision) + ' · ' + esc(R.KIND_LABEL[c.kind]) + ' · ' + esc(dayLabel(c.day)) + '</div></div>' +
+        '<span class="pts">+' + c.points + '</span></li>';
+    }).join('');
+  }
+
+  /* Board */
+  var areaSel = $('rc-area');
+  (function fillAreas() {
+    var FAM = [['segment', 'Operational Segments'], ['function', 'Corporate Functions'], ['product', 'Products & Technology']];
+    areaSel.innerHTML = FAM.map(function (f) {
+      var ids = Object.keys(L).filter(function (k) { return L[k].group === f[0]; });
+      return ids.length ? '<optgroup label="' + esc(f[1]) + '">' + ids.map(function (k) {
+        return '<option value="' + esc(k) + '">' + esc(L[k].name) + '</option>';
+      }).join('') + '</optgroup>' : '';
+    }).join('');
+    var want = new URLSearchParams(location.search).get('area');
+    var mine = (TAQA_ROLES[role] || {}).scope === 'own' ? TAQA_ROLE.area() : null;
+    var pick = [want, mine, 'drilling'].filter(function (k) { return k && L[k] && L[k].group !== 'company'; })[0];
+    if (pick) areaSel.value = pick;
+  })();
+  $('rc-month').textContent = monthLabel(R.thisMonth());
+  var hide = $('rc-hide');
+  if (!earner) $('rc-hide-wrap').hidden = true;
+  hide.checked = R.isHidden(R.me());
+  hide.addEventListener('change', function () { R.setHidden(hide.checked); paintBoard(); });
+  areaSel.addEventListener('change', function () {
+    try { history.replaceState(null, '', '?area=' + encodeURIComponent(areaSel.value) + '#board'); } catch (e) {}
+    paintBoard(); paintAreas();
+  });
+
+  function paintBoard() {
+    var id = areaSel.value, rows = R.board(id), list = $('rc-board-list'), me = R.me();
+    if (!rows.length) {
+      list.innerHTML = '<li class="empty">No released work in ' + esc(L[id] ? L[id].name : id) + ' this month yet.</li>';
+    } else {
+      list.innerHTML = rows.map(function (r, i) {
+        return '<li class="' + (r.you ? 'mine' : '') + '"><span class="rank">' + (i + 1) + '</span>' +
+          '<div class="who"><div class="nm"><span class="t">' + esc(r.label) + '</span>' +
+            (r.example ? '<span class="chip ex">Example</span>' : '') +
+            (r.level ? '<span class="chip lvl">' + esc(r.level.name) + '</span>' : '') + '</div>' +
+          '<div class="mt">' + esc(breakdown(r.breakdown)) + '</div></div>' +
+          '<span class="pts">' + r.monthPoints + ' pts</span></li>';
+      }).join('');
+    }
+    var mineHere = rows.some(function (r) { return r.you; });
+    $('rc-board-note').textContent = earner && !mineHere
+      ? 'You have no released work in this area this month. It appears here once a document you filed is released.'
+      : '';
+  }
+
+  /* Areas */
+  function paintAreas() {
+    var rows = R.byArea().slice(0, 12), max = rows.length ? rows[0].points : 1, here = areaSel.value;
+    $('rc-areas-list').innerHTML = rows.length ? rows.map(function (a) {
+      return '<li class="' + (a.id === here ? 'mine' : '') + '"><a href="segment.html?id=' + encodeURIComponent(a.id) + '" title="' + esc(a.name) + '">' + esc(a.name) + '</a>' +
+        '<span class="tr"><span style="width:' + Math.max(3, Math.round(a.points / max * 100)) + '%"></span></span>' +
+        '<span class="v">' + a.points + ' pts</span></li>';
+    }).join('') : '<li class="empty">No released work this month yet.</li>';
+  }
+
+  function paint() { paintLevel(); paintMine(); paintBoard(); paintAreas(); }
+  paint();
+  try { TAQA_STORE.onChange(paint); } catch (e) {}
+  if (location.hash === '#board') { var b = $('board'); if (b) b.scrollIntoView(); }
+})();
+</script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
+</body>
+</html>
