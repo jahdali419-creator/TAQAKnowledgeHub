@@ -927,8 +927,14 @@
     if (!/^\d{4}-\d{2}-\d{2}$/.test(eff) || addMonths(eff, 0) !== eff)
       return { ok: false, error: 'The effective date is not a date.' };
     if (eff < today) return { ok: false, error: 'The effective date cannot be earlier than the approval date (' + today + ').' };
+    // Whether the revision in force was past its review when this one was
+    // approved, decided once here (by the register's own flag, as
+    // TAQA_DOC.overdue reads it) so editing the old revision's review fields
+    // later never changes what this approval was.
+    var inForce = revisionsOf(d.docNumber).filter(function (x) { return x !== d && isLiveStatus(x.status); });
     var dates = { approvedBy: actingName(), approvedById: actingId(), approvedUnderGrant: actingGrant(), approvedOnBehalfOfId: actingFor(), approvedDate: today, approvedAt: now,
-                  issueDate: eff, nextReviewDate: addMonths(eff, reviewCycle(d)), reviewOverdue: false };
+                  issueDate: eff, nextReviewDate: addMonths(eff, reviewCycle(d)), reviewOverdue: false,
+                  replacedOverdue: inForce.some(function (x) { return x.reviewOverdue === true; }) };
     if (eff > today) {
       // Approved now, in force from its effective date: the revision it
       // replaces stays current until then.
@@ -941,7 +947,7 @@
     // superseded revision keeps every field it had: its approval history is
     // never rewritten. Its translations in force are superseded with it,
     // marked to be re-issued against the new revision (PI-34).
-    var replaced = revisionsOf(d.docNumber).filter(function (x) { return x !== d && isLiveStatus(x.status); });
+    var replaced = inForce;
     write(d, Object.assign({ approvalStage: null, status: 'current' }, dates));
     replaced.forEach(function (x) {
       write(x, { status: 'superseded', supersededBy: 'Rev ' + revOf(d), supersededAt: now, supersededDate: today });
@@ -1065,7 +1071,7 @@
     'submittedById', 'countersignedById', 'approvedById', 'approvedUnderGrant', 'rejectedById', 'rejectedUnderGrant',
     'withdrawnById', 'withdrawnUnderGrant', 'cancelledById',
     'approvedOnBehalfOfId', 'rejectedOnBehalfOfId', 'withdrawnOnBehalfOfId',
-    'supersededAt', 'supersededDate', 'tookEffectAt', 'issueDate'];
+    'supersededAt', 'supersededDate', 'tookEffectAt', 'issueDate', 'replacedOverdue'];
 
   /* Never taken from a caller of add(): the store writes each of these. */
   /* The dates a record carries are the register's: issued (effective) and

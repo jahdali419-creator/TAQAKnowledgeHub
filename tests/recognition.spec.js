@@ -68,6 +68,56 @@ test.describe('Points are earned only for released work', () => {
     expect(mine).toEqual([[n, 'overdue', 15]]);
   });
 
+  test('the overdue bonus is decided when the revision is released, not by later edits', async ({ page, gotoApp, clearAppState, setRole }) => {
+    await start(page, gotoApp, clearAppState, setRole);
+    const kinds = () => as(page, 'employee', null, () => TAQA_RECOGNITION.contributions().map((c) => [c.docNumber, c.revision, c.kind, c.points]));
+    const revise = (n) => as(page, 'employee', null, (n) => {
+      const p = TAQA_STORE.revisionParent(n);
+      const d = TAQA_STORE.add({ docNumber: n, supersedes: n, title: p.title, segment: p.segment, docType: p.docType, language: p.language, summary: 'Revised.' });
+      return d ? d.revision : null;
+    }, n);
+    // Overdue when released: 15, and clearing the old revision's review later changes nothing.
+    const late = 'TQ-TWS-CTSS-SOP-004';
+    expect(await revise(late)).toBe('2.0');
+    await check(page, late);
+    expect((await release(page, 'coiled-tubing', late)).ok).toBe(true);
+    expect((await as(page, 'owner', 'coiled-tubing', (n) => TAQA_STORE.patch(n, { reviewOverdue: false, nextReviewDate: '2099-01-01' }, '1.0'), late)).ok).toBe(true);
+    // In date when released: 10, and marking the old revision overdue later changes nothing.
+    const ontime = 'TQ-TWS-CTSS-SOP-007';
+    expect(await revise(ontime)).toBe('2.0');
+    await check(page, ontime);
+    expect((await release(page, 'coiled-tubing', ontime)).ok).toBe(true);
+    expect((await as(page, 'owner', 'coiled-tubing', (n) => TAQA_STORE.patch(n, { reviewOverdue: true, nextReviewDate: '2020-01-01' }, '1.0'), ontime)).ok).toBe(true);
+    expect((await kinds()).sort()).toEqual([[late, '2.0', 'overdue', 15], [ontime, '2.0', 'document', 10]].sort());
+    // The decision is the store's, and nobody can edit it.
+    const edit = await as(page, 'owner', 'coiled-tubing', (n) => TAQA_STORE.patch(n, { replacedOverdue: false }), late);
+    expect(edit.ok).toBe(false);
+    expect(await employeePoints(page)).toBe(25);
+  });
+
+  test('the revision actually replaced decides the bonus, never a returned attempt', async ({ page, gotoApp, clearAppState, setRole }) => {
+    await start(page, gotoApp, clearAppState, setRole);
+    const n = 'TQ-TDS-DSS-SOP-022';                                   // a waiting Rev 4.0, its review flagged overdue
+    expect((await as(page, 'qms', null, ({ n, r }) => TAQA_STORE.reject(n, r), { n, r: REASON })).ok).toBe(true);
+    const again = await as(page, 'employee', null, (n) => {
+      const d = TAQA_STORE.add({ resubmitOf: n + '@4.0', docNumber: n, title: 'End of Well Report SOP', summary: 'Filed again with the fixes.' });
+      return d ? [d.revision, d.attempt] : null;
+    }, n);
+    expect(again).toEqual(['4.0', 2]);
+    await check(page, n);
+    expect((await release(page, 'drilling', n)).ok).toBe(true);    // attempt 2 is now in force, in date
+    const rev = await as(page, 'employee', null, (n) => {
+      const p = TAQA_STORE.revisionParent(n);
+      const d = TAQA_STORE.add({ docNumber: n, supersedes: n, title: p.title, segment: p.segment, docType: p.docType, language: p.language, summary: 'Rev 5.0.' });
+      return d ? d.revision : null;
+    }, n);
+    expect(rev).toBe('5.0');
+    await check(page, n);
+    expect((await release(page, 'drilling', n)).ok).toBe(true);
+    const mine = await as(page, 'employee', null, () => TAQA_RECOGNITION.contributions().map((c) => [c.revision, c.kind, c.points]));
+    expect(mine.sort()).toEqual([['4.0', 'document', 10], ['5.0', 'document', 10]]);
+  });
+
   test('an ordinary release earns 10 and a returned filing earns 0', async ({ page, gotoApp, clearAppState, setRole }) => {
     await start(page, gotoApp, clearAppState, setRole);
     const a = await fileNew(page, 'drilling', 'sop', 'Rig move checklist');
@@ -123,9 +173,32 @@ test.describe('A new level is announced once, to the person who earned it', () =
     await expect(note).toHaveAttribute('role', 'status');
     expect(await note.evaluate((n) => getComputedStyle(n).pointerEvents)).toBe('none');
     expect(await page.evaluate(() => document.activeElement === document.body || document.activeElement === null)).toBe(true);
+    // Once it fades it leaves the page, so a screen reader cannot land on it later.
+    await expect(note).toBeHidden({ timeout: 9000 });
+    await expect(note).toHaveText('');
     await gotoApp('/index.html');
     await page.waitForTimeout(300);
     await expect(page.locator('#rise-note.on')).toHaveCount(0);
+  });
+
+  test.describe('on a phone', () => {
+    test.use(PHONE);
+    test('the note uses the screen width instead of half of it', async ({ page, gotoApp, clearAppState, setRole }) => {
+      await start(page, gotoApp, clearAppState, setRole);
+      await gotoApp('/index.html');
+      const n = await fileNew(page, 'drilling', 'lesson', 'Pump pressure drop: what we checked');
+      await check(page, n);
+      await release(page, 'drilling', n);
+      await setRole('employee');
+      await gotoApp('/glossary.html');
+      const note = page.locator('#rise-note');
+      await expect(note).toHaveText(/You reached Contributor/);
+      const box = await note.boundingBox();
+      expect(box.width).toBeGreaterThan(260);                        // was capped at 195 (half of 390)
+      expect(box.x).toBeGreaterThanOrEqual(15);
+      expect(box.x + box.width).toBeLessThanOrEqual(390 - 15);
+      expect(box.height).toBeLessThan(64);                           // one or two lines, not four
+    });
   });
 
   test('a first visit never shows a message', async ({ page, gotoApp, clearAppState, setRole }) => {
@@ -146,7 +219,10 @@ test.describe('Where the level shows', () => {
         if (!shown) { await expect(badge).toHaveCount(0); return; }
         await expect(badge).toBeVisible();
         await expect(badge).toHaveAttribute('href', 'recognition.html');
-        await expect(badge).toHaveAttribute('aria-label', /Your level: No level yet, 0 points/);
+        // Its level shows as text, and its name starts with what is shown.
+        await expect(badge.locator('.rlv-name')).toHaveText('No level yet');
+        await expect(badge.locator('.rlv-name')).toBeVisible();
+        await expect(badge).toHaveAccessibleName(/^No level yet\s*,\s*your level\. Open My contributions$/);
         // It sits right after the role control, inside the bar's right cluster.
         expect(await page.evaluate(() => document.getElementById('taqa-door').nextElementSibling.id)).toBe('rise-lvl');
       });
@@ -211,6 +287,44 @@ test.describe('My contributions page', () => {
       assertNoConsoleErrors(consoleErrors);
     });
   }
+
+  test('area totals never rank teams on example points', async ({ page, gotoApp, clearAppState, setRole }) => {
+    await start(page, gotoApp, clearAppState, setRole);
+    await gotoApp('/recognition.html');
+    const rows = page.locator('#rc-areas-list li');
+    await expect(rows.first()).toBeVisible();
+    // Nothing real released yet: every bar says it is an example.
+    const n0 = await rows.count();
+    for (let i = 0; i < n0; i++) await expect(rows.nth(i)).toContainText('Example');
+    await expect(page.locator('#rc-areas-sub')).toContainText('example points');
+    // One real release puts its area first, with real and example points apart.
+    const n = await fileNew(page, 'wireline', 'lesson', 'Cable head torque check');
+    await check(page, n);
+    await release(page, 'wireline', n);
+    await setRole('employee');
+    await gotoApp('/recognition.html');
+    await expect(rows.first().locator('a')).toHaveText('Wireline Services');
+    await expect(rows.first().locator('.v')).toHaveText(/^20 pts(\s*\+ \d+ example)?$/);
+    const top = await page.evaluate(() => TAQA_RECOGNITION.byArea()[0]);
+    expect([top.id, top.real]).toEqual(['wireline', 20]);
+  });
+
+  test('QMS and the auditor are not addressed as earners', async ({ page, gotoApp, clearAppState, setRole }) => {
+    for (const role of ['qms', 'auditor']) {
+      await start(page, gotoApp, clearAppState, setRole, role);
+      await gotoApp('/recognition.html');
+      await expect(page.locator('#rc-rules-body tr').first()).toContainText('A document someone filed is released');
+      await expect(page.locator('#rc-lede')).not.toContainText('your points');
+      if (role === 'qms') await expect(page.locator('#rc-level-body')).toContainText('before the approver releases it');
+    }
+  });
+
+  test('progress reports the true figure, and the page says levels are not appraisal', async ({ page, gotoApp, clearAppState, setRole }) => {
+    await start(page, gotoApp, clearAppState, setRole);
+    await gotoApp('/recognition.html');
+    await expect(page.locator('.lv-bar')).toHaveAttribute('aria-valuenow', '0');
+    await expect(page.locator('.foot')).toContainText('not linked to appraisal, pay or performance reviews');
+  });
 
   test('lists released work, hides the name on request, and keeps titles as text', async ({ page, gotoApp, clearAppState, setRole }) => {
     await start(page, gotoApp, clearAppState, setRole);

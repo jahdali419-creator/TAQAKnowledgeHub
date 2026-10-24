@@ -99,31 +99,19 @@
     if (LIVE.indexOf(d.status) !== -1) return true;
     return d.status === 'obsolete' && LIVE.indexOf(d.withdrawnFromStatus) !== -1;
   }
-  // The revision this one replaced, which keeps its own review dates.
-  function predecessor(d, rows) {
-    var m = /^Rev\s+(.+)$/i.exec(String(d.supersedes || ''));
-    if (!m) return null;
-    var want = m[1].trim().toLowerCase();
-    for (var i = 0; i < rows.length; i++) {
-      var x = rows[i];
-      if (x !== d && x.docNumber === d.docNumber && String(x.revision == null ? '' : x.revision).trim().toLowerCase() === want) return x;
-    }
-    return null;
-  }
-  function wasOverdue(p, d) {
-    if (!p) return false;
-    return p.reviewOverdue === true || !!(p.nextReviewDate && d.approvedDate && p.nextReviewDate < d.approvedDate);
-  }
-  function kindOf(d, rows) {
+  // The store records, at approval, whether the revision in force was past
+  // its review then (replacedOverdue). It is never recomputed here, so later
+  // edits to the old revision's review fields do not change past points.
+  function kindOf(d) {
     if (d.docType === 'lesson' || d.docType === 'alert') return 'lesson';
-    if (!d.translationOf && wasOverdue(predecessor(d, rows), d)) return 'overdue';
+    if (!d.translationOf && d.replacedOverdue === true) return 'overdue';
     return 'document';
   }
   function liveContributions() {
     var rows;
     try { rows = TAQA_STORE.all(); } catch (e) { return []; }
     return rows.filter(released).map(function (d) {
-      var kind = kindOf(d, rows);
+      var kind = kindOf(d);
       return {
         who: d.submittedById, key: TAQA_STORE.recordKey(d), doc: d,
         docNumber: d.docNumber, revision: d.revision, segment: d.segment,
@@ -205,15 +193,18 @@
     return rows.filter(function (r) { return r.monthPoints > 0; })
       .sort(function (a, b) { return b.monthPoints - a.monthPoints || b.total - a.total || (a.label < b.label ? -1 : 1); });
   }
-  // Points per area this month, for managers comparing teams.
+  // Points per area this month. Real releases and example points are kept
+  // apart, and areas rank on real work first, so made-up points never put
+  // one team above another.
   function byArea(month) {
     var L = lookups();
     return Object.keys(L).map(function (id) {
-      var rows = board(id, month);
-      return { id: id, name: L[id].name, points: sum(rows.map(function (r) { return { points: r.monthPoints }; })), people: rows.length,
+      var rows = board(id, month), real = 0, ex = 0;
+      rows.forEach(function (r) { if (r.example) ex += r.monthPoints; else real += r.monthPoints; });
+      return { id: id, name: L[id].name, real: real, example: ex, points: real + ex, people: rows.length,
                examples: rows.filter(function (r) { return r.example; }).length };
     }).filter(function (a) { return a.points > 0; })
-      .sort(function (a, b) { return b.points - a.points || (a.name < b.name ? -1 : 1); });
+      .sort(function (a, b) { return b.real - a.real || b.example - a.example || (a.name < b.name ? -1 : 1); });
   }
 
   /* ── Shared bits of page ────────────────────────────────────────────── */
@@ -228,18 +219,20 @@
     '#navbar .rise-lvl:hover{background:var(--tb-hover,rgba(0,93,99,.06));}' +
     '#navbar .rise-lvl:focus-visible{outline:2px solid var(--tb-ink,#005D63);outline-offset:2px;}' +
     '#navbar .rise-lvl svg{width:17px;height:17px;color:var(--tb-ink,#005D63);flex:none;}' +
-    '#navbar .rise-lvl .rl-t{font-weight:500;color:var(--tb-muted,#756A61);}' +
-    '@media (max-width:1499px){#navbar .rise-lvl .rl-t{display:none;}}' +
+    '#navbar .rise-lvl .rlv-pts{font-weight:500;color:var(--tb-muted,#756A61);}' +
+    '#navbar .rise-lvl .rlv-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;}' +
+    '@media (max-width:1499px){#navbar .rise-lvl .rlv-pts{display:none;}}' +
     '@media (max-width:1280px){#navbar .rise-lvl{display:none!important;}}' +
     /* Phone menu row */
     '.nav-mobile-menu .mm-main a.mm-rise .mm-rise-l{margin-inline-start:auto;font-size:13px;font-weight:500;color:var(--tb-muted,#756A61);white-space:nowrap;}' +
     /* Level-up note: its own region, never taking focus or taps, and never
        over the bar, the bell or the menu. */
-    '#rise-note{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:9000;pointer-events:none;' +
+    '#rise-note{position:fixed;left:16px;right:16px;margin-inline:auto;width:max-content;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:9000;pointer-events:none;' +
       'max-width:calc(100vw - 32px);display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:14px;' +
       'background:#00474C;color:#fff;box-shadow:0 14px 34px -14px rgba(0,40,44,.55);font:500 14px/1.35 "Inter",system-ui,sans-serif;' +
       'opacity:0;transition:opacity .25s ease,transform .25s ease;}' +
-    '#rise-note.on{opacity:1;transform:translateX(-50%) translateY(-4px);}' +
+    '#rise-note.on{opacity:1;transform:translateY(-4px);}' +
+    '#rise-note[hidden]{display:none;}' +
     '#rise-note svg{width:22px;height:22px;flex:none;color:#7FE0DB;}' +
     '#rise-note b{font-weight:700;}' +
     'html.taqa-menu-open #rise-note{display:none;}' +
@@ -274,9 +267,12 @@
     if (!bar || !canEarn(id)) { if (old) old.remove(); return; }
     var t = badgeText(id), a = old || document.createElement('a');
     a.id = 'rise-lvl'; a.className = 'rise-lvl'; a.href = 'recognition.html';
-    a.setAttribute('aria-label', 'Your level: ' + t.name + ', ' + t.pts + ' points. Open My contributions');
+    // The name is the visible text plus a hidden ending, so a voice user
+    // can say what they see (WCAG 2.5.3).
+    a.removeAttribute('aria-label');
     a.title = t.name + ' · ' + t.pts + ' points' + (t.lv.next ? ' · ' + t.lv.toNext + ' to ' + t.lv.next.name : '');
-    a.innerHTML = MEDAL + '<span class="rl-n">' + t.pts + ' pts</span><span class="rl-t">' + esc(t.name) + '</span>';
+    a.innerHTML = MEDAL + '<span class="rlv-name">' + esc(t.name) + '</span><span class="rlv-pts">' + t.pts + ' pts</span>' +
+      '<span class="rlv-sr">, your level. Open My contributions</span>';
     if (!old) {
       var door = document.getElementById('taqa-door');
       if (door && door.parentNode === bar) bar.insertBefore(a, door.nextSibling);
@@ -328,6 +324,10 @@
     var was = levelFor(before), now = levelFor(pts);
     if (now.index > was.index && now.level) showNote(now.level, pts);
   }
+  // The live region goes in empty and gets its words a moment later, so
+  // screen readers hear them. Nothing starts until the page is on screen
+  // (requestAnimationFrame waits for a background tab to be shown), and once
+  // it fades the note leaves the page's reading order.
   function showNote(level, pts) {
     var n = document.getElementById('rise-note');
     if (!n) {
@@ -335,10 +335,18 @@
       n.id = 'rise-note'; n.setAttribute('role', 'status'); n.setAttribute('aria-live', 'polite');
       document.body.appendChild(n);
     }
-    n.innerHTML = MEDAL + '<span>You reached <b>' + esc(level.name) + '</b> · ' + pts + ' points</span>';
-    requestAnimationFrame(function () { n.classList.add('on'); });
     clearTimeout(showNote.t);
-    showNote.t = setTimeout(function () { n.classList.remove('on'); }, 6000);
+    n.hidden = false; n.classList.remove('on'); n.textContent = '';
+    requestAnimationFrame(function () {
+      showNote.t = setTimeout(function () {
+        n.innerHTML = MEDAL + '<span>You reached <b>' + esc(level.name) + '</b> · ' + pts + ' points</span>';
+        n.classList.add('on');
+        showNote.t = setTimeout(function () {
+          n.classList.remove('on');
+          showNote.t = setTimeout(function () { n.hidden = true; n.textContent = ''; }, 300);
+        }, 6000);
+      }, 100);
+    });
   }
 
   function paintAll() { paintBadge(); paintMenu(); paintArea(); }
@@ -357,7 +365,7 @@
   function start() {
     paintAll(); checkLevelUp();
     try { TAQA_STORE.onChange(paintAll); } catch (e) {}
-    document.addEventListener('taqa:role-changed', paintAll);
+    root.addEventListener('taqa:role-changed', paintAll);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();

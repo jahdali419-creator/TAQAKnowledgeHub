@@ -34,6 +34,7 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
   --text:#1E1C1A;--text-muted:#5F564F;--text-light:#756A61;
   --fill:#E7F3F3;--fill-strong:#005D63;
   --glass:#FFFFFF;--glass-border:rgba(117,106,97,0.18);
+  --ex-stripe:rgba(117,106,97,0.45);
 }
 html[data-taqa-theme="dark"]{
   --primary-ink:#00BBB6;--dark:#001314;--paper:#002326;--inset:#001C1E;
@@ -41,6 +42,7 @@ html[data-taqa-theme="dark"]{
   --text:#C7DBDD;--text-muted:#9CC0C2;--text-light:#7FAFB2;
   --fill:rgba(0,187,182,0.12);--fill-strong:#00BBB6;
   --glass:#002326;--glass-border:rgba(0,187,182,0.20);
+  --ex-stripe:rgba(127,175,178,0.50);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;}
@@ -118,8 +120,14 @@ main{max-width:1060px;margin:0 auto;width:100%;padding:32px 40px 80px;display:gr
 .bars a{color:var(--text);text-decoration:none;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .bars a:hover{color:var(--primary-ink);text-decoration:underline;}
 .bars .tr{height:10px;border-radius:999px;background:var(--fill);overflow:hidden;}
-.bars .tr span{display:block;height:100%;background:var(--fill-strong);border-radius:999px;}
-.bars .v{font-weight:700;font-variant-numeric:tabular-nums;color:var(--text);white-space:nowrap;}
+.bars .tr{display:flex;}
+.bars .tr span{display:block;height:100%;background:var(--fill-strong);}
+.bars .tr span.exb{background:repeating-linear-gradient(135deg,var(--ex-stripe) 0 3px,transparent 3px 7px);}
+.bars .tr span:first-child{border-radius:999px 0 0 999px;}
+.bars .tr span:last-child{border-radius:0 999px 999px 0;}
+.bars .tr span:only-child{border-radius:999px;}
+.bars .v{font-weight:700;font-variant-numeric:tabular-nums;color:var(--text);white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.bars .v .exv{font-weight:500;color:var(--text-light);}
 .bars li.mine a{color:var(--primary-ink);}
 
 .foot{font-size:13px;line-height:1.6;color:var(--text-light);max-width:80ch;}
@@ -209,11 +217,11 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
   </section>
 
   <section class="card" id="rc-areas" aria-labelledby="rc-areas-h">
-    <div class="card-hd"><h2 id="rc-areas-h">Contributions by area this month</h2><span class="sub">Points earned in each area. For managers comparing teams.</span></div>
+    <div class="card-hd"><h2 id="rc-areas-h">Contributions by area this month</h2><span class="sub" id="rc-areas-sub">Points from released work in each area. Striped bars are example points, made up for this preview.</span></div>
     <ol class="bars" id="rc-areas-list"></ol>
   </section>
 
-  <p class="foot">Entries marked <span class="chip ex">Example</span> are made up to show how the lists look; they are not real people and never count in the register. In production, points come from TAQA sign-in and the shared register, so they are the same on every device. Whether a level links to appraisal is a decision for HR.</p>
+  <p class="foot">Entries marked <span class="chip ex">Example</span> are made up to show how the lists look; they are not real people and never count in the register. This is a preview: points and levels are not linked to appraisal, pay or performance reviews.</p>
 </main>
 
 <footer style="height:4px;position:relative;margin-top:auto;"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:#005D63;"></div></footer>
@@ -250,12 +258,18 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
     return out.join(' · ');
   }
 
-  /* Rules */
-  $('rc-rules-body').innerHTML =
-    '<tr><td>A document you filed is released</td><td class="pt">' + R.POINTS.document + '</td></tr>' +
-    '<tr><td>You brought an overdue document up to date with a new revision</td><td class="pt">' + R.POINTS.overdue + '</td></tr>' +
-    '<tr><td>Your Lesson Learned or Technical Alert is released</td><td class="pt">' + R.POINTS.lesson + '</td></tr>' +
-    '<tr class="zero"><td>Your filing is returned or rejected</td><td class="pt">0</td></tr>';
+  /* Rules: addressed to the reader when they earn, neutral when they
+     check or read (QMS and the auditor earn nothing). */
+  if (!earner) $('rc-lede').textContent = 'Points for work that passed QMS and approval, so only released documents count. Employees, Directors and Maintenance Managers earn them for the work they file.';
+  $('rc-rules-body').innerHTML = earner
+    ? '<tr><td>A document you filed is released</td><td class="pt">' + R.POINTS.document + '</td></tr>' +
+      '<tr><td>You brought an overdue document up to date with a new revision</td><td class="pt">' + R.POINTS.overdue + '</td></tr>' +
+      '<tr><td>Your Lesson Learned or Technical Alert is released</td><td class="pt">' + R.POINTS.lesson + '</td></tr>' +
+      '<tr class="zero"><td>Your filing is returned or rejected</td><td class="pt">0</td></tr>'
+    : '<tr><td>A document someone filed is released</td><td class="pt">' + R.POINTS.document + '</td></tr>' +
+      '<tr><td>An overdue document is brought up to date with a new revision</td><td class="pt">' + R.POINTS.overdue + '</td></tr>' +
+      '<tr><td>A Lesson Learned or Technical Alert is released</td><td class="pt">' + R.POINTS.lesson + '</td></tr>' +
+      '<tr class="zero"><td>A filing is returned or rejected</td><td class="pt">0</td></tr>';
 
   /* Level */
   function paintLevel() {
@@ -265,17 +279,17 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
       $('rc-level-h').textContent = 'Points and levels';
       box.innerHTML = '<p class="empty">' + (role === 'auditor'
         ? 'An auditor reads the register and files nothing, so there is no level for this view. Every area’s list is below.'
-        : 'QMS checks and releases other people’s work, so QMS earns no points in this preview. Every area’s list is below.') + '</p>' + ladder(-1);
+        : 'QMS checks other people’s work before the approver releases it, so QMS earns no points in this preview. Every area’s list is below.') + '</p>' + ladder(-1);
       return;
     }
     var pts = R.pointsOf(), lv = R.levelFor(pts);
     var from = lv.level ? lv.level.min : 0, to = lv.next ? lv.next.min : pts;
-    var pct = lv.next ? Math.max(4, Math.round((pts - from) / (to - from) * 100)) : 100;
+    var pct = lv.next ? Math.round((pts - from) / (to - from) * 100) : 100, shown = Math.max(4, pct);
     box.innerHTML =
       '<div class="lv-top"><div class="lv-mark">' + R.MEDAL + '</div><div>' +
         '<div class="lv-name">' + esc(lv.level ? lv.level.name : 'No level yet') + '</div>' +
         '<div class="lv-pts">' + plural(pts, 'point', 'points') + ' · ' + esc(R.labelFor(R.me())) + '</div></div></div>' +
-      '<div class="lv-bar" role="progressbar" aria-label="Progress to the next level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><span style="width:' + pct + '%"></span></div>' +
+      '<div class="lv-bar" role="progressbar" aria-label="Progress to the next level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><span style="width:' + shown + '%"></span></div>' +
       '<p class="lv-next">' + (lv.next
         ? '<b>' + lv.toNext + ' more points</b> to reach ' + esc(lv.next.name) + '.'
         : 'You have reached the top level.') +
@@ -354,11 +368,18 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
 
   /* Areas */
   function paintAreas() {
-    var rows = R.byArea().slice(0, 12), max = rows.length ? rows[0].points : 1, here = areaSel.value;
+    var rows = R.byArea().slice(0, 12), here = areaSel.value;
+    var max = Math.max.apply(null, rows.map(function (a) { return a.points; }).concat(1));
+    function w(n) { return Math.max(3, Math.round(n / max * 100)); }
     $('rc-areas-list').innerHTML = rows.length ? rows.map(function (a) {
+      var bar = (a.real ? '<span style="width:' + w(a.real) + '%"></span>' : '') +
+                (a.example ? '<span class="exb" style="width:' + w(a.example) + '%"></span>' : '');
+      var val = a.real && a.example ? a.real + ' pts <span class="exv">+ ' + a.example + ' example</span>'
+              : a.real ? a.real + ' pts'
+              : a.example + ' pts <span class="chip ex">Example</span>';
       return '<li class="' + (a.id === here ? 'mine' : '') + '"><a href="segment.html?id=' + encodeURIComponent(a.id) + '" title="' + esc(a.name) + '">' + esc(a.name) + '</a>' +
-        '<span class="tr"><span style="width:' + Math.max(3, Math.round(a.points / max * 100)) + '%"></span></span>' +
-        '<span class="v">' + a.points + ' pts</span></li>';
+        '<span class="tr" aria-hidden="true">' + bar + '</span>' +
+        '<span class="v">' + val + '</span></li>';
     }).join('') : '<li class="empty">No released work this month yet.</li>';
   }
 
