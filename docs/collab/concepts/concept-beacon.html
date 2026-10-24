@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en" data-taqa-theme="light">
+<head>
+<meta charset="UTF-8">
+<script>/* Our own attribute, set outright every load (see index.html). */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>/* Installed app on an iPhone: draw edge to edge so topbar.css can pad for the status bar. */(function(){try{if(navigator.standalone||matchMedia('(display-mode: standalone)').matches){var m=document.querySelector('meta[name="viewport"]');if(m&&!/viewport-fit/.test(m.content))m.content+=', viewport-fit=cover';}}catch(e){}})();</script>
+<title>RISE</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#005D63">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RISE">
+<meta name="application-name" content="RISE">
+<link rel="apple-touch-icon" href="icons/rise-apple-touch-icon.png">
+<link rel="icon" href="icons/rise-favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="icons/rise-favicon-16.png" type="image/png" sizes="16x16">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* ════════════════════════════════════════════════════════════════════
+   BEACON
+   The RISE mark is the layout. Its three shapes are three working parts
+   of the page, drawn at the scale of the screen:
+     orange bar  → the beacon: a small accent that leads the eye in
+     cyan bar    → the search console
+     teal pillar → the spine: under the console it carries what is
+                   waiting for you and the ways in, then crosses into
+                   the page and ends in the mark's 45° cut beside
+                   "Browse by area".
+   Every card, tab and button repeats that 45° cut and nothing else.
+   ════════════════════════════════════════════════════════════════════ */
+:root{
+  /* Legacy names that shared.js and the tour still read. */
+  --primary:#005D63; --primary-ink:#005D63; --primary-light:#00BBB6; --primary-hover:#00474C;
+  --accent:#FD691D; --bg:#F3F5F4; --bg-white:#FFFFFF; --border:#C7DBDD;
+  --text:#1E1C1A; --text-muted:#524D48; --text-light:#6B625A;
+  --glass:rgba(0,93,99,.06); --glass-border:rgba(117,106,97,.18); --glass-border-hover:rgba(0,93,99,.3);
+
+  --bc-canvas:#F3F5F4;
+  --bc-paper:#FFFFFF;
+  --bc-ink:#1E1C1A;
+  --bc-ink-2:#4A4540;
+  --bc-ink-3:#665E57;         /* 5.9:1 on paper, 5.4:1 on canvas */
+  --bc-line:rgba(0,41,44,.13);
+  --bc-tint:#E9F1F0;
+  --bc-link:#005D63;
+  --bc-hero:#00292C;
+  --bc-pillar:#005D63;
+  --bc-cyan:#00BBB6;
+  --bc-orange:#FF6720;        /* shapes only, never text */
+  --bc-sel:#005D63;
+  --bc-font:'BwGradual','Urbanist',system-ui,sans-serif;
+  --bc-ease:cubic-bezier(.23,1,.32,1);
+
+  /* The mark's proportions at each size.
+     H console height (the cyan bar), B beam height (the orange bar),
+     P pillar width, G gap beside the pillar, K the small 45° cut. */
+  --pad:16px; --H:68px; --B:16px; --P:44px; --G:14px; --gap:6px; --K:14px;
+}
+@media (min-width:720px){ :root{ --pad:32px; --H:76px; --B:22px; --P:64px; --G:20px; --K:16px; } }
+@media (min-width:1024px){ :root{ --pad:48px; --H:84px; --B:26px; --P:88px; --G:24px; --K:18px; } }
+
+html[data-taqa-theme="dark"]{
+  --primary-ink:#00BBB6; --bg:#001416; --bg-white:#002326; --border:#003A3D;
+  --text:#C7DBDD; --text-muted:#8CB6B9; --text-light:#8CB6B9;
+  --bc-canvas:#001416;
+  --bc-paper:#002326;
+  --bc-ink:#D7E7E8;
+  --bc-ink-2:#A9C9CB;
+  --bc-ink-3:#8CB6B9;
+  --bc-line:rgba(0,187,182,.16);
+  --bc-tint:#00303A;
+  --bc-link:#00BBB6;
+  --bc-hero:#00292C;
+  --bc-pillar:#00666C;
+  --bc-sel:#00BBB6;
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0; font-family:var(--bc-font); background:var(--bc-canvas); color:var(--bc-ink);
+  line-height:1.5; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;}
+.bc-wrap{max-width:calc(1200px + 2 * var(--pad)); margin:0 auto; padding-inline:var(--pad);}
+.sr-only{position:absolute!important; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;}
+b{font-weight:700;}
+.num{font-variant-numeric:tabular-nums;}
+
+/* ── The hero band: dark teal in both themes ─────────────────────── */
+.bc-hero{
+  position:relative; z-index:1; background:var(--bc-hero); color:#fff;
+  /* The beam runs off the left edge and the console off the right on a
+     phone; clip only sideways so the pillar can reach the band's foot. */
+  overflow-x:clip;
+  padding-top:calc(var(--nav-h, 64px) + 34px); padding-bottom:36px;
+}
+.bc-hero::before{content:''; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(90% 70% at 92% 0%, rgba(0,187,182,.13), transparent 62%);}
+.bc-hero .bc-wrap{position:relative;}
+
+.bc-h1{margin:0; font:700 clamp(31px, 8.8vw, 76px)/1.04 var(--bc-font); letter-spacing:-.025em; color:#fff;}
+.bc-h1 span{display:block;}
+.bc-h1 .bc-h1-b{color:#9FE3DF;}
+.bc-sub{margin:14px 0 0; max-width:34em; font:400 16px/1.5 var(--bc-font); color:rgba(255,255,255,.82);}
+
+/* The mark, assembled */
+.bc-mark{position:relative; margin-top:30px; padding-top:calc(var(--B) + var(--gap));}
+
+/* Orange: comes in from the left edge of the screen. Its cut end lies on
+   the same 45° line as the console's left end, as in the logo. */
+.bc-beam{position:absolute; top:0; height:var(--B); width:100vw;
+  left:calc(var(--H) + var(--gap) + var(--B) - 100vw);
+  background:var(--bc-orange);
+  clip-path:polygon(0 0,100% 0,calc(100% - var(--B)) 100%,0 100%);}
+
+/* Cyan: the console. */
+.bc-console{position:relative; display:flex; align-items:center; height:var(--H);
+  margin:0; margin-right:calc(-1 * var(--pad)); padding:8px var(--pad) 8px var(--H);}
+.bc-console::before{content:''; position:absolute; inset:0; background:var(--bc-cyan);
+  clip-path:polygon(var(--H) 0,100% 0,100% 100%,0 100%);}
+.bc-glass{position:absolute; z-index:1; top:50%; left:calc(var(--H) * .7 - 10px); width:20px; height:20px;
+  margin-top:-10px; color:#00292C; pointer-events:none;}
+.bc-field{position:relative; z-index:1; flex:1; min-width:0; height:100%; display:flex; align-items:center; gap:6px;
+  padding:4px; padding-inline-start:14px; background:#fff;}
+.bc-field:focus-within{box-shadow:inset 0 0 0 2px #005D63;}
+.bc-input{flex:1; min-width:0; height:100%; border:0; margin:0; padding:0; background:transparent;
+  font:400 16px/1.2 var(--bc-font); color:#1E1C1A; -webkit-appearance:none; appearance:none;}
+.bc-input::placeholder{color:#665E57; opacity:1;}
+.bc-input::-webkit-search-cancel-button{-webkit-appearance:none;}
+.bc-go{position:relative; isolation:isolate; flex-shrink:0; height:100%; min-height:44px; display:inline-flex; align-items:center; gap:8px;
+  padding:0 16px 0 18px; border:0; background:transparent; color:#fff; cursor:pointer;
+  font:600 15px/1 var(--bc-font); -webkit-tap-highlight-color:transparent;}
+.bc-go::before{content:''; position:absolute; inset:0; z-index:-1; background:#00292C;
+  clip-path:polygon(0 0,100% 0,100% 100%,var(--K) 100%,0 calc(100% - var(--K)));
+  transition:background-color 150ms var(--bc-ease);}
+.bc-go svg{width:16px; height:16px;}
+@media (hover:hover){ .bc-go:hover::before{background:#005D63;} }
+.bc-go:active{transform:scale(.98);}
+html[data-taqa-theme="dark"] .bc-field{background:#001A1C;}
+html[data-taqa-theme="dark"] .bc-field:focus-within{box-shadow:inset 0 0 0 2px #00BBB6;}
+html[data-taqa-theme="dark"] .bc-input{color:#E6F2F2;}
+html[data-taqa-theme="dark"] .bc-input::placeholder{color:#8CB6B9;}
+html[data-taqa-theme="dark"] .bc-go::before{background:#005D63;}
+@media (hover:hover){ html[data-taqa-theme="dark"] .bc-go:hover::before{background:#00757C;} }
+
+/* Teal: the pillar, and what sits beside it */
+.bc-base{position:relative; padding-top:18px; padding-inline-start:calc(var(--P) + var(--G));}
+.bc-pillar{position:absolute; top:0; left:0; width:var(--P); bottom:-36px; background:var(--bc-pillar);}
+
+.bc-readout{margin:0; font:400 14px/1.5 var(--bc-font); color:rgba(255,255,255,.8);}
+.bc-readout b{color:#fff;}
+.bc-readout .sep{padding-inline-start:.45em; color:rgba(255,255,255,.45);}
+.bc-readout .ro{white-space:nowrap;}
+.bc-lamp{display:inline-block; width:15px; height:8px; margin-inline-end:8px; vertical-align:1px; background:var(--bc-cyan);
+  clip-path:polygon(4px 0,calc(100% - 4px) 0,100% 100%,0 100%);}
+
+/* The role desk: what is waiting for you. Hidden for an Employee. */
+.bc-desk{position:relative; isolation:isolate; margin-top:14px; padding:14px 14px 14px 16px;
+  display:grid; grid-template-columns:minmax(0,1fr); gap:6px 16px; align-items:center;}
+.bc-desk[hidden]{display:none;}
+.bc-desk::before{content:''; position:absolute; inset:0; z-index:-1; background:rgba(0,187,182,.14);
+  clip-path:polygon(0 0,100% 0,100% 100%,var(--K) 100%,0 calc(100% - var(--K)));}
+.desk-who{font:600 13px/1.3 var(--bc-font); color:#9FE3DF;}
+.desk-line{font:400 15px/1.45 var(--bc-font); color:#fff;}
+.desk-line b{font-variant-numeric:tabular-nums;}
+.desk-go{position:relative; isolation:isolate; justify-self:start; display:inline-flex; align-items:center; min-height:44px; padding:0 18px;
+  color:#00191B; text-decoration:none; font:700 14px/1 var(--bc-font); margin-top:4px;}
+.desk-go::before{content:''; position:absolute; inset:0; z-index:-1; background:var(--bc-cyan);
+  clip-path:polygon(0 0,100% 0,100% 100%,12px 100%,0 calc(100% - 12px)); transition:background-color 150ms var(--bc-ease);}
+@media (hover:hover){ .desk-go:hover::before{background:#7BEEE6;} }
+
+/* Ways in */
+.bc-ways{list-style:none; margin:14px 0 0; padding:0; display:grid; gap:8px;}
+.bc-way{position:relative; isolation:isolate; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center;
+  column-gap:12px; min-height:64px; padding:11px 14px 11px 16px; color:#fff; text-decoration:none;}
+.bc-way::before{content:''; position:absolute; inset:0; z-index:-1; background:rgba(255,255,255,.075);
+  clip-path:polygon(0 0,100% 0,100% 100%,var(--K) 100%,0 calc(100% - var(--K)));
+  transition:background-color 150ms var(--bc-ease);}
+@media (hover:hover){ .bc-way:hover::before{background:rgba(255,255,255,.14);} }
+.bc-way-t{font:600 16px/1.25 var(--bc-font);}
+.bc-way-d{grid-column:1; font:400 13px/1.4 var(--bc-font); color:rgba(255,255,255,.76);}
+.bc-way-go{grid-column:2; grid-row:1 / span 2; width:20px; height:20px; color:#9FE3DF;
+  transition:transform 200ms var(--bc-ease);}
+@media (hover:hover){ .bc-way:hover .bc-way-go{transform:translateX(3px);} }
+
+/* Focus on the dark band: the site-wide ring is #005D63, about 2:1 here. */
+#beacon :focus-visible{outline-color:#9FE3DF!important;}
+#beacon .bc-field :focus-visible{outline-color:#005D63!important;}
+html[data-taqa-theme="dark"] #beacon .bc-field :focus-visible{outline-color:#00BBB6!important;}
+#beacon .bc-input:focus-visible{outline:none!important;}
+
+/* ── Browse by area ──────────────────────────────────────────────── */
+.bc-areas{position:relative; padding-bottom:48px;}
+.bc-areas-head{display:grid; grid-template-columns:var(--P) minmax(0,1fr); column-gap:var(--G);}
+/* The pillar again, continuing from the hero into the page, ending in the
+   mark's own 45° cut. */
+.bc-spine{background:var(--bc-pillar);
+  clip-path:polygon(0 0,100% 0,100% 100%,0 calc(100% - var(--P)));}
+.bc-head-in{padding:26px 0 calc(var(--P) * .5);}
+.bc-h2{margin:0; font:700 26px/1.15 var(--bc-font); letter-spacing:-.018em; color:var(--bc-ink);}
+.bc-lede{margin:6px 0 0; font:400 15px/1.5 var(--bc-font); color:var(--bc-ink-3); max-width:40em;}
+
+/* A card with the 45° cut: ::before is the 1px edge, ::after the face. */
+.cf{position:relative; isolation:isolate; text-decoration:none; color:var(--bc-ink);}
+.cf::before,.cf::after{content:''; position:absolute; z-index:-1; pointer-events:none;
+  clip-path:polygon(0 0,100% 0,100% 100%,var(--K) 100%,0 calc(100% - var(--K)));}
+.cf::before{inset:0; background:var(--bc-line);}
+.cf::after{inset:1px; background:var(--bc-paper); transition:background-color 150ms var(--bc-ease);}
+@media (hover:hover){ a.cf:hover::after{background:var(--bc-tint);} }
+
+.bc-company{display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; column-gap:14px;
+  margin-top:18px; min-height:72px; padding:13px 16px 13px 18px;}
+.bc-company-t{font:700 16px/1.25 var(--bc-font);}
+.bc-company-d{grid-column:1; font:400 13.5px/1.45 var(--bc-font); color:var(--bc-ink-3);}
+.bc-company-c{grid-column:2; grid-row:1 / span 2; text-align:end; font:400 13px/1.3 var(--bc-font); color:var(--bc-ink-3); white-space:nowrap;}
+.bc-company-c b{display:block; font-size:20px; line-height:1.1; color:var(--bc-ink); font-variant-numeric:tabular-nums;}
+
+/* Tabs: one group at a time, so a phone is not a wall of 24 tiles. */
+.bc-tabs{display:flex; gap:2px; margin-top:24px; border-bottom:1px solid var(--bc-line);
+  overflow-x:auto; scrollbar-width:none;}
+.bc-tabs::-webkit-scrollbar{display:none;}
+.bc-tab{position:relative; flex:0 0 auto; min-height:46px; padding:0 12px; margin:0; border:0; background:none; cursor:pointer;
+  font:500 15px/1 var(--bc-font); color:var(--bc-ink-2); -webkit-tap-highlight-color:transparent;
+  transition:color 150ms var(--bc-ease);}
+.bc-tab .n{margin-inline-start:6px; font-weight:400; color:var(--bc-ink-3); font-variant-numeric:tabular-nums;}
+.bc-tab .lg{display:none;}
+@media (hover:hover){ .bc-tab:hover{color:var(--bc-ink);} }
+.bc-tab[aria-selected="true"]{color:var(--bc-ink); font-weight:700;}
+.bc-tab::after{content:''; position:absolute; left:6px; right:6px; bottom:-1px; height:4px; background:var(--bc-sel);
+  clip-path:polygon(4px 0,calc(100% - 4px) 0,100% 100%,0 100%);
+  transform:scaleX(0); transition:transform 220ms var(--bc-ease);}
+.bc-tab[aria-selected="true"]::after{transform:none;}
+
+.bc-panel:focus-visible{outline-offset:6px;}
+.bc-grid{list-style:none; margin:16px 0 0; padding:0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px;}
+.bc-grid li{min-width:0;}
+.bc-tile{display:flex; flex-direction:column; height:100%; min-height:108px; padding:14px 14px 12px;}
+.bc-tile-n{font:600 15.5px/1.25 var(--bc-font); overflow-wrap:anywhere;}
+.bc-tile-t{margin-top:3px; font:400 13px/1.35 var(--bc-font); color:var(--bc-ink-3);}
+.bc-tile-c{margin-top:auto; padding-top:12px; font:400 13px/1 var(--bc-font); color:var(--bc-ink-3);}
+.bc-tile-c b{font-size:16px; color:var(--bc-ink); margin-inline-end:4px; font-variant-numeric:tabular-nums;}
+.bc-bar{position:absolute; top:0; left:0; width:56px; height:4px; background:var(--bc-cyan);
+  clip-path:polygon(0 0,100% 0,calc(100% - 4px) 100%,0 100%);
+  transform:scaleX(0); transform-origin:left; transition:transform 240ms var(--bc-ease);}
+@media (hover:hover){ .bc-tile:hover .bc-bar{transform:none;} }
+.bc-tile:focus-visible .bc-bar{transform:none;}
+
+/* ── Just issued ─────────────────────────────────────────────────── */
+.bc-latest{padding:8px 0 56px;}
+.bc-cols{display:grid; grid-template-columns:minmax(0,1fr); gap:28px; margin-top:22px;}
+.bc-h3{display:flex; align-items:center; gap:10px; margin:0 0 4px; font:700 17px/1.3 var(--bc-font); color:var(--bc-ink);}
+.bc-key{flex-shrink:0; width:22px; height:10px;}
+.bc-key-alert{background:var(--bc-orange); clip-path:polygon(0 0,100% 0,calc(100% - 10px) 100%,10px 100%);}
+.bc-key-lesson{background:var(--bc-cyan); clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 100%,0 100%);}
+.bc-list{list-style:none; margin:0; padding:0;}
+.bc-list li{border-top:1px solid var(--bc-line);}
+.bc-item{display:block; padding:13px 0 14px; text-decoration:none; color:var(--bc-ink);}
+.bc-item-t{display:block; font:500 16px/1.4 var(--bc-font);}
+.bc-item-m{display:block; margin-top:3px; font:400 13px/1.4 var(--bc-font); color:var(--bc-ink-3);}
+@media (hover:hover){ .bc-item:hover .bc-item-t{color:var(--bc-link); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px;} }
+.bc-empty{padding:13px 0; margin:0; border-top:1px solid var(--bc-line); font-size:14px; color:var(--bc-ink-3);}
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+.bc-foot{border-top:1px solid var(--bc-line); padding:26px 0 36px;}
+.bc-foot .bc-wrap{display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+.bc-foot svg{width:40px; height:33px; flex-shrink:0;}
+.bc-foot-t{font:600 15px/1.3 var(--bc-font); color:var(--bc-ink);}
+.bc-foot-d{font:400 13px/1.45 var(--bc-font); color:var(--bc-ink-3);}
+.mk-p{fill:#005D63;}
+html[data-taqa-theme="dark"] .mk-p{fill:#FFFFFF;}
+
+/* ── Wider screens ───────────────────────────────────────────────── */
+@media (min-width:720px){
+  .bc-sub{font-size:18px;}
+  .bc-glass{width:22px; height:22px; margin-top:-11px; left:calc(var(--H) * .7 - 11px);}
+  .bc-input{font-size:17px;}
+  .bc-ways{grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px;}
+  .bc-way{min-height:92px; align-items:start; padding:14px 14px 16px 16px;}
+  .bc-way-go{grid-row:1; align-self:start; margin-top:1px;}
+  .bc-way-d{margin-top:4px;}
+  .bc-desk{grid-template-columns:auto minmax(0,1fr) auto; padding:12px 12px 12px 18px;}
+  .desk-go{margin-top:0;}
+  .bc-h2{font-size:32px;}
+  .bc-tab .sh{display:none;} .bc-tab .lg{display:inline;}
+  .bc-tab{padding:0 16px;}
+  .bc-grid{grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px;}
+  .bc-cols{grid-template-columns:repeat(2,minmax(0,1fr)); gap:40px;}
+  .bc-company{max-width:640px;}
+}
+@media (min-width:1024px){
+  .bc-hero{padding-top:calc(var(--nav-h, 64px) + 64px); padding-bottom:64px;}
+  .bc-pillar{bottom:-64px;}
+  /* The headline and its one line of explanation side by side, so the
+     band uses its width and Browse by area starts above the fold. */
+  .bc-top{display:grid; grid-template-columns:auto minmax(0,400px); justify-content:space-between; align-items:end; column-gap:56px;}
+  .bc-sub{font-size:19px; margin:0 0 10px;}
+  .bc-mark{margin-top:48px;}
+  .bc-console{width:min(100%, 1040px); margin-right:0; padding-inline-end:var(--H);}
+  .bc-console::before{clip-path:polygon(var(--H) 0,calc(100% - var(--H)) 0,100% 100%,0 100%);}
+  .bc-glass{width:24px; height:24px; margin-top:-12px; left:calc(var(--H) * .7 - 12px);}
+  .bc-field{padding:6px; padding-inline-start:18px;}
+  .bc-input{font-size:18px;}
+  .bc-go{padding:0 22px 0 24px; font-size:16px;}
+  .bc-base{padding-top:22px; max-width:1040px;}
+  .bc-readout{font-size:15px;}
+  .bc-areas{padding-bottom:64px;}
+  .bc-head-in{padding-top:34px;}
+  .bc-grid{grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px;}
+  .bc-tile{min-height:120px; padding:18px 18px 14px;}
+  .bc-tile-n{font-size:17px;}
+  .bc-latest{padding:16px 0 72px;}
+  .bc-cols{gap:56px;}
+}
+/* A narrow phone: the button keeps its arrow and its accessible name, and
+   gives the width to the field so the placeholder is not cut off. */
+@media (max-width:374px){
+  .bc-go span{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+  .bc-go{padding:0 16px 0 20px;}
+  .bc-go svg{width:18px; height:18px;}
+  .bc-tab{padding:0 9px; font-size:14px;}
+}
+
+/* ── Arrival: the mark assembles once ────────────────────────────── */
+@media (prefers-reduced-motion: no-preference){
+  .bc-h1,.bc-sub{animation:bcUp 700ms var(--bc-ease) both;}
+  .bc-sub{animation-delay:90ms;}
+  .bc-beam{animation:bcBeam 800ms var(--bc-ease) 180ms both;}
+  .bc-console{animation:bcSlide 800ms var(--bc-ease) 300ms both;}
+  .bc-pillar{transform-origin:top; animation:bcGrow 900ms var(--bc-ease) 480ms both;}
+  .bc-stack{animation:bcUp 700ms var(--bc-ease) 640ms both;}
+  .bc-spine{transform-origin:top; animation:bcGrow 600ms var(--bc-ease) 1050ms both;}
+}
+@keyframes bcUp{from{opacity:0; transform:translateY(14px);}}
+@keyframes bcBeam{from{opacity:0; transform:translateX(-30vw);}}
+@keyframes bcSlide{from{opacity:0; transform:translateX(40px);}}
+@keyframes bcGrow{from{transform:scaleY(0);}}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto;}
+  .bc-tab::after,.bc-bar,.bc-way-go,.cf::after,.bc-go::before{transition:none!important;}
+}
+</style>
+<link rel="stylesheet" href="techhub.css">
+<link rel="stylesheet" href="topbar.css">
+</head>
+<body>
+
+<!-- ── Navigation (shared chrome, unchanged from index.html) ── -->
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+  <a href="index.html" class="nav-brand">
+    <img src="assets/brand/rise-lockup-header.png" alt="RISE" class="nav-logo nav-logo-light" width="320" height="120">
+    <img src="assets/brand/rise-lockup-header-reverse.png" alt="RISE" class="nav-logo nav-logo-dark" width="320" height="120">
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html" class="active" aria-current="page">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
+    <li><a href="ai-search.html">Document Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
+  <div class="nav-right">
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- ── Beacon: the mark as the page ── -->
+<header class="bc-hero" id="beacon">
+  <div class="bc-wrap">
+    <div class="bc-top">
+      <h1 class="bc-h1"><span>Find the current,</span> <span class="bc-h1-b">approved version.</span></h1>
+      <p class="bc-sub">Procedures, standards, alerts and lessons learned from every area, always at the revision in force.</p>
+    </div>
+
+    <div class="bc-mark">
+      <span class="bc-beam" aria-hidden="true"></span>
+
+      <form class="bc-console" id="bc-search" action="ai-search.html" method="get" role="search" aria-label="Search the register">
+        <svg class="bc-glass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.6-4.6"/></svg>
+        <div class="bc-field">
+          <input class="bc-input" type="search" id="bc-q" name="q" placeholder="Search documents" autocomplete="off" enterkeyhint="search" aria-label="Search procedures, standards, alerts and lessons learned">
+          <button type="submit" class="bc-go"><span>Search</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
+        </div>
+      </form>
+
+      <div class="bc-base">
+        <span class="bc-pillar" aria-hidden="true"></span>
+        <div class="bc-stack">
+          <p class="bc-readout" id="bc-readout" hidden></p>
+
+          <!-- The role desk: what is waiting for you. Hidden for an Employee. -->
+          <div class="bc-desk" id="desk" hidden>
+            <span class="desk-who" id="desk-who"></span>
+            <span class="desk-line" id="desk-line"></span>
+            <a class="desk-go" id="desk-go" href="dashboard.html">Open</a>
+          </div>
+
+          <ul class="bc-ways" aria-label="Ways in">
+            <li><a class="bc-way" href="#areas">
+              <span class="bc-way-t">Browse all areas</span>
+              <span class="bc-way-d" id="bc-way-areas">Segments, functions and centres</span>
+              <svg class="bc-way-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v14"/><path d="m6 13 6 6 6-6"/></svg>
+            </a></li>
+            <li><a class="bc-way" href="support-ticket.html">
+              <span class="bc-way-t">Ask Expert</span>
+              <span class="bc-way-d">Send a field problem to the right expert</span>
+              <svg class="bc-way-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+            </a></li>
+            <li><a class="bc-way" href="glossary.html">
+              <span class="bc-way-t">Field Glossary</span>
+              <span class="bc-way-d">Oilfield terms and abbreviations</span>
+              <svg class="bc-way-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+            </a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+<!-- ── Browse by area ── -->
+<section class="bc-areas" id="areas" aria-labelledby="areas-h">
+  <div class="bc-wrap">
+    <div class="bc-areas-head">
+      <span class="bc-spine" aria-hidden="true"></span>
+      <div class="bc-head-in">
+        <h2 class="bc-h2" id="areas-h">Browse by area</h2>
+        <p class="bc-lede" id="bc-areas-lede">Every segment, function and centre in the register. Pick a group, then an area.</p>
+        <a class="bc-company cf" href="segment.html?id=company">
+          <span class="bc-company-t">Company policies</span>
+          <span class="bc-company-d">Signed by the CEO. They apply in every area below.</span>
+          <span class="bc-company-c" id="bc-company-c"></span>
+        </a>
+      </div>
+    </div>
+
+    <div class="bc-tabs" role="tablist" aria-label="Area groups" id="bc-tabs"></div>
+    <div id="bc-panels"></div>
+  </div>
+</section>
+
+<!-- ── Just issued ── -->
+<section class="bc-latest" aria-labelledby="latest-h">
+  <div class="bc-wrap">
+    <h2 class="bc-h2" id="latest-h">Just issued</h2>
+    <p class="bc-lede">The newest technical alerts and lessons learned that you can open.</p>
+    <div class="bc-cols">
+      <div>
+        <h3 class="bc-h3"><span class="bc-key bc-key-alert" aria-hidden="true"></span>Technical alerts</h3>
+        <ol class="bc-list" id="bc-alerts"></ol>
+      </div>
+      <div>
+        <h3 class="bc-h3"><span class="bc-key bc-key-lesson" aria-hidden="true"></span>Lessons learned</h3>
+        <ol class="bc-list" id="bc-lessons"></ol>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="bc-foot">
+  <div class="bc-wrap">
+    <svg viewBox="0 0 726 591" aria-hidden="true" focusable="false"><polygon points="0,0 472,0 352,128 118,128" fill="#FF6720"/><polygon points="378,88 605,88 725,217 238,217" fill="#00BBB6"/><polygon class="mk-p" points="238,217 381,217 381,590 238,447"/></svg>
+    <div>
+      <div class="bc-foot-t">RISE · What We Know.</div>
+      <div class="bc-foot-d">© 2026 TAQA, Industrialization &amp; Energy Services Company. Built by TAQA Learning Center.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── Search: Enter or the button opens Document Search; empty opens it plain ──
+(function(){
+  var form = document.getElementById('bc-search'), inp = document.getElementById('bc-q');
+  if (!form || !inp) return;
+  if (window.matchMedia) {
+    var mq = matchMedia('(min-width:720px)');
+    var fit = function(){ inp.placeholder = mq.matches ? 'Search procedures, standards, alerts, lessons' : 'Search documents'; };
+    fit();
+    if (mq.addEventListener) mq.addEventListener('change', fit); else if (mq.addListener) mq.addListener(fit);
+  }
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var q = inp.value.trim();
+    window.location.href = 'ai-search.html' + (q ? '?q=' + encodeURIComponent(q) : '');
+  });
+})();
+
+// ── The bar turns to glass while the dark band is under it ──
+(function(){
+  var nav = document.getElementById('navbar'), hero = document.getElementById('beacon');
+  if (!nav || !hero) return;
+  function sync(){
+    var navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'), 10) || 64;
+    nav.classList.toggle('nav-on-hero', window.scrollY < (hero.offsetHeight - navH));
+  }
+  sync();
+  window.addEventListener('scroll', sync, { passive:true });
+  window.addEventListener('resize', sync);
+})();
+</script>
+
+<!-- ── First-Time Tour ── -->
+<div id="tour-backdrop"></div>
+<div id="tour-spot"></div>
+<div id="tour-card">
+  <button id="tour-close" aria-label="Close tour">✕</button>
+  <div id="tc-step"></div>
+  <div id="tc-title"></div>
+  <p id="tc-desc"></p>
+  <div id="tc-footer">
+    <div id="tc-dots"></div>
+    <div id="tc-btns">
+      <button id="tc-skip">Skip tour</button>
+      <button id="tc-next">Next →</button>
+    </div>
+  </div>
+</div>
+<style>
+#tour-backdrop{position:fixed;inset:0;background:rgba(0,19,20,0.7);z-index:9990;display:none;pointer-events:all;}
+#tour-spot{position:fixed;border-radius:4px;border:2.5px solid #00BBB6;box-shadow:0 0 0 4px rgba(0,187,182,0.18),0 0 0 9999px rgba(0,19,20,0.68);
+  z-index:9992;pointer-events:none;opacity:0;
+  transition:top .4s cubic-bezier(.4,0,.2,1),left .4s cubic-bezier(.4,0,.2,1),width .4s cubic-bezier(.4,0,.2,1),height .4s cubic-bezier(.4,0,.2,1),opacity .3s;}
+#tour-spot.on{opacity:1;}
+#tour-card{position:fixed;z-index:9995;background:#fff;padding:22px 22px 16px;width:min(320px,calc(100vw - 32px));
+  box-shadow:0 24px 64px rgba(0,0,0,0.28);display:none;font-family:var(--bc-font);
+  clip-path:polygon(0 0,100% 0,100% 100%,18px 100%,0 calc(100% - 18px));
+  transition:top .4s cubic-bezier(.4,0,.2,1),left .4s cubic-bezier(.4,0,.2,1),opacity .25s;}
+html[data-taqa-theme="dark"] #tour-card{background:#002D30;}
+#tour-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:15px;color:var(--text-light);cursor:pointer;line-height:1;padding:4px;}
+#tc-step{font-size:12.5px;font-weight:600;color:var(--primary-ink);margin-bottom:6px;}
+#tc-title{font-size:18px;font-weight:700;color:#1E1C1A;margin-bottom:8px;line-height:1.3;}
+html[data-taqa-theme="dark"] #tc-title{color:#C7DBDD;}
+#tc-desc{font-size:14px;color:#665E57;line-height:1.6;margin:0 0 18px;white-space:pre-line;}
+html[data-taqa-theme="dark"] #tc-desc{color:#8CB6B9;}
+#tc-footer{display:flex;align-items:center;justify-content:space-between;}
+#tc-dots{display:flex;gap:5px;}
+.t-dot{width:7px;height:7px;border-radius:50%;background:#C7DBDD;}
+.t-dot.on{background:#005D63;}
+html[data-taqa-theme="dark"] .t-dot{background:#00484B;}
+html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
+#tc-btns{display:flex;gap:8px;align-items:center;}
+#tc-skip{background:none;border:none;font-size:13.5px;color:var(--text-light);cursor:pointer;padding:7px 10px;font-family:inherit;}
+#tc-next{background:#005D63;color:#fff;border:none;padding:9px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;}
+</style>
+<script>
+(function(){
+  try { if (localStorage.getItem('taqa-tour-done')) return; } catch (e) { return; }
+  // Area counts come from the register, never typed here.
+  var fam = { segment:0, 'function':0, product:0 };
+  try { var LS = TAQA_DOC_LOOKUPS.segments; Object.keys(LS).forEach(function(k){ if (fam[LS[k].group] != null) fam[LS[k].group]++; }); } catch (e) {}
+  var scope = fam.segment ? fam.segment + ' operational segments, ' + fam['function'] + ' corporate functions and ' + fam.product + ' centres of excellence' : 'every segment, function and centre';
+  var STEPS = [
+    { title:'Welcome to RISE', desc:'One place for the current, approved version of every field document, procedure and alert across ' + scope + '.', target:null },
+    { title:'Search first', desc:'Type what you need and press Enter. Document Search looks across every area you can open.', target:'#bc-search' },
+    { title:'Browse by area', desc:'Pick a group, then your area, for its procedures, standards, alerts and lessons learned.', target:'#areas' },
+    { title:'Field Glossary', desc:"Don't know an abbreviation? The Field Glossary has the terms used across TAQA operations.", target:'.bc-way[href="glossary.html"]' },
+    { title:'Ask Expert', desc:'Stuck on a field problem? Send it to the right expert and get a direct answer.', target:'.bc-way[href="support-ticket.html"]' }
+  ];
+  var cur = 0, spot = document.getElementById('tour-spot'), card = document.getElementById('tour-card'), backdrop = document.getElementById('tour-backdrop');
+  function dots(){ var d = document.getElementById('tc-dots'); d.innerHTML = ''; STEPS.forEach(function(_, i){ var el = document.createElement('div'); el.className = 't-dot' + (i === cur ? ' on' : ''); d.appendChild(el); }); }
+  function placeCard(rect){
+    var cw = card.offsetWidth || 320, ch = card.offsetHeight || 200, vw = innerWidth, vh = innerHeight, P = 16;
+    if (vw <= 640 || !rect) { card.style.left = '50%'; card.style.transform = 'translateX(-50%)'; card.style.bottom = (P + 16) + 'px'; card.style.top = ''; return; }
+    card.style.transform = ''; card.style.bottom = '';
+    if (rect.bottom + ch + P < vh) { card.style.top = (rect.bottom + P) + 'px'; card.style.left = Math.min(Math.max(rect.left, P), vw - cw - P) + 'px'; }
+    else if (rect.top - ch - P > 0) { card.style.top = (rect.top - ch - P) + 'px'; card.style.left = Math.min(Math.max(rect.left, P), vw - cw - P) + 'px'; }
+    else { card.style.top = Math.min(Math.max(rect.top, P), vh - ch - P) + 'px'; card.style.left = Math.min(rect.right + P, vw - cw - P) + 'px'; }
+  }
+  function show(idx){
+    cur = idx; var step = STEPS[idx];
+    document.getElementById('tc-step').textContent = (idx + 1) + ' of ' + STEPS.length;
+    document.getElementById('tc-title').textContent = step.title;
+    document.getElementById('tc-desc').textContent = step.desc;
+    document.getElementById('tc-next').textContent = idx === STEPS.length - 1 ? 'Done' : 'Next →';
+    dots();
+    var el = step.target ? document.querySelector(step.target) : null;
+    if (el && !el.getClientRects().length) el = null;
+    card.style.display = 'block';
+    if (el) {
+      el.scrollIntoView({ behavior:'smooth', block:'center' });
+      backdrop.style.display = 'none'; spot.classList.remove('on');
+      setTimeout(function(){
+        var r = el.getBoundingClientRect(), P = 8;
+        spot.style.top = (r.top - P) + 'px'; spot.style.left = (r.left - P) + 'px';
+        spot.style.width = (r.width + P * 2) + 'px'; spot.style.height = (r.height + P * 2) + 'px';
+        spot.classList.add('on'); placeCard(r);
+      }, 350);
+    } else { spot.classList.remove('on'); backdrop.style.display = 'block'; placeCard(null); }
+  }
+  function end(){ card.style.display = 'none'; spot.classList.remove('on'); backdrop.style.display = 'none'; try { localStorage.setItem('taqa-tour-done', '1'); } catch (e) {} }
+  document.getElementById('tc-skip').onclick = end;
+  document.getElementById('tour-close').onclick = end;
+  document.getElementById('tc-next').onclick = function(){ if (cur < STEPS.length - 1) show(cur + 1); else end(); };
+  backdrop.addEventListener('click', function(e){ if (e.target === backdrop) end(); });
+  setTimeout(function(){ show(0); }, 1400);
+})();
+</script>
+
+<script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script src="store.js"></script>
+<script src="segments-data.js"></script>
+<script>
+/* ── Everything with a number reads the register, here, at runtime ──── */
+(function(){
+  if (typeof TAQA_STORE === 'undefined' || typeof TAQA_DOC_LOOKUPS === 'undefined') return;
+  var S = TAQA_STORE, L = TAQA_DOC_LOOKUPS.segments;
+  function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
+  var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function day(iso){ var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ''); return m ? (+m[3]) + ' ' + MON[+m[2] - 1] + ' ' + m[1] : ''; }
+  function plural(n, one, many){ return n === 1 ? one : many; }
+
+  // A short line under each area name. Display copy only, keyed by id;
+  // the names and the families come from the register.
+  var TAGS = {
+    drilling:'Well operations', 'well-safety':'HSE critical', fracturing:'Stimulation',
+    inspection:'Compliance', 'coiled-tubing':'Well intervention', cementing:'Well integrity',
+    'well-testing':'Testing services', wireline:'Logging', slickline:'Logging',
+    'well-completions':'Well operations', 'marine-services':'Marine',
+    qhse:'Quality and safety', cybersecurity:'Governance', hr:'People', finance:'Finance',
+    it:'Systems', 'supply-chain':'Procurement', legal:'Legal',
+    'learning-center':'Training', commercial:'Contracts and sales', 'geothermal-coe':'Advisory',
+    'pt-drilling-coe':'Edmonton, Canada', 'pt-completions-coe':'Aberdeen, United Kingdom',
+    'pt-intervention-coe':'Stavanger, Norway'
+  };
+  var GROUPS = [
+    { k:'seg', group:'segment',  long:'Operational segments',  short:'Segments' },
+    { k:'fn',  group:'function', long:'Corporate functions',   short:'Functions' },
+    { k:'pt',  group:'product',  long:'Products & technology', short:'Products' }
+  ];
+  var KEY = 'taqa-beacon-group', open = 'seg';
+  try { var s = localStorage.getItem(KEY); if (s === 'seg' || s === 'fn' || s === 'pt') open = s; } catch (e) {}
+
+  var tabs = document.getElementById('bc-tabs'), panels = document.getElementById('bc-panels');
+
+  function areas(group){
+    return Object.keys(L).filter(function(id){ return L[id].group === group; }).map(function(id){
+      var name = L[id].name, tag = TAGS[id] || '';
+      if (tag && name.toLowerCase().indexOf(tag.toLowerCase()) === 0) tag = '';
+      return { id:id, name:name, tag:tag, live:S.area(id).live };
+    }).sort(function(a, b){ return b.live - a.live || a.name.localeCompare(b.name); });
+  }
+
+  function paintAreas(){
+    var data = GROUPS.map(function(g){ return { g:g, rows:areas(g.group) }; });
+    tabs.innerHTML = data.map(function(d){
+      var on = d.g.k === open;
+      return '<button type="button" class="bc-tab" role="tab" id="bc-t-' + d.g.k + '" aria-controls="bc-p-' + d.g.k + '"' +
+        ' aria-selected="' + on + '" tabindex="' + (on ? 0 : -1) + '">' +
+        '<span class="lg">' + esc(d.g.long) + '</span><span class="sh">' + esc(d.g.short) + '</span>' +
+        '<span class="n">' + d.rows.length + '</span></button>';
+    }).join('');
+    panels.innerHTML = data.map(function(d){
+      return '<div class="bc-panel" role="tabpanel" id="bc-p-' + d.g.k + '" aria-labelledby="bc-t-' + d.g.k + '" tabindex="0"' +
+        (d.g.k === open ? '' : ' hidden') + '><ul class="bc-grid">' +
+        d.rows.map(function(a){
+          return '<li><a class="bc-tile cf" href="segment.html?id=' + encodeURIComponent(a.id) + '">' +
+            '<span class="bc-bar" aria-hidden="true"></span>' +
+            '<span class="bc-tile-n">' + esc(a.name) + '</span>' +
+            (a.tag ? '<span class="bc-tile-t">' + esc(a.tag) + '</span>' : '') +
+            '<span class="bc-tile-c"><b>' + a.live + '</b>in force</span></a></li>';
+        }).join('') + '</ul></div>';
+    }).join('');
+    return data;
+  }
+
+  function select(k, focus){
+    open = k;
+    try { localStorage.setItem(KEY, k); } catch (e) {}
+    tabs.querySelectorAll('.bc-tab').forEach(function(t){
+      var on = t.id === 'bc-t-' + k;
+      t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1;
+      if (on && focus) t.focus();
+    });
+    panels.querySelectorAll('.bc-panel').forEach(function(p){ p.hidden = p.id !== 'bc-p-' + k; });
+  }
+  tabs.addEventListener('click', function(e){ var t = e.target.closest('.bc-tab'); if (t) select(t.id.slice(5)); });
+  tabs.addEventListener('keydown', function(e){
+    var ks = GROUPS.map(function(g){ return g.k; }), i = ks.indexOf(open), n = null;
+    if (e.key === 'ArrowRight') n = ks[(i + 1) % ks.length];
+    else if (e.key === 'ArrowLeft') n = ks[(i + ks.length - 1) % ks.length];
+    else if (e.key === 'Home') n = ks[0];
+    else if (e.key === 'End') n = ks[ks.length - 1];
+    if (n) { e.preventDefault(); select(n, true); }
+  });
+
+  function latest(type){
+    return S.rows('visible', { docType:type }).slice().sort(function(a, b){
+      return String(b.issueDate || '').localeCompare(String(a.issueDate || ''));
+    }).slice(0, 3);
+  }
+  function list(el, rows, none){
+    if (!el) return;
+    if (!rows.length) { el.innerHTML = '<li class="bc-empty">' + esc(none) + '</li>'; return; }
+    el.innerHTML = rows.map(function(d){
+      var href = 'viewer.html?seg=' + encodeURIComponent(d.segment) + '&type=' + encodeURIComponent(d.docType) +
+        '&title=' + encodeURIComponent(d.title) + (d.docNumber ? '&doc=' + encodeURIComponent(d.docNumber) : '');
+      var where = (L[d.segment] || {}).name || '';
+      return '<li><a class="bc-item" href="' + esc(href) + '">' +
+        '<span class="bc-item-t">' + esc(d.title) + '</span>' +
+        '<span class="bc-item-m">' + esc(where) + (d.revision ? ' · Rev ' + esc(d.revision) : '') +
+          (d.issueDate ? ' · ' + esc(day(d.issueDate)) : '') + '</span></a></li>';
+    }).join('');
+  }
+
+  function paint(){
+    var data = paintAreas();
+    var n = {}; data.forEach(function(d){ n[d.g.k] = d.rows.length; });
+    var areasN = n.seg + n.fn + n.pt;
+    var docs = S.count('visible'), alerts = S.count('visible', { docType:'alert' });
+
+    var ro = document.getElementById('bc-readout');
+    ro.innerHTML = '<span class="bc-lamp" aria-hidden="true"></span>' +
+      '<span class="ro"><b class="num">' + docs + '</b> ' + plural(docs, 'document', 'documents') + ' in force</span><span class="sep" aria-hidden="true">·</span> ' +
+      '<span class="ro"><b class="num">' + areasN + '</b> areas</span><span class="sep" aria-hidden="true">·</span> ' +
+      '<span class="ro"><b class="num">' + alerts + '</b> technical ' + plural(alerts, 'alert', 'alerts') + ' active</span>';
+    ro.hidden = false;
+
+    var w = document.getElementById('bc-way-areas');
+    if (w) w.textContent = n.seg + ' segments, ' + n.fn + ' functions, ' + n.pt + ' centres';
+
+    var c = S.area('company').live, cc = document.getElementById('bc-company-c');
+    if (cc) cc.innerHTML = '<b>' + c + '</b>in force';
+
+    list(document.getElementById('bc-alerts'), latest('alert'), 'No technical alerts you can open right now.');
+    list(document.getElementById('bc-lessons'), latest('lesson'), 'No lessons learned you can open right now.');
+  }
+  S.onChange(paint);
+})();
+</script>
+<script>
+/* ── The role desk (#desk), as on today's Home ────────────────────────
+   What is waiting on you. Hidden entirely for an Employee.            */
+(function(){
+  if (typeof TAQA_STORE === 'undefined' || typeof TAQA_ROLE === 'undefined') return;
+  var desk = document.getElementById('desk');
+  if (!desk) return;
+  function esc(v){ return String(v).replace(/[&<>"']/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
+  function paint(){
+    var k = TAQA_ROLE.current(), cap = TAQA_ROLE.effective(), R = TAQA_ROLES[k];
+    var who = document.getElementById('desk-who'), line = document.getElementById('desk-line'), go = document.getElementById('desk-go');
+    var d = (typeof TAQA_DELEGATION !== 'undefined') && TAQA_DELEGATION.current();
+    who.textContent = d ? 'Delegate' : (cap.scope === 'own' ? TAQA_ROLE.holderTitle() : R.label);
+    var n, txt, href = 'dashboard.html', cta = 'Open the queue';
+    if (cap.countersign) {
+      n = TAQA_STORE.count('awaiting-qms');
+      txt = n ? '<b>' + n + '</b> document' + (n === 1 ? '' : 's') + ' waiting on your QMS check.'
+              : 'Nothing is waiting on your QMS check. <b>' + TAQA_STORE.count('awaiting-director') + '</b> still with their approvers.';
+      cta = n ? 'Check' : 'Open the register';
+      href = n ? 'master-list.html?view=qms' : 'master-list.html';
+    } else if (cap.approve) {
+      var seg = cap.ownSegment;
+      n = TAQA_STORE.rows('awaiting-director', seg ? { segment:seg } : null)
+            .filter(function(x){ return TAQA_APPROVAL.canApprove(x); }).length;
+      var over = seg ? TAQA_STORE.area(seg).overdue : 0;
+      txt = (n ? '<b>' + n + '</b> document' + (n === 1 ? '' : 's') + ' waiting on your sign-off' : 'Nothing waiting on your sign-off') +
+            ' in <b>' + esc(TAQA_ROLE.areaName(seg)) + '</b>' + (over ? ', and <b>' + over + '</b> past review there.' : '.');
+      href = 'dashboard.html?id=' + encodeURIComponent(seg || '');
+      cta = n ? 'Approve' : 'Open your segment';
+    } else if (k === 'auditor') {
+      txt = 'Read only across <b>' + TAQA_STORE.count('register') + '</b> records, including the export. Nothing here changes on your account.';
+      href = 'master-list.html'; cta = 'Open the register';
+    } else {
+      desk.hidden = true;
+      return;
+    }
+    line.innerHTML = txt; go.href = href; go.textContent = cta;
+    desk.hidden = false;
+  }
+  TAQA_STORE.onChange(paint);
+})();
+</script>
+<script src="shared.js"></script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary-ink);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#C8102E;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-taqa-theme="dark"] .bell-badge{border-color:#002326;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
+</body>
+</html>

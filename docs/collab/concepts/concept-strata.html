@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en" data-taqa-theme="light">
+<head>
+<meta charset="UTF-8">
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>/* Installed app on an iPhone: the status bar is drawn over the page, and iOS keeps taps in that strip for itself, so the bell and the other controls under it could not be tapped. Drawing edge to edge (viewport-fit=cover) turns on the bar's safe-area padding in topbar.css, which drops them below the status bar. A browser tab is left exactly as it was. */(function(){try{if(navigator.standalone||matchMedia('(display-mode: standalone)').matches){var m=document.querySelector('meta[name="viewport"]');if(m&&!/viewport-fit/.test(m.content))m.content+=', viewport-fit=cover';}}catch(e){}})();</script>
+<title>RISE</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#005D63">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RISE">
+<meta name="application-name" content="RISE">
+<link rel="apple-touch-icon" href="icons/rise-apple-touch-icon.png">
+<link rel="icon" href="icons/rise-favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="icons/rise-favicon-16.png" type="image/png" sizes="16x16">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* ── RISE Home, concept "Strata" ─────────────────────────────────────────
+   The register drawn as a core sample. Each area is a bed in the core, as
+   thick as the number of documents in force there, and depth down the core
+   is counted in documents. The core is the browse: every bed ties across
+   to the row that opens that area. One typeface for words (BW Gradual),
+   colour from the teal family, orange only as a small mark.             */
+:root{
+  --ease:cubic-bezier(.23,1,.32,1);
+  --f:'BwGradual','Urbanist',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --ground:#F4F3EE;
+  --paper:#FFFFFF;
+  --ink:#1E1C1A;
+  --ink-2:#4A4540;
+  --ink-3:#6B625A;
+  --rule:rgba(30,28,26,.12);
+  --rule-2:rgba(30,28,26,.22);
+  --teal:#005D63;
+  --num:#005D63;
+  --accent:#FF6720;
+  --btn:#005D63; --btn-ink:#FFFFFF; --btn-hi:#00474C;
+
+  /* The beds. Each family has its own rock: a hatched cap of company
+     policies, then dotted sandstone (segments), brick limestone
+     (functions) and dashed shale (products and technology). */
+  --c-cap:#005D63;   --p-cap:rgba(255,255,255,.30);
+  --c-seg-a:#C3E2DE; --c-seg-b:#A9D4CF; --p-seg:rgba(0,72,77,.45);
+  --c-fn-a:#E8E1D3;  --c-fn-b:#D9CFBC;  --p-fn:rgba(96,74,44,.36);
+  --c-pt-a:#8CC0BC;  --c-pt-b:#76B2AE;  --p-pt:rgba(0,41,44,.48);
+  --core-edge:rgba(30,28,26,.42);
+  --contact:rgba(30,28,26,.28);
+  --tick:rgba(30,28,26,.40);
+
+  /* Ties: the band from a bed to its row, and the row's own ground.
+     The same colour on both, so bed, tie and row read as one shape. */
+  --r-cap:rgba(0,93,99,.12);
+  --r-seg-a:rgba(0,128,124,.035); --r-seg-b:rgba(0,128,124,.085);
+  --r-fn-a:rgba(140,108,60,.04);  --r-fn-b:rgba(140,108,60,.095);
+  --r-pt-a:rgba(0,93,99,.06);     --r-pt-b:rgba(0,93,99,.12);
+  --r-hot:rgba(0,187,182,.26);
+
+  --art-w:94px; --depth-w:30px; --core-w:40px;
+}
+html[data-taqa-theme="dark"]{
+  --ground:#001416;
+  --paper:#002326;
+  --ink:#D3E4E5;
+  --ink-2:#A9C8CA;
+  --ink-3:#86AFB2;
+  --rule:rgba(0,187,182,.14);
+  --rule-2:rgba(0,187,182,.28);
+  --teal:#00BBB6;
+  --num:#00BBB6;
+  --btn:#00BBB6; --btn-ink:#00191B; --btn-hi:#7BEEE6;
+
+  --c-cap:#00A6A1;   --p-cap:rgba(0,25,27,.38);
+  --c-seg-a:#155C5B; --c-seg-b:#0C4144; --p-seg:rgba(0,214,206,.50);
+  --c-fn-a:#3B342C;  --c-fn-b:#302A24;  --p-fn:rgba(236,218,190,.30);
+  --c-pt-a:#22696B;  --c-pt-b:#1B5A5C;  --p-pt:rgba(176,238,232,.42);
+  --core-edge:rgba(0,187,182,.50);
+  --contact:rgba(0,0,0,.50);
+  --tick:rgba(134,175,178,.55);
+
+  --r-cap:rgba(0,187,182,.15);
+  --r-seg-a:rgba(0,187,182,.045); --r-seg-b:rgba(0,187,182,.09);
+  --r-fn-a:rgba(236,218,190,.045); --r-fn-b:rgba(236,218,190,.085);
+  --r-pt-a:rgba(0,187,182,.08);   --r-pt-b:rgba(0,187,182,.13);
+  --r-hot:rgba(0,187,182,.24);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:var(--f);background:var(--ground);color:var(--ink);line-height:1.5;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+a{color:inherit;}
+.vh{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+
+/* ── Page frame ── */
+.pg{max-width:1320px;margin:0 auto;padding:calc(var(--nav-h,64px) + 28px) 16px 56px;}
+.pg-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:44px;}
+
+/* ── The statement ── */
+.kicker{display:flex;align-items:center;gap:10px;margin-bottom:16px;
+  font-size:14px;font-weight:500;line-height:1.3;color:var(--ink-2);}
+/* A core-box tag: the chamfered corner of the TAQA mark, in its orange. */
+.tag{width:11px;height:11px;flex:none;background:var(--accent);
+  clip-path:polygon(0 0,100% 0,100% 100%,34% 100%,0 66%);}
+h1{color:var(--ink);font-weight:700;letter-spacing:-.02em;}
+.h1-n{display:block;margin:0 0 8px -.04em;font-size:clamp(78px,8.6vw,132px);line-height:.88;font-weight:800;
+  letter-spacing:-.045em;color:var(--num);font-variant-numeric:lining-nums tabular-nums;}
+.h1-n[hidden]{display:none;}
+.h1-t{display:block;max-width:17ch;font-size:clamp(27px,2.35vw,34px);line-height:1.16;font-weight:600;}
+.lede{margin-top:18px;max-width:40ch;font-size:16.5px;line-height:1.6;color:var(--ink-2);}
+.lede b{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
+
+/* ── Search: a solid sheet, the first thing to reach for ── */
+.find{display:flex;align-items:center;gap:8px;margin-top:26px;padding:6px 6px 6px 16px;
+  background:var(--paper);border:1px solid var(--rule-2);border-radius:14px;
+  box-shadow:0 1px 2px rgba(0,41,44,.05),0 16px 34px -22px rgba(0,41,44,.40);
+  transition:border-color 150ms var(--ease),box-shadow 150ms var(--ease);}
+.find:focus-within{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,187,182,.38);}
+.find > svg{width:20px;height:20px;flex:none;color:var(--ink-3);}
+.find input{flex:1;min-width:0;height:48px;border:0;background:transparent;outline:none;
+  font:500 16px/1.2 var(--f);color:var(--ink);}
+.find input::placeholder{color:var(--ink-3);opacity:1;}
+.find input::-webkit-search-cancel-button{-webkit-appearance:none;}
+/* The form draws the focus ring, so the field inside it does not draw a second. */
+.find input:focus-visible{outline:none!important;}
+.find-go{flex:none;height:48px;padding:0 20px;border:0;border-radius:10px;cursor:pointer;
+  background:var(--btn);color:var(--btn-ink);font:600 15px/1 var(--f);
+  transition:background-color 150ms var(--ease),transform 100ms var(--ease);}
+@media (hover:hover){.find-go:hover{background:var(--btn-hi);}}
+.find-go:active{transform:scale(.97);}
+
+/* ── The desk: what is waiting for this role (hidden for Employee) ── */
+.desk{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:16px;padding:14px 14px 14px 16px;
+  background:var(--paper);border:1px solid var(--rule);border-inline-start:3px solid var(--teal);border-radius:12px;}
+.desk[hidden]{display:none;}
+.desk-who{font-size:13px;font-weight:600;line-height:1.3;color:var(--teal);}
+.desk-line{order:3;flex:1 1 100%;font-size:15px;line-height:1.5;color:var(--ink);}
+.desk-line b{font-weight:700;font-variant-numeric:tabular-nums;}
+.desk-go{margin-inline-start:auto;display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:9px;
+  background:var(--btn);color:var(--btn-ink);font-size:14px;font-weight:600;text-decoration:none;
+  transition:background-color 150ms var(--ease);}
+@media (hover:hover){.desk-go:hover{background:var(--btn-hi);}}
+
+/* ── Two more ways in ── */
+.ways{list-style:none;margin-top:26px;border-top:1px solid var(--rule);}
+.way{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;column-gap:14px;
+  min-height:64px;padding:12px 4px;border-bottom:1px solid var(--rule);text-decoration:none;color:var(--ink);
+  transition:background-color 150ms var(--ease);}
+.ways li:last-child .way{border-bottom:0;}
+@media (hover:hover){.way:hover{background:var(--r-seg-a);} .way:hover .way-go{transform:translateX(3px);color:var(--teal);}}
+.way-i{grid-row:1 / span 2;width:38px;height:38px;border-radius:10px;display:grid;place-items:center;
+  background:var(--r-seg-b);color:var(--teal);}
+.way-i svg{width:18px;height:18px;}
+.way-t{font-size:16px;font-weight:600;line-height:1.3;}
+.way-d{grid-column:2;font-size:14px;line-height:1.4;color:var(--ink-3);}
+.way-go{grid-column:3;grid-row:1 / span 2;width:16px;height:16px;color:var(--ink-3);transition:transform 150ms var(--ease),color 150ms var(--ease);}
+
+/* ── The core ── */
+.core-head{margin-bottom:18px;}
+.core-head h2{font-size:22px;font-weight:700;line-height:1.25;letter-spacing:-.01em;color:var(--ink);}
+.core-key{margin-top:6px;max-width:54ch;font-size:14.5px;line-height:1.55;color:var(--ink-3);}
+.log{display:grid;grid-template-columns:var(--art-w) minmax(0,1fr);}
+.log-art{position:relative;min-height:1px;}
+.log-art > svg{position:absolute;left:0;top:0;display:block;overflow:visible;}
+.log-art .bed,.log-art .rib{cursor:pointer;}
+.log-art .rib{transition:fill 150ms var(--ease);}
+.log-art .rib.hot{fill:var(--r-hot)!important;}
+.log-art .mark{fill:var(--accent);opacity:0;transition:opacity 150ms var(--ease);}
+.log-art .mark.on{opacity:1;}
+.log-art .ring{fill:none;stroke:var(--ink);stroke-width:2;opacity:0;transition:opacity 150ms var(--ease);pointer-events:none;}
+.log-art .ring.on{opacity:1;}
+.log-art text{font-family:var(--f);font-size:11px;fill:var(--ink-3);font-variant-numeric:tabular-nums;}
+.log-art text.td{font-size:12px;font-weight:700;fill:var(--ink);}
+/* The core is drawn top down on arrival, as a core comes out of the barrel. */
+/* Filled backwards only: once drawn, nothing is clipped, so the depth
+   labels at the very top and base of the core stay whole. */
+.log-art.extrude{animation:extrude 1100ms var(--ease) 120ms backwards;}
+@keyframes extrude{from{clip-path:inset(0 0 100% 0);}to{clip-path:inset(0 0 0 0);}}
+
+.ix{min-width:0;}
+.ix-list{list-style:none;}
+.ix-row{display:flex;align-items:center;gap:10px;min-height:48px;padding:10px 12px 10px 14px;
+  background:var(--rg,transparent);color:var(--ink);text-decoration:none;
+  transition:background-color 150ms var(--ease);}
+.ix-row.hot{background:var(--r-hot);}
+.ix-name{flex:1;min-width:0;font-size:15.5px;font-weight:500;line-height:1.3;overflow-wrap:anywhere;}
+.ix-sub{display:block;margin-top:2px;font-size:13.5px;font-weight:400;line-height:1.4;color:var(--ink-3);}
+.ix-n{flex:none;min-width:2.4ch;text-align:end;font-size:15px;font-weight:600;color:var(--ink-2);font-variant-numeric:tabular-nums;}
+.ix-go{flex:none;width:14px;height:14px;color:var(--ink-3);transition:transform 150ms var(--ease),color 150ms var(--ease);}
+.ix-row.hot .ix-go{transform:translateX(2px);color:var(--teal);}
+.ix-cap .ix-name{font-weight:600;}
+.ix-h{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;column-gap:10px;row-gap:2px;padding:24px 12px 10px 14px;
+  font-size:15px;font-weight:700;line-height:1.3;color:var(--ink);}
+.ix-h .sw{width:24px;height:14px;flex:none;border-radius:3px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--contact);}
+.ix-hm{grid-column:2;font-size:13.5px;font-weight:500;color:var(--ink-3);}
+.log-empty{padding:16px;font-size:15px;color:var(--ink-2);}
+.log-empty a{color:var(--teal);font-weight:600;}
+
+/* ── The newest alerts and lessons: what has just come in from the field ── */
+.news h2{font-size:22px;font-weight:700;line-height:1.25;letter-spacing:-.01em;color:var(--ink);}
+.news-key{margin-top:6px;font-size:14.5px;line-height:1.55;color:var(--ink-3);}
+.news-list{list-style:none;margin-top:14px;border-top:1px solid var(--rule);}
+.nw{display:block;padding:14px 4px 15px;border-bottom:1px solid var(--rule);color:var(--ink);text-decoration:none;
+  transition:background-color 150ms var(--ease);}
+@media (hover:hover){.nw:hover{background:var(--r-seg-a);} .nw:hover .nw-t{color:var(--teal);}}
+.nw-m{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;font-size:13.5px;line-height:1.4;color:var(--ink-3);}
+.nw-m .dot{width:8px;height:8px;flex:none;border-radius:2px;background:var(--teal);}
+.nw-m .dot.alert{background:var(--accent);}
+.nw-m .sep{opacity:.6;}
+.nw-t{display:block;margin-top:5px;font-size:16px;font-weight:500;line-height:1.4;transition:color 150ms var(--ease);}
+
+/* ── Footer ── */
+.foot{border-top:1px solid var(--rule);}
+.foot-in{max-width:1320px;margin:0 auto;padding:28px 16px calc(36px + var(--safe-b,0px));
+  display:flex;flex-wrap:wrap;gap:6px 28px;font-size:13.5px;line-height:1.5;color:var(--ink-3);}
+.foot-b{flex:1 1 100%;font-size:15px;color:var(--ink);}
+.foot-b strong{font-weight:700;color:var(--teal);}
+
+/* ── Wider screens ── */
+@media (min-width:700px){
+  :root{--art-w:212px;--depth-w:52px;--core-w:84px;}
+  .pg{padding:calc(var(--nav-h,64px) + 40px) 32px 72px;}
+  .foot-in{padding-inline:32px;}
+  .ix-row{padding-inline:18px 16px;}
+  .ix-h{padding-inline:18px 16px;grid-template-columns:auto minmax(0,1fr) auto;}
+  .ix-hm{grid-column:3;}
+  .h1-t{max-width:19ch;}
+}
+@media (min-width:1040px){
+  .pg{padding:calc(var(--nav-h,64px) + 60px) 48px 96px;}
+  .foot-in{padding-inline:48px;}
+  /* The statement, then the newest alerts and lessons, on the left; the core
+     runs the full height on the right. On a phone the core comes first. */
+  .pg-grid{grid-template-columns:minmax(0,5fr) minmax(0,7fr);grid-template-rows:auto 1fr;
+    grid-template-areas:"lead core" "news core";column-gap:72px;row-gap:60px;align-items:start;}
+  .lead{grid-area:lead;}
+  .core-sec{grid-area:core;}
+  .news{grid-area:news;}
+}
+@media (min-width:1280px){
+  :root{--art-w:244px;--depth-w:56px;--core-w:96px;}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .log-art.extrude{animation:none;}
+  .find,.find-go,.desk-go,.way,.way-go,.ix-row,.ix-go,.nw,.nw-t,.log-art .rib,.log-art .mark,.log-art .ring{transition:none;}
+}
+@media print{
+  .find,.ways,.desk{display:none;}
+}
+
+/* ── First-visit tour (same gate as Home) ── */
+#tour-backdrop{position:fixed;inset:0;background:rgba(0,19,20,0.7);z-index:9990;display:none;pointer-events:all;}
+#tour-spot{position:fixed;border-radius:12px;border:2.5px solid #00BBB6;
+  box-shadow:0 0 0 4px rgba(0,187,182,0.18),0 0 0 9999px rgba(0,19,20,0.68);z-index:9992;pointer-events:none;
+  transition:top .4s var(--ease),left .4s var(--ease),width .4s var(--ease),height .4s var(--ease),opacity .3s;opacity:0;}
+#tour-spot.on{opacity:1;}
+#tour-card{position:fixed;z-index:9995;background:var(--paper);border-radius:18px;padding:22px 22px 16px;
+  width:min(320px,calc(100vw - 32px));box-shadow:0 24px 64px rgba(0,0,0,0.28);
+  transition:top .4s var(--ease),left .4s var(--ease),opacity .25s;display:none;}
+#tour-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:15px;color:var(--ink-3);cursor:pointer;line-height:1;padding:4px;}
+#tc-step{font-size:13px;font-weight:600;color:var(--teal);margin-bottom:6px;}
+#tc-title{font-size:17px;font-weight:700;color:var(--ink);margin-bottom:8px;line-height:1.3;}
+#tc-desc{font-size:14px;color:var(--ink-2);line-height:1.6;margin:0 0 18px;white-space:pre-line;}
+#tc-footer{display:flex;align-items:center;justify-content:space-between;}
+#tc-dots{display:flex;gap:5px;}
+.t-dot{width:7px;height:7px;border-radius:50%;background:var(--rule-2);transition:background .2s,transform .2s;}
+.t-dot.on{background:var(--teal);transform:scale(1.25);}
+#tc-btns{display:flex;gap:8px;align-items:center;}
+#tc-skip{background:none;border:none;font:500 13px var(--f);color:var(--ink-3);cursor:pointer;padding:7px 10px;border-radius:8px;}
+#tc-next{background:var(--btn);color:var(--btn-ink);border:none;padding:8px 20px;border-radius:9px;font:600 14px var(--f);cursor:pointer;}
+</style>
+<link rel="stylesheet" href="techhub.css">
+<link rel="stylesheet" href="topbar.css">
+</head>
+<body>
+
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+  <a href="index.html" class="nav-brand">
+    <img src="assets/brand/rise-lockup-header.png" alt="RISE" class="nav-logo nav-logo-light" width="320" height="120">
+    <img src="assets/brand/rise-lockup-header-reverse.png" alt="RISE" class="nav-logo nav-logo-dark" width="320" height="120">
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html" class="active" aria-current="page">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
+    <li><a href="ai-search.html">Document Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
+  <div class="nav-right">
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<main id="main" class="pg">
+  <div class="pg-grid">
+
+    <!-- ── What RISE holds today ── -->
+    <section class="lead" aria-labelledby="lead-h">
+      <p class="kicker"><span class="tag" aria-hidden="true"></span><span id="asof">The register today</span></p>
+      <h1 id="lead-h"><span class="h1-n" id="h1-n" hidden></span> <span class="h1-t" id="h1-t">Every controlled document, at its current approved revision.</span></h1>
+      <p class="lede" id="lede">Search the register, or browse it area by area.</p>
+
+      <form class="find" id="find" action="ai-search.html" method="get" role="search" aria-label="Search the register">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+        <input type="search" id="find-q" name="q" placeholder="Search documents, procedures, manuals" autocomplete="off" enterkeyhint="search" aria-label="Search documents, procedures and manuals">
+        <button type="submit" class="find-go" id="find-go">Search</button>
+      </form>
+
+      <!-- What is waiting on this role. Hidden for Employee, who has no queue. -->
+      <div class="desk" id="desk" hidden>
+        <span class="desk-who" id="desk-who"></span>
+        <span class="desk-line" id="desk-line"></span>
+        <a class="desk-go" id="desk-go" href="dashboard.html">Open</a>
+      </div>
+
+      <ul class="ways">
+        <li><a class="way" href="support-ticket.html">
+          <span class="way-i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12Z"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.4v.3"/><path d="M12 16.5h.01"/></svg></span>
+          <span class="way-t">Ask an expert</span>
+          <span class="way-d">Send a field problem to someone who knows the answer.</span>
+          <svg class="way-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </a></li>
+        <li><a class="way" href="glossary.html">
+          <span class="way-i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/><path d="M9 7h7M9 11h5"/></svg></span>
+          <span class="way-t">Field glossary</span>
+          <span class="way-d">Every oilfield term and abbreviation, explained.</span>
+          <svg class="way-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </a></li>
+      </ul>
+    </section>
+
+    <!-- ── The core: every area in the register, as a bed ── -->
+    <section class="core-sec" id="areas" aria-labelledby="areas-h">
+      <div class="core-head">
+        <h2 id="areas-h">Browse by area</h2>
+        <p class="core-key" id="core-key">Every area in the register, from the company's own policies down.</p>
+      </div>
+      <div class="log" id="log">
+        <div class="log-art" id="log-art" aria-hidden="true"></div>
+        <div class="ix" id="log-ix"><p class="log-empty">The register did not load. <a href="ai-search.html">Open Document Search</a></p></div>
+      </div>
+    </section>
+
+    <!-- ── The top of the core: the newest alerts and lessons ── -->
+    <section class="news" id="news" aria-labelledby="news-h" hidden>
+      <h2 id="news-h">Latest alerts and lessons</h2>
+      <p class="news-key">Newest first, from every area you can open.</p>
+      <ul class="news-list" id="news-list"></ul>
+    </section>
+
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <p class="foot-b"><strong>RISE</strong> · What We Know.</p>
+    <p>© 2026 TAQA, Industrialization &amp; Energy Services Company. All rights reserved.</p>
+    <p>Built by TAQA Learning Center</p>
+  </div>
+</footer>
+
+<!-- ── First-visit tour ── -->
+<div id="tour-backdrop"></div>
+<div id="tour-spot"></div>
+<div id="tour-card" role="dialog" aria-labelledby="tc-title">
+  <button id="tour-close" aria-label="Close tour">✕</button>
+  <div id="tc-step"></div>
+  <div id="tc-title"></div>
+  <p id="tc-desc"></p>
+  <div id="tc-footer">
+    <div id="tc-dots"></div>
+    <div id="tc-btns">
+      <button id="tc-skip">Skip tour</button>
+      <button id="tc-next">Next →</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  try{ if(localStorage.getItem('taqa-tour-done')) return; }catch(e){ return; }
+  // No figures here: the tour is read once, and a number typed into it
+  // would outlive the register it described.
+  var STEPS=[
+    { title:'Welcome to RISE',
+      desc:'One place for the current, approved version of every controlled document at TAQA. Here is a quick look around.',
+      target:null },
+    { title:'Browse by area',
+      desc:'The core lists every area in the register, each as thick as the documents in force there. Tap a band or a name to open that area.',
+      target:'#areas' },
+    { title:'Search any document',
+      desc:'Search the whole register by title, number or keyword.',
+      target:'#find' },
+    { title:'Field Glossary',
+      desc:"Don't know an abbreviation? The Field Glossary has the terms used across TAQA operations.",
+      target:'.nav-links a[href="glossary.html"]', mobileLabel:'Also in the menu ☰ → Field Glossary' },
+    { title:'Ask an Expert',
+      desc:'Stuck on a field problem? Send it to the right expert and get a direct answer.',
+      target:'.nav-links a[href="support-ticket.html"]', mobileLabel:'Also in the menu ☰ → Ask Expert' }
+  ];
+  var cur=0, spot=document.getElementById('tour-spot'), card=document.getElementById('tour-card'),
+      backdrop=document.getElementById('tour-backdrop');
+  function isMob(){return window.matchMedia?matchMedia('(max-width:1280px)').matches:innerWidth<=1280;}
+  function dots(){var d=document.getElementById('tc-dots');d.innerHTML='';
+    STEPS.forEach(function(_,i){var el=document.createElement('div');el.className='t-dot'+(i===cur?' on':'');d.appendChild(el);});}
+  function placeCard(rect){
+    var cw=card.offsetWidth||320, ch=card.offsetHeight||200, vw=innerWidth, vh=innerHeight, P=16;
+    if(innerWidth<=640||!rect){card.style.left='50%';card.style.transform='translateX(-50%)';card.style.bottom=(P+16)+'px';card.style.top='';return;}
+    card.style.transform='';card.style.bottom='';
+    if(rect.bottom+ch+P<vh){card.style.top=(rect.bottom+P)+'px';card.style.left=Math.min(Math.max(rect.left,P),vw-cw-P)+'px';}
+    else if(rect.top-ch-P>0){card.style.top=(rect.top-ch-P)+'px';card.style.left=Math.min(Math.max(rect.left,P),vw-cw-P)+'px';}
+    else{card.style.top=Math.min(Math.max(rect.top,P),vh-ch-P)+'px';card.style.left=Math.min(rect.right+P,vw-cw-P)+'px';}
+  }
+  function show(idx){
+    cur=idx; var step=STEPS[idx], last=idx===STEPS.length-1;
+    document.getElementById('tc-step').textContent=(idx+1)+' of '+STEPS.length;
+    document.getElementById('tc-title').textContent=step.title;
+    document.getElementById('tc-next').textContent=last?'Done':'Next →';
+    dots();
+    var mob=isMob(), desc=step.desc;
+    if(mob&&step.mobileLabel) desc+='\n\n'+step.mobileLabel;
+    document.getElementById('tc-desc').textContent=desc;
+    var el=step.target?document.querySelector(step.target):null;
+    var hidden=el&&(!el.getClientRects().length||getComputedStyle(el).visibility==='hidden');
+    if(hidden){el=(mob&&step.mobileLabel)?document.getElementById('nav-hamburger'):null;if(el&&!el.getClientRects().length)el=null;}
+    card.style.display='block';
+    if(el){
+      el.scrollIntoView({behavior:'smooth',block:'center'});
+      backdrop.style.display='none'; spot.classList.remove('on');
+      setTimeout(function(){var r=el.getBoundingClientRect(),P=8;
+        // A tall target (the whole core) is outlined only where it is on screen.
+        var t=Math.max(r.top,(window.TAQA_TOP?TAQA_TOP():64)+8), b=Math.min(r.bottom,innerHeight-8);
+        spot.style.top=(t-P)+'px';spot.style.left=(r.left-P)+'px';spot.style.width=(r.width+P*2)+'px';spot.style.height=(b-t+P*2)+'px';
+        spot.classList.add('on');placeCard({top:t,bottom:b,left:r.left,right:r.right});},350);
+    } else { spot.classList.remove('on'); backdrop.style.display='block'; placeCard(null); }
+  }
+  function end(){card.style.display='none';spot.classList.remove('on');backdrop.style.display='none';
+    try{localStorage.setItem('taqa-tour-done','1');}catch(e){}}
+  document.getElementById('tc-skip').onclick=end;
+  document.getElementById('tour-close').onclick=end;
+  document.getElementById('tc-next').onclick=function(){ if(cur<STEPS.length-1) show(cur+1); else end(); };
+  backdrop.addEventListener('click',function(e){if(e.target===backdrop)end();});
+  setTimeout(function(){show(0);},900);
+})();
+</script>
+
+<script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script src="store.js"></script>
+<script src="segments-data.js"></script>
+<script>
+/* ── Search ──────────────────────────────────────────────────────────────
+   A real form, so Enter and the button both submit. An empty query opens
+   Document Search as it is, with no ?q= on the address.                  */
+(function(){
+  var form=document.getElementById('find'), inp=document.getElementById('find-q');
+  if(!form||!inp) return;
+  if(window.matchMedia){
+    var mq=matchMedia('(max-width:520px)');
+    var fit=function(){ inp.placeholder=mq.matches?'Search documents':'Search documents, procedures, manuals'; };
+    fit(); if(mq.addEventListener) mq.addEventListener('change',fit); else if(mq.addListener) mq.addListener(fit);
+  }
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var q=inp.value.trim();
+    window.location.href='ai-search.html'+(q?'?q='+encodeURIComponent(q):'');
+  });
+})();
+
+/* ── The statement and the core ──────────────────────────────────────────
+   Every figure on this page is read from the register here, for the role
+   that is looking: an Employee is not told about documents they cannot
+   open (BD-03, PI-27). Nothing is typed by hand.                         */
+(function(){
+  if(typeof TAQA_STORE==='undefined'||typeof TAQA_DOC_LOOKUPS==='undefined') return;
+  var S=TAQA_STORE, L=TAQA_DOC_LOOKUPS.segments;
+  var art=document.getElementById('log-art'), ix=document.getElementById('log-ix');
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function fmt(n){ return Number(n).toLocaleString('en-US'); }
+  function plural(n,one,many){ return n===1?one:many; }
+
+  // Families top to bottom, as the register's own group field names them.
+  // Titles and their one line are display copy; members and counts are not.
+  var FAM=[
+    { g:'segment',  k:'seg', title:'Operational segments',    pat:'p-dots'  },
+    { g:'function', k:'fn',  title:'Corporate functions',     pat:'p-brick' },
+    { g:'product',  k:'pt',  title:'Products and technology', pat:'p-dash'  }
+  ];
+
+  /* The model: one bed per area, in core order. */
+  function model(){
+    var beds=[], fams=[];
+    if(L.company){
+      var c=S.area('company');
+      beds.push({ id:'company', name:L.company.name, n:c.live, k:'cap', tone:'', cap:true });
+    }
+    FAM.forEach(function(f){
+      var rows=Object.keys(L).filter(function(id){ return L[id].group===f.g; })
+        .map(function(id){ return { id:id, name:L[id].name, n:S.area(id).live, k:f.k }; })
+        .sort(function(a,b){ return b.n-a.n || a.name.localeCompare(b.name); });
+      rows.forEach(function(r,i){ r.tone=i%2?'b':'a'; beds.push(r); });
+      fams.push({ f:f, rows:rows, n:rows.reduce(function(s,r){ return s+r.n; },0) });
+    });
+    return { beds:beds, fams:fams, total:beds.reduce(function(s,b){ return s+b.n; },0) };
+  }
+  var M=null;
+
+  function paintLead(){
+    var total=S.count('visible'),
+        areas=Object.keys(L).length,
+        alerts=S.count('visible',{docType:'alert'}),
+        lessons=S.count('visible',{docType:'lesson'});
+    var n=document.getElementById('h1-n'), t=document.getElementById('h1-t');
+    n.textContent=fmt(total); n.hidden=false;
+    t.textContent=plural(total,'document in force, at its current approved revision.',
+                               'documents in force, each at its current approved revision.');
+    document.getElementById('lede').innerHTML=
+      'They cover <b>'+fmt(areas)+'</b> areas of TAQA, and include <b>'+fmt(alerts)+'</b> technical '+
+      plural(alerts,'alert','alerts')+' and <b>'+fmt(lessons)+'</b> '+plural(lessons,'lesson','lessons')+' learned in the field.';
+    try{
+      document.getElementById('asof').textContent='The register on '+
+        new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    }catch(e){}
+    document.getElementById('core-key').textContent=
+      'Each band is one area, as thick as the documents in force there. Depth down the core is counted in documents, '+
+      fmt(M.total)+' at the bottom.';
+  }
+
+  var GO='<svg class="ix-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.5 6l6 6-6 6"/></svg>';
+  function rowHTML(b){
+    var rg=b.cap?'var(--r-cap)':'var(--r-'+b.k+'-'+b.tone+')';
+    return '<a class="ix-row'+(b.cap?' ix-cap':'')+'" data-bed="'+esc(b.id)+'" href="segment.html?id='+encodeURIComponent(b.id)+'" style="--rg:'+rg+'">'+
+      '<span class="ix-name">'+esc(b.name)+(b.cap?'<span class="ix-sub">Signed by the CEO. Every area follows them.</span>':'')+'</span>'+
+      '<span class="ix-n">'+fmt(b.n)+'<span class="vh"> '+plural(b.n,'document','documents')+'</span></span>'+GO+'</a>';
+  }
+  function swatch(f){
+    return '<svg class="sw" viewBox="0 0 24 14" aria-hidden="true" focusable="false">'+
+      '<rect width="24" height="14" style="fill:var(--c-'+f.k+'-a)"/><rect width="24" height="14" fill="url(#'+f.pat+')"/></svg>';
+  }
+  function paintIndex(){
+    var cap=M.beds[0]&&M.beds[0].cap?M.beds[0]:null;
+    var h=(cap?'<div class="ix-capwrap">'+rowHTML(cap)+'</div>':'');
+    M.fams.forEach(function(F){
+      var f=F.f;
+      h+='<section class="ix-fam" aria-labelledby="fam-'+f.k+'">'+
+        '<h3 class="ix-h" id="fam-'+f.k+'">'+swatch(f)+'<span>'+esc(f.title)+'</span>'+
+          '<span class="ix-hm">'+fmt(F.rows.length)+' '+plural(F.rows.length,'area','areas')+', '+fmt(F.n)+' '+plural(F.n,'document','documents')+'</span></h3>'+
+        '<ul class="ix-list">'+F.rows.map(function(b){ return '<li>'+rowHTML(b)+'</li>'; }).join('')+'</ul>'+
+      '</section>';
+    });
+    ix.innerHTML=h;
+  }
+
+  /* ── The newest alerts and lessons this reader may open ── */
+  var TYPE={ alert:'Technical alert', lesson:'Lesson learned' };
+  function day(s){
+    var p=String(s||'').split('-'); if(p.length<3) return '';
+    var m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+p[1]-1];
+    return m?(+p[2])+' '+m+' '+p[0]:'';
+  }
+  function paintNews(){
+    var box=document.getElementById('news'), list=document.getElementById('news-list');
+    if(!box||!list) return;
+    var items=S.rows('visible').filter(function(d){ return d.docType==='alert'||d.docType==='lesson'; })
+      .sort(function(a,b){ return String(b.issueDate||'').localeCompare(String(a.issueDate||'')); })
+      .slice(0,4);
+    if(!items.length){ box.hidden=true; return; }
+    list.innerHTML=items.map(function(d){
+      var href='viewer.html?doc='+encodeURIComponent(d.docNumber||'')+(d.revision?'&rev='+encodeURIComponent(d.revision):'')+
+               '&seg='+encodeURIComponent(d.segment||'')+'&type='+encodeURIComponent(d.docType||'');
+      var area=(L[d.segment]||{}).name||'', when=day(d.issueDate);
+      return '<li><a class="nw" href="'+href+'">'+
+        '<span class="nw-m"><span class="dot'+(d.docType==='alert'?' alert':'')+'" aria-hidden="true"></span>'+
+          '<span>'+TYPE[d.docType]+'</span><span class="sep" aria-hidden="true">·</span><span>'+esc(area)+'</span>'+
+          (when?'<span class="sep" aria-hidden="true">·</span><span>'+esc(when)+'</span>':'')+'</span>'+
+        '<span class="nw-t">'+esc(d.title)+'</span></a></li>';
+    }).join('');
+    box.hidden=false;
+  }
+
+  /* ── Drawing the core ─────────────────────────────────────────────────
+     Drawn to the index beside it: the core runs from the top of the first
+     row to the bottom of the last, and each bed takes its share of that
+     height by documents. Each bed then ties across to its own row.       */
+  var geo=[];
+  function cssNum(name,fb){ var v=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name)); return isNaN(v)?fb:v; }
+  function r1(x){ return Math.round(x*10)/10; }
+  function draw(){
+    var rows=[].slice.call(ix.querySelectorAll('.ix-row'));
+    if(!rows.length||!M) return;
+    var box=art.getBoundingClientRect();
+    var W=Math.round(box.width), H=Math.round(ix.getBoundingClientRect().height);
+    if(W<40||H<40) return;
+    var D=cssNum('--depth-w',30), C=cssNum('--core-w',40), x0=D, x1=D+C, xe=W, xm=(x1+xe)/2;
+    var f0=rows[0].getBoundingClientRect(), fl=rows[rows.length-1].getBoundingClientRect();
+    var top=f0.top-box.top, bot=fl.bottom-box.top, span=bot-top, total=M.total;
+    var y=top, s='', beds='', ribs='', contacts='', ticks='';
+    geo=[];
+    rows.forEach(function(row,i){
+      var b=M.beds[i]; if(!b) return;
+      var h=total?span*b.n/total:span/rows.length;
+      var rr=row.getBoundingClientRect(), rt=rr.top-box.top, rb=rr.bottom-box.top;
+      var bt=y, bb=y+h; y=bb;
+      geo.push({ id:b.id, bt:bt, bb:bb, rt:rt, rb:rb, href:row.getAttribute('href') });
+      var base=b.cap?'var(--c-cap)':'var(--c-'+b.k+'-'+b.tone+')',
+          pat =b.cap?'p-hatch':(b.k==='seg'?'p-dots':b.k==='fn'?'p-brick':'p-dash'),
+          rib =b.cap?'var(--r-cap)':'var(--r-'+b.k+'-'+b.tone+')';
+      if(h>0){
+        beds+='<g class="bed" data-bed="'+esc(b.id)+'"><rect x="'+x0+'" y="'+r1(bt)+'" width="'+C+'" height="'+r1(Math.max(h,0.6))+'" style="fill:'+base+'"/>'+
+              '<rect x="'+x0+'" y="'+r1(bt)+'" width="'+C+'" height="'+r1(Math.max(h,0.6))+'" fill="url(#'+pat+')"/></g>';
+      }
+      // Contact at the base of each bed; a family boundary is drawn heavier.
+      var nb=M.beds[i+1], fam=nb&&(nb.k!==b.k);
+      if(nb) contacts+='<line x1="'+x0+'" x2="'+x1+'" y1="'+r1(bb)+'" y2="'+r1(bb)+'" style="stroke:'+(fam?'var(--core-edge)':'var(--contact)')+'" stroke-width="'+(fam?1.6:0.8)+'"/>';
+      ribs+='<path class="rib" data-bed="'+esc(b.id)+'" style="fill:'+rib+'" d="M'+x1+' '+r1(bt)+
+            'C'+r1(xm)+' '+r1(bt)+' '+r1(xm)+' '+r1(rt)+' '+xe+' '+r1(rt)+
+            'L'+xe+' '+r1(rb)+'C'+r1(xm)+' '+r1(rb)+' '+r1(xm)+' '+r1(bb)+' '+x1+' '+r1(bb)+'Z"/>';
+    });
+
+    // The depth track: a ruler counted in documents, from 0 at the top of the
+    // core to the total at its base.
+    var per=total?span/total:0, step=per*10>=7?10:(per*50>=8?50:100);
+    ticks+='<line x1="'+(D-1)+'" x2="'+(D-1)+'" y1="'+r1(top)+'" y2="'+r1(bot)+'" style="stroke:var(--tick)" stroke-width="1"/>';
+    for(var v=0; total && v<=total; v+=step){
+      var ty=top+v*per, major=v%100===0, mid=v%50===0, len=major?8:(mid?5:3);
+      ticks+='<line x1="'+(D-1-len)+'" x2="'+(D-1)+'" y1="'+r1(ty)+'" y2="'+r1(ty)+'" style="stroke:var(--tick)" stroke-width="1"/>';
+      if(major && (total-v)*per>22) ticks+='<text x="'+(D-12)+'" y="'+r1(ty+4)+'" text-anchor="end">'+fmt(v)+'</text>';
+    }
+    ticks+='<line x1="'+(D-10)+'" x2="'+(D-1)+'" y1="'+r1(bot)+'" y2="'+r1(bot)+'" style="stroke:var(--ink)" stroke-width="1.4"/>'+
+           '<text class="td" x="'+(D-12)+'" y="'+r1(bot+4)+'" text-anchor="end">'+fmt(total)+'</text>';
+
+    var rx=Math.min(10,C/5);
+    s='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" focusable="false">'+
+      '<defs>'+
+        '<pattern id="p-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" style="stroke:var(--p-cap)" stroke-width="1.6"/></pattern>'+
+        '<pattern id="p-dots" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" style="fill:var(--p-seg)"/><circle cx="6" cy="6" r="1" style="fill:var(--p-seg)"/></pattern>'+
+        '<pattern id="p-brick" width="16" height="10" patternUnits="userSpaceOnUse"><path d="M0 .5H16M0 5.5H16M4 .5V5.5M12 5.5V10.5" style="stroke:var(--p-fn)" stroke-width="1" fill="none"/></pattern>'+
+        '<pattern id="p-dash" width="14" height="8" patternUnits="userSpaceOnUse"><path d="M1 2.5H7M8 6.5H14" style="stroke:var(--p-pt)" stroke-width="1.2" fill="none"/></pattern>'+
+        '<linearGradient id="g-cyl" x1="0" x2="1" y1="0" y2="0">'+
+          '<stop offset="0" stop-color="#000" stop-opacity=".20"/><stop offset=".22" stop-color="#000" stop-opacity="0"/>'+
+          '<stop offset=".42" stop-color="#fff" stop-opacity=".22"/><stop offset=".62" stop-color="#fff" stop-opacity="0"/>'+
+          '<stop offset="1" stop-color="#000" stop-opacity=".24"/></linearGradient>'+
+        '<clipPath id="c-core"><rect x="'+x0+'" y="'+r1(top)+'" width="'+C+'" height="'+r1(span)+'" rx="'+rx+'"/></clipPath>'+
+      '</defs>'+
+      '<g class="ribs">'+ribs+'</g>'+
+      '<g clip-path="url(#c-core)">'+beds+contacts+
+        '<rect x="'+x0+'" y="'+r1(top)+'" width="'+C+'" height="'+r1(span)+'" fill="url(#g-cyl)" pointer-events="none"/></g>'+
+      '<rect x="'+x0+'" y="'+r1(top)+'" width="'+C+'" height="'+r1(span)+'" rx="'+rx+'" fill="none" style="stroke:var(--core-edge)" stroke-width="1.2" pointer-events="none"/>'+
+      '<g class="depth">'+ticks+'</g>'+
+      '<rect class="ring" id="core-ring" x="'+(x0+1)+'" y="0" width="'+(C-2)+'" height="0" rx="2"/>'+
+      '<rect class="mark" id="core-mark" x="'+(D-6)+'" y="0" width="4" height="0" rx="1"/>'+
+    '</svg>';
+    art.innerHTML=s;
+    if(hotId) setHot(hotId);
+  }
+
+  /* ── One bed, tie and row light up together ── */
+  var hotId=null;
+  function setHot(id){
+    hotId=id;
+    [].forEach.call(document.querySelectorAll('.ix-row.hot, .log-art .rib.hot'),function(el){ el.classList.remove('hot'); });
+    var ring=document.getElementById('core-ring'), mark=document.getElementById('core-mark');
+    var g=null; for(var i=0;i<geo.length;i++) if(geo[i].id===id) g=geo[i];
+    if(!id||!g){ if(ring) ring.classList.remove('on'); if(mark) mark.classList.remove('on'); return; }
+    var sel='[data-bed="'+(window.CSS&&CSS.escape?CSS.escape(id):id)+'"]';
+    [].forEach.call(document.querySelectorAll('.ix-row'+sel+', .log-art .rib'+sel),function(el){ el.classList.add('hot'); });
+    var h=Math.max(g.bb-g.bt,3), t=g.bt-(h-(g.bb-g.bt))/2;
+    if(ring){ ring.setAttribute('y',r1(t+1)); ring.setAttribute('height',r1(Math.max(h-2,1))); ring.classList.add('on'); }
+    if(mark){ mark.setAttribute('y',r1(t)); mark.setAttribute('height',r1(h)); mark.classList.add('on'); }
+  }
+  ix.addEventListener('mouseover',function(e){ var r=e.target.closest('.ix-row'); if(r) setHot(r.dataset.bed); });
+  ix.addEventListener('mouseleave',function(){ setHot(null); });
+  ix.addEventListener('focusin',function(e){ var r=e.target.closest('.ix-row'); setHot(r?r.dataset.bed:null); });
+  ix.addEventListener('focusout',function(e){ if(!ix.contains(e.relatedTarget)) setHot(null); });
+  // The core is a picture of the list, so it points at the list: hovering a
+  // bed lights its row, and a bed or its tie opens the same area.
+  art.addEventListener('mouseover',function(e){ var b=e.target.closest('[data-bed]'); setHot(b?b.getAttribute('data-bed'):null); });
+  art.addEventListener('mouseleave',function(){ setHot(null); });
+  art.addEventListener('click',function(e){
+    var b=e.target.closest('[data-bed]'); if(!b) return;
+    var row=ix.querySelector('.ix-row[data-bed="'+(window.CSS&&CSS.escape?CSS.escape(b.getAttribute('data-bed')):b.getAttribute('data-bed'))+'"]');
+    if(row) window.location.href=row.getAttribute('href');
+  });
+
+  /* ── Paint, and repaint when the register or the layout changes ── */
+  var first=true, raf=0;
+  function redraw(){ cancelAnimationFrame(raf); raf=requestAnimationFrame(draw); }
+  function paint(){
+    M=model();
+    paintLead();
+    paintIndex();
+    paintNews();
+    draw();
+    if(first){
+      first=false;
+      if(!reduce){ art.classList.add('extrude'); }
+    }
+  }
+  S.onChange(paint);
+  if(window.ResizeObserver){ new ResizeObserver(redraw).observe(ix); }
+  window.addEventListener('resize',redraw);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(redraw);
+  window.addEventListener('load',redraw);
+})();
+</script>
+<script>
+/* ── Your desk ─────────────────────────────────────────────────────────
+   The one line on the home page that differs by door. Everything else on
+   this page is the same for everyone, which is the point: one hub, one
+   register, and only the actions change.                                */
+(function(){
+  if (typeof TAQA_STORE === 'undefined' || typeof TAQA_ROLE === 'undefined') return;
+  var desk = document.getElementById('desk');
+  if (!desk) return;
+
+  function paint(){
+    var k = TAQA_ROLE.current(), cap = TAQA_ROLE.effective(), R = TAQA_ROLES[k];
+    var who = document.getElementById('desk-who'),
+        line= document.getElementById('desk-line'),
+        go  = document.getElementById('desk-go');
+    var d = (typeof TAQA_DELEGATION !== 'undefined') && TAQA_DELEGATION.current();
+
+    who.className = 'desk-who d-' + k;
+    // A director is a director OF somewhere. Saying only "Segment Director"
+    // leaves the one thing that decides what they can sign unstated.
+    who.textContent = d ? 'Delegate'
+      : (cap.scope === 'own' ? TAQA_ROLE.holderTitle() : R.label);
+
+    var n, txt, href = 'dashboard.html', cta = 'Open the queue';
+    if (cap.countersign) {
+      n = TAQA_STORE.count('awaiting-qms');
+      txt = n ? '<b>' + n + '</b> document' + (n===1?'':'s') +
+                ' waiting on your QMS check.'
+              : 'Nothing is waiting on your QMS check. <b>' +
+                TAQA_STORE.count('awaiting-director') + '</b> still with their approvers.';
+      // QMS checks every area, so its queue is the QMS Workbench (the Master
+      // List's Waiting on QMS view), not one area's desk.
+      cta = n ? 'Check' : 'Open the register';
+      href = n ? 'master-list.html?view=qms' : 'master-list.html';
+    } else if (cap.approve) {
+      var seg = cap.ownSegment;
+      n = TAQA_STORE.rows('awaiting-director', seg ? { segment: seg } : null)
+            .filter(function(x){ return TAQA_APPROVAL.canApprove(x); }).length;
+      var over = seg ? TAQA_STORE.area(seg).overdue : 0;
+      var where = TAQA_ROLE.areaName(seg);
+      txt = (n ? '<b>' + n + '</b> document' + (n===1?'':'s') + ' waiting on your sign-off'
+               : 'Nothing waiting on your sign-off') +
+            ' in <b>' + String(where).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}) + '</b>' +
+            (over ? ', and <b>' + over + '</b> past review there.' : '.');
+      href = 'dashboard.html?id=' + encodeURIComponent(seg || '');
+      cta = n ? 'Approve' : 'Open your segment';
+    } else if (k === 'auditor') {
+      txt = 'Read only across <b>' + TAQA_STORE.count('register') +
+            '</b> records, including the export. Nothing here changes on your account.';
+      href = 'master-list.html'; cta = 'Open the register';
+    } else {
+      // An employee has no queue, and the search already does what this
+      // line offered, so the desk is not drawn for them at all.
+      desk.hidden = true;
+      return;
+    }
+    line.innerHTML = txt; go.href = href; go.textContent = cta;
+    desk.hidden = false;
+  }
+  TAQA_STORE.onChange(paint);
+})();
+</script>
+<script src="shared.js"></script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary-ink);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#C8102E;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-taqa-theme="dark"] .bell-badge{border-color:#002326;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
+</body>
+</html>

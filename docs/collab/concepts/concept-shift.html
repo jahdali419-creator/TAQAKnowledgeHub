@@ -1,0 +1,978 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-taqa-theme="light">
+<head>
+<meta charset="UTF-8">
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>/* Installed app on an iPhone: the status bar is drawn over the page, and iOS keeps taps in that strip for itself, so the bell and the other controls under it could not be tapped. Drawing edge to edge (viewport-fit=cover) turns on the bar's safe-area padding in topbar.css, which drops them below the status bar. A browser tab is left exactly as it was. */(function(){try{if(navigator.standalone||matchMedia('(display-mode: standalone)').matches){var m=document.querySelector('meta[name="viewport"]');if(m&&!/viewport-fit/.test(m.content))m.content+=', viewport-fit=cover';}}catch(e){}})();</script>
+<title>RISE</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#005D63">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RISE">
+<meta name="application-name" content="RISE">
+<link rel="apple-touch-icon" href="icons/rise-apple-touch-icon.png">
+<link rel="icon" href="icons/rise-favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="icons/rise-favicon-16.png" type="image/png" sizes="16x16">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* ── RISE Home, concept: the shift handover ─────────────────────────────
+   The page opens like the briefing a crew gets at the start of a shift:
+   one search, then a single sentence that says what changed in the last
+   90 days, a strip chart of when it happened, and the items themselves.
+   Every number is counted from the register at runtime (TAQA_STORE). */
+:root{
+  /* Names shared.js and the page-progress script read from the page. */
+  --primary:#005D63; --primary-ink:#005D63; --primary-light:#00BBB6; --primary-hover:#00474C;
+  --bg:#F4F5F3; --bg-white:#FFFFFF; --border:#C7DBDD;
+  --text:#1E1C1A; --text-muted:#524D48; --text-light:#756A61;
+  --glass:rgba(0,93,99,.06); --glass-border:rgba(117,106,97,.22); --glass-border-hover:rgba(0,93,99,.4);
+  --stop-ink:#C8102E; --ok-ink:#00705F; --alert-ink:#B4231B;
+
+  /* This page. One typeface for words: the brand face. */
+  --sb-font:'BwGradual','Urbanist',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --sb-canvas:#F4F5F3;
+  --sb-paper:#FFFFFF;
+  --sb-ink:#1E1C1A;
+  --sb-ink-2:#4A4540;
+  --sb-ink-3:#655D55;          /* 5.9:1 on paper, 5.4:1 on canvas */
+  --sb-line:rgba(117,106,97,.17);
+  --sb-teal:#005D63;
+  --sb-tint:rgba(0,93,99,.07);
+  --sb-tint-2:rgba(0,93,99,.12);
+  --sb-band:#005D63;           /* TAQA teal: white on it is 7.4:1 */
+  --sb-soft:#B5EAE6;           /* small type on the band: 6.1:1 */
+  --sb-band-line:rgba(255,255,255,.26);
+  --sb-alert:#FF6720;          /* marks only, never text */
+  --sb-doc-mark:#005D63;
+  --sb-lesson-mark:#00A5A1;
+  --sb-warn:#7A5600;
+  --sb-new-bg:rgba(0,93,99,.1);
+  --sb-new-ink:#005D63;
+  --sb-shadow:0 1px 2px rgba(0,41,44,.05),0 12px 30px -20px rgba(0,41,44,.28);
+  --sb-ease:cubic-bezier(.23,1,.32,1);
+}
+html[data-taqa-theme="dark"]{
+  --primary-ink:#00BBB6; --primary-light:#00BBB6;
+  --bg:#001416; --bg-white:#002326; --border:#003A3D;
+  --text:#C7DBDD; --text-muted:#8CB6B9; --text-light:#619B9E;
+  --glass:rgba(0,187,182,.07); --glass-border:rgba(0,187,182,.2); --glass-border-hover:rgba(0,187,182,.4);
+
+  --sb-canvas:#001416;
+  --sb-paper:#002326;
+  --sb-ink:#D3E4E5;
+  --sb-ink-2:#A9C9CB;
+  --sb-ink-3:#86B1B4;          /* 6.9:1 on paper */
+  --sb-line:rgba(0,187,182,.15);
+  --sb-teal:#00BBB6;
+  --sb-tint:rgba(0,187,182,.08);
+  --sb-tint-2:rgba(0,187,182,.15);
+  --sb-band:#00343A;
+  --sb-soft:#9FE3DF;
+  --sb-band-line:rgba(159,227,223,.26);
+  --sb-doc-mark:#7FD6D2;
+  --sb-lesson-mark:#00BBB6;
+  --sb-warn:#FFB81C;
+  --sb-new-bg:rgba(0,187,182,.16);
+  --sb-new-ink:#9FE3DF;
+  --sb-shadow:0 0 0 1px rgba(0,187,182,.05),0 14px 32px -20px rgba(0,0,0,.65);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-text-size-adjust:100%;}
+@media (prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth;} }
+body{font-family:var(--sb-font);background:var(--sb-canvas);color:var(--sb-ink);line-height:1.5;
+  -webkit-font-smoothing:antialiased;}
+img,svg{display:block;}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+
+.sb-skip{position:absolute;left:12px;top:-80px;z-index:2000;padding:10px 14px;border-radius:10px;
+  background:#fff;color:#005D63;font:700 15px var(--sb-font);text-decoration:none;box-shadow:var(--sb-shadow);}
+.sb-skip:focus{top:calc(var(--nav-h, 64px) + 8px);}
+
+.sb-wrap{width:100%;max-width:1296px;margin-inline:auto;padding-inline:16px;}
+@media (min-width:700px){ .sb-wrap{padding-inline:32px;} }
+@media (min-width:1100px){ .sb-wrap{padding-inline:48px;} }
+
+/* ── The band: date, title, search, the handover ── */
+.sb-band{position:relative;overflow:hidden;background:var(--sb-band);color:#fff;
+  padding-top:calc(var(--nav-h, 64px) + 22px);padding-bottom:26px;}
+.sb-band-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:28px;}
+.sb-when{display:flex;align-items:center;gap:10px;margin-bottom:8px;
+  font-size:14.5px;color:var(--sb-soft);font-variant-numeric:tabular-nums;}
+.sb-when::before{content:"";flex-shrink:0;width:7px;height:7px;border-radius:50%;background:var(--sb-soft);
+  box-shadow:0 0 0 4px rgba(181,234,230,.16);}
+.sb-h1{font:700 34px/1.06 var(--sb-font);letter-spacing:-.025em;color:#fff;margin-bottom:18px;}
+
+.sb-search{display:flex;align-items:center;gap:8px;min-height:58px;padding:6px 6px 6px 16px;
+  background:#fff;border:1px solid transparent;border-radius:14px;
+  box-shadow:0 20px 40px -24px rgba(0,0,0,.6);
+  transition:box-shadow 180ms var(--sb-ease),border-color 180ms var(--sb-ease);}
+.sb-search:has(input:focus){border-color:#00BBB6;box-shadow:0 20px 40px -24px rgba(0,0,0,.6),0 0 0 4px rgba(0,187,182,.4);}
+.sb-search > svg{width:20px;height:20px;flex-shrink:0;color:#655D55;}
+.sb-search input{flex:1;min-width:0;height:46px;border:0;outline:0;background:transparent;
+  font:400 16px var(--sb-font);color:#1E1C1A;text-overflow:ellipsis;}
+.sb-search input::placeholder{color:#655D55;opacity:1;}
+.sb-search input::-webkit-search-cancel-button{display:none;}
+.sb-search input:focus-visible{outline:none!important;}
+.sb-search-btn{flex-shrink:0;height:46px;padding:0 20px;border:0;border-radius:10px;cursor:pointer;
+  background:#005D63;color:#fff;font:700 15px var(--sb-font);
+  transition:background-color 150ms var(--sb-ease),transform 100ms var(--sb-ease);}
+.sb-search-btn:active{transform:scale(.97);}
+@media (hover:hover){ .sb-search-btn:hover{background:#00474C;} }
+html[data-taqa-theme="dark"] .sb-search{background:#002326;border-color:rgba(0,187,182,.38);}
+html[data-taqa-theme="dark"] .sb-search > svg{color:#86B1B4;}
+html[data-taqa-theme="dark"] .sb-search input{color:#D3E4E5;}
+html[data-taqa-theme="dark"] .sb-search input::placeholder{color:#86B1B4;}
+html[data-taqa-theme="dark"] .sb-search-btn{background:#00BBB6;color:#00191B;}
+@media (hover:hover){ html[data-taqa-theme="dark"] .sb-search-btn:hover{background:#7FD6D2;} }
+
+.sb-tools{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.sb-tool{display:flex;align-items:center;justify-content:center;gap:9px;min-height:48px;padding:0 12px;
+  border-radius:12px;border:1px solid var(--sb-band-line);background:rgba(255,255,255,.06);
+  color:#fff;text-decoration:none;font:400 15px/1.2 var(--sb-font);
+  transition:background-color 150ms var(--sb-ease),border-color 150ms var(--sb-ease);}
+.sb-tool svg{width:18px;height:18px;flex-shrink:0;color:var(--sb-soft);}
+@media (hover:hover){ .sb-tool:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.5);} }
+
+/* The handover: one sentence, every number a link to its list */
+.sb-scope{display:flex;flex-wrap:nowrap;align-items:center;gap:8px 10px;margin-bottom:14px;
+  font-size:14.5px;color:var(--sb-soft);}
+.sb-scope label{flex-shrink:0;}
+.sb-select{position:relative;display:inline-flex;flex:1 1 auto;min-width:0;max-width:100%;}
+.sb-select select{-webkit-appearance:none;appearance:none;width:100%;max-width:100%;min-height:42px;padding:0 40px 0 15px;
+  border-radius:999px;border:1px solid var(--sb-band-line);background:rgba(255,255,255,.08);
+  color:#fff;font:400 15px var(--sb-font);text-overflow:ellipsis;cursor:pointer;
+  transition:background-color 150ms var(--sb-ease);}
+@media (hover:hover){ .sb-select select:hover{background:rgba(255,255,255,.15);} }
+.sb-select svg{position:absolute;right:15px;top:50%;width:12px;height:12px;margin-top:-6px;pointer-events:none;color:var(--sb-soft);}
+.sb-select option,.sb-select optgroup{color:#1E1C1A;background:#fff;}
+html[data-taqa-theme="dark"] .sb-select option,html[data-taqa-theme="dark"] .sb-select optgroup{color:#D3E4E5;background:#002326;}
+
+.sb-sentence{font:300 21px/1.46 var(--sb-font);letter-spacing:-.006em;color:#fff;text-wrap:pretty;}
+.sb-sentence a,.sb-sentence-2 a{color:#fff;font-weight:700;text-decoration:none;white-space:nowrap;
+  border-bottom:2px solid rgba(181,234,230,.5);transition:border-color 150ms var(--sb-ease);}
+@media (hover:hover){ .sb-sentence a:hover,.sb-sentence-2 a:hover{border-bottom-color:#fff;} }
+.sb-sw{display:inline-block;width:4px;height:.78em;margin-right:.34em;border-radius:2px;vertical-align:-.02em;}
+.sw-doc{background:#fff;} .sw-alert{background:var(--sb-alert);} .sw-lesson{background:#5FD9D4;}
+.sb-sentence-2{margin-top:12px;font:400 15.5px/1.5 var(--sb-font);color:var(--sb-soft);}
+
+/* The strip: the last 90 days as a strip chart, one mark per document
+   issued. Alerts stand tallest. It repeats the sentence, so it is one
+   labelled image to a screen reader. */
+.sb-strip{position:relative;height:60px;margin-top:22px;}
+.sb-track{position:absolute;inset:0 0 22px 0;border-bottom:1px solid rgba(255,255,255,.42);
+  background-image:linear-gradient(90deg,rgba(255,255,255,.075) 1px,transparent 1px);
+  background-size:calc(100% * 7 / 90) 100%;background-position:100% 0;}
+.sb-tk{position:absolute;bottom:22px;width:3px;margin-left:-1.5px;height:13px;border-radius:2px 2px 0 0;
+  background:rgba(255,255,255,.88);transform-origin:50% 100%;}
+.sb-tk.t-lesson{height:20px;background:#5FD9D4;}
+.sb-tk.t-alert{height:30px;background:var(--sb-alert);}
+.sb-tk.t-alert::before{content:"";position:absolute;left:50%;top:-3px;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:var(--sb-alert);}
+.sb-lab{position:absolute;bottom:0;font-size:12.5px;line-height:16px;color:var(--sb-soft);white-space:nowrap;}
+.sb-lab.is-mo::before{content:"";position:absolute;left:0;bottom:22px;width:1px;height:38px;background:rgba(255,255,255,.22);}
+.sb-lab.is-mo{padding-left:5px;}
+.sb-lab.is-end{right:0;text-align:right;}
+@media (prefers-reduced-motion:no-preference){
+  .sb-tk{animation:sbGrow 640ms var(--sb-ease) both;animation-delay:calc(var(--i, 0) * 22ms + 120ms);}
+}
+@keyframes sbGrow{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+
+/* The band's own focus ring: shared.js draws a #005D63 one site-wide,
+   which disappears on this teal. */
+html[data-taqa-theme] .sb-band :focus-visible{outline-color:#B5EAE6!important;}
+html[data-taqa-theme] .sb-band .sb-search :focus-visible{outline-color:#005D63!important;}
+html[data-taqa-theme="dark"] .sb-band .sb-search :focus-visible{outline-color:#00BBB6!important;}
+
+/* ── The briefing ── */
+.sb-body{display:grid;grid-template-columns:minmax(0,1fr);gap:36px;padding-top:24px;padding-bottom:56px;}
+.sb-feed,.sb-areas{min-width:0;}
+/* The skip link's target takes focus so the next Tab lands inside it; the
+   whole briefing does not need a ring of its own. */
+#briefing:focus,#briefing:focus-visible{outline:none!important;}
+
+/* The role desk (QMS, Director, Maintenance Manager, Auditor) */
+.desk{position:relative;overflow:hidden;background:var(--sb-paper);border:1px solid var(--sb-line);
+  border-radius:16px;box-shadow:var(--sb-shadow);padding:16px 18px 16px 22px;}
+.desk[hidden]{display:none;}
+.desk::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--sb-teal);}
+.desk-inner{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;}
+.desk-who{flex-shrink:0;padding:7px 12px;border-radius:999px;background:var(--sb-tint);
+  color:var(--sb-teal);font:700 13.5px/1 var(--sb-font);}
+.desk-line{flex:1 1 300px;min-width:0;font-size:16px;line-height:1.45;color:var(--sb-ink);}
+.desk-line b{font-weight:700;font-variant-numeric:tabular-nums;}
+.desk-go{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;
+  border-radius:12px;background:#005D63;color:#fff;font:700 14.5px var(--sb-font);text-decoration:none;
+  transition:background-color 150ms var(--sb-ease);}
+@media (hover:hover){ .desk-go:hover{background:#00474C;} }
+html[data-taqa-theme="dark"] .desk-go{background:#00BBB6;color:#00191B;}
+@media (max-width:640px){ .desk-line{flex-basis:100%;} .desk-go{width:100%;} }
+
+.sb-sec{scroll-margin-top:calc(var(--nav-h, 64px) + 16px);}
+.sb-sec + .sb-sec{margin-top:38px;}
+.sb-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-bottom:4px;}
+.sb-head h2{font:700 21px/1.25 var(--sb-font);letter-spacing:-.012em;color:var(--sb-ink);}
+.sb-count{font-size:14.5px;color:var(--sb-ink-3);font-variant-numeric:tabular-nums;}
+.sb-sub{max-width:62ch;margin-bottom:12px;font-size:15px;line-height:1.5;color:var(--sb-ink-3);}
+
+.sb-card{background:var(--sb-paper);border:1px solid var(--sb-line);border-radius:16px;
+  box-shadow:var(--sb-shadow);overflow:hidden;}
+.sb-list{list-style:none;}
+.sb-list > li + li{border-top:1px solid var(--sb-line);}
+.sb-item{display:grid;grid-template-columns:4px minmax(0,1fr) 16px;column-gap:14px;align-items:center;
+  min-height:70px;padding:14px 16px;color:inherit;text-decoration:none;
+  transition:background-color 150ms var(--sb-ease);}
+@media (hover:hover){ .sb-item:hover{background:var(--sb-tint);} }
+.sb-item:active{background:var(--sb-tint-2);}
+.sb-bar{align-self:stretch;min-height:38px;border-radius:2px;background:var(--sb-doc-mark);}
+.sb-bar.t-alert{background:var(--sb-alert);}
+.sb-bar.t-lesson{background:var(--sb-lesson-mark);}
+.sb-bar.t-overdue{background:var(--sb-warn);}
+.sb-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  font:400 16px/1.38 var(--sb-font);color:var(--sb-ink);overflow-wrap:anywhere;}
+/* An alert's title is the message, so it gets a third line before it is cut. */
+.k-attention .sb-t{-webkit-line-clamp:3;}
+.sb-m{display:flex;flex-wrap:wrap;align-items:center;row-gap:3px;margin-top:5px;
+  font-size:13.5px;line-height:1.4;color:var(--sb-ink-3);}
+/* The dot ends an item rather than starting the next, so a wrapped line
+   never opens with one. Short items do not break inside. */
+.sb-mi:not(:last-child)::after{content:"·";margin:0 7px;}
+.sb-mi.nw{white-space:nowrap;}
+.sb-m > .sb-new{margin-right:9px;}
+.sb-new{padding:2px 8px;border-radius:999px;background:var(--sb-new-bg);color:var(--sb-new-ink);
+  font-size:12.5px;font-weight:700;line-height:1.35;}
+.sb-rev del{text-decoration-thickness:1.5px;}
+.sb-rev b{font-weight:700;color:var(--sb-ink-2);}
+.sb-due{color:var(--sb-warn);font-weight:700;}
+.sb-chev{width:16px;height:16px;color:var(--sb-ink-3);}
+[dir="rtl"] .sb-chev{transform:scaleX(-1);}
+.sb-empty{padding:18px 16px;font-size:15px;line-height:1.5;color:var(--sb-ink-2);}
+
+.sb-more{display:inline-flex;align-items:center;gap:8px;margin-top:12px;min-height:44px;padding:0 16px;
+  border-radius:12px;border:1px solid var(--sb-line);background:var(--sb-paper);color:var(--sb-teal);
+  font:700 14.5px var(--sb-font);cursor:pointer;transition:border-color 150ms var(--sb-ease);}
+.sb-more[hidden]{display:none;}
+@media (hover:hover){ .sb-more:hover{border-color:var(--sb-teal);} }
+.sb-more svg{width:14px;height:14px;transition:transform 200ms var(--sb-ease);}
+.sb-more[aria-expanded="true"] svg{transform:rotate(180deg);}
+
+.sb-od{padding:16px 18px;}
+.sb-od p{font-size:15.5px;line-height:1.55;color:var(--sb-ink-2);}
+.sb-od p b{color:var(--sb-ink);font-weight:700;}
+.sb-od-go{display:inline-flex;align-items:center;min-height:44px;margin-top:6px;color:var(--sb-teal);
+  font-weight:700;text-decoration:underline;text-underline-offset:3px;}
+.sb-od-go[hidden]{display:none;}
+.sb-od-list{margin-top:12px;}
+.sb-od-list[hidden]{display:none;}
+
+/* ── Areas ── */
+.sb-areas{scroll-margin-top:calc(var(--nav-h, 64px) + 16px);}
+.sb-company{display:flex;align-items:center;gap:12px;min-height:64px;padding:12px 16px;
+  color:var(--sb-ink);text-decoration:none;}
+.sb-company span:first-child{min-width:0;}
+.sb-company b{display:block;font:700 16px/1.3 var(--sb-font);}
+.sb-company small{display:block;font-size:13.5px;line-height:1.4;color:var(--sb-ink-3);}
+.sb-company .sb-area-n{margin-left:auto;}
+@media (hover:hover){ .sb-company:hover{background:var(--sb-tint);} }
+.sb-fam{margin-top:10px;}
+.sb-fam summary{display:flex;align-items:center;gap:10px;min-height:58px;padding:12px 16px;cursor:pointer;
+  list-style:none;font:700 16px/1.3 var(--sb-font);color:var(--sb-ink);
+  transition:background-color 150ms var(--sb-ease);}
+.sb-fam summary::-webkit-details-marker{display:none;}
+@media (hover:hover){ .sb-fam summary:hover{background:var(--sb-tint);} }
+.sb-fam summary .sb-count{margin-left:auto;font-weight:400;}
+.sb-fam summary svg{width:16px;height:16px;flex-shrink:0;color:var(--sb-ink-3);transition:transform 200ms var(--sb-ease);}
+.sb-fam[open] summary{border-bottom:1px solid var(--sb-line);}
+.sb-fam[open] summary svg{transform:rotate(180deg);}
+.sb-area-list{list-style:none;}
+.sb-area-list > li + li{border-top:1px solid var(--sb-line);}
+.sb-area{display:flex;align-items:center;gap:10px;min-height:52px;padding:10px 16px;
+  color:var(--sb-ink);text-decoration:none;font:400 15.5px/1.35 var(--sb-font);
+  transition:background-color 150ms var(--sb-ease);}
+@media (hover:hover){ .sb-area:hover{background:var(--sb-tint);} }
+.sb-area-name{min-width:0;overflow-wrap:anywhere;}
+.sb-area-new{flex-shrink:0;padding:2px 8px;border-radius:999px;background:var(--sb-new-bg);
+  color:var(--sb-new-ink);font-size:12.5px;font-weight:700;line-height:1.35;}
+.sb-area-n{margin-left:auto;flex-shrink:0;font-size:14px;color:var(--sb-ink-3);font-variant-numeric:tabular-nums;}
+.sb-area.is-brief{background:var(--sb-tint);box-shadow:inset 4px 0 0 var(--sb-teal);}
+
+/* ── Footer ── */
+.sb-foot{border-top:1px solid var(--sb-line);background:var(--sb-paper);
+  padding:26px 0 calc(26px + var(--safe-b, 0px));}
+.sb-foot-in{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 32px;
+  font-size:13.5px;line-height:1.5;color:var(--sb-ink-3);}
+.sb-foot strong{color:var(--sb-ink);font-weight:700;}
+.sb-foot a{color:var(--sb-teal);font-weight:700;text-underline-offset:3px;}
+
+/* ── Desktop: the same briefing in two columns ── */
+@media (min-width:1000px){
+  .sb-band{padding-top:calc(var(--nav-h, 64px) + 52px);padding-bottom:44px;}
+  .sb-band-grid{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:80px;align-items:end;}
+  .sb-h1{font-size:50px;margin-bottom:26px;}
+  .sb-tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;}
+  .sb-tool{padding:0 18px;}
+  .sb-select{flex:0 1 auto;}
+  .sb-select select{width:auto;}
+  .sb-sentence{font-size:28px;line-height:1.38;}
+  .sb-sentence-2{font-size:16px;}
+  .sb-strip{margin-top:28px;}
+  .sb-body{grid-template-columns:minmax(0,7fr) minmax(0,5fr);column-gap:56px;row-gap:32px;
+    padding-top:40px;padding-bottom:88px;}
+  .desk{grid-column:1 / -1;}
+}
+@media (max-width:360px){
+  .sb-h1{font-size:31px;}
+  .sb-sentence{font-size:20px;}
+  .sb-tool{font-size:14.5px;gap:7px;padding:0 8px;}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .sb-band *,.sb-body *,.sb-foot *{transition:none!important;animation:none!important;}
+}
+</style>
+<link rel="stylesheet" href="techhub.css">
+<link rel="stylesheet" href="topbar.css">
+</head>
+<body>
+<a class="sb-skip" href="#briefing">Skip to the briefing</a>
+
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+  <a href="index.html" class="nav-brand">
+    <img src="assets/brand/rise-lockup-header.png" alt="RISE" class="nav-logo nav-logo-light" width="320" height="120">
+    <img src="assets/brand/rise-lockup-header-reverse.png" alt="RISE" class="nav-logo nav-logo-dark" width="320" height="120">
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html" class="active" aria-current="page">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
+    <li><a href="ai-search.html">Document Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
+  <div class="nav-right">
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<main id="main">
+<header class="sb-band" aria-labelledby="sb-title">
+  <div class="sb-wrap sb-band-grid">
+    <div class="sb-lead">
+      <p class="sb-when"><time id="sb-now"></time></p>
+      <h1 class="sb-h1" id="sb-title">Shift briefing</h1>
+      <form class="sb-search" id="hero-search" action="ai-search.html" method="get" role="search" aria-label="Search the register">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+        <input type="search" id="hero-search-input" name="q" placeholder="Search documents, procedures, manuals" autocomplete="off" enterkeyhint="search" aria-label="Search documents, procedures and manuals">
+        <button type="submit" class="sb-search-btn" id="hero-search-btn">Search</button>
+      </form>
+      <div class="sb-tools">
+        <a class="sb-tool" href="glossary.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Field glossary</a>
+        <a class="sb-tool" href="support-ticket.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.9-.9L3 20.5l1.6-4.4A8 8 0 0 1 3.5 11.5 8.5 8.5 0 0 1 12 3a8.5 8.5 0 0 1 9 8.5z"/></svg>Ask an expert</a>
+      </div>
+    </div>
+
+    <div class="sb-hand">
+      <div class="sb-scope">
+        <label for="sb-area">Briefing for</label>
+        <span class="sb-select">
+          <select id="sb-area"><option value="all">All areas</option></select>
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+        </span>
+      </div>
+      <p class="sb-sentence" id="sb-sentence">Reading the register…</p>
+      <p class="sb-sentence-2" id="sb-sentence-2"></p>
+      <div class="sb-strip" id="sb-strip" role="img" aria-label="Timeline of the last 90 days"></div>
+    </div>
+  </div>
+</header>
+
+<div class="sb-wrap sb-body" id="briefing" tabindex="-1">
+  <!-- What is waiting on this reader. Hidden for a role with nothing to act on. -->
+  <div class="desk" id="desk" hidden>
+    <div class="desk-inner">
+      <span class="desk-who" id="desk-who"></span>
+      <span class="desk-line" id="desk-line"></span>
+      <a class="desk-go" id="desk-go" href="dashboard.html">Open</a>
+    </div>
+  </div>
+
+  <div class="sb-feed">
+    <section class="sb-sec" id="attention" aria-labelledby="h-attention">
+      <div class="sb-head"><h2 id="h-attention">Needs attention</h2><span class="sb-count" id="n-attention"></span></div>
+      <p class="sb-sub">Technical alerts in force, newest first. Read the alert before the job it applies to.</p>
+      <div class="sb-card"><ul class="sb-list" id="l-attention"></ul></div>
+      <button type="button" class="sb-more" id="m-attention" data-sec="attention" aria-controls="l-attention" aria-expanded="false" hidden><span>Show all</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg></button>
+    </section>
+
+    <section class="sb-sec" id="changed" aria-labelledby="h-changed">
+      <div class="sb-head"><h2 id="h-changed">What changed</h2><span class="sb-count" id="n-changed"></span></div>
+      <p class="sb-sub">Procedures, standards, manuals and forms that came into force in the last 90 days. The revision shown is the one to use.</p>
+      <div class="sb-card"><ul class="sb-list" id="l-changed"></ul></div>
+      <button type="button" class="sb-more" id="m-changed" data-sec="changed" aria-controls="l-changed" aria-expanded="false" hidden><span>Show all</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg></button>
+    </section>
+
+    <section class="sb-sec" id="lessons" aria-labelledby="h-lessons">
+      <div class="sb-head"><h2 id="h-lessons">Lessons learned</h2><span class="sb-count" id="n-lessons"></span></div>
+      <p class="sb-sub">What other crews found out, newest first.</p>
+      <div class="sb-card"><ul class="sb-list" id="l-lessons"></ul></div>
+      <button type="button" class="sb-more" id="m-lessons" data-sec="lessons" aria-controls="l-lessons" aria-expanded="false" hidden><span>Show all</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg></button>
+    </section>
+
+    <section class="sb-sec" id="overdue" aria-labelledby="h-overdue">
+      <div class="sb-head"><h2 id="h-overdue">Past review date</h2><span class="sb-count" id="n-overdue"></span></div>
+      <div class="sb-card sb-od">
+        <p id="od-line"></p>
+        <a class="sb-od-go" id="od-go" href="master-list.html?view=overdue" hidden></a>
+      </div>
+      <div class="sb-card sb-od-list" id="od-wrap" hidden><ul class="sb-list" id="l-overdue"></ul></div>
+      <button type="button" class="sb-more" id="m-overdue" data-sec="overdue" aria-controls="od-wrap" aria-expanded="false" hidden><span>Show the list</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg></button>
+    </section>
+  </div>
+
+  <aside class="sb-areas" id="areas" aria-labelledby="h-areas">
+    <div class="sb-head"><h2 id="h-areas">Areas</h2><span class="sb-count" id="n-areas"></span></div>
+    <p class="sb-sub">Every segment, function and centre. The figure is the documents in force you can open there.</p>
+    <a class="sb-card sb-company" id="sb-company" href="segment.html?id=company"><span><b>Company policies</b><small>Signed by the CEO. They apply to everyone.</small></span><span class="sb-area-n" id="sb-company-n"></span><svg class="sb-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+    <div id="sb-fams"></div>
+  </aside>
+</div>
+</main>
+
+<footer class="sb-foot">
+  <div class="sb-wrap sb-foot-in">
+    <p><strong>RISE</strong>, the TAQA knowledge hub. Built by TAQA Learning Center.</p>
+    <p><a class="hero-label" href="https://engage.cloud.microsoft/main/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyMTA0NzY4NjgyOTQyNDY0In0/all" target="_blank" rel="noopener noreferrer" aria-label="#BetterTogether@TAQA, opens the initiative community in Viva Engage">#BetterTogether@TAQA</a></p>
+    <p>© 2026 TAQA, Industrialization &amp; Energy Services Company.</p>
+  </div>
+</footer>
+
+<!-- ── First-Time Tour ── -->
+<div id="tour-backdrop"></div>
+<div id="tour-spot"></div>
+<div id="tour-card">
+  <button id="tour-close" aria-label="Close tour">✕</button>
+  <div id="tc-step"></div>
+  <div id="tc-title"></div>
+  <p id="tc-desc"></p>
+  <div id="tc-footer">
+    <div id="tc-dots"></div>
+    <div id="tc-btns">
+      <button id="tc-skip">Skip tour</button>
+      <button id="tc-next">Next</button>
+    </div>
+  </div>
+</div>
+
+<style>
+#tour-backdrop{position:fixed;inset:0;background:rgba(0,19,20,0.7);z-index:9990;display:none;pointer-events:all;}
+#tour-spot{position:fixed;border-radius:12px;border:2.5px solid #00BBB6;
+  box-shadow:0 0 0 4px rgba(0,187,182,0.18), 0 0 0 9999px rgba(0,19,20,0.68);
+  z-index:9992;pointer-events:none;opacity:0;
+  transition:top .4s cubic-bezier(.4,0,.2,1),left .4s cubic-bezier(.4,0,.2,1),width .4s cubic-bezier(.4,0,.2,1),height .4s cubic-bezier(.4,0,.2,1),opacity .3s;}
+#tour-spot.on{opacity:1;}
+#tour-card{position:fixed;z-index:9995;background:#fff;border-radius:18px;padding:22px 22px 16px;
+  width:min(320px,calc(100vw - 32px));box-shadow:0 24px 64px rgba(0,0,0,0.28);
+  transition:top .4s cubic-bezier(.4,0,.2,1),left .4s cubic-bezier(.4,0,.2,1),opacity .25s;display:none;font-family:var(--sb-font);}
+html[data-taqa-theme="dark"] #tour-card{background:#002D30;box-shadow:0 24px 64px rgba(0,0,0,0.5);}
+#tour-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:15px;color:var(--sb-ink-3);cursor:pointer;line-height:1;padding:4px;}
+#tc-step{font-size:13px;font-weight:700;color:var(--sb-teal);margin-bottom:6px;}
+#tc-title{font-size:18px;font-weight:700;color:var(--sb-ink);margin-bottom:8px;line-height:1.3;}
+#tc-desc{font-size:14.5px;color:var(--sb-ink-2);line-height:1.6;margin:0 0 18px;white-space:pre-line;}
+#tc-footer{display:flex;align-items:center;justify-content:space-between;}
+#tc-dots{display:flex;gap:5px;}
+.t-dot{width:7px;height:7px;border-radius:50%;background:#C7DBDD;}
+.t-dot.on{background:#005D63;}
+html[data-taqa-theme="dark"] .t-dot{background:#00484B;}
+html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
+#tc-btns{display:flex;gap:8px;align-items:center;}
+#tc-skip{background:none;border:none;font:400 14px var(--sb-font);color:var(--sb-ink-3);cursor:pointer;padding:10px;border-radius:8px;}
+#tc-next{background:#005D63;color:#fff;border:none;min-height:40px;padding:0 20px;border-radius:10px;font:700 14px var(--sb-font);cursor:pointer;}
+html[data-taqa-theme="dark"] #tc-next{background:#00BBB6;color:#00191B;}
+@media (prefers-reduced-motion:reduce){ #tour-spot,#tour-card{transition:none;} }
+</style>
+
+<script>
+/* First-visit tour, gated on taqa-tour-done as on today's Home. Its figures
+   are counted from the register when a step is shown, never typed here. */
+(function(){
+  try { if (localStorage.getItem('taqa-tour-done')) return; } catch (e) { return; }
+  function families(){
+    try {
+      var S = TAQA_DOC_LOOKUPS.segments, c = { segment:0, 'function':0, product:0 };
+      Object.keys(S).forEach(function(k){ if (c[S[k].group] != null) c[S[k].group]++; });
+      return c.segment + ' operational segments, ' + c['function'] + ' corporate functions and ' + c.product + ' product centres';
+    } catch (e) { return 'every segment, function and centre'; }
+  }
+  var STEPS = [
+    { title:'Welcome to RISE', target:null,
+      desc:function(){ return 'One place for the current, approved revision of every controlled document, across ' + families() + '. This page is your shift briefing: what changed, what needs attention, and every area.'; } },
+    { title:'Your briefing', target:'#sb-sentence',
+      desc:function(){ return 'One sentence says what came into force in the last 90 days. Tap a number to jump to the list. Choose an area above it to brief on that area only.'; } },
+    { title:'Browse every area', target:'#areas',
+      desc:function(){ return 'Every area is here: ' + families() + '. Tap one for its policies, standards, procedures and lessons.'; } },
+    { title:'Field Glossary', target:'.sb-tool[href="glossary.html"]',
+      desc:function(){ return 'Do not know an abbreviation? The Field Glossary has the acronyms and terms used across TAQA operations.'; } },
+    { title:'Ask an Expert', target:'.sb-tool[href="support-ticket.html"]',
+      desc:function(){ return 'Stuck on a field problem? Send it to your segment expert and get a direct answer.'; } }
+  ];
+  var cur = 0, spot = document.getElementById('tour-spot'), card = document.getElementById('tour-card'),
+      backdrop = document.getElementById('tour-backdrop');
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function dots(){
+    var d = document.getElementById('tc-dots'); d.innerHTML = '';
+    STEPS.forEach(function(_, i){ var el = document.createElement('div'); el.className = 't-dot' + (i === cur ? ' on' : ''); d.appendChild(el); });
+  }
+  function placeCard(rect){
+    var cw = card.offsetWidth || 320, ch = card.offsetHeight || 200, vw = window.innerWidth, vh = window.innerHeight, P = 16;
+    if (vw <= 640 || !rect) { card.style.left = '50%'; card.style.transform = 'translateX(-50%)'; card.style.bottom = (P + 16) + 'px'; card.style.top = ''; return; }
+    card.style.transform = ''; card.style.bottom = '';
+    if (rect.bottom + ch + P < vh) { card.style.top = (rect.bottom + P) + 'px'; card.style.left = Math.min(Math.max(rect.left, P), vw - cw - P) + 'px'; }
+    else if (rect.top - ch - P > 0) { card.style.top = (rect.top - ch - P) + 'px'; card.style.left = Math.min(Math.max(rect.left, P), vw - cw - P) + 'px'; }
+    else { card.style.top = Math.min(Math.max(rect.top, P), vh - ch - P) + 'px'; card.style.left = Math.min(rect.right + P, vw - cw - P) + 'px'; }
+  }
+  function show(idx){
+    cur = idx; var step = STEPS[idx], last = idx === STEPS.length - 1;
+    document.getElementById('tc-step').textContent = (idx + 1) + ' of ' + STEPS.length;
+    document.getElementById('tc-title').textContent = step.title;
+    document.getElementById('tc-next').textContent = last ? 'Done' : 'Next';
+    document.getElementById('tc-desc').textContent = step.desc();
+    dots();
+    var el = step.target ? document.querySelector(step.target) : null;
+    if (el && !el.getClientRects().length) el = null;
+    card.style.display = 'block';
+    if (el) {
+      el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+      backdrop.style.display = 'none'; spot.classList.remove('on');
+      setTimeout(function(){
+        var r = el.getBoundingClientRect(), P = 8;
+        spot.style.top = (r.top - P) + 'px'; spot.style.left = (r.left - P) + 'px';
+        spot.style.width = (r.width + P * 2) + 'px'; spot.style.height = (r.height + P * 2) + 'px';
+        spot.classList.add('on'); placeCard(r);
+      }, 350);
+    } else { spot.classList.remove('on'); backdrop.style.display = 'block'; placeCard(null); }
+  }
+  function end(){
+    card.style.display = 'none'; spot.classList.remove('on'); backdrop.style.display = 'none';
+    try { localStorage.setItem('taqa-tour-done', '1'); } catch (e) {}
+  }
+  document.getElementById('tc-skip').onclick = end;
+  document.getElementById('tour-close').onclick = end;
+  document.getElementById('tc-next').onclick = function(){ if (cur < STEPS.length - 1) show(cur + 1); else end(); };
+  backdrop.addEventListener('click', function(e){ if (e.target === backdrop) end(); });
+  setTimeout(function(){ show(0); }, 900);
+})();
+</script>
+
+<script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script src="store.js"></script>
+<script src="segments-data.js"></script>
+<script>
+/* ── Search ── A real form, so Enter and the button both submit. An empty
+   query opens Document Search as it is, with no ?q= on the address. */
+(function(){
+  var form = document.getElementById('hero-search'), inp = document.getElementById('hero-search-input');
+  if (!form || !inp) return;
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(max-width:520px)');
+    var fit = function(){ inp.placeholder = mq.matches ? 'Search documents' : 'Search documents, procedures, manuals'; };
+    fit();
+    if (mq.addEventListener) mq.addEventListener('change', fit); else if (mq.addListener) mq.addListener(fit);
+  }
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var q = inp.value.trim();
+    window.location.href = 'ai-search.html' + (q ? '?q=' + encodeURIComponent(q) : '');
+  });
+})();
+
+/* ── The clock on the briefing ── The reader's own date and time. */
+(function(){
+  var t = document.getElementById('sb-now');
+  if (!t) return;
+  function tick(){
+    var d = new Date();
+    t.textContent = d.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' }) +
+      ' · ' + d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+    t.setAttribute('datetime', d.toISOString());
+  }
+  tick();
+  setInterval(tick, 30000);
+})();
+
+/* ── The briefing ───────────────────────────────────────────────────────
+   Everything below is read from TAQA_STORE: what this reader may open
+   ('visible'), narrowed to the area they brief on. Nothing is counted
+   twice and nothing is typed by hand, and the whole briefing repaints
+   when the register changes here or in another tab. */
+(function(){
+  'use strict';
+  if (typeof TAQA_STORE === 'undefined' || typeof TAQA_DOC_LOOKUPS === 'undefined') return;
+  var S = TAQA_STORE, SEG = TAQA_DOC_LOOKUPS.segments, TYPES = TAQA_DOC_LOOKUPS.types || {};
+  var A = (typeof TAQA_DOC !== 'undefined') ? TAQA_DOC : null;
+  var R = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE : null;
+  var DAYS = 90, KEY = 'rise-brief-area';
+  var FAM = [
+    { group:'segment',  title:'Operational segments' },
+    { group:'function', title:'Corporate functions' },
+    { group:'product',  title:'Products and technology' }
+  ];
+  var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var MONTH = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var CHEV = '<svg class="sb-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  var DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg>';
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+  function count(n, one, many){ return n + ' ' + (n === 1 ? one : many); }
+  function parse(s){
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || '');
+    return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+  }
+  function shortDate(s){
+    var d = parse(s); if (!d) return '';
+    return d.getDate() + ' ' + MON[d.getMonth()] + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '');
+  }
+  function longDate(s){ var d = parse(s); return d ? d.getDate() + ' ' + MONTH[d.getMonth()] : ''; }
+  function shortType(k){ return k === 'sop' ? 'Procedure' : String((TYPES[k] || {}).label || k).split(' / ')[0]; }
+  function areaName(id){ return (SEG[id] || {}).name || id; }
+  function href(d){
+    return 'viewer.html?doc=' + encodeURIComponent(d.docNumber || '') +
+      (d.revision ? '&rev=' + encodeURIComponent(d.revision) : '') +
+      '&seg=' + encodeURIComponent(d.segment || '') + '&type=' + encodeURIComponent(d.docType || '') +
+      '&title=' + encodeURIComponent(d.title || '');
+  }
+  function newestFirst(a, b){
+    return String(b.issueDate || '').localeCompare(String(a.issueDate || '')) || String(a.title).localeCompare(String(b.title));
+  }
+  function famIds(g){
+    return Object.keys(SEG).filter(function(k){ return SEG[k].group === g; })
+      .sort(function(a, b){ return SEG[a].name.localeCompare(SEG[b].name); });
+  }
+  function canRegister(){ try { return !R || R.canRegister(); } catch (e) { return false; } }
+  function cap(){ try { return R && R.effective ? R.effective() : null; } catch (e) { return null; } }
+
+  /* ── Which area the briefing is for ──
+     A convenience kept in this browser only. A Director or Maintenance
+     Manager starts on the area they hold; everyone else on all areas. */
+  function startScope(){
+    var saved = null;
+    try { saved = localStorage.getItem(KEY); } catch (e) {}
+    if (saved === 'all' || (saved && SEG[saved])) return saved;
+    var c = cap();
+    if (c && c.scope === 'own' && c.ownSegment && SEG[c.ownSegment]) return c.ownSegment;
+    return 'all';
+  }
+  var scope = startScope();
+  var open = { attention:false, changed:false, lessons:false };
+  var odStep = null;   // overdue list: 0 hidden, 1 the most overdue, 2 all
+
+  var sel = document.getElementById('sb-area');
+  (function fill(){
+    var h = '<option value="all">All areas</option>';
+    if (SEG.company) h += '<option value="company">' + esc(SEG.company.name) + '</option>';
+    FAM.forEach(function(f){
+      var ids = famIds(f.group); if (!ids.length) return;
+      h += '<optgroup label="' + esc(f.title) + '">' + ids.map(function(k){
+        return '<option value="' + esc(k) + '">' + esc(SEG[k].name) + '</option>';
+      }).join('') + '</optgroup>';
+    });
+    sel.innerHTML = h;
+    sel.value = scope;
+    if (sel.value !== scope) { scope = 'all'; sel.value = 'all'; }
+  })();
+  sel.addEventListener('change', function(){
+    scope = sel.value;
+    try { localStorage.setItem(KEY, scope); } catch (e) {}
+    open = { attention:false, changed:false, lessons:false };
+    odStep = null;
+    paint();
+  });
+
+  /* ── The areas, built once so a group a reader opened stays open ── */
+  var fams = document.getElementById('sb-fams');
+  var wide = window.matchMedia && matchMedia('(min-width:1000px)').matches;
+  fams.innerHTML = FAM.map(function(f){
+    var ids = famIds(f.group); if (!ids.length) return '';
+    var mine = scope !== 'all' && ids.indexOf(scope) !== -1;
+    return '<details class="sb-card sb-fam" data-group="' + f.group + '"' + (wide || mine ? ' open' : '') + '>' +
+      '<summary><span>' + esc(f.title) + '</span><span class="sb-count">' + count(ids.length, 'area', 'areas') + '</span>' + DOWN + '</summary>' +
+      '<ul class="sb-area-list" id="fam-' + f.group + '"></ul></details>';
+  }).join('');
+
+  /* ── Reading the register ── */
+  function read(){
+    var today = S.localDay(), t0 = parse(today), s0 = new Date(t0);
+    s0.setDate(s0.getDate() - DAYS);
+    var start = S.localDay(s0);
+    function inWin(d){ return !!d.issueDate && d.issueDate >= start && d.issueDate <= today; }
+    var all = S.rows('visible');
+    var vis = scope === 'all' ? all : all.filter(function(d){ return d.segment === scope; });
+    var alerts  = vis.filter(function(d){ return d.docType === 'alert'; }).sort(newestFirst);
+    var lessons = vis.filter(function(d){ return d.docType === 'lesson'; }).sort(newestFirst);
+    var changed = vis.filter(function(d){ return d.docType !== 'alert' && d.docType !== 'lesson' && inWin(d); }).sort(newestFirst);
+    var overdue = vis.filter(function(d){ return A ? A.overdue(d) : !!d.reviewOverdue; })
+      .sort(function(a, b){ return String(a.nextReviewDate || '').localeCompare(String(b.nextReviewDate || '')); });
+    return { today:today, start:start, t0:t0, s0:s0, inWin:inWin, all:all, vis:vis,
+      alerts:alerts, lessons:lessons, changed:changed, overdue:overdue,
+      newAlerts:alerts.filter(inWin), newLessons:lessons.filter(inWin), window:vis.filter(inWin) };
+  }
+
+  /* ── The sentence ── */
+  function sentence(D){
+    var where = scope === 'all' ? '' : ' in ' + esc(areaName(scope));
+    function link(id, sw, text){
+      return '<a href="#' + id + '"><span class="sb-sw sw-' + sw + '" aria-hidden="true"></span>' + text + '</a>';
+    }
+    var c = D.changed.length, a = D.newAlerts.length, l = D.newLessons.length, s;
+    if (!c && !a && !l) {
+      // A quiet stretch is news too: say when the last change was.
+      var last = D.vis.slice().sort(newestFirst)[0];
+      s = 'Nothing new came into force' + where + ' in the last ' + DAYS + ' days.' +
+        (last && last.issueDate ? ' The latest, on ' + longDate(last.issueDate) +
+          (parse(last.issueDate).getFullYear() !== D.t0.getFullYear() ? ' ' + parse(last.issueDate).getFullYear() : '') +
+          ', was a ' + esc(shortType(last.docType).toLowerCase()) + '.' : '');
+    } else {
+      s = 'In the last ' + DAYS + ' days' + where + ', ' +
+        link('changed', 'doc', c ? count(c, 'document', 'documents') : 'no documents') + (c === 1 ? ' was' : ' were') + ' issued or revised, ' +
+        link('attention', 'alert', a ? count(a, 'technical alert', 'technical alerts') : 'no technical alerts') + ' went out and ' +
+        link('lessons', 'lesson', l ? count(l, 'lesson learned', 'lessons learned') : 'no lessons learned') + (l === 1 ? ' was' : ' were') + ' shared.';
+    }
+    document.getElementById('sb-sentence').innerHTML = s;
+    var o = D.overdue.length;
+    document.getElementById('sb-sentence-2').innerHTML = o
+      ? '<a href="#overdue">' + count(o, 'document', 'documents') + '</a> you can open' + where + (o === 1 ? ' is' : ' are') + ' past ' + (o === 1 ? 'its' : 'their') + ' review date.'
+      : 'Nothing you can open' + where + ' is past its review date.';
+  }
+
+  /* ── The strip ── */
+  function strip(D){
+    var el = document.getElementById('sb-strip');
+    var span = D.t0 - D.s0;
+    function x(d){ return Math.max(0, Math.min(1, (d - D.s0) / span)) * 100; }
+    var rank = { doc:0, lesson:1, alert:2 };
+    var marks = D.window.map(function(d){
+      return { d:d, k: d.docType === 'alert' ? 'alert' : d.docType === 'lesson' ? 'lesson' : 'doc' };
+    }).sort(function(a, b){ return rank[a.k] - rank[b.k] || String(a.d.issueDate).localeCompare(String(b.d.issueDate)); });
+    var sameDay = {};
+    var h = '<div class="sb-track" aria-hidden="true"></div>';
+    marks.forEach(function(m, i){
+      var k = m.d.issueDate, nth = sameDay[k] = (sameDay[k] || 0) + 1;
+      h += '<span class="sb-tk t-' + m.k + '" aria-hidden="true" style="--i:' + i + ';left:max(1.5px, calc(' +
+        x(parse(k)).toFixed(3) + '% - ' + ((nth - 1) * 5) + 'px))"></span>';
+    });
+    // The window's first day, each month that starts inside it, and today.
+    var labels = [], m0 = new Date(D.s0.getFullYear(), D.s0.getMonth() + 1, 1);
+    for (; m0 <= D.t0; m0 = new Date(m0.getFullYear(), m0.getMonth() + 1, 1)) {
+      var p = x(m0); if (p < 88) labels.push({ p:p, t:MON[m0.getMonth()] });
+    }
+    if (!labels.length || labels[0].p > 14) h += '<span class="sb-lab" aria-hidden="true" style="left:0">' + D.s0.getDate() + ' ' + MON[D.s0.getMonth()] + '</span>';
+    labels.forEach(function(l){ h += '<span class="sb-lab is-mo" aria-hidden="true" style="left:' + l.p.toFixed(3) + '%">' + l.t + '</span>'; });
+    h += '<span class="sb-lab is-end" aria-hidden="true">Today</span>';
+    el.innerHTML = h;
+    var latest = D.window.length ? D.window.slice().sort(newestFirst)[0].issueDate : null;
+    el.setAttribute('aria-label', 'Timeline of the last ' + DAYS + ' days: ' +
+      (D.window.length ? count(D.window.length, 'document', 'documents') + ' came into force, the latest on ' + longDate(latest) + '.'
+                       : 'nothing came into force.'));
+  }
+
+  /* ── The lists ── */
+  function rev(d){
+    var r = esc(d.revision);
+    if (d.supersedes) {
+      var old = esc(String(d.supersedes).replace(/^Rev\s*/i, ''));
+      return '<span class="sb-rev"><span class="sr-only">Rev ' + r + ', replaces Rev ' + old + '</span>' +
+        '<span aria-hidden="true">Rev <del>' + old + '</del> <b>' + r + '</b></span></span>';
+    }
+    return '<span class="sb-rev">' + (/^1(\.0)?$/.test(String(d.revision)) ? 'First issue, ' : '') + 'Rev ' + r + '</span>';
+  }
+  function row(d, kind, D){
+    var meta = [], bar = kind === 'attention' ? 'alert' : kind === 'lessons' ? 'lesson' : kind === 'overdue' ? 'overdue' : 'doc';
+    var when = '<time datetime="' + esc(d.issueDate) + '">' + shortDate(d.issueDate) + '</time>';
+    // [text, keep on one line]
+    if (kind === 'changed' || kind === 'overdue') meta.push([esc(shortType(d.docType)), 1]);
+    if (scope === 'all') meta.push([esc(areaName(d.segment)), 0]);
+    if (kind === 'changed') { meta.push([rev(d), 1]); meta.push([when, 1]); }
+    else if (kind === 'overdue') { meta.push(['Rev ' + esc(d.revision), 1]); meta.push(['<span class="sb-due">Review was due ' + shortDate(d.nextReviewDate) + '</span>', 1]); }
+    else { meta.push(['Rev ' + esc(d.revision), 1]); meta.push([when, 1]); }
+    var fresh = (kind === 'attention' || kind === 'lessons') && D.inWin(d);
+    return '<li><a class="sb-item k-' + kind + '" href="' + esc(href(d)) + '">' +
+      '<span class="sb-bar t-' + bar + '" aria-hidden="true"></span>' +
+      '<span><span class="sb-t">' + esc(d.title) + '</span>' +
+      '<span class="sb-m">' + (fresh ? '<span class="sb-new">New</span>' : '') +
+        meta.map(function(m){ return '<span class="sb-mi' + (m[1] ? ' nw' : '') + '">' + m[0] + '</span>'; }).join('') + '</span></span>' +
+      CHEV + '</a></li>';
+  }
+  var FIRST = { attention:3, changed:5, lessons:3, overdue:3 };
+  function list(id, rows, D, empty){
+    var ul = document.getElementById('l-' + id), more = document.getElementById('m-' + id);
+    // A button that would reveal a single row is not worth the tap.
+    var first = rows.length > FIRST[id] + 1 ? FIRST[id] : rows.length;
+    if (!rows.length) { ul.innerHTML = '<li class="sb-empty">' + empty + '</li>'; more.hidden = true; return; }
+    ul.innerHTML = rows.slice(0, open[id] ? rows.length : first).map(function(d){ return row(d, id, D); }).join('');
+    more.hidden = rows.length <= first;
+    more.setAttribute('aria-expanded', String(open[id]));
+    more.querySelector('span').textContent = open[id] ? 'Show fewer' : 'Show all ' + rows.length;
+  }
+  function overdue(D){
+    var o = D.overdue.length, where = scope === 'all' ? '' : ' in ' + esc(areaName(scope));
+    document.getElementById('n-overdue').textContent = o ? count(o, 'document', 'documents') : '';
+    var line = document.getElementById('od-line'), go = document.getElementById('od-go');
+    var wrap = document.getElementById('od-wrap'), more = document.getElementById('m-overdue');
+    line.innerHTML = o
+      ? '<b>' + count(o, 'document', 'documents') + '</b> you can open' + where + (o === 1 ? ' is' : ' are') +
+        ' past ' + (o === 1 ? 'its' : 'their') + ' periodic review date. ' + (o === 1 ? 'It stays' : 'They stay') +
+        ' in force until a new revision is approved.'
+      : 'Nothing you can open' + where + ' is past its periodic review date.';
+    // Where the overdue work is done, for the reader who does it.
+    var c = cap(), target = null, label = '';
+    if (o && canRegister()) { target = 'master-list.html?view=overdue'; label = 'Open the overdue list in the Master List'; }
+    else if (o && c && c.scope === 'own' && c.ownSegment) { target = 'dashboard.html?id=' + encodeURIComponent(c.ownSegment); label = 'Open the ' + areaName(c.ownSegment) + ' desk'; }
+    else if (o && scope !== 'all') { target = 'segment.html?id=' + encodeURIComponent(scope); label = 'Open ' + areaName(scope); }
+    go.hidden = !target;
+    if (target) { go.href = target; go.textContent = label; }
+    // The list, most overdue first, in steps: the register's keepers start
+    // on the first few, everyone else one tap away from them; then all.
+    var keeper = canRegister();
+    if (!o) { wrap.hidden = true; more.hidden = true; return; }
+    var few = o > FIRST.overdue + 1 ? FIRST.overdue : o;
+    if (odStep === null) odStep = keeper ? 1 : 0;
+    var shown = odStep === 0 ? 0 : odStep === 1 ? few : o;
+    wrap.hidden = shown === 0;
+    document.getElementById('l-overdue').innerHTML = D.overdue.slice(0, shown).map(function(d){ return row(d, 'overdue', D); }).join('');
+    var nextStep = shown === 0 ? 1 : shown < o ? 2 : (keeper ? 1 : 0);
+    more.hidden = keeper && few === o;
+    more.dataset.next = String(nextStep);
+    more.setAttribute('aria-expanded', String(shown > 0));
+    more.querySelector('span').textContent = shown === 0 ? 'Show the most overdue'
+      : shown < o ? 'Show all ' + o : (keeper ? 'Show fewer' : 'Hide the list');
+    more.querySelector('svg').style.transform = shown === o ? 'rotate(180deg)' : 'none';
+  }
+  function areas(D){
+    var by = {}, fresh = {};
+    D.all.forEach(function(d){
+      by[d.segment] = (by[d.segment] || 0) + 1;
+      if (D.inWin(d)) fresh[d.segment] = (fresh[d.segment] || 0) + 1;
+    });
+    var total = 0;
+    FAM.forEach(function(f){
+      var ul = document.getElementById('fam-' + f.group); if (!ul) return;
+      var ids = famIds(f.group); total += ids.length;
+      ul.innerHTML = ids.map(function(k){
+        var nNew = fresh[k] || 0, n = by[k] || 0;
+        return '<li><a class="sb-area' + (k === scope ? ' is-brief' : '') + '" href="segment.html?id=' + encodeURIComponent(k) + '">' +
+          '<span class="sb-area-name">' + esc(SEG[k].name) + '</span>' +
+          (nNew ? '<span class="sb-area-new">' + nNew + ' new</span>' : '') +
+          '<span class="sb-area-n">' + n + '<span class="sr-only"> ' + (n === 1 ? 'document' : 'documents') + '</span></span>' + CHEV + '</a></li>';
+      }).join('');
+    });
+    document.getElementById('n-areas').textContent = total ? count(total, 'area', 'areas') : '';
+    var cn = by.company || 0;
+    document.getElementById('sb-company-n').innerHTML = cn + '<span class="sr-only"> ' + (cn === 1 ? 'policy' : 'policies') + '</span>';
+    document.getElementById('sb-company').classList.toggle('is-brief', scope === 'company');
+  }
+
+  function paint(){
+    var D = read();
+    sentence(D);
+    strip(D);
+    var where = scope === 'all' ? '' : ' in ' + esc(areaName(scope));
+    document.getElementById('n-attention').textContent = D.alerts.length ? count(D.alerts.length, 'alert', 'alerts') + ' in force' : '';
+    document.getElementById('n-changed').textContent = D.changed.length ? D.changed.length + ' in ' + DAYS + ' days' : '';
+    document.getElementById('n-lessons').textContent = D.lessons.length ? count(D.lessons.length, 'lesson', 'lessons') : '';
+    list('attention', D.alerts, D, 'No technical alert is in force' + where + '.');
+    list('changed', D.changed, D, 'Nothing was issued or revised' + where + ' in the last ' + DAYS + ' days.');
+    list('lessons', D.lessons, D, 'No lesson learned has been shared' + where + ' yet.');
+    overdue(D);
+    areas(D);
+  }
+
+  document.querySelector('.sb-feed').addEventListener('click', function(e){
+    var b = e.target.closest('.sb-more'); if (!b) return;
+    var id = b.dataset.sec, D = read();
+    if (id === 'overdue') { odStep = +b.dataset.next; overdue(D); return; }
+    open[id] = !open[id];
+    list(id, D[id === 'attention' ? 'alerts' : id], D, '');
+  });
+
+  S.onChange(paint);
+  window.addEventListener('taqa:role-changed', paint);
+})();
+</script>
+<script>
+/* ── The role desk ─────────────────────────────────────────────────────
+   Unchanged from today's Home: the one line that differs by door. */
+(function(){
+  if (typeof TAQA_STORE === 'undefined' || typeof TAQA_ROLE === 'undefined') return;
+  var desk = document.getElementById('desk');
+  if (!desk) return;
+
+  function paint(){
+    var k = TAQA_ROLE.current(), cap = TAQA_ROLE.effective(), R = TAQA_ROLES[k];
+    var who = document.getElementById('desk-who'),
+        line= document.getElementById('desk-line'),
+        go  = document.getElementById('desk-go');
+    var d = (typeof TAQA_DELEGATION !== 'undefined') && TAQA_DELEGATION.current();
+
+    who.className = 'desk-who d-' + k;
+    who.textContent = d ? 'Delegate'
+      : (cap.scope === 'own' ? TAQA_ROLE.holderTitle() : R.label);
+
+    var n, txt, href = 'dashboard.html', cta = 'Open the queue';
+    if (cap.countersign) {
+      n = TAQA_STORE.count('awaiting-qms');
+      txt = n ? '<b>' + n + '</b> document' + (n===1?'':'s') +
+                ' waiting on your QMS check.'
+              : 'Nothing is waiting on your QMS check. <b>' +
+                TAQA_STORE.count('awaiting-director') + '</b> still with their approvers.';
+      cta = n ? 'Check' : 'Open the register';
+      href = n ? 'master-list.html?view=qms' : 'master-list.html';
+    } else if (cap.approve) {
+      var seg = cap.ownSegment;
+      n = TAQA_STORE.rows('awaiting-director', seg ? { segment: seg } : null)
+            .filter(function(x){ return TAQA_APPROVAL.canApprove(x); }).length;
+      var over = seg ? TAQA_STORE.area(seg).overdue : 0;
+      var where = TAQA_ROLE.areaName(seg);
+      txt = (n ? '<b>' + n + '</b> document' + (n===1?'':'s') + ' waiting on your sign-off'
+               : 'Nothing waiting on your sign-off') +
+            ' in <b>' + String(where).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}) + '</b>' +
+            (over ? ', and <b>' + over + '</b> past review there.' : '.');
+      href = 'dashboard.html?id=' + encodeURIComponent(seg || '');
+      cta = n ? 'Approve' : 'Open your segment';
+    } else if (k === 'auditor') {
+      txt = 'Read only across <b>' + TAQA_STORE.count('register') +
+            '</b> records, including the export. Nothing here changes on your account.';
+      href = 'master-list.html'; cta = 'Open the register';
+    } else {
+      desk.hidden = true;
+      return;
+    }
+    line.innerHTML = txt; go.href = href; go.textContent = cta;
+    desk.hidden = false;
+  }
+  TAQA_STORE.onChange(paint);
+})();
+</script>
+<script src="shared.js"></script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary-ink);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#C8102E;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-taqa-theme="dark"] .bell-badge{border-color:#002326;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
+</body>
+</html>
