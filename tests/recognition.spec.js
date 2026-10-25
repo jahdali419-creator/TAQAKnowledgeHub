@@ -236,6 +236,8 @@ test.describe('A new level is announced once, to the person who earned it', () =
   test.use(DESKTOP);
 
   test('the filer sees it the next time they open RISE, and only once', async ({ page, gotoApp, clearAppState, setRole }) => {
+    // Waits for the note to show and then fade (about 7 s) on top of a release.
+    test.slow();
     await start(page, gotoApp, clearAppState, setRole);
     await gotoApp('/index.html');                                     // the employee has been here before
     await expect(page.locator('#rise-note')).toHaveCount(0);
