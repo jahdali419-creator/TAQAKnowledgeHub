@@ -968,13 +968,17 @@ html[data-taqa-theme="dark"] .pj-box::after{border-color:#00191B;}
   });
 
   /* The phone bar shows only while the summary card is out of view and the
-     pack is in view, so it never sits over the form or the card it repeats. */
+     pack is in view, so it never sits over the form or the card it repeats.
+     On a phone the card follows the results: it counts as in view once it
+     rises above the strip the bar itself covers, so the bar stays while
+     the last results are read and gives way when the card arrives. */
   (function dockWatch() {
     var dock = $('pj-dock'), card = document.querySelector('#pj-rail .pj-card');
     if (!('IntersectionObserver' in window) || !card) { dock.classList.add('on'); return; }
     var cardIn = true, packIn = false;
     function set() { dock.classList.toggle('on', !cardIn && packIn); }
-    new IntersectionObserver(function (es) { es.forEach(function (e) { cardIn = e.isIntersecting; }); set(); }).observe(card);
+    new IntersectionObserver(function (es) { es.forEach(function (e) { cardIn = e.isIntersecting; }); set(); },
+      { rootMargin: '0px 0px -96px 0px' }).observe(card);
     new IntersectionObserver(function (es) { es.forEach(function (e) { packIn = e.isIntersecting; }); set(); }, { rootMargin: '0px 0px -30% 0px' }).observe(pack);
   })();
 

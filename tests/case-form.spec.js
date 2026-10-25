@@ -484,7 +484,8 @@ test.describe('a returned case', () => {
 
     // The link cannot be used twice, nor by anyone else.
     await gotoApp('/case-new.html?edit=' + encodeURIComponent(filed.key));
-    await expect(page.locator('#case-edit-refused')).toContainText('has a filing in progress');
+    // Attempt 2 now exists, so attempt 1 is history and is never filed again.
+    await expect(page.locator('#case-edit-refused')).toContainText('A later attempt of ' + filed.n + ' has been filed since');
     await expect(page.locator('#case-form')).toBeHidden();
     await setRole('owner', 'drilling');
     await gotoApp('/case-new.html?edit=' + encodeURIComponent(filed.key));

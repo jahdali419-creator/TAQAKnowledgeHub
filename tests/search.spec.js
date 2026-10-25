@@ -174,8 +174,10 @@ test.describe('words match the register', () => {
     expect(await expectedDocs(page, q)).toHaveLength(0);
     await search(page, q);
     await expect(page.locator('.sr-empty h3')).toHaveText(`No results for “${q}”`);
-    await expect(page.locator('.sr-empty p')).toContainText(q);
-    await expect(page.locator('.sr-empty')).toContainText('Check the spelling, or the document number.');
+    await expect(page.locator('.sr-empty p').first()).toContainText(q);
+    // One tip reads as a sentence, not a list of one.
+    await expect(page.locator('.sr-empty p.sr-tip')).toHaveText('Check the spelling, or the document number.');
+    await expect(page.locator('.sr-empty ul')).toHaveCount(0);
     await expect(page.locator('#results-list .result')).toHaveCount(0);
     await expect(page.locator('#result-count')).toHaveText(`0 results for “${q}”`);
     assertNoConsoleErrors(consoleErrors);

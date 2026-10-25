@@ -318,11 +318,17 @@ test.describe('the pack', () => {
     }
     await gotoApp('/prejob.html?area=drilling');
     await expect(page.locator('#pj-dock')).not.toHaveClass(/\bon\b/);
-    await page.locator('.pj-item').last().scrollIntoViewIfNeeded();
+    // On a phone the results come first and the summary card follows them:
+    // the bar carries the count and Print while the results are read...
+    const item = page.locator('.pj-item').nth(2);
+    await item.scrollIntoViewIfNeeded();
     await expect(page.locator('#pj-dock')).toHaveClass(/\bon\b/);
     await expect(page.locator('#pj-dock-print')).toBeVisible();
-    await page.locator('.pj-item').last().locator('input[type="checkbox"]').check();
+    await item.locator('input[type="checkbox"]').check();
     await expect(page.locator('#pj-dock-n')).toHaveText('1');
+    // ...and gives way once the card it repeats is on screen.
+    await page.locator('#pj-rail .pj-card').scrollIntoViewIfNeeded();
+    await expect(page.locator('#pj-dock')).not.toHaveClass(/\bon\b/);
     await page.evaluate(() => window.scrollTo(0, 0));
     await expect(page.locator('#pj-dock')).not.toHaveClass(/\bon\b/);
   });

@@ -967,7 +967,9 @@ function activityFrom(id){
           ? 'Awaiting ' + dEsc((typeof TAQA_APPROVAL !== 'undefined' && TAQA_APPROVAL.waitingOn(d)) || 'approval') +
             ': <strong>' + esc(d.docNumber || d.title) + '</strong>'
           : over
-            ? 'Review overdue on <strong>' + esc(d.docNumber || d.title) + '</strong>'
+            ? 'Review overdue on <strong>' + esc(d.docNumber || d.title) + '</strong>' +
+              // No page revises a field case in place yet (case.html says the same).
+              (d.card && typeof d.card === 'object' ? '. A field case is reviewed by filing an updated case.' : '')
             : 'Issued <strong>' + esc(d.docNumber || d.title) + '</strong> revision ' + esc(d.revision || '1.0'),
         time: over && at ? 'Due ' + when(at) : when(at)
       };
