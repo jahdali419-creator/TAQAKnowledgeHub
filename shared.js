@@ -1405,7 +1405,7 @@ document.addEventListener('keydown',function(e){
     employee: { short:'Employee',  name:'Employee',         line:'Read the register' },
     owner:    { short:'Director',  name:'Segment Director', line:'Approve your segment' },
     maintenance:{ short:'Maintenance', name:'Maintenance Manager', line:'Approve your maintenance' },
-    qms:      { short:'QMS',       name:'QMS',              line:'Countersign and release' },
+    qms:      { short:'QMS',       name:'QMS',              line:'Check before approval' },
     auditor:  { short:'Auditor',   name:'Auditor',          line:'Read only, everything' }
   };
 

@@ -976,13 +976,15 @@
       return { ok: false, error: 'The effective date is not a date.' };
     if (eff < today) return { ok: false, error: 'The effective date cannot be earlier than the approval date (' + today + ').' };
     // Whether the revision in force was past its review when this one was
-    // approved, decided once here (by the register's own flag, as
-    // TAQA_DOC.overdue reads it) so editing the old revision's review fields
-    // later never changes what this approval was.
+    // approved: flagged overdue, or past its review date, which is how the
+    // area page and the Master List show it. Decided once here, so editing
+    // the old revision's review fields later never changes this approval.
     var inForce = revisionsOf(d.docNumber).filter(function (x) { return x !== d && isLiveStatus(x.status); });
     var dates = { approvedBy: actingName(), approvedById: actingId(), approvedUnderGrant: actingGrant(), approvedOnBehalfOfId: actingFor(), approvedDate: today, approvedAt: now,
                   issueDate: eff, nextReviewDate: addMonths(eff, reviewCycle(d)), reviewOverdue: false,
-                  replacedOverdue: inForce.some(function (x) { return x.reviewOverdue === true; }) };
+                  replacedOverdue: inForce.some(function (x) {
+                    return !!x.reviewOverdue || (!!x.nextReviewDate && x.nextReviewDate < today);
+                  }) };
     if (eff > today) {
       // Approved now, in force from its effective date: the revision it
       // replaces stays current until then.
@@ -1167,6 +1169,10 @@
     if (!d || !mayManage(d)) return false;
     // Only the record the number resolves to, and only one filed here.
     if (load().indexOf(d) === -1) return false;
+    // Only a filing nobody has decided on yet. A checked, returned or
+    // released record leaves the register by withdrawal, which keeps its
+    // history and the filer's points; deleting it would erase both.
+    if (d.status !== 'draft' || d.approvedAt || d.countersignedAt || d.rejected) return false;
     _added = load().filter(function (x) { return x !== d; });
     save();
     announce({ action: 'remove', docNumber: docNumber });

@@ -104,6 +104,57 @@ test.describe('Points are earned only for released work', () => {
     expect(await employeePoints(page)).toBe(25);
   });
 
+  test('a document past its review date counts as overdue, as the area page shows it', async ({ page, gotoApp, clearAppState, setRole }) => {
+    await start(page, gotoApp, clearAppState, setRole);
+    // In force with reviewOverdue false, but its review date (7 Oct 2026) has passed.
+    const n = 'TQ-P&T-WCC-SOP-002';
+    const before = await page.evaluate((n) => { const d = TAQA_STORE.findDoc(n); return [d.reviewOverdue, d.nextReviewDate < TAQA_STORE.localDay()]; }, n);
+    expect(before).toEqual([false, true]);
+    const rev = await as(page, 'employee', null, (n) => {
+      const p = TAQA_STORE.revisionParent(n);
+      const d = TAQA_STORE.add({ docNumber: n, supersedes: n, title: p.title, segment: p.segment, docType: p.docType, language: p.language, summary: 'Review brought up to date.' });
+      return d ? d.revision : null;
+    }, n);
+    expect(rev).toBeTruthy();
+    await check(page, n);
+    expect((await release(page, 'pt-completions-coe', n)).ok).toBe(true);
+    const mine = await as(page, 'employee', null, () => TAQA_RECOGNITION.contributions().map((c) => [c.kind, c.points]));
+    expect(mine).toEqual([['overdue', 15]]);
+  });
+
+  test('a release approved before the bonus was recorded still earns it', async ({ page, gotoApp, clearAppState, setRole }) => {
+    await start(page, gotoApp, clearAppState, setRole);
+    const n = 'TQ-TWS-CTSS-SOP-004';                                   // review overdue in the register
+    await as(page, 'employee', null, (n) => {
+      const p = TAQA_STORE.revisionParent(n);
+      return TAQA_STORE.add({ docNumber: n, supersedes: n, title: p.title, segment: p.segment, docType: p.docType, language: p.language, summary: 'Brought up to date.' }) ? 1 : 0;
+    }, n);
+    await check(page, n);
+    expect((await release(page, 'coiled-tubing', n)).ok).toBe(true);
+    // The record as an earlier build wrote it: no replacedOverdue at all.
+    await page.evaluate((n) => {
+      const rows = JSON.parse(localStorage.getItem('taqa-uploads-v1') || '[]');
+      rows.forEach((r) => { if (r.docNumber === n) delete r.replacedOverdue; });
+      localStorage.setItem('taqa-uploads-v1', JSON.stringify(rows));
+    }, n);
+    await gotoApp('/index.html');
+    const mine = await as(page, 'employee', null, () => TAQA_RECOGNITION.contributions().map((c) => [c.docNumber, c.revision, c.kind, c.points]));
+    expect(mine).toEqual([[n, '2.0', 'overdue', 15]]);
+  });
+
+  test('a released record cannot be deleted, so its points stay', async ({ page, gotoApp, clearAppState, setRole }) => {
+    await start(page, gotoApp, clearAppState, setRole);
+    const n = await fileNew(page, 'drilling', 'lesson', 'Shaker screen blinding on the 12 1/4 section');
+    await check(page, n);
+    await release(page, 'drilling', n);
+    expect(await employeePoints(page)).toBe(20);
+    for (const [role, area] of [['qms', null], ['owner', 'drilling']]) {
+      expect(await as(page, role, area, (n) => TAQA_STORE.remove(n), n)).toBe(false);
+    }
+    expect(await employeePoints(page)).toBe(20);
+    expect(await page.evaluate((n) => TAQA_STORE.findDoc(n).status, n)).toBe('current');
+  });
+
   test('the revision actually replaced decides the bonus, never a returned attempt', async ({ page, gotoApp, clearAppState, setRole }) => {
     await start(page, gotoApp, clearAppState, setRole);
     const n = 'TQ-TDS-DSS-SOP-022';                                   // a waiting Rev 4.0, its review flagged overdue
@@ -342,6 +393,17 @@ test.describe('My contributions page', () => {
       await expect(page.locator('#rc-lede')).not.toContainText('your points');
       if (role === 'qms') await expect(page.locator('#rc-level-body')).toContainText('before the approver releases it');
     }
+  });
+
+  test.describe('desktop badge on My contributions', () => {
+    test.use(DESKTOP);
+    test('marks the page as the current one', async ({ page, gotoApp, clearAppState, setRole }) => {
+      await start(page, gotoApp, clearAppState, setRole);
+      await gotoApp('/recognition.html');
+      await expect(page.locator('#rise-lvl')).toHaveAttribute('aria-current', 'page');
+      await gotoApp('/glossary.html');
+      await expect(page.locator('#rise-lvl')).not.toHaveAttribute('aria-current', 'page');
+    });
   });
 
   test('progress reports the true figure, and the page says levels are not appraisal', async ({ page, gotoApp, clearAppState, setRole }) => {

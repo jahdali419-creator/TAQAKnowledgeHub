@@ -34,7 +34,7 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
   --text:#1E1C1A;--text-muted:#5F564F;--text-light:#756A61;
   --fill:#E7F3F3;--fill-strong:#005D63;
   --glass:#FFFFFF;--glass-border:rgba(117,106,97,0.18);
-  --ex-stripe:rgba(117,106,97,0.45);
+  --ex-stripe:rgba(117,106,97,0.8);
 }
 html[data-taqa-theme="dark"]{
   --primary-ink:#00BBB6;--dark:#001314;--paper:#002326;--inset:#001C1E;
@@ -42,7 +42,7 @@ html[data-taqa-theme="dark"]{
   --text:#C7DBDD;--text-muted:#9CC0C2;--text-light:#7FAFB2;
   --fill:rgba(0,187,182,0.12);--fill-strong:#00BBB6;
   --glass:#002326;--glass-border:rgba(0,187,182,0.20);
-  --ex-stripe:rgba(127,175,178,0.50);
+  --ex-stripe:rgba(127,175,178,0.8);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;}
@@ -116,7 +116,7 @@ main{max-width:1060px;margin:0 auto;width:100%;padding:32px 40px 80px;display:gr
 
 /* Areas */
 .bars{list-style:none;display:grid;gap:10px;}
-.bars li{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr) auto;align-items:center;gap:12px;font-size:13.5px;}
+.bars li{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr) 11.5em;align-items:center;gap:12px;font-size:13.5px;min-height:22px;}
 .bars a{color:var(--text);text-decoration:none;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .bars a:hover{color:var(--primary-ink);text-decoration:underline;}
 .bars .tr{height:10px;border-radius:999px;background:var(--fill);overflow:hidden;}
@@ -126,7 +126,7 @@ main{max-width:1060px;margin:0 auto;width:100%;padding:32px 40px 80px;display:gr
 .bars .tr span:first-child{border-radius:999px 0 0 999px;}
 .bars .tr span:last-child{border-radius:0 999px 999px 0;}
 .bars .tr span:only-child{border-radius:999px;}
-.bars .v{font-weight:700;font-variant-numeric:tabular-nums;color:var(--text);white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.bars .v{font-weight:700;font-variant-numeric:tabular-nums;color:var(--text);white-space:nowrap;display:flex;align-items:center;justify-content:flex-end;gap:6px;}
 .bars .v .exv{font-weight:500;color:var(--text-light);}
 .bars li.mine a{color:var(--primary-ink);}
 
@@ -141,9 +141,17 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
   .ladder{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;}
   .ladder .ln{font-size:11px;}
   .board-tools label[for="rc-area"]{width:100%;}
-  .bars li{grid-template-columns:minmax(0,1fr) auto;}
+  .bars li{grid-template-columns:minmax(0,1fr);gap:6px;}
+  .bars a{white-space:normal;}
+  .bars .v{justify-content:flex-start;}
   .bars .tr{grid-column:1 / -1;order:3;}
   .list li.mine{margin:0 -8px;padding-left:8px;padding-right:8px;}
+}
+@media(max-width:400px){
+  /* Five level names do not fit side by side: the ladder reads top down. */
+  .ladder{grid-template-columns:minmax(0,1fr);gap:0;}
+  .ladder li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-top-width:2px;padding:7px 0;}
+  .ladder .lp{margin-top:0;}
 }
 @media print{nav,#nav-mobile-menu{display:none!important;}}
 </style>
@@ -261,7 +269,7 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
 
   /* Rules: addressed to the reader when they earn, neutral when they
      check or read (QMS and the auditor earn nothing). */
-  if (!earner) $('rc-lede').textContent = 'Points for work that passed QMS and approval, so only released documents count. Employees, Directors and Maintenance Managers earn them for the work they file.';
+  if (!earner) $('rc-lede').textContent = 'Points for work that passed QMS and approval, so only released documents count. Everyone who files work earns them; QMS and auditors check and read, so they do not.';
   $('rc-rules-body').innerHTML = earner
     ? '<tr><td>A document or field case you filed is released</td><td class="pt">' + R.POINTS.document + '</td></tr>' +
       '<tr><td>You brought an overdue document up to date with a new revision</td><td class="pt">' + R.POINTS.overdue + '</td></tr>' +
@@ -357,7 +365,7 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
           '<div class="who"><div class="nm"><span class="t">' + esc(r.label) + '</span>' +
             (r.example ? '<span class="chip ex">Example</span>' : '') +
             (r.level ? '<span class="chip lvl">' + esc(r.level.name) + '</span>' : '') + '</div>' +
-          '<div class="mt">' + esc(breakdown(r.breakdown)) + '</div></div>' +
+          '<div class="mt">' + esc((r.title ? r.title + ' · ' : '') + breakdown(r.breakdown)) + '</div></div>' +
           '<span class="pts">' + r.monthPoints + ' pts</span></li>';
       }).join('');
     }

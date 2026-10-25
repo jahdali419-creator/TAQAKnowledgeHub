@@ -106,19 +106,33 @@
   // The store records, at approval, whether the revision in force was past
   // its review then (replacedOverdue). It is never recomputed here, so later
   // edits to the old revision's review fields do not change past points.
-  function kindOf(d) {
+  // A release approved before the store recorded replacedOverdue falls back
+  // to the revision it actually replaced (the one whose supersededBy names
+  // it), judged on that revision's flag or review date at approval.
+  function legacyOverdue(d, rows) {
+    var name = 'rev ' + String(d.revision == null ? '' : d.revision).trim().toLowerCase();
+    for (var i = 0; i < rows.length; i++) {
+      var x = rows[i];
+      if (x === d || x.docNumber !== d.docNumber) continue;
+      if (String(x.supersededBy || '').trim().toLowerCase() !== name) continue;
+      return !!x.reviewOverdue || !!(x.nextReviewDate && d.approvedDate && x.nextReviewDate < d.approvedDate);
+    }
+    return false;
+  }
+  function kindOf(d, rows) {
     if (d.docType === 'lesson' || d.docType === 'alert' || d.docType === 'incident') return 'lesson';
     // The other field case types earn as a document, whatever they replaced.
     var t = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.types[d.docType]) || {};
-    if (t.cardOnly) return 'document';
-    if (!d.translationOf && d.replacedOverdue === true) return 'overdue';
+    if (t.cardOnly || d.translationOf) return 'document';
+    if (d.replacedOverdue === true) return 'overdue';
+    if (d.replacedOverdue === undefined && rows && legacyOverdue(d, rows)) return 'overdue';
     return 'document';
   }
   function liveContributions() {
     var rows;
     try { rows = TAQA_STORE.all(); } catch (e) { return []; }
     return rows.filter(released).map(function (d) {
-      var kind = kindOf(d);
+      var kind = kindOf(d, rows);
       return {
         who: d.submittedById, key: TAQA_STORE.recordKey(d), doc: d,
         docNumber: d.docNumber, revision: d.revision, segment: d.segment,
@@ -135,9 +149,21 @@
   function pointsOf(id) { return sum(contributions(id)); }
 
   /* ── Example history ────────────────────────────────────────────────────
-     Made-up job titles with a letter, never a person's name, and always
+     Made-up people: an invented name with a job title (the owner asked for
+     real-looking names, 25 Oct 2026). Never a real colleague, and always
      marked "Example" wherever they show. Stable for each area, and always
      "this month", so the lists look lived-in on any date. */
+  var EX_FIRST = ['Faisal', 'Nora', 'Khalid', 'Sara', 'Omar', 'Reem', 'Yousef', 'Lama', 'Turki', 'Hassan',
+                  'Huda', 'Majed', 'Fahad', 'Rakan', 'Abeer', 'Ibrahim', 'Saad', 'Nasser', 'Dana', 'Ali'];
+  var EX_LAST = ['Al-Harbi', 'Al-Qahtani', 'Al-Otaibi', 'Al-Shehri', 'Al-Zahrani', 'Al-Ghamdi', 'Al-Dossary', 'Al-Mutairi',
+                 'Al-Anazi', 'Al-Subaie', 'Al-Shammari', 'Al-Malki', 'Al-Amri', 'Al-Juhani', 'Al-Saleh', 'Al-Yami'];
+  function exName(h, i, taken) {
+    for (var k = 0; k < EX_FIRST.length; k++) {
+      var nm = EX_FIRST[(h + i * 7 + k) % EX_FIRST.length] + ' ' + EX_LAST[((h >>> 4) + i * 5 + k) % EX_LAST.length];
+      if (!taken[nm]) { taken[nm] = true; return nm; }
+    }
+    return EX_FIRST[i % EX_FIRST.length] + ' ' + EX_LAST[i % EX_LAST.length];
+  }
   var EX_TITLES = {
     segment:  ['Field Engineer', 'Operations Supervisor', 'Maintenance Technician', 'Quality Engineer', 'Technical Trainer'],
     'function': ['Specialist', 'Senior Advisor', 'Coordinator', 'Analyst'],
@@ -161,7 +187,7 @@
     if (!a || !EX_TITLES[a.group]) return [];
     var size = areaSize(areaId), tier = size >= 50 ? 3 : size >= 30 ? 2 : size >= 10 ? 1 : 0;
     var h = hash(areaId), titles = EX_TITLES[a.group], past = EX_PAST[tier], n = EX_PEOPLE[tier];
-    var out = [];
+    var out = [], taken = {};
     for (var i = 0; i < n; i++) {
       var docs = (h >>> (i * 3)) % 3 + (tier >= 2 ? 1 : 0) + (tier === 3 && i < 2 ? 1 : 0);
       var overdue = tier >= 1 ? (h >>> (i * 3 + 7)) % 2 : 0, lessons = tier >= 1 ? (h >>> (i * 2 + 13)) % 2 : 0;
@@ -170,7 +196,7 @@
       var month = docs * POINTS.document + overdue * POINTS.overdue + lessons * POINTS.lesson;
       out.push({
         id: 'example:' + areaId + ':' + i, example: true, area: areaId,
-        label: titles[(h + i) % titles.length] + ' ' + 'ABCDE'.charAt(i),
+        label: exName(h, i, taken), title: titles[(h + i) % titles.length],
         monthPoints: month, breakdown: { document: docs, overdue: overdue, lesson: lessons },
         total: month + (past[i] || 0) + ((h >>> i) % 5) * 10
       });
@@ -229,6 +255,11 @@
     '#navbar .rise-lvl .rlv-pts{font-weight:500;color:var(--tb-muted,#756A61);}' +
     '#navbar .rise-lvl .rlv-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;}' +
     '@media (max-width:1499px){#navbar .rise-lvl .rlv-pts{display:none;}}' +
+    /* With the level badge on the bar, the door shows the role's short
+       caption until there is room for the area name, so the links never run
+       into the logo or the door. */
+    '@media (max-width:1460px){html.rise-has-lvl #navbar .door-cap-s{display:inline;}html.rise-has-lvl #navbar .door-cap-s + .door-cap{display:none;}}' +
+    '#navbar .rise-lvl[aria-current="page"]{background:var(--tb-hover,rgba(0,93,99,.06));border-color:var(--tb-ink,#005D63);}' +
     '@media (max-width:1280px){#navbar .rise-lvl{display:none!important;}}' +
     /* Phone menu row */
     '.nav-mobile-menu .mm-main a.mm-rise .mm-rise-l{margin-inline-start:auto;font-size:13px;font-weight:500;color:var(--tb-muted,#756A61);white-space:nowrap;}' +
@@ -271,12 +302,14 @@
   function paintBadge() {
     var id = me(), bar = document.querySelector('#navbar .nav-right');
     var old = document.getElementById('rise-lvl');
+    document.documentElement.classList.toggle('rise-has-lvl', !!(bar && canEarn(id)));
     if (!bar || !canEarn(id)) { if (old) old.remove(); return; }
     var t = badgeText(id), a = old || document.createElement('a');
     a.id = 'rise-lvl'; a.className = 'rise-lvl'; a.href = 'recognition.html';
     // The name is the visible text plus a hidden ending, so a voice user
     // can say what they see (WCAG 2.5.3).
     a.removeAttribute('aria-label');
+    if (/recognition\.html$/.test(location.pathname)) a.setAttribute('aria-current', 'page');
     a.title = t.name + ' · ' + t.pts + ' points' + (t.lv.next ? ' · ' + t.lv.toNext + ' to ' + t.lv.next.name : '');
     a.innerHTML = MEDAL + '<span class="rlv-name">' + esc(t.name) + '</span><span class="rlv-pts">' + t.pts + ' pts</span>' +
       '<span class="rlv-sr">, your level. Open My contributions</span>';
@@ -346,13 +379,13 @@
     n.hidden = false; n.classList.remove('on'); n.textContent = '';
     requestAnimationFrame(function () {
       showNote.t = setTimeout(function () {
-        n.innerHTML = MEDAL + '<span>You reached <b>' + esc(level.name) + '</b> · ' + pts + ' points</span>';
+        n.innerHTML = MEDAL + '<span>You reached <b>' + esc(level.name) + '</b> · <span style="white-space:nowrap">' + pts + ' points</span></span>';
         n.classList.add('on');
         showNote.t = setTimeout(function () {
           n.classList.remove('on');
           showNote.t = setTimeout(function () { n.hidden = true; n.textContent = ''; }, 300);
         }, 6000);
-      }, 100);
+      }, 650);   // after the page's own fade-in, so the note fades in where it sits
     });
   }
 
