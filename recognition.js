@@ -66,6 +66,9 @@
     return { index: i, level: i >= 0 ? LEVELS[i] : null, next: next, toNext: next ? next.min - points : 0 };
   }
 
+  // The level's key ('none' below Contributor), used for its colour.
+  function levelKey(points) { var l = levelFor(points).level; return l ? l.key : 'none'; }
+
   /* ── Preferences: hide my name, last level announced ────────────────── */
   function prefs() {
     try { var p = JSON.parse(localStorage.getItem(PREF_KEY) || '{}'); return p && typeof p === 'object' ? p : {}; }
@@ -244,25 +247,45 @@
   var MEDAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 3h9l-2.6 5.2"/><path d="M9.6 8.2 7.5 3"/><circle cx="12" cy="14.5" r="5.5"/><path d="m12 11.9.9 1.8 2 .3-1.4 1.4.3 2-1.8-.9-1.8.9.3-2-1.4-1.4 2-.3z"/></svg>';
   var css = document.createElement('style');
   css.textContent =
-    /* Level badge: beside the role control on the desktop bar. It hides with
-       the role control at 1280px and below, where the phone menu carries it. */
-    '#navbar .rise-lvl{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 11px 0 8px;border-radius:999px;' +
-      'border:1px solid var(--tb-rule,rgba(117,106,97,.22));color:var(--tb-text,#1E1C1A);text-decoration:none;white-space:nowrap;flex:none;' +
-      'font:600 12.5px/1 "Inter",system-ui,sans-serif;font-variant-numeric:tabular-nums;}' +
-    '#navbar .rise-lvl:hover{background:var(--tb-hover,rgba(0,93,99,.06));}' +
+    /* Level colours (owner's choice, 25 Oct 2026): grey with no level, then
+       teal, deep teal, blue, green and gold for Knowledge Champion, from the
+       TAQA palette. Light values on light ground; the dark theme, the bar
+       over the home photo and the level-up note take the dark values. */
+    '.rlv-tone{--lv-bg:transparent;--lv-bd:rgba(117,106,97,.3);--lv-fg:#1E1C1A;--lv-ic:#756A61;}' +
+    '.rlv-tone.lv-contributor{--lv-bg:#E3F7F6;--lv-bd:#00A6A1;--lv-fg:#00585A;--lv-ic:#00A6A1;}' +
+    '.rlv-tone.lv-practitioner{--lv-bg:#E7F1F1;--lv-bd:#005D63;--lv-fg:#004A4F;--lv-ic:#005D63;}' +
+    '.rlv-tone.lv-specialist{--lv-bg:#E6F1F7;--lv-bd:#0076A8;--lv-fg:#00567A;--lv-ic:#0076A8;}' +
+    '.rlv-tone.lv-expert{--lv-bg:#E5F3F0;--lv-bd:#008675;--lv-fg:#00594E;--lv-ic:#008675;}' +
+    '.rlv-tone.lv-champion{--lv-bg:#FFF3D1;--lv-bd:#D99A00;--lv-fg:#5C3F00;--lv-ic:#C98A00;}' +
+    'html[data-taqa-theme="dark"] .rlv-tone,#navbar.nav-on-hero .nav-right .rlv-tone,#rise-note.rlv-tone{--lv-bg:rgba(255,255,255,.06);--lv-bd:rgba(255,255,255,.35);--lv-fg:#FFFFFF;--lv-ic:rgba(255,255,255,.78);}' +
+    'html[data-taqa-theme="dark"] .rlv-tone.lv-contributor,#navbar.nav-on-hero .nav-right .rlv-tone.lv-contributor,#rise-note.rlv-tone.lv-contributor{--lv-bg:rgba(0,187,182,.18);--lv-bd:#00BBB6;--lv-fg:#FFFFFF;--lv-ic:#5FE0DB;}' +
+    'html[data-taqa-theme="dark"] .rlv-tone.lv-practitioner,#navbar.nav-on-hero .nav-right .rlv-tone.lv-practitioner,#rise-note.rlv-tone.lv-practitioner{--lv-bg:rgba(0,93,99,.55);--lv-bd:#3FB8B4;--lv-fg:#FFFFFF;--lv-ic:#8FE3DF;}' +
+    'html[data-taqa-theme="dark"] .rlv-tone.lv-specialist,#navbar.nav-on-hero .nav-right .rlv-tone.lv-specialist,#rise-note.rlv-tone.lv-specialist{--lv-bg:rgba(0,118,168,.35);--lv-bd:#4FB3E0;--lv-fg:#FFFFFF;--lv-ic:#8ED3F2;}' +
+    'html[data-taqa-theme="dark"] .rlv-tone.lv-expert,#navbar.nav-on-hero .nav-right .rlv-tone.lv-expert,#rise-note.rlv-tone.lv-expert{--lv-bg:rgba(0,134,117,.35);--lv-bd:#3CC2A9;--lv-fg:#FFFFFF;--lv-ic:#86E3D1;}' +
+    'html[data-taqa-theme="dark"] .rlv-tone.lv-champion,#navbar.nav-on-hero .nav-right .rlv-tone.lv-champion,#rise-note.rlv-tone.lv-champion{--lv-bg:rgba(255,184,28,.22);--lv-bd:#FFB81C;--lv-fg:#FFFFFF;--lv-ic:#FFC94D;}' +
+    /* Level badge: beside the role control on the desktop bar, in its level's
+       colour. It hides with the role control at 1280px and below, where the
+       phone menu carries it. */
+    '#navbar .rise-lvl{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 9px;border-radius:999px;' +
+      'border:1px solid var(--lv-bd);background:var(--lv-bg);color:var(--lv-fg);text-decoration:none;white-space:nowrap;flex:none;' +
+      'font:600 12.5px/1 "Inter",system-ui,sans-serif;font-variant-numeric:tabular-nums;transition:box-shadow .15s ease;}' +
+    '#navbar .rise-lvl:hover{box-shadow:inset 0 0 0 1px var(--lv-bd);}' +
     '#navbar .rise-lvl:focus-visible{outline:2px solid var(--tb-ink,#005D63);outline-offset:2px;}' +
-    '#navbar .rise-lvl svg{width:17px;height:17px;color:var(--tb-ink,#005D63);flex:none;}' +
-    '#navbar .rise-lvl .rlv-pts{font-weight:500;color:var(--tb-muted,#756A61);}' +
+    '#navbar .rise-lvl svg{width:17px;height:17px;color:var(--lv-ic);flex:none;}' +
+    '#navbar .rise-lvl .rlv-pts{font-weight:500;}' +
     '#navbar .rise-lvl .rlv-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;}' +
     '@media (max-width:1499px){#navbar .rise-lvl .rlv-pts{display:none;}}' +
     /* With the level badge on the bar, the door shows the role's short
        caption until there is room for the area name, so the links never run
        into the logo or the door. */
     '@media (max-width:1460px){html.rise-has-lvl #navbar .door-cap-s{display:inline;}html.rise-has-lvl #navbar .door-cap-s + .door-cap{display:none;}}' +
-    '#navbar .rise-lvl[aria-current="page"]{background:var(--tb-hover,rgba(0,93,99,.06));border-color:var(--tb-ink,#005D63);}' +
+    '#navbar .rise-lvl[aria-current="page"]{box-shadow:inset 0 0 0 1px var(--lv-bd);}' +
     '@media (max-width:1280px){#navbar .rise-lvl{display:none!important;}}' +
     /* Phone menu row */
-    '.nav-mobile-menu .mm-main a.mm-rise .mm-rise-l{margin-inline-start:auto;font-size:13px;font-weight:500;color:var(--tb-muted,#756A61);white-space:nowrap;}' +
+    '.nav-mobile-menu .mm-main a.mm-rise .mm-rise-l{margin-inline-start:auto;font-size:13px;font-weight:600;white-space:nowrap;' +
+      'padding:4px 10px;border-radius:999px;border:1px solid var(--lv-bd);background:var(--lv-bg);color:var(--lv-fg);}' +
+    '#rise-note.rlv-tone svg{color:var(--lv-ic);}' +
+    '#rise-note.rlv-tone{box-shadow:0 14px 34px -14px rgba(0,40,44,.55),inset 0 0 0 1px var(--lv-bd);}' +
     /* Level-up note: its own region, never taking focus or taps, and never
        over the bar, the bell or the menu. */
     '#rise-note{position:fixed;left:16px;right:16px;margin-inline:auto;width:max-content;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:9000;pointer-events:none;' +
@@ -295,7 +318,7 @@
 
   function badgeText(id) {
     var pts = pointsOf(id), lv = levelFor(pts);
-    return { pts: pts, lv: lv, name: lv.level ? lv.level.name : 'No level yet' };
+    return { pts: pts, lv: lv, name: lv.level ? lv.level.name : 'No level yet', key: levelKey(pts) };
   }
 
   // Desktop: a small badge after the role control, opening My contributions.
@@ -305,7 +328,7 @@
     document.documentElement.classList.toggle('rise-has-lvl', !!(bar && canEarn(id)));
     if (!bar || !canEarn(id)) { if (old) old.remove(); return; }
     var t = badgeText(id), a = old || document.createElement('a');
-    a.id = 'rise-lvl'; a.className = 'rise-lvl'; a.href = 'recognition.html';
+    a.id = 'rise-lvl'; a.className = 'rise-lvl rlv-tone lv-' + t.key; a.href = 'recognition.html';
     // The name is the visible text plus a hidden ending, so a voice user
     // can say what they see (WCAG 2.5.3).
     a.removeAttribute('aria-label');
@@ -329,7 +352,7 @@
     if (/recognition\.html$/.test(location.pathname)) { a.classList.add('active'); a.setAttribute('aria-current', 'page'); }
     var t = canEarn(id) ? badgeText(id) : null;
     a.innerHTML = '<span>' + (t ? 'My contributions' : 'Contributions') + '</span>' +
-      (t ? '<span class="mm-rise-l">' + esc(t.lv.level ? t.lv.level.name : 'No level yet') + ' · ' + t.pts + ' pts</span>' : '');
+      (t ? '<span class="mm-rise-l rlv-tone lv-' + t.key + '">' + esc(t.name) + ' · ' + t.pts + ' pts</span>' : '');
     if (!a.parentNode) main.appendChild(a);
   }
 
@@ -379,6 +402,7 @@
     n.hidden = false; n.classList.remove('on'); n.textContent = '';
     requestAnimationFrame(function () {
       showNote.t = setTimeout(function () {
+        n.className = 'rlv-tone lv-' + level.key;
         n.innerHTML = MEDAL + '<span>You reached <b>' + esc(level.name) + '</b> · <span style="white-space:nowrap">' + pts + ' points</span></span>';
         n.classList.add('on');
         showNote.t = setTimeout(function () {
@@ -393,7 +417,7 @@
 
   root.TAQA_RECOGNITION = {
     LEVELS: LEVELS, POINTS: POINTS, KIND_LABEL: KIND_LABEL,
-    levelFor: levelFor, pointsOf: pointsOf, contributions: contributions, board: board, byArea: byArea,
+    levelFor: levelFor, levelKey: levelKey, pointsOf: pointsOf, contributions: contributions, board: board, byArea: byArea,
     examples: examples, canEarn: canEarn, labelFor: labelFor, me: me, thisMonth: thisMonth,
     isHidden: isHidden, setHidden: function (on) { setHidden(me(), on); paintAll(); }, MEDAL: MEDAL, esc: esc
   };

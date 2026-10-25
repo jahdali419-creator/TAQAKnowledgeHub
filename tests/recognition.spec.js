@@ -395,6 +395,30 @@ test.describe('My contributions page', () => {
     }
   });
 
+  test.describe('level colours', () => {
+    test.use(DESKTOP);
+    test('the badge, menu row and page take the level\'s colour', async ({ page, gotoApp, clearAppState, setRole }) => {
+      await start(page, gotoApp, clearAppState, setRole);
+      await gotoApp('/glossary.html');
+      const badge = page.locator('#rise-lvl');
+      await expect(badge).toHaveClass(/\blv-none\b/);
+      const grey = await badge.evaluate((b) => getComputedStyle(b).borderTopColor);
+      const n = await fileNew(page, 'drilling', 'lesson', 'Bit balling in the reactive shale');
+      await check(page, n);
+      await release(page, 'drilling', n);
+      await setRole('employee');
+      await gotoApp('/glossary.html');
+      await expect(badge).toHaveClass(/\blv-contributor\b/);
+      const teal = await badge.evaluate((b) => getComputedStyle(b).borderTopColor);
+      expect(teal).not.toBe(grey);
+      expect(teal).toBe('rgb(0, 166, 161)');
+      await gotoApp('/recognition.html');
+      await expect(page.locator('.lv-mark')).toHaveClass(/\blv-contributor\b/);
+      await expect(page.locator('.ladder li.got')).toHaveCount(1);
+      expect(await page.locator('.ladder li.got').evaluate((li) => getComputedStyle(li).borderTopColor)).toBe('rgb(0, 166, 161)');
+    });
+  });
+
   test.describe('desktop badge on My contributions', () => {
     test.use(DESKTOP);
     test('marks the page as the current one', async ({ page, gotoApp, clearAppState, setRole }) => {
