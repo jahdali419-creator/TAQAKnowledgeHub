@@ -444,6 +444,10 @@ const TAQA_APPROVAL = {
   approverFor(doc){
     if (TAQA_APPROVAL.isMaintenance(doc)) return 'Maintenance Manager';
     const t = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.types[doc.docType]) || {};
+    // A field case (a record carrying a card, cases.js) is released by its
+    // area's Director whatever its type, a Lesson Learned or Technical Alert
+    // filed as a card included, as for the eight case-only types.
+    if (t.card && doc.card && typeof doc.card === 'object') return 'Relevant Operation Director';
     const a = (t.approver || '').trim();
     return (!a || a === ',') ? null : a;
   },
@@ -642,8 +646,13 @@ const TAQA_DELEGATION = {
   typesFor(roleKey){
     const all = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? Object.keys(TAQA_DOC_LOOKUPS.types) : [];
     const maint = (TAQA_ROLES[roleKey] || {}).department === 'maintenance';
+    const T = (typeof TAQA_DOC_LOOKUPS !== 'undefined') ? TAQA_DOC_LOOKUPS.types : {};
     return all.filter(function(t){
       if (t === 'software') return false;
+      // Field cases are operations' work, never a maintenance department's
+      // (store.js fieldCaseProblem), so a Maintenance Manager holds none of
+      // the case-only types.
+      if (maint && T[t] && T[t].cardOnly) return false;
       return maint ? t !== 'policy' : t !== 'bulletin';
     });
   },

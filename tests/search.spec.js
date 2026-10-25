@@ -1,312 +1,414 @@
-// Regression suite for ai-search.html + search-index.js.
+// Search (ai-search.html): what it is, and only that.
 //
-// NAMING HONESTY: despite the page's own copy ("AI-Powered Document
-// Intelligence", "Ask AI"), reading search-index.js and the "Real Document
-// Search" script in ai-search.html shows this is a client-side KEYWORD /
-// substring search over the local document register (TAQA_SEARCH_INDEX,
-// built from TAQA_STORE.rows('register')). searchDocs() scores an exact
-// title match, a start-of-title match, a substring match, a segment-name
-// match and a doc-type match, then sorts by that score. There is no
-// generative model anywhere in this page: the CSP's `connect-src 'self'`
-// alone rules out a call to an external LLM API, and there is no fetch()
-// to one either (grepped for `fetch(`, `anthropic`, `openai`, `api.`,
-// `https://` in ai-search.html and search-index.js: none found). So this
-// suite tests it as what it is, keyword/full-text search, filtering and
-// ranking, and never asserts anything about "AI" reasoning or generation.
-//
-// The page's one AI-adjacent claim that actually matters is the safety
-// banner fixes.js injects ("AI answers are not a substitute for approved
-// documents..."); that banner is tested below for presence/visibility and
-// for not overclaiming beyond a caution to verify against the source.
+// The page ranks register records by title, number, area and type, and
+// field cases by any word in the case, with filters. It runs in the browser
+// over TAQA_SEARCH_INDEX (search-index.js, built from TAQA_STORE) and
+// TAQA_CASES (cases.js). It claims nothing else: no AI wording, no chat, no
+// answer written for the reader. Every result is a record the reader may
+// open and links to it: a document to viewer.html, a field case to
+// case.html. The file name and ?q= stay, so the home search, bookmarks and
+// the "/" shortcut keep working.
 const { test, expect, assertNoConsoleErrors } = require('./helpers/fixtures');
 
-// Real segment ids wired to the quick-filter chips (data-seg) in
-// ai-search.html, cross-checked against TAQA_DOC_LOOKUPS.segments in
-// documents-master.js: all five exist for real (drilling, well-safety,
-// fracturing, qhse, hr), so the chip markup and the register agree.
-const SEG_ALL = 'all';
-const SEG_WELL_SAFETY = 'well-safety'; // "Safety Services" chip
-
-test.beforeEach(async ({ gotoApp, setRole, clearAppState }) => {
+test.beforeEach(async ({ gotoApp, setRole, clearAppState, page }) => {
   await gotoApp('/index.html');
   await clearAppState();
-  // qms sees every status (including draft) and every classification, so
-  // its results are not narrowed by role the way employee/owner would be,
-  // matching the pattern smoke.spec.js already uses for full-visibility runs.
+  await page.evaluate(() => localStorage.setItem('taqa-tour-done', '1'));
+  // QMS sees every status and classification, so its results are not
+  // narrowed by role; role-specific tests set their own.
   await setRole('qms', 'coiled-tubing');
-  await gotoApp('/ai-search.html');
 });
 
-// Reads the register the page itself built, exactly as searchDocs() would
-// see it, so tests never hardcode a count that can drift from the data.
-async function indexRows(page) {
-  return page.evaluate(() => window.TAQA_SEARCH_INDEX || []);
+/* The page's own matching rule, written out independently: a document
+   matches when every word (split on spaces, outer punctuation trimmed)
+   appears in its title, number, area name or type (key, label or mark).
+   Rows that are field cases are not documents. */
+async function expectedDocs(page, q, keep = () => true) {
+  const rows = await page.evaluate((q) => {
+    const T = TAQA_DOC_LOOKUPS.types;
+    const cases = new Set(TAQA_STORE.all().filter((d) => d.card && typeof d.card === 'object').map((d) => d.docNumber + '@' + d.revision));
+    const toks = q.toLowerCase().split(/\s+/).map((t) => t.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '')).filter(Boolean);
+    return (window.TAQA_SEARCH_INDEX || [])
+      .filter((d) => !(T[d.tp] && T[d.tp].cardOnly) && !cases.has(d.n + '@' + d.rev))
+      .filter((d) => {
+        const t = T[d.tp] || {};
+        const fields = [d.t, d.n || '', d.sn, [d.tp, t.label || '', t.mark || ''].join(' ')].map((f) => f.toLowerCase());
+        return toks.every((w) => fields.some((f) => f.includes(w)));
+      });
+  }, q);
+  return rows.filter(keep);
 }
-
-// Mirrors the *matching* predicate inside searchDocs() in ai-search.html
-// (title / doc number / segment name / doc type substring match) without
-// reimplementing its ranking, just enough to assert a result set is the
-// same real matches the app's own logic would keep.
-function predicateMatches(rows, q) {
-  const ql = q.toLowerCase();
-  return rows.filter((d) => {
-    const tl = (d.t || '').toLowerCase();
-    const nl = (d.n || '').toLowerCase();
-    const sl = (d.sn || '').toLowerCase();
-    const tp = (d.tp || '').toLowerCase();
-    return tl.includes(ql) || nl.includes(ql) || sl.includes(ql) || tp.includes(ql);
-  });
+async function search(page, q) {
+  await page.locator('#query-input').fill(q);
+  await page.locator('#query-input').press('Enter');
 }
+const docRows = (page) => page.locator('#results-list .sr-docs .result');
+const caseRows = (page) => page.locator('#results-list .result.is-case');
 
-test.describe('Safety disclaimer banner', () => {
-  test('is present, visible, and does not overclaim what the search does', async ({
-    page,
-    consoleErrors,
-  }) => {
-    const banner = page.locator('.ai-safety-banner');
-    await expect(banner).toBeVisible();
-    const text = (await banner.innerText()).trim();
-    expect(text.length).toBeGreaterThan(0);
-    // It must caution the reader to verify against the real record...
-    expect(text).toMatch(/not a substitute for approved documents/i);
-    expect(text.toLowerCase()).toContain('verify');
-    // ...and must not claim things this keyword search does not do: it
-    // never asserts the results are guaranteed accurate/complete, and it
-    // never claims a model "understands" or "generates" the answer.
-    expect(text.toLowerCase()).not.toMatch(/guarantee|100% accurate|always correct/);
-    expect(text.toLowerCase()).not.toMatch(/generative|large language model|\bllm\b/);
-    assertNoConsoleErrors(consoleErrors);
-  });
-
-  test('never calls out to an external AI endpoint while searching', async ({
-    page,
-    consoleErrors,
-  }) => {
-    const externalRequests = [];
-    page.on('request', (req) => {
-      const url = new URL(req.url());
-      if (url.hostname !== '127.0.0.1' && url.hostname !== 'localhost') {
-        externalRequests.push(req.url());
-      }
-    });
-    await page.locator('#query-input').fill('shut-in');
-    await page.locator('#query-input').press('Enter');
-    await expect(page.locator('#chat-log .source-card').first()).toBeVisible();
-    expect(externalRequests).toEqual([]);
-    assertNoConsoleErrors(consoleErrors);
-  });
-});
-
-test.describe('Keyword search: real matches', () => {
-  test('a real keyword returns results that are plausible actual matches', async ({
-    page,
-    consoleErrors,
-  }) => {
-    // "shut-in" is a real substring of real titles in the register (Well
-    // Shut-In Procedure, Hard Shut-In vs. Soft Shut-In, and a lessons-learned
-    // title), all in the well-safety segment, confirmed by reading
-    // documents-master.js directly before writing this test.
-    const query = 'shut-in';
-    await page.locator('#query-input').fill(query);
-    await page.locator('#query-input').press('Enter');
-    await expect(page.locator('#chat-log .source-card').first()).toBeVisible();
-
-    const rows = await indexRows(page);
-    const expected = predicateMatches(rows, query);
-    expect(expected.length).toBeGreaterThan(0);
-
-    const cardTitles = await page.locator('.source-card-title').allInnerTexts();
-    expect(cardTitles.length).toBe(expected.length);
-    // Every rendered card is one of the real matches (never an invented one)...
-    const expectedTitles = expected.map((d) => d.t).sort();
-    expect([...cardTitles].sort()).toEqual(expectedTitles);
-    // ...and the well-known document is actually among them.
-    expect(cardTitles).toContain('Well Shut-In Procedure');
-
-    // The results header names the real count, not a placeholder.
-    await expect(page.locator('.sources-label')).toContainText(String(expected.length));
-    assertNoConsoleErrors(consoleErrors);
-  });
-
-  test('a nonsense query shows an honest empty state, not an error', async ({
-    page,
-    consoleErrors,
-  }) => {
-    const query = 'zzqxnonexistentqueryimpossible987';
-    const rows = await indexRows(page);
-    // Guard the fixture itself: this string must not accidentally match.
-    expect(predicateMatches(rows, query).length).toBe(0);
-
-    await page.locator('#query-input').fill(query);
-    await page.locator('#query-input').press('Enter');
-
-    await expect(page.locator('.welcome-state h3')).toHaveText('No Documents Found');
-    await expect(page.locator('.welcome-state p')).toContainText(query);
-    await expect(page.locator('.source-card')).toHaveCount(0);
-    assertNoConsoleErrors(consoleErrors);
-  });
-});
-
-test.describe('Instant preview vs. full results', () => {
-  test('typing shows the type-ahead preview panel without opening full results', async ({
-    page,
-    consoleErrors,
-  }) => {
-    const panel = page.locator('#ir-panel');
-    await expect(panel).not.toHaveClass(/open/);
-
-    await page.locator('#query-input').fill('shut-in');
-    // renderPreview() is debounced 150ms after input.
-    await expect(panel).toHaveClass(/open/);
-    await expect(panel.locator('.ir-item')).not.toHaveCount(0);
-    await expect(panel.locator('.ir-title mark').first()).toHaveText(/shut-in/i);
-
-    // Submitting has not happened yet, so the full results view is untouched.
-    await expect(page.locator('.welcome-state h3')).toHaveText('Ready to Search');
-    assertNoConsoleErrors(consoleErrors);
-  });
-
-  test('pressing Enter closes the preview and renders full results', async ({
-    page,
-    consoleErrors,
-  }) => {
-    const panel = page.locator('#ir-panel');
-    await page.locator('#query-input').fill('shut-in');
-    await expect(panel).toHaveClass(/open/);
-
-    await page.locator('#query-input').press('Enter');
-    await expect(panel).not.toHaveClass(/open/);
-    await expect(page.locator('#chat-log .source-card').first()).toBeVisible();
-    await expect(page.locator('.msg-user .bubble')).toHaveText('shut-in');
-    assertNoConsoleErrors(consoleErrors);
-  });
-
-  test('clicking an instant-preview item opens that exact document', async ({
-    page,
-    consoleErrors,
-  }) => {
-    await page.locator('#query-input').fill('shut-in');
-    const firstItem = page.locator('#ir-panel .ir-item').first();
-    await expect(firstItem).toBeVisible();
-    const href = await firstItem.getAttribute('href');
-    expect(href).toMatch(/^viewer\.html\?doc=/);
-    assertNoConsoleErrors(consoleErrors);
-  });
-});
-
-test.describe('Segment quick-filter chips', () => {
-  test('a real segment chip narrows full results to that segment, "All" clears it', async ({
-    page,
-    consoleErrors,
-  }) => {
-    const allChip = page.locator('.seg-filters .filter-chip[data-seg="all"]');
-    const safetyChip = page.locator(`.seg-filters .filter-chip[data-seg="${SEG_WELL_SAFETY}"]`);
-    await expect(allChip).toHaveClass(/active/);
-
-    await safetyChip.click();
-    await expect(safetyChip).toHaveClass(/active/);
-    await expect(allChip).not.toHaveClass(/active/);
-
-    // Clicking a segment chip with no typed query still runs a full search
-    // (handleFilterChange -> renderFullResults) because the filter alone
-    // makes activeFilterCount() > 0.
-    await expect(page.locator('#chat-log .source-card').first()).toBeVisible();
-
-    const rows = await indexRows(page);
-    const expectedCount = rows.filter((d) => d.s === SEG_WELL_SAFETY).length;
-    expect(expectedCount).toBeGreaterThan(0);
-    // renderFullResults() caps the rendered cards at RESULT_CAP (40) even
-    // when more documents match; the header text still states the real
-    // total, so both are checked.
-    const RESULT_CAP = 40;
-    await expect(page.locator('.source-card')).toHaveCount(Math.min(expectedCount, RESULT_CAP));
-    await expect(page.locator('.sources-label')).toContainText(String(expectedCount));
-    if (expectedCount > RESULT_CAP) {
-      await expect(page.locator('.msg-ai .bubble p').first()).toContainText(
-        `Showing the first ${RESULT_CAP}`
-      );
+/* A real field case, filed and released the way it happens: an employee
+   files, QMS checks, the area's Director approves. */
+const INCIDENT = {
+  type: 'incident', area: 'drilling', location: 'Saudi Arabia', services: ['Jar', 'MM5 motor'],
+  title: 'Jar fired early while working a tight spot',
+  summary: 'The jar fired below its set load while back-reaming at 9,800 ft, and the string was pulled to surface.',
+  eventMonth: '2026-08', wellRef: 'Rig 12 / Well A-7', holeSize: '8 1/2', formation: 'Shuaiba',
+  sourceDoc: 'Daily drilling report 2026-08-14', authorRole: 'Field Engineer', classification: 'internal', sections: {},
+  incident: {
+    type: 'Drill string, jars and connections', date: '2026-08-14', activity: 'Back-reaming a tight spot',
+    symptoms: [{ time: '03:40', tag: 'Overpull above baseline', text: 'Overpull rose to 40 klbf' }],
+    tried: [{ action: 'Worked the string with reduced pull', result: 'Partial', note: '' }],
+    ending: 'POOH', findings: ['Connections and threads'], findingsText: 'Jar mandrel scored', contact: 'Drilling Supervisor, day crew',
+  },
+};
+const CASE_STUDY = {
+  type: 'case-study', area: 'drilling', location: 'UAE', services: ['DTECH RSS'],
+  title: 'RSS held the tangent through the build section', summary: 'One run through the build and tangent with the RSS.',
+  eventMonth: '2026-07', holeSize: '12 1/4', sourceDoc: 'End of well report', authorRole: 'Directional Driller',
+  sections: { challenge: 'Long tangent in hard stringers', action: 'Ran the RSS with a tuned BHA', result: 'One run, 2,100 ft' },
+};
+async function fileCases(page, { release = true } = {}) {
+  return page.evaluate(({ inc, cs, release }) => {
+    TAQA_ROLE.set('employee');
+    const a = TAQA_CASES.file(inc);
+    const b = TAQA_CASES.file(cs);
+    if (release) {
+      TAQA_ROLE.set('qms');
+      TAQA_STORE.countersign(a.record.docNumber);
+      TAQA_ROLE.set('owner'); TAQA_ROLE.setArea('drilling');
+      TAQA_STORE.approve(a.record.docNumber);
     }
+    TAQA_ROLE.set('employee');
+    return { inc: a.record.docNumber, cs: b.record.docNumber, ok: a.ok && b.ok };
+  }, { inc: INCIDENT, cs: CASE_STUDY, release });
+}
 
-    const segNames = await page.locator('.source-card-seg').allInnerTexts();
-    for (const t of segNames) expect(t).toContain('Safety Services');
-
-    await allChip.click();
-    await expect(allChip).toHaveClass(/active/);
-    await expect(safetyChip).not.toHaveClass(/active/);
-    await expect(page.locator('.welcome-state h3')).toHaveText('Ready to Search');
+test.describe('an honest page', () => {
+  test('is called Search, makes no AI claim and carries no AI styling', async ({ page, gotoApp, consoleErrors }) => {
+    await gotoApp('/ai-search.html');
+    await expect(page).toHaveTitle('Search, RISE');
+    await expect(page.locator('h1')).toHaveText('Search');
+    await expect(page.locator('#navbar a[aria-current="page"]')).toHaveText('Search');
+    // What it does, said plainly.
+    await expect(page.locator('#sr-lede')).toContainText('title, number, area and type');
+    await expect(page.locator('#sr-foot')).toContainText('nothing you type leaves the device');
+    const text = await page.locator('body').innerText();
+    expect(text).not.toMatch(/\bAI\b/);
+    // The page's own words (results are register titles and are not checked).
+    const own = (await page.locator('.sr-hero, .sr-panel, #filters-drawer, #sr-foot').allInnerTexts()).join(' ');
+    expect(own).not.toMatch(/intelligence|ask anything|generat|answer/i);
+    expect(text).not.toContain('✦');                           // no sparkle glyph
+    await expect(page.locator('.ai-safety-banner, .ai-badge, .msg-ai, .msg-user, .thinking-block, #bg-canvas')).toHaveCount(0);
+    await expect(page.locator('script[src="fixes.js"]')).toHaveCount(0);
+    await search(page, 'shut-in');
+    await expect(docRows(page).first()).toBeVisible();
+    expect(await page.locator('body').innerText()).not.toMatch(/\bAI\b/);
     assertNoConsoleErrors(consoleErrors);
   });
 
-  // Regression test for a bug fixed today: #filters-trigger-btn shares the
-  // .filter-chip CSS class with the real segment chips (for visual
-  // consistency) but is NOT one, it has no data-seg attribute and only
-  // opens the filters drawer (toggleFilters()). A since-removed duplicate
-  // filter script (fixes.js FIX 5) used to match on .filter-chip broadly
-  // and painted this button "active" on click, and could affect
-  // FILTERS.segment. The current code's syncSegmentChips() only ever
-  // touches `.seg-filters .filter-chip[data-seg]`, so the trigger button
-  // is structurally excluded now; this proves it stays that way.
-  test('the Filters drawer-trigger button is never treated as a segment chip', async ({
-    page,
-    consoleErrors,
-  }) => {
-    // The trigger button (and the off-canvas drawer behavior it opens) only
-    // exists below the 1300px "pinned sidebar" breakpoint in the page's CSS.
-    await page.setViewportSize({ width: 1024, height: 900 });
-
-    const trigger = page.locator('#filters-trigger-btn');
-    const allChip = page.locator('.seg-filters .filter-chip[data-seg="all"]');
-    await expect(trigger).toBeVisible();
-    await expect(allChip).toHaveClass(/active/);
-
-    await trigger.click();
-
-    // It opens the drawer...
-    await expect(page.locator('#filters-drawer')).toHaveClass(/open/);
-    // ...but never gains the segment-chip "active" styling.
-    await expect(trigger).not.toHaveClass(/active/);
-    // No real segment chip's state moved either.
-    await expect(allChip).toHaveClass(/active/);
-    const otherChipClasses = await page
-      .locator('.seg-filters .filter-chip[data-seg]:not([data-seg="all"])')
-      .evaluateAll((els) => els.map((el) => el.className));
-    expect(otherChipClasses.length).toBeGreaterThan(0);
-    for (const cls of otherChipClasses) expect(cls).not.toMatch(/\bactive\b/);
-    // And since FILTERS.segment is untouched, no full-results search ran.
-    await expect(page.locator('.welcome-state h3')).toHaveText('Ready to Search');
+  test('never sends anything off the device while searching', async ({ page, gotoApp, consoleErrors }) => {
+    const external = [];
+    page.on('request', (req) => {
+      const u = new URL(req.url());
+      if (u.hostname !== '127.0.0.1' && u.hostname !== 'localhost') external.push(req.url());
+    });
+    await gotoApp('/ai-search.html');
+    await page.locator('#query-input').pressSequentially('pressure test', { delay: 20 });
+    await page.locator('#query-input').press('Enter');
+    await expect(docRows(page).first()).toBeVisible();
+    expect(external).toEqual([]);
     assertNoConsoleErrors(consoleErrors);
   });
 });
 
-test.describe('Filters drawer (narrow viewport, off-canvas)', () => {
+test.describe('words match the register', () => {
+  test('a keyword returns exactly the documents that contain it, with the count said once', async ({ page, gotoApp, consoleErrors }) => {
+    await gotoApp('/ai-search.html');
+    await search(page, 'shut-in');
+    const expected = await expectedDocs(page, 'shut-in');
+    expect(expected.length).toBeGreaterThan(1);
+    await expect(docRows(page)).toHaveCount(expected.length);
+    const titles = await page.locator('#results-list .sr-docs .r-title').allInnerTexts();
+    expect([...titles].sort()).toEqual(expected.map((d) => d.t).sort());
+    expect(titles).toContain('Well Shut-In Procedure');
+    await expect(page.locator('#result-count')).toHaveText(`${expected.length} results for “shut-in”`);
+    await expect(page.locator('#results-list .sr-docs .sr-gn')).toHaveText(String(expected.length));
+    // The word is marked where it was found, and nothing else is.
+    await expect(page.locator('#results-list .sr-docs .r-title mark').first()).toHaveText(/shut-in/i);
+    // Each row names its number, area, status and review state.
+    const first = docRows(page).first();
+    await expect(first.locator('.r-num')).toHaveText(/^TQ-/);
+    await expect(first.locator('.r-area')).not.toBeEmpty();
+    await expect(first.locator('.r-state .chip').first()).toHaveText(/In force|Draft|Approved|Asset/);
+    expect(await first.getAttribute('href')).toMatch(/^viewer\.html\?doc=TQ-/);
+    assertNoConsoleErrors(consoleErrors);
+  });
+
+  test('every word has to match, so more words never find more', async ({ page, gotoApp }) => {
+    await gotoApp('/ai-search.html');
+    const one = await expectedDocs(page, 'pressure');
+    const two = await expectedDocs(page, 'pressure test');
+    expect(two.length).toBeGreaterThan(0);
+    expect(two.length).toBeLessThan(one.length);
+    await search(page, 'pressure test');
+    await expect(docRows(page)).toHaveCount(two.length);
+    // A word found only in the area or the type still counts: "coiled" is
+    // in no title of a Coiled Tubing SOP that the area name does not cover.
+    const area = await expectedDocs(page, 'coiled sop');
+    expect(area.every((d) => d.s === 'coiled-tubing' || /coiled/i.test(d.t))).toBe(true);
+    await search(page, 'coiled sop');
+    await expect(page.locator('#results-list .sr-docs .sr-gn')).toHaveText(String(area.length));
+  });
+
+  test('an exact number or title comes first', async ({ page, gotoApp }) => {
+    await gotoApp('/ai-search.html');
+    await search(page, 'TQ-TWS-CTSS-SOP-002');
+    await expect(docRows(page).first()).toHaveAttribute('href', /doc=TQ-TWS-CTSS-SOP-002&/);
+    await expect(docRows(page).first().locator('.r-num mark')).toHaveText('TQ-TWS-CTSS-SOP-002');
+    await search(page, 'well shut-in procedure');
+    await expect(docRows(page).first().locator('.r-title')).toHaveText('Well Shut-In Procedure');
+  });
+
+  test('a word nothing contains gets an honest empty state', async ({ page, gotoApp, consoleErrors }) => {
+    await gotoApp('/ai-search.html');
+    const q = 'zzqxnonexistentqueryimpossible987';
+    expect(await expectedDocs(page, q)).toHaveLength(0);
+    await search(page, q);
+    await expect(page.locator('.sr-empty h3')).toHaveText(`No results for “${q}”`);
+    await expect(page.locator('.sr-empty p')).toContainText(q);
+    await expect(page.locator('.sr-empty')).toContainText('Check the spelling, or the document number.');
+    await expect(page.locator('#results-list .result')).toHaveCount(0);
+    await expect(page.locator('#result-count')).toHaveText(`0 results for “${q}”`);
+    assertNoConsoleErrors(consoleErrors);
+  });
+});
+
+test.describe('the box', () => {
+  test('results follow the typing, and the address keeps the search', async ({ page, gotoApp }) => {
+    await gotoApp('/ai-search.html');
+    await expect(page.locator('.sr-try h3')).toHaveText('Try a search');
+    await page.locator('#query-input').pressSequentially('BHA', { delay: 30 });
+    await expect(docRows(page).first()).toBeVisible();          // no Enter needed
+    await expect(page).toHaveURL(/\/ai-search\.html\?q=BHA$/);
+    await page.locator('#sr-clear').click();
+    await expect(page.locator('#query-input')).toHaveValue('');
+    await expect(page.locator('#query-input')).toBeFocused();
+    await expect(page.locator('.sr-try')).toBeVisible();
+    await expect(page).toHaveURL(/\/ai-search\.html$/);
+  });
+
+  test('?q= opens with the search run and recorded once', async ({ page, gotoApp, consoleErrors }) => {
+    await gotoApp('/ai-search.html?q=' + encodeURIComponent('shut-in'));
+    await expect(page.locator('#query-input')).toHaveValue('shut-in');
+    await expect(docRows(page).first()).toBeVisible();
+    const searches = await page.evaluate(() => JSON.parse(localStorage.getItem('taqa-analytics') || '[]').filter((e) => e.e === 'search').map((e) => e.k));
+    expect(searches).toEqual(['shut-in']);
+    assertNoConsoleErrors(consoleErrors);
+  });
+
+  test('every example offered finds something', async ({ page, gotoApp }) => {
+    await gotoApp('/ai-search.html');
+    const examples = await page.locator('.sr-try button').allInnerTexts();
+    expect(examples.length).toBeGreaterThan(2);
+    for (const q of examples) {
+      const n = await expectedDocs(page, q);
+      expect(n.length, q).toBeGreaterThan(0);
+    }
+    await page.locator('.sr-try button').first().click();
+    await expect(page.locator('#query-input')).toHaveValue(examples[0]);
+    await expect(docRows(page).first()).toBeVisible();
+  });
+
+  test('"/" jumps to the box from anywhere, and the arrows walk the list', async ({ page, gotoApp }) => {
+    await gotoApp('/ai-search.html?q=shut-in');
+    await page.locator('h1').click();
+    await page.keyboard.press('/');
+    await expect(page.locator('#query-input')).toBeFocused();
+    await page.keyboard.press('ArrowDown');
+    await expect(docRows(page).nth(0)).toBeFocused();
+    await page.keyboard.press('ArrowDown');
+    await expect(docRows(page).nth(1)).toBeFocused();
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('ArrowUp');
+    await expect(page.locator('#query-input')).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#query-input')).toHaveValue('');
+  });
+});
+
+test.describe('documents and field cases', () => {
+  test('with no case released, Field cases says so and points at the library', async ({ page, gotoApp, consoleErrors }) => {
+    await gotoApp('/ai-search.html');
+    await expect(page.locator('#n-cases')).toHaveText('0');
+    await expect(page.locator('#st-cases')).toHaveText('0');
+    await expect(page.locator('#results-list')).toContainText('No field cases have been released yet');
+    await page.locator('#sr-content label', { hasText: 'Field cases' }).click();
+    await expect(page.locator('.sr-empty h3')).toHaveText('No field cases yet');
+    await expect(page.locator('.sr-empty a[href="cases.html"]')).toBeVisible();
+    await expect(page).toHaveURL(/content=cases/);
+    assertNoConsoleErrors(consoleErrors);
+  });
+
+  test('a released case is found as a case, links to case.html and shows area, location and service', async ({ page, gotoApp, setRole, consoleErrors }) => {
+    await gotoApp('/ai-search.html');
+    const n = await fileCases(page);
+    expect(n.ok).toBe(true);
+    await setRole('employee');
+    await gotoApp('/ai-search.html');
+    await expect(page.locator('#st-cases')).toHaveText('1');
+    await search(page, 'jar');
+    const row = caseRows(page);
+    await expect(row).toHaveCount(1);                 // the case study is still with QMS and has no jar
+    await expect(row).toHaveAttribute('href', `case.html?doc=${n.inc}&rev=1.0`);
+    await expect(row.locator('.r-kicker')).toHaveText('Field case · Failure / incident card');
+    await expect(row.locator('.r-title')).toHaveText(INCIDENT.title);
+    await expect(row.locator('.r-area')).toHaveText('Drilling Services');
+    await expect(row.locator('.r-loc')).toHaveText('Saudi Arabia');
+    await expect(row.locator('.r-svc')).toHaveText('Jar, MM5 motor');
+    await expect(row.locator('.r-hole')).toHaveText('8 1/2 in');
+    await expect(row.locator('.r-end')).toHaveText('Ended: POOH');
+    await expect(row.locator('.chip')).toHaveText('Published');
+    // The case is a register record too, but it is listed once, as a case.
+    await expect(page.locator(`#results-list .sr-docs a[href*="${n.inc}"]`)).toHaveCount(0);
+    const docs = await expectedDocs(page, 'jar');
+    await expect(page.locator('#n-docs')).toHaveText(String(docs.length));
+    await expect(page.locator('#n-cases')).toHaveText('1');
+    await expect(page.locator('#n-all')).toHaveText(String(docs.length + 1));
+    await expect(page.locator('#result-count')).toHaveText(`${docs.length + 1} results for “jar”`);
+
+    await page.locator('#sr-content label', { hasText: 'Documents' }).click();
+    await expect(caseRows(page)).toHaveCount(0);
+    await expect(docRows(page)).toHaveCount(docs.length);
+    await page.locator('#sr-content label', { hasText: 'Field cases' }).click();
+    await expect(docRows(page)).toHaveCount(0);
+    await expect(caseRows(page)).toHaveCount(1);
+    await expect(page.locator('#result-count')).toHaveText('1 field case for “jar”');
+
+    await caseRows(page).click();
+    await expect(page).toHaveURL(new RegExp(`case\\.html\\?doc=${n.inc}&rev=1\\.0`));
+    await expect(page.locator('h1')).toHaveText(INCIDENT.title);
+    assertNoConsoleErrors(consoleErrors);
+  });
+
+  test('words written inside a case find it, not only its title', async ({ page, gotoApp, setRole }) => {
+    await gotoApp('/ai-search.html');
+    const n = await fileCases(page);
+    await setRole('employee');
+    await gotoApp('/ai-search.html?content=cases');
+    await search(page, 'mandrel scored');            // only in the findings
+    await expect(caseRows(page)).toHaveCount(1);
+    await expect(caseRows(page)).toHaveAttribute('href', new RegExp(n.inc));
+  });
+
+  test('a case still on its way is shown to its filer with its status, and to nobody it is not open to', async ({ page, gotoApp, setRole }) => {
+    await gotoApp('/ai-search.html');
+    const n = await fileCases(page, { release: false });
+    await setRole('employee');
+    await gotoApp('/ai-search.html?content=cases');
+    await expect(caseRows(page)).toHaveCount(2);
+    await expect(page.locator(`#results-list a[href*="${n.cs}"] .chip`)).toHaveText('With QMS');
+    await expect(page.locator('#st-cases')).toHaveText('0');      // nothing released yet
+    await setRole('owner', 'wireline');
+    await gotoApp('/ai-search.html?content=cases');
+    await expect(caseRows(page)).toHaveCount(0);
+    await expect(page.locator('.sr-empty h3')).toHaveText('No field cases yet');
+    await setRole('qms', 'drilling');
+    await gotoApp('/ai-search.html?q=RSS&content=cases');
+    await expect(caseRows(page)).toHaveCount(1);
+  });
+
+  test('a case type narrows to field cases, a document type to documents', async ({ page, gotoApp, setRole }) => {
+    await gotoApp('/ai-search.html');
+    await fileCases(page);
+    await setRole('employee');
+    await gotoApp('/ai-search.html');
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.locator('#f-type').selectOption('case:incident');
+    await expect(page.locator('#sr-content input[value="cases"]')).toBeChecked();
+    await expect(caseRows(page)).toHaveCount(1);
+    await expect(page.locator('#n-docs')).toHaveText('0');
+    await page.locator('#f-type').selectOption('sop');
+    await expect(page.locator('#sr-content input[value="docs"]')).toBeChecked();
+    await expect(caseRows(page)).toHaveCount(0);
+    await expect(page.locator('#n-cases')).toHaveText('0');
+  });
+});
+
+test.describe('filters', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test('an area narrows the list to that area, and its chip takes it off again', async ({ page, gotoApp, consoleErrors }) => {
+    await gotoApp('/ai-search.html');
+    await expect(page.locator('#filters-trigger-btn')).toBeHidden();      // a column here, not a drawer
+    await page.locator('#f-segment').selectOption('well-safety');
+    const expected = await expectedDocs(page, '', (d) => d.s === 'well-safety');
+    expect(expected.length).toBeGreaterThan(0);
+    await expect(page.locator('#results-list .sr-docs .sr-gn')).toHaveText(String(expected.length));
+    await expect(docRows(page)).toHaveCount(Math.min(expected.length, 40));
+    for (const t of await page.locator('#results-list .sr-docs .r-area').allInnerTexts()) expect(t).toBe('Safety Services');
+    await expect(page).toHaveURL(/area=well-safety/);
+    const chip = page.locator('.sr-fchip');
+    await expect(chip).toHaveText('Area: Safety Services');
+    await chip.click();
+    await expect(page.locator('#f-segment')).toHaveValue('all');
+    await expect(page.locator('.sr-try')).toBeVisible();
+    assertNoConsoleErrors(consoleErrors);
+  });
+
+  test('status and type add up (AND), are kept in the address, and clear together', async ({ page, gotoApp }) => {
+    await gotoApp('/ai-search.html');
+    const drafts = await expectedDocs(page, '', (d) => d.st === 'draft' || d.st === 'approved');
+    expect(drafts.length).toBeGreaterThan(0);
+    await page.locator('#f-status').selectOption('draft');
+    await expect(docRows(page)).toHaveCount(drafts.length);
+    await expect(docRows(page).first().locator('.chip').first()).toHaveText(/not yet in force/);
+    await expect(page.locator('#filters-badge')).toHaveText('1');
+    const draftSops = drafts.filter((d) => d.tp === 'sop');
+    await page.locator('#f-type').selectOption('sop');
+    await expect(docRows(page)).toHaveCount(draftSops.length);
+    await expect(page.locator('#filters-badge')).toHaveText('2');
+    await expect(page).toHaveURL(/type=sop/);
+    await page.reload();
+    await expect(page.locator('#f-status')).toHaveValue('draft');
+    await expect(page.locator('#f-type')).toHaveValue('sop');
+    await expect(docRows(page)).toHaveCount(draftSops.length);
+    await page.locator('#filters-clear-btn').click();
+    await expect(page.locator('#filters-badge')).toBeHidden();
+    await expect(page.locator('#f-status')).toHaveValue('all');
+    await expect(page.locator('#f-type')).toHaveValue('all');
+    await expect(page.locator('.sr-try')).toBeVisible();
+  });
+
+  test('a long list shows 40 at a time and says so', async ({ page, gotoApp }) => {
+    await gotoApp('/ai-search.html?content=docs');
+    const all = await expectedDocs(page, '');
+    expect(all.length).toBeGreaterThan(80);
+    await expect(docRows(page)).toHaveCount(40);
+    await expect(page.locator('.sr-more span')).toContainText(`Showing 40 of ${all.length}`);
+    await page.locator('.sr-more button').click();
+    await expect(docRows(page)).toHaveCount(80);
+    await expect(docRows(page).nth(40)).toBeFocused();
+  });
+});
+
+test.describe('the filters drawer below 1100px', () => {
   test.use({ viewport: { width: 1024, height: 900 } });
 
-  test('opens via the trigger, closes via the close button, the scrim, and Escape', async ({
-    page,
-    consoleErrors,
-  }) => {
-    const drawer = page.locator('#filters-drawer');
-    const trigger = page.locator('#filters-trigger-btn');
-    const scrim = page.locator('#filters-scrim');
-
+  test('opens from its button and closes from its own button, the shade and Escape', async ({ page, gotoApp, consoleErrors }) => {
+    await gotoApp('/ai-search.html');
+    const drawer = page.locator('#filters-drawer'), trigger = page.locator('#filters-trigger-btn'), scrim = page.locator('#filters-scrim');
     await expect(drawer).not.toHaveClass(/open/);
-
+    await expect(drawer).toHaveAttribute('role', 'dialog');
     await trigger.click();
     await expect(drawer).toHaveClass(/open/);
     await expect(scrim).toHaveClass(/open/);
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
-
     await page.locator('.filters-close-btn').click();
     await expect(drawer).not.toHaveClass(/open/);
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
-
+    await expect(trigger).toBeFocused();
     await trigger.click();
-    await expect(drawer).toHaveClass(/open/);
-    // Click the scrim well away from both the fixed top navbar and the
-    // 284px-wide drawer itself, so the click actually lands on the scrim.
     await scrim.click({ position: { x: 900, y: 500 } });
     await expect(drawer).not.toHaveClass(/open/);
-
     await trigger.click();
     await expect(drawer).toHaveClass(/open/);
     await page.keyboard.press('Escape');
@@ -314,154 +416,104 @@ test.describe('Filters drawer (narrow viewport, off-canvas)', () => {
     assertNoConsoleErrors(consoleErrors);
   });
 
-  test('status and type filters in the drawer actually narrow results', async ({
-    page,
-    consoleErrors,
-  }) => {
+  test('a filter set inside it runs at once, and its button says how many results wait', async ({ page, gotoApp }) => {
+    await gotoApp('/ai-search.html');
     await page.locator('#filters-trigger-btn').click();
-
-    const rows = await indexRows(page);
-    const expectedDraftCount = rows.filter((d) => d.st === 'draft').length;
-    expect(expectedDraftCount).toBeGreaterThan(0);
-
+    const drafts = await expectedDocs(page, '', (d) => d.st === 'draft' || d.st === 'approved');
     await page.locator('#f-status').selectOption('draft');
-    // A filter-only change with no typed query still triggers full results.
-    await expect(page.locator('#chat-log .source-card, .welcome-state h3').first()).toBeVisible();
-    if (expectedDraftCount > 0) {
-      await expect(page.locator('.source-card')).toHaveCount(expectedDraftCount);
-      await expect(page.locator('.result-note').first()).toContainText('Draft');
+    await expect(page.locator('#filters-done')).toHaveText(`Show ${drafts.length} results`);
+    await expect(page.locator('#filters-badge-mini')).toHaveText('1');
+    await page.locator('#filters-done').click();
+    await expect(page.locator('#filters-drawer')).not.toHaveClass(/open/);
+    await expect(docRows(page)).toHaveCount(drafts.length);
+  });
+});
+
+test.describe('escaping', () => {
+  test('a query carrying markup is shown as text, never run', async ({ page, gotoApp, consoleErrors }) => {
+    await gotoApp('/ai-search.html');
+    let dialog = false;
+    page.on('dialog', async (d) => { dialog = true; await d.dismiss(); });
+    const scripts = await page.locator('script').count();
+    for (const payload of ['<script>alert(1)</script>', '<img src=x onerror=alert(1)>', '"><b>shut-in</b>']) {
+      await search(page, payload);
+      await expect(page.locator('.sr-empty h3')).toContainText(payload);
+      await expect(page.locator('#result-count')).toContainText(payload);
     }
-    await expect(page.locator('#filters-badge')).toHaveText('1');
-
-    // Add a document-type filter on top (AND), narrowing further or equal.
-    const expectedDraftSop = rows.filter((d) => d.st === 'draft' && d.tp === 'sop').length;
-    await page.locator('#f-type').selectOption('sop');
-    await expect(page.locator('.source-card')).toHaveCount(expectedDraftSop);
-    await expect(page.locator('#filters-badge')).toHaveText('2');
-
-    await page.locator('#filters-clear-btn').click();
-    await expect(page.locator('#filters-badge')).toBeHidden();
-    await expect(page.locator('#f-status')).toHaveValue('all');
-    await expect(page.locator('#f-type')).toHaveValue('all');
-    await expect(page.locator('.welcome-state h3')).toHaveText('Ready to Search');
+    expect(await page.locator('script').count()).toBe(scripts);
+    expect(await page.locator('#results-list img').count()).toBe(0);
+    expect(dialog).toBe(false);
     assertNoConsoleErrors(consoleErrors);
+  });
+
+  test('a real title with an ampersand reads correctly, highlighted or not', async ({ page, gotoApp }) => {
+    await gotoApp('/ai-search.html');
+    await search(page, 'Offboarding');
+    await expect(page.locator('#results-list .r-title', { hasText: 'Exit & Offboarding SOP' })).toHaveCount(1);
+    await search(page, 'exit &');
+    await expect(page.locator('#results-list .r-title', { hasText: 'Exit & Offboarding SOP' })).toHaveCount(1);
   });
 });
 
-test.describe('XSS / escaping', () => {
-  test('an HTML-bearing query is rendered as literal text everywhere it is echoed', async ({
-    page,
-    consoleErrors,
-  }) => {
-    let dialogFired = false;
-    page.on('dialog', async (d) => {
-      dialogFired = true;
-      await d.dismiss();
-    });
+test.describe('on a phone (390px)', () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
 
-    const scriptCountBefore = await page.locator('script').count();
-    const payload = '<script>alert(1)</script>';
-
-    await page.locator('#query-input').fill(payload);
-    // Preview echoes the query into highlight()/esc() too; give it a beat.
-    await page.waitForTimeout(250);
-    await page.locator('#query-input').press('Enter');
-
-    // No match for this literal payload against real titles, so the empty
-    // state renders, and its "match "<query>"" text must be the literal
-    // string, decoded back from the escaped markup, not executed HTML.
-    await expect(page.locator('.welcome-state h3')).toHaveText('No Documents Found');
-    await expect(page.locator('.welcome-state p')).toContainText(payload);
-
-    const scriptCountAfter = await page.locator('script').count();
-    expect(scriptCountAfter).toBe(scriptCountBefore);
-    expect(dialogFired).toBe(false);
+  test('nothing runs off the side, before or after results, with a case among them', async ({ page, gotoApp, setRole, consoleErrors }) => {
+    await gotoApp('/ai-search.html');
+    await fileCases(page);
+    await setRole('employee');
+    await gotoApp('/ai-search.html');
+    const over = () => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(await over()).toBeLessThanOrEqual(1);
+    await search(page, 'jar');
+    await expect(caseRows(page)).toHaveCount(1);
+    expect(await over()).toBeLessThanOrEqual(1);
+    for (const r of await page.locator('#results-list .result').all()) {
+      const b = await r.boundingBox();
+      expect(b.x).toBeGreaterThanOrEqual(0);
+      expect(b.x + b.width).toBeLessThanOrEqual(390);
+    }
+    // The three content choices share one row and each is a full tap target.
+    for (const l of await page.locator('.sr-seg-o span').all()) expect((await l.boundingBox()).height).toBeGreaterThanOrEqual(36);
     assertNoConsoleErrors(consoleErrors);
   });
 
-  test('an HTML-bearing query that does match still renders the doc title unescaped-safe', async ({
-    page,
-    consoleErrors,
-  }) => {
-    // Craft a query that both contains markup AND matches a real document,
-    // by wrapping a real keyword: highlight() escapes the title first and
-    // only wraps <mark> around the safely-escaped text, so this proves the
-    // matched title never becomes raw markup even alongside a markup-like query.
-    let dialogFired = false;
-    page.on('dialog', async () => {
-      dialogFired = true;
-    });
-
-    await page.locator('#query-input').fill('<b>shut-in</b>');
-    await page.waitForTimeout(250);
-    // No literal title contains "<b>shut-in</b>", so this is an empty-state
-    // case too, but it exercises highlight()'s regex path (built from the
-    // raw, HTML-unescaped query) against the escaped title without throwing.
-    await page.locator('#query-input').press('Enter');
-    await expect(page.locator('.welcome-state h3')).toHaveText('No Documents Found');
-    expect(dialogFired).toBe(false);
-    assertNoConsoleErrors(consoleErrors);
-  });
-
-  test('real titles containing HTML-special characters render correctly (ampersand)', async ({
-    page,
-    consoleErrors,
-  }) => {
-    // "Exit & Offboarding SOP" is a real title (documents-master.js, HR
-    // segment) and exercises esc() on real register data, not just a
-    // synthetic payload: a naive template would either double-escape it
-    // ("Exit &amp;amp; Offboarding SOP") or leave it unescaped and break
-    // the surrounding markup.
-    await page.locator('#query-input').fill('Offboarding');
-    await page.locator('#query-input').press('Enter');
-    await expect(page.locator('.source-card-title').first()).toBeVisible();
-    const titles = await page.locator('.source-card-title').allInnerTexts();
-    expect(titles.some((t) => t === 'Exit & Offboarding SOP')).toBe(true);
-    assertNoConsoleErrors(consoleErrors);
-  });
-});
-
-test.describe('Mobile responsiveness (390px)', () => {
-  test.use({ viewport: { width: 390, height: 844 } });
-
-  test('no horizontal overflow on load or with results rendered', async ({
-    page,
-    consoleErrors,
-  }) => {
-    const overflowBefore = await page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
-    );
-    expect(overflowBefore).toBeLessThanOrEqual(1);
-
-    await page.locator('#query-input').fill('shut-in');
-    await page.locator('#query-input').press('Enter');
-    await expect(page.locator('#chat-log .source-card').first()).toBeVisible();
-
-    const overflowAfter = await page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
-    );
-    expect(overflowAfter).toBeLessThanOrEqual(1);
-    assertNoConsoleErrors(consoleErrors);
-  });
-
-  test('the filters drawer is usable at 390px width', async ({ page, consoleErrors }) => {
-    const trigger = page.locator('#filters-trigger-btn');
+  test('the filters rise as a sheet that fits the screen and closes on its result button', async ({ page, gotoApp }) => {
+    await gotoApp('/ai-search.html');
+    await page.locator('#filters-trigger-btn').click();
     const drawer = page.locator('#filters-drawer');
-    await expect(trigger).toBeVisible();
-
-    await trigger.click();
     await expect(drawer).toHaveClass(/open/);
+    await page.waitForTimeout(350);
     const box = await drawer.boundingBox();
-    expect(box).not.toBeNull();
-    // The drawer must fit on screen (max-width:86vw in its own CSS) rather
-    // than spilling past the 390px viewport.
-    expect(box.x + box.width).toBeLessThanOrEqual(390 + 1);
-
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(391);
+    expect(box.y + box.height).toBeLessThanOrEqual(845);
     await page.locator('#f-status').selectOption('draft');
     await expect(page.locator('#filters-badge')).toHaveText('1');
-
-    await page.locator('.filters-close-btn').click();
+    await page.locator('#filters-done').click();
     await expect(drawer).not.toHaveClass(/open/);
-    assertNoConsoleErrors(consoleErrors);
   });
+
+  test('at 320px the page still fits', async ({ page, gotoApp }) => {
+    await page.setViewportSize({ width: 320, height: 700 });
+    await gotoApp('/ai-search.html?q=pressure');
+    await expect(docRows(page).first()).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+  });
+});
+
+test.describe('every role', () => {
+  for (const [role, area] of [['employee', null], ['owner', 'drilling'], ['maintenance', 'drilling'], ['qms', null], ['auditor', null]]) {
+    test(`${role}${area ? '@' + area : ''}: Search opens and finds with no console error`, async ({ page, gotoApp, setRole, consoleErrors }) => {
+      await gotoApp('/ai-search.html');
+      await fileCases(page);
+      await setRole(role, area || undefined);
+      await gotoApp('/ai-search.html?q=jar');
+      await expect(page.locator('h1')).toHaveText('Search');
+      await expect(page.locator('#results-list .result, #results-list .sr-empty').first()).toBeVisible();
+      await page.locator('#sr-content label', { hasText: 'Field cases' }).click();
+      await expect(page.locator('#result-count')).toBeVisible();
+      assertNoConsoleErrors(consoleErrors);
+    });
+  }
 });

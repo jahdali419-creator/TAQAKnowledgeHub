@@ -510,7 +510,8 @@ html[data-taqa-theme="dark"] .policy-rules {
       <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
     </li>
-    <li><a href="ai-search.html">Document Search</a></li>
+    <li><a href="cases.html">Cases</a></li>
+    <li><a href="ai-search.html">Search</a></li>
     <li class="nav-reg"><a href="master-list.html">Master List</a></li>
     <li><a href="glossary.html">Field Glossary</a></li>
     <li><a href="support-ticket.html">Ask Expert</a></li>
@@ -1524,6 +1525,8 @@ function refileAttempt(){
 function startRefile(key){
   var note = document.getElementById('refile-note');
   var r = TAQA_STORE.byKey(key);
+  // A returned field case is filed again on its own form, card and all.
+  if (r && r.card && typeof r.card === 'object') { location.replace('case-new.html?edit=' + encodeURIComponent(key)); return; }
   var problem = (!r || !r.rejected || r.status !== 'draft') ? 'That filing cannot be filed again: it is not a returned attempt.'
     : TAQA_STORE.checkFiling({ title: 'again', resubmitOf: key, docNumber: r.docNumber });
   note.hidden = false;
@@ -1669,6 +1672,9 @@ function revisionCandidates() {
   return Object.keys(nums).map(function(n){
     const p = TAQA_STORE.revisionParent(n);
     if (!p || !seeable(p)) return null;
+    // A lesson or alert filed as a field case keeps its card: it is not
+    // revised here as a plain document (the store refuses that too).
+    if (p.card && typeof p.card === 'object') return null;
     if (type !== 'bulletin' && (p.department || null) !== dept) return null;
     return { num: n, title: p.title, rev: p.revision || '', reissue: p.status === 'superseded',
              busy: !!TAQA_STORE.openDraft(n) };
@@ -2117,7 +2123,9 @@ function paintMySubmissions(){
       var later = TAQA_STORE.revisionsOf(d.docNumber).some(function(x){
         return String(x.revision || '') === String(d.revision || '') && (x.attempt || 1) > (d.attempt || 1);
       });
-      if (!later) why += '<a class="subs-again" href="upload.html?refile=' + encodeURIComponent(TAQA_STORE.recordKey(d)) + '">File it again</a>';
+      // A field case is filed again from its own form, with its card.
+      if (!later) why += '<a class="subs-again" href="' + (d.card ? 'case-new.html?edit=' : 'upload.html?refile=') +
+        encodeURIComponent(TAQA_STORE.recordKey(d)) + '">File it again</a>';
     } else if (d.status === 'current') { st = 'Published'; cls = 'st-live'; }
     else if (d.status === 'superseded') { st = 'Superseded'; cls = 'st-back'; }
     else if (d.status === 'obsolete' && d.cancelled) {

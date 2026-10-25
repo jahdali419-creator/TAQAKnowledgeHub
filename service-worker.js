@@ -1,4 +1,4 @@
-const CACHE = 'taqa-hub-v111';
+const CACHE = 'taqa-hub-v112';
 
 // Detect base path automatically, works on GitHub Pages and Azure
 const BASE = self.location.pathname.replace('service-worker.js', '');
@@ -12,7 +12,6 @@ const CORE = [
   BASE + 'form.html',
   BASE + 'forms-data.js',
   BASE + 'shared.js',
-  BASE + 'fixes.js',
   BASE + 'segments-data.js',
   // The register, the role rules and the counting layer. Without these three
   // an offline page loads its shell and then shows no documents and no counts
@@ -33,6 +32,14 @@ const CORE = [
   // Recognition: points and levels for released work (demo).
   BASE + 'recognition.html',
   BASE + 'recognition.js',
+  // Field cases: the library, one case, the form, the pre-job pack, and
+  // the two files every one of them reads.
+  BASE + 'cases.html',
+  BASE + 'case.html',
+  BASE + 'case-new.html',
+  BASE + 'prejob.html',
+  BASE + 'cases-data.js',
+  BASE + 'cases.js',
   BASE + 'qrcode.js',
   BASE + 'qr.js',
   BASE + 'techhub.css',

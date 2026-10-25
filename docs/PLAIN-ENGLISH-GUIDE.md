@@ -427,7 +427,7 @@ Short answers. If you do not know something, say **"Let me confirm and come back
 | Is it backed up? | The code is in version control with full history. There is no other data yet. |
 | Who supports it? | Nobody in IT yet. That is one of my three asks. |
 | Why is it on public GitHub? | The free preview link requires it. It goes private the day TAQA hosting is live. No passwords or real documents are in it. |
-| Is there AI in it? | No. The page labelled AI Search does keyword matching against a fixed list. Nothing is sent to any AI service. |
+| Is there AI in it? | No. Search does keyword matching against the register held in the browser. Nothing is sent to any AI service. |
 | What about Arabic? | It is English only today. If Arabic is needed, that is a separate piece of work to scope. |
 | Can people use it offline? | Yes, and that is a question for you: it means documents cache onto the device, including personal phones. |
 | How long will it take? | One to two days to be running on TAQA Azure. Two to three more for login, once the App Registration is approved. |

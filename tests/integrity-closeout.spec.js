@@ -165,20 +165,20 @@ test.describe('PI-22: an exact number of a withdrawn document says what it is', 
     await gotoApp('/ai-search.html');
     await page.locator('#query-input').fill(q);
     await page.locator('#query-input').press('Enter');
-    await expect(page.locator('#chat-log h3, #chat-log h4').first()).toBeVisible();
+    await expect(page.locator('#results-list h3').first()).toBeVisible();
   }
 
   test('a superseded number: one card, marked Superseded, naming the missing successor and SCORE', async ({ page, gotoApp, setRole, clearAppState, consoleErrors }) => {
     await start(page, gotoApp, clearAppState, setRole, 'employee');
     await search(page, gotoApp, SUPERSEDED.n);
-    const card = page.locator('#chat-log .source-card-withdrawn');
+    const card = page.locator('#results .result-withdrawn');
     await expect(card).toHaveCount(1);
     await expect(card).toContainText('Superseded. Do not use.');
     await expect(card).toContainText('This document exists, but the matching revision is superseded');
     await expect(card).toContainText('Rev 4.0');
     await expect(card).toContainText('SCORE');
-    await expect(page.locator('#chat-log')).not.toContainText('check the document number');
-    await expect(page.locator('#chat-log')).not.toContainText(/\bCurrent\b/);
+    await expect(page.locator('#results-list')).not.toContainText('check the document number');
+    await expect(page.locator('#results-list')).not.toContainText(/\bCurrent\b/);
     // It opens that revision, which the document page shows as withdrawn.
     await card.click();
     await expect(page).toHaveURL(/viewer\.html\?doc=TQ-TWS-CTSS-SOP-003&rev=3\.0/);
@@ -191,7 +191,7 @@ test.describe('PI-22: an exact number of a withdrawn document says what it is', 
     await start(page, gotoApp, clearAppState, setRole, 'employee');
     for (const q of [OBSOLETE.legacy, OBSOLETE.n.toLowerCase()]) {
       await search(page, gotoApp, q);
-      const card = page.locator('#chat-log .source-card-withdrawn');
+      const card = page.locator('#results .result-withdrawn');
       await expect(card).toHaveCount(1);
       await expect(card).toContainText('Withdrawn. Do not use.');
       await expect(card).toContainText(OBSOLETE.n);
@@ -201,18 +201,18 @@ test.describe('PI-22: an exact number of a withdrawn document says what it is', 
   test('a restricted withdrawn number stays not found for an Employee, and is shown to QMS', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, clearAppState, setRole, 'employee');
     await search(page, gotoApp, GONE_RESTRICTED.n);
-    await expect(page.locator('#chat-log .source-card-withdrawn')).toHaveCount(0);
-    await expect(page.locator('#chat-log')).toContainText('No Documents Found');
+    await expect(page.locator('#results .result-withdrawn')).toHaveCount(0);
+    await expect(page.locator('#results-list')).toContainText('No results for');
     await setRole('qms', CT);
     await search(page, gotoApp, GONE_RESTRICTED.n);
-    await expect(page.locator('#chat-log .source-card-withdrawn')).toHaveCount(1);
+    await expect(page.locator('#results .result-withdrawn')).toHaveCount(1);
   });
 
   test('a partial number never brings a withdrawn record into the results', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, clearAppState, setRole, 'employee');
     await search(page, gotoApp, 'TQ-TWS-CTSS-SOP-00');
-    await expect(page.locator('#chat-log .source-card-withdrawn')).toHaveCount(0);
-    await expect(page.locator('#chat-log')).not.toContainText(SUPERSEDED.t);
+    await expect(page.locator('#results .result-withdrawn')).toHaveCount(0);
+    await expect(page.locator('#results-list')).not.toContainText(SUPERSEDED.t);
   });
 });
 
@@ -275,12 +275,12 @@ test.describe('PI-27: titles and counts are what the reader may open', () => {
     await gotoApp('/ai-search.html');
     await page.locator('#query-input').fill(RESTRICTED.t);
     await page.locator('#query-input').press('Enter');
-    await expect(page.locator('#chat-log')).toContainText('No Documents Found');
+    await expect(page.locator('#results-list')).toContainText('No results for');
     await setRole('qms', CT);
     await gotoApp('/ai-search.html');
     await page.locator('#query-input').fill(RESTRICTED.t);
     await page.locator('#query-input').press('Enter');
-    await expect(page.locator('#chat-log .source-card').first()).toContainText(RESTRICTED.t);
+    await expect(page.locator('#results .result').first()).toContainText(RESTRICTED.t);
   });
 
   test('document page: a restricted number reads exactly like a number that does not exist', async ({ page, gotoApp, setRole, clearAppState, consoleErrors }) => {

@@ -238,7 +238,9 @@ test.describe('analytics.html', () => {
 
     const pagesList = page.locator('#pages-list');
     await expect(pagesList).toContainText('Field Glossary');
-    await expect(pagesList).toContainText('AI Search');
+    await expect(pagesList).toContainText('Search');
+    // The page is plain Search: no AI label survives in the analytics either.
+    await expect(pagesList).not.toContainText('AI Search');
 
     // renderAnalytics() (analytics.html:280-327, called at line 356) runs
     // from a <script> that sits BEFORE shared.js's own <script src> tag

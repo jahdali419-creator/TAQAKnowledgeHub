@@ -1,8 +1,10 @@
 // RISE Recognition (demo): points and levels for released work only.
 //
-//   10  a document the person filed is released
+//   10  a document the person filed is released (a field case card such as
+//       a case study or best practice counts as a document)
 //   15  a new revision of a document whose review was overdue
-//   20  a Lesson Learned or Technical Alert is released
+//   20  a Lesson Learned, failure / incident card or Technical Alert is
+//       released, as a document or as a field case
 //    0  a filing that is returned, rejected, still in the queue, or
 //       approved for a later date that has not arrived
 //
@@ -31,6 +33,13 @@ const as = (page, role, area, fn, arg) => page.evaluate(({ role, area, src, arg 
 const fileNew = (page, area, type, title) => as(page, 'employee', null, ({ area, type, title }) => {
   const n = TAQA_STORE.nextNumber(area, type);
   const d = TAQA_STORE.add({ docNumber: n, title, segment: area, docType: type, revision: '1.0', summary: 'Filed for the recognition test.' });
+  return d ? d.docNumber : null;
+}, { area, type, title });
+// An employee files a field case (a register record with its card).
+const fileCase = (page, area, type, title) => as(page, 'employee', null, ({ area, type, title }) => {
+  const n = TAQA_STORE.nextNumber(area, type);
+  const d = TAQA_STORE.add({ docNumber: n, title, segment: area, docType: type, revision: '1.0', summary: 'Filed for the recognition test.',
+    card: { v: 1, type, area, location: 'Saudi Arabia', services: ['Jar'], eventMonth: '2026-08', sourceDoc: 'Test source', authorRole: 'Field Engineer', sections: {} } });
   return d ? d.docNumber : null;
 }, { area, type, title });
 const check = (page, n) => as(page, 'qms', null, (n) => TAQA_STORE.countersign(n), n);
@@ -116,6 +125,22 @@ test.describe('Points are earned only for released work', () => {
     expect((await release(page, 'drilling', n)).ok).toBe(true);
     const mine = await as(page, 'employee', null, () => TAQA_RECOGNITION.contributions().map((c) => [c.revision, c.kind, c.points]));
     expect(mine.sort()).toEqual([['4.0', 'document', 10], ['5.0', 'document', 10]]);
+  });
+
+  test('an incident card earns 20 like a lesson; any other field case earns 10 as a document', async ({ page, gotoApp, clearAppState, setRole }) => {
+    await start(page, gotoApp, clearAppState, setRole);
+    const inc = await fileCase(page, 'drilling', 'incident', 'Jar fired early at 9,800 ft');
+    const cs = await fileCase(page, 'drilling', 'case-study', 'RSS run through the build section');
+    const bp = await fileCase(page, 'drilling', 'practice', 'Shock sub placement in hard stringers');
+    expect([inc, cs, bp].every(Boolean)).toBe(true);
+    for (const n of [inc, cs, bp]) {
+      expect((await check(page, n)).ok).toBe(true);
+      expect((await release(page, 'drilling', n)).ok).toBe(true);
+    }
+    const mine = await as(page, 'employee', null, () => TAQA_RECOGNITION.contributions().map((c) => [c.doc.docType, c.kind, c.points]));
+    expect(mine.sort()).toEqual([['case-study', 'document', 10], ['incident', 'lesson', 20], ['practice', 'document', 10]]);
+    expect(await employeePoints(page)).toBe(40);
+    expect(await page.evaluate(() => TAQA_RECOGNITION.KIND_LABEL.lesson)).toBe('Lesson, incident or alert released');
   });
 
   test('an ordinary release earns 10 and a returned filing earns 0', async ({ page, gotoApp, clearAppState, setRole }) => {
@@ -313,7 +338,7 @@ test.describe('My contributions page', () => {
     for (const role of ['qms', 'auditor']) {
       await start(page, gotoApp, clearAppState, setRole, role);
       await gotoApp('/recognition.html');
-      await expect(page.locator('#rc-rules-body tr').first()).toContainText('A document someone filed is released');
+      await expect(page.locator('#rc-rules-body tr').first()).toContainText('A document or field case someone filed is released');
       await expect(page.locator('#rc-lede')).not.toContainText('your points');
       if (role === 'qms') await expect(page.locator('#rc-level-body')).toContainText('before the approver releases it');
     }

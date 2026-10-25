@@ -315,7 +315,11 @@ const TAQA_DOC_LOOKUPS = {
       "controlled": true,
       "retentionYears": 10,
       "provisional": true,
-      "note": "TQ-QHSE-S001 has no code for Technical Alerts yet, so they use ALT until QHSE assigns one. The number may change then."
+      "note": "TQ-QHSE-S001 has no code for Technical Alerts yet, so they use ALT until QHSE assigns one. The number may change then.",
+      // Field cases (cases.js): a Technical Alert can also be filed as a
+      // structured card, "Technical alert / tool limit". A register alert
+      // without a card stays an ordinary document.
+      "card": true
     },
     "lesson": {
       "label": "Lesson Learned",
@@ -327,7 +331,129 @@ const TAQA_DOC_LOOKUPS = {
       "controlled": true,
       "retentionYears": 10,
       "provisional": true,
-      "note": "TQ-QHSE-S001 has no code for Lessons Learned yet, so they use LL until QHSE assigns one. The number may change then."
+      "note": "TQ-QHSE-S001 has no code for Lessons Learned yet, so they use LL until QHSE assigns one. The number may change then.",
+      "card": true
+    },
+    // ── Field cases (TAQA Applied Intelligence business case) ──────────────
+    // Ten content types, filed by operations in an operational segment as a
+    // structured card (cases.js, cases-data.js). Lesson and alert above are
+    // reused; these eight exist only as cards ("cardOnly"): no document form
+    // of them is offered in Upload. Owner, approver and review date follow
+    // the business case: "review date on every card; owner prompted after 24
+    // months". Each letter is provisional until QHSE assigns a code, and is
+    // two or three letters so it joins its serial with a hyphen and never
+    // collides with P, F, S, M, LL, ALT, SOP, WI or MB (store.js numberFormat).
+    "case-study": {
+      "label": "Case study",
+      "letter": "CS",
+      "mark": "CS",
+      "owner": "Relevant SPL / Function",
+      "approver": "Relevant Operation Director",
+      "reviewCycleMonths": 24,
+      "controlled": true,
+      "retentionYears": 10,
+      "provisional": true,
+      "note": "TQ-QHSE-S001 has no code for case studies yet, so they use CS until QHSE assigns one. The number may change then.",
+      "card": true,
+      "cardOnly": true
+    },
+    "incident": {
+      "label": "Failure / incident card",
+      "letter": "INC",
+      "mark": "INC",
+      "owner": "Relevant SPL / Function",
+      "approver": "Relevant Operation Director",
+      "reviewCycleMonths": 24,
+      "controlled": true,
+      "retentionYears": 10,
+      "provisional": true,
+      "note": "TQ-QHSE-S001 has no code for failure / incident cards yet, so they use INC until QHSE assigns one. The number may change then.",
+      "card": true,
+      "cardOnly": true
+    },
+    "prejob": {
+      "label": "Pre-job plan",
+      "letter": "PJP",
+      "mark": "PJP",
+      "owner": "Relevant SPL / Function",
+      "approver": "Relevant Operation Director",
+      "reviewCycleMonths": 24,
+      "controlled": true,
+      "retentionYears": 10,
+      "provisional": true,
+      "note": "TQ-QHSE-S001 has no code for pre-job plans yet, so they use PJP until QHSE assigns one. The number may change then.",
+      "card": true,
+      "cardOnly": true
+    },
+    "appreciation": {
+      "label": "Customer appreciation",
+      "letter": "CA",
+      "mark": "CA",
+      "owner": "Relevant SPL / Function",
+      "approver": "Relevant Operation Director",
+      "reviewCycleMonths": 24,
+      "controlled": true,
+      "retentionYears": 10,
+      "provisional": true,
+      "note": "TQ-QHSE-S001 has no code for customer appreciations yet, so they use CA until QHSE assigns one. The number may change then.",
+      "card": true,
+      "cardOnly": true
+    },
+    "practice": {
+      "label": "Best practice",
+      "letter": "BP",
+      "mark": "BP",
+      "owner": "Relevant SPL / Function",
+      "approver": "Relevant Operation Director",
+      "reviewCycleMonths": 24,
+      "controlled": true,
+      "retentionYears": 10,
+      "provisional": true,
+      "note": "TQ-QHSE-S001 has no code for best practices yet, so they use BP until QHSE assigns one. The number may change then.",
+      "card": true,
+      "cardOnly": true
+    },
+    "field-profile": {
+      "label": "Location / field profile",
+      "letter": "FP",
+      "mark": "FP",
+      "owner": "Relevant SPL / Function",
+      "approver": "Relevant Operation Director",
+      "reviewCycleMonths": 24,
+      "controlled": true,
+      "retentionYears": 10,
+      "provisional": true,
+      "note": "TQ-QHSE-S001 has no code for location / field profiles yet, so they use FP until QHSE assigns one. The number may change then.",
+      "card": true,
+      "cardOnly": true
+    },
+    "benchmark": {
+      "label": "Performance benchmark",
+      "letter": "PB",
+      "mark": "PB",
+      "owner": "Relevant SPL / Function",
+      "approver": "Relevant Operation Director",
+      "reviewCycleMonths": 24,
+      "controlled": true,
+      "retentionYears": 10,
+      "provisional": true,
+      "note": "TQ-QHSE-S001 has no code for performance benchmarks yet, so they use PB until QHSE assigns one. The number may change then.",
+      "card": true,
+      "cardOnly": true
+    },
+    "training": {
+      "label": "Expert / training",
+      "letter": "EXP",
+      "mark": "EXP",
+      "owner": "Relevant SPL / Function",
+      "approver": "Relevant Operation Director",
+      "reviewCycleMonths": 24,
+      "controlled": true,
+      "retentionYears": 10,
+      "provisional": true,
+      "note": "TQ-QHSE-S001 has no code for expert / training records yet, so they use EXP until QHSE assigns one. The number may change then.",
+      "card": true,
+      "cardOnly": true
     },
     "form": {
       "label": "Form / Checklist",
@@ -985,6 +1111,8 @@ const TAQA_DOC = {
   // A segment's maintenance department documents are released by its own
   // Maintenance Manager, whatever their type (roles.js, TAQA_APPROVAL).
   approver:   d => d.department === 'maintenance' ? 'Maintenance Manager'
+                 // A field case is released by its area's Director (roles.js approverFor).
+                 : (TAQA_DOC.type(d).card && d.card && typeof d.card === 'object') ? 'Relevant Operation Director'
                  : d.translationOf ? 'Translation verified by: ' + (TAQA_DOC.type(d).approver||',')
                                    : (TAQA_DOC.type(d).approver || ','),
   retention:  d => TAQA_DOC.type(d).retentionYears,

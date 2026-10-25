@@ -1,0 +1,1787 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-taqa-theme="light">
+<head>
+<meta charset="UTF-8">
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>/* Installed app on an iPhone: the status bar is drawn over the page, and iOS keeps taps in that strip for itself, so the bell and the other controls under it could not be tapped. Drawing edge to edge (viewport-fit=cover) turns on the bar's safe-area padding in topbar.css, which drops them below the status bar. A browser tab is left exactly as it was. */(function(){try{if(navigator.standalone||matchMedia('(display-mode: standalone)').matches){var m=document.querySelector('meta[name="viewport"]');if(m&&!/viewport-fit/.test(m.content))m.content+=', viewport-fit=cover';}}catch(e){}})();</script>
+<title>Add a Case, RISE</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#005D63">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RISE">
+<meta name="application-name" content="RISE">
+<link rel="apple-touch-icon" href="icons/rise-apple-touch-icon.png">
+<link rel="icon" href="icons/rise-favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="icons/rise-favicon-16.png" type="image/png" sizes="16x16">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* Add a case. One calm column of numbered steps, a progress rail beside it
+   on a desk screen, and an action bar that stays in reach while the form
+   scrolls (pinned to the bottom edge on a phone). Labels sit above inputs,
+   errors sit under the field they belong to, and nothing moves except by
+   transform and opacity. */
+:root{
+  --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;
+  --dark:#F4F4F3;--paper:#FFFFFF;--inset:#F7F6F4;--field:#FFFFFF;
+  --line:rgba(117,106,97,0.18);--line-soft:rgba(117,106,97,0.10);--line-strong:rgba(117,106,97,0.30);
+  --input-line:#958B83;
+  --text:#1E1C1A;--text-muted:#5F564F;--text-light:#756A61;
+  --fill:#E7F3F3;--fill-strong:#005D63;--fill-hover:#004A4F;--on-fill:#FFFFFF;
+  --stop:#C8102E;--stop-bg:#FDF3F4;--ok:#00705F;--partial:#8A5F00;
+  --ok-bg:#E9F4F1;--partial-bg:#FBF4E4;
+  --focus:rgba(0,187,182,0.45);
+  --lift:0 1px 2px rgba(0,41,44,.05),0 12px 30px -18px rgba(0,41,44,.28);
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+html[data-taqa-theme="dark"]{
+  --primary-ink:#00BBB6;--dark:#001314;--paper:#002326;--inset:#001C1E;--field:#001A1C;
+  --line:rgba(0,187,182,0.20);--line-soft:rgba(0,187,182,0.10);--line-strong:rgba(0,187,182,0.32);
+  --input-line:#3D8286;
+  --text:#C7DBDD;--text-muted:#9CC0C2;--text-light:#7FAFB2;
+  --fill:rgba(0,187,182,0.12);--fill-strong:#00BBB6;--fill-hover:#5FD6D2;--on-fill:#00191B;
+  --stop:#FF8A94;--stop-bg:rgba(255,138,148,0.07);--ok:#4FD1B5;--partial:#FFB81C;
+  --ok-bg:rgba(79,209,181,0.09);--partial-bg:rgba(255,184,28,0.08);
+  --lift:0 0 0 1px rgba(0,187,182,.06),0 14px 32px -18px rgba(0,0,0,.7);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html:root{scroll-padding-top:calc(var(--nav-h,64px) + 20px);scroll-padding-bottom:calc(132px + var(--safe-b,0px));}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;}
+html[data-taqa-theme="dark"] body{background:#001314;}
+.page-wrapper{padding-top:var(--nav-h,64px);min-height:100vh;display:flex;flex-direction:column;}
+.skip{position:absolute;left:-9999px;top:auto;}
+.skip:focus{left:16px;top:calc(var(--nav-h,64px) + 8px);z-index:10001;background:var(--paper);color:var(--primary-ink);padding:8px 14px;border-radius:8px;border:1px solid var(--line);}
+.sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+main{max-width:1140px;margin:0 auto;width:100%;padding:30px 40px 72px;display:grid;gap:22px;align-content:start;}
+main:focus{outline:none;}
+svg{display:block;}
+
+/* ── Head ── */
+.cn-head{display:grid;gap:10px;max-width:780px;}
+#cn-gate:empty,#cn-drafts:empty{display:none;}
+#cn-gate{display:grid;gap:14px;}
+.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font:700 11px/1.3 'Inter',sans-serif;letter-spacing:1.3px;text-transform:uppercase;color:var(--text-light);}
+.crumbs a{color:var(--primary-ink);text-decoration:none;}
+.crumbs a:hover{text-decoration:underline;text-underline-offset:3px;}
+.crumbs .sep{opacity:.6;}
+h1{font-family:'BwGradual','Urbanist',sans-serif;font-size:34px;font-weight:800;letter-spacing:-.5px;line-height:1.12;color:var(--text);text-wrap:balance;}
+.lede{font-size:15px;line-height:1.62;color:var(--text-muted);max-width:66ch;}
+.route{list-style:none;display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:4px;}
+.route[hidden]{display:none;}
+.route li{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--text-muted);}
+.route li .rn{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--fill);color:var(--primary-ink);font:800 11px/1 'Inter',sans-serif;font-variant-numeric:tabular-nums;}
+.route li + li::before{content:'';width:18px;height:1px;background:var(--line-strong);margin-right:4px;}
+
+/* ── Notices: refusal, filing again, problems loading ── */
+.note{display:flex;gap:14px;align-items:flex-start;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:18px 20px;max-width:780px;box-shadow:var(--lift);}
+.note .ic{flex:none;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--fill);color:var(--primary-ink);}
+.note .ic svg{width:19px;height:19px;}
+.note-b{min-width:0;display:grid;gap:6px;}
+.note h2{font:700 17px/1.3 'BwGradual','Urbanist',sans-serif;color:var(--text);}
+.note p{font-size:14px;line-height:1.6;color:var(--text-muted);overflow-wrap:anywhere;}
+.note p b{color:var(--text);font-weight:600;}
+.note a{color:var(--primary-ink);font-weight:600;}
+.note .links{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:2px;font-size:14px;}
+.note.ret{border-left:4px solid #FF6720;}
+.note .why{display:block;margin-top:2px;padding:10px 12px;border-radius:10px;background:var(--inset);color:var(--text);font-size:14px;line-height:1.55;overflow-wrap:anywhere;white-space:pre-wrap;}
+
+/* ── Saved drafts ── */
+.drafts{background:var(--paper);border:1px solid var(--line);border-radius:16px;max-width:780px;}
+.drafts summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:16px;}
+.drafts summary::-webkit-details-marker{display:none;}
+.drafts summary:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;}
+.drafts .ic{flex:none;width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:var(--fill);color:var(--primary-ink);}
+.drafts .ic svg{width:16px;height:16px;}
+.dr-h{flex:1;min-width:0;}
+.dr-h b{display:block;font-size:14.5px;font-weight:700;color:var(--text);}
+.dr-h span{display:block;font-size:12.5px;color:var(--text-light);margin-top:2px;}
+.drafts .chev{width:16px;height:16px;color:var(--text-light);transition:transform .2s var(--ease);}
+.drafts[open] .chev{transform:rotate(180deg);}
+.drafts ul{list-style:none;padding:0 18px 10px;}
+.drafts li{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;padding:12px 0;border-top:1px solid var(--line-soft);}
+.dr-t{flex:1 1 240px;min-width:0;}
+.dr-n{font-size:14px;font-weight:600;color:var(--text);overflow-wrap:anywhere;}
+.dr-m{font-size:12.5px;color:var(--text-light);margin-top:2px;overflow-wrap:anywhere;}
+.dr-now{display:inline-block;margin-left:6px;padding:0 7px;border-radius:999px;background:var(--fill);color:var(--primary-ink);font:700 10.5px/1.7 'Inter',sans-serif;letter-spacing:.3px;vertical-align:1px;}
+.dr-b{display:flex;gap:6px;flex-wrap:wrap;}
+
+/* ── Layout ── */
+.cn-layout{display:grid;grid-template-columns:212px minmax(0,1fr);gap:40px;align-items:start;}
+.cn-layout[hidden]{display:none;}
+#case-form{min-width:0;display:grid;grid-template-columns:minmax(0,1fr);gap:18px;max-width:800px;}
+
+/* ── Progress rail (desk screens) ── */
+.cn-rail{position:sticky;top:calc(var(--nav-h,64px) + 26px);}
+.rail-k{font:700 11px/1 'Inter',sans-serif;letter-spacing:1.3px;text-transform:uppercase;color:var(--text-light);margin:4px 0 14px;}
+.rail{list-style:none;}
+.rail > li{position:relative;padding-bottom:4px;}
+.rail > li:not(:last-child)::before{content:'';position:absolute;left:13px;top:32px;bottom:2px;width:2px;border-radius:2px;background:var(--line);}
+.rail > li.done:not(:last-child)::before{background:var(--fill-strong);opacity:.5;}
+.rail a{display:grid;grid-template-columns:28px minmax(0,1fr);column-gap:12px;text-decoration:none;color:var(--text);padding:2px 4px 10px 0;border-radius:10px;}
+.rail a:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;}
+.dot{grid-row:span 2;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line-strong);background:var(--paper);font:700 12px/1 'Inter',sans-serif;color:var(--text-muted);font-variant-numeric:tabular-nums;transition:background-color .2s var(--ease),border-color .2s var(--ease),color .2s var(--ease);}
+.dot svg{width:14px;height:14px;display:none;}
+.rl{font-size:13.5px;font-weight:600;line-height:1.3;padding-top:4px;overflow-wrap:anywhere;}
+.rs{font-size:12px;color:var(--text-light);margin-top:2px;}
+.rail li.cur > a .dot{border-color:var(--fill-strong);color:var(--primary-ink);}
+.rail li.cur > a .rl{color:var(--primary-ink);}
+.rail li.done > a .dot{background:var(--fill-strong);border-color:var(--fill-strong);color:var(--on-fill);}
+.rail li.done > a .dot b{display:none;}
+.rail li.done > a .dot svg{display:block;}
+.rail li.bad > a .dot{border-color:var(--stop);color:var(--stop);background:var(--paper);}
+.rail li.bad > a .dot b{display:inline;}
+.rail li.bad > a .dot svg{display:none;}
+.rail li.bad > a .rs{color:var(--stop);font-weight:600;}
+.rail li.off > a{pointer-events:none;}
+.rail li.off > a .dot,.rail li.off > a .rl{opacity:.6;}
+.rail-sub{list-style:none;margin:-4px 0 8px 40px;display:grid;gap:1px;}
+.rail-sub a{display:flex;gap:8px;align-items:baseline;font-size:12.5px;line-height:1.35;color:var(--text-muted);padding:3px 4px 3px 0;text-decoration:none;}
+.rail-sub a:hover{color:var(--primary-ink);}
+.rail-sub .sn{flex:none;width:14px;font-weight:700;color:var(--text-light);font-variant-numeric:tabular-nums;}
+.rail-sub li.done .sn{color:var(--primary-ink);}
+.rail-sub li.bad a,.rail-sub li.bad .sn{color:var(--stop);}
+.rail-sub li.cur a{color:var(--primary-ink);font-weight:600;}
+.rail-progress{margin-top:16px;padding-top:16px;border-top:1px solid var(--line);}
+.pbar{height:6px;border-radius:999px;background:var(--fill);overflow:hidden;}
+.pbar span{display:block;height:100%;width:100%;border-radius:inherit;background:var(--fill-strong);transform-origin:left center;transform:scaleX(0);transition:transform .5s var(--ease);}
+.ptext{font-size:12.5px;line-height:1.45;color:var(--text-muted);margin-top:8px;font-variant-numeric:tabular-nums;}
+.ptext b{color:var(--text);font-weight:700;}
+
+/* ── Error summary ── */
+.err-sum{border:1px solid var(--stop);border-left-width:5px;border-radius:14px;background:var(--stop-bg);padding:16px 20px 18px;}
+.err-sum[hidden]{display:none;}
+.err-sum:focus{outline:none;}
+.err-sum:focus-visible{outline:2px solid var(--stop);outline-offset:3px;}
+.err-sum h2{display:flex;align-items:center;gap:10px;font:700 16.5px/1.3 'BwGradual','Urbanist',sans-serif;color:var(--text);margin-bottom:4px;}
+.err-sum h2 svg{width:19px;height:19px;color:var(--stop);flex:none;}
+.err-sum p{font-size:13.5px;line-height:1.55;color:var(--text-muted);margin-bottom:8px;overflow-wrap:anywhere;}
+.err-sum ul{list-style:none;display:grid;gap:5px;}
+.err-sum li{font-size:14px;line-height:1.45;overflow-wrap:anywhere;}
+.err-sum a{color:var(--stop);font-weight:600;text-decoration:underline;text-underline-offset:2px;}
+.err-sum a:focus-visible{outline:2px solid var(--stop);outline-offset:2px;border-radius:3px;}
+.err-sum .el{display:inline;font-size:13px;font-weight:600;color:var(--text-muted);margin-right:6px;}
+.req-note{font-size:12.5px;line-height:1.5;color:var(--text-muted);margin:-6px 0 -8px;}
+.req-note .req{margin:0 1px;}
+
+/* ── Steps ── */
+.step{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:24px 26px 26px;scroll-margin-top:calc(var(--nav-h,64px) + 20px);box-shadow:var(--lift);min-width:0;}
+.step:focus{outline:none;}
+.step-hd{display:flex;gap:14px;align-items:flex-start;margin-bottom:22px;}
+.step-n{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line-strong);color:var(--text-muted);font:700 13px/1 'Inter',sans-serif;font-variant-numeric:tabular-nums;transition:background-color .25s var(--ease),border-color .25s var(--ease),color .25s var(--ease);}
+.step-n svg{width:15px;height:15px;display:none;}
+.step.done > .step-hd .step-n{background:var(--fill-strong);border-color:var(--fill-strong);color:var(--on-fill);}
+.step.done > .step-hd .step-n b{display:none;}
+.step.done > .step-hd .step-n svg{display:block;}
+.step.bad > .step-hd .step-n{border-color:var(--stop);color:var(--stop);}
+.step-hd h2{font-family:'BwGradual','Urbanist',sans-serif;font-size:19px;font-weight:700;color:var(--text);line-height:1.25;letter-spacing:-.1px;}
+.step-hd p{font-size:13.5px;color:var(--text-muted);line-height:1.55;margin-top:3px;max-width:62ch;}
+.step-hd .k{display:block;font:700 10.5px/1.2 'Inter',sans-serif;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-light);margin-bottom:4px;}
+.stack{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 18px;}
+.grid2 .full{grid-column:1 / -1;}
+
+/* Incident card: six numbered parts inside step 4. */
+.subs{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;}
+.sub{border:1px solid var(--line);border-radius:16px;padding:18px 20px 20px;background:var(--paper);scroll-margin-top:calc(var(--nav-h,64px) + 20px);}
+.sub:focus{outline:none;}
+.sub-hd{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.sub-n{flex:none;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--fill);color:var(--primary-ink);font:800 13px/1 'Inter',sans-serif;font-variant-numeric:tabular-nums;}
+.sub.done .sub-n{background:var(--fill-strong);color:var(--on-fill);}
+.sub.bad .sub-n{background:var(--stop-bg);color:var(--stop);box-shadow:inset 0 0 0 1px var(--stop);}
+.sub-hd h3{font:700 16px/1.3 'BwGradual','Urbanist',sans-serif;color:var(--text);}
+.sub-hd .of{margin-left:auto;font-size:12px;color:var(--text-light);font-variant-numeric:tabular-nums;white-space:nowrap;}
+
+.rules{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;align-items:start;padding:18px 20px;border-radius:16px;background:var(--inset);border:1px solid var(--line);border-left:4px solid var(--fill-strong);}
+.rules .ic{grid-row:span 2;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--fill);color:var(--primary-ink);}
+.rules .ic svg{width:18px;height:18px;}
+.rules h2{font:700 15.5px/1.3 'BwGradual','Urbanist',sans-serif;color:var(--text);padding-top:2px;}
+.rules p{font-size:14.5px;line-height:1.65;color:var(--text);max-width:70ch;}
+
+.later{display:grid;gap:12px;border:1.5px dashed var(--line-strong);border-radius:18px;padding:22px 24px;}
+.later p{font-size:14px;line-height:1.6;color:var(--text-muted);}
+.later ol{list-style:none;display:flex;flex-wrap:wrap;gap:8px;}
+.later li{display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 6px;border-radius:999px;background:var(--paper);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--text-muted);}
+.later li b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--inset);color:var(--text-light);font:700 11.5px/1 'Inter',sans-serif;}
+
+/* ── Fields ── */
+.fld{min-width:0;}
+fieldset.fld{border:0;padding:0;margin:0;}
+fieldset.fld:focus{outline:none;}
+.lbl{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:7px;padding:0;line-height:1.35;}
+legend.lbl{float:left;width:100%;}
+legend.lbl + *{clear:both;}
+.req{color:var(--primary-ink);font-weight:800;margin-left:-2px;}
+.req[hidden]{display:none;}
+.tag{display:inline-flex;align-items:center;padding:1px 9px;border-radius:999px;font:600 11.5px/1.6 'Inter',sans-serif;background:var(--inset);color:var(--text-muted);border:1px solid var(--line-strong);letter-spacing:.1px;}
+.tag.need{background:var(--fill);color:var(--primary-ink);border-color:transparent;}
+.tag[hidden]{display:none;}
+.hint{font-size:12.5px;line-height:1.5;color:var(--text-light);margin:-3px 0 8px;max-width:66ch;}
+.inp{display:block;width:100%;min-height:46px;padding:11px 14px;border:1px solid var(--input-line);border-radius:12px;background:var(--field);color:var(--text);font:400 15px/1.45 'Inter',sans-serif;transition:border-color .15s var(--ease),box-shadow .15s var(--ease);-webkit-appearance:none;appearance:none;}
+.inp::placeholder{color:var(--text-light);opacity:1;}
+textarea.inp{min-height:98px;resize:vertical;line-height:1.55;}
+textarea.inp.tall{min-height:128px;}
+select.inp{cursor:pointer;padding-right:42px;text-overflow:ellipsis;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235F564F' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 16px center;}
+html[data-taqa-theme="dark"] select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239CC0C2' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");color-scheme:dark;}
+html[data-taqa-theme="dark"] .inp{color-scheme:dark;}
+select.inp option{background:var(--paper);color:var(--text);}
+@media (hover:hover){.inp:hover{border-color:var(--primary-ink);}}
+html[data-taqa-theme="dark"] .check input{color-scheme:dark;}
+.inp:focus{outline:none;border-color:var(--fill-strong);box-shadow:0 0 0 3px var(--focus);}
+.narrow .inp{max-width:420px;}
+.short .inp{max-width:240px;}
+.fld.bad > .inp,.fld.bad > .ctl .inp,.fld.bad > .other .inp{border-color:var(--stop);box-shadow:inset 0 0 0 1px var(--stop);}
+.fld.bad > .inp:focus{box-shadow:inset 0 0 0 1px var(--stop),0 0 0 3px var(--focus);}
+.err{display:flex;gap:7px;align-items:flex-start;margin-top:8px;font-size:13px;font-weight:600;line-height:1.45;color:var(--stop);overflow-wrap:anywhere;}
+.err::before{content:'!';flex:none;width:16px;height:16px;margin-top:1px;border-radius:50%;background:var(--stop);color:var(--paper);font:800 11px/16px 'Inter',sans-serif;text-align:center;}
+.err[hidden]{display:none;}
+.count{margin-top:6px;font-size:12px;color:var(--text-light);text-align:right;font-variant-numeric:tabular-nums;}
+.count.over{color:var(--stop);font-weight:700;}
+.locked{display:flex;align-items:center;gap:10px;min-height:46px;padding:10px 14px;border-radius:12px;border:1px dashed var(--line-strong);background:var(--inset);color:var(--text);font-size:15px;font-weight:600;max-width:420px;}
+.locked:focus{outline:2px solid var(--primary-ink);outline-offset:2px;}
+.locked svg{width:16px;height:16px;color:var(--text-light);flex:none;}
+.other{margin-top:12px;max-width:520px;}
+.other[hidden]{display:none;}
+.other .lbl{font-size:12.5px;}
+
+/* Content type tiles */
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.tile{position:relative;display:block;cursor:pointer;min-width:0;}
+.tile input,.chip input,.opt input{position:absolute;opacity:0;width:1px;height:1px;left:14px;top:14px;margin:0;}
+.tile-b{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 12px;align-items:start;align-content:start;height:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line-strong);background:var(--paper);transition:border-color .15s var(--ease),background-color .15s var(--ease),transform .15s var(--ease);}
+.tile-m{grid-row:span 2;min-width:44px;height:30px;padding:0 7px;border-radius:8px;display:grid;place-items:center;background:var(--fill);color:var(--primary-ink);font:800 12px/1 'Inter',sans-serif;letter-spacing:.6px;transition:background-color .15s var(--ease),color .15s var(--ease);}
+.tile-l{font-size:14px;font-weight:700;color:var(--text);line-height:1.3;overflow-wrap:anywhere;}
+.tile-d{font-size:12.5px;color:var(--text-muted);line-height:1.45;}
+@media (hover:hover){.tile:hover .tile-b{border-color:var(--primary-ink);}}
+.tile:active .tile-b{transform:scale(.99);}
+.tile input:checked + .tile-b{border-color:var(--fill-strong);background:var(--fill);box-shadow:inset 0 0 0 1px var(--fill-strong);}
+.tile input:checked + .tile-b .tile-m{background:var(--fill-strong);color:var(--on-fill);}
+.tile input:focus-visible + .tile-b{outline:2px solid var(--primary-ink);outline-offset:2px;}
+.tile-now{display:none;}
+.tile.is-locked{cursor:default;max-width:420px;}
+.tile.is-locked .tile-b{border-color:var(--fill-strong);background:var(--fill);box-shadow:inset 0 0 0 1px var(--fill-strong);}
+.tile.is-locked .tile-m{background:var(--fill-strong);color:var(--on-fill);}
+.tile.is-locked:focus{outline:none;}
+.tile.is-locked:focus .tile-b{outline:2px solid var(--primary-ink);outline-offset:2px;}
+.hint.after{margin:8px 0 0;}
+
+/* Chips: location, services, findings, result */
+.chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{position:relative;display:inline-flex;cursor:pointer;min-width:0;max-width:100%;}
+.chip > span{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:9px 15px;border-radius:999px;border:1px solid var(--input-line);background:var(--field);color:var(--text);font:500 14px/1.25 'Inter',sans-serif;transition:background-color .15s var(--ease),border-color .15s var(--ease),color .15s var(--ease);overflow-wrap:anywhere;}
+.chip > span::before{content:'';display:none;width:5px;height:10px;margin:-3px 2px 0 1px;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg);flex:none;}
+@media (hover:hover){.chip:hover > span{border-color:var(--primary-ink);}}
+.chip input:checked + span{background:var(--fill-strong);border-color:var(--fill-strong);color:var(--on-fill);font-weight:600;}
+.chip input:checked + span::before{display:block;}
+.chip input:focus-visible + span{outline:2px solid var(--primary-ink);outline-offset:2px;}
+.chip i{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none;}
+.chip .r-failed i{background:var(--stop);}
+.chip .r-partial i{background:var(--partial);}
+.chip .r-worked i{background:var(--ok);}
+.chip input:checked + span i{box-shadow:0 0 0 2px var(--on-fill);}
+.chip input:checked + span.r-failed::before,.chip input:checked + span.r-partial::before,.chip input:checked + span.r-worked::before{display:none;}
+/* A chosen result keeps its meaning: red, amber or green, as on the case page's ledger. */
+.chip input:checked + span.r-failed{background:var(--stop-bg);color:var(--stop);border-color:var(--stop);box-shadow:inset 0 0 0 1.5px var(--stop);font-weight:700;}
+.chip input:checked + span.r-partial{background:var(--partial-bg);color:var(--partial);border-color:var(--partial);box-shadow:inset 0 0 0 1.5px var(--partial);font-weight:700;}
+.chip input:checked + span.r-worked{background:var(--ok-bg);color:var(--ok);border-color:var(--ok);box-shadow:inset 0 0 0 1.5px var(--ok);font-weight:700;}
+.chip input:checked + span.r-failed i,.chip input:checked + span.r-partial i,.chip input:checked + span.r-worked i{box-shadow:0 0 0 3px var(--paper);}
+.fld.bad .chips .chip > span,.fld.bad .opts .opt-b{border-color:var(--stop);}
+
+/* Option cards: class, how it ended */
+.opts{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;}
+.opts.cols{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));}
+.opt{position:relative;display:block;cursor:pointer;min-width:0;}
+.opt-b{display:grid;grid-template-columns:20px minmax(0,1fr);gap:3px 12px;align-items:start;height:100%;padding:12px 14px;border:1px solid var(--line-strong);border-radius:12px;background:var(--field);transition:border-color .15s var(--ease),background-color .15s var(--ease);}
+.opt-r{grid-row:span 2;width:20px;height:20px;margin-top:1px;border-radius:50%;border:2px solid var(--input-line);display:grid;place-items:center;background:var(--field);}
+.opt-l{font-size:14px;font-weight:700;color:var(--text);line-height:1.35;}
+.opt-h{font-size:12.5px;color:var(--text-muted);line-height:1.45;}
+@media (hover:hover){.opt:hover .opt-b{border-color:var(--primary-ink);}}
+.opt input:checked + .opt-b{border-color:var(--fill-strong);background:var(--fill);box-shadow:inset 0 0 0 1px var(--fill-strong);}
+.opt input:checked + .opt-b .opt-r{border-color:var(--fill-strong);}
+.opt input:checked + .opt-b .opt-r::after{content:'';width:10px;height:10px;border-radius:50%;background:var(--fill-strong);}
+.opt input:focus-visible + .opt-b{outline:2px solid var(--primary-ink);outline-offset:2px;}
+
+/* Check rows */
+.check{display:grid;grid-template-columns:22px minmax(0,1fr);gap:3px 12px;align-items:start;padding:13px 14px;border:1px solid var(--line-strong);border-radius:12px;background:var(--field);cursor:pointer;}
+.check input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--fill-strong);cursor:pointer;grid-row:span 2;}
+.check input:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;}
+.check .cl{font-size:14px;font-weight:700;color:var(--text);line-height:1.35;}
+.check .ch{font-size:12.5px;color:var(--text-muted);line-height:1.45;}
+.fld.bad > .check{border-color:var(--stop);box-shadow:inset 0 0 0 1px var(--stop);}
+.cond{margin-top:8px;font-size:13px;line-height:1.5;color:var(--text-muted);display:flex;gap:8px;align-items:flex-start;}
+.cond[hidden]{display:none;}
+.cond svg{width:15px;height:15px;flex:none;margin-top:2px;color:var(--primary-ink);}
+
+/* Repeatable rows: symptoms (a timeline) and what was tried (a ledger) */
+.rows{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;}
+.rows .lead{font-size:12.5px;line-height:1.5;color:var(--text-light);margin-top:-6px;}
+.tl,.ledger{list-style:none;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;}
+.tl{position:relative;padding-left:24px;}
+.tl::before{content:'';position:absolute;left:6px;top:18px;bottom:18px;width:2px;border-radius:2px;background:var(--line-strong);}
+.tl > li{position:relative;}
+.tl > li::before{content:'';position:absolute;left:-23px;top:15px;width:10px;height:10px;border-radius:50%;background:var(--paper);border:2px solid var(--fill-strong);}
+.rcard{border:1px solid var(--line);border-radius:14px;padding:12px 14px 14px;background:var(--inset);min-width:0;}
+.rcard-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
+.row-k{font:700 11px/1.2 'Inter',sans-serif;letter-spacing:1.1px;text-transform:uppercase;color:var(--text-muted);font-variant-numeric:tabular-nums;}
+.tools{display:flex;gap:4px;}
+.ibtn{width:36px;height:36px;border-radius:10px;border:1px solid var(--line-strong);background:var(--paper);color:var(--text-muted);display:grid;place-items:center;cursor:pointer;transition:color .15s var(--ease),border-color .15s var(--ease);}
+.ibtn svg{width:16px;height:16px;}
+@media (hover:hover){.ibtn:hover:not(:disabled){color:var(--primary-ink);border-color:var(--primary-ink);}}
+.ibtn:disabled{opacity:.38;cursor:default;}
+.ibtn:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;}
+.rg{display:grid;grid-template-columns:minmax(0,180px) minmax(0,1fr);gap:12px;}
+.rg .full{grid-column:1 / -1;}
+.rg.tried{grid-template-columns:minmax(0,1fr);}
+.rg .lbl{font-size:12.5px;margin-bottom:5px;}
+.rcard .inp{min-height:42px;padding:9px 12px;font-size:14.5px;}
+.rcard textarea.inp{min-height:70px;}
+.rcard textarea.inp.sm{min-height:0;}
+.rcard .chip > span{min-height:38px;padding:7px 13px;font-size:13.5px;}
+.none{font-size:13.5px;color:var(--text-light);padding:12px 14px;border:1px dashed var(--line-strong);border-radius:12px;}
+.add{justify-self:start;display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:0 16px 0 12px;border-radius:12px;border:1.5px dashed var(--input-line);background:transparent;color:var(--primary-ink);font:600 14px/1 'Inter',sans-serif;cursor:pointer;transition:background-color .15s var(--ease),border-color .15s var(--ease);}
+.add svg{width:16px;height:16px;}
+@media (hover:hover){.add:hover{background:var(--fill);border-style:solid;border-color:var(--fill-strong);}}
+.add:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;}
+
+/* ── Action bar ── */
+.cn-actions{position:sticky;bottom:0;z-index:40;display:flex;align-items:center;flex-wrap:wrap;justify-content:space-between;gap:12px 18px;padding:14px 16px 14px 20px;background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:0 -14px 34px -22px rgba(0,41,44,.45),0 1px 2px rgba(0,41,44,.05);}
+html[data-taqa-theme="dark"] .cn-actions{box-shadow:0 -14px 34px -20px rgba(0,0,0,.85);}
+.st{flex:1 1 220px;min-width:0;display:grid;gap:7px;}
+.st-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--text-muted);font-variant-numeric:tabular-nums;}
+.st-row b{color:var(--text);font-weight:700;}
+.st .pbar{max-width:260px;}
+#cn-saved{color:var(--text-light);}
+#cn-saved.ok{color:var(--primary-ink);font-weight:600;}
+#cn-saved.bad{color:var(--stop);font-weight:600;}
+.btns{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 18px;border-radius:12px;border:1px solid transparent;cursor:pointer;text-decoration:none;white-space:nowrap;font:600 14px/1 'BwGradual','Urbanist','Inter',sans-serif;letter-spacing:.005em;-webkit-tap-highlight-color:transparent;transition:background-color .15s var(--ease),border-color .15s var(--ease),color .15s var(--ease),transform .1s var(--ease);}
+.btn svg{width:16px;height:16px;flex:none;}
+.btn:active{transform:scale(.98);}
+.btn:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;}
+.btn.quiet{background:var(--paper);color:var(--primary-ink);border-color:var(--line-strong);}
+@media (hover:hover){.btn.quiet:hover{border-color:var(--primary-ink);background:var(--fill);}}
+.btn.primary{background:var(--fill-strong);color:var(--on-fill);}
+@media (hover:hover){.btn.primary:hover{background:var(--fill-hover);}}
+.btn.primary:disabled{opacity:.6;cursor:progress;}
+.btn.sm{min-height:38px;padding:0 13px;font-size:13px;border-radius:10px;}
+.btn.sm.warn{border-color:var(--stop);color:var(--stop);}
+body #back-to-top{bottom:calc(112px + var(--safe-b,0px));}
+
+/* ── Motion ── */
+@keyframes cnIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.enter{animation:cnIn .42s var(--ease) both;animation-delay:var(--d,0ms);}
+@keyframes cnPulse{0%{transform:scale(1);}40%{transform:scale(1.18);}100%{transform:scale(1);}}
+.step-n.pop,.dot.pop{animation:cnPulse .4s var(--ease);}
+
+a:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;}
+
+/* On a desk screen the rail carries the progress; the bar keeps the save state. */
+@media(min-width:1024px){#cn-ptext,.st-row .sep,.cn-actions .pbar{display:none;}}
+@media(max-width:1023px){
+  .cn-layout{grid-template-columns:minmax(0,1fr);}
+  .cn-rail{display:none;}
+  #case-form{max-width:none;}
+}
+@media(max-width:640px){
+  main{padding:20px 16px 0;gap:18px;}
+  h1{font-size:27px;}
+  .lede{font-size:14.5px;}
+  .note{padding:16px;}
+  .step{padding:18px 16px 20px;border-radius:16px;}
+  .step-hd{gap:12px;margin-bottom:18px;}
+  .step-hd h2{font-size:18px;}
+  /* One box deep on a phone: the incident's parts and their rows are
+     divided by a rule, not boxed inside the step's box, so inputs keep
+     their width. */
+  .sub{padding:14px 0 4px;border-width:1px 0 0;border-radius:0;background:none;}
+  .rcard{padding:12px 0 14px;border-width:1px 0 0;border-radius:0;background:none;}
+  .tl{padding-left:18px;}
+  .tl > li::before{left:-18px;}
+  .chips.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  .chips.seg .chip{max-width:none;}
+  .chips.seg .chip > span{width:100%;justify-content:center;padding:7px 6px;gap:6px;}
+  .grid2{grid-template-columns:minmax(0,1fr);gap:20px;}
+  .rg{grid-template-columns:minmax(0,1fr);}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  .tile-b{grid-template-columns:minmax(0,1fr);padding:11px 12px;gap:8px;}
+  .tile-m{grid-row:auto;justify-self:start;min-width:40px;height:26px;font-size:11.5px;}
+  .tile-l{font-size:13.5px;}
+  .tile-d{display:none;}
+  .tile-now{display:block;margin-top:10px;font-size:13px;line-height:1.5;color:var(--text-muted);}
+  .tile-now:empty{display:none;}
+  .inp{font-size:16px;}
+  .rcard .inp{font-size:16px;}
+  .rules{padding:16px;grid-template-columns:minmax(0,1fr);}
+  .rules .ic{display:none;}
+  .cn-actions{margin:0 -16px;border-radius:0;border-left:0;border-right:0;border-bottom:0;padding:10px 16px calc(10px + var(--safe-b,0px));gap:8px;}
+  .st{flex-basis:100%;gap:0;}
+  .st .pbar{display:none;}
+  .btns{width:100%;flex-wrap:nowrap;}
+  .btn{padding:0 14px;}
+  #btn-submit{flex:1 1 auto;}
+  .btn .lg{display:none;}
+  #btn-json{width:46px;padding:0;flex:none;}
+  #btn-json .sh{display:none;}
+  .route{gap:8px 16px;}
+  .route li + li::before{display:none;}
+}
+@media(min-width:641px){.btn .sh{display:none;}}
+.btn .tiny-l{display:none;}
+@media(max-width:360px){
+  .btn{padding:0 11px;font-size:13.5px;}
+  .btn .full-l{display:none;}
+  .btn .tiny-l{display:inline;}
+  .tiles{gap:6px;}
+}
+@media (prefers-reduced-motion: reduce){
+  .enter,.step-n.pop,.dot.pop{animation:none!important;}
+  .pbar span,.drafts .chev{transition:none!important;}
+}
+@media print{
+  nav,#nav-mobile-menu,.cn-rail,.cn-actions,.drafts,.skip,#back-to-top,footer{display:none!important;}
+  body,html[data-taqa-theme="dark"] body{background:#fff;color:#000;}
+  .page-wrapper{padding-top:0;}
+  .step,.sub{box-shadow:none;break-inside:avoid;}
+}
+</style>
+<link rel="stylesheet" href="techhub.css">
+<link rel="stylesheet" href="topbar.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="page-wrapper">
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+  <a href="index.html" class="nav-brand">
+    <img src="assets/brand/rise-lockup-header.png" alt="RISE" class="nav-logo nav-logo-light" width="320" height="120">
+    <img src="assets/brand/rise-lockup-header-reverse.png" alt="RISE" class="nav-logo nav-logo-dark" width="320" height="120">
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
+    <li><a href="cases.html" class="active" aria-current="page">Cases</a></li>
+    <li><a href="ai-search.html">Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
+  <div class="nav-right">
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<main id="main" tabindex="-1">
+  <header class="cn-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="cases.html" id="cn-back">Field cases</a><span class="sep" aria-hidden="true">/</span><span id="cn-crumb" aria-current="page">Add a case</span></nav>
+    <h1 id="cn-title">Add a case</h1>
+    <p class="lede" id="cn-lede">Write down what happened in the field so the next crew can find it before their job. It is filed for an operational segment and goes through the usual route. Until it is released, only you, QMS, the area’s Director and an external auditor can see it.</p>
+    <ol class="route" aria-label="The route a case takes">
+      <li><span class="rn" aria-hidden="true">1</span>You file it</li>
+      <li><span class="rn" aria-hidden="true">2</span>QMS checks it</li>
+      <li><span class="rn" aria-hidden="true">3</span>The area’s Director releases it</li>
+    </ol>
+  </header>
+
+  <div id="cn-gate"></div>
+  <div id="cn-drafts"></div>
+
+  <div class="cn-layout" id="cn-layout" hidden>
+    <nav class="cn-rail" id="cn-rail" aria-label="Form progress"></nav>
+    <form id="case-form" novalidate aria-labelledby="cn-title"></form>
+  </div>
+</main>
+
+
+<footer style="height:4px;position:relative;margin-top:auto;"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:#005D63;"></div></footer>
+</div>
+
+<script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script src="store.js"></script>
+<script src="shared.js"></script>
+<script src="recognition.js"></script>
+<script src="cases-data.js"></script>
+<script src="cases.js"></script>
+<script>
+/* ──────────────────────────────────────────────────────────────────────────
+   Add a case (case-new.html)
+   ──────────────────────────────────────────────────────────────────────────
+   Step 1 asks what kind of case it is, for which operational segment, where
+   and with which services or tools. The type then decides its own sections
+   (the incident card's six, with the rules box first) and the area decides
+   the services, endings and findings on offer. Everything else comes from
+   TAQA_CASES (cases.js): the field list, validation, filing, drafts.
+
+     ?edit=<record key>   files a returned case again (same number, next
+                          attempt); type and area stay as filed
+     ?draft=<id>          opens a draft saved in this browser
+     ?type=, ?area=       start with that type or area chosen
+
+   Every value a person typed reaches the page as text (textContent or an
+   input's value), never as markup.
+   ────────────────────────────────────────────────────────────────────── */
+(function () {
+  'use strict';
+  var C = window.TAQA_CASES;
+  function $(id) { return document.getElementById(id); }
+  var gate = $('cn-gate'), draftsBox = $('cn-drafts'), layout = $('cn-layout'), form = $('case-form'), rail = $('cn-rail');
+
+  /* ── DOM helpers ─────────────────────────────────────────────────────── */
+  function h(tag, a, kids) {
+    var el = document.createElement(tag);
+    if (a) Object.keys(a).forEach(function (k) {
+      var v = a[k];
+      if (v == null || v === false) return;
+      if (k === 'class') el.className = v;
+      else if (k.indexOf('on') === 0 && typeof v === 'function') el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? '' : String(v));
+    });
+    add(el, kids);
+    return el;
+  }
+  function add(el, kids) {
+    (Array.isArray(kids) ? kids : kids == null ? [] : [kids]).forEach(function (c) {
+      if (c == null || c === false) return;
+      if (Array.isArray(c)) add(el, c);
+      else el.appendChild(typeof c === 'object' ? c : document.createTextNode(String(c)));
+    });
+  }
+  // Static icon paths only: nothing a person typed ever goes through here.
+  var SVG = {
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    up: '<path d="M12 19V5"/><path d="M6 11l6-6 6 6"/>',
+    down: '<path d="M12 5v14"/><path d="M18 13l-6 6-6-6"/>',
+    x: '<path d="M6 6l12 12"/><path d="M18 6L6 18"/>',
+    plus: '<path d="M12 5v14"/><path d="M5 12h14"/>',
+    save: '<path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4"/><path d="M8 20v-6h8v6"/>',
+    download: '<path d="M12 4v11"/><path d="M7 10.5l5 5 5-5"/><path d="M5 20h14"/>',
+    send: '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>',
+    lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6v.4"/>',
+    alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6"/><path d="M12 16.6v.4"/>',
+    stop: '<circle cx="12" cy="12" r="9"/><path d="M8.6 8.6l6.8 6.8"/>',
+    redo: '<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v5h5"/>',
+    list: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>',
+    doc: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 13h6M10 17h4"/>',
+    chev: '<path d="M6 9l6 6 6-6"/>'
+  };
+  function icon(name, cls) {
+    var t = document.createElement('template');
+    t.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"' +
+      (cls ? ' class="' + cls + '"' : '') + '>' + (SVG[name] || '') + '</svg>';
+    return t.content.firstChild;
+  }
+  function notice(o) {
+    return h('section', { class: 'note' + (o.cls ? ' ' + o.cls : ''), id: o.id, 'aria-labelledby': o.id + '-h' }, [
+      h('span', { class: 'ic' }, [icon(o.icon || 'info')]),
+      h('div', { class: 'note-b' }, [h('h2', { id: o.id + '-h' }, [o.title])].concat(o.body || []))
+    ]);
+  }
+
+  if (!C || !form) {
+    if (gate) gate.appendChild(notice({ id: 'case-broken', icon: 'alert', title: 'The form could not load',
+      body: [h('p', null, ['RISE could not load its case rules. Reload the page.'])] }));
+    return;
+  }
+
+  /* ── What the form is made of ────────────────────────────────────────── */
+  var F = C.FIELDS || {}, O = C.OPTIONS, q = new URLSearchParams(location.search);
+  var editKey = q.get('edit') || '';
+  var REDUCE = false;
+  try { REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  var TODAY = (window.TAQA_STORE && TAQA_STORE.localDay) ? TAQA_STORE.localDay() : new Date().toISOString().slice(0, 10);
+  // One plain line per type: what that kind of case records.
+  var DESC = {
+    'case-study': 'What TAQA did on a job and the result, in numbers from the source.',
+    'lesson': 'What happened, why it matters and what to do differently.',
+    'incident': 'One incident: the symptoms in order, what was tried and how it ended.',
+    'prejob': 'The objective, the key risks and the plan for a job.',
+    'appreciation': 'What a customer recognised, with the letter or email as evidence.',
+    'practice': 'A way of working, where it works and the evidence for it.',
+    'field-profile': 'A field’s formations and hazards, what works there and known problems.',
+    'benchmark': 'A measured value and what it is compared with.',
+    'alert': 'A tool limit, the evidence for it and the action it requires.',
+    'training': 'Who knows a topic, how to reach them and where the material is.'
+  };
+  var SHARED = {};
+  (F.shared || []).forEach(function (f) { SHARED[f.key] = f; });
+  var INC = {}, INC_N = {};
+  (F.incident || []).forEach(function (sec) { (sec.fields || []).forEach(function (f) { INC[f.key] = f; INC_N[f.key] = sec.n; }); });
+  var STEP_OF = { type: 'what', area: 'what', location: 'what', services: 'what', title: 'case', summary: 'case', eventMonth: 'case',
+    customer: 'where', field: 'where', wellRef: 'where', holeSize: 'where', formation: 'where',
+    sourceDoc: 'source', authorRole: 'source', classification: 'source', salesReady: 'source' };
+  var REQ_STEPS = ['what', 'case', 'type', 'source'];
+  var RESULT_CLS = { Failed: 'r-failed', Partial: 'r-partial', Worked: 'r-worked' };
+
+  var can = C.canFile();
+  var state, draftId = null, touched = {}, submitted = false, summaryOn = false, refusal = '';
+  var dirty = false, problems = [], built = false, editInfo = null, saveTimer = null, observer = null;
+  var sumBox = null, actions = null, live = null, draftsOpen = null;
+
+  function S(v) { return v == null ? '' : String(v); }
+  function T(v) { return S(v).trim(); }
+  function typeInfo(k) {
+    return C.TYPES.filter(function (t) { return t.key === k; })[0] || { key: k, label: C.typeLabel(k), letter: '' };
+  }
+  function typeFields(t) { return (F.sections || {})[t] || []; }
+
+  /* ── State: what the form holds, and the draft it stands for ────────────
+     The form keeps 'Other' choices apart from what was typed for them; the
+     draft (what validate, file and the drafts store take) holds only the
+     typed text, as cases.js expects. */
+  function blankSym() { return { time: '', tag: '', text: '' }; }
+  function blankTry() { return { action: '', result: '', note: '' }; }
+  function blank() {
+    return {
+      type: '', area: can.areas && can.areas.length === 1 ? can.areas[0] : '',
+      location: '', locationOther: '', services: [], servicesOther: '',
+      title: '', summary: '', eventMonth: '', customer: '', field: '', wellRef: '', holeSize: '', formation: '',
+      sourceDoc: '', authorRole: '', classification: 'internal', salesReady: false, sections: {},
+      incident: { type: '', typeOther: '', date: '', timeNoticed: '', depthFt: '', equipment: '', mud: '', nptHr: '',
+        activity: '', ongoing: '', conditions: '', symptoms: [blankSym()], tried: [blankTry()],
+        ending: '', findings: [], findingsText: '', cause: '', contact: '' }
+    };
+  }
+  state = blank();
+  function getPath(p) {
+    return p.split('.').reduce(function (o, k) { return o == null ? undefined : o[k]; }, state);
+  }
+  function setPath(p, v) {
+    var ks = p.split('.'), o = state;
+    for (var i = 0; i < ks.length - 1; i++) {
+      if (o[ks[i]] == null || typeof o[ks[i]] !== 'object') o[ks[i]] = {};
+      o = o[ks[i]];
+    }
+    o[ks[ks.length - 1]] = v;
+  }
+  function idOf(p) { return 'f-' + p.replace(/\./g, '-'); }
+  function errOf(p) { return 'e-' + p.replace(/\./g, '-'); }
+  function ready() { return !!state.type && !!state.area; }
+
+  function servicesOut() {
+    var picked = state.services.filter(function (v) { return v !== 'Other'; });
+    if (state.services.indexOf('Other') !== -1) {
+      var typed = S(state.servicesOther).split(/[,;\n]/).map(function (x) { return x.trim(); }).filter(Boolean);
+      picked = picked.concat(typed.length ? typed : ['Other']);
+    }
+    return picked;
+  }
+  function toDraft() {
+    var s = state, d = {
+      type: s.type, area: s.area,
+      location: s.location === 'Other' ? (T(s.locationOther) || 'Other') : s.location,
+      services: servicesOut(),
+      title: s.title, summary: s.summary, eventMonth: s.eventMonth, customer: s.customer, field: s.field,
+      wellRef: s.wellRef, holeSize: s.holeSize, formation: s.formation, sourceDoc: s.sourceDoc, authorRole: s.authorRole,
+      classification: s.classification || 'internal', salesReady: s.salesReady === true, sections: {}
+    };
+    typeFields(s.type).forEach(function (f) {
+      d.sections[f.key] = f.kind === 'check' ? s.sections[f.key] === true : S(s.sections[f.key]);
+    });
+    if (s.type === 'incident') {
+      var i = s.incident, o = {};
+      Object.keys(INC).forEach(function (k) {
+        var f = INC[k];
+        if (f.kind === 'rows') o[k] = (i[k] || []).map(function (r) {
+          var x = {}; (f.columns || []).forEach(function (c) { x[c.key] = S(r[c.key]); }); return x;
+        });
+        else if (f.kind === 'chips') o[k] = (i[k] || []).slice();
+        else o[k] = S(i[k]);
+      });
+      o.type = i.type === 'Other' ? (T(i.typeOther) || 'Other') : i.type;
+      d.incident = o;
+    }
+    return d;
+  }
+  function fromDraft(d, keepArea) {
+    d = d && typeof d === 'object' ? d : {};
+    var s = blank();
+    s.type = C.isCaseType(d.type) ? d.type : '';
+    if (keepArea && C.isOperational(d.area)) s.area = d.area;
+    else if (can.areas.indexOf(d.area) !== -1) s.area = d.area;
+    var loc = T(d.location);
+    if (loc && loc !== 'Other' && O.locations.indexOf(loc) !== -1) s.location = loc;
+    else if (loc) { s.location = 'Other'; s.locationOther = loc === 'Other' ? '' : loc; }
+    var list = s.area ? O.services(s.area) : [], others = [], other = false;
+    (Array.isArray(d.services) ? d.services : []).map(T).filter(Boolean).forEach(function (v) {
+      if (v === 'Other') other = true;
+      else if (list.indexOf(v) !== -1) { if (s.services.indexOf(v) === -1) s.services.push(v); }
+      else if (others.indexOf(v) === -1) others.push(v);
+    });
+    if (others.length || other) { s.services.push('Other'); s.servicesOther = others.join(', '); }
+    ['title', 'summary', 'eventMonth', 'customer', 'field', 'wellRef', 'holeSize', 'formation', 'sourceDoc', 'authorRole']
+      .forEach(function (k) { s[k] = S(d[k]); });
+    s.classification = O.classes.some(function (c) { return c.value === d.classification; }) ? d.classification : 'internal';
+    s.salesReady = d.salesReady === true;
+    var sec = d.sections && typeof d.sections === 'object' ? d.sections : {};
+    Object.keys(sec).forEach(function (k) { var v = sec[k]; s.sections[k] = typeof v === 'boolean' ? v : S(v); });
+    var inc = d.incident && typeof d.incident === 'object' ? d.incident : null;
+    if (inc) {
+      Object.keys(INC).forEach(function (k) {
+        var f = INC[k];
+        if (f.kind === 'rows') {
+          var rows = (Array.isArray(inc[k]) ? inc[k] : []).filter(function (r) { return r && typeof r === 'object'; }).map(function (r) {
+            var x = {}; (f.columns || []).forEach(function (c) { x[c.key] = S(r[c.key]); }); return x;
+          });
+          s.incident[k] = rows.length ? rows : (k === 'symptoms' ? [blankSym()] : []);
+        } else if (f.kind === 'chips') s.incident[k] = (Array.isArray(inc[k]) ? inc[k] : []).map(T).filter(Boolean);
+        else s.incident[k] = S(inc[k]);
+      });
+      var it = T(inc.type);
+      if (it && O.incidentTypes.indexOf(it) === -1) { s.incident.type = 'Other'; s.incident.typeOther = it; }
+    }
+    return s;
+  }
+
+  /* ── Checking: TAQA_CASES.validate is the only judge ─────────────────── */
+  function stepFor(key) {
+    if (STEP_OF[key]) return STEP_OF[key];
+    var p = key.split('.')[0];
+    return p === 'sections' || p === 'incident' ? 'type' : 'what';
+  }
+  function subFor(key) { var p = key.split('.'); return p[0] === 'incident' ? (INC_N[p[1]] || 0) : 0; }
+
+  function refresh(typingKey) {
+    if (!built) return;
+    var all = C.validate(toDraft());
+    problems = ready() ? all : all.filter(function (p) { return stepFor(p.key) === 'what'; });
+    paintErrors(typingKey);
+    paintConditional();
+    paintSteps();
+    if (summaryOn) paintSummary();
+  }
+  // An error shows once the field was changed, or after a submit. While a
+  // person is typing in a field its error can clear but never appear.
+  function paintErrors(typingKey) {
+    var by = {};
+    problems.forEach(function (p) { if (!by[p.key]) by[p.key] = p; });
+    Array.prototype.forEach.call(form.querySelectorAll('[data-key]'), function (w) {
+      var key = w.getAttribute('data-key'), p = by[key], el = $(errOf(key));
+      if (!el) return;
+      var shownNow = !el.hidden;
+      var show = !!p && (submitted || !!touched[key]) && !(key === typingKey && !shownNow);
+      el.hidden = !show;
+      el.textContent = show ? p.message : '';
+      w.classList.toggle('bad', show);
+      var ctl = $(idOf(key));
+      if (ctl) { if (show) ctl.setAttribute('aria-invalid', 'true'); else ctl.removeAttribute('aria-invalid'); }
+    });
+  }
+  function tripOut() {
+    return state.type === 'incident' && !!state.incident.ending && state.incident.ending === O.tripOut(state.area);
+  }
+  function paintConditional() {
+    var trip = tripOut(), fr = $('req-incident-findings'), ft = $('tag-incident-findings'), fh = $('h-incident-findings');
+    if (fr) fr.hidden = !trip;
+    if (ft) ft.hidden = !trip;
+    if (fh) fh.textContent = trip
+      ? 'Required: it ended with ' + state.incident.ending + ', so record what was found at surface. Tick what applies, describe it in the box below, or both.'
+      : 'Tick what was found at surface. Required when it ends with ' + O.tripOut(state.area) + '.';
+    var sn = $('cond-salesReady');
+    if (sn) sn.hidden = !(state.type === 'appreciation' && state.salesReady === true && state.sections.shareAgreed !== true);
+  }
+  function stepList() {
+    var inc = state.type === 'incident';
+    return [
+      { key: 'what', n: 1, title: 'What and where', required: true },
+      { key: 'case', n: 2, title: 'The case', required: true },
+      { key: 'where', n: 3, title: 'Where it happened', required: false },
+      { key: 'type', n: 4, title: state.type ? (inc ? 'Incident card' : typeInfo(state.type).label) : 'The type’s own sections',
+        required: true, subs: inc ? (F.incident || []) : null },
+      { key: 'source', n: 5, title: 'Source and sharing', required: true }
+    ];
+  }
+  function pop(el) {
+    if (!el || REDUCE) return;
+    el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+  }
+  function paintSteps() {
+    // A step turns red only when one of its errors is on screen.
+    var count = {}, subCount = {}, shown = {}, subShown = {}, on = ready();
+    problems.forEach(function (p) {
+      var s = stepFor(p.key), n = subFor(p.key), vis = submitted || !!touched[p.key];
+      count[s] = (count[s] || 0) + 1;
+      if (vis) shown[s] = true;
+      if (n) { subCount[n] = (subCount[n] || 0) + 1; if (vis) subShown[n] = true; }
+    });
+    stepList().forEach(function (st) {
+      var n = count[st.key] || 0, reach = st.key === 'what' || on;
+      var bad = reach && n > 0 && !!shown[st.key];
+      var done = reach && !n && st.required;
+      var sec = $('s-' + st.key);
+      if (sec) {
+        var was = sec.classList.contains('done');
+        sec.classList.toggle('done', done);
+        sec.classList.toggle('bad', bad);
+        if (done && !was) pop(sec.querySelector('.step-n'));
+      }
+      var li = rail.querySelector('li[data-for="' + st.key + '"]');
+      if (li) {
+        li.classList.toggle('done', done); li.classList.toggle('bad', bad); li.classList.toggle('off', !reach);
+        var la = li.querySelector('a');
+        // A step that is not on the page yet is not a link anyone can follow.
+        if (!reach) { la.setAttribute('aria-disabled', 'true'); la.setAttribute('tabindex', '-1'); }
+        else { la.removeAttribute('aria-disabled'); la.removeAttribute('tabindex'); }
+        var rs = li.querySelector('.rs');
+        if (rs) rs.textContent = !reach ? 'After step 1' : !st.required ? (n ? 'Check the format' : 'Optional')
+          : !n ? 'Ready' : bad ? (n === 1 ? '1 to fix' : n + ' to fix') : (n === 1 ? '1 to fill' : n + ' to fill');
+      }
+    });
+    if (state.type === 'incident' && on) {
+      (F.incident || []).forEach(function (s) {
+        var n = subCount[s.n] || 0, box = $('s-inc-' + s.n);
+        var needs = (s.fields || []).some(function (f) { return f.required; }) || (s.n === 6 && tripOut());
+        var bad = n > 0 && !!subShown[s.n];
+        var done = !n && needs;
+        if (box) { box.classList.toggle('done', done); box.classList.toggle('bad', bad); }
+        var li = rail.querySelector('li[data-sub="' + s.n + '"]');
+        if (li) { li.classList.toggle('done', done); li.classList.toggle('bad', bad); }
+      });
+    }
+    var readyN = REQ_STEPS.filter(function (k) { return (k === 'what' || on) && !count[k]; }).length;
+    var total = REQ_STEPS.length;
+    Array.prototype.forEach.call(document.querySelectorAll('.pbar span'), function (b) { b.style.transform = 'scaleX(' + (readyN / total) + ')'; });
+    var txt = readyN === total ? 'Ready to submit' : readyN + ' of ' + total + ' required steps ready';
+    ['cn-ptext', 'rail-ptext'].forEach(function (id) {
+      var el = $(id);
+      if (!el) return;
+      el.textContent = '';
+      if (readyN === total) add(el, h('b', null, [txt]));
+      else add(el, [h('b', null, [readyN + ' of ' + total]), ' required steps ready']);
+    });
+  }
+  // The summary is rebuilt only when what it lists changes, never on every
+  // keystroke, so it is not re-read over the person's typing.
+  var sumSig = null;
+  function paintSummary(force) {
+    if (!sumBox) return;
+    var list = problems.map(function (p, i) { return { p: p, el: $(idOf(p.key)), i: i }; });
+    list.sort(function (a, b) {
+      if (a.el && b.el && a.el !== b.el) return a.el.compareDocumentPosition(b.el) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+      if (a.el && !b.el) return -1;
+      if (!a.el && b.el) return 1;
+      return a.i - b.i;
+    });
+    var sig = (refusal || '') + '\u0001' + list.map(function (x) { return x.p.key + '\u0002' + x.p.message; }).join('\u0001');
+    if (!force && sig === sumSig && !sumBox.hidden) return;
+    sumSig = sig;
+    sumBox.textContent = '';
+    if (!list.length && !refusal) { sumBox.hidden = true; summaryOn = false; sumSig = null; return; }
+    sumBox.hidden = false;
+    var head = refusal ? 'The case was not filed' : list.length === 1 ? '1 field needs attention' : list.length + ' fields need attention';
+    sumBox.appendChild(h('h2', { id: 'case-errors-h' }, [icon('alert'), head]));
+    sumBox.appendChild(h('p', { id: refusal ? 'case-refusal' : null }, [refusal || 'Nothing was filed. Fix these, then submit again.']));
+    if (!list.length) return;
+    var ul = h('ul');
+    list.forEach(function (x) {
+      var p = x.p, own = p.message.indexOf(p.label) === 0;
+      ul.appendChild(h('li', null, [own ? null : h('span', { class: 'el' }, [p.label + ':']),
+        h('a', { href: '#' + idOf(p.key), 'data-go': p.key, onclick: function (e) { e.preventDefault(); focusField(p.key); } }, [p.message])]));
+    });
+    sumBox.appendChild(ul);
+  }
+  function focusField(key) {
+    var el = $(idOf(key));
+    if (!el) return;
+    var wrap = el.closest('[data-key]') || el, target = el;
+    var other = wrap.querySelector('.other:not([hidden]) input');
+    if (other && !T(other.value)) target = other;
+    else if (el.tagName === 'FIELDSET') target = el.querySelector('input:checked') || el.querySelector('input,select,textarea,button') || el;
+    (wrap.closest('.fld') || wrap).scrollIntoView({ block: 'center', behavior: REDUCE ? 'auto' : 'smooth' });
+    try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
+  }
+
+  /* ── Editing ─────────────────────────────────────────────────────────── */
+  function edited(key, typing) {
+    dirty = true;
+    queueAutosave();
+    refresh(typing ? key : null);
+  }
+  function touch(key) { touched[key] = true; refresh(); }
+  function announce(msg) { if (live) { live.textContent = ''; setTimeout(function () { live.textContent = msg; }, 30); } }
+  function say(msg, tone) {
+    var el = $('cn-saved');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = tone || '';
+  }
+  function clock() { return new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); }
+
+  /* ── Field builders ──────────────────────────────────────────────────── */
+  // The * is for the eye; a screen reader hears "required" in the label or
+  // legend itself, so a choice group says it is required before a submit.
+  function reqMark(id, hidden) {
+    return h('span', { class: 'req', id: id || null, hidden: !!hidden }, [h('span', { 'aria-hidden': 'true' }, ['*']), h('span', { class: 'sr' }, [' (required)'])]);
+  }
+  function errP(key) { return h('p', { class: 'err', id: errOf(key), hidden: true }); }
+  function grow(el) {
+    if (!el.isConnected) return;
+    el.style.height = 'auto';
+    el.style.height = (el.scrollHeight + 2) + 'px';
+  }
+  function textField(path, def, o) {
+    o = o || {}; def = def || {};
+    var id = idOf(path), hid = 'h-' + id.slice(2);
+    var req = o.required != null ? o.required : !!def.required;
+    var hint = o.hint !== undefined ? o.hint : def.hint;
+    var kind = o.kind || def.kind, max = def.max || 0, el;
+    var w = h('div', { class: 'fld' + (o.cls ? ' ' + o.cls : ''), 'data-key': path });
+    w.appendChild(h('label', { class: 'lbl', for: id }, [o.label || def.label, req ? reqMark() : null, o.tag || null]));
+    if (hint) w.appendChild(h('p', { class: 'hint', id: hid }, [hint]));
+    if (kind === 'textarea') el = h('textarea', { class: 'inp' + (o.tall ? ' tall' : ''), id: id, rows: o.rows || 3 });
+    else {
+      el = h('input', { class: 'inp', id: id, autocomplete: 'off',
+        type: kind === 'month' ? 'month' : kind === 'date' ? 'date' : kind === 'time' ? 'time' : 'text' });
+      if (kind === 'month') { el.setAttribute('max', TODAY.slice(0, 7)); el.setAttribute('placeholder', 'YYYY-MM'); }
+      if (kind === 'date') el.setAttribute('max', TODAY);
+      if (kind === 'number') el.setAttribute('inputmode', 'decimal');
+      if (o.list) el.setAttribute('list', o.list);
+    }
+    if (o.placeholder) el.setAttribute('placeholder', o.placeholder);
+    if (req) { el.required = true; el.setAttribute('aria-required', 'true'); }
+    el.setAttribute('aria-describedby', (hint ? hid + ' ' : '') + errOf(path) + (max ? ' c-' + id.slice(2) : ''));
+    el.value = S(getPath(path));
+    // A month, date or time box drops a value it cannot show; the form then
+    // holds what the person sees, not a value hidden from them.
+    if (el.value !== S(getPath(path))) setPath(path, el.value);
+    var counter = max ? h('p', { class: 'count', id: 'c-' + id.slice(2) }) : null;
+    function count() {
+      if (!counter) return;
+      var n = el.value.length;
+      counter.textContent = n.toLocaleString('en-GB') + ' of ' + max.toLocaleString('en-GB') + ' characters';
+      counter.classList.toggle('over', n > max);
+    }
+    var typed = false;
+    el.addEventListener('input', function () {
+      typed = true;
+      setPath(path, el.value); count();
+      if (el.tagName === 'TEXTAREA') grow(el);
+      if (o.onInput) o.onInput(el.value);
+      edited(path, true);
+    });
+    el.addEventListener('change', function () { touched[path] = true; if (o.onChange) o.onChange(el.value); refresh(); });
+    // Leaving a box that was typed in checks it, as a change would.
+    el.addEventListener('blur', function () { if (typed && !touched[path]) { touched[path] = true; refresh(); } else if (typed) refresh(); typed = false; });
+    w.appendChild(el);
+    if (counter) { w.appendChild(counter); count(); }
+    w.appendChild(errP(path));
+    if (el.tagName === 'TEXTAREA') requestAnimationFrame(function () { grow(el); });
+    return w;
+  }
+  function checkField(path, label, hint, o) {
+    o = o || {};
+    var id = idOf(path), hid = 'h-' + id.slice(2);
+    var w = h('div', { class: 'fld', 'data-key': path });
+    var inp = h('input', { type: 'checkbox', id: id, 'aria-describedby': (hint ? hid + ' ' : '') + errOf(path) });
+    inp.checked = getPath(path) === true;
+    inp.addEventListener('change', function () {
+      setPath(path, inp.checked);
+      touched[path] = true;
+      (o.alsoTouch || []).forEach(function (k) { touched[k] = true; });
+      edited(path);
+    });
+    w.appendChild(h('label', { class: 'check', for: id }, [inp, h('span', { class: 'cl' }, [label]), hint ? h('span', { class: 'ch', id: hid }, [hint]) : null]));
+    if (o.after) w.appendChild(o.after);
+    w.appendChild(errP(path));
+    return w;
+  }
+  function otherBox(baseId, path, label, hint, key) {
+    var oid = baseId + '-other', ohid = 'h-' + oid.slice(2);
+    var inp = h('input', { class: 'inp', id: oid, type: 'text', autocomplete: 'off', 'aria-describedby': (hint ? ohid + ' ' : '') + errOf(key) });
+    inp.value = S(getPath(path));
+    var typed = false;
+    inp.addEventListener('input', function () { typed = true; setPath(path, inp.value); edited(key, true); });
+    inp.addEventListener('change', function () { touched[key] = true; refresh(); });
+    inp.addEventListener('blur', function () { if (typed) { touched[key] = true; refresh(); } typed = false; });
+    return h('div', { class: 'other' }, [h('label', { class: 'lbl', for: oid }, [label]), hint ? h('p', { class: 'hint', id: ohid }, [hint]) : null, inp]);
+  }
+  /* A set of choices: chips (location, services, findings), option cards
+     (class, how it ended) or a segmented row (a step's result). */
+  function choiceGroup(o) {
+    var key = o.key || o.path, gid = idOf(key), hid = 'h-' + gid.slice(2), name = 'g-' + key.replace(/\./g, '-');
+    var fs = h('fieldset', { class: 'fld grp', id: gid, 'data-key': key, tabindex: '-1',
+      'aria-describedby': (o.hint ? hid + ' ' : '') + errOf(key) });
+    fs.appendChild(h('legend', { class: 'lbl' }, [o.label, o.required ? reqMark() : null, o.reqId ? reqMark(o.reqId, true) : null, o.tag || null]));
+    if (o.hint) fs.appendChild(h('p', { class: 'hint', id: hid }, [o.hint]));
+    var wrap = h('div', { class: o.style === 'opts' ? 'opts' + (o.cols ? ' cols' : '') : o.style === 'seg' ? 'chips seg' : 'chips' });
+    var other = null;
+    function otherOn() {
+      var v = getPath(o.path);
+      return o.multi ? (v || []).indexOf('Other') !== -1 : v === 'Other';
+    }
+    var items = o.items.slice();
+    if (o.multi && o.keepExtra) {
+      (getPath(o.path) || []).forEach(function (v) { if (!items.some(function (x) { return x.value === v; })) items.push({ value: v, label: v }); });
+    }
+    items.forEach(function (it, i) {
+      var inp = h('input', { type: o.multi ? 'checkbox' : 'radio', name: name, value: it.value, id: name + '-' + i });
+      var cur = getPath(o.path);
+      inp.checked = o.multi ? (cur || []).indexOf(it.value) !== -1 : cur === it.value;
+      inp.addEventListener('change', function () {
+        if (o.multi) {
+          var arr = (getPath(o.path) || []).filter(function (v) { return v !== it.value; });
+          if (inp.checked) arr.push(it.value);
+          var order = items.map(function (x) { return x.value; });
+          arr.sort(function (a, b) { return order.indexOf(a) - order.indexOf(b); });
+          setPath(o.path, arr);
+        } else setPath(o.path, it.value);
+        touched[key] = true;
+        if (other) {
+          var was = other.hidden;
+          other.hidden = !otherOn();
+          if (was && !other.hidden) { var oi = other.querySelector('input'); if (oi) setTimeout(function () { oi.focus(); }, 0); }
+        }
+        if (o.onPick) o.onPick(it.value, inp.checked);
+        edited(key);
+      });
+      var body = o.style === 'opts'
+        ? h('span', { class: 'opt-b' }, [h('span', { class: 'opt-r', 'aria-hidden': 'true' }), h('span', { class: 'opt-l' }, [it.label]),
+            it.hint ? h('span', { class: 'opt-h' }, [it.hint]) : null])
+        : h('span', { class: it.cls || null }, [o.style === 'seg' ? h('i', { 'aria-hidden': 'true' }) : null, it.label]);
+      wrap.appendChild(h('label', { class: o.style === 'opts' ? 'opt' : 'chip', for: inp.id }, [inp, body]));
+    });
+    fs.appendChild(wrap);
+    if (o.otherPath) {
+      other = otherBox(gid, o.otherPath, o.otherLabel, o.otherHint, key);
+      other.hidden = !otherOn();
+      fs.appendChild(other);
+    }
+    if (o.after) fs.appendChild(o.after);
+    fs.appendChild(errP(key));
+    return fs;
+  }
+  function selectField(path, label, items, o) {
+    o = o || {};
+    var id = idOf(path), hid = 'h-' + id.slice(2);
+    var w = h('div', { class: 'fld' + (o.cls ? ' ' + o.cls : ''), 'data-key': path });
+    w.appendChild(h('label', { class: 'lbl', for: id }, [label, o.required ? reqMark() : null]));
+    if (o.hint) w.appendChild(h('p', { class: 'hint', id: hid }, [o.hint]));
+    var sel = h('select', { class: 'inp', id: id, 'aria-describedby': (o.hint ? hid + ' ' : '') + errOf(path) });
+    if (o.required) { sel.required = true; sel.setAttribute('aria-required', 'true'); }
+    sel.appendChild(h('option', { value: '' }, [o.placeholder || 'Choose']));
+    items.forEach(function (it) { sel.appendChild(h('option', { value: it.value }, [it.label])); });
+    sel.value = S(getPath(path));
+    var other = o.otherPath ? otherBox(id, o.otherPath, o.otherLabel, o.otherHint, path) : null;
+    if (other) other.hidden = sel.value !== 'Other';
+    sel.addEventListener('change', function () {
+      touched[path] = true;
+      if (o.onChange) { o.onChange(sel.value); return; }
+      setPath(path, sel.value);
+      if (other) {
+        var was = other.hidden;
+        other.hidden = sel.value !== 'Other';
+        if (was && !other.hidden) { var oi = other.querySelector('input'); if (oi) setTimeout(function () { oi.focus(); }, 0); }
+      }
+      edited(path);
+    });
+    w.appendChild(sel);
+    if (other) w.appendChild(other);
+    w.appendChild(errP(path));
+    return w;
+  }
+
+  /* ── Steps ───────────────────────────────────────────────────────────── */
+  function stepShell(key, n, title, desc) {
+    var sec = h('section', { class: 'step', id: 's-' + key, 'data-step': key, tabindex: '-1', 'aria-labelledby': 's-' + key + '-h' });
+    sec.appendChild(h('div', { class: 'step-hd' }, [
+      h('span', { class: 'step-n', 'aria-hidden': 'true' }, [h('b', null, [String(n)]), icon('check')]),
+      h('div', null, [h('h2', { id: 's-' + key + '-h' }, [h('span', { class: 'sr' }, ['Step ' + n + ': ']), title]), desc ? h('p', null, [desc]) : null])
+    ]));
+    return sec;
+  }
+
+  function typeGroup() {
+    if (editKey) {
+      var t = typeInfo(state.type);
+      return h('div', { class: 'fld', 'data-key': 'type' }, [
+        h('p', { class: 'lbl', id: 'l-type' }, ['Content type']),
+        h('div', { class: 'tile is-locked', id: 'f-type', tabindex: '-1', 'aria-labelledby': 'l-type', 'aria-describedby': 'h-type' }, [
+          h('span', { class: 'tile-b' }, [h('span', { class: 'tile-m', 'aria-hidden': 'true' }, [t.letter]), h('span', { class: 'tile-l' }, [t.label]),
+            h('span', { class: 'tile-d', id: 'h-type' }, [h('span', { class: 'sr' }, ['Locked. ']), 'A case filed again keeps its type.'])])
+        ]),
+        errP('type')
+      ]);
+    }
+    var fs = h('fieldset', { class: 'fld grp', id: 'f-type', 'data-key': 'type', tabindex: '-1', 'aria-describedby': 'e-type' });
+    fs.appendChild(h('legend', { class: 'lbl' }, ['Content type', reqMark()]));
+    var grid = h('div', { class: 'tiles' });
+    C.TYPES.forEach(function (t) {
+      var inp = h('input', { type: 'radio', name: 'g-type', value: t.key, id: 'f-type-' + t.key, 'aria-labelledby': 'l-type-' + t.key, 'aria-describedby': 'd-type-' + t.key });
+      inp.checked = state.type === t.key;
+      inp.addEventListener('change', function () {
+        if (!inp.checked) return;
+        var was = ready();
+        state.type = t.key;
+        touched.type = true;
+        dirty = true; queueAutosave();
+        build({ animate: true, focus: inp.id, enterAll: !was });
+        announce(t.label + ' chosen. ' + (ready() ? 'Its sections are below.' : 'Choose the area to continue.'));
+      });
+      grid.appendChild(h('label', { class: 'tile', for: inp.id }, [inp, h('span', { class: 'tile-b' }, [
+        h('span', { class: 'tile-m', 'aria-hidden': 'true' }, [t.letter]),
+        h('span', { class: 'tile-l', id: 'l-type-' + t.key }, [t.label]),
+        h('span', { class: 'tile-d', id: 'd-type-' + t.key }, [DESC[t.key] || ''])
+      ])]));
+    });
+    fs.appendChild(grid);
+    fs.appendChild(h('p', { class: 'tile-now', 'aria-hidden': 'true' }, [state.type ? DESC[state.type] || '' : '']));
+    fs.appendChild(errP('type'));
+    return fs;
+  }
+  function areaChanged(v) {
+    var was = ready();
+    state.area = v;
+    var list = v ? O.services(v) : [];
+    state.services = state.services.filter(function (s) { return s === 'Other' || list.indexOf(s) !== -1; });
+    var ends = v ? O.endings(v).map(function (e) { return e.value; }) : [];
+    if (state.incident.ending && ends.indexOf(state.incident.ending) === -1) state.incident.ending = '';
+    touched.area = true; dirty = true; queueAutosave();
+    build({ animate: !was && ready(), focus: 'f-area' });
+    if (v) announce(C.areaName(v) + ' chosen. The services' + (state.type === 'incident' ? ', endings and findings' : '') + ' follow it.');
+  }
+  function areaField() {
+    var areas = C.operational().filter(function (a) { return can.areas.indexOf(a.id) !== -1; });
+    if (editKey || areas.length === 1) {
+      if (!editKey && !state.area) state.area = areas[0].id;
+      var why = editKey ? 'A case filed again keeps its area.' : 'As its Segment Director you file cases for ' + C.areaName(state.area) + ' only.';
+      return h('div', { class: 'fld', 'data-key': 'area' }, [
+        h('p', { class: 'lbl', id: 'l-area' }, ['Area']),
+        h('div', { class: 'locked', id: 'f-area', tabindex: '-1', 'aria-labelledby': 'l-area', 'aria-describedby': 'h-area' }, [icon('lock'), C.areaName(state.area)]),
+        h('p', { class: 'hint after', id: 'h-area' }, [why]),
+        errP('area')
+      ]);
+    }
+    return selectField('area', 'Area', areas.map(function (a) { return { value: a.id, label: a.name }; }), {
+      required: true, cls: 'narrow', placeholder: 'Choose the operational segment',
+      hint: 'An operational segment. Field cases are never filed for a maintenance department.', onChange: areaChanged });
+  }
+  function servicesGroup() {
+    if (!state.area) {
+      return h('div', { class: 'fld', 'data-key': 'services', id: 'f-services', tabindex: '-1' }, [
+        h('p', { class: 'lbl' }, ['Service(s) / tool(s)', reqMark()]),
+        h('p', { class: 'none' }, ['Choose the area first. The services and tools offered follow it.']),
+        errP('services')
+      ]);
+    }
+    return choiceGroup({ key: 'services', path: 'services', multi: true, required: true, label: 'Service(s) / tool(s)',
+      hint: 'Tick every one involved. The list follows the area.',
+      items: O.services(state.area).map(function (v) { return { value: v, label: v }; }),
+      otherPath: 'servicesOther', otherLabel: 'Type the other service or tool', otherHint: 'Separate several with commas.' });
+  }
+  function stepWhat() {
+    var sec = stepShell('what', 1, 'What and where', 'The kind of case, the segment it belongs to, and where and with what it happened.');
+    sec.appendChild(h('div', { class: 'stack' }, [
+      typeGroup(),
+      areaField(),
+      choiceGroup({ key: 'location', path: 'location', required: true, label: 'Location',
+        items: O.locations.map(function (v) { return { value: v, label: v }; }),
+        otherPath: 'locationOther', otherLabel: 'Type the location', otherHint: 'The country or region.' }),
+      servicesGroup()
+    ]));
+    return sec;
+  }
+  function rulesBox() {
+    return h('aside', { class: 'rules', id: 'incident-rules', 'aria-labelledby': 'incident-rules-h' }, [
+      h('span', { class: 'ic' }, [icon('list')]),
+      h('h2', { id: 'incident-rules-h' }, ['Before you write the incident card']),
+      h('p', { id: 'incident-rules-text' }, [C.INCIDENT_RULES])
+    ]);
+  }
+  function laterBox() {
+    var names = ['The case', 'Where it happened', 'The type’s own sections', 'Source and sharing'];
+    return h('div', { class: 'later', id: 'cn-later' }, [
+      h('p', null, ['Choose the content type and the area to see the rest of the form. The type decides its own sections; the area decides the services, endings and findings offered.']),
+      h('ol', { 'aria-label': 'The steps that follow' }, names.map(function (n, i) { return h('li', null, [h('b', { 'aria-hidden': 'true' }, [String(i + 2)]), n]); }))
+    ]);
+  }
+  function stepCase() {
+    var sec = stepShell('case', 2, 'The case', 'A title someone would search for, and one paragraph that tells it.');
+    sec.appendChild(h('div', { class: 'stack' }, [
+      textField('title', SHARED.title, { hint: 'Say what happened and with what, the way someone would search for it.' }),
+      textField('summary', SHARED.summary, { rows: 4, tall: true, hint: 'What happened, what was done and how it ended, in plain words.' }),
+      textField('eventMonth', SHARED.eventMonth, { cls: 'short', hint: state.type === 'incident'
+        ? 'The month it happened, as YYYY-MM. On an incident card it follows the incident date.'
+        : 'The month it happened, as YYYY-MM.' })
+    ]));
+    return sec;
+  }
+  function stepWhere() {
+    var sec = stepShell('where', 3, 'Where it happened', 'Optional. Each detail helps the next crew match it to their job. Unsure of a value? Leave it blank.');
+    sec.appendChild(h('div', { class: 'grid2' }, [
+      textField('customer', SHARED.customer),
+      textField('field', SHARED.field),
+      textField('wellRef', SHARED.wellRef),
+      textField('holeSize', SHARED.holeSize, { list: 'dl-holes', hint: 'In inches, for example 8 1/2 or 8.5.' }),
+      textField('formation', SHARED.formation, { cls: 'full' }),
+      h('datalist', { id: 'dl-holes' }, O.holeSizes.map(function (v) { return h('option', { value: v }); }))
+    ]));
+    return sec;
+  }
+
+  /* Incident card: six numbered sections. */
+  function nptCopy() {
+    var w = h('div', { class: 'fld short', id: 'npt-again' });
+    var inp = h('input', { class: 'inp', id: 'f-npt-again', type: 'text', inputmode: 'decimal', autocomplete: 'off', 'aria-describedby': 'h-npt-again' });
+    inp.value = S(state.incident.nptHr);
+    inp.addEventListener('input', function () {
+      state.incident.nptHr = inp.value;
+      var first = $(idOf('incident.nptHr'));
+      if (first) first.value = inp.value;
+      edited('incident.nptHr', true);
+    });
+    inp.addEventListener('change', function () { touched['incident.nptHr'] = true; refresh(); });
+    w.appendChild(h('label', { class: 'lbl', for: 'f-npt-again' }, ['NPT (hr)']));
+    w.appendChild(h('p', { class: 'hint', id: 'h-npt-again' }, ['Section 1 left it blank. It is the same value: fill it in here or there.']));
+    w.appendChild(inp);
+    w.hidden = !!T(state.incident.nptHr);
+    return w;
+  }
+  // An incident card has one month: its date's. The event month box
+  // follows the incident date, so the two can never disagree.
+  function syncMonth(v) {
+    var m = /^(\d{4}-\d{2})-\d{2}$/.exec(T(v));
+    if (!m || state.type !== 'incident') return;
+    state.eventMonth = m[1];
+    var em = $(idOf('eventMonth'));
+    if (em && em.value !== m[1]) em.value = m[1];
+  }
+  function symRow(i, n) {
+    var lid = 'symptoms-' + i + '-k';
+    return h('li', null, [h('div', { class: 'rcard', role: 'group', 'aria-labelledby': lid }, [
+      h('div', { class: 'rcard-hd' }, [h('span', { class: 'row-k', id: lid }, ['Symptom ' + (i + 1)]), rowTools('symptoms', i, n, 'Symptom')]),
+      h('div', { class: 'rg' }, [
+        cell('symptoms', i, 'time', 'Time', false, { placeholder: 'hh:mm or T+n min' }),
+        cell('symptoms', i, 'tag', 'Tag (optional)', false, { placeholder: 'e.g. SPP above baseline' }),
+        cell('symptoms', i, 'text', 'Observation', true, { textarea: true, full: true })
+      ])
+    ])]);
+  }
+  function tryRow(i, n) {
+    var lid = 'tried-' + i + '-k', path = 'incident.tried.' + i + '.result';
+    return h('li', null, [h('div', { class: 'rcard', role: 'group', 'aria-labelledby': lid }, [
+      h('div', { class: 'rcard-hd' }, [h('span', { class: 'row-k', id: lid }, ['Action ' + (i + 1)]), rowTools('tried', i, n, 'Action')]),
+      h('div', { class: 'rg tried' }, [
+        cell('tried', i, 'action', 'Action', true, { textarea: true, small: true }),
+        choiceGroup({ key: path, path: path, label: 'Result', required: true, style: 'seg',
+          items: O.results.map(function (v) { return { value: v, label: v, cls: RESULT_CLS[v] }; }) }),
+        cell('tried', i, 'note', 'Note', false, {})
+      ])
+    ])]);
+  }
+  function rowTools(kind, i, n, noun) {
+    var lower = noun.toLowerCase();
+    var blankOnly = kind === 'symptoms' && n === 1 && !T(state.incident.symptoms[0].text) && !T(state.incident.symptoms[0].time) && !T(state.incident.symptoms[0].tag);
+    return h('div', { class: 'tools' }, [
+      h('button', { type: 'button', class: 'ibtn', id: 'mv-' + kind + '-' + i + '-up', title: 'Move up', 'aria-label': 'Move ' + lower + ' ' + (i + 1) + ' up',
+        disabled: i === 0, onclick: function () { moveRow(kind, i, -1); } }, [icon('up')]),
+      h('button', { type: 'button', class: 'ibtn', id: 'mv-' + kind + '-' + i + '-down', title: 'Move down', 'aria-label': 'Move ' + lower + ' ' + (i + 1) + ' down',
+        disabled: i === n - 1, onclick: function () { moveRow(kind, i, 1); } }, [icon('down')]),
+      h('button', { type: 'button', class: 'ibtn', id: 'rm-' + kind + '-' + i, title: 'Remove', 'aria-label': 'Remove ' + lower + ' ' + (i + 1),
+        disabled: blankOnly, onclick: function () { removeRow(kind, i); } }, [icon('x')])
+    ]);
+  }
+  function cell(kind, i, col, label, req, o) {
+    var path = 'incident.' + kind + '.' + i + '.' + col, id = idOf(path);
+    var w = h('div', { class: 'fld' + (o.full ? ' full' : ''), 'data-key': path });
+    w.appendChild(h('label', { class: 'lbl', for: id }, [label, req ? reqMark() : null]));
+    var el = o.textarea ? h('textarea', { class: 'inp' + (o.small ? ' sm' : ''), id: id, rows: 2 }) : h('input', { class: 'inp', id: id, type: 'text', autocomplete: 'off' });
+    if (o.placeholder) el.setAttribute('placeholder', o.placeholder);
+    if (req) el.setAttribute('aria-required', 'true');
+    el.setAttribute('aria-describedby', errOf(path));
+    el.value = S(state.incident[kind][i][col]);
+    el.addEventListener('input', function () {
+      state.incident[kind][i][col] = el.value;
+      if (o.textarea) grow(el);
+      var rm = $('rm-' + kind + '-' + i);
+      if (rm && kind === 'symptoms') rm.disabled = state.incident.symptoms.length === 1 && !T(el.value) && !rowHasText(i);
+      typed = true;
+      edited(path, true);
+    });
+    var typed = false;
+    el.addEventListener('change', function () { touched[path] = true; refresh(); });
+    el.addEventListener('blur', function () { if (typed) { touched[path] = true; refresh(); } typed = false; });
+    w.appendChild(el);
+    w.appendChild(errP(path));
+    if (o.textarea) requestAnimationFrame(function () { grow(el); });
+    return w;
+  }
+  function rowHasText(i) { var r = state.incident.symptoms[i] || {}; return !!(T(r.time) || T(r.tag) || T(r.text)); }
+  function drawRows(kind, focusId, into) {
+    var w = into || $('rows-' + kind);
+    if (!w) return;
+    w.textContent = '';
+    var list = state.incident[kind];
+    w.appendChild(h('p', { class: 'lead' }, [kind === 'symptoms'
+      ? 'In the order they were seen. Time as hh:mm or T+n min. A tag is optional, for example “SPP above baseline”.'
+      : 'Each action in the order it was tried, and what it did. Leave this empty if nothing was tried.']));
+    var ol = h('ol', { class: kind === 'symptoms' ? 'tl' : 'ledger', id: 'list-' + kind });
+    if (!list.length) ol.appendChild(h('li', { class: 'none' }, ['Nothing recorded yet.']));
+    list.forEach(function (r, i) { ol.appendChild(kind === 'symptoms' ? symRow(i, list.length) : tryRow(i, list.length)); });
+    w.appendChild(ol);
+    w.appendChild(h('button', { type: 'button', class: 'add', id: 'add-' + kind, onclick: function () { addRow(kind); } },
+      [icon('plus'), kind === 'symptoms' ? 'Add a symptom' : 'Add an action']));
+    if (focusId && $(focusId)) $(focusId).focus();
+  }
+  function rowsChanged(kind, focusId) {
+    Object.keys(touched).forEach(function (k) { if (k.indexOf('incident.' + kind + '.') === 0) delete touched[k]; });
+    drawRows(kind, focusId);
+    edited('incident.' + kind);
+  }
+  function firstCol(kind) { return kind === 'symptoms' ? 'time' : 'action'; }
+  function addRow(kind) {
+    var list = state.incident[kind];
+    list.push(kind === 'symptoms' ? blankSym() : blankTry());
+    rowsChanged(kind, idOf('incident.' + kind + '.' + (list.length - 1) + '.' + firstCol(kind)));
+    announce((kind === 'symptoms' ? 'Symptom ' : 'Action ') + list.length + ' added.');
+  }
+  function moveRow(kind, i, d) {
+    var list = state.incident[kind], j = i + d;
+    if (j < 0 || j >= list.length) return;
+    var t = list[i]; list[i] = list[j]; list[j] = t;
+    var same = d < 0 ? j > 0 : j < list.length - 1;
+    rowsChanged(kind, 'mv-' + kind + '-' + j + '-' + ((d < 0) === same ? 'up' : 'down'));
+    announce((kind === 'symptoms' ? 'Symptom' : 'Action') + ' moved to position ' + (j + 1) + '.');
+  }
+  function removeRow(kind, i) {
+    var list = state.incident[kind];
+    if (kind === 'symptoms' && list.length === 1) list[0] = blankSym();
+    else list.splice(i, 1);
+    rowsChanged(kind, list.length ? idOf('incident.' + kind + '.' + Math.min(i, list.length - 1) + '.' + firstCol(kind)) : 'add-' + kind);
+    announce((kind === 'symptoms' ? 'Symptom ' : 'Action ') + (i + 1) + ' removed.');
+  }
+  function incSection(s) {
+    var box = h('section', { class: 'sub', id: 's-inc-' + s.n, 'data-sub': s.n, tabindex: '-1', 'aria-labelledby': 's-inc-' + s.n + '-h' }, [
+      h('div', { class: 'sub-hd' }, [
+        h('span', { class: 'sub-n', 'aria-hidden': 'true' }, [String(s.n)]),
+        h('h3', { id: 's-inc-' + s.n + '-h' }, [h('span', { class: 'sr' }, ['Section ' + s.n + ' of 6: ']), s.title]),
+        h('span', { class: 'of', 'aria-hidden': 'true' }, [s.n + ' of 6'])
+      ])
+    ]);
+    var body;
+    if (s.n === 1) {
+      var npt = textField('incident.nptHr', INC.nptHr, { hint: 'Hours lost, if known.', onInput: function (v) { var c = $('f-npt-again'); if (c) c.value = v; },
+        onChange: function (v) { var c = $('npt-again'); if (c) c.hidden = !!T(v); } });
+      body = h('div', { class: 'grid2' }, [
+        selectField('incident.type', INC.type.label, O.incidentTypes.map(function (v) { return { value: v, label: v }; }), {
+          required: true, cls: 'full', placeholder: 'Choose the incident type', otherPath: 'incident.typeOther', otherLabel: 'Type the incident type' }),
+        textField('incident.date', INC.date, { onInput: syncMonth, onChange: syncMonth }),
+        textField('incident.timeNoticed', INC.timeNoticed, { hint: 'hh:mm, if known.' }),
+        textField('incident.depthFt', INC.depthFt, { hint: 'A number, in feet measured depth.' }),
+        npt,
+        textField('incident.equipment', INC.equipment, { cls: 'full' }),
+        textField('incident.mud', INC.mud, { cls: 'full' })
+      ]);
+    } else if (s.n === 2) {
+      body = h('div', { class: 'stack' }, [
+        textField('incident.activity', INC.activity, { hint: 'What the crew was doing when the first symptom appeared.' }),
+        textField('incident.ongoing', INC.ongoing),
+        textField('incident.conditions', INC.conditions)
+      ]);
+    } else if (s.n === 3 || s.n === 4) {
+      var kind = s.n === 3 ? 'symptoms' : 'tried';
+      body = h('div', { class: 'rows', id: 'rows-' + kind });
+      box.appendChild(body);
+      drawRows(kind, null, body);
+      return box;
+    } else if (s.n === 5) {
+      body = h('div', { class: 'stack' }, [
+        choiceGroup({ key: 'incident.ending', path: 'incident.ending', required: true, label: 'Choose how it ended', style: 'opts',
+          hint: 'The endings used in ' + C.areaName(state.area) + '.',
+          items: O.endings(state.area) }),
+        nptCopy()
+      ]);
+    } else {
+      body = h('div', { class: 'stack' }, [
+        choiceGroup({ key: 'incident.findings', path: 'incident.findings', multi: true, keepExtra: true, label: INC.findings.label,
+          reqId: 'req-incident-findings', tag: h('span', { class: 'tag need', id: 'tag-incident-findings', hidden: true }, ['Required']),
+          hint: ' ', items: O.findings(state.area).map(function (v) { return { value: v, label: v }; }) }),
+        textField('incident.findingsText', INC.findingsText, { tall: false }),
+        textField('incident.cause', INC.cause, { tag: h('span', { class: 'tag' }, ['Hypothesis, not a finding']),
+          hint: 'Your explanation, if you have one. It is always shown as a hypothesis, never as a finding.' }),
+        textField('incident.contact', INC.contact, { cls: 'narrow' })
+      ]);
+    }
+    box.appendChild(body);
+    return box;
+  }
+  function stepType() {
+    if (state.type === 'incident') {
+      var sec = stepShell('type', 4, 'Failure / incident card', 'Six sections. Write what was observed; your explanation has its own box in section 6.');
+      sec.appendChild(h('div', { class: 'subs' }, (F.incident || []).map(incSection)));
+      return sec;
+    }
+    var t = typeInfo(state.type);
+    var s2 = stepShell('type', 4, t.label, DESC[state.type]);
+    s2.appendChild(h('div', { class: 'stack' }, typeFields(state.type).map(function (f) {
+      var path = 'sections.' + f.key;
+      if (f.kind === 'check') return checkField(path, f.label, f.key === 'shareAgreed' ? 'Required before the case can be marked sales-ready.' : f.hint);
+      return textField(path, f, { tall: f.kind === 'textarea' && f.required });
+    })));
+    return s2;
+  }
+  function stepSource() {
+    var sec = stepShell('source', 5, 'Source and sharing', 'Where the facts came from, who wrote it, and who may read it.');
+    var cond = h('p', { class: 'cond', id: 'cond-salesReady', hidden: true }, [icon('info'),
+      h('span', null, ['A customer appreciation is sales-ready only once the customer agreed it can be shared. Tick that box in step 4.'])]);
+    sec.appendChild(h('div', { class: 'stack' }, [
+      textField('sourceDoc', SHARED.sourceDoc),
+      textField('authorRole', SHARED.authorRole, { cls: 'narrow' }),
+      choiceGroup({ key: 'classification', path: 'classification', label: SHARED.classification ? SHARED.classification.label : 'Class',
+        style: 'opts', cols: true, hint: 'Who can open it once it is released.', items: O.classes }),
+      checkField('salesReady', 'Sales-ready', SHARED.salesReady ? SHARED.salesReady.hint : '', { after: cond, alsoTouch: ['sections.shareAgreed'] })
+    ]));
+    return sec;
+  }
+
+  /* ── Rail and action bar ─────────────────────────────────────────────── */
+  function jump(e) {
+    var href = this.getAttribute('href'), el = href && $(href.slice(1));
+    if (!el) return;
+    e.preventDefault();
+    el.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'start' });
+    try { el.focus({ preventScroll: true }); } catch (x) { el.focus(); }
+  }
+  function buildRail() {
+    rail.textContent = '';
+    rail.appendChild(h('p', { class: 'rail-k', id: 'rail-k' }, [editKey ? 'Filing again' : 'Your case']));
+    var ol = h('ol', { class: 'rail', 'aria-labelledby': 'rail-k' });
+    stepList().forEach(function (st) {
+      var li = h('li', { 'data-for': st.key });
+      li.appendChild(h('a', { href: '#s-' + st.key, onclick: jump }, [
+        h('span', { class: 'dot', 'aria-hidden': 'true' }, [h('b', null, [String(st.n)]), icon('check')]),
+        h('span', { class: 'rl' }, [st.title]), h('span', { class: 'rs' })
+      ]));
+      if (st.subs && ready()) {
+        li.appendChild(h('ol', { class: 'rail-sub' }, st.subs.map(function (s) {
+          return h('li', { 'data-sub': s.n }, [h('a', { href: '#s-inc-' + s.n, onclick: jump }, [h('span', { class: 'sn' }, [String(s.n)]), s.title])]);
+        })));
+      }
+      ol.appendChild(li);
+    });
+    rail.appendChild(ol);
+    rail.appendChild(h('div', { class: 'rail-progress' }, [h('div', { class: 'pbar', 'aria-hidden': 'true' }, [h('span')]), h('p', { class: 'ptext', id: 'rail-ptext' })]));
+  }
+  function watchSteps() {
+    if (observer) observer.disconnect();
+    if (!('IntersectionObserver' in window)) return;
+    var seen = {};
+    observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { seen[en.target.id] = en.isIntersecting; });
+      var cur = Array.prototype.filter.call(form.querySelectorAll('.step'), function (s) { return seen[s.id]; })[0];
+      var sub = Array.prototype.filter.call(form.querySelectorAll('.sub'), function (s) { return seen[s.id]; })[0];
+      Array.prototype.forEach.call(rail.querySelectorAll('li[data-for]'), function (li) {
+        var on = !!cur && li.getAttribute('data-for') === cur.getAttribute('data-step');
+        li.classList.toggle('cur', on);
+        var a = li.querySelector('a');
+        if (on) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current');
+      });
+      Array.prototype.forEach.call(rail.querySelectorAll('li[data-sub]'), function (li) {
+        li.classList.toggle('cur', !!sub && li.getAttribute('data-sub') === sub.getAttribute('data-sub'));
+      });
+    }, { rootMargin: '-30% 0px -60% 0px' });
+    Array.prototype.forEach.call(form.querySelectorAll('.step, .sub'), function (s) { observer.observe(s); });
+  }
+  function makeActions() {
+    return h('div', { class: 'cn-actions', id: 'cn-actions' }, [
+      h('div', { class: 'st' }, [
+        h('div', { class: 'st-row' }, [h('span', { id: 'cn-ptext' }), h('span', { class: 'sep', 'aria-hidden': 'true' }, ['·']), h('span', { id: 'cn-saved' }, ['Not saved yet'])]),
+        h('div', { class: 'pbar', 'aria-hidden': 'true' }, [h('span')])
+      ]),
+      h('div', { class: 'btns' }, [
+        h('button', { type: 'button', class: 'btn quiet', id: 'btn-save', onclick: function () { saveDraft(true); } },
+          [icon('save'), h('span', { class: 'lg' }, ['Save draft']), h('span', { class: 'sh' }, ['Save'])]),
+        h('button', { type: 'button', class: 'btn quiet', id: 'btn-json', 'aria-label': 'Download JSON', title: 'Download what is in the form as a JSON file', onclick: downloadJson },
+          [icon('download'), h('span', { class: 'lg' }, ['Download JSON']), h('span', { class: 'sh' }, ['JSON'])]),
+        h('button', { type: 'submit', class: 'btn primary', id: 'btn-submit' }, [
+          h('span', { class: 'full-l' }, [editKey ? 'File it again' : 'Submit for review']),
+          h('span', { class: 'tiny-l' }, [editKey ? 'File again' : 'Submit']), icon('send')])
+      ])
+    ]);
+  }
+
+  /* ── Building the form ───────────────────────────────────────────────── */
+  function build(o) {
+    o = o || {};
+    form.textContent = '';
+    form.appendChild(sumBox);
+    form.appendChild(h('p', { class: 'req-note', id: 'cn-req-note' }, ['Fields marked ', h('span', { class: 'req' }, ['*']), ' are required.']));
+    form.appendChild(stepWhat());
+    var after = [];
+    if (ready()) {
+      if (state.type === 'incident') after.push(rulesBox());
+      after.push(stepCase(), stepWhere(), stepType(), stepSource());
+    } else after.push(laterBox());
+    after.forEach(function (el, i) {
+      if (o.animate && !REDUCE && (o.enterAll || el.id === 's-type' || el.id === 'incident-rules' || after.length === 1)) {
+        el.classList.add('enter');
+        el.style.setProperty('--d', Math.min(i, 4) * 60 + 'ms');
+        el.addEventListener('animationend', function done() { el.classList.remove('enter'); el.style.removeProperty('--d'); el.removeEventListener('animationend', done); });
+      }
+      form.appendChild(el);
+    });
+    form.appendChild(actions);
+    built = true;
+    buildRail();
+    watchSteps();
+    refresh();
+    if (o.focus && $(o.focus)) { try { $(o.focus).focus({ preventScroll: true }); } catch (e) { $(o.focus).focus(); } }
+  }
+
+  /* ── Drafts ──────────────────────────────────────────────────────────── */
+  function when(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return 'earlier';
+    var t = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    if (d.toDateString() === new Date().toDateString()) return 'today at ' + t;
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ' at ' + t;
+  }
+  function renderDrafts() {
+    draftsBox.textContent = '';
+    if (editKey || !can.ok) return;
+    var list = C.drafts.list();
+    if (!list.length) return;
+    var det = h('details', { class: 'drafts', id: 'drafts-panel' });
+    det.open = draftsOpen == null ? !draftId : draftsOpen;
+    det.addEventListener('toggle', function () { draftsOpen = det.open; });
+    det.appendChild(h('summary', null, [
+      h('span', { class: 'ic' }, [icon('doc')]),
+      h('span', { class: 'dr-h' }, [h('b', null, [list.length === 1 ? 'You have 1 saved draft' : 'You have ' + list.length + ' saved drafts']),
+        h('span', null, ['Kept in this browser only. The draft that is open saves itself as you type.'])]),
+      icon('chev', 'chev')
+    ]));
+    var ul = h('ul', { id: 'drafts-list' });
+    list.forEach(function (x) {
+      var d = x.draft || {}, open = x.id === draftId;
+      var meta = [d.resubmitOf ? 'Filing again' : null, d.type && C.isCaseType(d.type) ? C.typeLabel(d.type) : 'No type chosen',
+        d.area && C.isOperational(d.area) ? C.areaName(d.area) : null, 'saved ' + when(x.savedAt)].filter(Boolean).join(' · ');
+      var go = open ? null : h('button', { type: 'button', class: 'btn sm quiet', 'data-draft': x.id }, ['Continue']);
+      if (go) go.addEventListener('click', function () { continueDraft(x, go); });
+      var del = h('button', { type: 'button', class: 'btn sm quiet', 'data-del': x.id, 'aria-label': 'Delete draft: ' + (T(d.title) || 'Untitled draft') }, ['Delete']);
+      // The visible word starts the accessible name (label in name).
+      del.addEventListener('click', function () { deleteDraft(x, del); });
+      ul.appendChild(h('li', { 'data-id': x.id }, [
+        h('div', { class: 'dr-t' }, [h('div', { class: 'dr-n' }, [T(d.title) || 'Untitled draft', open ? h('span', { class: 'dr-now' }, ['Open now']) : null]),
+          h('div', { class: 'dr-m' }, [meta])]),
+        h('div', { class: 'dr-b' }, [go, del])
+      ]));
+    });
+    det.appendChild(ul);
+    draftsBox.appendChild(det);
+  }
+  function continueDraft(x, btn) {
+    if (x.draft && x.draft.resubmitOf) {
+      location.href = 'case-new.html?edit=' + encodeURIComponent(x.draft.resubmitOf) + '&draft=' + encodeURIComponent(x.id);
+      return;
+    }
+    if (dirty && btn.getAttribute('data-sure') !== '1') {
+      btn.setAttribute('data-sure', '1');
+      btn.classList.add('warn');
+      btn.textContent = 'Replace the form?';
+      announce('The form has changes that are not saved. Press again to replace them with this draft.');
+      return;
+    }
+    restoreDraft(x);
+  }
+  function deleteDraft(x, btn) {
+    var name = T((x.draft || {}).title) || 'Untitled draft';
+    if (btn.getAttribute('data-sure') !== '1') {
+      btn.setAttribute('data-sure', '1');
+      btn.classList.add('warn');
+      btn.textContent = 'Delete it?';
+      btn.setAttribute('aria-label', 'Delete it? Press again to delete draft: ' + name);
+      announce('Press Delete again to remove this draft.');
+      return;
+    }
+    // Focus goes to the next draft's Delete button, or the one before, or
+    // the drafts heading, or the form's first step when none is left.
+    var ids = C.drafts.list().map(function (d) { return d.id; }), at = ids.indexOf(x.id);
+    C.drafts.remove(x.id);
+    if (x.id === draftId) { draftId = null; clearTimeout(saveTimer); dirty = true; say('Draft deleted. The form keeps what you typed.', ''); }
+    announce('Draft deleted.');
+    renderDrafts();
+    var next = ids[at + 1] || ids[at - 1] || null;
+    var target = next ? draftsBox.querySelector('[data-del="' + next + '"]') : null;
+    if (!target) target = draftsBox.querySelector('summary');
+    if (!target) target = $('cn-title');
+    if (target) {
+      if (target.id === 'cn-title') target.setAttribute('tabindex', '-1');
+      try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
+    }
+  }
+  function restoreDraft(x) {
+    clearTimeout(saveTimer);
+    draftId = x.id;
+    state = fromDraft(x.draft, false);
+    touched = {}; submitted = false; summaryOn = false; refusal = ''; dirty = false;
+    draftsOpen = false;
+    build({ animate: true, enterAll: true });
+    renderDrafts();
+    say('Draft restored at ' + clock(), 'ok');
+    announce('Draft restored. Changes now save to it automatically.');
+    var first = $('s-what');
+    if (first) { first.scrollIntoView({ block: 'start', behavior: REDUCE ? 'auto' : 'smooth' }); try { first.focus({ preventScroll: true }); } catch (e) {} }
+  }
+  function queueAutosave() {
+    if (!draftId) return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () { saveDraft(false); }, 1200);
+  }
+  function saveDraft(manual) {
+    clearTimeout(saveTimer); saveTimer = null;
+    var d = toDraft();
+    if (editKey) d.resubmitOf = editKey;
+    var first = !draftId;
+    var id = C.drafts.save(d, draftId);
+    if (!id) { say('This browser would not keep the draft. Use Download JSON to keep a copy.', 'bad'); return false; }
+    draftId = id; dirty = false;
+    say((manual ? 'Draft saved at ' : 'Saved at ') + clock(), 'ok');
+    if (manual) announce(first ? 'Draft saved in this browser. From now on it saves itself as you type.' : 'Draft saved.');
+    renderDrafts();
+    return true;
+  }
+  function downloadJson() {
+    var d = toDraft();
+    var out = {
+      schema: 'taqa-field-case-draft/1', exportedAt: new Date().toISOString(), filed: false,
+      note: 'What was in the Add a case form. It is not filed and has no number of its own yet.',
+      resubmitOf: editKey || null, docNumber: editInfo ? editInfo.number : null,
+      title: T(d.title), summary: T(d.summary), classification: d.classification, card: C.buildCard(d)
+    };
+    var name = ((editInfo ? editInfo.number + '-attempt-' + editInfo.attempt : 'field-case-draft-' + (d.type || 'untyped')) + '-' + TODAY)
+      .replace(/[^A-Za-z0-9._-]+/g, '-') + '.json';
+    var url = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' }));
+    var a = h('a', { href: url, download: name, hidden: true });
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 1500);
+    say('Downloaded ' + name, 'ok');
+  }
+
+  /* ── Filing ──────────────────────────────────────────────────────────── */
+  function submit() {
+    var btn = $('btn-submit');
+    if (!btn || btn.disabled) return;
+    submitted = true; refusal = '';
+    btn.disabled = true;
+    var res;
+    try { res = C.file(toDraft(), editKey ? { resubmitOf: editKey } : undefined); }
+    catch (e) { res = { ok: false, error: 'The case was not filed. Nothing was saved.', problems: [] }; }
+    if (res && res.ok) {
+      clearTimeout(saveTimer);
+      if (draftId) C.drafts.remove(draftId);
+      dirty = false;
+      say('Filed as ' + res.record.docNumber + '. Opening it.', 'ok');
+      location.assign(res.url);
+      return;
+    }
+    btn.disabled = false;
+    refusal = res && !(res.problems || []).length ? (res.error || 'The case was not filed.') : '';
+    summaryOn = true;
+    refresh();
+    paintSummary(true);
+    var hd = $('case-errors-h');
+    if (hd) announce(T(hd.textContent) + '. ' + (refusal || 'Nothing was filed.'));
+    sumBox.scrollIntoView({ block: 'start', behavior: REDUCE ? 'auto' : 'smooth' });
+    try { sumBox.focus({ preventScroll: true }); } catch (e) { sumBox.focus(); }
+  }
+
+  /* ── Who may file, and what is being filed ───────────────────────────── */
+  function refuse(why) {
+    var rule = C.FIELD_CASE_ROLE || '';
+    $('cn-lede').textContent = 'Operations file field cases for their own segment. QMS checks each one, then the area’s Director releases it to the library.';
+    var route = document.querySelector('.route');
+    if (route) route.hidden = true;
+    var text = why && why.indexOf(rule) === -1 ? why + ' ' + rule : (why || rule);
+    gate.appendChild(notice({ id: 'case-refused', icon: 'stop', title: 'Cases are not filed from this role', body: [
+      h('p', { id: 'case-refused-why' }, [text]),
+      h('p', null, ['You can still read every released case in the library.']),
+      h('p', { class: 'links' }, [h('a', { href: 'cases.html' }, ['Back to the case library'])])
+    ] }));
+  }
+  function startEdit() {
+    $('cn-title').textContent = 'File the case again';
+    $('cn-crumb').textContent = 'File again';
+    document.title = 'File a Case Again, RISE';
+    $('cn-lede').textContent = 'A reviewer returned this case with a reason. Change what it asks, then file it again. Until it is released, only you, QMS, the area’s Director and an external auditor can see it.';
+    var entry = C.byKey(editKey), base = C.draftFrom(editKey);
+    // The register's own rule: a returned attempt is filed again once, and
+    // not while a later attempt is in progress or in force.
+    var again = entry && base && window.TAQA_STORE && TAQA_STORE.resubmission ? TAQA_STORE.resubmission({ resubmitOf: editKey }) : null;
+    if (!entry || !base || entry.status !== 'returned' || (again && again.problem)) {
+      var why = !entry || !base
+        ? 'Only the person who filed a case can file it again, and only while it is returned.'
+        : entry.status !== 'returned' ? entry.docNumber + ' is not returned, so there is nothing to file again. Its status is: ' + entry.statusLabel + '.'
+        : again.problem;
+      gate.appendChild(notice({ id: 'case-edit-refused', icon: 'stop', title: 'This case cannot be filed again here', body: [
+        h('p', null, [why]),
+        h('p', { class: 'links' }, [h('a', { href: 'cases.html' }, ['Back to the case library']), entry ? h('a', { href: entry.url }, ['Open the case']) : null])
+      ] }));
+      return false;
+    }
+    var attempt = C.nextAttempt ? C.nextAttempt(entry.record) : ((entry.record && entry.record.attempt) || 1) + 1;
+    editInfo = { number: entry.docNumber, attempt: attempt, url: entry.url };
+    var did = q.get('draft'), x = did ? C.drafts.get(did) : null;
+    if (x && x.draft && x.draft.resubmitOf === editKey) { draftId = x.id; state = fromDraft(x.draft, true); }
+    else state = fromDraft(base, true);
+    state.type = base.type; state.area = base.area;
+    gate.appendChild(notice({ id: 'case-returned', cls: 'ret', icon: 'redo', title: entry.docNumber + ' was returned', body: [
+      h('p', null, ['The reason given:']),
+      h('span', { class: 'why', id: 'case-returned-why' }, [entry.returnedReason || 'No reason was recorded.']),
+      h('p', null, ['It keeps its number and revision and goes back to QMS as attempt ' + attempt + '. Its type and area stay as filed.']),
+      h('p', { class: 'links' }, [h('a', { href: entry.url }, ['Open the returned case'])])
+    ] }));
+    return true;
+  }
+  function init() {
+    if (!can.ok) { refuse(can.why); return; }
+    if (editKey) { if (!startEdit()) return; }
+    else {
+      var did = q.get('draft'), x = did ? C.drafts.get(did) : null;
+      if (x && x.draft && x.draft.resubmitOf) { location.replace('case-new.html?edit=' + encodeURIComponent(x.draft.resubmitOf) + '&draft=' + encodeURIComponent(x.id)); return; }
+      if (x) { draftId = x.id; state = fromDraft(x.draft, false); }
+      else {
+        var t = q.get('type'), a = q.get('area');
+        if (t && C.isCaseType(t)) state.type = t;
+        if (a && can.areas.indexOf(a) !== -1) state.area = a;
+      }
+    }
+    // Not a live region: it is announced once per submit (focus moves to it
+    // and the live line says how many fields need attention).
+    sumBox = h('div', { class: 'err-sum', id: 'case-errors', tabindex: '-1', role: 'region', 'aria-labelledby': 'case-errors-h', hidden: true });
+    actions = makeActions();
+    live = h('p', { class: 'sr', id: 'cn-live', 'aria-live': 'polite' });
+    $('main').appendChild(live);
+    form.addEventListener('submit', function (e) { e.preventDefault(); submit(); });
+    // Enter in a one-line box must not file the case half written.
+    form.addEventListener('keydown', function (e) {
+      var t = e.target;
+      if (e.key === 'Enter' && t && t.tagName === 'INPUT' && ['checkbox', 'radio', 'submit', 'button'].indexOf(t.type) === -1) e.preventDefault();
+    });
+    layout.hidden = false;
+    renderDrafts();
+    build({ animate: false });
+    if (draftId) say('Draft restored at ' + clock(), 'ok');
+  }
+  init();
+})();
+</script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
+</body>
+</html>

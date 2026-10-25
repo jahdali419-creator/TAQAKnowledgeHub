@@ -7,8 +7,12 @@
    never takes points away).
 
      a document released                                  10
+       (a field case counts as a document: case study,
+        pre-job plan, appreciation, best practice, field
+        profile, benchmark, expert / training)
      a new revision of a document that was overdue        15
-     a Lesson Learned or Technical Alert released          20
+     a Lesson Learned, incident card or Technical Alert
+       released (document or field case)                  20
 
    Levels: Contributor 10, Practitioner 50, Specialist 150, Expert 300,
    Knowledge Champion 600.
@@ -36,7 +40,7 @@
     { key: 'champion',     name: 'Knowledge Champion', min: 600 }
   ];
   var POINTS = { document: 10, overdue: 15, lesson: 20 };
-  var KIND_LABEL = { document: 'Document released', overdue: 'Overdue document brought up to date', lesson: 'Lesson Learned or Alert released' };
+  var KIND_LABEL = { document: 'Document released', overdue: 'Overdue document brought up to date', lesson: 'Lesson, incident or alert released' };
   // QMS checks documents and an auditor only reads, so neither files work
   // that can be released under their own name in this demo.
   var EARNERS = ['employee', 'owner', 'maintenance'];
@@ -103,7 +107,10 @@
   // its review then (replacedOverdue). It is never recomputed here, so later
   // edits to the old revision's review fields do not change past points.
   function kindOf(d) {
-    if (d.docType === 'lesson' || d.docType === 'alert') return 'lesson';
+    if (d.docType === 'lesson' || d.docType === 'alert' || d.docType === 'incident') return 'lesson';
+    // The other field case types earn as a document, whatever they replaced.
+    var t = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS.types[d.docType]) || {};
+    if (t.cardOnly) return 'document';
     if (!d.translationOf && d.replacedOverdue === true) return 'overdue';
     return 'document';
   }

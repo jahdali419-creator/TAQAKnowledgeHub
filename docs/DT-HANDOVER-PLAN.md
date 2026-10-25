@@ -26,7 +26,7 @@ The frontend is complete and running. It is a static web application with no bac
 |---|---|
 | Technology | Plain HTML, CSS and JavaScript. No framework, no build step, no dependencies to patch |
 | Size | About 13,700 lines across 11 pages and 4 shared scripts |
-| Pages | Home, dashboard, segment view, document library, document viewer, AI search, analytics, glossary, upload, support ticket, offline fallback |
+| Pages | Home, dashboard, segment view, document library, document viewer, search, analytics, glossary, upload, support ticket, offline fallback |
 | Segments modelled | 12: Cementing, Coiled Tubing, Cybersecurity, Drilling, Fracturing, HR, Inspection, QHSE, TWS Maintenance, Well Safety, Well Testing, Wireline |
 | Offline capability | Progressive Web App with a service worker, installable, with an offline fallback page |
 | Language | English only. No Arabic version exists today |

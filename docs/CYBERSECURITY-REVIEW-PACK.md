@@ -239,11 +239,11 @@ Across all 126 buttons and 151 click handlers in the application, the Network co
 |---|---|---|---|---|
 | Search, filter, alphabet and category controls | Filter a list already held in the browser | None | None | None |
 | Submit a term | Displays a confirmation. Nothing is saved or sent | None | None | None |
-| Ask a question, on the search page | Matches the typed text against a fixed local list and shows results. **There is no AI service behind this and no query leaves the browser** | None | None | Query stays in the page |
+| Type a search, on the Search page | Matches the typed words against the register and field cases held in the browser and shows results. **There is no AI service behind this and no query leaves the browser** | None | None | Query stays in the page |
 
-### A note on the AI-labelled pages
+### A note on Search and Ask Expert
 
-The pages named "AI Document Search" and "Ask Expert" contain no artificial intelligence and no connection to any language model. They perform keyword matching against a fixed list held in a JavaScript file. No text typed into them is transmitted anywhere.
+Search (once labelled "AI Document Search", now plain Search) and "Ask Expert" contain no artificial intelligence and no connection to any language model. They perform keyword matching against a fixed list held in a JavaScript file. No text typed into them is transmitted anywhere.
 
 If an actual AI service is connected in future, that will be a material change requiring its own security review, covering where prompts are sent, whether document content leaves the tenant, retention, and whether data is used for training.
 

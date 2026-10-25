@@ -344,15 +344,19 @@ test.describe('on a phone', () => {
     expect(seg.x + seg.width).toBeLessThanOrEqual(360);
   });
 
-  // The answer bubble is a flex item that would not shrink below its longest
-  // word, so at 360px the result cards ran 29px off the screen.
+  // A long document number or title once held the results wider than the
+  // screen, and at 360px the rows ran 29px off the right edge.
   test('search results stay inside the screen', async ({ page, gotoApp, setRole, clearAppState }) => {
     await prime(page, gotoApp, clearAppState, setRole, 'employee');
     await gotoApp('/ai-search.html?q=' + encodeURIComponent('Pre-Job Safety Checklist'));
-    const bubble = page.locator('.msg-ai .bubble').first();
-    await expect(bubble.locator('.source-card').first()).toBeVisible();
-    const b = await bubble.boundingBox();
+    const list = page.locator('#results-list .sr-group').first();
+    await expect(list.locator('.result').first()).toBeVisible();
+    const b = await list.boundingBox();
     expect(b.x + b.width).toBeLessThanOrEqual(360);
+    for (const r of await list.locator('.result').all()) {
+      const rb = await r.boundingBox();
+      expect(rb.x + rb.width).toBeLessThanOrEqual(360);
+    }
   });
 
 });

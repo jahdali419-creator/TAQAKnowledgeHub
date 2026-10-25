@@ -110,7 +110,7 @@ A cross-segment search. Results show the document title, its segment and its typ
 
 The index holds 503 of the 546 documents. The 43 Cybersecurity documents are absent from it entirely, so searching for them returns nothing even though they appear on the Cybersecurity segment page. Every other segment is fully indexed. This needs closing before launch.
 
-The page is labelled "AI Document Search" and offers example prompts, but it performs keyword matching against a fixed list held in the browser. There is no artificial intelligence behind it and no connection to any language model. Nothing typed into it is transmitted anywhere.
+The page was once labelled "AI Document Search". It is now called Search and says what it does: keyword matching, in the browser, against the register and the field cases the reader may open. There is no artificial intelligence behind it and no connection to any language model. Nothing typed into it is transmitted anywhere.
 
 ### Field glossary
 
