@@ -150,6 +150,9 @@ test.describe('Cases and Search in the bar and the menu', () => {
   test.describe('desktop bar', () => {
     test.use(DESKTOP);
     test('every page reads Home, Areas, Cases, Search, Field Glossary, Ask Expert', async ({ page, gotoApp, setRole, consoleErrors }) => {
+      // Fourteen page loads in one test: where a navigation stalls (see the
+      // gotoApp note in helpers/fixtures.js) the default 30 s is not enough.
+      test.slow();
       await gotoApp('/index.html');
       await setRole('employee');
       for (const path of PAGES) {
