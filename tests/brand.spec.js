@@ -173,6 +173,8 @@ test.describe('RISE icons and names', () => {
   });
 
   test('no page title or install prompt still says TechHub or TAQA Knowledge Hub', async ({ page, gotoApp }) => {
+    // Opens every page in turn: allow for the slow navigations noted in helpers/fixtures.js.
+    test.slow();
     for (const p of PAGES.filter((x) => !x.role)) {
       await gotoApp(p.path);
       const t = await page.title();
