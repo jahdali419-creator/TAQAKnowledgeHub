@@ -441,7 +441,8 @@ html[data-taqa-theme="dark"] .dash-unknown{background:#002326;border-color:#0048
       <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
     </li>
-    <li><a href="ai-search.html">Document Search</a></li>
+    <li><a href="cases.html">Cases</a></li>
+    <li><a href="ai-search.html">Search</a></li>
     <li class="nav-reg"><a href="master-list.html">Master List</a></li>
     <li><a href="glossary.html">Field Glossary</a></li>
     <li><a href="support-ticket.html">Ask Expert</a></li>
@@ -966,7 +967,9 @@ function activityFrom(id){
           ? 'Awaiting ' + dEsc((typeof TAQA_APPROVAL !== 'undefined' && TAQA_APPROVAL.waitingOn(d)) || 'approval') +
             ': <strong>' + esc(d.docNumber || d.title) + '</strong>'
           : over
-            ? 'Review overdue on <strong>' + esc(d.docNumber || d.title) + '</strong>'
+            ? 'Review overdue on <strong>' + esc(d.docNumber || d.title) + '</strong>' +
+              // No page revises a field case in place yet (case.html says the same).
+              (d.card && typeof d.card === 'object' ? '. A field case is reviewed by filing an updated case.' : '')
             : 'Issued <strong>' + esc(d.docNumber || d.title) + '</strong> revision ' + esc(d.revision || '1.0'),
         time: over && at ? 'Due ' + when(at) : when(at)
       };
@@ -1828,6 +1831,7 @@ function updateBellCount() {
 }
 </script>
 <script src="shared.js"></script>
+<script src="recognition.js"></script>
 <script>
 (function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--border,rgba(0,0,0,0.08));background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:rgba(0,93,99,0.06);border-color:rgba(0,93,99,0.3);color:var(--primary-ink);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#C8102E;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-taqa-theme="dark"] .bell-badge{border-color:#002326;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();
 </script>

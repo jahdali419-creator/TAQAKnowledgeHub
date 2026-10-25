@@ -167,7 +167,10 @@ window.showToast=function(msg,type){
 // ── Reading progress bar ──
 (function(){
   var s=document.createElement('style');
-  s.textContent='#read-progress{position:fixed;top:0;left:0;height:3px;z-index:9998;pointer-events:none;background:#005D63;width:0;opacity:0.85;transition:width 80ms linear;}';
+  // Screen furniture never reaches paper: a printed case card or pre-job
+  // sheet carries no back-to-top button and no progress bar across its top.
+  s.textContent='#read-progress{position:fixed;top:0;left:0;height:3px;z-index:9998;pointer-events:none;background:#005D63;width:0;opacity:0.85;transition:width 80ms linear;}'+
+    '@media print{#back-to-top,#read-progress,#page-progress,.scroll-top-btn,#shortcut-overlay{display:none!important;}}';
   document.head.appendChild(s);
   var bar=document.createElement('div');
   bar.id='read-progress';
@@ -184,8 +187,10 @@ window.showToast=function(msg,type){
 (function(){
   var s=document.createElement('style');
   s.textContent=
-    '#shortcut-overlay{position:fixed;inset:0;z-index:99990;background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s;}'+
-    '#shortcut-overlay.open{opacity:1;pointer-events:auto;}'+
+    // Hidden (visibility) while closed, so its close button is not in the
+    // Tab order and its heading is not in the page's outline.
+    '#shortcut-overlay{position:fixed;inset:0;z-index:99990;background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 0.2s,visibility 0s linear 0.2s;}'+
+    '#shortcut-overlay.open{opacity:1;visibility:visible;pointer-events:auto;transition:opacity 0.2s,visibility 0s;}'+
     '#shortcut-box{background:#002326;border:1px solid rgba(0,187,182,0.2);border-radius:20px;padding:28px 32px;min-width:320px;max-width:90vw;box-shadow:0 24px 64px rgba(0,0,0,0.5);transform:scale(0.96);transition:transform 0.2s;}'+
     '#shortcut-overlay.open #shortcut-box{transform:scale(1);}'+
     '#shortcut-box h3{font-size:15px;font-weight:700;color:#fff;margin:0 0 20px;display:flex;align-items:center;justify-content:space-between;font-family:"BwGradual","Urbanist",sans-serif;}'+
@@ -726,11 +731,15 @@ window.addEventListener('pageshow', function(e){
   }
   if(menu){
     menu.setAttribute('aria-label','Menu');
-    var items=[{href:'index.html',label:'Home'},{href:'ai-search.html',label:'Document Search'}];
+    // The same order as the bar: Home, (Areas, listed below here), Cases,
+    // Search. Cases stays marked on a case, the form and the pre-job pack.
+    var items=[{href:'index.html',label:'Home'},
+               {href:'cases.html',label:'Cases',also:['case.html','case-new.html','prejob.html']},
+               {href:'ai-search.html',label:'Search'}];
     if(canRegister) items.push({href:'master-list.html',label:'Master List'});
     items.push({href:'glossary.html',label:'Field Glossary'},{href:'support-ticket.html',label:'Ask Expert'});
     var html='<div class="mm-main">'+items.map(function(l){
-      var a=onPage(l.href);
+      var a=onPage(l.href)||(l.also||[]).some(onPage);
       return '<a href="'+l.href+'"'+(a?' class="active" aria-current="page"':'')+'>'+l.label+'</a>';
     }).join('')+'</div>';
 
@@ -1396,7 +1405,7 @@ document.addEventListener('keydown',function(e){
     employee: { short:'Employee',  name:'Employee',         line:'Read the register' },
     owner:    { short:'Director',  name:'Segment Director', line:'Approve your segment' },
     maintenance:{ short:'Maintenance', name:'Maintenance Manager', line:'Approve your maintenance' },
-    qms:      { short:'QMS',       name:'QMS',              line:'Countersign and release' },
+    qms:      { short:'QMS',       name:'QMS',              line:'Check before approval' },
     auditor:  { short:'Auditor',   name:'Auditor',          line:'Read only, everything' }
   };
 

@@ -179,15 +179,15 @@ TAQA_DOC_LOOKUPS.segments[${JSON.stringify('x"><img src=x onerror="window.__pwn=
     await assertNothingRan(page, 'bell, banner, desk line');
   });
 
-  test('AI search and Analytics: an unknown register type and stored search text stay text', async ({ page, gotoApp, setRole, clearAppState, seedRegister }) => {
+  test('Search and Analytics: an unknown register type and stored search text stay text', async ({ page, gotoApp, setRole, clearAppState, seedRegister }) => {
     await start(page, gotoApp, clearAppState, setRole, 'qms');
-    await seedRegister([{ docNumber: 'TQ-PWN-S007', title: 'Zebrafish handling', segment: SEG, docType: tag('ai-type') }]);
+    await seedRegister([{ docNumber: 'TQ-PWN-S007', title: 'Zebrafish handling', segment: SEG, docType: tag('search-type') }]);
     await page.evaluate((t) => localStorage.setItem('taqa-analytics', JSON.stringify([
       { e: 'search', k: t, t: Date.now() }, { e: t, k: 'x', t: Date.now() },
     ])), tag('analytics'));
     await gotoApp('/ai-search.html?q=zebrafish');
     await page.waitForTimeout(500);
-    await assertNothingRan(page, 'ai search');
+    await assertNothingRan(page, 'search');
     await gotoApp('/analytics.html');
     await expect(page.locator('#activity-list')).toContainText('<img src=x');
     await assertNothingRan(page, 'analytics');

@@ -12,7 +12,8 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>/* Installed app on an iPhone: the status bar is drawn over the page, and iOS keeps taps in that strip for itself, so the bell and the other controls under it could not be tapped. Drawing edge to edge (viewport-fit=cover) turns on the bar's safe-area padding in topbar.css, which drops them below the status bar. A browser tab is left exactly as it was. */(function(){try{if(navigator.standalone||matchMedia('(display-mode: standalone)').matches){var m=document.querySelector('meta[name="viewport"]');if(m&&!/viewport-fit/.test(m.content))m.content+=', viewport-fit=cover';}}catch(e){}})();</script>
-<title>AI Search, RISE</title>
+<title>Search, RISE</title>
+<meta name="description" content="Search the RISE register and the field cases by title, number, area and type.">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#005D63">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -23,521 +24,348 @@ try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAtt
 <link rel="icon" href="icons/rise-favicon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="icons/rise-favicon-16.png" type="image/png" sizes="16x16">
 <link rel="stylesheet" href="fonts/fonts.css">
-<noscript></noscript>
 <style>
+/* Search. A dark band names the page and what it looks through; the search
+   box rides over its lower edge; then the filters beside a ranked list.
+   Every row is one record the reader may open: a document from the register
+   or a field case. Nothing on this page is generated: words are matched as
+   typed, in this browser, against the register and the cases. */
 :root{
-  --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;--accent:#FD691D;
-  --dark:#F4F4F3;--inset:#EDEBE8;--glass:rgba(255,255,255,0.88);--glass-2:rgba(255,255,255,0.98);
-  --glass-border:rgba(0,0,0,0.08);--glass-border-hover:rgba(0,93,99,0.35);
-  --text:#1E1C1A;--text-muted:#524D48;--gradient:#005D63; /* flat brand teal - no gradient */
-  /* One faint teal wash for every document-type chip. The word in the chip
-     already names the type, so the six hues it used to run were a colour code
-     nobody had learnt. Alert is the exception and keeps the orange family. */
-  --brand-soft:rgba(0,93,99,.07);--alert-soft:rgba(253,105,29,.10);
-  /* Orange is legible as a fill long before it is legible as a glyph, so
-     warning TEXT runs through this darkened ink. */
-  --alert-ink:#A8431A;
+  --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;
+  --dark:#F4F4F3;--paper:#FFFFFF;--inset:#F7F6F4;
+  --line:rgba(117,106,97,0.18);--line-soft:rgba(117,106,97,0.10);--line-strong:rgba(117,106,97,0.32);
+  --text:#1E1C1A;--text-muted:#5F564F;--text-light:#6E655D;
+  --fill:#E7F3F3;--fill-strong:#005D63;--hover:#F2F8F8;
+  --ok:#00705F;--ok-bg:#E6F3F0;--warn:#8A5A00;--warn-bg:#FBF1DC;--info:#005E86;--info-bg:#E5F0F6;
+  --stop:#B00E28;--stop-bg:#FCEBEE;
+  --accent:#FF6720;
+  --mark:rgba(0,187,182,.24);
+  --band:#00292C;
+  --shadow:0 1px 2px rgba(0,41,44,.05),0 10px 28px -14px rgba(0,41,44,.22);
+  --shadow-3:0 2px 6px rgba(0,41,44,.06),0 28px 56px -24px rgba(0,41,44,.34);
+  --ease:cubic-bezier(.23,1,.32,1);
+  --focus:0 0 0 3px rgba(0,187,182,.45);
+  --arrow:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23857B73' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
-*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
-@keyframes pageFadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
-body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;animation:pageFadeIn 0.45s cubic-bezier(.4,0,.2,1);}
-#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
-.page-wrapper{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
-
-.btn{padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
-  transition:all 0.25s;border:none;font-family:'Inter',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:7px;}
-.btn-primary{background:var(--gradient);color:#fff;}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,93,99,0.4);}
-
-/* ── Search Hub (centered column) ── */
-.search-hub{
-  padding:110px 24px 0;
-  max-width:700px;margin:0 auto;width:100%;
-  text-align:center;
-  position:relative;
+html[data-taqa-theme="dark"]{
+  color-scheme:dark;
+  --primary-ink:#00BBB6;--dark:#001314;--paper:#002326;--inset:#001C1E;
+  --line:rgba(0,187,182,0.20);--line-soft:rgba(0,187,182,0.10);--line-strong:rgba(0,187,182,0.32);
+  --text:#C7DBDD;--text-muted:#9CC0C2;--text-light:#86B3B6;
+  --fill:rgba(0,187,182,0.12);--fill-strong:#00BBB6;--hover:rgba(0,187,182,0.06);
+  --ok:#4FD1B5;--ok-bg:rgba(79,209,181,.12);--warn:#FFB81C;--warn-bg:rgba(255,184,28,.10);--info:#7CCBEF;--info-bg:rgba(107,197,238,.12);
+  --stop:#FF8A94;--stop-bg:rgba(255,138,148,.10);
+  --mark:rgba(0,187,182,.18);
+  --band:#002326;
+  --shadow:0 0 0 1px rgba(0,187,182,.08),0 12px 30px -14px rgba(0,0,0,.6);
+  --shadow-3:0 0 0 1px rgba(0,187,182,.10),0 28px 56px -22px rgba(0,0,0,.7);
+  --arrow:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2386B3B6' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
-
-/* ── Ambient Glow ── */
-.hub-glow{
-  position:absolute;top:-60px;left:50%;transform:translateX(-50%);
-  width:900px;height:560px;
-  background:radial-gradient(ellipse 700px 420px at 50% 0%, rgba(0,187,182,0.11) 0%, rgba(0,93,99,0.04) 45%, transparent 70%);
-  pointer-events:none;z-index:0;
-}
-
-/* ── AI Badge ── */
-.ai-badge{
-  display:inline-flex;align-items:center;gap:9px;padding:6px 18px;margin-bottom:26px;
-  background:linear-gradient(135deg,rgba(0,93,99,0.09),rgba(0,187,182,0.06));
-  border:1px solid rgba(0,187,182,0.28);border-radius:50px;
-  font-size:11.5px;color:var(--primary-ink);font-weight:500;letter-spacing:0.3px;
-  box-shadow:0 2px 16px rgba(0,187,182,0.12);
-  position:relative;z-index:1;
-}
-.ai-spark{animation:sparkSpin 5s linear infinite;display:inline-block;}
-@keyframes sparkSpin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-
-/* ── Hero Title ── */
-.hub-title{
-  font-family:'BwGradual','Urbanist',sans-serif;
-  font-size:clamp(32px,5.5vw,56px);
-  font-weight:800;letter-spacing:-1.5px;line-height:1.16;
-  margin-bottom:18px;color:var(--text);
-  position:relative;z-index:1;
-}
-.hub-title .grad{
-  color:var(--primary-ink);
-}
-.hub-sub{font-size:15px;color:var(--text-muted);line-height:1.7;max-width:460px;margin:0 auto 24px;position:relative;z-index:1;}
-
-/* ── Stats Pills ── */
-.stats-pills{
-  display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:36px;
-  flex-wrap:wrap;position:relative;z-index:1;
-}
-.stat-pill{
-  display:flex;align-items:center;gap:7px;padding:5px 15px;border-radius:50px;
-  background:rgba(255,255,255,0.82);border:1px solid var(--glass-border);
-  font-size:12px;color:var(--text-muted);font-weight:500;
-  backdrop-filter:blur(8px);
-}
-.stat-dot{width:6px;height:6px;border-radius:50%;background:var(--primary-light);flex-shrink:0;}
-.stat-sep{color:#BEB8B2;font-size:12px;}
-html[data-taqa-theme="dark"] .stat-sep{color:#00484B;}
-
-/* ── Search Card ── */
-.search-card{
-  background:rgba(255,255,255,0.95);
-  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  border:1.5px solid rgba(255,255,255,0.95);
-  border-radius:22px;
-  box-shadow:0 4px 28px rgba(0,0,0,0.08),0 1px 6px rgba(0,0,0,0.04),
-             inset 0 1px 0 rgba(255,255,255,1);
-  overflow:hidden;
-  transition:border-color 0.32s,box-shadow 0.35s,transform 0.32s;
-  position:relative;z-index:1;
-  margin-bottom:0;
-}
-.search-card:focus-within{
-  border-color:rgba(0,187,182,0.45);
-  box-shadow:0 0 0 4px rgba(0,187,182,0.09),0 12px 40px rgba(0,0,0,0.1),
-             inset 0 1px 0 rgba(255,255,255,1);
-  transform:translateY(-4px);
-}
-
-/* ── Input Row ── */
-.search-input-row{
-  display:flex;align-items:flex-end;gap:12px;
-  padding:18px 16px 16px 22px;
-}
-#query-input{
-  flex:1;border:none;outline:none;background:transparent;
-  color:var(--text);font-size:15.5px;font-family:'Inter',sans-serif;
-  resize:none;line-height:1.6;min-height:28px;max-height:180px;
-  padding:0;
-}
-#query-input::placeholder{color:var(--text-muted);}
-
-/* ── Send Button ── */
-.send-btn{
-  width:44px;height:44px;border-radius:13px;
-  background:var(--gradient);border:none;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  color:#fff;font-size:19px;flex-shrink:0;
-  transition:transform 0.22s,box-shadow 0.22s,opacity 0.2s;
-  box-shadow:0 4px 16px rgba(0,93,99,0.32);
-}
-.send-btn:hover{transform:scale(1.08) translateY(-1px);box-shadow:0 7px 24px rgba(0,93,99,0.48);}
-.send-btn:disabled{opacity:0.6;cursor:default;transform:none;}
-.send-btn.loading{animation:pulse-btn 0.9s ease infinite;}
-@keyframes pulse-btn{0%,100%{opacity:1;}50%{opacity:0.5;}}
-
-/* ── Bottom Row (filters + char count) ── */
-.search-bottom-row{
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:9px 18px 12px;
-  border-top:1px solid rgba(0,0,0,0.055);
-}
-.seg-filters{display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap;}
-.seg-filters::-webkit-scrollbar{display:none;}
-.filter-label{font-size:11px;color:var(--text-muted);white-space:nowrap;flex-shrink:0;font-weight:500;letter-spacing:0.3px;}
-.filter-chip{
-  padding:4px 12px;border-radius:50px;font-size:11.5px;font-weight:500;
-  background:transparent;border:1px solid var(--glass-border);
-  color:var(--text-muted);cursor:pointer;transition:all 0.22s;white-space:nowrap;flex-shrink:0;
-}
-.filter-chip.active{
-  background:rgba(0,93,99,0.1);border-color:rgba(0,187,182,0.3);
-  color:var(--primary-ink);font-weight:600;
-}
-.filter-chip:hover{border-color:var(--glass-border-hover);color:var(--text);}
-.char-count{font-size:10.5px;color:var(--text-muted);white-space:nowrap;flex-shrink:0;}
-
-/* ── Suggested Prompts ── */
-.prompts-section{
-  max-width:700px;margin:0 auto;width:100%;
-  padding:20px 24px 0;
-  position:relative;z-index:1;
-}
-.prompts-row{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;}
-.prompts-tag{font-size:11.5px;color:var(--text-muted);font-weight:600;letter-spacing:0.4px;text-transform:uppercase;white-space:nowrap;padding-top:6px;}
-.prompts-chips{display:flex;flex-wrap:wrap;gap:7px;}
-.prompt-chip{
-  padding:6px 14px;border-radius:50px;font-size:12.5px;
-  background:rgba(255,255,255,0.75);border:1px solid var(--glass-border);
-  color:var(--text-muted);cursor:pointer;
-  transition:all 0.22s;backdrop-filter:blur(8px);
-}
-.prompt-chip:hover{
-  border-color:rgba(0,187,182,0.35);color:var(--primary-ink);
-  background:rgba(0,187,182,0.05);transform:translateY(-1px);
-  box-shadow:0 4px 12px rgba(0,0,0,0.06);
-}
-
-/* ── Results Section ── */
-.results-section{
-  flex:1;max-width:700px;margin:0 auto;width:100%;
-  padding:28px 24px 80px;
-}
-
-/* ── Welcome State ── */
-.welcome-state{text-align:center;padding:56px 20px 20px;}
-.welcome-icon{
-  width:64px;height:64px;border-radius:20px;background:var(--gradient);
-  display:flex;align-items:center;justify-content:center;
-  font-size:28px;color:#fff;margin:0 auto 20px;
-  box-shadow:0 8px 32px rgba(0,93,99,0.25);
-}
-.welcome-state h3{font-family:'BwGradual','Urbanist',sans-serif;font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px;}
-.welcome-state p{font-size:13.5px;color:var(--text-muted);line-height:1.65;max-width:320px;margin:0 auto;}
-
-/* ── Thinking Block ── */
-.thinking-block{display:none;align-items:center;gap:14px;
-  background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;
-  padding:20px 22px;margin-bottom:16px;}
-.thinking-block.active{display:flex;}
-.thinking-avatar{
-  width:34px;height:34px;border-radius:10px;background:var(--gradient);
-  display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex-shrink:0;}
-.thinking-label{font-size:13px;color:var(--text-muted);margin-bottom:8px;}
-.thinking-dots{display:flex;gap:5px;}
-.thinking-dot{width:7px;height:7px;border-radius:50%;background:var(--primary-light);}
-.thinking-dot:nth-child(1){animation:dot 1.2s ease infinite 0s;}
-.thinking-dot:nth-child(2){animation:dot 1.2s ease infinite 0.2s;}
-.thinking-dot:nth-child(3){animation:dot 1.2s ease infinite 0.4s;}
-@keyframes dot{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-7px);}}
-
-/* ── Chat Bubbles ── */
-.chat-log{display:flex;flex-direction:column;gap:16px;}
-@keyframes msgIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
-.msg-user,.msg-ai{animation:msgIn 0.3s cubic-bezier(.4,0,.2,1);}
-.msg-user{display:flex;justify-content:flex-end;}
-.msg-user .bubble{
-  max-width:72%;background:linear-gradient(135deg,rgba(0,93,99,0.12),rgba(0,187,182,0.08));
-  border:1px solid rgba(0,187,182,0.18);
-  border-radius:18px 18px 4px 18px;padding:13px 18px;font-size:14.5px;line-height:1.65;
-}
-.msg-ai{display:flex;gap:12px;align-items:flex-start;}
-.msg-ai-avatar{
-  width:34px;height:34px;border-radius:10px;background:var(--gradient);
-  display:flex;align-items:center;justify-content:center;
-  font-size:15px;color:#fff;flex-shrink:0;margin-top:2px;
-  box-shadow:0 4px 12px rgba(0,93,99,0.25);
-}
-.msg-ai .bubble{
-  /* min-width:0 lets the answer shrink to the screen: without it a long
-     document number or title held it wider, and at 360px the result cards
-     ran 29px off the right edge. */
-  flex:1;min-width:0;overflow-wrap:anywhere;background:var(--glass-2);border:1px solid var(--glass-border);
-  border-radius:4px 18px 18px 18px;padding:18px 20px;
-  font-size:14px;line-height:1.78;
-  box-shadow:0 2px 12px rgba(0,0,0,0.05);
-}
-.msg-ai .bubble h4{font-family:'BwGradual','Urbanist',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;color:var(--primary-ink);}
-.msg-ai .bubble p{margin-bottom:10px;color:var(--text-muted);}
-.msg-ai .bubble p:last-of-type{margin-bottom:0;}
-.msg-ai .bubble strong{color:var(--text);}
-
-/* ── Source Citations ── */
-.sources-block{margin-top:18px;padding-top:16px;border-top:1px solid rgba(0,0,0,0.07);}
-.sources-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:8px;font-weight:600;}
-.sources-label::after{content:'';flex:1;height:1px;background:rgba(0,0,0,0.07);}
-.sources-list{display:flex;flex-direction:column;gap:7px;}
-.source-card{
-  display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:11px;
-  background:rgba(0,93,99,0.04);border:1px solid rgba(0,187,182,0.1);
-  cursor:pointer;transition:all 0.22s;text-decoration:none;
-}
-.source-card:hover{background:rgba(0,93,99,0.09);border-color:rgba(0,187,182,0.28);transform:translateX(3px);}
-.source-card-bar{width:3px;height:30px;border-radius:2px;flex-shrink:0;}
-.source-card-body{flex:1;min-width:0;}
-.source-card-title{font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.source-card-meta{display:flex;align-items:center;gap:8px;margin-top:3px;}
-.source-card-seg{font-size:10.5px;color:var(--text-muted);}
-.source-card-type{font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:0.4px;}
-.source-card-arrow{font-size:14px;color:var(--text-muted);flex-shrink:0;transition:color 0.2s;}
-.source-card:hover .source-card-arrow{color:var(--primary-ink);}
-
-/* ── Footer ── */
-footer{border-top:none;padding:0;background:transparent;position:relative;margin-top:auto;height:4px;}
-footer::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:#005D63;}
-.bg-blobs{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
-.bg-blob{position:absolute;border-radius:50%;filter:blur(100px);}
-.bg-blob-1{width:720px;height:720px;top:-220px;left:-200px;background:radial-gradient(circle,rgba(0,187,182,0.13) 0%,transparent 65%);}
-.bg-blob-2{width:580px;height:580px;top:38%;right:-160px;background:radial-gradient(circle,rgba(0,93,99,0.10) 0%,transparent 65%);}
-.bg-blob-3{width:460px;height:460px;bottom:-80px;left:28%;background:radial-gradient(circle,rgba(0,187,182,0.08) 0%,transparent 65%);}
-@keyframes blob1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(50px,-70px) scale(1.08);}}
-@keyframes blob2{0%,100%{transform:translate(0,0) scale(1);}40%{transform:translate(-60px,50px) scale(1.06);}80%{transform:translate(30px,-30px) scale(0.95);}}
-@keyframes blob3{0%,100%{transform:translate(0,0) scale(1);}60%{transform:translate(-40px,60px) scale(1.1);}}
-::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(0,93,99,0.28);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:rgba(0,93,99,0.5);}
-html[data-taqa-theme="dark"]{--primary-ink:#00BBB6;--dark:#001314;--inset:#002D30;--glass:rgba(0,45,48,0.88);
-  /* The answer bubble is painted with var(--glass-2) and this block never
-     restated it, so dark mode handed a white bubble dark-theme text. */
-  --glass-2:rgba(0,35,38,0.98);
-  --glass-border:rgba(255,255,255,0.07);--text:#C7DBDD;--text-muted:#8CB6B9;
-  --brand-soft:rgba(0,187,182,.10);--alert-soft:rgba(253,105,29,.16);--alert-ink:#FF9B5E;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-padding-top:calc(var(--nav-h,64px) + 12px);}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;}
 html[data-taqa-theme="dark"] body{background:#001314;}
-html[data-taqa-theme="dark"] .search-card{background:rgba(0,45,48,0.95);border-color:rgba(255,255,255,0.08);}
-html[data-taqa-theme="dark"] #query-input{color:#C7DBDD;}html[data-taqa-theme="dark"] #query-input::placeholder{color:#619B9E;}
-html[data-taqa-theme="dark"] .search-bottom-row{border-color:rgba(255,255,255,0.07);}
-html[data-taqa-theme="dark"] .filter-chip{border-color:rgba(255,255,255,0.1);color:#619B9E;}
-html[data-taqa-theme="dark"] .filter-chip.active{background:rgba(0,93,99,0.2);border-color:rgba(0,187,182,0.3);color:#00BBB6;}
-html[data-taqa-theme="dark"] .stat-pill{background:rgba(0,45,48,0.8);border-color:rgba(255,255,255,0.07);}
-html[data-taqa-theme="dark"] .results-area{background:transparent;}
-html[data-taqa-theme="dark"] .prompt-chip{background:rgba(0,45,48,0.8);border-color:rgba(255,255,255,0.09);color:#619B9E;}
-html[data-taqa-theme="dark"] .prompt-chip:hover{background:rgba(0,93,99,0.15);border-color:rgba(0,187,182,0.25);color:#00BBB6;}
-html[data-taqa-theme="dark"] footer{background:#002326;border-color:#003A3D;}
-html[data-taqa-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(0,187,182,0.2);}
-html[data-taqa-theme="dark"] .bg-blob-1{background:radial-gradient(circle,rgba(0,187,182,0.05) 0%,transparent 65%);}
-html[data-taqa-theme="dark"] .bg-blob-2{background:radial-gradient(circle,rgba(0,93,99,0.04) 0%,transparent 65%);}
-html[data-taqa-theme="dark"] .bg-blob-3{background:radial-gradient(circle,rgba(0,187,182,0.03) 0%,transparent 65%);}
-html[data-taqa-theme="dark"] .scroll-top-btn{background:rgba(0,35,38,0.92);border-color:rgba(255,255,255,0.1);}
+.page-wrapper{padding-top:var(--nav-h,64px);min-height:100vh;display:flex;flex-direction:column;}
+.skip{position:absolute;left:-9999px;top:auto;}
+.skip:focus{left:16px;top:calc(var(--nav-h,64px) + 8px);z-index:10001;background:var(--paper);color:var(--primary-ink);padding:8px 14px;border-radius:8px;border:1px solid var(--line);}
+.vh{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+main{display:block;flex:1 0 auto;}
+a{color:var(--primary-ink);}
+a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;}
 
-/* ── Typewriter cursor ── */
-.tw-cursor{display:inline-block;width:2px;height:1em;background:var(--primary-light);margin-left:2px;vertical-align:text-bottom;animation:twBlink 0.9s ease infinite;}
-@keyframes twBlink{0%,100%{opacity:1;}50%{opacity:0;}}
+/* ── Band ── */
+.sr-hero{position:relative;overflow:hidden;isolation:isolate;background:var(--band);color:#fff;}
+html[data-taqa-theme="dark"] .sr-hero{border-bottom:1px solid rgba(0,187,182,.14);}
+.sr-hero .th-lines{z-index:-1;}
+.sr-hero-in{max-width:1200px;margin:0 auto;padding:40px 40px 96px;display:grid;
+  grid-template-columns:minmax(0,1fr) auto;gap:24px 48px;align-items:end;}
+.sr-eyebrow{display:flex;align-items:center;gap:10px;font:700 11px/1.3 'Inter',sans-serif;letter-spacing:1.5px;
+  text-transform:uppercase;color:#9FE3DF;margin-bottom:14px;}
+.sr-eyebrow::before{content:'';width:22px;height:2px;border-radius:2px;background:var(--accent);flex:none;}
+.sr-hero h1{font-family:'BwGradual','Urbanist',sans-serif;font-weight:800;font-size:clamp(36px,4.6vw,56px);
+  line-height:1.02;letter-spacing:-.025em;color:#fff;}
+.sr-sub{font-family:'BwGradual','Urbanist',sans-serif;font-weight:700;font-size:clamp(20px,2.2vw,26px);line-height:1.2;
+  letter-spacing:-.01em;color:#00BBB6;margin-top:6px;}
+.sr-lede{margin-top:14px;max-width:64ch;font-size:15px;line-height:1.6;color:rgba(255,255,255,.80);}
+.sr-hero h1,.sr-sub,.sr-lede,.sr-stats{animation:srRise .6s var(--ease) both;}
+.sr-sub{animation-delay:.06s;}.sr-lede{animation-delay:.12s;}.sr-stats{animation-delay:.18s;}
+@keyframes srRise{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+.sr-stats{display:grid;grid-template-columns:repeat(3,auto);margin:0;}
+.sr-stat{display:flex;flex-direction:column-reverse;justify-content:flex-end;padding:4px 22px 2px;border-left:1px solid rgba(255,255,255,.18);min-width:0;}
+.sr-stat:first-child{border-left:0;padding-left:0;}
+.sr-stat dd{font:800 32px/1 'BwGradual','Urbanist',sans-serif;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:-.02em;}
+.sr-stat dt{margin-top:8px;font-size:12.5px;line-height:1.35;color:rgba(255,255,255,.76);max-width:15ch;}
 
-/* ── Page Exit Transition ── */
-@keyframes pageFadeOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-5px);}}
-body.page-exit{animation:pageFadeOut 0.28s ease forwards;pointer-events:none;}
+/* ── The box ── */
+.sr-panel{position:relative;z-index:5;max-width:1200px;margin:-60px auto 0;padding:0 40px;}
+.sr-panel-in{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-3);padding:18px 20px 16px;}
+.sr-lbl{display:block;font:600 12.5px/1.3 'Inter',sans-serif;color:var(--text-muted);margin-bottom:6px;}
+.sr-qrow{display:flex;gap:10px;align-items:stretch;}
+.sr-qbox{position:relative;flex:1 1 auto;min-width:0;}
+.sr-qbox > svg{position:absolute;left:16px;top:50%;width:19px;height:19px;transform:translateY(-50%);color:var(--text-light);pointer-events:none;}
+#query-input{width:100%;min-height:54px;padding:0 48px 0 48px;border-radius:14px;border:1px solid var(--line-strong);background:var(--inset);
+  color:var(--text);font:500 16.5px/1.2 'Inter',sans-serif;-webkit-appearance:none;appearance:none;
+  transition:border-color .15s var(--ease),background-color .15s var(--ease),box-shadow .15s var(--ease);}
+#query-input::placeholder{color:var(--text-light);opacity:1;}
+#query-input:focus{outline:none;border-color:var(--primary-ink);background:var(--paper);box-shadow:var(--focus);}
+#query-input::-webkit-search-cancel-button,#query-input::-webkit-search-decoration{-webkit-appearance:none;appearance:none;display:none;}
+.sr-qx{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;border:0;background:transparent;
+  color:var(--text-light);cursor:pointer;display:grid;place-items:center;}
+.sr-qx:hover{background:var(--fill);color:var(--text);}
+.sr-qx svg{width:14px;height:14px;}
+.sr-go{flex:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:54px;padding:0 24px;border-radius:14px;border:0;cursor:pointer;
+  background:var(--primary);color:#fff;font:600 15px/1 'BwGradual','Urbanist',sans-serif;transition:background-color .15s var(--ease),transform .1s var(--ease);}
+.sr-go:hover{background:#003A3D;}
+.sr-go:active{transform:scale(.98);}
+.sr-go svg{width:18px;height:18px;}
+html[data-taqa-theme="dark"] .sr-go{background:#00BBB6;color:#00191B;}
+html[data-taqa-theme="dark"] .sr-go:hover{background:#9FE3DF;}
+.sr-row2{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;margin-top:14px;}
+.sr-seg{border:0;display:flex;align-items:center;gap:10px;min-width:0;}
+.sr-seg legend{float:left;font:600 12.5px/1.3 'Inter',sans-serif;color:var(--text-muted);margin-right:2px;}
+.sr-seg-g{display:inline-flex;gap:2px;padding:3px;border-radius:12px;background:var(--inset);border:1px solid var(--line-soft);min-width:0;}
+.sr-seg-o{position:relative;display:inline-flex;min-width:0;}
+.sr-seg-o input{position:absolute;inset:0;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;}
+.sr-seg-o span{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 14px;border-radius:9px;font:600 13.5px/1.1 'Inter',sans-serif;color:var(--text-muted);white-space:nowrap;}
+.sr-seg-o span i{font-style:normal;font-weight:500;font-size:12px;color:var(--text-light);font-variant-numeric:tabular-nums;}
+.sr-seg-o input:hover + span{color:var(--text);}
+.sr-seg-o input:checked + span{background:var(--paper);color:var(--primary-ink);box-shadow:0 1px 2px rgba(0,41,44,.12),0 0 0 1px var(--line);}
+.sr-seg-o input:checked + span i{color:var(--text-muted);}
+html[data-taqa-theme="dark"] .sr-seg-o input:checked + span{background:#003A3D;}
+.sr-seg-o input:focus-visible + span{outline:2px solid var(--primary-ink);outline-offset:1px;}
+.sr-hint{font-size:13px;line-height:1.5;color:var(--text-light);}
+.sr-hint kbd{display:inline-block;min-width:20px;padding:1px 6px;border-radius:6px;border:1px solid var(--line-strong);border-bottom-width:2px;
+  background:var(--paper);font:600 12px/1.4 'Inter',sans-serif;color:var(--text-muted);text-align:center;}
+@media (hover:none){.sr-hint .k{display:none;}}
 
-/* ── Scroll Progress Ring ── */
-.scroll-top-btn{
-  position:fixed;bottom:28px;right:28px;z-index:500;
-  width:46px;height:46px;border-radius:50%;
-  background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  border:1px solid var(--glass-border);box-shadow:0 4px 20px rgba(0,0,0,0.1);
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  opacity:0;transform:translateY(14px);
-  transition:opacity 0.3s,transform 0.3s,box-shadow 0.2s;padding:0;
-}
-.scroll-top-btn.stp-visible{opacity:1;transform:translateY(0);}
-.scroll-top-btn:hover{box-shadow:0 8px 28px rgba(0,93,99,0.3);transform:translateY(-3px)!important;}
-.scroll-top-btn svg{position:absolute;top:0;left:0;width:46px;height:46px;}
-.stp-arrow{font-size:13px;color:var(--primary-ink);position:relative;z-index:1;font-weight:800;}
+/* ── Body: filters and results ── */
+.sr-body{max-width:1200px;width:100%;margin:0 auto;padding:28px 40px 72px;display:grid;
+  grid-template-columns:264px minmax(0,1fr);gap:28px;align-items:start;}
+.filters-drawer{position:sticky;top:calc(var(--nav-h,64px) + 16px);background:var(--paper);border:1px solid var(--line);border-radius:16px;
+  max-height:calc(100vh - var(--nav-h,64px) - 32px);display:flex;flex-direction:column;min-width:0;}
+.filters-drawer-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px 12px;border-bottom:1px solid var(--line-soft);}
+.filters-drawer-title{font:700 16px/1.2 'BwGradual','Urbanist',sans-serif;color:var(--text);display:flex;align-items:center;gap:8px;}
+.filters-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;
+  background:var(--primary);color:#fff;font:700 11px/1 'Inter',sans-serif;font-variant-numeric:tabular-nums;}
+html[data-taqa-theme="dark"] .filters-badge{background:#00BBB6;color:#00191B;}
+.filters-close-btn{display:none;width:40px;height:40px;border-radius:50%;border:0;background:var(--inset);color:var(--text-muted);cursor:pointer;place-items:center;flex:none;}
+.filters-close-btn:hover{background:var(--fill);color:var(--text);}
+.filters-close-btn svg{width:15px;height:15px;}
+.filters-body{padding:14px 18px 6px;overflow-y:auto;overscroll-behavior:contain;}
+.filters-group{margin-bottom:16px;min-width:0;}
+.filters-group > label,.filters-group > .fg-lbl{display:block;font:600 12.5px/1.3 'Inter',sans-serif;color:var(--text-muted);margin-bottom:6px;}
+.filters-group select,.filters-group input[type="date"]{width:100%;min-height:44px;padding:0 34px 0 12px;border-radius:10px;border:1px solid var(--line-strong);
+  background:var(--paper) var(--arrow) no-repeat right 12px center;-webkit-appearance:none;appearance:none;
+  color:var(--text);font:500 14px/1.2 'Inter',sans-serif;text-overflow:ellipsis;cursor:pointer;}
+.filters-group input[type="date"]{background-image:none;padding:0 10px;min-width:0;color-scheme:light;}
+html[data-taqa-theme="dark"] .filters-group input[type="date"]{color-scheme:dark;}
+.filters-group select.on,.filters-group input.on{border-color:var(--primary-ink);background-color:var(--fill);font-weight:600;}
+.filters-date-row{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;}
+.filters-date-row .dl{display:flex;align-items:center;gap:8px;}
+.filters-date-row .dl span{flex:none;width:34px;font-size:12.5px;color:var(--text-light);}
+.filters-note{font-size:12px;line-height:1.45;color:var(--text-light);margin-top:6px;}
+.filters-foot{display:flex;gap:10px;padding:12px 18px 16px;border-top:1px solid var(--line-soft);}
+.filters-clear-btn{flex:1 1 auto;min-height:42px;padding:0 14px;border-radius:10px;border:1px solid var(--line-strong);background:var(--paper);
+  color:var(--primary-ink);font:600 13.5px/1 'Inter',sans-serif;cursor:pointer;}
+.filters-clear-btn:hover{border-color:var(--primary-ink);background:var(--fill);}
+.filters-clear-btn:disabled{opacity:.5;cursor:default;}
+.filters-done{display:none;flex:1 1 auto;min-height:42px;padding:0 14px;border-radius:10px;border:0;background:var(--primary);color:#fff;
+  font:600 14px/1 'BwGradual','Urbanist',sans-serif;cursor:pointer;}
+html[data-taqa-theme="dark"] .filters-done{background:#00BBB6;color:#00191B;}
+.filters-scrim{display:none;}
 
-/* ── Hub Word Animations ── */
-@keyframes hubWordIn{from{opacity:0;transform:translateY(26px);}to{opacity:1;transform:translateY(0);}}
-.hw{opacity:0;animation:hubWordIn 0.72s cubic-bezier(0.16,1,0.3,1) forwards;}
-.hw-i{display:inline-block;}
-.hw-1{animation-delay:0.10s;}
-.hw-2{animation-delay:0.28s;}
-.hw-3{animation-delay:0.46s;}
-.hw-4{animation-delay:0.64s;}
-.hw-5{animation-delay:0.84s;}
-.hw-6{animation-delay:1.08s;}
-.hw-7{animation-delay:1.24s;}
-.hw-8{animation-delay:1.38s;}
+.sr-results{min-width:0;}
+.sr-rhead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin-bottom:12px;min-height:40px;}
+#result-count{font:600 16px/1.35 'Inter',sans-serif;color:var(--text-muted);min-width:0;overflow-wrap:anywhere;}
+#result-count b{font:800 20px/1 'BwGradual','Urbanist',sans-serif;color:var(--text);letter-spacing:-.01em;margin-right:2px;}
+#result-count .qq{color:var(--text);font-weight:700;}
+#filters-trigger-btn{display:none;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line-strong);
+  background:var(--paper);color:var(--text);font:600 13.5px/1 'Inter',sans-serif;cursor:pointer;}
+#filters-trigger-btn svg{width:16px;height:16px;color:var(--primary-ink);}
+#filters-trigger-btn:hover{border-color:var(--primary-ink);}
+.sr-active{display:flex;flex-wrap:wrap;gap:8px;margin:-2px 0 14px;}
+.sr-active:empty{display:none;}
+.sr-fchip{display:inline-flex;align-items:center;gap:6px;max-width:100%;min-height:34px;padding:0 8px 0 12px;border-radius:999px;border:1px solid transparent;
+  background:var(--fill);color:var(--primary-ink);font:600 12.5px/1.2 'Inter',sans-serif;cursor:pointer;}
+.sr-fchip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.sr-fchip b{font-weight:500;color:var(--text-muted);}
+.sr-fchip svg{width:12px;height:12px;flex:none;}
+.sr-fchip:hover{border-color:var(--primary-ink);}
+.sr-linkbtn{background:none;border:0;padding:6px 2px;font:600 13px 'Inter',sans-serif;color:var(--primary-ink);cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
 
-@media(max-width:640px){
-  .search-hub{padding-top:calc(var(--nav-h,64px) + 26px);}
-  .search-hub,.prompts-section,.results-section{padding-left:16px;padding-right:16px;}
-  .hub-title{letter-spacing:-1px;font-size:clamp(26px,8vw,40px);}
-  .hub-sub{font-size:13.5px;}
-  .search-input-row{padding:14px 12px 12px 16px;}
-  .search-bottom-row{flex-wrap:wrap;gap:8px;padding:8px 14px 10px;}
-  .char-count{display:none;}
-  .prompts-row{flex-direction:column;gap:8px;}
-  .msg-user .bubble{max-width:92%;}
-  .msg-ai{gap:8px;}
-  .msg-ai .bubble{font-size:13px;padding:14px 16px;}
-  footer{padding:20px;}
-}
-@media(max-width:480px){
-  .stats-pills{gap:5px;}
-  .stat-pill{font-size:11px;padding:4px 10px;}
-  .stat-sep{display:none;}
-  .prompt-chip{font-size:12px;padding:5px 12px;}
-}
+/* ── Groups and rows ── */
+.sr-group{background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:18px;}
+.sr-ghead{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;padding:14px 18px 12px;border-bottom:1px solid var(--line-soft);}
+.sr-ghead h3{font:700 16px/1.25 'BwGradual','Urbanist',sans-serif;color:var(--text);letter-spacing:-.005em;}
+.sr-gn{font:600 12.5px/1 'Inter',sans-serif;color:var(--text-light);font-variant-numeric:tabular-nums;}
+.sr-ghead .sr-gsub{flex-basis:100%;font-size:12.5px;line-height:1.45;color:var(--text-light);}
+.sr-ghead .sr-gact{margin-left:auto;}
+.sr-gact a,.sr-gact button{font:600 13px/1.2 'Inter',sans-serif;color:var(--primary-ink);background:none;border:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:6px 0;}
+.sr-withdrawn .sr-ghead h3{color:var(--stop);}
+.sr-list{list-style:none;}
+.sr-list > li + li{border-top:1px solid var(--line-soft);}
+.result{position:relative;display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:4px 14px;align-items:start;padding:14px 18px;
+  color:var(--text);text-decoration:none;transition:background-color .12s var(--ease);}
+.result:hover{background:var(--hover);}
+.result:focus-visible{outline:none;box-shadow:inset 0 0 0 2px var(--primary-ink);background:var(--hover);}
+.r-mark{position:relative;width:48px;height:40px;border-radius:10px;background:var(--fill);color:var(--primary-ink);display:grid;place-items:center;
+  font:800 11px/1 'BwGradual','Urbanist',sans-serif;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.r-mark.case{background:var(--paper);box-shadow:inset 0 0 0 1.5px var(--primary-ink);}
+.r-mark.hot::after{content:'';position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--accent);}
+.r-mark.stop{background:var(--stop-bg);color:var(--stop);}
+.r-body{min-width:0;display:flex;flex-direction:column;gap:4px;}
+.r-kicker{font:600 11.5px/1.3 'Inter',sans-serif;letter-spacing:.02em;color:var(--primary-ink);}
+.r-title{font:600 15.5px/1.38 'Inter',sans-serif;color:var(--text);overflow-wrap:anywhere;}
+.result:hover .r-title{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:var(--line-strong);}
+.r-title mark,.r-meta mark{background:var(--mark);color:inherit;border-radius:3px;padding:0 1px;}
+/* The dots between facts: each fact carries its own, and the list is shifted
+   left by one gap and clipped there, so a line that wraps never starts with
+   a stray dot. */
+.r-meta{display:flex;flex-wrap:wrap;align-items:baseline;row-gap:1px;margin-left:-15px;clip-path:inset(0 0 0 15px);
+  font-size:13px;line-height:1.5;color:var(--text-muted);min-width:0;}
+.r-meta > span{position:relative;margin-left:15px;min-width:0;overflow-wrap:anywhere;}
+.r-meta > span::before{content:'\00B7';position:absolute;left:-10px;color:var(--text-light);}
+.r-num{font-weight:600;color:var(--text);}
+.r-facts{color:var(--text-light);}
+html[data-taqa-theme="dark"] .r-meta mark{color:var(--text);}
+.r-note{font-size:13px;line-height:1.5;color:var(--text-muted);}
+.r-note-withdrawn{color:var(--stop);}
+.r-note-withdrawn b{font-weight:700;}
+.r-state{display:flex;flex-direction:column;align-items:flex-end;gap:6px;padding-top:2px;}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font:600 12px/1.35 'Inter',sans-serif;white-space:nowrap;}
+.chip::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex:none;}
+.chip.ok{color:var(--ok);background:var(--ok-bg);}
+.chip.warn{color:var(--warn);background:var(--warn-bg);}
+.chip.info{color:var(--info);background:var(--info-bg);}
+.chip.plain{color:var(--text-muted);background:var(--inset);box-shadow:inset 0 0 0 1px var(--line);}
+.chip.plain::before{display:none;}
+.chip.stop{color:var(--stop);background:var(--stop-bg);}
+.sr-more{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding:12px 18px 14px;border-top:1px solid var(--line-soft);
+  font-size:13px;color:var(--text-light);}
+.sr-more button{min-height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--line-strong);background:var(--paper);color:var(--primary-ink);
+  font:600 13.5px/1 'Inter',sans-serif;cursor:pointer;}
+.sr-more button:hover{border-color:var(--primary-ink);background:var(--fill);}
+.result.in{animation:srIn .32s var(--ease) both;}
+@keyframes srIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 
-/* ── Instant Results Panel ── */
-.ir-panel{
-  position:relative;z-index:2;
-  background:rgba(255,255,255,0.99);
-  border:1.5px solid rgba(0,187,182,0.38);
-  border-top:none;
-  border-radius:0 0 18px 18px;
-  box-shadow:0 14px 44px rgba(0,0,0,0.13);
-  margin-top:-2px;
-  overflow:hidden;
-  text-align:left;
-  display:none;
-}
-.ir-panel.open{display:block;}
-.ir-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:9px 16px 7px;
-  font-size:10.5px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;
-  color:var(--text-muted);
-  border-bottom:1px solid rgba(0,0,0,0.06);
-}
-.ir-item{
-  display:flex;align-items:center;gap:12px;
-  padding:11px 16px;
-  cursor:pointer;text-decoration:none;
-  transition:background 0.15s;
-  border-bottom:1px solid rgba(0,0,0,0.04);
-}
-.ir-item:last-of-type{border-bottom:none;}
-.ir-item:hover{background:rgba(0,187,182,0.05);}
-/* A draft or a document under review is in the index so its author can find
-   it, but it is not in force, and a search result that does not say so is
-   the same mistake as a register that does not say so. */
-.ir-state{display:inline-block;margin-inline-start:6px;padding:0 6px;border-radius:20px;
-  font-size:9px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;vertical-align:1px;}
-.ir-state-draft{background:rgba(0,118,168,.05);color:var(--info-ink,#0076A8);}
-.ir-state-under-review{background:rgba(255,184,28,.14);color:var(--warn-ink,#8A6200);}
-.ir-badge{
-  flex-shrink:0;padding:2px 8px;border-radius:5px;
-  font-size:10px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;
-  min-width:54px;text-align:center;
-}
-.ir-body{flex:1;min-width:0;}
-.ir-title{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ir-title mark{background:rgba(0,187,182,0.22);color:var(--primary-ink);border-radius:2px;padding:0 1px;font-style:normal;}
-/* Teal on a teal wash failed in dark; the wash alone marks the match there. */
-html[data-taqa-theme="dark"] .ir-title mark{color:var(--text);}
-.ir-seg{font-size:11px;color:var(--text-muted);margin-top:2px;}
-.ir-arrow{font-size:15px;color:var(--text-muted);flex-shrink:0;transition:color 0.15s;}
-.ir-item:hover .ir-arrow{color:var(--primary-ink);}
-.ir-footer{
-  padding:9px 16px;font-size:11.5px;color:var(--text-muted);
-  text-align:center;border-top:1px solid rgba(0,0,0,0.06);
-  background:rgba(0,0,0,0.015);
-}
-html[data-taqa-theme="dark"] .ir-panel{background:rgba(0,45,48,0.99);border-color:rgba(0,187,182,0.25);}
-html[data-taqa-theme="dark"] .ir-header{border-color:rgba(255,255,255,0.06);}
-html[data-taqa-theme="dark"] .ir-item{border-color:rgba(255,255,255,0.04);}
-html[data-taqa-theme="dark"] .ir-item:hover{background:rgba(0,187,182,0.07);}
-html[data-taqa-theme="dark"] .ir-title{color:#C7DBDD;}
-html[data-taqa-theme="dark"] .ir-footer{background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.06);}
+/* ── Empty, idle and the footnote ── */
+.sr-empty{background:var(--paper);border:1px dashed var(--line-strong);border-radius:16px;padding:26px 24px;}
+.sr-empty h3{font:700 18px/1.3 'BwGradual','Urbanist',sans-serif;color:var(--text);margin-bottom:8px;overflow-wrap:anywhere;}
+.sr-empty p{font-size:14px;line-height:1.6;color:var(--text-muted);overflow-wrap:anywhere;max-width:70ch;}
+.sr-empty ul{margin:10px 0 0 18px;font-size:14px;line-height:1.7;color:var(--text-muted);}
+.sr-empty .sr-tip{margin-top:10px;}
+.sr-empty .sr-tip button,.sr-empty ul button{background:none;border:0;padding:0;font:inherit;font-weight:600;color:var(--primary-ink);cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+.sr-empty .sr-acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;}
+.sr-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:0 16px;border-radius:11px;border:1px solid var(--line-strong);
+  background:var(--paper);color:var(--primary-ink);font:600 14px/1 'BwGradual','Urbanist',sans-serif;text-decoration:none;cursor:pointer;}
+.sr-btn:hover{border-color:var(--primary-ink);background:var(--fill);}
+.sr-btn.pri{background:var(--primary);border-color:var(--primary);color:#fff;}
+.sr-btn.pri:hover{background:#003A3D;}
+html[data-taqa-theme="dark"] .sr-btn.pri{background:#00BBB6;border-color:#00BBB6;color:#00191B;}
+.sr-try{margin-bottom:18px;}
+.sr-try h3{font:600 12.5px/1.3 'Inter',sans-serif;color:var(--text-muted);margin-bottom:8px;}
+.sr-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.sr-chips button{min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--text);
+  font:500 13.5px/1 'Inter',sans-serif;cursor:pointer;transition:border-color .12s var(--ease),background-color .12s var(--ease);}
+.sr-chips button:hover{border-color:var(--primary-ink);background:var(--fill);color:var(--primary-ink);}
+.sr-note{padding:16px 18px;font-size:13.5px;line-height:1.6;color:var(--text-muted);}
+.sr-note a{font-weight:600;}
+.sr-foot{margin-top:6px;font-size:12.5px;line-height:1.6;color:var(--text-light);max-width:80ch;}
+.sr-foot b{color:var(--text-muted);font-weight:600;}
 
-/* Long option text ends in an ellipsis rather than being cut mid letter. */
-select { text-overflow:ellipsis; padding-inline-end:30px; }
+footer.sr-bar{height:4px;position:relative;margin-top:auto;}
+footer.sr-bar::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:#005D63;}
 
-/* ── Filters Drawer / Panel ── */
-button.filter-chip{font-family:inherit;display:inline-flex;align-items:center;gap:6px;}
-.filters-badge{
-  background:var(--gradient);color:#fff;font-size:10px;font-weight:700;border-radius:50px;
-  padding:1px 6px;min-width:16px;line-height:1.5;text-align:center;display:inline-block;
+/* ── Narrower: filters become a drawer under the bar ── */
+@media (max-width:1099.98px){
+  .sr-body{grid-template-columns:minmax(0,1fr);}
+  #filters-trigger-btn{display:inline-flex;}
+  .filters-drawer{position:fixed;top:var(--nav-h,64px);left:0;bottom:0;max-height:none;width:340px;max-width:88vw;z-index:700;border-radius:0 18px 18px 0;
+    border-left:0;box-shadow:var(--shadow-3);transform:translateX(-102%);visibility:hidden;
+    transition:transform .28s var(--ease),visibility 0s linear .28s;padding-left:var(--safe-l,0px);}
+  .filters-drawer.open{transform:none;visibility:visible;transition-delay:0s;}
+  .filters-close-btn{display:grid;}
+  .filters-body{flex:1 1 auto;}
+  .filters-done{display:inline-flex;align-items:center;justify-content:center;}
+  .filters-scrim{display:block;position:fixed;inset:var(--nav-h,64px) 0 0 0;z-index:650;background:rgba(0,25,27,.42);opacity:0;visibility:hidden;
+    transition:opacity .25s var(--ease),visibility 0s linear .25s;}
+  .filters-scrim.open{opacity:1;visibility:visible;transition-delay:0s;}
+  .filters-foot{padding-bottom:calc(16px + var(--safe-b,0px));}
 }
-.filters-scrim{
-  position:fixed;inset:0;background:rgba(0,0,0,0.38);z-index:650;
-  opacity:0;pointer-events:none;transition:opacity 0.25s;
-}
-.filters-scrim.open{opacity:1;pointer-events:auto;}
-.filters-drawer{
-  position:fixed;top:var(--nav-h,64px);left:0;height:calc(100dvh - var(--nav-h,64px));width:284px;max-width:86vw;
-  background:var(--glass-2);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
-  border-inline-end:1px solid var(--glass-border);
-  box-shadow:0 10px 40px rgba(0,0,0,0.18);
-  z-index:700;transform:translateX(-100%);
-  transition:transform 0.3s cubic-bezier(.4,0,.2,1);
-  overflow-y:auto;padding:20px 18px calc(24px + var(--safe-b,0px)) max(18px, var(--safe-l,0px));text-align:left;
-  scroll-padding-bottom:var(--safe-b,0px);
-}
-.filters-drawer.open{transform:translateX(0);}
-.filters-drawer-head{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--glass-border);
-}
-.filters-drawer-title{
-  font-family:'BwGradual','Urbanist',sans-serif;font-weight:700;font-size:15px;
-  color:var(--text);display:flex;align-items:center;gap:8px;
-}
-.filters-close-btn{
-  width:28px;height:28px;border-radius:8px;border:1px solid var(--glass-border);
-  background:transparent;color:var(--text-muted);cursor:pointer;font-size:13px;
-  display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;
-}
-.filters-close-btn:hover{border-color:var(--glass-border-hover);color:var(--text);}
-.filters-group{margin-bottom:18px;}
-.filters-group label{
-  display:block;font-size:10.5px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;
-  color:var(--text-muted);margin-bottom:7px;
-}
-.filters-group select,.filters-group input[type="date"]{
-  width:100%;padding:9px 10px;border-radius:9px;border:1px solid var(--glass-border);
-  background:rgba(255,255,255,0.75);color:var(--text);font-size:13px;font-family:'Inter',sans-serif;
-  outline:none;transition:border-color 0.2s,box-shadow 0.2s;color-scheme:light;
-}
-.filters-group select:focus,.filters-group input[type="date"]:focus{
-  border-color:rgba(0,187,182,0.45);box-shadow:0 0 0 3px rgba(0,187,182,0.1);
-}
-.filters-date-row{display:flex;align-items:center;gap:7px;}
-.filters-date-row input{flex:1;min-width:0;}
-.filters-date-sep{font-size:11px;color:var(--text-muted);flex-shrink:0;}
-.filters-clear-btn{
-  width:100%;margin-top:2px;padding:9px;border-radius:9px;border:1px solid var(--glass-border);
-  background:transparent;color:var(--text-muted);font-size:12.5px;font-weight:600;cursor:pointer;
-  transition:all 0.2s;font-family:'Inter',sans-serif;
-}
-.filters-clear-btn:hover{border-color:rgba(0,187,182,0.35);color:var(--primary-ink);background:rgba(0,187,182,0.05);}
-@media(min-width:1300px){
-  .filters-drawer{
-    top:calc(var(--nav-h,64px) + 46px);left:24px;height:auto;max-height:calc(100vh - 140px - var(--nav-safe,0px));
-    border-radius:18px;border:1px solid var(--glass-border);border-inline-end:1px solid var(--glass-border);
-    transform:translateX(0);box-shadow:0 4px 28px rgba(0,0,0,0.08);
-  }
-  .filters-scrim{display:none;}
-  .filters-close-btn{display:none;}
-  #filters-trigger-btn{display:none;}
-}
-html[data-taqa-theme="dark"] .filters-drawer{background:rgba(0,35,38,0.98);border-color:rgba(255,255,255,0.08);}
-html[data-taqa-theme="dark"] .filters-drawer-head{border-color:rgba(255,255,255,0.07);}
-html[data-taqa-theme="dark"] .filters-close-btn{border-color:rgba(255,255,255,0.1);color:#619B9E;}
-html[data-taqa-theme="dark"] .filters-group select,html[data-taqa-theme="dark"] .filters-group input[type="date"]{
-  background:rgba(0,45,48,0.6);border-color:rgba(255,255,255,0.1);color:#C7DBDD;color-scheme:dark;
-}
-html[data-taqa-theme="dark"] .filters-clear-btn{border-color:rgba(255,255,255,0.1);color:#619B9E;}
-html[data-taqa-theme="dark"] .filters-clear-btn:hover{border-color:rgba(0,187,182,0.3);color:#00BBB6;background:rgba(0,93,99,0.15);}
+html.sr-lock,html.sr-lock body{overflow:hidden!important;}
 
-/* ── Real result / source cards (search results, honest empty state) ── */
-.source-card{cursor:pointer;}
-.result-note{font-size:12px;color:var(--text-muted);margin-top:2px;}
-.result-note-withdrawn{color:var(--stop-ink,#C8102E);font-size:12.5px;line-height:1.45;}
-.result-note-withdrawn b{font-weight:700;}
-.empty-state-suggest{margin-top:2px;}
-.empty-state-suggest button{
-  background:none;border:none;padding:0;color:var(--primary-ink);font-weight:600;
-  font-size:inherit;font-family:inherit;cursor:pointer;text-decoration:underline;
+@media (max-width:860px){
+  .sr-hero-in{grid-template-columns:minmax(0,1fr);padding:32px 24px 88px;}
+  .sr-stats{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .sr-panel{padding:0 24px;}
+  .sr-body{padding:24px 24px 64px;}
 }
-
-/* shared.js paints the breadcrumb on var(--primary), which is a ground colour,
-   so on the dark canvas the current crumb sat at about 2.5 to 1. The leading
-   html raises specificity over the sheet shared.js appends after ours. */
-/* fixes.js gives the AI disclaimer an amber of its own that measures 4.42 on
-   the banner tint. Its dark rule is selector-heavy, so this one carries the
-   theme attribute and body to outrank it in both themes. */
-html[data-taqa-theme] body .ai-safety-banner{color:var(--alert-ink);background:var(--alert-soft);
-  border-color:rgba(253,105,29,.28);border-inline-start:3px solid #FD691D;}
+@media (max-width:640px){
+  .sr-hero-in{padding:26px 16px 80px;gap:18px;}
+  .sr-hero h1{font-size:36px;}
+  .sr-sub{font-size:20px;}
+  .sr-lede{font-size:14.5px;}
+  .sr-stat{padding:2px 12px;}
+  .sr-stat dd{font-size:24px;}
+  .sr-stat dt{font-size:12px;}
+  .sr-panel{padding:0 12px;margin-top:-64px;}
+  .sr-panel-in{padding:14px 14px 12px;border-radius:18px;}
+  #query-input{min-height:52px;font-size:16px;padding-right:44px;}
+  .sr-go{min-height:52px;width:52px;padding:0;}
+  .sr-go span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+  .sr-row2{margin-top:12px;}
+  .sr-seg{width:100%;}
+  .sr-seg legend{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+  .sr-seg-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;}
+  .sr-seg-o span{justify-content:center;padding:0 6px;font-size:13px;gap:5px;width:100%;}
+  .sr-seg-o{width:100%;}
+  .sr-hint{display:none;}
+  .sr-body{padding:18px 16px 56px;gap:0;}
+  .sr-group{border-radius:14px;}
+  .sr-ghead{padding:12px 14px 10px;}
+  .result{grid-template-columns:40px minmax(0,1fr);gap:4px 12px;padding:13px 14px;}
+  .r-mark{width:40px;height:36px;font-size:10px;border-radius:9px;}
+  .r-title{font-size:15px;}
+  .r-meta{font-size:12.5px;}
+  .r-state{grid-column:2;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-start;padding-top:2px;}
+  .chip{font-size:11.5px;padding:2px 9px;}
+  .sr-more{padding:12px 14px;}
+  .sr-empty{padding:20px 16px;}
+  /* A sheet that rises from the bottom. */
+  .filters-drawer{top:auto;left:0;right:0;bottom:0;width:auto;max-width:none;max-height:calc(100dvh - var(--nav-h,64px) - 12px);
+    border-radius:20px 20px 0 0;border:0;transform:translateY(104%);padding-left:var(--safe-l,0px);padding-right:var(--safe-r,0px);}
+  .filters-drawer::before{content:'';display:block;width:40px;height:4px;border-radius:2px;background:var(--line-strong);margin:10px auto 0;flex:none;}
+  .filters-drawer-head{padding:10px 16px 10px;}
+  .filters-body{padding:14px 16px 4px;}
+  .filters-foot{padding:12px 16px calc(14px + var(--safe-b,0px));}
+}
+@media (max-width:380px){
+  .sr-stat{padding:2px 8px;}
+  .sr-stat dd{font-size:21px;}
+  .sr-seg-o span i{display:none;}
+}
+@media (prefers-reduced-motion: reduce){
+  .sr-hero h1,.sr-sub,.sr-lede,.sr-stats,.result.in{animation:none!important;}
+  .filters-drawer,.filters-scrim{transition-duration:.01ms!important;}
+}
+@media print{
+  nav,#nav-mobile-menu,.sr-panel,.filters-drawer,.filters-scrim,#filters-trigger-btn,.sr-active,.sr-more,.sr-gact,.sr-try,.skip,footer{display:none!important;}
+  .page-wrapper{padding-top:0;}
+  .sr-hero{background:none;color:#000;}
+  .sr-hero-in{padding:0 0 12px;}
+  .sr-hero h1,.sr-stat dd{color:#000;}
+  .sr-sub,.sr-lede,.sr-stat dt,.sr-eyebrow{color:#333;}
+  .th-lines{display:none;}
+  .sr-body{display:block;padding:0;}
+  .sr-group{break-inside:auto;border-color:#999;}
+  .result{break-inside:avoid;}
+}
 </style>
 <link rel="stylesheet" href="techhub.css">
 <link rel="stylesheet" href="topbar.css">
 </head>
 <body>
-<div class="bg-blobs" aria-hidden="true"><div class="bg-blob bg-blob-1"></div><div class="bg-blob bg-blob-2"></div><div class="bg-blob bg-blob-3"></div></div>
-<canvas id="bg-canvas"></canvas>
+<a class="skip" href="#main">Skip to content</a>
 <div class="page-wrapper">
 
 <nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
@@ -551,7 +379,8 @@ html[data-taqa-theme] body .ai-safety-banner{color:var(--alert-ink);background:v
       <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
     </li>
-    <li><a href="ai-search.html" class="active" aria-current="page">Document Search</a></li>
+    <li><a href="cases.html">Cases</a></li>
+    <li><a href="ai-search.html" class="active" aria-current="page">Search</a></li>
     <li class="nav-reg"><a href="master-list.html">Master List</a></li>
     <li><a href="glossary.html">Field Glossary</a></li>
     <li><a href="support-ticket.html">Ask Expert</a></li>
@@ -566,474 +395,259 @@ html[data-taqa-theme] body .ai-safety-banner{color:var(--alert-ink);background:v
   </div>
 </nav>
 
-<!-- ── Search Hub ── -->
-<div class="search-hub">
-  <div class="hub-glow"></div>
-
-  <div class="ai-badge hw hw-1"><span class="ai-spark">✦</span> AI-Powered Document Intelligence</div>
-  <h1 class="hub-title"><span class="hw hw-2 hw-i">Ask</span> <span class="hw hw-3 hw-i">Anything</span> <span class="hw hw-4 hw-i">About</span><br><span class="hw hw-5 hw-i"><span class="grad">TAQA Operations</span></span></h1>
-  <p class="hub-sub hw hw-6">Answers sourced from the register, every controlled document in every area.</p>
-
-  <div class="stats-pills hw hw-7">
-    <div class="stat-pill"><span class="stat-dot"></span><span id="ai-doc-n">600</span> Documents</div>
-    <span class="stat-sep">·</span>
-    <div class="stat-pill"><span class="stat-dot"></span><span id="ai-area-n">24</span> Areas</div>
-    <span class="stat-sep">·</span>
-    <div class="stat-pill"><span class="stat-dot"></span>SOPs · Manuals · Alerts</div>
-  </div>
-
-  <!-- Search Card -->
-  <div class="search-card">
-    <div class="search-input-row">
-      <textarea id="query-input" placeholder="e.g. What is the well shut-in procedure? What are the H2S PPE requirements?" rows="1"></textarea>
-      <button class="send-btn" id="send-btn" onclick="submitQuery()" title="Ask AI">✦</button>
-    </div>
-    <div class="search-bottom-row">
-      <div class="seg-filters">
-        <span class="filter-label">Segment</span>
-        <span class="filter-chip active" data-seg="all">All</span>
-        <span class="filter-chip" data-seg="drilling">Drilling Services</span>
-        <span class="filter-chip" data-seg="well-safety">Safety Services</span>
-        <span class="filter-chip" data-seg="fracturing">Fracturing</span>
-        <span class="filter-chip" data-seg="qhse">QHSE</span>
-        <span class="filter-chip" data-seg="hr">HR</span>
-        <button type="button" class="filter-chip" id="filters-trigger-btn" onclick="toggleFilters()"
-          aria-haspopup="dialog" aria-expanded="false" aria-controls="filters-drawer">
-          Filters<span class="filters-badge" id="filters-badge-mini" style="display:none">0</span>
-        </button>
+<main id="main" tabindex="-1">
+  <section class="sr-hero" aria-labelledby="sr-title">
+    <div class="th-lines" aria-hidden="true"></div>
+    <div class="sr-hero-in">
+      <div>
+        <p class="sr-eyebrow">RISE · Search</p>
+        <h1 id="sr-title">Search</h1>
+        <p class="sr-sub">Documents and field cases.</p>
+        <p class="sr-lede" id="sr-lede">Finds documents in the register by title, number, area and type, and field cases by any word in the case. Every word you type has to match; exact titles and numbers come first.</p>
       </div>
-      <span class="char-count" id="char-count">0 / 500</span>
+      <dl class="sr-stats" aria-label="What Search looks through">
+        <div class="sr-stat"><dt>Documents in force you can open</dt><dd id="st-docs">0</dd></div>
+        <div class="sr-stat"><dt>Field cases released</dt><dd id="st-cases">0</dd></div>
+        <div class="sr-stat"><dt>Areas with documents</dt><dd id="st-areas">0</dd></div>
+      </dl>
     </div>
-  </div>
-  <!-- ── Instant Results (injected below search card) ── -->
-  <div id="ir-panel" class="ir-panel" role="listbox" aria-label="Document matches"></div>
-</div>
+  </section>
 
-<!-- ── Filters Panel / Drawer ── -->
-<div class="filters-scrim" id="filters-scrim" onclick="closeFilters()"></div>
-<aside class="filters-drawer" id="filters-drawer" aria-label="Search filters" role="dialog" aria-modal="false">
-  <div class="filters-drawer-head">
-    <span class="filters-drawer-title">Filters<span class="filters-badge" id="filters-badge" style="display:none">0</span></span>
-    <button type="button" class="filters-close-btn" onclick="closeFilters()" aria-label="Close filters">✕</button>
-  </div>
-  <div class="filters-group">
-    <label for="f-segment">Area / Segment</label>
-    <select id="f-segment"></select>
-  </div>
-  <div class="filters-group">
-    <label for="f-status">Status</label>
-    <select id="f-status">
-      <option value="all">All Statuses</option>
-      <option value="current">Published</option>
-      <option value="under-review">Under Review</option>
-      <option value="draft">Draft</option>
-      <option value="overdue">Review Overdue</option>
-    </select>
-  </div>
-  <div class="filters-group">
-    <label for="f-type">Document Type</label>
-    <select id="f-type"></select>
-  </div>
-  <div class="filters-group">
-    <label id="f-date-label">Issued Date Range</label>
-    <div class="filters-date-row">
-      <input type="date" id="f-date-from" aria-label="Issued from">
-      <span class="filters-date-sep">to</span>
-      <input type="date" id="f-date-to" aria-label="Issued to">
-    </div>
-  </div>
-  <button type="button" class="filters-clear-btn" id="filters-clear-btn" onclick="clearAllFilters()">Clear all filters</button>
-</aside>
-
-<!-- ── Suggested Prompts ── -->
-<div class="prompts-section">
-  <div class="prompts-row">
-    <span class="prompts-tag">Try</span>
-    <div class="prompts-chips">
-      <span class="prompt-chip" onclick="setPrompt(this)">Well shut-in procedure</span>
-      <span class="prompt-chip" onclick="setPrompt(this)">BOP test frequency</span>
-      <span class="prompt-chip" onclick="setPrompt(this)">H2S PPE requirements</span>
-      <span class="prompt-chip" onclick="setPrompt(this)">Active technical alerts</span>
-      <span class="prompt-chip" onclick="setPrompt(this)">Cement slurry mixing</span>
-      <span class="prompt-chip" onclick="setPrompt(this)">Non-conformance report</span>
-      <span class="prompt-chip" onclick="setPrompt(this)">CT BHA assembly steps</span>
-      <span class="prompt-chip" onclick="setPrompt(this)">SIMOPS restrictions</span>
-    </div>
-  </div>
-</div>
-
-<!-- ── Results ── -->
-<div class="results-section">
-  <div class="thinking-block" id="thinking-block">
-    <div class="thinking-avatar">✦</div>
-    <div>
-      <div class="thinking-label">Searching the register...</div>
-      <div class="thinking-dots">
-        <div class="thinking-dot"></div>
-        <div class="thinking-dot"></div>
-        <div class="thinking-dot"></div>
+  <div class="sr-panel">
+    <form class="sr-panel-in" id="sr-form" role="search" action="ai-search.html" method="get" autocomplete="off">
+      <label class="sr-lbl" for="query-input">Search for</label>
+      <div class="sr-qrow">
+        <div class="sr-qbox">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="search" id="query-input" name="q" maxlength="200" placeholder="Title, number, area or type" spellcheck="false" autocapitalize="off" enterkeyhint="search" aria-describedby="sr-hint" aria-controls="results">
+          <button type="button" class="sr-qx" id="sr-clear" aria-label="Clear the search" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
+        <button type="submit" class="sr-go" id="search-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search</span></button>
       </div>
-    </div>
+      <div class="sr-row2">
+        <fieldset class="sr-seg" id="sr-content">
+          <legend>Show</legend>
+          <div class="sr-seg-g">
+            <label class="sr-seg-o"><input type="radio" name="content" value="all" checked><span>All <i id="n-all"></i></span></label>
+            <label class="sr-seg-o"><input type="radio" name="content" value="docs"><span>Documents <i id="n-docs"></i></span></label>
+            <label class="sr-seg-o"><input type="radio" name="content" value="cases"><span>Field cases <i id="n-cases"></i></span></label>
+          </div>
+        </fieldset>
+        <p class="sr-hint" id="sr-hint"><span class="k">Press <kbd>/</kbd> to come back to this box. </span>Results update as you type.</p>
+      </div>
+    </form>
   </div>
-  <div class="chat-log" id="chat-log">
-    <div class="welcome-state">
-      <div class="welcome-icon">✦</div>
-      <h3>Ready to Search</h3>
-      <p>Type a question or select a suggested prompt above to get started.</p>
-    </div>
+
+  <div class="sr-body">
+    <div class="filters-scrim" id="filters-scrim"></div>
+    <aside class="filters-drawer" id="filters-drawer" aria-labelledby="filters-title">
+      <div class="filters-drawer-head">
+        <h2 class="filters-drawer-title" id="filters-title">Filters <span class="filters-badge" id="filters-badge" hidden>0</span></h2>
+        <button type="button" class="filters-close-btn" id="filters-close" aria-label="Close filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      </div>
+      <div class="filters-body">
+        <div class="filters-group">
+          <label for="f-segment">Area</label>
+          <select id="f-segment"></select>
+        </div>
+        <div class="filters-group">
+          <label for="f-type">Type</label>
+          <select id="f-type"></select>
+        </div>
+        <div class="filters-group">
+          <label for="f-status">Status</label>
+          <select id="f-status">
+            <option value="all">All statuses</option>
+            <option value="current">In force</option>
+            <option value="under-review">In force, under review</option>
+            <option value="draft">Not yet in force</option>
+            <option value="overdue">Review overdue</option>
+          </select>
+        </div>
+        <div class="filters-group" role="group" aria-labelledby="f-date-label">
+          <span class="fg-lbl" id="f-date-label">Issued between</span>
+          <div class="filters-date-row">
+            <div class="dl"><span>From</span><input type="date" id="f-date-from" aria-label="Issued from"></div>
+            <div class="dl"><span>To</span><input type="date" id="f-date-to" aria-label="Issued to"></div>
+          </div>
+          <p class="filters-note">Field cases use the day they were released.</p>
+        </div>
+      </div>
+      <div class="filters-foot">
+        <button type="button" class="filters-clear-btn" id="filters-clear-btn">Clear all filters</button>
+        <button type="button" class="filters-done" id="filters-done">Show results</button>
+      </div>
+    </aside>
+
+    <section class="sr-results" id="results" aria-labelledby="result-count">
+      <div class="sr-rhead">
+        <h2 id="result-count" aria-live="polite"></h2>
+        <button type="button" id="filters-trigger-btn" aria-controls="filters-drawer" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filters<span class="filters-badge" id="filters-badge-mini" hidden>0</span></button>
+      </div>
+      <div class="sr-active" id="sr-active"></div>
+      <div id="results-list"></div>
+      <p class="sr-foot" id="sr-foot"><b>How Search works.</b> It runs in this browser over the register and the field cases your role may open; nothing you type leaves the device. A document matches when every word appears in its title, number, area or type; a field case matches when every word appears anywhere in it. Withdrawn documents are left out, except that typing the exact number of one says what happened to it.</p>
+    </section>
   </div>
+</main>
+
+<footer class="sr-bar"></footer>
 </div>
-
-<footer></footer>
-</div>
-
-<!-- ── Scroll Progress Ring ── -->
-<button class="scroll-top-btn" id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top" aria-label="Back to top">
-  <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="23" cy="23" r="19" stroke="rgba(0,93,99,0.12)" stroke-width="2.5"/>
-    <circle id="stp-ring" cx="23" cy="23" r="19" stroke="url(#stpg)" stroke-width="2.5"
-      stroke-linecap="round" stroke-dasharray="119.4" stroke-dashoffset="119.4"
-      transform="rotate(-90 23 23)"/>
-    <defs><linearGradient id="stpg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#005D63"/><stop offset="100%" stop-color="#00BBB6"/>
-    </linearGradient></defs>
-  </svg>
-  <span class="stp-arrow">↑</span>
-</button>
-
-<script>
-// ── Prefill from URL ──
-const urlQ = new URLSearchParams(window.location.search).get('q');
-if (urlQ) { document.getElementById('query-input').value = urlQ; }
-
-// ── Char Counter + auto-resize ──
-const input = document.getElementById('query-input');
-input.addEventListener('input', () => {
-  const len = input.value.length;
-  document.getElementById('char-count').textContent = len + ' / 500';
-  if (len > 500) input.value = input.value.substring(0, 500);
-  input.style.height = 'auto';
-  input.style.height = Math.min(input.scrollHeight, 180) + 'px';
-});
-input.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitQuery(); }
-});
-
-// ── Prompt Chips ──
-function setPrompt(el) {
-  input.value = el.textContent;
-  input.dispatchEvent(new Event('input'));
-  input.focus();
-}
-
-// Segment quick-chips, the filters drawer and submitQuery() itself all need
-// the real register (TAQA_SEARCH_INDEX), which loads later in the page, so
-// that wiring lives in the "Real Document Search" script near the bottom of
-// the page rather than here.
-
-// ── Canvas ──
-const canvas = document.getElementById('bg-canvas');
-const ctx = canvas.getContext('2d');
-let W,H,pts=[];
-function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
-resize();window.addEventListener('resize',resize);
-function initPts(){pts=[];let n=Math.floor(W*H/20000);
-  for(let i=0;i<n;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,s:Math.random()*1.5+.3});}
-initPts();
-// The canvas is an opaque sheet over the body, so it has to carry the canvas
-// colour of whichever theme is live or it hands the dark page a white backdrop.
-function draw(){ctx.fillStyle=document.documentElement.getAttribute('data-taqa-theme')==='dark'?'#001314':'#F4F4F3';ctx.fillRect(0,0,W,H);
-  const g=ctx.createRadialGradient(W*.5,H*.25,0,W*.5,H*.25,500);
-  g.addColorStop(0,'rgba(0,93,99,0.05)');g.addColorStop(1,'transparent');
-  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-  pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;
-    if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
-    ctx.beginPath();ctx.arc(p.x,p.y,p.s,0,Math.PI*2);ctx.fillStyle='rgba(0,93,99,0.1)';ctx.fill();});
-  requestAnimationFrame(draw);}
-draw();
-
-// A prefilled query needs submitQuery(), which is defined once the register
-// has loaded further down the page, so the actual search runs from there.
-
-// ── Scroll Progress Ring ──
-(function(){
-  const btn=document.getElementById('scroll-top-btn');
-  const ring=document.getElementById('stp-ring');
-  const C=119.4;
-  window.addEventListener('scroll',function(){
-    const pct=window.scrollY/(document.documentElement.scrollHeight-window.innerHeight)||0;
-    if(btn){if(window.scrollY>300)btn.classList.add('stp-visible');else btn.classList.remove('stp-visible');}
-    if(ring)ring.style.strokeDashoffset=C*(1-pct);
-  },{passive:true});
-})();
-
-// ── Page Exit Transition ──
-document.addEventListener('click',function(e){
-  const a=e.target.closest('a[href]');
-  if(!a)return;
-  const h=a.getAttribute('href');
-  if(!h||h.startsWith('#')||h.startsWith('http')||h.startsWith('mailto'))return;
-  if(a.target==='_blank')return;
-  e.preventDefault();
-  document.body.classList.add('page-exit');
-  setTimeout(()=>window.location.href=h,270);
-});
-</script>
 
 <script src="documents-master.js"></script>
 <script src="roles.js"></script>
 <script src="store.js"></script>
-<script>
-/* Two counts on this page were typed three times between them and said 523
-   and 492 on the same screen. They come from the register now. */
-(function(){
-  if (typeof TAQA_STORE === 'undefined') return;
-  // The area figure counted three families and left out Company Wide and the
-  // area still waiting on QHSE, so it said 24 while the master list said 26.
-  // Both now count every area that holds documents.
-  function paint(){
-    var n = TAQA_STORE.count('visible');
-    var areas = Object.keys(TAQA_DOC_LOOKUPS.segments)
-      .filter(function(k){ return TAQA_STORE.area(k).live > 0; }).length;
-    var a = document.getElementById('ai-doc-n'); if (a) a.textContent = n;
-    var b = document.getElementById('ai-area-n'); if (b) b.textContent = areas;
-  }
-  TAQA_STORE.onChange(paint);
-})();
-</script>
 <script src="shared.js"></script>
-<script src="fixes.js"></script>
+<script src="recognition.js"></script>
+<script src="cases-data.js"></script>
+<script src="cases.js"></script>
 <script src="search-index.js"></script>
 <script>
-// ── Real Document Search ──
-// Wires the free-text query, the type-ahead preview and the filters panel to
-// the actual register: TAQA_SEARCH_INDEX, built in search-index.js from
-// TAQA_STORE. Every result here is a row from the register and every link
-// opens that row's real viewer.html; nothing is invented.
-(function(){
-  // The label already names the type on a result card, so every badge takes
-  // the one teal wash; Alert stays orange because it is an operational
-  // warning, the colour the rest of the Hub gives an alert.
-  var TYPE_CFG={
-    sop:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
-    manual:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
-    standard:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
-    policy:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
-    form:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
-    alert:{bg:'var(--alert-soft)',color:'var(--alert-ink)'},
-    lesson:{bg:'var(--brand-soft)',color:'var(--primary-ink)'},
-    software:{bg:'var(--brand-soft)',color:'var(--primary-ink)'}
-  };
-  var TYPE_ORDER=['sop','manual','form','standard','policy','alert','lesson','software'];
-  // The badge text is the register's mark (WI, ST, POL, LL); the filter's
-  // Document Type list instead spells the type out, since a dropdown is read
-  // slower than a badge and "WI" alone means nothing there.
-  (function(){ var T=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.types)||{};
-    var fb={sop:'SOP',form:'FRM',manual:'WI',standard:'ST',policy:'POL',alert:'ALT',lesson:'LL',software:'ZIP'};
-    TYPE_ORDER.forEach(function(k){
-      TYPE_CFG[k].label=(T[k]&&T[k].mark)||fb[k];
-      TYPE_CFG[k].fullLabel=(T[k]&&T[k].label)||k;
-    });
-  })();
+/* ── Search ──────────────────────────────────────────────────────────────
+   Two sources, both already on the page and both trimmed to what the reader
+   may open:
+     documents    TAQA_SEARCH_INDEX (search-index.js), built from the
+                  register; withdrawn records are never in it
+     field cases  TAQA_CASES (cases.js): filed cases with a card, and the
+                  published cases shipped with RISE
+   A register row that is a field case is shown as a case, never twice.
+   Every result links to its real record; nothing here is written, guessed
+   or summarised. */
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var LK = (typeof TAQA_DOC_LOOKUPS !== 'undefined' && TAQA_DOC_LOOKUPS) || { types: {}, segments: {} };
+  var TYPES = LK.types || {}, SEGS = LK.segments || {};
+  var CASES = window.TAQA_CASES || null;
+  var STORE = window.TAQA_STORE || null;
 
-  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-  function highlight(str,q){
-    if(!q)return esc(str);
-    var re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
-    return esc(str).replace(re,'<mark>$1</mark>');
-  }
-  // The one place a match becomes a link. Every card, in the type-ahead
-  // preview and in the full results below, opens the same real record.
-  function docHref(d){
-    // A draft result is a revision in progress: open that revision, not the
-    // one in force under the same number (PR 2A-2).
-    return 'viewer.html?doc='+encodeURIComponent(d.n||'')+(d.st==='draft'&&d.rev?'&rev='+encodeURIComponent(d.rev):'')+
-      '&seg='+encodeURIComponent(d.s)+'&type='+encodeURIComponent(d.tp)+'&title='+encodeURIComponent(d.t);
-  }
-  function statusNote(d){
-    if(!d.st||d.st==='current'||d.st==='asset')return '';
-    var label=d.st==='under-review'?'under review':d.st;
-    return ' <span class="ir-state ir-state-'+esc(d.st)+'">'+esc(label)+'</span>';
-  }
-
-  var FILTERS={segment:'all',status:'all',type:'all',dateFrom:'',dateTo:''};
-
-  var segSelect=document.getElementById('f-segment');
-  var typeSelect=document.getElementById('f-type');
-  var statusSelect=document.getElementById('f-status');
-  var dateFromInput=document.getElementById('f-date-from');
-  var dateToInput=document.getElementById('f-date-to');
-  var drawer=document.getElementById('filters-drawer');
-  var scrim=document.getElementById('filters-scrim');
-  var badgeMain=document.getElementById('filters-badge');
-  var badgeMini=document.getElementById('filters-badge-mini');
-  var triggerBtn=document.getElementById('filters-trigger-btn');
-
-  // Areas and types come from the register's own lookups, never a list typed
-  // by hand, so a new area or a renamed type appears here on its own.
-  (function populateSelects(){
-    var S=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.segments)||{};
-    var names=Object.keys(S).map(function(k){return{id:k,name:S[k].name||k};})
-      .sort(function(a,b){return a.name.localeCompare(b.name);});
-    if(segSelect){
-      var opts='<option value="all">All Areas</option>';
-      names.forEach(function(s){opts+='<option value="'+esc(s.id)+'">'+esc(s.name)+'</option>';});
-      segSelect.innerHTML=opts;
-    }
-    if(typeSelect){
-      var topts='<option value="all">All Types</option>';
-      TYPE_ORDER.forEach(function(t){topts+='<option value="'+t+'">'+esc(TYPE_CFG[t].fullLabel)+'</option>';});
-      typeSelect.innerHTML=topts;
-    }
-  })();
-
-  function activeFilterCount(){
-    var n=0;
-    if(FILTERS.segment!=='all')n++;
-    if(FILTERS.status!=='all')n++;
-    if(FILTERS.type!=='all')n++;
-    if(FILTERS.dateFrom)n++;
-    if(FILTERS.dateTo)n++;
-    return n;
-  }
-  function updateFilterBadge(){
-    var n=activeFilterCount();
-    [badgeMain,badgeMini].forEach(function(b){
-      if(!b)return;
-      b.textContent=n;
-      b.style.display=n?'inline-block':'none';
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
+  function low(s) { return String(s == null ? '' : s).toLowerCase(); }
+  function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function dayLabel(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ''));
+    return m ? (+m[3]) + ' ' + MON[+m[2] - 1] + ' ' + m[1] : '';
+  }
+  function monthLabel(iso) {
+    var m = /^(\d{4})-(\d{2})/.exec(String(iso || ''));
+    return m && +m[2] >= 1 && +m[2] <= 12 ? MON[+m[2] - 1] + ' ' + m[1] : '';
+  }
+  function today() { try { return STORE ? STORE.localDay() : new Date().toISOString().slice(0, 10); } catch (e) { return new Date().toISOString().slice(0, 10); } }
 
-  // Withdrawn documents (obsolete, superseded) never reach this array at all:
-  // search-index.js leaves them out, per TQ-QHSE-S001 4.6, so there is no
-  // "withdrawn" option here to filter by; a query never turns one up either.
-  function matchesFilters(d){
-    if(FILTERS.segment!=='all'&&d.s!==FILTERS.segment)return false;
-    if(FILTERS.type!=='all'&&d.tp!==FILTERS.type)return false;
-    if(FILTERS.status==='overdue'){ if(!d.ov)return false; }
-    else if(FILTERS.status!=='all'&&d.st!==FILTERS.status)return false;
-    if(FILTERS.dateFrom){ if(!d.iss||d.iss<FILTERS.dateFrom)return false; }
-    if(FILTERS.dateTo){ if(!d.iss||d.iss>FILTERS.dateTo)return false; }
+  /* ── Types ── */
+  var DOC_ORDER = ['sop', 'manual', 'form', 'standard', 'policy', 'alert', 'lesson', 'bulletin', 'software'];
+  function typeInfo(tp) {
+    var t = Object.prototype.hasOwnProperty.call(TYPES, tp) ? TYPES[tp] : null;
+    return { label: (t && t.label) || String(tp || ''), mark: (t && t.mark) || String(tp || '').slice(0, 4).toUpperCase() };
+  }
+  var HOT = { alert: 1, incident: 1 };
+  var CASE_TYPES = CASES ? CASES.TYPES : [];
+  function caseTypeOf(v) { return /^case:/.test(v) ? v.slice(5) : null; }
+
+  /* ── State, from the address so a link or a bookmark reopens it ── */
+  var BLANK = { q: '', content: 'all', segment: 'all', status: 'all', type: 'all', dateFrom: '', dateTo: '' };
+  var state = {}; Object.keys(BLANK).forEach(function (k) { state[k] = BLANK[k]; });
+  var limits = { docs: 40, cases: 40 };
+  var STATUS_OK = { all: 1, current: 1, 'under-review': 1, draft: 1, overdue: 1 };
+  (function readURL() {
+    var P = new URLSearchParams(location.search);
+    state.q = String(P.get('q') || '').slice(0, 200);
+    var c = P.get('content'); if (c === 'docs' || c === 'cases') state.content = c;
+    var a = P.get('area'); if (a && Object.prototype.hasOwnProperty.call(SEGS, a)) state.segment = a;
+    var s = P.get('status'); if (s && STATUS_OK[s]) state.status = s;
+    var t = P.get('type');
+    if (t && (DOC_ORDER.indexOf(t) !== -1 && TYPES[t] || (caseTypeOf(t) && CASE_TYPES.some(function (x) { return x.key === caseTypeOf(t); })))) state.type = t;
+  })();
+  function writeURL() {
+    var p = new URLSearchParams();
+    if (state.q) p.set('q', state.q);
+    if (state.content !== 'all') p.set('content', state.content);
+    if (state.segment !== 'all') p.set('area', state.segment);
+    if (state.type !== 'all') p.set('type', state.type);
+    if (state.status !== 'all') p.set('status', state.status);
+    var s = p.toString(), next = location.pathname + (s ? '?' + s : '') + location.hash;
+    if (next !== location.pathname + location.search + location.hash) { try { history.replaceState(null, '', next); } catch (e) {} }
+  }
+
+  /* ── Words ── */
+  function tokensOf(q) {
+    var seen = {};
+    return low(q).split(/\s+/).map(function (t) { return t.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, ''); })
+      .filter(function (t) { if (!t || seen[t]) return false; seen[t] = 1; return true; });
+  }
+  // Marks every place a word was found, on the raw text, then escapes it, so
+  // a word can never land inside an entity or a tag.
+  function hl(raw, toks) {
+    var s = String(raw == null ? '' : raw);
+    if (!toks || !toks.length || !s) return esc(s);
+    var l = s.toLowerCase(), r = [];
+    toks.forEach(function (t) { var i = 0; while (t && (i = l.indexOf(t, i)) !== -1) { r.push([i, i + t.length]); i += t.length; } });
+    if (!r.length) return esc(s);
+    r.sort(function (a, b) { return a[0] - b[0]; });
+    var m = [r[0]];
+    for (var k = 1; k < r.length; k++) { var last = m[m.length - 1]; if (r[k][0] <= last[1]) last[1] = Math.max(last[1], r[k][1]); else m.push(r[k]); }
+    var out = '', at = 0;
+    m.forEach(function (x) { out += esc(s.slice(at, x[0])) + '<mark>' + esc(s.slice(x[0], x[1])) + '</mark>'; at = x[1]; });
+    return out + esc(s.slice(at));
+  }
+
+  /* ── Documents ── */
+  function caseKeys() {
+    var out = {};
+    if (STORE) STORE.all().forEach(function (d) { if (d && d.card && typeof d.card === 'object') out[d.docNumber + '@' + d.revision] = 1; });
+    return out;
+  }
+  function docPool() {
+    var keys = caseKeys();
+    return (window.TAQA_SEARCH_INDEX || []).filter(function (d) {
+      var t = TYPES[d.tp];
+      return !(t && t.cardOnly) && !keys[d.n + '@' + d.rev];
+    });
+  }
+  function docPasses(d) {
+    if (state.segment !== 'all' && d.s !== state.segment) return false;
+    if (state.type !== 'all' && (caseTypeOf(state.type) || d.tp !== state.type)) return false;
+    if (state.status === 'overdue') { if (!d.ov) return false; }
+    else if (state.status === 'draft') { if (d.st !== 'draft' && d.st !== 'approved') return false; }
+    else if (state.status !== 'all' && d.st !== state.status) return false;
+    if (state.dateFrom && (!d.iss || d.iss < state.dateFrom)) return false;
+    if (state.dateTo && (!d.iss || d.iss > state.dateTo)) return false;
     return true;
   }
-
-  // The one search. Filters narrow the register first (AND); free text then
-  // scores what is left: an exact title or document number outranks a
-  // start-of-title match, which outranks a substring, which outranks a hit
-  // that only lands in the segment name or the type.
-  function searchDocs(q){
-    if(!window.TAQA_SEARCH_INDEX)return [];
-    var ql=(q||'').trim().toLowerCase();
-    var pool=TAQA_SEARCH_INDEX.filter(matchesFilters);
-    if(!ql)return pool;
-    return pool.map(function(d){
-      var sc=0,tl=d.t.toLowerCase(),sl=d.sn.toLowerCase(),tp=d.tp.toLowerCase(),nl=(d.n||'').toLowerCase();
-      if(tl===ql)sc+=10;
-      else if(tl.indexOf(ql)===0)sc+=6;
-      else if(tl.indexOf(ql)>-1)sc+=4;
-      if(nl){
-        if(nl===ql)sc+=9;
-        else if(nl.indexOf(ql)===0)sc+=5;
-        else if(nl.indexOf(ql)>-1)sc+=3;
+  var LIVE_RANK = { current: 0, 'under-review': 0, approved: 1, draft: 2, asset: 3 };
+  function inForce(d) { return d.st === 'current' || d.st === 'under-review'; }
+  function searchDocs(q) {
+    var toks = tokensOf(q), phrase = low(q).trim().replace(/\s+/g, ' ');
+    var pool = docPool().filter(docPasses);
+    if (!toks.length) {
+      return pool.slice().sort(function (a, b) {
+        var x = a.iss || '', y = b.iss || '';
+        if (x !== y) return x < y ? 1 : -1;
+        return a.t.localeCompare(b.t);
+      });
+    }
+    var hits = [];
+    pool.forEach(function (d) {
+      var ti = typeInfo(d.tp), title = low(d.t), num = low(d.n), area = low(d.sn), type = low(d.tp + ' ' + ti.label + ' ' + ti.mark);
+      var sc = 0;
+      for (var i = 0; i < toks.length; i++) {
+        var t = toks[i], inT = title.indexOf(t) !== -1, inN = !!num && num.indexOf(t) !== -1, inA = area.indexOf(t) !== -1, inY = type.indexOf(t) !== -1;
+        if (!inT && !inN && !inA && !inY) return;
+        sc += (inT ? 2 : 0) + (inN ? 2 : 0) + (inA ? 1 : 0) + (inY ? 1 : 0);
       }
-      if(sl.indexOf(ql)>-1)sc+=2;
-      if(tp.indexOf(ql)>-1)sc+=1;
-      return{d:d,sc:sc};
-    }).filter(function(x){return x.sc>0;}).sort(function(a,b){return b.sc-a.sc;}).map(function(x){return x.d;});
-  }
-
-  // ── Type-ahead preview under the search box ──
-  var panel=document.getElementById('ir-panel');
-  var inp=document.getElementById('query-input');
-  var timer=null;
-
-  function renderPreview(q){
-    if(!panel||!window.TAQA_SEARCH_INDEX)return;
-    if(!q||q.length<2){panel.classList.remove('open');return;}
-    if(window.TAQA_Track)window.TAQA_Track('search',q);
-    var all=searchDocs(q);
-    var shown=all.slice(0,8);
-    if(!shown.length){panel.classList.remove('open');return;}
-    var html=
-      '<div class="ir-header"><span>Document Matches</span><span>'+
-      (all.length>8?'Top 8 of '+all.length:all.length+' found')+'</span></div>'+
-      shown.map(function(d){
-        var c=Object.prototype.hasOwnProperty.call(TYPE_CFG,d.tp)?TYPE_CFG[d.tp]:{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:d.tp};
-        return '<a class="ir-item" href="'+docHref(d)+'" role="option">'+
-          '<span class="ir-badge" style="background:'+c.bg+';color:'+c.color+'">'+esc(c.label)+'</span>'+
-          '<div class="ir-body">'+
-            '<div class="ir-title">'+highlight(d.t,q)+'</div>'+
-            '<div class="ir-seg">'+esc(d.sn)+statusNote(d)+'</div>'+
-          '</div>'+
-          '<span class="ir-arrow">›</span>'+
-        '</a>';
-      }).join('')+
-      '<div class="ir-footer">Press <strong>Enter</strong> to see all matching documents</div>';
-    panel.innerHTML=html;
-    panel.classList.add('open');
-  }
-
-  if(inp){
-    inp.addEventListener('input',function(){
-      clearTimeout(timer);
-      var q=inp.value.trim();
-      timer=setTimeout(function(){renderPreview(q);},150);
+      if (title === phrase) sc += 10; else if (title.indexOf(phrase) === 0) sc += 6; else if (title.indexOf(phrase) !== -1) sc += 4;
+      if (num) { if (num === phrase) sc += 9; else if (num.indexOf(phrase) === 0) sc += 5; else if (num.indexOf(phrase) !== -1) sc += 3; }
+      hits.push({ d: d, sc: sc });
     });
-    inp.addEventListener('keydown',function(e){
-      if(e.key==='Escape'&&panel){panel.classList.remove('open');}
-    });
+    return hits.sort(function (a, b) {
+      return (b.sc - a.sc) || ((LIVE_RANK[a.d.st] || 0) - (LIVE_RANK[b.d.st] || 0)) || a.d.t.localeCompare(b.d.t);
+    }).map(function (x) { return x.d; });
   }
-
-  document.addEventListener('click',function(e){
-    if(!panel)return;
-    var card=document.querySelector('.search-card');
-    if(card&&card.contains(e.target))return;
-    if(panel.contains(e.target))return;
-    panel.classList.remove('open');
-  });
-
-  // ── Full results, shown below the search card once a search runs ──
-  var chatLog=document.getElementById('chat-log');
-  var welcomeHTML=chatLog?chatLog.innerHTML:'';
-  var RESULT_CAP=40;
-
-  function filterSummary(){
-    var bits=[];
-    if(FILTERS.segment!=='all'){
-      var S=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.segments)||{};
-      bits.push((S[FILTERS.segment]&&S[FILTERS.segment].name)||FILTERS.segment);
-    }
-    if(FILTERS.type!=='all')bits.push(TYPE_CFG[FILTERS.type]?TYPE_CFG[FILTERS.type].fullLabel:FILTERS.type);
-    if(FILTERS.status!=='all'){
-      var labels={current:'Published','under-review':'Under Review',draft:'Draft',overdue:'Review Overdue'};
-      bits.push(labels[FILTERS.status]||FILTERS.status);
-    }
-    if(FILTERS.dateFrom||FILTERS.dateTo)bits.push('issued '+(FILTERS.dateFrom||'any date')+' to '+(FILTERS.dateTo||'any date'));
-    return bits;
-  }
-
-  function resultCardHTML(d){
-    var c=Object.prototype.hasOwnProperty.call(TYPE_CFG,d.tp)?TYPE_CFG[d.tp]:{bg:'var(--brand-soft)',color:'var(--primary-ink)',label:d.tp};
-    var note='';
-    if(d.st&&d.st!=='current'&&d.st!=='asset'){
-      note=d.st==='under-review'?'Under review':d.st==='draft'?'Draft, not yet in force':esc(d.st);
-      if(d.ov)note+=' · review overdue';
-    } else if(d.ov){ note='Review overdue'; }
-    return '<a class="source-card" href="'+docHref(d)+'">'+
-      '<div class="source-card-bar" style="background:'+c.color+'"></div>'+
-      '<div class="source-card-body">'+
-        '<div class="source-card-title">'+esc(d.t)+'</div>'+
-        '<div class="source-card-meta">'+
-          '<span class="source-card-seg">'+esc(d.sn)+(d.n?' · '+esc(d.n):'')+'</span>'+
-          '<span class="source-card-type" style="background:'+c.bg+';border-color:'+c.bg+';color:'+c.color+'">'+esc(c.label)+'</span>'+
-        '</div>'+
-        (note?'<div class="result-note">'+note+'</div>':'')+
-      '</div>'+
-      '<span class="source-card-arrow">›</span>'+
-    '</a>';
-  }
-
   /* An exact document number or legacy ID whose record is withdrawn (PI-22).
      Withdrawn records stay out of the search pool (TQ-QHSE-S001 4.6), but
      someone holding an old printed copy who types its number must be told
@@ -1042,195 +656,451 @@ document.addEventListener('click',function(e){
      a restricted withdrawn record stays not found for an Employee (BD-03).
      Nothing here is shown as current. Where the register names a successor
      it holds no record of, it says so and points at SCORE (BD-01). */
-  function exactWithdrawn(q){
-    var k=String(q||'').trim().toUpperCase();
-    if(!k||typeof TAQA_STORE==='undefined')return [];
-    var ok=function(d){ return !TAQA_STORE.readable||TAQA_STORE.readable(d); };
-    var all=TAQA_STORE.all();
-    var hits=all.filter(function(d){
-      return (String(d.docNumber||'').toUpperCase()===k||String(d.legacyId||'').toUpperCase()===k)&&ok(d);
+  function exactWithdrawn(q) {
+    var k = String(q || '').trim().toUpperCase();
+    if (!k || !STORE) return [];
+    var ok = function (d) { return !STORE.readable || STORE.readable(d); };
+    var all = STORE.all();
+    var hits = all.filter(function (d) {
+      return (String(d.docNumber || '').toUpperCase() === k || String(d.legacyId || '').toUpperCase() === k) && ok(d);
     });
-    if(!hits.length)return [];
-    var nums={};hits.forEach(function(d){ if(d.docNumber)nums[d.docNumber]=1; });
-    var out=[];
-    Object.keys(nums).forEach(function(n){
-      var fam=all.filter(function(d){ return d.docNumber===n&&ok(d); });
+    if (!hits.length) return [];
+    var nums = {}; hits.forEach(function (d) { if (d.docNumber) nums[d.docNumber] = 1; });
+    var out = [];
+    Object.keys(nums).forEach(function (n) {
+      var fam = all.filter(function (d) { return d.docNumber === n && ok(d); });
       // A revision this role may open that is in force: search already shows it.
-      if(fam.some(function(d){ return d.status==='current'||d.status==='under-review'; }))return;
-      var w=fam.filter(function(d){ return d.status==='superseded'||d.status==='obsolete'; })
-        .sort(function(a,b){ return parseFloat(b.revision||0)-parseFloat(a.revision||0); })[0];
-      if(w)out.push(w);
+      if (fam.some(function (d) { return d.status === 'current' || d.status === 'under-review'; })) return;
+      var w = fam.filter(function (d) { return d.status === 'superseded' || d.status === 'obsolete'; })
+        .sort(function (a, b) { return parseFloat(b.revision || 0) - parseFloat(a.revision || 0); })[0];
+      if (w) out.push(w);
     });
     return out;
   }
-  function withdrawnCardHTML(d){
-    var S=(typeof TAQA_DOC_LOOKUPS!=='undefined'&&TAQA_DOC_LOOKUPS.segments)||{};
-    var sn=(S[d.segment]&&S[d.segment].name)||d.segment||'';
-    var rev=(TAQA_STORE.revisionLabel?TAQA_STORE.revisionLabel(d):'Rev '+(d.revision||''));
-    var state=d.status==='superseded'?'Superseded':(d.cancelled?'Cancelled':'Withdrawn');
-    var next=d.status==='superseded'
-      ? (d.supersededBy
-          ? 'The register names '+esc(d.supersededBy)+' as its replacement but holds no record of it here. Verify the current revision in SCORE before use.'
-          : 'The register holds no revision of it in force. Verify the current revision in SCORE before use.')
-      : 'It is no longer in force and has no replacement in the register. Check with QMS or SCORE before relying on any copy.';
-    var href='viewer.html?doc='+encodeURIComponent(d.docNumber||'')+(d.revision?'&rev='+encodeURIComponent(d.revision):'')+
-      '&seg='+encodeURIComponent(d.segment||'')+'&type='+encodeURIComponent(d.docType||'');
-    return '<a class="source-card source-card-withdrawn" href="'+href+'" data-withdrawn="'+esc(d.status)+'">'+
-      '<div class="source-card-bar" style="background:var(--stop-ink,#C8102E)"></div>'+
-      '<div class="source-card-body">'+
-        '<div class="source-card-title">'+esc(d.title)+'</div>'+
-        '<div class="source-card-meta"><span class="source-card-seg">'+esc(sn)+' · '+esc(d.docNumber||'')+' · '+esc(rev)+'</span></div>'+
-        '<div class="result-note result-note-withdrawn"><b>'+state+'. Do not use.</b> This document exists, but the matching revision is '+state.toLowerCase()+'. '+next+'</div>'+
-      '</div>'+
-      '<span class="source-card-arrow">›</span>'+
-    '</a>';
-  }
-  function withdrawnBlock(list){
-    if(!list.length)return '';
-    return '<div class="sources-block withdrawn-block">'+
-      '<div class="sources-label">Withdrawn, not in force</div>'+
-      '<div class="sources-list">'+list.map(withdrawnCardHTML).join('')+'</div></div>';
-  }
 
-  function renderEmptyState(q){
-    var qText=q?' match "<strong>'+esc(q)+'</strong>"':' match the selected filters';
-    return '<div class="welcome-state">'+
-      '<div class="welcome-icon">⌕</div>'+
-      '<h3>No Documents Found</h3>'+
-      '<p>No documents in the register'+qText+'. Try a shorter search term, check the document number, or '+
-      '<span class="empty-state-suggest"><button type="button" onclick="clearAllFilters()">clear all filters</button></span>.</p>'+
-    '</div>';
-  }
-
-  function renderFullResults(q){
-    if(!chatLog)return;
-    if(!window.TAQA_SEARCH_INDEX){chatLog.innerHTML=welcomeHTML;return;}
-    var results=searchDocs(q);
-    var gone=exactWithdrawn(q);
-    if(!results.length&&gone.length){
-      chatLog.innerHTML=(q?'<div class="msg-user"><div class="bubble">'+esc(q)+'</div></div>':'')+
-        '<div class="msg-ai"><div class="msg-ai-avatar">✦</div><div class="bubble">'+
-        '<h4>Search Results</h4><p>No document in force matches "'+esc(q)+'". '+
-        (gone.length===1?'One withdrawn document carries this number:':'Withdrawn documents carry this number:')+'</p>'+
-        withdrawnBlock(gone)+'</div></div>';
-      return;
-    }
-    if(!results.length){ chatLog.innerHTML=renderEmptyState(q); return; }
-    var shown=results.slice(0,RESULT_CAP);
-    var bits=filterSummary();
-    var qLine=q?'"'+esc(q)+'"':'the selected filters';
-    var filterLine=bits.length?' ('+bits.map(esc).join(', ')+')':'';
-    var userBubble=q?'<div class="msg-user"><div class="bubble">'+esc(q)+'</div></div>':'';
-    chatLog.innerHTML=userBubble+
-      '<div class="msg-ai"><div class="msg-ai-avatar">✦</div><div class="bubble">'+
-      '<h4>Search Results</h4>'+
-      '<p>'+results.length+' document'+(results.length===1?'':'s')+' in the register match '+qLine+filterLine+'.'+
-      (results.length>RESULT_CAP?' Showing the first '+RESULT_CAP+'; narrow the search or add a filter for fewer, more exact matches.':'')+'</p>'+
-      withdrawnBlock(gone)+
-      '<div class="sources-block">'+
-        '<div class="sources-label">'+results.length+' Document'+(results.length===1?'':'s')+'</div>'+
-        '<div class="sources-list">'+shown.map(resultCardHTML).join('')+'</div>'+
-      '</div>'+
-      '</div></div>';
-  }
-
-  window.submitQuery=function submitQuery(){
-    var q=inp?inp.value.trim():'';
-    if(!q&&activeFilterCount()===0)return;
-    if(panel)panel.classList.remove('open');
-    if(inp){ inp.value=''; inp.style.height='auto'; }
-    var cc=document.getElementById('char-count');
-    if(cc)cc.textContent='0 / 500';
-
-    var thinking=document.getElementById('thinking-block');
-    var btn=document.getElementById('send-btn');
-    if(thinking)thinking.classList.add('active');
-    if(btn){btn.classList.add('loading');btn.disabled=true;}
-
-    // A brief, real pause: this is a register lookup, not a generated answer,
-    // so it stays short rather than pretending to think something over.
-    setTimeout(function(){
-      if(thinking)thinking.classList.remove('active');
-      if(btn){btn.classList.remove('loading');btn.disabled=false;}
-      renderFullResults(q);
-      if(chatLog)chatLog.scrollIntoView({behavior:'smooth',block:'nearest'});
-    }, 220);
-  };
-
-  // ── Filters: quick segment chips, the panel's own controls, and the drawer ──
-  function syncSegmentChips(){
-    document.querySelectorAll('.seg-filters .filter-chip[data-seg]').forEach(function(c){
-      c.classList.toggle('active', c.getAttribute('data-seg')===FILTERS.segment);
+  /* ── Field cases ── */
+  function caseDay(e) { return e.publishedDate || (e.record && e.record.issueDate) || ''; }
+  function casePool() { return CASES ? CASES.all({ includeUnreleased: true }).filter(function (e) { return e.source !== 'register'; }) : []; }
+  function searchCases(q) {
+    if (!CASES) return [];
+    if (state.type !== 'all' && !caseTypeOf(state.type)) return [];
+    var f = { source: 'case', includeUnreleased: true };
+    if (state.segment !== 'all') f.area = state.segment;
+    if (caseTypeOf(state.type)) f.type = caseTypeOf(state.type);
+    return CASES.match(f, q).filter(function (e) {
+      var rs = e.record ? e.record.status : null;
+      if (state.status === 'current' && !(e.released && (!rs || rs === 'current'))) return false;
+      if (state.status === 'under-review' && rs !== 'under-review') return false;
+      if (state.status === 'draft' && e.released) return false;
+      if (state.status === 'overdue' && !(e.record && e.record.reviewOverdue)) return false;
+      var day = caseDay(e);
+      if (state.dateFrom && (!day || day < state.dateFrom)) return false;
+      if (state.dateTo && (!day || day > state.dateTo)) return false;
+      return true;
     });
   }
-  window.setSegmentFilter=function(segId){
-    FILTERS.segment=segId;
-    if(segSelect)segSelect.value=segId;
-    syncSegmentChips();
-    handleFilterChange();
-  };
-  document.querySelectorAll('.seg-filters .filter-chip[data-seg]').forEach(function(chip){
-    chip.addEventListener('click',function(){ window.setSegmentFilter(chip.getAttribute('data-seg')); });
-  });
 
-  function handleFilterChange(){
-    updateFilterBadge();
-    var q=inp?inp.value.trim():'';
-    renderPreview(q);
-    if(q||activeFilterCount()>0){ renderFullResults(q); }
-    else if(chatLog){ chatLog.innerHTML=welcomeHTML; }
+  /* ── Rows ── */
+  function chip(cls, text) { return '<span class="chip ' + cls + '">' + esc(text) + '</span>'; }
+  function docHref(d) {
+    // A draft result is a revision in progress: open that revision, not the
+    // one in force under the same number (PR 2A-2).
+    return 'viewer.html?doc=' + encodeURIComponent(d.n || '') + (d.st === 'draft' && d.rev ? '&rev=' + encodeURIComponent(d.rev) : '') +
+      '&seg=' + encodeURIComponent(d.s) + '&type=' + encodeURIComponent(d.tp) + '&title=' + encodeURIComponent(d.t);
+  }
+  function recFor(d) {
+    if (!STORE || !d.n) return null;
+    try { return (d.rev && STORE.findRev(d.n, d.rev)) || null; } catch (e) { return null; }
+  }
+  function docRow(d, toks, i, anim) {
+    var ti = typeInfo(d.tp), rec = recFor(d), meta = [], state_ = [];
+    if (d.n) meta.push('<span class="r-num">' + hl(d.n, toks) + '</span>');
+    meta.push('<span class="r-area">' + hl(d.sn, toks) + '</span>');
+    if (d.rev && d.st !== 'asset') meta.push('<span class="r-rev">' + esc(rec && STORE.revisionLabel ? STORE.revisionLabel(rec) : 'Rev ' + d.rev) + '</span>');
+    if (d.iss) meta.push('<span class="r-date">Issued ' + esc(dayLabel(d.iss)) + '</span>');
+    var live = d.st === 'current' || d.st === 'under-review';
+    if (live && !d.ov && rec && rec.nextReviewDate) meta.push('<span class="r-review">Review by ' + esc(monthLabel(rec.nextReviewDate)) + '</span>');
+    if (rec && rec.classification && rec.classification !== 'internal') meta.push('<span class="r-cls">' + esc(rec.classification.charAt(0).toUpperCase() + rec.classification.slice(1)) + '</span>');
+    if (d.st === 'current') state_.push(chip('ok', 'In force'));
+    else if (d.st === 'under-review') state_.push(chip('ok', 'In force, under review'));
+    else if (d.st === 'draft') state_.push(chip('info', 'Draft, not yet in force'));
+    else if (d.st === 'approved') state_.push(chip('info', 'Approved, not yet in force'));
+    else if (d.st === 'asset') state_.push(chip('plain', 'Asset'));
+    if (d.ov) state_.push(chip('warn', 'Review overdue'));
+    return '<li><a class="result' + (anim ? ' in' : '') + '" href="' + esc(docHref(d)) + '"' + (anim ? ' style="animation-delay:' + Math.min(i, 10) * 22 + 'ms"' : '') + ' data-kind="doc">' +
+      '<span class="r-mark' + (HOT[d.tp] ? ' hot' : '') + '" aria-hidden="true">' + esc(ti.mark) + '</span>' +
+      '<span class="r-body"><span class="r-title">' + hl(d.t, toks) + '</span>' +
+      '<span class="vh">, ' + esc(ti.label) + '.</span>' +
+      '<span class="r-meta">' + meta.join('') + '</span></span>' +
+      '<span class="r-state">' + state_.join('') + '</span></a></li>';
+  }
+  var CASE_CHIP = { published: 'ok', 'with-qms': 'info', 'with-director': 'info', approved: 'info' };
+  function caseRow(e, toks, i, anim) {
+    var meta = [], facts = [];
+    if (e.docNumber) meta.push('<span class="r-num">' + hl(e.docNumber, toks) + '</span>');
+    meta.push('<span class="r-area">' + hl(e.areaName, toks) + '</span>');
+    if (e.location) facts.push('<span class="r-loc">' + hl(e.location, toks) + '</span>');
+    if (e.services && e.services.length) {
+      var sv = e.services.slice(0, 3).join(', ') + (e.services.length > 3 ? ' +' + (e.services.length - 3) + ' more' : '');
+      facts.push('<span class="r-svc">' + hl(sv, toks) + '</span>');
+    }
+    if (e.holeSize) facts.push('<span class="r-hole">' + esc(CASES.holeLabel(e.holeSize)) + '</span>');
+    var when = e.incidentDate ? dayLabel(e.incidentDate) : monthLabel(e.eventMonth);
+    if (when) facts.push('<span class="r-when">' + esc(when) + '</span>');
+    if (e.ending) facts.push('<span class="r-end">Ended: ' + esc(e.ending) + '</span>');
+    var chips = chip(CASE_CHIP[e.status] || 'plain', e.statusLabel || 'Published');
+    if (e.salesReady) chips += chip('plain', 'Sales-ready');
+    return '<li><a class="result is-case' + (anim ? ' in' : '') + '" href="' + esc(e.url) + '"' + (anim ? ' style="animation-delay:' + Math.min(i, 10) * 22 + 'ms"' : '') + ' data-kind="case">' +
+      '<span class="r-mark case' + (HOT[e.type] ? ' hot' : '') + '" aria-hidden="true">' + esc(e.letter || typeInfo(e.type).mark) + '</span>' +
+      '<span class="r-body"><span class="r-kicker">Field case · ' + esc(e.typeLabel) + '</span>' +
+      '<span class="r-title">' + hl(e.title, toks) + '</span>' +
+      '<span class="r-meta">' + meta.join('') + '</span>' +
+      (facts.length ? '<span class="r-meta r-facts">' + facts.join('') + '</span>' : '') + '</span>' +
+      '<span class="r-state">' + chips + '</span></a></li>';
+  }
+  function withdrawnRow(d) {
+    var sn = (SEGS[d.segment] && SEGS[d.segment].name) || d.segment || '';
+    var rev = (STORE.revisionLabel ? STORE.revisionLabel(d) : 'Rev ' + (d.revision || ''));
+    var st = d.status === 'superseded' ? 'Superseded' : (d.cancelled ? 'Cancelled' : 'Withdrawn');
+    var next = d.status === 'superseded'
+      ? (d.supersededBy
+          ? 'The register names ' + esc(d.supersededBy) + ' as its replacement but holds no record of it here. Verify the current revision in SCORE before use.'
+          : 'The register holds no revision of it in force. Verify the current revision in SCORE before use.')
+      : 'It is no longer in force and has no replacement in the register. Check with QMS or SCORE before relying on any copy.';
+    var href = 'viewer.html?doc=' + encodeURIComponent(d.docNumber || '') + (d.revision ? '&rev=' + encodeURIComponent(d.revision) : '') +
+      '&seg=' + encodeURIComponent(d.segment || '') + '&type=' + encodeURIComponent(d.docType || '');
+    return '<li><a class="result result-withdrawn" href="' + esc(href) + '" data-withdrawn="' + esc(d.status) + '">' +
+      '<span class="r-mark stop" aria-hidden="true">' + esc(typeInfo(d.docType).mark) + '</span>' +
+      '<span class="r-body"><span class="r-title">' + esc(d.title) + '</span>' +
+      '<span class="r-meta"><span class="r-area">' + esc(sn) + '</span><span class="r-num">' + esc(d.docNumber || '') + '</span><span class="r-rev">' + esc(rev) + '</span></span>' +
+      '<span class="r-note r-note-withdrawn"><b>' + st + '. Do not use.</b> This document exists, but the matching revision is ' + st.toLowerCase() + '. ' + next + '</span></span>' +
+      '<span class="r-state">' + chip('stop', st) + '</span></a></li>';
+  }
+  function group(kind, title, count, rows, opts) {
+    opts = opts || {};
+    return '<section class="sr-group sr-' + kind + '" data-kind="' + kind + '" aria-labelledby="g-' + kind + '">' +
+      '<header class="sr-ghead"><h3 id="g-' + kind + '">' + esc(title) + '</h3>' + (count != null ? '<span class="sr-gn">' + count + '</span>' : '') +
+      (opts.action ? '<span class="sr-gact">' + opts.action + '</span>' : '') +
+      (opts.sub ? '<p class="sr-gsub">' + opts.sub + '</p>' : '') + '</header>' +
+      (rows ? '<ol class="sr-list">' + rows + '</ol>' : '') + (opts.foot || '') + '</section>';
   }
 
-  if(segSelect)segSelect.addEventListener('change',function(){FILTERS.segment=segSelect.value;syncSegmentChips();handleFilterChange();});
-  if(typeSelect)typeSelect.addEventListener('change',function(){FILTERS.type=typeSelect.value;handleFilterChange();});
-  if(statusSelect)statusSelect.addEventListener('change',function(){FILTERS.status=statusSelect.value;handleFilterChange();});
-  if(dateFromInput)dateFromInput.addEventListener('change',function(){FILTERS.dateFrom=dateFromInput.value;handleFilterChange();});
-  if(dateToInput)dateToInput.addEventListener('change',function(){FILTERS.dateTo=dateToInput.value;handleFilterChange();});
-
-  window.clearAllFilters=function(){
-    FILTERS={segment:'all',status:'all',type:'all',dateFrom:'',dateTo:''};
-    if(segSelect)segSelect.value='all';
-    if(typeSelect)typeSelect.value='all';
-    if(statusSelect)statusSelect.value='all';
-    if(dateFromInput)dateFromInput.value='';
-    if(dateToInput)dateToInput.value='';
-    syncSegmentChips();
-    updateFilterBadge();
-    var q=inp?inp.value.trim():'';
-    renderPreview(q);
-    if(q){ renderFullResults(q); }
-    else if(chatLog){ chatLog.innerHTML=welcomeHTML; }
-  };
-
-  window.openFilters=function(){
-    if(drawer)drawer.classList.add('open');
-    if(scrim)scrim.classList.add('open');
-    if(triggerBtn)triggerBtn.setAttribute('aria-expanded','true');
-  };
-  window.closeFilters=function(){
-    if(drawer)drawer.classList.remove('open');
-    if(scrim)scrim.classList.remove('open');
-    if(triggerBtn)triggerBtn.setAttribute('aria-expanded','false');
-  };
-  window.toggleFilters=function(){
-    if(drawer&&drawer.classList.contains('open'))window.closeFilters();
-    else window.openFilters();
-  };
-  document.addEventListener('keydown',function(e){
-    if(e.key==='Escape')window.closeFilters();
-  });
-
-  syncSegmentChips();
-  updateFilterBadge();
-
-  // A prefilled query (?q=) can only run now that submitQuery is real.
-  if(typeof urlQ!=='undefined'&&urlQ){
-    if(inp)inp.value=urlQ;
-    setTimeout(window.submitQuery,300);
+  /* ── Filters ── */
+  var segSel = $('f-segment'), typeSel = $('f-type'), statusSel = $('f-status'), fromIn = $('f-date-from'), toIn = $('f-date-to');
+  (function fillSelects() {
+    var FAM = [['segment', 'Operational segments'], ['function', 'Corporate functions'], ['product', 'Products and technology'], ['company', 'Company']];
+    var opts = '<option value="all">All areas</option>';
+    FAM.forEach(function (f) {
+      var ids = Object.keys(SEGS).filter(function (k) { return SEGS[k].group === f[0]; })
+        .sort(function (a, b) { return String(SEGS[a].name).localeCompare(String(SEGS[b].name)); });
+      if (ids.length) opts += '<optgroup label="' + esc(f[1]) + '">' + ids.map(function (k) { return '<option value="' + esc(k) + '">' + esc(SEGS[k].name || k) + '</option>'; }).join('') + '</optgroup>';
+    });
+    segSel.innerHTML = opts;
+    var t = '<option value="all">All types</option><optgroup label="Documents">' +
+      DOC_ORDER.filter(function (k) { return TYPES[k]; }).map(function (k) { return '<option value="' + k + '">' + esc(TYPES[k].label) + '</option>'; }).join('') + '</optgroup>';
+    if (CASE_TYPES.length) t += '<optgroup label="Field cases">' + CASE_TYPES.map(function (x) { return '<option value="case:' + esc(x.key) + '">' + esc(x.label) + '</option>'; }).join('') + '</optgroup>';
+    typeSel.innerHTML = t;
+  })();
+  function activeFilters() {
+    var out = [];
+    if (state.segment !== 'all') out.push({ k: 'segment', label: 'Area', value: (SEGS[state.segment] && SEGS[state.segment].name) || state.segment });
+    if (state.type !== 'all') {
+      var ct = caseTypeOf(state.type), lbl = ct ? (CASE_TYPES.filter(function (x) { return x.key === ct; })[0] || {}).label : typeInfo(state.type).label;
+      out.push({ k: 'type', label: 'Type', value: lbl || state.type });
+    }
+    if (state.status !== 'all') out.push({ k: 'status', label: 'Status', value: statusSel.options[statusSel.selectedIndex] ? statusSel.options[statusSel.selectedIndex].text : state.status });
+    if (state.dateFrom) out.push({ k: 'dateFrom', label: 'Issued from', value: dayLabel(state.dateFrom) });
+    if (state.dateTo) out.push({ k: 'dateTo', label: 'Issued to', value: dayLabel(state.dateTo) });
+    return out;
   }
+  function syncControls() {
+    segSel.value = state.segment; typeSel.value = state.type; statusSel.value = state.status;
+    fromIn.value = state.dateFrom; toIn.value = state.dateTo;
+    [segSel, typeSel, statusSel].forEach(function (s) { s.classList.toggle('on', s.value !== 'all'); });
+    [fromIn, toIn].forEach(function (s) { s.classList.toggle('on', !!s.value); });
+    document.querySelectorAll('#sr-content input').forEach(function (r) { r.checked = r.value === state.content; });
+    var n = activeFilters().length;
+    ['filters-badge', 'filters-badge-mini'].forEach(function (id) { var b = $(id); b.textContent = n; b.hidden = !n; });
+    $('filters-clear-btn').disabled = !n;
+  }
+
+  /* ── Painting ── */
+  var list = $('results-list'), countEl = $('result-count'), input = $('query-input');
+  var EXAMPLES = ['Well shut-in', 'BHA', 'H2S', 'Pressure test', 'Nitrogen', 'Cement slurry', 'Permit to work', 'Stuck pipe', 'Wireline', 'Jar', 'Lessons learned'];
+  function examples() {
+    return EXAMPLES.filter(function (q) { return searchDocs(q).length + searchCases(q).length > 0; }).slice(0, 7);
+  }
+  function stats() {
+    try {
+      // A released field case is a register record in force too; it is
+      // counted once, as a case, never as a document as well.
+      // Counted from the same list the results come from, so the figure
+      // here and the "(N in force)" in the count line are the same number.
+      var rel = CASES ? CASES.released() : [];
+      $('st-docs').textContent = docPool().filter(inForce).length;
+      $('st-cases').textContent = rel.filter(function (e) { return e.source !== 'register'; }).length;
+      $('st-areas').textContent = STORE ? Object.keys(SEGS).filter(function (k) { return STORE.area(k).live > 0; }).length : 0;
+    } catch (e) {}
+  }
+  function idleView(docsAll, casesAll) {
+    var ex = examples(), html = '';
+    if (ex.length) html += '<div class="sr-try"><h3>Try a search</h3><div class="sr-chips">' +
+      ex.map(function (q) { return '<button type="button" data-q="' + esc(q) + '">' + esc(q) + '</button>'; }).join('') + '</div></div>';
+    var day = today();
+    var recent = docsAll.filter(function (d) { return (d.st === 'current' || d.st === 'under-review') && d.iss && d.iss <= day; }).slice(0, 6);
+    if (recent.length) html += group('recent', 'Recently issued', null, recent.map(function (d, i) { return docRow(d, [], i, true); }).join(''),
+      { sub: 'Documents in force you can open, newest issue date first.', action: '<button type="button" data-content="docs">See all ' + docsAll.length + '</button>' });
+    var released = casesAll.filter(function (e) { return e.released; });
+    if (casesAll.length) {
+      html += group('cases', 'Latest field cases', null, casesAll.slice(0, 3).map(function (e, i) { return caseRow(e, [], i, true); }).join(''),
+        { action: '<button type="button" data-content="cases">See all ' + casesAll.length +
+          (casesAll.length - released.length ? ' (' + (casesAll.length - released.length) + ' not yet released)' : '') + '</button>' });
+    } else {
+      html += group('cases', 'Field cases', null, '', { foot: '<p class="sr-note">' + (released.length ? '' :
+        'No field cases have been released yet. Operations file them in the <a href="cases.html">case library</a>; once QMS checks a case and the area’s Director approves it, Search finds it here.') + '</p>' });
+    }
+    return html;
+  }
+  function emptyView(kind) {
+    var q = state.q, nf = activeFilters().length, tips = [];
+    if (kind === 'cases' && !casePool().length) {
+      return '<div class="sr-empty"><h3>No field cases yet</h3><p>No field case has been released for you to read yet, so there is nothing to search here. Operations file cases in the case library; once QMS checks a case and the area’s Director approves it, it can be found here.</p>' +
+        '<div class="sr-acts"><a class="sr-btn pri" href="cases.html">Open the case library</a>' + (q || nf ? '<button type="button" class="sr-btn" data-content="all">Search everything</button>' : '') + '</div></div>';
+    }
+    var what = kind === 'docs' ? 'documents' : kind === 'cases' ? 'field cases' : 'documents or field cases';
+    var h = q ? 'No results for “' + esc(q) + '”' : 'Nothing matches these filters';
+    var p = q
+      ? 'None of the ' + what + ' you can open contains every word of “' + esc(q) + '”' + (nf ? ' with the filters set' : '') + '.'
+      : 'None of the ' + what + ' you can open matches the filters set.';
+    if (q) { tips.push('Check the spelling, or the document number.'); if (tokensOf(q).length > 1) tips.push('Use fewer words: every word has to match.'); }
+    if (nf) tips.push('<button type="button" data-clear="1">Clear the filters</button> (' + plural(nf, 'filter is', 'filters are') + ' set).');
+    if (kind !== 'all') tips.push('<button type="button" data-content="all">Search documents and field cases together</button>.');
+    var tipsHtml = tips.length === 1 ? '<p class="sr-tip">' + tips[0] + '</p>'
+      : tips.length ? '<ul>' + tips.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul>' : '';
+    return '<div class="sr-empty"><h3>' + h + '</h3><p>' + p + '</p>' + tipsHtml + '</div>';
+  }
+  function countLine(n, kind) {
+    var noun = kind === 'docs' ? ['document', 'documents'] : kind === 'cases' ? ['field case', 'field cases'] : ['result', 'results'];
+    return '<b>' + n + '</b> ' + (n === 1 ? noun[0] : noun[1]) + (state.q ? ' for <span class="qq">\u201C' + esc(state.q) + '\u201D</span>' : '');
+  }
+  function activeChips() {
+    var f = activeFilters();
+    if (!f.length) return '';
+    return f.map(function (x) {
+      return '<button type="button" class="sr-fchip" data-unset="' + x.k + '" aria-label="Remove filter: ' + esc(x.label + ' ' + x.value) + '"><span><b>' + esc(x.label) + ':</b> ' + esc(x.value) + '</span>' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>';
+    }).join('') + (f.length > 1 ? '<button type="button" class="sr-linkbtn" data-clear="1">Clear all</button>' : '');
+  }
+
+  var lastAnimKey = '';
+  function render(opts) {
+    opts = opts || {};
+    var anim = !!opts.animate;
+    try { if (window.TAQA_SEARCH && opts.rebuild) TAQA_SEARCH.rebuild(); } catch (e) {}
+    stats();
+    syncControls();
+    var q = state.q, toks = tokensOf(q);
+    var docs = searchDocs(q), cases = searchCases(q), gone = q ? exactWithdrawn(q) : [];
+    $('n-all').textContent = docs.length + cases.length;
+    $('n-docs').textContent = docs.length;
+    $('n-cases').textContent = cases.length;
+    $('filters-done').textContent = 'Show ' + plural(state.content === 'docs' ? docs.length : state.content === 'cases' ? cases.length : docs.length + cases.length, 'result', 'results');
+    $('sr-active').innerHTML = activeChips();
+    $('sr-clear').hidden = !input.value;
+    var nf = activeFilters().length;
+    writeURL();
+
+    // Nothing asked yet: a way in, not an empty page.
+    if (!q && !nf && state.content === 'all') {
+      // Say what each figure holds, so it reads with the figures above it:
+      // documents you can open include ones not in force yet, and your own
+      // cases are listed before they are released.
+      var nIn = docs.filter(inForce).length, nWait = cases.filter(function (e) { return !e.released; }).length;
+      countEl.innerHTML = '<b>' + docs.length + '</b> ' + (docs.length === 1 ? 'document' : 'documents') +
+        (nIn !== docs.length ? ' (' + nIn + ' in force)' : '') + ' and <b>' + cases.length + '</b> ' + (cases.length === 1 ? 'field case' : 'field cases') +
+        (nWait ? ' (' + nWait + ' not yet released)' : '') + ' you can open';
+      list.innerHTML = idleView(docs, cases);
+      return;
+    }
+    var html = '';
+    var showDocs = state.content !== 'cases', showCases = state.content !== 'docs';
+    var total = (showDocs ? docs.length : 0) + (showCases ? cases.length : 0);
+    countEl.innerHTML = countLine(total, state.content);
+
+    if (showDocs && gone.length) {
+      html += group('withdrawn', 'Withdrawn, not in force', null, gone.map(withdrawnRow).join(''),
+        { sub: docs.length || cases.length ? '' : 'No document in force matches “' + esc(q) + '”. ' + (gone.length === 1 ? 'One withdrawn document carries this number:' : 'Withdrawn documents carry this number:') });
+    }
+    if (showCases && cases.length) {
+      var capC = state.content === 'all' && docs.length ? 3 : limits.cases;
+      var shownC = cases.slice(0, capC);
+      var footC = '';
+      if (capC === limits.cases && cases.length > shownC.length) footC = '<div class="sr-more"><span>Showing ' + shownC.length + ' of ' + cases.length + '</span><button type="button" data-more="cases">Show ' + Math.min(40, cases.length - shownC.length) + ' more</button></div>';
+      html += group('cases', 'Field cases', cases.length, shownC.map(function (e, i) { return caseRow(e, toks, i, anim); }).join(''),
+        { action: state.content === 'all' && cases.length > shownC.length ? '<button type="button" data-content="cases">See all ' + cases.length + ' field cases</button>' : '', foot: footC });
+    }
+    if (showDocs && docs.length) {
+      var shownD = docs.slice(0, limits.docs);
+      var footD = docs.length > shownD.length ? '<div class="sr-more"><span>Showing ' + shownD.length + ' of ' + docs.length + '. A word more, or a filter, narrows the list.</span><button type="button" data-more="docs">Show ' + Math.min(40, docs.length - shownD.length) + ' more</button></div>' : '';
+      html += group('docs', 'Documents', docs.length, shownD.map(function (d, i) { return docRow(d, toks, i, anim); }).join(''), { foot: footD });
+    }
+    if (!total && !gone.length) html += emptyView(state.content);
+    else if (!total && gone.length && !showDocs) html += emptyView(state.content);
+    if (state.content === 'all' && !casePool().length && (docs.length || gone.length)) {
+      html += '<p class="sr-foot">No field cases have been released yet, so only documents were searched. <a href="cases.html">Open the case library</a>.</p>';
+    }
+    list.innerHTML = html;
+  }
+
+  /* ── Wiring ── */
+  var timer = null, lastTracked = '';
+  function track(q) {
+    if (!q || q === lastTracked) return;
+    lastTracked = q;
+    try { if (window.TAQA_Track) window.TAQA_Track('search', q); } catch (e) {}
+  }
+  function setQuery(q, commit) {
+    state.q = String(q || '').trim().slice(0, 200);
+    limits.docs = 40; limits.cases = 40;
+    render({ animate: !!commit });
+    if (commit) track(state.q);
+  }
+  input.value = state.q;
+  input.addEventListener('input', function () {
+    $('sr-clear').hidden = !input.value;
+    clearTimeout(timer);
+    timer = setTimeout(function () { if (input.value.trim() !== state.q) setQuery(input.value, false); }, 140);
+  });
+  $('sr-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearTimeout(timer);
+    setQuery(input.value, true);
+    // On a touch screen the keyboard covers the results: put it away.
+    try { if (matchMedia('(hover:none)').matches) input.blur(); } catch (err) {}
+    var r = $('results').getBoundingClientRect();
+    if (r.top > innerHeight * 0.7) $('results').scrollIntoView({ block: 'start' });
+  });
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && input.value) { e.preventDefault(); e.stopPropagation(); input.value = ''; setQuery('', false); }
+    else if (e.key === 'ArrowDown') { var f = list.querySelector('a.result'); if (f) { e.preventDefault(); f.focus(); } }
+  });
+  $('sr-clear').addEventListener('click', function () { input.value = ''; setQuery('', false); input.focus(); });
+  // Up and down walk the list; up from the first row returns to the box.
+  list.addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    var rows = Array.prototype.slice.call(list.querySelectorAll('a.result')), i = rows.indexOf(document.activeElement);
+    if (i === -1) return;
+    e.preventDefault();
+    if (e.key === 'ArrowDown' && rows[i + 1]) rows[i + 1].focus();
+    else if (e.key === 'ArrowUp') (rows[i - 1] || input).focus();
+  });
+  list.addEventListener('click', function (e) {
+    var b = e.target.closest('button, a.result');
+    if (!b) return;
+    if (b.matches('a.result')) { track(state.q); return; }
+    if (b.hasAttribute('data-q')) { input.value = b.getAttribute('data-q'); setQuery(input.value, true); return; }
+    if (b.hasAttribute('data-content')) { setContent(b.getAttribute('data-content'), true); return; }
+    if (b.hasAttribute('data-clear')) { clearAll(); return; }
+    if (b.hasAttribute('data-more')) {
+      var k = b.getAttribute('data-more'), was = list.querySelectorAll('.sr-' + k + ' a.result').length;
+      limits[k] += 40; render();
+      var next = list.querySelectorAll('.sr-' + k + ' a.result')[was];
+      if (next) next.focus();
+    }
+  });
+  $('sr-active').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.hasAttribute('data-clear')) { clearAll(); return; }
+    var k = b.getAttribute('data-unset'); if (!k) return;
+    state[k] = BLANK[k]; render();
+    var nb = $('sr-active').querySelector('button'); (nb || input).focus();
+  });
+  function setContent(c, focus) {
+    state.content = c;
+    // A type belongs to one kind of record: a document type with Field cases
+    // (or the reverse) would only ever show nothing.
+    if (c === 'docs' && caseTypeOf(state.type)) state.type = 'all';
+    if (c === 'cases' && state.type !== 'all' && !caseTypeOf(state.type)) state.type = 'all';
+    limits.docs = 40; limits.cases = 40;
+    render({ animate: true });
+    if (focus) { var r = document.querySelector('#sr-content input:checked'); if (r) r.focus(); }
+  }
+  document.querySelectorAll('#sr-content input').forEach(function (r) {
+    r.addEventListener('change', function () { if (r.checked) setContent(r.value, false); });
+  });
+  segSel.addEventListener('change', function () { state.segment = segSel.value; render(); });
+  typeSel.addEventListener('change', function () {
+    state.type = typeSel.value;
+    if (caseTypeOf(state.type)) state.content = 'cases';
+    else if (state.type !== 'all' && state.content === 'cases') state.content = 'docs';
+    render();
+  });
+  statusSel.addEventListener('change', function () { state.status = statusSel.value; render(); });
+  fromIn.addEventListener('change', function () { state.dateFrom = fromIn.value; render(); });
+  toIn.addEventListener('change', function () { state.dateTo = toIn.value; render(); });
+  function clearAll() {
+    ['segment', 'status', 'type', 'dateFrom', 'dateTo'].forEach(function (k) { state[k] = BLANK[k]; });
+    render();
+  }
+  $('filters-clear-btn').addEventListener('click', clearAll);
+  window.clearAllFilters = clearAll;
+
+  /* ── The filters drawer, below 1100px ── */
+  var drawer = $('filters-drawer'), scrim = $('filters-scrim'), trigger = $('filters-trigger-btn');
+  var mq = matchMedia('(max-width:1099.98px)');
+  function asDrawer() { return mq.matches; }
+  function setDialog() {
+    if (asDrawer()) { drawer.setAttribute('role', 'dialog'); drawer.setAttribute('aria-modal', 'true'); }
+    else { drawer.removeAttribute('role'); drawer.removeAttribute('aria-modal'); closeFilters(true); }
+  }
+  function openFilters() {
+    if (!asDrawer()) { segSel.focus(); return; }
+    drawer.classList.add('open'); scrim.classList.add('open');
+    trigger.setAttribute('aria-expanded', 'true');
+    document.documentElement.classList.add('sr-lock');
+    setTimeout(function () { try { $('filters-close').focus({ preventScroll: true }); } catch (e) {} }, 30);
+  }
+  function closeFilters(silent) {
+    var was = drawer.classList.contains('open');
+    drawer.classList.remove('open'); scrim.classList.remove('open');
+    trigger.setAttribute('aria-expanded', 'false');
+    document.documentElement.classList.remove('sr-lock');
+    if (was && !silent && trigger.offsetParent) trigger.focus();
+  }
+  window.openFilters = openFilters;
+  window.closeFilters = function () { closeFilters(false); };
+  window.toggleFilters = function () { if (drawer.classList.contains('open')) closeFilters(false); else openFilters(); };
+  trigger.addEventListener('click', window.toggleFilters);
+  $('filters-close').addEventListener('click', function () { closeFilters(false); });
+  $('filters-done').addEventListener('click', function () { closeFilters(false); });
+  scrim.addEventListener('click', function () { closeFilters(false); });
+  document.addEventListener('keydown', function (e) {
+    if (!drawer.classList.contains('open')) return;
+    if (e.key === 'Escape') { closeFilters(false); return; }
+    if (e.key !== 'Tab') return;
+    // Keep the keyboard inside the open drawer.
+    var f = Array.prototype.filter.call(drawer.querySelectorAll('button, select, input'), function (el) { return !el.disabled && el.offsetParent !== null; });
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    else if (!drawer.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+  });
+  if (mq.addEventListener) mq.addEventListener('change', setDialog); else if (mq.addListener) mq.addListener(setDialog);
+  setDialog();
+
+  /* ── First paint, then every register or role change ── */
+  var first = true;
+  function paint() {
+    if (first) { first = false; render({ animate: true }); if (state.q) track(state.q); return; }
+    render({ rebuild: true });
+  }
+  if (CASES) CASES.onChange(paint);
+  else if (STORE) STORE.onChange(paint);
+  else paint();
 })();
 </script>
-<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{background:var(--glass);border-color:var(--glass-border-hover);color:var(--primary-ink);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#C8102E;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-taqa-theme="dark"] .bell-badge{border-color:#002326;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}.bell-btn{position:relative;width:36px;height:36px;border-radius:9px;border:1px solid var(--glass-border,rgba(0,0,0,.08));background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--text-muted);}.bell-btn:hover{border-color:var(--primary-ink);color:var(--primary-ink);}.bell-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:50px;background:#C8102E;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;line-height:1;pointer-events:none;}html[data-taqa-theme="dark"] .bell-badge{border-color:#002326;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
 </body>
 </html>

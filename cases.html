@@ -1,0 +1,918 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-taqa-theme="light">
+<head>
+<meta charset="UTF-8">
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>/* Installed app on an iPhone: the status bar is drawn over the page, and iOS keeps taps in that strip for itself, so the bell and the other controls under it could not be tapped. Drawing edge to edge (viewport-fit=cover) turns on the bar's safe-area padding in topbar.css, which drops them below the status bar. A browser tab is left exactly as it was. */(function(){try{if(navigator.standalone||matchMedia('(display-mode: standalone)').matches){var m=document.querySelector('meta[name="viewport"]');if(m&&!/viewport-fit/.test(m.content))m.content+=', viewport-fit=cover';}}catch(e){}})();</script>
+<title>Field Cases, RISE</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#005D63">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RISE">
+<meta name="application-name" content="RISE">
+<link rel="apple-touch-icon" href="icons/rise-apple-touch-icon.png">
+<link rel="icon" href="icons/rise-favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="icons/rise-favicon-16.png" type="image/png" sizes="16x16">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* Case library. A photo band that names the question (what happened before),
+   a search panel that rides over its lower edge, then the cases as cards with
+   the filer's own work beside them. On a phone the filters become a sheet
+   that rises from the bottom, so the page never scrolls sideways. */
+:root{
+  --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;
+  --dark:#F4F4F3;--paper:#FFFFFF;--inset:#F7F6F4;
+  --line:rgba(117,106,97,0.18);--line-soft:rgba(117,106,97,0.10);--line-strong:rgba(117,106,97,0.30);
+  --text:#1E1C1A;--text-muted:#5F564F;--text-light:#756A61;
+  --fill:#E7F3F3;--fill-strong:#005D63;
+  --ok:#00705F;--ok-bg:#E6F3F0;--warn:#8A6200;--warn-bg:#FBF3E0;--stop:#C8102E;--stop-bg:#FCEBEE;
+  --accent:#FF6720;
+  --shadow:0 1px 2px rgba(0,41,44,.05),0 10px 28px -14px rgba(0,41,44,.22);
+  --shadow-3:0 2px 6px rgba(0,41,44,.06),0 28px 56px -24px rgba(0,41,44,.34);
+  --ease:cubic-bezier(.23,1,.32,1);
+  --focus:0 0 0 3px rgba(0,187,182,.45);
+  --arrow:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23857B73' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+html[data-taqa-theme="dark"]{
+  color-scheme:dark;
+  --primary-ink:#00BBB6;--dark:#001314;--paper:#002326;--inset:#001C1E;
+  --line:rgba(0,187,182,0.20);--line-soft:rgba(0,187,182,0.10);--line-strong:rgba(0,187,182,0.30);
+  --text:#C7DBDD;--text-muted:#9CC0C2;--text-light:#7FAFB2;
+  --fill:rgba(0,187,182,0.12);--fill-strong:#00BBB6;
+  --ok:#4FD1B5;--ok-bg:rgba(79,209,181,.12);--warn:#FFB81C;--warn-bg:rgba(255,184,28,.10);--stop:#FF8A94;--stop-bg:rgba(255,138,148,.10);
+  --shadow:0 0 0 1px rgba(0,187,182,.08),0 12px 30px -14px rgba(0,0,0,.6);
+  --shadow-3:0 0 0 1px rgba(0,187,182,.10),0 28px 56px -22px rgba(0,0,0,.7);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;}
+html[data-taqa-theme="dark"] body{background:#001314;}
+.page-wrapper{padding-top:var(--nav-h,64px);min-height:100vh;display:flex;flex-direction:column;}
+.skip{position:absolute;left:-9999px;top:auto;}
+.skip:focus{left:16px;top:calc(var(--nav-h,64px) + 8px);z-index:10001;background:var(--paper);color:var(--primary-ink);padding:8px 14px;border-radius:8px;border:1px solid var(--line);}
+.vh{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+main{display:block;}
+a{color:var(--primary-ink);}
+a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;}
+
+/* ── Hero ── */
+.cl-hero{position:relative;overflow:hidden;isolation:isolate;background:#001314;color:#fff;}
+.cl-photo{position:absolute;inset:-2%;z-index:-3;background:#001314 center 42%/cover no-repeat;
+  animation:clKen 30s ease-in-out infinite alternate;will-change:transform;}
+@keyframes clKen{0%{transform:scale(1) translate(0,0);}50%{transform:scale(1.06) translate(-1%,-.6%);}100%{transform:scale(1.09) translate(.6%,.8%);}}
+.cl-hero::before{content:'';position:absolute;inset:0;z-index:-2;
+  background:linear-gradient(105deg,rgba(0,19,20,.95) 0%,rgba(0,19,20,.86) 52%,rgba(0,19,20,.66) 100%);}
+.cl-hero .th-lines{z-index:-1;}
+.cl-hero-in{max-width:1200px;margin:0 auto;padding:44px 40px 104px;display:grid;
+  grid-template-columns:minmax(0,1fr) auto;gap:28px 48px;align-items:end;}
+.cl-eyebrow{display:flex;align-items:center;gap:10px;font:700 11px/1.3 'Inter',sans-serif;letter-spacing:1.5px;
+  text-transform:uppercase;color:#9FE3DF;margin-bottom:16px;}
+.cl-eyebrow::before{content:'';width:22px;height:2px;border-radius:2px;background:var(--accent);flex:none;}
+.cl-hero h1{font-family:'BwGradual','Urbanist',sans-serif;font-weight:800;font-size:clamp(34px,4.6vw,58px);
+  line-height:1.04;letter-spacing:-.025em;color:#fff;text-wrap:balance;}
+.cl-hero h1 .l1{display:block;}
+.cl-hero h1 .l2{display:block;color:#00BBB6;}
+.cl-hero h1 .l1,.cl-hero h1 .l2{animation:clRise .7s var(--ease) both;}
+.cl-hero h1 .l2{animation-delay:.08s;}
+.cl-lede{margin-top:16px;max-width:62ch;font-size:15.5px;line-height:1.6;color:rgba(255,255,255,.80);animation:clRise .7s var(--ease) .14s both;}
+.cl-cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;animation:clRise .7s var(--ease) .2s both;}
+@keyframes clRise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+.cl-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 20px;border-radius:12px;
+  font:600 14.5px/1 'BwGradual','Urbanist',sans-serif;text-decoration:none;cursor:pointer;border:1px solid transparent;white-space:nowrap;
+  transition:transform .12s var(--ease);-webkit-tap-highlight-color:transparent;}
+.cl-btn:active{transform:scale(.98);}
+.cl-btn svg{width:17px;height:17px;flex:none;}
+.cl-btn.pri{background:#00BBB6;color:#00191B;}
+.cl-btn.pri:hover{background:#9FE3DF;}
+.cl-btn.ghost{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.30);}
+.cl-btn.ghost:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.55);}
+.cl-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(159,227,223,.7);}
+.cl-stats{display:grid;grid-template-columns:repeat(3,minmax(0,128px));gap:0;animation:clRise .7s var(--ease) .24s both;}
+.cl-stat{padding:4px 22px 2px;border-left:1px solid rgba(255,255,255,.18);min-width:0;}
+.cl-stat:first-child{border-left:0;padding-left:0;}
+.cl-stat dd{font:800 34px/1 'BwGradual','Urbanist',sans-serif;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:-.02em;}
+.cl-stat dt{margin-top:8px;font-size:12.5px;line-height:1.35;color:rgba(255,255,255,.74);}
+.cl-stats dl,.cl-stats{margin:0;}
+.cl-stat{display:flex;flex-direction:column-reverse;justify-content:flex-end;}
+
+/* ── Search panel ── */
+.cl-panel{position:relative;z-index:5;max-width:1200px;margin:-68px auto 0;padding:0 40px;}
+.cl-panel-in{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-3);padding:18px 20px 16px;}
+.cl-lbl{display:block;font:600 12.5px/1.3 'Inter',sans-serif;color:var(--text-muted);margin-bottom:6px;}
+.cl-qrow{display:flex;gap:10px;align-items:flex-end;}
+.cl-qfield{flex:1 1 auto;min-width:0;}
+.cl-qbox{position:relative;}
+.cl-qbox svg{position:absolute;left:16px;top:50%;width:18px;height:18px;transform:translateY(-50%);color:var(--text-light);pointer-events:none;}
+#cl-q{width:100%;min-height:52px;padding:0 44px 0 46px;border-radius:14px;border:1px solid var(--line-strong);background:var(--inset);
+  color:var(--text);font:500 16px/1.2 'Inter',sans-serif;}
+#cl-q::placeholder{color:var(--text-light);opacity:1;}
+#cl-q:focus{outline:none;border-color:var(--primary-ink);background:var(--paper);box-shadow:var(--focus);}
+#cl-q::-webkit-search-cancel-button{display:none;}
+.cl-qx{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;border:0;background:transparent;
+  color:var(--text-light);cursor:pointer;display:grid;place-items:center;}
+.cl-qx:hover{background:var(--fill);color:var(--text);}
+.cl-qx svg{position:static;transform:none;width:14px;height:14px;}
+.cl-qx[hidden]{display:none;}
+.cl-fbar{display:none;}
+#cl-q:placeholder-shown{padding-right:14px;}
+.cl-flt-head,.cl-flt-foot,.cl-scrim{display:none;}
+.cl-grid5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:14px;}
+.cl-field{min-width:0;}
+.cl-field select{width:100%;min-height:44px;padding:0 34px 0 12px;border-radius:10px;border:1px solid var(--line-strong);
+  background:var(--paper) var(--arrow) no-repeat right 12px center;-webkit-appearance:none;appearance:none;
+  color:var(--text);font:500 14px/1.2 'Inter',sans-serif;text-overflow:ellipsis;cursor:pointer;}
+.cl-field select.on{border-color:var(--primary-ink);background-color:var(--fill);font-weight:600;}
+.cl-row2{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px 28px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line-soft);}
+.cl-ended{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;min-width:0;}
+.cl-ended[hidden]{display:none;}
+.cl-ended .cl-lbl{margin:0 4px 0 0;}
+.cl-chips{display:flex;flex-wrap:wrap;gap:8px;min-width:0;}
+.cl-chips .th-chip{min-height:36px;}
+.cl-chips .th-chip[disabled]{opacity:.55;cursor:default;}
+.cl-seg{border:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0;}
+.cl-seg legend{float:left;font:600 12.5px/1.3 'Inter',sans-serif;color:var(--text-muted);margin-right:4px;}
+.cl-seg-g{display:inline-flex;flex-wrap:wrap;gap:2px;padding:3px;border-radius:12px;background:var(--inset);border:1px solid var(--line-soft);}
+.cl-seg-o{position:relative;display:inline-flex;}
+.cl-seg-o input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;}
+.cl-seg-o span{display:inline-flex;align-items:center;min-height:36px;padding:0 13px;border-radius:9px;font:600 13px/1.1 'Inter',sans-serif;color:var(--text-muted);white-space:nowrap;}
+.cl-seg-o input:hover + span{color:var(--text);}
+.cl-seg-o input:checked + span{background:var(--paper);color:var(--primary-ink);box-shadow:0 1px 2px rgba(0,41,44,.12),0 0 0 1px var(--line);}
+html[data-taqa-theme="dark"] .cl-seg-o input:checked + span{background:#003A3D;}
+.cl-seg-o input:focus-visible + span{outline:2px solid var(--primary-ink);outline-offset:1px;}
+.cl-note{margin-top:12px;font-size:13px;line-height:1.5;color:var(--text-muted);}
+.cl-note[hidden]{display:none;}
+
+/* ── Results and the filer's own work ── */
+.cl-body{max-width:1200px;width:100%;margin:0 auto;padding:30px 40px 80px;display:grid;
+  grid-template-columns:minmax(0,1fr) 320px;grid-template-rows:auto auto 1fr;gap:24px 28px;align-items:start;}
+.cl-results{grid-column:1;grid-row:1 / span 3;min-width:0;}
+.cl-aside{grid-column:2;min-width:0;}
+.cl-aside[hidden]{display:none;}
+#cl-mine{grid-row:1;}
+#cl-route{grid-row:2;}
+.cl-rhead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px;margin-bottom:16px;}
+.cl-mine-jump{display:none;}
+@media(max-width:1023px){
+  .cl-mine-jump:not([hidden]){display:block;margin:-6px 0 14px;font-size:13px;line-height:1.5;color:var(--text-muted);font-variant-numeric:tabular-nums;}
+  .cl-mine-jump a{color:var(--primary-ink);font-weight:600;text-underline-offset:3px;}
+  #cl-mine{scroll-margin-top:calc(var(--nav-h,64px) + 16px);}
+}
+.cl-rhead h2{font:700 20px/1.25 'BwGradual','Urbanist',sans-serif;color:var(--text);letter-spacing:-.01em;}
+#cl-count{font-size:14px;color:var(--text-muted);font-variant-numeric:tabular-nums;}
+#cl-count b{color:var(--text);font-weight:700;}
+.cl-clear{background:none;border:0;padding:6px 2px;font:600 13.5px 'Inter',sans-serif;color:var(--primary-ink);cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+.cl-clear[hidden]{display:none;}
+.cl-grid{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;align-items:start;}
+.cl-card{position:relative;height:100%;display:flex;flex-direction:column;gap:10px;min-width:0;background:var(--paper);
+  border:1px solid var(--line);border-radius:16px;padding:18px 18px 14px;transition:transform .22s var(--ease);}
+@media(hover:hover){.cl-card:hover{transform:translateY(-3px);border-color:rgba(0,93,99,.38);box-shadow:var(--shadow);}
+  html[data-taqa-theme="dark"] .cl-card:hover{border-color:rgba(0,187,182,.45);}}
+.cl-card.in{animation:clIn .42s var(--ease) both;}
+@keyframes clIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.cl-top{display:flex;align-items:center;gap:11px;min-width:0;}
+.cl-mark{position:relative;flex:none;width:40px;height:40px;border-radius:11px;background:var(--fill);color:var(--primary-ink);
+  display:grid;place-items:center;font:800 11px/1 'BwGradual','Urbanist',sans-serif;letter-spacing:.04em;}
+.cl-mark.hot::after{content:'';position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--paper);}
+.cl-tl{min-width:0;}
+.cl-tl b{display:block;font:600 12.5px/1.3 'Inter',sans-serif;color:var(--text-muted);}
+.cl-tl span{display:block;font-size:12px;line-height:1.35;color:var(--text-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cl-card h3{font:700 17px/1.32 'BwGradual','Urbanist',sans-serif;color:var(--text);letter-spacing:-.005em;overflow-wrap:anywhere;}
+.cl-card h3 a{color:inherit;text-decoration:none;}
+.cl-card h3 a::after{content:'';position:absolute;inset:0;border-radius:16px;}
+.cl-card h3 a:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;}
+.cl-card h3 a:focus-visible{outline:none;}
+.cl-card h3 a:focus-visible::after{box-shadow:var(--focus);}
+.cl-meta{font-size:13px;line-height:1.45;color:var(--text-muted);font-variant-numeric:tabular-nums;overflow-wrap:anywhere;}
+.cl-sum{font-size:13.5px;line-height:1.5;color:var(--text-muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;}
+.cl-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.cl-tag{display:inline-block;max-width:100%;padding:3px 9px;border-radius:999px;border:1px solid var(--line-strong);font:500 12px/1.35 'Inter',sans-serif;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cl-foot{margin-top:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;padding-top:12px;border-top:1px solid var(--line-soft);}
+.cl-src{font-size:12px;line-height:1.35;color:var(--text-light);font-variant-numeric:tabular-nums;overflow-wrap:anywhere;}
+.cl-src b{font-weight:600;color:var(--text-muted);}
+.cl-end{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--fill);color:var(--primary-ink);font:600 12px/1.4 'Inter',sans-serif;}
+.cl-end i{font-style:normal;font-weight:500;color:var(--text-muted);}
+.cl-st{display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font:600 11.5px/1.45 'Inter',sans-serif;border:1px solid currentColor;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;}
+.cl-st::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex:none;}
+.cl-st.s-pub{color:var(--ok);background:var(--ok-bg);border-color:transparent;}
+/* In progress reads neutral with a hollow dot; only Published is green and filled. */
+.cl-st.s-qms,.cl-st.s-dir{color:var(--text-muted);background:var(--inset);border-color:var(--line-strong);}
+.cl-st.s-qms::before,.cl-st.s-dir::before{background:transparent;box-shadow:inset 0 0 0 1.5px currentColor;}
+.cl-st.s-app{color:var(--ok);}
+.cl-st.s-ret{color:var(--stop);background:var(--stop-bg);border-color:transparent;}
+.cl-st.s-old{color:var(--text-muted);}
+.cl-more{display:flex;justify-content:center;margin-top:22px;}
+.cl-more[hidden]{display:none;}
+.cl-qbtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:12px;
+  border:1px solid var(--line-strong);background:var(--paper);color:var(--primary-ink);font:600 14px/1 'BwGradual','Urbanist',sans-serif;
+  cursor:pointer;text-decoration:none;white-space:nowrap;transition:transform .12s var(--ease);}
+.cl-qbtn:hover{border-color:var(--primary-ink);background:var(--fill);}
+.cl-qbtn:active{transform:scale(.98);}
+.cl-qbtn.pri{background:var(--fill-strong);border-color:transparent;color:#fff;}
+html[data-taqa-theme="dark"] .cl-qbtn.pri{color:#00191B;}
+.cl-qbtn.pri:hover{background:#003A3D;}
+html[data-taqa-theme="dark"] .cl-qbtn.pri:hover{background:#9FE3DF;}
+.cl-empty{background:var(--paper);border:1px dashed var(--line-strong);border-radius:16px;padding:28px 26px;}
+.cl-empty h3{font:700 17px/1.3 'BwGradual','Urbanist',sans-serif;color:var(--text);margin-bottom:6px;}
+.cl-empty p{font-size:14px;line-height:1.6;color:var(--text-muted);max-width:62ch;}
+.cl-empty .cl-acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;}
+
+.cl-box{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px 20px 18px;min-width:0;}
+.cl-box + .cl-box{margin-top:0;}
+.cl-box h2{font:700 16.5px/1.3 'BwGradual','Urbanist',sans-serif;color:var(--text);margin-bottom:4px;}
+.cl-box .sub{font-size:13px;line-height:1.5;color:var(--text-light);}
+.cl-mine-list{list-style:none;margin-top:12px;}
+.cl-mine-list li{padding:12px 0;border-top:1px solid var(--line-soft);min-width:0;}
+.cl-mine-list li:first-child{border-top:0;padding-top:4px;}
+.cl-mine-list a.t{display:block;font:600 14.5px/1.35 'BwGradual','Urbanist',sans-serif;color:var(--text);text-decoration:none;overflow-wrap:anywhere;}
+.cl-mine-list a.t:hover{color:var(--primary-ink);text-decoration:underline;}
+.cl-mine-list .m{margin:4px 0 7px;font-size:12px;color:var(--text-light);font-variant-numeric:tabular-nums;overflow-wrap:anywhere;}
+.cl-why{margin-top:8px;padding:9px 11px;border-radius:10px;background:var(--stop-bg);font-size:12.5px;line-height:1.5;color:var(--text);overflow-wrap:anywhere;}
+.cl-why a{font-weight:600;}
+.cl-box .cl-acts{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:12px;}
+.cl-box .cl-acts a,.cl-box .cl-acts button{font:600 13.5px 'Inter',sans-serif;color:var(--primary-ink);background:none;border:0;padding:4px 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+.cl-steps{list-style:none;margin-top:12px;display:grid;gap:12px;counter-reset:st;}
+.cl-steps li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;font-size:13.5px;line-height:1.5;color:var(--text-muted);counter-increment:st;}
+.cl-steps li::before{content:counter(st);width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--fill);color:var(--primary-ink);font:700 12.5px/1 'Inter',sans-serif;}
+.cl-steps b{color:var(--text);font-weight:600;}
+.cl-route-note{margin-top:14px;padding-top:12px;border-top:1px solid var(--line-soft);font-size:12.5px;line-height:1.55;color:var(--text-light);}
+
+@media(max-width:1180px){.cl-grid5{grid-template-columns:repeat(3,minmax(0,1fr));}}
+@media(max-width:1023px){
+  .cl-body{grid-template-columns:minmax(0,1fr);grid-template-rows:none;}
+  .cl-results,.cl-aside,#cl-mine,#cl-route{grid-column:1;grid-row:auto;}
+  .cl-results{order:1;}#cl-mine{order:2;}#cl-route{order:3;}
+  .cl-hero-in{grid-template-columns:minmax(0,1fr);}
+  .cl-stats{margin-top:4px;}
+}
+
+/* ── Phone: filters become a sheet ── */
+@media(max-width:760px){
+  .cl-hero-in{padding:28px 16px 84px;gap:22px;}
+  .cl-hero h1{font-size:clamp(30px,8.6vw,40px);}
+  .cl-lede{font-size:14.5px;}
+  .cl-cta .cl-btn{flex:1 1 auto;}
+  .cl-stats{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .cl-stat{padding:2px 12px 0;}
+  .cl-stat dd{font-size:28px;}
+  .cl-stat dt{font-size:12px;}
+  .cl-panel{margin-top:-56px;padding:0 16px;}
+  .cl-panel-in{padding:14px 14px 14px;border-radius:18px;}
+  .cl-qrow{flex-direction:column;align-items:stretch;gap:10px;}
+  .cl-fbar{display:flex;align-items:center;gap:12px;min-width:0;}
+  .cl-fsum{min-width:0;font-size:13px;line-height:1.4;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cl-flt-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:14px;border:1px solid var(--line-strong);
+    background:var(--paper);color:var(--text);font:600 14px/1 'Inter',sans-serif;cursor:pointer;flex:none;}
+  .cl-flt-btn svg{width:18px;height:18px;}
+  .cl-flt-btn .n{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--fill-strong);color:#fff;font:700 11.5px/20px 'Inter',sans-serif;text-align:center;}
+  html[data-taqa-theme="dark"] .cl-flt-btn .n{color:#00191B;}
+  .cl-flt-btn .n[hidden]{display:none;}
+  .cl-flt-btn .w{display:none;}
+  .cl-flt{position:fixed;left:0;right:0;bottom:0;z-index:4001;background:var(--paper);border-radius:22px 22px 0 0;box-shadow:var(--shadow-3);
+    max-height:calc(100vh - 96px);max-height:88dvh;overflow-y:auto;overscroll-behavior:contain;padding:0 16px calc(12px + env(safe-area-inset-bottom,0px));
+    transform:translateY(104%);visibility:hidden;transition:transform .3s var(--ease),visibility 0s linear .3s;}
+  html.cl-sheet .cl-flt{transform:none;visibility:visible;transition-delay:0s;}
+  .cl-scrim{display:block;position:fixed;inset:0;z-index:4000;background:rgba(0,19,20,.45);opacity:0;visibility:hidden;
+    transition:opacity .3s var(--ease),visibility 0s linear .3s;}
+  html.cl-sheet .cl-scrim{opacity:1;visibility:visible;transition-delay:0s;}
+  html.cl-sheet,html.cl-sheet body{overflow:hidden;}
+  .cl-flt-head{display:block;position:sticky;top:0;z-index:1;background:var(--paper);padding:10px 0 12px;border-bottom:1px solid var(--line-soft);}
+  .cl-flt-head .grab{display:block;width:40px;height:4px;border-radius:2px;background:var(--line-strong);margin:0 auto 10px;}
+  .cl-flt-head .row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .cl-flt-head h2{font:700 19px/1.2 'BwGradual','Urbanist',sans-serif;color:var(--text);}
+  .cl-x{width:40px;height:40px;border-radius:50%;border:0;background:var(--inset);color:var(--text-muted);display:grid;place-items:center;cursor:pointer;}
+  .cl-x svg{width:15px;height:15px;}
+  .cl-grid5{grid-template-columns:minmax(0,1fr);gap:14px;margin-top:14px;}
+  .cl-row2{flex-direction:column;align-items:stretch;gap:16px;}
+  .cl-ended{display:block;}
+  .cl-ended .cl-lbl{margin:0 0 8px;}
+  .cl-seg{display:block;}
+  .cl-seg legend{float:none;margin:0 0 8px;}
+  .cl-seg-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;}
+  .cl-seg-o span{width:100%;justify-content:center;text-align:center;white-space:normal;padding:6px 8px;}
+  .cl-flt-foot{display:flex;gap:10px;position:sticky;bottom:calc(-12px - env(safe-area-inset-bottom,0px));background:var(--paper);
+    padding:12px 0 calc(12px + env(safe-area-inset-bottom,0px));margin-top:16px;border-top:1px solid var(--line-soft);}
+  .cl-flt-foot .cl-qbtn{flex:1 1 0;min-width:0;}
+  .cl-body{padding:22px 16px 60px;gap:20px;}
+  .cl-grid{grid-template-columns:minmax(0,1fr);gap:12px;}
+  .cl-card{padding:16px 16px 12px;}
+  .cl-box{padding:18px 16px 16px;}
+  .cl-empty{padding:22px 18px;}
+}
+@media(max-width:360px){
+  .cl-stat{padding:2px 8px 0;}
+  .cl-stat dd{font-size:24px;}
+  #cl-q{padding-left:40px;}
+  .cl-qbox > svg{left:13px;}
+}
+@media(prefers-reduced-motion:reduce){
+  .cl-photo,.cl-hero h1 .l1,.cl-hero h1 .l2,.cl-lede,.cl-cta,.cl-stats,.cl-card.in{animation:none!important;}
+  .cl-card,.cl-flt,.cl-scrim,.cl-btn,.cl-qbtn{transition:none!important;}
+  @media(hover:hover){.cl-card:hover{transform:none;}}
+}
+@media print{
+  nav,#nav-mobile-menu,.cl-photo,.cl-panel,.cl-aside,.cl-more,.cl-cta,.skip,footer{display:none!important;}
+  .cl-hero{background:#fff;color:#000;}
+  .cl-hero::before,.cl-hero .th-lines{display:none;}
+  .cl-hero-in{padding:0 0 16px;}
+  .cl-hero h1,.cl-hero h1 .l2,.cl-stat dd{color:#000;}
+  .cl-eyebrow,.cl-lede,.cl-stat dt{color:#333;}
+  .page-wrapper{padding-top:0;}
+  .cl-body{display:block;padding:0;}
+  .cl-card{break-inside:avoid;box-shadow:none;}
+}
+.cl-fl{display:inline-flex;flex-wrap:wrap;gap:6px;min-width:0;}
+.cl-fl:empty{display:none;}
+.cl-stats.two{grid-template-columns:repeat(2,minmax(0,128px));}
+@media(max-width:760px){.cl-stats.two{grid-template-columns:repeat(2,minmax(0,1fr));}}
+.cl-none{font-size:13px;color:var(--text-light);}
+</style>
+<link rel="stylesheet" href="techhub.css">
+<link rel="stylesheet" href="topbar.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="page-wrapper">
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+  <a href="index.html" class="nav-brand">
+    <img src="assets/brand/rise-lockup-header.png" alt="RISE" class="nav-logo nav-logo-light" width="320" height="120">
+    <img src="assets/brand/rise-lockup-header-reverse.png" alt="RISE" class="nav-logo nav-logo-dark" width="320" height="120">
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
+    <li><a href="cases.html" class="active" aria-current="page">Cases</a></li>
+    <li><a href="ai-search.html">Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
+  <div class="nav-right">
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<main id="main" tabindex="-1">
+  <section class="cl-hero" aria-labelledby="cl-title">
+    <div class="cl-photo" id="cl-photo" aria-hidden="true"></div>
+    <div class="th-lines" aria-hidden="true"></div>
+    <div class="cl-hero-in">
+      <div class="cl-hero-txt">
+        <p class="cl-eyebrow" id="cl-eyebrow">All operational segments · Field cases</p>
+        <h1 id="cl-title"><span class="l1">What happened before.</span> <span class="l2">What was tried. What was found.</span></h1>
+        <p class="cl-lede" id="cl-lede">Field cases from the eleven operational segments, with the register’s lessons learned and technical alerts beside them.</p>
+        <div class="cl-cta" id="cl-cta">
+          <a class="cl-btn pri" id="cl-add" href="case-new.html" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add a case</a>
+          <a class="cl-btn ghost" id="cl-pack" href="prejob.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2"/><path d="m9 13 2 2 4-4"/></svg>Pre-job pack</a>
+        </div>
+      </div>
+      <dl class="cl-stats" id="cl-stats" aria-label="Library figures">
+        <div class="cl-stat"><dt>in the library</dt><dd id="cl-n-all">0</dd></div>
+        <div class="cl-stat"><dt>field cases</dt><dd id="cl-n-case">0</dd></div>
+        <div class="cl-stat" id="cl-stat-mine"><dt>yours, any status</dt><dd id="cl-n-mine">0</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <div class="cl-panel">
+    <form class="cl-panel-in" id="cl-form" role="search" aria-label="Search and filter the case library" novalidate>
+      <div class="cl-qrow">
+        <div class="cl-qfield">
+          <label class="cl-lbl" for="cl-q">Search the library</label>
+          <div class="cl-qbox">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="search" id="cl-q" name="q" autocomplete="off" spellcheck="false" placeholder="Search a symptom, tool, rig, well or finding" enterkeyhint="search">
+            <button type="button" class="cl-qx" id="cl-qx" aria-label="Clear the search" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+          </div>
+        </div>
+        <div class="cl-fbar">
+          <button type="button" class="cl-flt-btn" id="cl-flt-btn" aria-controls="cl-flt" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span>Filters</span><span class="n" id="cl-flt-n" hidden></span></button>
+          <span class="cl-fsum" id="cl-fsum"></span>
+        </div>
+      </div>
+
+      <div class="cl-scrim" id="cl-scrim" aria-hidden="true"></div>
+      <div class="cl-flt" id="cl-flt" aria-labelledby="cl-flt-h">
+        <div class="cl-flt-head">
+          <span class="grab" aria-hidden="true"></span>
+          <div class="row"><h2 id="cl-flt-h">Filters</h2><button type="button" class="cl-x" id="cl-flt-x" aria-label="Close filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        </div>
+        <div class="cl-grid5">
+          <div class="cl-field"><label class="cl-lbl" for="cl-area">Area</label><select id="cl-area" name="area"></select></div>
+          <div class="cl-field"><label class="cl-lbl" for="cl-type">Content type</label><select id="cl-type" name="type"></select></div>
+          <div class="cl-field"><label class="cl-lbl" for="cl-loc">Location</label><select id="cl-loc" name="loc"></select></div>
+          <div class="cl-field"><label class="cl-lbl" for="cl-svc">Service / tool</label><select id="cl-svc" name="svc"></select></div>
+          <div class="cl-field"><label class="cl-lbl" for="cl-hole">Hole size</label><select id="cl-hole" name="hole"></select></div>
+        </div>
+        <div class="cl-row2">
+          <div class="cl-ended" id="cl-ended" role="group" aria-labelledby="cl-ended-l">
+            <span class="cl-lbl" id="cl-ended-l">Ended with</span>
+            <div class="cl-chips" id="cl-endings"></div>
+          </div>
+          <fieldset class="cl-seg" id="cl-src">
+            <legend>Source</legend>
+            <div class="cl-seg-g">
+              <label class="cl-seg-o"><input type="radio" name="src" value="all" checked><span>All</span></label>
+              <label class="cl-seg-o"><input type="radio" name="src" value="case"><span>Cases</span></label>
+              <label class="cl-seg-o"><input type="radio" name="src" value="register"><span>Register lessons &amp; alerts</span></label>
+              <label class="cl-seg-o"><input type="radio" name="src" value="mine"><span>My contributions</span></label>
+            </div>
+          </fieldset>
+        </div>
+        <div class="cl-flt-foot">
+          <button type="button" class="cl-qbtn" id="cl-flt-clear">Clear all</button>
+          <button type="button" class="cl-qbtn pri" id="cl-flt-done">Show results</button>
+        </div>
+      </div>
+      <p class="cl-note" id="cl-area-note" hidden></p>
+    </form>
+  </div>
+
+  <div class="cl-body">
+    <section class="cl-results" id="cl-results" aria-labelledby="cl-results-h">
+      <div class="cl-rhead">
+        <h2 id="cl-results-h">Cases and register entries</h2>
+        <div><span id="cl-count" role="status" aria-live="polite"></span> <button type="button" class="cl-clear" id="cl-clear" hidden>Clear filters</button></div>
+      </div>
+      <p class="cl-mine-jump" id="cl-mine-jump" hidden></p>
+      <ul class="cl-grid" id="cl-grid"></ul>
+      <div id="cl-empty"></div>
+      <div class="cl-more" id="cl-more" hidden><button type="button" class="cl-qbtn" id="cl-more-btn">Show more</button></div>
+    </section>
+
+    <section class="cl-box cl-aside" id="cl-mine" aria-labelledby="cl-mine-h" hidden>
+      <h2 id="cl-mine-h">Your contributions</h2>
+      <p class="sub" id="cl-mine-sub"></p>
+      <ul class="cl-mine-list" id="cl-mine-list"></ul>
+      <div class="cl-acts" id="cl-mine-acts"></div>
+    </section>
+
+    <section class="cl-box cl-aside" id="cl-route" aria-labelledby="cl-route-h">
+      <h2 id="cl-route-h">How a case reaches the library</h2>
+      <ol class="cl-steps">
+        <li><span><b>Operations file it:</b> an employee, or the area’s Director.</span></li>
+        <li><span><b>QMS checks it</b> against its source document.</span></li>
+        <li><span><b>The area’s Director releases it.</b> Only then is it listed here.</span></li>
+      </ol>
+      <p class="cl-route-note">Until it is released, only its filer, QMS, the area’s Director and an external auditor can see it. Lessons learned and technical alerts that are register documents are listed too, marked Register.</p>
+    </section>
+  </div>
+</main>
+
+<footer style="height:4px;position:relative;margin-top:auto;"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:#005D63;"></div></footer>
+</div>
+
+<script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script src="store.js"></script>
+<script src="shared.js"></script>
+<script src="recognition.js"></script>
+<script src="cases-data.js"></script>
+<script src="cases.js"></script>
+<script>
+(function () {
+  'use strict';
+  /* Case library. Everything listed comes from TAQA_CASES: released field
+     cases, supplied (shipped) cases and the register's own lessons learned
+     and technical alerts, each labelled with where it came from. Every value
+     a person typed is escaped before it reaches innerHTML. */
+  var C = window.TAQA_CASES;
+  if (!C) return;
+  var esc = C.esc, O = C.OPTIONS, $ = function (id) { return document.getElementById(id); };
+  var PAGE = 24;
+  var sheetMq = matchMedia('(max-width:760px)');
+  var PHOTOS = {
+    'coiled-tubing': 'taqa-hero-5.jpeg', 'fracturing': 'taqa-hero-3.jpeg', 'cementing': 'taqa-hero-2.jpg',
+    'drilling': 'taqa-hero.webp', 'wireline': 'taqa-hero-4.jpg', 'inspection': 'taqa-hero-4.jpg',
+    'well-safety': 'taqa-hero.webp', 'well-testing': 'taqa-hero-3.jpeg'
+  };
+  var SOURCES = ['all', 'case', 'register', 'mine'];
+  var HOT = { incident: 1, alert: 1 };
+
+  /* ── State, from the address so a filtered view can be shared ── */
+  var url = new URLSearchParams(location.search);
+  var S = {
+    q: url.get('q') || '', area: url.get('area') || '', type: url.get('type') || '',
+    location: url.get('loc') || '', service: url.get('svc') || '', hole: url.get('hole') || '',
+    ending: url.get('end') || '', source: url.get('src') || 'all', shown: PAGE
+  };
+  var askedArea = S.area;
+  if (S.area && !C.isOperational(S.area)) S.area = '';
+  if (S.type && !C.isCaseType(S.type)) S.type = '';
+  if (SOURCES.indexOf(S.source) === -1) S.source = 'all';
+  if (O.locations.indexOf(S.location) === -1) S.location = '';
+  if (S.hole && C.holeNumber(S.hole) === null) S.hole = '';
+
+  /* ── Helpers ── */
+  function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
+  function day(v) {
+    var p = String(v || '').split('-');
+    if (p.length === 3) return new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    if (p.length === 2) return new Date(+p[0], +p[1] - 1, 1).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+    return '';
+  }
+  function dateText(e) {
+    if (e.incidentDate) return day(e.incidentDate);
+    if (e.eventMonth) return day(e.eventMonth);
+    if (e.source === 'register' && e.publishedDate) return 'In force from ' + day(e.publishedDate);
+    if (e.source === 'shipped' && e.publishedDate) return 'Published ' + day(e.publishedDate);
+    return '';
+  }
+  var SRC_LABEL = { 'case': 'Field case', 'shipped': 'Supplied case', 'register': 'Register document' };
+  var ST_CLASS = { 'published': 's-pub', 'with-qms': 's-qms', 'with-director': 's-dir', 'returned': 's-ret', 'approved': 's-app' };
+  function stChip(e, short) {
+    var label = short && e.status === 'returned' ? 'Returned' : e.statusLabel;
+    return '<span class="cl-st ' + (ST_CLASS[e.status] || 's-old') + '">' + esc(label) + '</span>';
+  }
+  /* One line per case: a returned attempt that was filed again is the same
+     case, so only its newest filing is listed (mine() is newest first). */
+  function latest(list) {
+    var seen = {};
+    return list.filter(function (e) {
+      var k = e.docNumber || e.key;
+      if (seen[k]) return false;
+      seen[k] = 1; return true;
+    });
+  }
+  /* May this returned case be filed again now? Only by its filer, and only
+     while no later attempt of it is in progress or in force (cases.js, the
+     register's own resubmission rule). */
+  function canRefile(e) { return C.canResubmit(e); }
+  function optionList(sel, items, first) {
+    sel.innerHTML = '<option value="">' + esc(first) + '</option>' + items.map(function (o) {
+      return '<option value="' + esc(o.value) + '">' + esc(o.label) + '</option>';
+    }).join('');
+  }
+
+  // The full prompt does not fit beside a thumb on a phone.
+  function placeholder() { $('cl-q').placeholder = sheetMq.matches ? 'Symptom, tool, rig, well or finding' : 'Search a symptom, tool, rig, well or finding'; }
+  placeholder();
+
+  /* ── Filters ── */
+  var fArea = $('cl-area'), fType = $('cl-type'), fLoc = $('cl-loc'), fSvc = $('cl-svc'), fHole = $('cl-hole');
+  optionList(fArea, C.operational().map(function (a) { return { value: a.id, label: a.name }; }), 'All segments');
+  optionList(fType, C.TYPES.map(function (t) { return { value: t.key, label: t.label }; }), 'All content types');
+  optionList(fLoc, O.locations.map(function (l) { return { value: l, label: l === 'Other' ? 'Other (not listed)' : l }; }), 'Any location');
+  optionList(fHole, O.holeSizes.map(function (h) { return { value: h, label: C.holeLabel(h) }; }), 'Any hole size');
+  function fillServices() {
+    var list = O.services(S.area || null);
+    optionList(fSvc, list.map(function (s) { return { value: s, label: s === 'Other' ? 'Other (not listed)' : s }; }),
+      'Any service or tool');
+    fSvc.value = S.service;
+  }
+  function endingsNow() { return O.endings(S.area || null); }
+  /* A service or an ending belongs to an area's own list: when the area
+     (or the content type) changes, a choice that no longer applies goes. */
+  function normalize() {
+    if (S.service && O.services(S.area || null).indexOf(S.service) === -1) S.service = '';
+    if (S.ending && !endingsNow().some(function (x) { return x.value === S.ending; })) S.ending = '';
+    if (S.type && S.type !== 'incident') S.ending = '';
+  }
+  function syncControls() {
+    fArea.value = S.area; fType.value = S.type; fLoc.value = S.location; fHole.value = S.hole;
+    fillServices();
+    $('cl-q').value = S.q;
+    $('cl-qx').hidden = !S.q;
+    var r = document.querySelector('#cl-src input[value="' + S.source + '"]');
+    if (r) r.checked = true;
+    [fArea, fType, fLoc, fSvc, fHole].forEach(function (s) { s.classList.toggle('on', !!s.value); });
+  }
+  function filters(over) {
+    var f = { source: S.source, area: S.area || null, type: S.type || null, location: S.location || null,
+              service: S.service || null, holeSize: S.hole || null, ending: S.ending || null };
+    if (over) for (var k in over) f[k] = over[k];
+    return f;
+  }
+  function activeCount() {
+    return [S.area, S.type, S.location, S.service, S.hole, S.ending].filter(Boolean).length + (S.source !== 'all' ? 1 : 0);
+  }
+  function writeUrl() {
+    var p = new URLSearchParams();
+    if (S.q) p.set('q', S.q);
+    if (S.area) p.set('area', S.area);
+    if (S.type) p.set('type', S.type);
+    if (S.location) p.set('loc', S.location);
+    if (S.service) p.set('svc', S.service);
+    if (S.hole) p.set('hole', S.hole);
+    if (S.ending) p.set('end', S.ending);
+    if (S.source !== 'all') p.set('src', S.source);
+    var s = p.toString();
+    try { history.replaceState(null, '', location.pathname.split('/').pop() + (s ? '?' + s : '')); } catch (e) {}
+  }
+
+  /* ── Hero ── */
+  var photoArea = null;
+  function paintHero(lib) {
+    var where = S.area ? C.areaName(S.area) : 'All operational segments';
+    $('cl-eyebrow').textContent = where + ' · Field cases';
+    document.title = (S.area ? C.areaName(S.area) + ' field cases' : 'Field Cases') + ', RISE';
+    if (photoArea !== S.area) {
+      photoArea = S.area;
+      $('cl-photo').style.backgroundImage = "url('" + (PHOTOS[S.area] || 'taqa-hero.webp') + "')";
+    }
+    var who = C.canFile(S.area || undefined), any = C.canFile();
+    var add = $('cl-add');
+    add.hidden = !any.ok;
+    if (any.ok) {
+      var target = S.area && who.ok ? S.area : (any.areas.length === 1 ? any.areas[0] : '');
+      add.href = 'case-new.html' + (target ? '?area=' + encodeURIComponent(target) : '');
+    }
+    $('cl-pack').href = 'prejob.html' + (S.area ? '?area=' + encodeURIComponent(S.area) : '');
+    var mine = C.mine({ latest: true }).filter(function (e) { return !S.area || e.area === S.area; });
+    $('cl-n-all').textContent = lib.length;
+    $('cl-n-case').textContent = lib.filter(function (e) { return e.source !== 'register'; }).length;
+    $('cl-n-mine').textContent = mine.length;
+    $('cl-stat-mine').hidden = !any.ok && !mine.length;
+    $('cl-stats').classList.toggle('two', $('cl-stat-mine').hidden);
+  }
+
+  /* ── Ended-with chips: the area's own endings, each with how many match ── */
+  function paintEndings() {
+    var box = $('cl-ended');
+    var show = !S.type || S.type === 'incident';
+    box.hidden = !show;
+    if (!show) { $('cl-endings').innerHTML = ''; return; }
+    var base = filters({ ending: null });
+    // An area has its own list, shown whole. With every segment at once the
+    // two lists would read as one, so only the endings that occur are shown.
+    var rows = endingsNow().map(function (x) {
+      return { x: x, n: C.match(Object.assign({}, base, { ending: x.value }), S.q).length };
+    }).filter(function (r) { return S.area || r.n || S.ending === r.x.value; });
+    $('cl-endings').innerHTML = rows.length ? rows.map(function (r) {
+      var on = S.ending === r.x.value;
+      return '<button type="button" class="th-chip" data-end="' + esc(r.x.value) + '" aria-pressed="' + on + '"' +
+        (r.x.hint ? ' title="' + esc(r.x.hint) + '"' : '') + (!r.n && !on ? ' disabled' : '') + '>' + esc(r.x.label) +
+        '<span class="th-chip-n">' + r.n + '</span></button>';
+    }).join('') : '<span class="cl-none">No incident card matches yet. Choose an area to see its endings.</span>';
+  }
+
+  /* ── Cards ── */
+  function card(e, delay, animate) {
+    var meta = [];
+    if (e.wellRef) meta.push(e.wellRef);
+    if (e.field && e.field !== e.wellRef) meta.push(e.field);
+    if (e.holeSize) meta.push(C.holeLabel(e.holeSize));
+    var d = dateText(e); if (d) meta.push(d);
+    var svc = e.services.slice(0, 3).map(function (s) { return '<span class="cl-tag">' + esc(s) + '</span>'; }).join('') +
+      (e.services.length > 3 ? '<span class="cl-tag">+' + (e.services.length - 3) + ' more</span>' : '');
+    var end = e.ending ? '<span class="cl-end"><i>Ended</i> ' + esc(e.ending) + '</span>' : '';
+    var st = e.status !== 'published' ? stChip(e, true) : '';
+    var num = e.docNumber || e.id || '';
+    var head = '<div class="cl-top"><span class="cl-mark' + (HOT[e.type] ? ' hot' : '') + '" aria-hidden="true">' + esc(e.letter || '') + '</span>' +
+      '<span class="cl-tl"><b>' + esc(e.typeLabel) + '</b><span>' + esc(e.areaName) + (e.location ? ' · ' + esc(e.location) : '') + '</span></span></div>';
+    return '<li><article class="cl-card' + (animate ? ' in' : '') + '"' + (animate ? ' style="animation-delay:' + Math.min(Math.max(delay, 0), 10) * 32 + 'ms"' : '') + '>' +
+      head +
+      '<h3><a href="' + esc(e.url) + '">' + esc(e.title || 'Untitled') + '</a></h3>' +
+      (meta.length ? '<p class="cl-meta">' + meta.map(esc).join(' · ') + '</p>' : '') +
+      (svc ? '<div class="cl-tags" aria-label="Services and tools">' + svc + '</div>' : '') +
+      (e.summary ? '<p class="cl-sum">' + esc(e.summary) + '</p>' : '') +
+      '<div class="cl-foot"><span class="cl-fl">' + end + st + '</span>' +
+        '<span class="cl-src"><b>' + esc(SRC_LABEL[e.source] || '') + '</b>' + (num ? ' · ' + esc(num) : '') + '</span></div>' +
+      '</article></li>';
+  }
+
+  function emptyState(lib) {
+    var who = C.canFile(S.area || undefined);
+    var add = who.ok ? '<a class="cl-qbtn pri" href="case-new.html' + (S.area ? '?area=' + encodeURIComponent(S.area) : '') + '">Add a case</a>' : '';
+    var clear = activeCount() || S.q ? '<button type="button" class="cl-qbtn" data-clear="1">Clear filters</button>' : '';
+    var where = S.area ? C.areaName(S.area) : 'the operational segments';
+    var h, p;
+    if (S.source === 'mine') {
+      if (!C.canFile().ok && !C.mine().length) {
+        h = 'Your role does not file field cases';
+        p = C.FIELD_CASE_ROLE + ' Released cases are listed under All.';
+        add = '';
+      } else if (!C.mine().length) {
+        h = 'You have not filed a case yet';
+        p = 'Cases you file appear here with their status: With QMS, With the Director, Published or Returned with the reason.';
+      } else {
+        h = 'None of your cases match';
+        p = 'Clear a filter or the search to see all of your cases.';
+        add = '';
+      }
+    } else if (!lib.some(function (e) { return e.source !== 'register'; }) && S.source === 'case' && !S.q &&
+               !S.type && !S.location && !S.service && !S.hole && !S.ending) {
+      h = 'No field case has been released in ' + where + ' yet';
+      p = 'A case is listed once QMS has checked it and the area’s Director has released it. Nothing here is made up, so the list starts empty.';
+      clear = S.area ? '<button type="button" class="cl-qbtn" data-src="all">Show register lessons and alerts</button>' : clear;
+    } else {
+      h = 'Nothing matches' + (S.q ? ' “' + S.q + '”' : ' these filters');
+      p = 'Try fewer words, or clear a filter. Search looks at the title, number, summary and every field of a case.';
+      add = '';
+    }
+    return '<div class="cl-empty"><h3>' + esc(h) + '</h3><p>' + esc(p) + '</p>' +
+      (add || clear ? '<div class="cl-acts">' + add + clear + '</div>' : '') + '</div>';
+  }
+
+  var animFrom = 0;     // the first paint draws every card in; "Show more" only the new ones
+  var NOUN = { all: ['entry', 'entries'], 'case': ['field case', 'field cases'],
+               register: ['register entry', 'register entries'], mine: ['of your cases', 'of your cases'] };
+  function paintResults(lib) {
+    var list = C.match(filters(), S.q);
+    if (S.source === 'mine') {
+      // Newest filing first, one line per case; a search still ranks first.
+      list = latest(list.slice().sort(function (a, b) {
+        var x = (a.record && a.record.submittedAt) || '', y = (b.record && b.record.submittedAt) || '';
+        return x < y ? 1 : x > y ? -1 : 0;
+      }));
+      if (S.q) list = list.map(function (e, i) { return [e, i]; })
+        .sort(function (a, b) { return (b[0].score - a[0].score) || (a[1] - b[1]); }).map(function (x) { return x[0]; });
+    }
+    if (S.source === 'all' && !S.q) {
+      // Browsing everything: the structured cases first, then the register's
+      // lessons and alerts, each newest first.
+      list = list.filter(function (e) { return e.source !== 'register'; })
+        .concat(list.filter(function (e) { return e.source === 'register'; }));
+    }
+    var total = list.length, shown = list.slice(0, S.shown);
+    $('cl-grid').innerHTML = shown.map(function (e, i) {
+      return card(e, i - animFrom, animFrom >= 0 && i >= animFrom);
+    }).join('');
+    animFrom = -1;
+    $('cl-empty').innerHTML = total ? '' : emptyState(lib);
+    var left = total - shown.length;
+    $('cl-more').hidden = left <= 0;
+    $('cl-more-btn').textContent = 'Show ' + Math.min(left, PAGE) + ' more · ' + left + ' not shown yet';
+    var noun = NOUN[S.source][total === 1 ? 0 : 1];
+    $('cl-count').innerHTML = '<b>' + total + '</b> ' + esc(noun) + (S.q ? ' for \u201c' + esc(S.q) + '\u201d' : '');
+    $('cl-results-h').textContent = S.source === 'mine' ? 'Your cases' : S.source === 'register' ? 'Register lessons and alerts'
+      : S.source === 'case' ? 'Field cases' : 'Cases and register entries';
+    $('cl-clear').hidden = !(activeCount() || S.q);
+    var n = activeCount();
+    $('cl-flt-n').hidden = !n; $('cl-flt-n').textContent = n;
+    $('cl-flt-btn').setAttribute('aria-label', n ? 'Filters, ' + n + ' on' : 'Filters');
+    var on = [];
+    if (S.area) on.push(C.areaName(S.area));
+    if (S.type) on.push(C.typeLabel(S.type));
+    if (S.location) on.push(S.location);
+    if (S.service) on.push(S.service);
+    if (S.hole) on.push(C.holeLabel(S.hole));
+    if (S.ending) on.push('Ended ' + S.ending);
+    if (S.source !== 'all') on.push({ 'case': 'Cases only', register: 'Register only', mine: 'My contributions' }[S.source]);
+    $('cl-fsum').textContent = on.length ? on.join(' \u00b7 ') : 'All segments, every content type';
+    $('cl-flt-done').textContent = total === 1 ? 'Show 1 result' : 'Show ' + total + ' results';
+  }
+
+  /* ── Your contributions ── */
+  function paintMine() {
+    var box = $('cl-mine'), mine = C.mine({ latest: true }), can = C.canFile().ok, jump = $('cl-mine-jump');
+    box.hidden = !can && !mine.length;
+    jump.hidden = true;
+    if (box.hidden) return;
+    var counts = {};
+    mine.forEach(function (e) { counts[e.status] = (counts[e.status] || 0) + 1; });
+    var bits = [];
+    if (counts['returned']) bits.push(counts['returned'] + ' returned');
+    if (counts['with-qms']) bits.push(counts['with-qms'] + ' with QMS');
+    if (counts['with-director']) bits.push(counts['with-director'] + ' with the Director');
+    if (counts['published']) bits.push(counts['published'] + ' published');
+    $('cl-mine-sub').textContent = mine.length
+      ? plural(mine.length, 'case', 'cases') + ' filed' + (bits.length ? ': ' + bits.join(', ') + '.' : '.')
+      : 'Cases you file appear here with their status, from the moment you submit them.';
+    // On a narrow screen the results come first; one line above them says
+    // what you filed and jumps to it.
+    if (mine.length) {
+      jump.innerHTML = esc($('cl-mine-sub').textContent.replace(/\.$/, '')) + ' · <a href="#cl-mine">See yours</a>';
+      jump.hidden = false;
+    }
+    var top = mine.slice(0, sheetMq.matches ? 3 : 5);
+    $('cl-mine-list').innerHTML = top.map(function (e) {
+      var ret = e.status === 'returned'
+        ? '<div class="cl-why"><b>Reason:</b> ' + esc(e.returnedReason || 'No reason recorded.') +
+          (canRefile(e) ? ' <a href="case-new.html?edit=' + encodeURIComponent(e.key) + '">Edit and file it again</a>' : '') + '</div>'
+        : '';
+      return '<li><a class="t" href="' + esc(e.url) + '">' + esc(e.title || 'Untitled') + '</a>' +
+        '<div class="m">' + esc([e.docNumber, e.revLabel, e.typeLabel].filter(Boolean).join(' · ')) + '</div>' +
+        stChip(e, true) + ret + '</li>';
+    }).join('');
+    var acts = [];
+    if (mine.length > top.length || (mine.length && S.source !== 'mine')) acts.push('<button type="button" data-src="mine">' + (mine.length > top.length ? 'See all ' + mine.length : 'List them below') + '</button>');
+    if (can) acts.push('<a href="case-new.html">Add a case</a>');
+    $('cl-mine-acts').innerHTML = acts.join('');
+  }
+
+  function paint() {
+    var lib = C.released().filter(function (e) { return !S.area || e.area === S.area; });
+    normalize();
+    syncControls();
+    paintHero(lib);
+    paintEndings();
+    paintResults(lib);
+    paintMine();
+    var note = $('cl-area-note');
+    if (askedArea && !C.isOperational(askedArea)) {
+      note.hidden = false;
+      note.textContent = C.areaName(askedArea) + ' is not an operational segment. Field cases are kept for the eleven operational segments, so all of them are shown.';
+    } else note.hidden = true;
+  }
+  function changed() { S.shown = PAGE; normalize(); writeUrl(); paint(); }
+
+  /* ── Events ── */
+  fArea.addEventListener('change', function () { S.area = fArea.value; askedArea = ''; changed(); });
+  fType.addEventListener('change', function () { S.type = fType.value; changed(); });
+  fLoc.addEventListener('change', function () { S.location = fLoc.value; changed(); });
+  fSvc.addEventListener('change', function () { S.service = fSvc.value; changed(); });
+  fHole.addEventListener('change', function () { S.hole = fHole.value; changed(); });
+  $('cl-src').addEventListener('change', function (ev) { if (ev.target && ev.target.name === 'src') { S.source = ev.target.value; changed(); } });
+  $('cl-endings').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button[data-end]');
+    if (!b || b.disabled) return;
+    var v = b.getAttribute('data-end');
+    S.ending = S.ending === v ? '' : v;
+    changed();
+    var again = document.querySelector('#cl-endings button[data-end="' + (window.CSS && CSS.escape ? CSS.escape(v) : v) + '"]');
+    if (again) again.focus();
+  });
+  var qt = null;
+  $('cl-q').addEventListener('input', function () {
+    clearTimeout(qt);
+    var v = this.value;
+    $('cl-qx').hidden = !v;
+    qt = setTimeout(function () { S.q = v.trim(); changed(); }, 160);
+  });
+  $('cl-qx').addEventListener('click', function () { $('cl-q').value = ''; S.q = ''; changed(); $('cl-q').focus(); });
+  $('cl-form').addEventListener('submit', function (ev) {
+    ev.preventDefault(); clearTimeout(qt); S.q = $('cl-q').value.trim(); changed();
+    try { $('cl-q').blur(); } catch (e) {}
+  });
+  function clearAll() {
+    S.q = ''; S.area = ''; S.type = ''; S.location = ''; S.service = ''; S.hole = ''; S.ending = ''; S.source = 'all'; askedArea = '';
+    changed();
+  }
+  $('cl-clear').addEventListener('click', clearAll);
+  $('cl-flt-clear').addEventListener('click', clearAll);
+  document.addEventListener('click', function (ev) {
+    var c = ev.target.closest('[data-clear]');
+    if (c) { clearAll(); return; }
+    var s = ev.target.closest('[data-src]');
+    if (s) {
+      S.source = s.getAttribute('data-src'); changed();
+      var r = $('cl-results'); if (r && r.scrollIntoView) r.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    }
+  });
+  $('cl-more-btn').addEventListener('click', function () {
+    var first = S.shown;
+    S.shown += PAGE; animFrom = first; paint();
+    var a = document.querySelectorAll('#cl-grid h3 a')[first];
+    if (a) a.focus();
+  });
+
+  /* ── Phone: the filter sheet ── */
+  var sheet = $('cl-flt'), opener = $('cl-flt-btn');
+  function setSheet(open) {
+    var root = document.documentElement;
+    if (open && !sheetMq.matches) return;
+    root.classList.toggle('cl-sheet', open);
+    opener.setAttribute('aria-expanded', String(open));
+    if (open) {
+      sheet.setAttribute('role', 'dialog'); sheet.setAttribute('aria-modal', 'true');
+      setTimeout(function () { var x = $('cl-flt-x'); if (x) x.focus(); }, 30);
+    } else {
+      sheet.removeAttribute('role'); sheet.removeAttribute('aria-modal');
+    }
+  }
+  function closeSheet(back) { if (!document.documentElement.classList.contains('cl-sheet')) return; setSheet(false); if (back) opener.focus(); }
+  opener.addEventListener('click', function () { setSheet(true); });
+  $('cl-flt-x').addEventListener('click', function () { closeSheet(true); });
+  $('cl-scrim').addEventListener('click', function () { closeSheet(true); });
+  $('cl-flt-done').addEventListener('click', function () {
+    closeSheet(false);
+    var r = $('cl-results-h'); if (r) { r.setAttribute('tabindex', '-1'); r.focus(); }
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape') { closeSheet(true); return; }
+    if (ev.key !== 'Tab' || !document.documentElement.classList.contains('cl-sheet')) return;
+    var f = Array.prototype.filter.call(sheet.querySelectorAll('button,select,input,a[href]'), function (el) {
+      return !el.disabled && el.offsetParent !== null && !(el.type === 'radio' && !el.checked);
+    });
+    if (!f.length) return;
+    if (ev.shiftKey && document.activeElement === f[0]) { ev.preventDefault(); f[f.length - 1].focus(); }
+    else if (!ev.shiftKey && document.activeElement === f[f.length - 1]) { ev.preventDefault(); f[0].focus(); }
+  });
+  (sheetMq.addEventListener ? sheetMq.addEventListener.bind(sheetMq, 'change') : sheetMq.addListener.bind(sheetMq))(function () {
+    if (!sheetMq.matches) setSheet(false);
+    placeholder();
+  });
+
+  C.onChange(paint);
+})();
+</script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
+</body>
+</html>

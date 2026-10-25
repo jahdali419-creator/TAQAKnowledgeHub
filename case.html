@@ -1,0 +1,738 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-taqa-theme="light">
+<head>
+<meta charset="UTF-8">
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>/* Installed app on an iPhone: the status bar is drawn over the page, and iOS keeps taps in that strip for itself, so the bell and the other controls under it could not be tapped. Drawing edge to edge (viewport-fit=cover) turns on the bar's safe-area padding in topbar.css, which drops them below the status bar. A browser tab is left exactly as it was. */(function(){try{if(navigator.standalone||matchMedia('(display-mode: standalone)').matches){var m=document.querySelector('meta[name="viewport"]');if(m&&!/viewport-fit/.test(m.content))m.content+=', viewport-fit=cover';}}catch(e){}})();</script>
+<title>Field Case, RISE</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#005D63">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RISE">
+<meta name="application-name" content="RISE">
+<link rel="apple-touch-icon" href="icons/rise-apple-touch-icon.png">
+<link rel="icon" href="icons/rise-favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="icons/rise-favicon-16.png" type="image/png" sizes="16x16">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* One field case. A dark band carries what it is (type, title, number) and
+   what can be done with it; a facts card rides the band's edge; the case's
+   own sections follow in a reading column, with the record and related cases
+   beside it. The incident card reads as it happened: symptoms on a numbered
+   timeline, each attempt in a ledger with its result, then the ending, the
+   findings, and the filer's hypothesis kept apart from the facts. */
+:root{
+  --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;
+  --dark:#F4F4F3;--paper:#FFFFFF;--inset:#F7F6F4;
+  --line:rgba(117,106,97,0.18);--line-soft:rgba(117,106,97,0.10);--line-strong:rgba(117,106,97,0.30);
+  --text:#1E1C1A;--text-muted:#5F564F;--text-light:#756A61;
+  --fill:#E7F3F3;--fill-strong:#005D63;
+  --ok:#00705F;--ok-bg:#E6F3F0;--warn:#8A6200;--warn-bg:#FBF3E0;--stop:#C8102E;--stop-bg:#FCEBEE;
+  --accent:#FF6720;
+  --band:#00292C;
+  --shadow:0 1px 2px rgba(0,41,44,.05),0 10px 28px -14px rgba(0,41,44,.22);
+  --shadow-3:0 2px 6px rgba(0,41,44,.06),0 28px 56px -24px rgba(0,41,44,.34);
+  --ease:cubic-bezier(.23,1,.32,1);
+  --focus:0 0 0 3px rgba(0,187,182,.45);
+}
+html[data-taqa-theme="dark"]{
+  color-scheme:dark;
+  --primary-ink:#00BBB6;--dark:#001314;--paper:#002326;--inset:#001C1E;
+  --line:rgba(0,187,182,0.20);--line-soft:rgba(0,187,182,0.10);--line-strong:rgba(0,187,182,0.30);
+  --text:#C7DBDD;--text-muted:#9CC0C2;--text-light:#7FAFB2;
+  --fill:rgba(0,187,182,0.12);--fill-strong:#00BBB6;
+  --ok:#4FD1B5;--ok-bg:rgba(79,209,181,.12);--warn:#FFB81C;--warn-bg:rgba(255,184,28,.10);--stop:#FF8A94;--stop-bg:rgba(255,138,148,.10);
+  --band:#002A2D;
+  --shadow:0 0 0 1px rgba(0,187,182,.08),0 12px 30px -14px rgba(0,0,0,.6);
+  --shadow-3:0 0 0 1px rgba(0,187,182,.10),0 28px 56px -22px rgba(0,0,0,.7);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;}
+html[data-taqa-theme="dark"] body{background:#001314;}
+.page-wrapper{padding-top:var(--nav-h,64px);min-height:100vh;display:flex;flex-direction:column;}
+.skip{position:absolute;left:-9999px;top:auto;}
+.skip:focus{left:16px;top:calc(var(--nav-h,64px) + 8px);z-index:10001;background:var(--paper);color:var(--primary-ink);padding:8px 14px;border-radius:8px;border:1px solid var(--line);}
+main{display:block;}
+a{color:var(--primary-ink);}
+a:focus-visible,button:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;}
+.cs-print-only{display:none;}
+
+/* ── Band ── */
+.cs-band{position:relative;overflow:hidden;isolation:isolate;background:var(--band);color:#fff;border-bottom:1px solid rgba(0,187,182,.14);}
+.cs-band .th-lines{z-index:-1;}
+.cs-band-in{max-width:1180px;margin:0 auto;padding:22px 40px 92px;}
+.cs-crumb ol{list-style:none;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:13px;color:rgba(255,255,255,.72);}
+.cs-crumb li{display:flex;align-items:center;gap:8px;min-width:0;}
+.cs-crumb li + li::before{content:'/';color:rgba(255,255,255,.45);}
+.cs-crumb a{color:rgba(255,255,255,.82);text-decoration:none;}
+.cs-crumb a:hover{color:#fff;text-decoration:underline;}
+.cs-crumb a:focus-visible{outline-color:#9FE3DF;}
+.cs-crumb [aria-current]{color:#fff;font-weight:600;font-variant-numeric:tabular-nums;overflow-wrap:break-word;}
+/* Numbers and references (TQ-TWS-CTSS-CS-001, 2026-08-14) never break at a hyphen. */
+.num{white-space:nowrap;}
+.cs-banner{display:flex;gap:12px;align-items:flex-start;margin-top:18px;padding:13px 16px;border-radius:14px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(159,227,223,.32);font-size:14px;line-height:1.55;color:rgba(255,255,255,.92);max-width:860px;}
+.cs-banner svg{width:20px;height:20px;flex:none;margin-top:1px;color:#9FE3DF;}
+.cs-banner b{color:#fff;}
+.cs-banner a{color:#9FE3DF;font-weight:600;}
+.cs-banner a:focus-visible{outline-color:#9FE3DF;}
+.cs-banner.ret{border-color:rgba(255,138,148,.55);}
+.cs-banner.ret svg{color:#FF8A94;}
+.cs-banner .acts{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:8px;}
+.cs-head{margin-top:22px;max-width:900px;animation:csRise .6s var(--ease) both;}
+@keyframes csRise{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+.cs-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-bottom:14px;}
+.cs-type{display:inline-flex;align-items:center;gap:10px;font:600 13px/1.3 'Inter',sans-serif;color:#fff;}
+.cs-mark{position:relative;flex:none;width:40px;height:40px;border-radius:11px;background:rgba(0,187,182,.16);border:1px solid rgba(0,187,182,.36);
+  color:#9FE3DF;display:grid;place-items:center;font:800 11px/1 'BwGradual','Urbanist',sans-serif;letter-spacing:.04em;}
+.cs-mark.hot::after{content:'';position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--band);}
+.cs-type small{display:block;font-weight:500;font-size:12.5px;color:rgba(255,255,255,.72);}
+.cs-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font:600 12px/1.45 'Inter',sans-serif;
+  border:1px solid rgba(255,255,255,.28);color:rgba(255,255,255,.9);white-space:nowrap;}
+.cs-pill svg{width:13px;height:13px;}
+.cs-pill.sales{border-color:rgba(0,187,182,.6);color:#9FE3DF;}
+.cs-pill.st::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
+.cs-pill.st.s-ret{color:#FFB3BA;border-color:rgba(255,138,148,.55);}
+/* In progress reads neutral with a hollow dot, as in the library. */
+.cs-pill.st.s-qms,.cs-pill.st.s-dir{color:rgba(255,255,255,.86);border-color:rgba(255,255,255,.38);}
+.cs-pill.st.s-qms::before,.cs-pill.st.s-dir::before{background:transparent;box-shadow:inset 0 0 0 1.5px currentColor;}
+.cs-pill.st.s-app{color:#9FE8D6;border-color:rgba(79,209,181,.5);}
+.cs-head h1{font-family:'BwGradual','Urbanist',sans-serif;font-weight:800;font-size:clamp(28px,3.6vw,44px);line-height:1.1;letter-spacing:-.02em;color:#fff;text-wrap:balance;overflow-wrap:anywhere;}
+.cs-num{margin-top:10px;font-size:13.5px;color:rgba(255,255,255,.74);font-variant-numeric:tabular-nums;overflow-wrap:anywhere;}
+.cs-num b{color:#fff;font-weight:600;letter-spacing:.02em;}
+.cs-sum{margin-top:14px;max-width:70ch;font-size:16px;line-height:1.62;color:rgba(255,255,255,.86);white-space:pre-wrap;overflow-wrap:anywhere;}
+.cs-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;}
+.cs-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:12px;cursor:pointer;
+  font:600 14px/1 'BwGradual','Urbanist',sans-serif;white-space:nowrap;text-decoration:none;border:1px solid rgba(255,255,255,.30);
+  background:rgba(255,255,255,.08);color:#fff;transition:transform .12s var(--ease);-webkit-tap-highlight-color:transparent;}
+.cs-btn:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.55);}
+.cs-btn:active{transform:scale(.98);}
+.cs-btn svg{width:16px;height:16px;flex:none;}
+.cs-btn.pri{background:#00BBB6;border-color:transparent;color:#00191B;}
+.cs-btn.pri:hover{background:#9FE3DF;}
+.cs-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(159,227,223,.7);}
+#cs-live{margin-top:10px;min-height:1px;font-size:13px;color:#9FE3DF;}
+
+/* ── Facts card ── */
+.cs-wrap{max-width:1180px;width:100%;margin:0 auto;padding:0 40px 80px;}
+.cs-facts{position:relative;z-index:2;margin-top:-60px;background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-3);
+  padding:20px 22px;animation:csRise .6s var(--ease) .08s both;}
+.cs-facts h2{display:flex;align-items:center;gap:8px;font:700 11px/1.3 'Inter',sans-serif;letter-spacing:1.4px;text-transform:uppercase;color:var(--primary-ink);margin-bottom:14px;}
+.cs-facts h2 .k{width:22px;height:22px;border-radius:6px;background:var(--fill);display:grid;place-items:center;letter-spacing:0;font-size:11.5px;}
+.cs-dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:16px 22px;}
+.cs-dl > div{min-width:0;padding-left:12px;border-left:2px solid var(--line-soft);}
+.cs-dl dt{font:600 11.5px/1.3 'Inter',sans-serif;letter-spacing:.3px;color:var(--text-light);}
+.cs-dl dd{margin-top:4px;font:600 14.5px/1.4 'Inter',sans-serif;color:var(--text);overflow-wrap:break-word;font-variant-numeric:tabular-nums;}
+.cs-nr{margin-top:14px;font-size:12.5px;line-height:1.5;color:var(--text-light);}
+.cs-nr b{font-weight:600;color:var(--text-muted);}
+.cs-dl dd.none{font-weight:400;color:var(--text-light);}
+
+/* ── Body ── */
+.cs-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:28px;align-items:start;margin-top:28px;}
+.cs-body{min-width:0;display:grid;gap:18px;}
+.cs-rail{min-width:0;display:grid;gap:18px;}
+.cs-sec{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:22px 24px;min-width:0;}
+.cs-sec > h2{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font:700 18px/1.3 'BwGradual','Urbanist',sans-serif;color:var(--text);margin-bottom:14px;letter-spacing:-.005em;}
+.cs-sec > h2 .k{flex:none;width:28px;height:28px;border-radius:8px;background:var(--fill);color:var(--primary-ink);display:grid;place-items:center;font:700 12.5px/1 'Inter',sans-serif;}
+.cs-sec > h2 .meta{margin-left:auto;font:500 13px/1.3 'Inter',sans-serif;color:var(--text-light);font-variant-numeric:tabular-nums;}
+.cs-f + .cs-f{margin-top:16px;padding-top:16px;border-top:1px solid var(--line-soft);}
+.cs-f h3{font:600 12.5px/1.3 'Inter',sans-serif;letter-spacing:.2px;color:var(--text-light);margin-bottom:5px;}
+.cs-f p{font-size:15.5px;line-height:1.65;color:var(--text);white-space:pre-wrap;overflow-wrap:anywhere;max-width:72ch;}
+.cs-f p.none{color:var(--text-light);font-size:14px;}
+.cs-fig{display:flex;flex-direction:column;gap:4px;padding:16px 18px;margin-bottom:16px;border-radius:14px;background:var(--fill);}
+.cs-fig span{font:600 12px/1.3 'Inter',sans-serif;letter-spacing:.3px;color:var(--text-muted);}
+.cs-fig b{font:800 clamp(22px,2.6vw,30px)/1.15 'BwGradual','Urbanist',sans-serif;color:var(--primary-ink);letter-spacing:-.01em;overflow-wrap:anywhere;font-variant-numeric:tabular-nums;}
+.cs-ok{display:inline-flex;align-items:center;gap:8px;margin-top:4px;padding:6px 12px;border-radius:10px;font:600 13.5px/1.4 'Inter',sans-serif;}
+.cs-ok svg{width:16px;height:16px;flex:none;}
+.cs-ok.yes{background:var(--ok-bg);color:var(--ok);}
+.cs-ok.no{background:var(--inset);color:var(--text-muted);border:1px solid var(--line);}
+
+/* Symptoms: a numbered timeline */
+.cs-tl{list-style:none;}
+.cs-tl li{position:relative;display:grid;grid-template-columns:34px minmax(0,1fr);gap:14px;padding-bottom:20px;}
+.cs-tl li:last-child{padding-bottom:0;}
+.cs-tl li:not(:last-child)::after{content:'';position:absolute;left:16px;top:36px;bottom:2px;width:2px;border-radius:2px;background:var(--line-strong);}
+.cs-tl .dot{position:relative;z-index:1;width:34px;height:34px;border-radius:50%;background:var(--paper);border:2px solid var(--fill-strong);
+  color:var(--primary-ink);display:grid;place-items:center;font:700 13px/1 'Inter',sans-serif;font-variant-numeric:tabular-nums;}
+.cs-tl .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;min-height:34px;}
+.cs-tl .tm{font:700 14px/1.3 'Inter',sans-serif;color:var(--primary-ink);font-variant-numeric:tabular-nums;}
+.cs-tl .tm.none{font-weight:500;color:var(--text-light);font-size:13px;}
+.cs-tag{display:inline-block;max-width:100%;padding:2px 9px;border-radius:999px;background:var(--fill);color:var(--primary-ink);font:600 12px/1.5 'Inter',sans-serif;overflow-wrap:anywhere;}
+.cs-tl .tx{margin-top:4px;font-size:15.5px;line-height:1.6;color:var(--text);overflow-wrap:anywhere;white-space:pre-wrap;}
+
+/* What was tried: a ledger */
+.cs-led{list-style:none;border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+.cs-led li{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:12px;align-items:start;padding:14px 16px;}
+.cs-led li + li{border-top:1px solid var(--line-soft);}
+.cs-led .n{width:26px;height:26px;border-radius:7px;background:var(--inset);border:1px solid var(--line);display:grid;place-items:center;
+  font:700 12px/1 'Inter',sans-serif;color:var(--text-muted);font-variant-numeric:tabular-nums;}
+.cs-led .a{font:600 15px/1.5 'Inter',sans-serif;color:var(--text);overflow-wrap:anywhere;}
+.cs-led .nt{margin-top:3px;font-size:13.5px;line-height:1.5;color:var(--text-muted);overflow-wrap:anywhere;}
+.cs-res{display:inline-flex;align-items:center;gap:6px;padding:4px 10px 4px 8px;border-radius:999px;font:700 12.5px/1.3 'Inter',sans-serif;white-space:nowrap;}
+.cs-res svg{width:14px;height:14px;flex:none;}
+.cs-res.r-failed{background:var(--stop-bg);color:var(--stop);}
+.cs-res.r-partial{background:var(--warn-bg);color:var(--warn);}
+.cs-res.r-worked{background:var(--ok-bg);color:var(--ok);}
+.cs-res.r-other{background:var(--inset);color:var(--text-muted);}
+.cs-tally{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+
+/* How it ended */
+.cs-end{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;}
+.cs-end .big{display:inline-flex;align-items:center;padding:8px 16px;border-radius:12px;background:var(--fill-strong);color:#fff;
+  font:700 17px/1.2 'BwGradual','Urbanist',sans-serif;letter-spacing:.01em;}
+html[data-taqa-theme="dark"] .cs-end .big{color:#00191B;}
+.cs-end .hint{font-size:14.5px;line-height:1.5;color:var(--text-muted);}
+.cs-end .npt{margin-left:auto;text-align:right;}
+.cs-end .npt b{display:block;font:800 24px/1 'BwGradual','Urbanist',sans-serif;color:var(--text);font-variant-numeric:tabular-nums;}
+.cs-end .npt span{font-size:12px;color:var(--text-light);}
+
+/* Findings and the hypothesis */
+.cs-finds{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;}
+.cs-find{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:999px;border:1px solid var(--line-strong);font:600 13px/1.4 'Inter',sans-serif;color:var(--text);}
+.cs-find svg{width:14px;height:14px;color:var(--primary-ink);flex:none;}
+.cs-finds + .cs-f{margin-top:14px;}
+.cs-hyp{margin-top:16px;padding:16px 18px;border-radius:14px;border:1.5px dashed var(--line-strong);background:var(--inset);}
+.cs-hyp .hd{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-bottom:6px;}
+.cs-hyp h3{font:700 14px/1.3 'Inter',sans-serif;color:var(--text);}
+.cs-hyp .lab{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:999px;background:var(--warn-bg);color:var(--warn);font:700 11.5px/1.5 'Inter',sans-serif;letter-spacing:.2px;}
+.cs-hyp p{font-size:15px;line-height:1.6;color:var(--text);white-space:pre-wrap;overflow-wrap:anywhere;}
+.cs-contact{margin-top:16px;padding:14px 16px;border-radius:12px;background:var(--fill);}
+.cs-contact h3{font:600 12.5px/1.3 'Inter',sans-serif;color:var(--text-muted);margin-bottom:4px;}
+.cs-contact p{font:600 15px/1.5 'Inter',sans-serif;color:var(--text);overflow-wrap:anywhere;}
+.cs-contact small{display:block;margin-top:4px;font-size:12px;color:var(--text-light);}
+
+/* Rail */
+.cs-box{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px;min-width:0;}
+.cs-box h2{font:700 16px/1.3 'BwGradual','Urbanist',sans-serif;color:var(--text);margin-bottom:12px;}
+.cs-rec{display:grid;gap:10px;}
+.cs-rec div{display:grid;grid-template-columns:92px minmax(0,1fr);gap:10px;font-size:13.5px;line-height:1.45;}
+.cs-rec dt{color:var(--text-light);}
+.cs-rec dd{color:var(--text);font-weight:500;overflow-wrap:break-word;font-variant-numeric:tabular-nums;min-width:0;}
+.cs-rel{list-style:none;display:grid;gap:4px;}
+.cs-rel li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:start;padding:10px 0;border-top:1px solid var(--line-soft);}
+.cs-rel li:first-child{border-top:0;padding-top:0;}
+.cs-rel .mk{width:34px;height:34px;border-radius:9px;background:var(--fill);color:var(--primary-ink);display:grid;place-items:center;font:800 10px/1 'BwGradual','Urbanist',sans-serif;}
+.cs-rel a{font:600 14px/1.35 'BwGradual','Urbanist',sans-serif;color:var(--text);text-decoration:none;overflow-wrap:anywhere;}
+.cs-rel a:hover{color:var(--primary-ink);text-decoration:underline;}
+.cs-rel .why{margin-top:3px;font-size:12px;line-height:1.45;color:var(--text-muted);}
+.cs-rel .m{margin-top:2px;font-size:11.5px;color:var(--text-light);font-variant-numeric:tabular-nums;}
+.cs-empty{font-size:13.5px;line-height:1.55;color:var(--text-muted);}
+.cs-empty a{font-weight:600;}
+.cs-box .more{display:inline-block;margin-top:12px;font:600 13.5px 'Inter',sans-serif;}
+
+/* Not available */
+.cs-gone{max-width:720px;margin-top:-60px;position:relative;z-index:2;background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-3);padding:26px 26px 24px;}
+.cs-gone p{font-size:15px;line-height:1.6;color:var(--text-muted);}
+.cs-gone p + p{margin-top:10px;}
+.cs-gone .acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;}
+.cs-qbtn{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:12px;border:1px solid var(--line-strong);background:var(--paper);
+  color:var(--primary-ink);font:600 14px/1 'BwGradual','Urbanist',sans-serif;text-decoration:none;}
+.cs-qbtn:hover{border-color:var(--primary-ink);background:var(--fill);}
+.cs-qbtn.pri{background:var(--fill-strong);border-color:transparent;color:#fff;}
+html[data-taqa-theme="dark"] .cs-qbtn.pri{color:#00191B;}
+
+@media(max-width:1023px){
+  .cs-grid{grid-template-columns:minmax(0,1fr);}
+}
+@media(max-width:640px){
+  .cs-band-in{padding:16px 16px 80px;}
+  .cs-wrap{padding:0 16px 60px;}
+  .cs-head h1{font-size:clamp(25px,7.4vw,32px);}
+  .cs-sum{font-size:15px;}
+  .cs-actions .cs-btn{flex:1 1 calc(50% - 5px);padding:0 12px;}
+  .cs-facts{padding:18px 16px;border-radius:18px;margin-top:-56px;}
+  .cs-dl{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 14px;}
+  .cs-sec{padding:18px 16px;}
+  .cs-sec > h2{font-size:17px;}
+  .cs-sec > h2 .meta{flex-basis:100%;margin-left:38px;}
+  .cs-led li{grid-template-columns:26px minmax(0,1fr);padding:12px 12px;gap:10px;}
+  .cs-led li .cs-res{grid-column:2;justify-self:start;}
+  .cs-end .npt{margin-left:0;text-align:left;}
+  .cs-box{padding:18px 16px;}
+  .cs-gone{padding:20px 18px;}
+}
+@media(max-width:480px){
+  .cs-crumb li:last-child{flex-basis:100%;}
+  .cs-crumb li:last-child::before{content:none;}
+}
+@media(max-width:360px){
+  .cs-dl{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+  .cs-actions .cs-btn{flex:1 1 100%;}
+}
+@media(prefers-reduced-motion:reduce){
+  .cs-head,.cs-facts{animation:none!important;}
+  .cs-btn{transition:none!important;}
+}
+
+/* ── Print: a clean case sheet ── */
+@media print{
+  @page{margin:16mm 14mm;}
+  html,body{background:#fff!important;color:#000;}
+  nav,#nav-mobile-menu,.skip,footer,.cs-actions,#cs-live,.cs-crumb,.cs-rail .cs-related,.cs-banner .acts,#page-progress,.bm-panel{display:none!important;}
+  .page-wrapper{padding-top:0;}
+  .cs-band{background:#fff!important;color:#000;border:0;}
+  .cs-band .th-lines{display:none;}
+  .cs-band-in{padding:0 0 12px;max-width:none;}
+  .cs-head{animation:none;margin-top:0;}
+  .cs-head h1,.cs-type,.cs-num b{color:#000;}
+  .cs-num,.cs-sum,.cs-type small{color:#333;}
+  .cs-mark{background:#fff;border-color:#999;color:#005D63;}
+  .cs-pill{color:#333!important;border-color:#999!important;}
+  .cs-banner{background:#fff;border-color:#999;color:#000;}
+  .cs-banner b{color:#000;}
+  .cs-banner svg{color:#333;}
+  .cs-wrap{padding:0;max-width:none;}
+  .cs-facts,.cs-gone{margin-top:0;box-shadow:none;animation:none;border-color:#bbb;}
+  .cs-grid{display:block;margin-top:14px;}
+  .cs-sec,.cs-box{box-shadow:none;border-color:#bbb;margin-bottom:12px;break-inside:avoid-page;}
+  .cs-sec > h2{break-after:avoid;}
+  .cs-tl li,.cs-led li{break-inside:avoid;}
+  .cs-print-only{display:block;margin-top:14px;padding-top:10px;border-top:1px solid #bbb;font-size:11px;color:#333;}
+}
+</style>
+<link rel="stylesheet" href="techhub.css">
+<link rel="stylesheet" href="topbar.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="page-wrapper">
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+  <a href="index.html" class="nav-brand">
+    <img src="assets/brand/rise-lockup-header.png" alt="RISE" class="nav-logo nav-logo-light" width="320" height="120">
+    <img src="assets/brand/rise-lockup-header-reverse.png" alt="RISE" class="nav-logo nav-logo-dark" width="320" height="120">
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
+    <li><a href="cases.html" class="active" aria-current="page">Cases</a></li>
+    <li><a href="ai-search.html">Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
+  <div class="nav-right">
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<main id="main" tabindex="-1">
+  <section class="cs-band" aria-labelledby="cs-title">
+    <div class="th-lines" aria-hidden="true"></div>
+    <div class="cs-band-in">
+      <nav class="cs-crumb" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="cases.html">Field cases</a></li>
+          <li id="cs-crumb-area" hidden></li>
+          <li id="cs-crumb-n" aria-current="page">Field case</li>
+        </ol>
+      </nav>
+      <div id="cs-banner"></div>
+      <header class="cs-head">
+        <div class="cs-chips" id="cs-chips"></div>
+        <h1 id="cs-title">Field case</h1>
+        <p class="cs-num" id="cs-num"></p>
+        <p class="cs-sum" id="cs-sum" hidden></p>
+        <div class="cs-actions" id="cs-actions"></div>
+        <p id="cs-live" role="status" aria-live="polite"></p>
+      </header>
+    </div>
+  </section>
+
+  <div class="cs-wrap" id="cs-wrap">
+    <div id="cs-content"></div>
+    <p class="cs-print-only" id="cs-print-foot"></p>
+  </div>
+</main>
+
+<footer style="height:4px;position:relative;margin-top:auto;"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:#005D63;"></div></footer>
+</div>
+
+<script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script src="store.js"></script>
+<script src="shared.js"></script>
+<script src="recognition.js"></script>
+<script src="cases-data.js"></script>
+<script src="cases.js"></script>
+<script>
+(function () {
+  'use strict';
+  /* One field case: case.html?doc=&rev=[&rid=] for a register case,
+     case.html?id= for a supplied one. TAQA_CASES.get() answers null both
+     when there is no such case and when this person may not see it, and the
+     page says the same thing for both. The card shown is entry.card, never
+     the record's own: the follow-up contact is stripped from entry.card for
+     anyone who is not a reviewer. Every value is escaped. */
+  var C = window.TAQA_CASES;
+  if (!C) return;
+  var esc = C.esc, $ = function (id) { return document.getElementById(id); };
+  var Q = {};
+  new URLSearchParams(location.search).forEach(function (v, k) { if (!(k in Q)) Q[k] = v; });
+
+  var ICON = {
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
+    back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>',
+    print: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg>',
+    down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>',
+    edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+    cross: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>',
+    half: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15Z" fill="currentColor" stroke="none"/></svg>',
+    star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z"/></svg>',
+    find: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>'
+  };
+  var HOT = { incident: 1, alert: 1 };
+  var RESULT = { 'Failed': ['r-failed', ICON.cross], 'Partial': ['r-partial', ICON.half], 'Worked': ['r-worked', ICON.check] };
+
+  function str(v) { return v == null ? '' : String(v).trim(); }
+  function day(v) {
+    var s = str(v).slice(0, 10), p = s.split('-');
+    if (p.length === 3 && /^\d{4}$/.test(p[0])) return new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    if (p.length === 2 && /^\d{4}$/.test(p[0])) return new Date(+p[0], +p[1] - 1, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+    return s;
+  }
+  function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
+  function today() { try { return TAQA_STORE.localDay(); } catch (e) { return new Date().toISOString().slice(0, 10); } }
+  function announce(t) { var l = $('cs-live'); l.textContent = ''; setTimeout(function () { l.textContent = t; }, 30); }
+
+  /* May the filer file this returned case again now? Only while no later
+     attempt of it exists: none in progress or in force, and no newer
+     attempt of the same revision, even a returned one. The newest one is
+     linked instead, so its fixes are never dropped. */
+  function laterAttempt(e) {
+    if (!e.record || typeof TAQA_STORE === 'undefined') return null;
+    var mine = e.record.attempt || 1;
+    var fam = (TAQA_STORE.revisionsOf(e.docNumber) || []).filter(function (x) {
+      if (x === e.record) return false;
+      if (!(x.status === 'draft' && x.rejected)) return true;
+      return String(x.revision) === String(e.record.revision) && (x.attempt || 1) > mine;
+    }).sort(function (a, b) { return (b.attempt || 1) - (a.attempt || 1); });
+    for (var i = 0; i < fam.length; i++) { var x = C.byKey(TAQA_STORE.recordKey(fam[i])); if (x) return x; }
+    return fam.length ? { title: '', url: '', statusLabel: 'in progress', revLabel: '' } : null;
+  }
+  function canRefile(e) {
+    return C.canResubmit(e) && !laterAttempt(e);
+  }
+
+  /* ── Not available ── */
+  function gone() {
+    document.title = 'Case not available, RISE';
+    $('cs-title').textContent = 'Case not available';
+    $('cs-crumb-n').textContent = 'Not available';
+    $('cs-crumb-area').hidden = true;
+    ['cs-chips', 'cs-num', 'cs-actions', 'cs-banner', 'cs-print-foot'].forEach(function (id) { $(id).innerHTML = ''; });
+    $('cs-sum').hidden = true;
+    var who = C.canFile();
+    $('cs-content').innerHTML = '<section class="cs-gone" aria-label="Why this case is not shown">' +
+      '<p>This case is not in the library, or it is not open to your role.</p>' +
+      '<p>A case waiting for review can be opened only by the person who filed it, QMS, the area’s Director and an external auditor. Check the address, or find the case in the library.</p>' +
+      '<div class="acts"><a class="cs-qbtn pri" href="cases.html">Open the case library</a>' +
+      (who.ok ? '<a class="cs-qbtn" href="case-new.html">Add a case</a>' : '') + '</div></section>';
+  }
+
+  /* ── Header ── */
+  var ST_CLASS = { 'with-qms': 's-qms', 'with-director': 's-dir', 'returned': 's-ret', 'approved': 's-app' };
+  function head(e) {
+    document.title = e.title + ', RISE';
+    var crumb = $('cs-crumb-area');
+    crumb.hidden = !e.area;
+    crumb.innerHTML = e.area ? '<a href="cases.html?area=' + encodeURIComponent(e.area) + '">' + esc(e.areaName) + '</a>' : '';
+    $('cs-crumb-n').textContent = e.docNumber || e.id || 'Field case';
+    $('cs-title').textContent = e.title || 'Untitled case';
+    var chips = '<span class="cs-type"><span class="cs-mark' + (HOT[e.type] ? ' hot' : '') + '" aria-hidden="true">' + esc(e.letter) + '</span>' +
+      '<span>' + esc(e.typeLabel) + '<small>' + esc(e.areaName) + (e.location ? ' · ' + esc(e.location) : '') + '</small></span></span>';
+    if (e.status !== 'published') chips += '<span class="cs-pill st ' + (ST_CLASS[e.status] || '') + '">' + esc(e.status === 'returned' ? 'Returned' : e.statusLabel) + '</span>';
+    if (e.salesReady) chips += '<span class="cs-pill sales" title="Can support a tender or customer meeting">' + ICON.star + 'Sales-ready</span>';
+    $('cs-chips').innerHTML = chips;
+    var num = [];
+    if (e.docNumber) num.push('<b>' + esc(e.docNumber) + '</b>');
+    else if (e.id) num.push('<b>' + esc(e.id) + '</b>');
+    if (e.revLabel) num.push(esc(e.revLabel));
+    num.push(esc(e.source === 'shipped' ? 'Supplied case' : 'Field case filed in RISE'));
+    if (e.released && e.publishedDate) num.push('In force from ' + esc(day(e.publishedDate)));
+    $('cs-num').innerHTML = num.join(' · ');
+    var sum = $('cs-sum');
+    sum.hidden = !e.summary;
+    sum.textContent = e.summary || '';
+  }
+
+  function banner(e) {
+    var box = $('cs-banner'), html = '', cls = '';
+    var stage = e.status === 'with-qms' ? 'With QMS' : 'With the Director';
+    if (e.status === 'with-qms' || e.status === 'with-director') {
+      if (e.mine) {
+        html = '<b>Submitted for review.</b> QMS checks it, then the Director. Until then only you, QMS, the area’s Director and an external auditor can see it. <span>Now: ' + esc(stage) + '.</span>';
+      } else {
+        html = '<b>Not released yet: ' + esc(stage) + '.</b> QMS checks it, then the area’s Director releases it. Until then only its filer, QMS, the area’s Director and an external auditor can see it.';
+        var r = TAQA_ROLE.current(), acts = [];
+        if (r === 'qms' && e.status === 'with-qms') acts.push('<a href="master-list.html?view=qms&amp;doc=' + encodeURIComponent(e.docNumber) + '">Check it in the QMS Workbench</a>');
+        if (r === 'owner' && e.status === 'with-director' && TAQA_ROLE.area() === e.area) acts.push('<a href="dashboard.html?id=' + encodeURIComponent(e.area) + '">Decide on your desk</a>');
+        if (acts.length) html += '<div class="acts">' + acts.join('') + '</div>';
+      }
+    } else if (e.status === 'approved') {
+      html = '<b>' + esc(e.statusLabel) + '.</b> It is listed in the library from that day. Until then only its filer, QMS, the area’s Director and an external auditor can see it.';
+    } else if (e.status === 'returned') {
+      cls = ' ret';
+      var by = e.record && e.record.rejectedAtStage === 'director' ? 'the Director' : 'QMS';
+      var later = laterAttempt(e);
+      var why = str(e.returnedReason) || 'No reason recorded';
+      html = '<b>Returned by ' + esc(by) + ':</b> ' + esc(why) + (/[.!?]$/.test(why) ? '' : '.');
+      if (later && later.url && later.status === 'returned')
+        html += ' <span>A later attempt was filed and returned too: <a href="' + esc(later.url) + '">' + esc(later.revLabel || 'the latest attempt') + '</a>. That one is the attempt to edit and file again.</span>';
+      else if (later && later.url) html += ' <span>It was filed again: <a href="' + esc(later.url) + '">' + esc([later.revLabel, later.statusLabel].filter(Boolean).join(', ')) + '</a>.</span>';
+      else if (canRefile(e)) html += ' Edit it and file it again; it keeps its number, ' + esc(e.docNumber) + '.' +
+        '<div class="acts"><a href="case-new.html?edit=' + encodeURIComponent(e.key) + '">Edit and file it again</a></div>';
+      else if (e.mine) html += ' It cannot be filed again from here while another filing of it is in progress.';
+    } else if (e.status !== 'published') {
+      html = '<b>No longer in force: ' + esc(e.statusLabel) + '.</b> Kept for the record.';
+      var cur = typeof TAQA_STORE !== 'undefined' ? TAQA_STORE.findDoc(e.docNumber) : null;
+      var ce = cur && cur !== e.record ? C.byKey(TAQA_STORE.recordKey(cur)) : null;
+      if (ce && ce.released) html += ' <a href="' + esc(ce.url) + '">Open the revision in force</a>.';
+    }
+    box.innerHTML = html ? '<div class="cs-banner' + cls + '" id="cs-status" role="note">' + ICON.info + '<div>' + html + '</div></div>' : '';
+  }
+
+  function actions(e) {
+    var a = [];
+    if (canRefile(e)) a.push('<a class="cs-btn pri" id="cs-edit" href="case-new.html?edit=' + encodeURIComponent(e.key) + '">' + ICON.edit + 'Edit and file again</a>');
+    a.push('<button type="button" class="cs-btn" id="cs-print">' + ICON.print + 'Print</button>');
+    a.push('<button type="button" class="cs-btn" id="cs-json">' + ICON.down + 'Download JSON</button>');
+    a.push('<button type="button" class="cs-btn" id="cs-html">' + ICON.down + 'Download HTML card</button>');
+    $('cs-actions').innerHTML = a.join('');
+  }
+
+  /* ── Facts ── */
+  // Escaped text with any word that holds a digit and a hyphen (a number,
+  // a date, a reference) kept on one line.
+  function nums(v) {
+    return String(v == null ? '' : v).split(/(\s+)/).map(function (w) {
+      return /\d/.test(w) && /-/.test(w) ? '<span class="num">' + esc(w) + '</span>' : esc(w);
+    }).join('');
+  }
+  /* The facts recorded come first; the ones left blank are named on one
+     line after them, so the grid never opens on a block of empty cells and
+     a blank is still said honestly. */
+  var blank = [];
+  function fact(label, v, always) {
+    v = str(v);
+    if (!v) { if (always) blank.push(label); return ''; }
+    return '<div><dt>' + esc(label) + '</dt><dd>' + nums(v) + '</dd></div>';
+  }
+  function facts(e) {
+    blank = [];
+    var c = e.card || {}, inc = e.type === 'incident' ? (c.incident || {}) : null;
+    var f = [
+      fact('Client', c.customer, true),
+      fact('Rig / well', c.wellRef, true),
+      fact('Field / area', c.field, true),
+      fact('Hole size', c.holeSize ? C.holeLabel(c.holeSize) : '', true),
+      fact('Formation / interval', c.formation, true),
+      fact('Service / tool', (c.services || []).join(', '), true)
+    ];
+    if (inc) {
+      f.push(fact('Incident type', inc.type, true));
+      f.push(fact('Incident date', inc.date ? day(inc.date) : '', true));
+      f.push(fact('Time first noticed', inc.timeNoticed, true));
+      f.push(fact('Depth at onset', str(inc.depthFt) ? Number(inc.depthFt).toLocaleString('en-GB') + ' ft MD' : '', true));
+      f.push(fact('Equipment / serial numbers', inc.equipment, true));
+      f.push(fact('Mud or fluid', inc.mud, true));
+      f.push(fact('NPT', str(inc.nptHr) ? inc.nptHr + ' hr' : '', true));
+    } else {
+      f.push(fact('Event month', c.eventMonth ? day(c.eventMonth) : '', true));
+    }
+    if (inc && c.eventMonth) f.push(fact('Event month', day(c.eventMonth)));
+    f.push(fact('Type', e.typeLabel, true));
+    f.push(fact('Source document', c.sourceDoc, true));
+    f.push(fact('Location', c.location, true));
+    f.push(fact('Class', ({ internal: 'Internal', confidential: 'Confidential', restricted: 'Restricted' })[e.classification] || e.classification, true));
+    f.push(fact('Author (role)', c.authorRole, true));
+    var nr = blank.length ? '<p class="cs-nr" id="cs-nr"><b>Not recorded:</b> ' + blank.map(esc).join(' · ') + '</p>' : '';
+    return '<section class="cs-facts" aria-labelledby="cs-facts-h"><h2 id="cs-facts-h">' + (inc ? '<span class="k" aria-hidden="true">1</span>The incident' : 'Facts') + '</h2><dl class="cs-dl">' + f.join('') + '</dl>' + nr + '</section>';
+  }
+
+  /* ── The type's own sections ── */
+  function block(label, v, always) {
+    v = str(v);
+    if (!v && !always) return '';
+    return '<div class="cs-f"><h3>' + esc(label) + '</h3>' + (v ? '<p>' + esc(v) + '</p>' : '<p class="none">Not recorded.</p>') + '</div>';
+  }
+  function sec(id, title, body, k, meta) {
+    return '<section class="cs-sec" id="' + id + '" aria-labelledby="' + id + '-h"><h2 id="' + id + '-h">' +
+      (k ? '<span class="k" aria-hidden="true">' + k + '</span>' : '') + esc(title) +
+      (meta ? ' <span class="meta">' + esc(meta) + '</span>' : '') + '</h2>' + body + '</section>';
+  }
+  function sections(e) {
+    var c = e.card || {}, s = c.sections || {}, fields = (C.FIELDS.sections || {})[e.type] || [];
+    var fig = { 'case-study': 'headline', 'benchmark': 'value' }[e.type];
+    var top = fig && str(s[fig]) ? '<div class="cs-fig"><span>' + esc((fields.filter(function (f) { return f.key === fig; })[0] || {}).label || '') + '</span><b>' + esc(s[fig]) + '</b></div>' : '';
+    var body = fields.filter(function (f) { return f.kind !== 'check' && f.key !== fig; }).map(function (f) {
+      return block(f.label, s[f.key], f.required);
+    }).join('');
+    if (e.type === 'appreciation') {
+      body += '<div class="cs-f"><h3>Sharing</h3>' + (s.shareAgreed === true
+        ? '<span class="cs-ok yes">' + ICON.check + 'The customer agreed this can be shared</span>'
+        : '<span class="cs-ok no">' + ICON.info + 'The customer has not confirmed this can be shared</span>') + '</div>';
+    }
+    if (!top && !body) return '';
+    return sec('cs-type-sec', e.typeLabel, top + body);
+  }
+
+  function incident(e) {
+    var inc = (e.card || {}).incident || {}, out = '';
+    // What was happening
+    out += sec('cs-happening', 'What was happening',
+      block('Activity when it started', inc.activity, true) + block('Ongoing activity', inc.ongoing) + block('Conditions', inc.conditions), '2');
+    // Symptoms, in order
+    var sy = (Array.isArray(inc.symptoms) ? inc.symptoms : []).filter(function (r) { return r && (str(r.text) || str(r.time) || str(r.tag)); });
+    out += sec('cs-symptoms', 'Symptoms, in order', sy.length
+      ? '<ol class="cs-tl">' + sy.map(function (r, i) {
+          return '<li><span class="dot" aria-hidden="true">' + (i + 1) + '</span><div><div class="row">' +
+            (str(r.time) ? '<span class="tm">' + esc(r.time) + '</span>' : '<span class="tm none">Time not recorded</span>') +
+            (str(r.tag) ? '<span class="cs-tag">' + esc(r.tag) + '</span>' : '') + '</div>' +
+            '<p class="tx">' + esc(r.text || '') + '</p></div></li>';
+        }).join('') + '</ol>'
+      : '<p class="cs-empty">No symptoms recorded.</p>', '3', sy.length ? plural(sy.length, 'observation', 'observations') : '');
+    // What was tried
+    var tr = (Array.isArray(inc.tried) ? inc.tried : []).filter(function (r) { return r && (str(r.action) || str(r.result) || str(r.note)); });
+    var tally = { Worked: 0, Partial: 0, Failed: 0 };
+    tr.forEach(function (r) { if (tally[r.result] != null) tally[r.result]++; });
+    var tl = ['Worked', 'Partial', 'Failed'].filter(function (k) { return tally[k]; }).map(function (k) { return tally[k] + ' ' + k.toLowerCase(); }).join(', ');
+    out += sec('cs-tried', 'What was tried', tr.length
+      ? '<ol class="cs-led">' + tr.map(function (r, i) {
+          var rs = RESULT[r.result] || ['r-other', ''];
+          return '<li><span class="n" aria-hidden="true">' + (i + 1) + '</span><div><div class="a">' + esc(r.action || 'Action not recorded') + '</div>' +
+            (str(r.note) ? '<div class="nt">' + esc(r.note) + '</div>' : '') + '</div>' +
+            '<span class="cs-res ' + rs[0] + '">' + rs[1] + '<span>' + esc(r.result || 'Result not recorded') + '</span></span></li>';
+        }).join('') + '</ol>'
+      : '<p class="cs-empty">Nothing recorded as tried.</p>', '4', tr.length ? plural(tr.length, 'step', 'steps') + (tl ? ': ' + tl : '') : '');
+    // How it ended
+    var hint = C.labelFor.ending(e.area, inc.ending);
+    out += sec('cs-ended', 'How it ended', '<div class="cs-end">' +
+      (str(inc.ending) ? '<span class="big">' + esc(inc.ending) + '</span>' : '<span class="cs-empty">Not recorded.</span>') +
+      (hint ? '<span class="hint">' + esc(hint) + '</span>' : '') +
+      (str(inc.nptHr) ? '<span class="npt"><b>' + esc(inc.nptHr) + ' hr</b><span>Non-productive time</span></span>' : '') + '</div>', '5');
+    // Findings at surface, then the hypothesis, kept apart
+    var fd = (Array.isArray(inc.findings) ? inc.findings : []).map(str).filter(Boolean);
+    var fbody = (fd.length ? '<div class="cs-finds">' + fd.map(function (x) { return '<span class="cs-find">' + ICON.find + esc(x) + '</span>'; }).join('') + '</div>' : '') +
+      block('What was found', inc.findingsText) +
+      (!fd.length && !str(inc.findingsText) ? '<p class="cs-empty">No findings recorded' + (str(inc.ending) && inc.ending !== C.OPTIONS.tripOut(e.area) ? ': it did not end with ' + esc(C.OPTIONS.tripOut(e.area) || 'a trip out of the hole') + '.' : '.') + '</p>' : '');
+    if (str(inc.cause)) fbody += '<div class="cs-hyp" id="cs-hyp"><div class="hd"><h3>Suspected cause</h3><span class="lab">Hypothesis, not a finding</span></div><p>' + esc(inc.cause) + '</p></div>';
+    if (str(inc.contact)) fbody += '<div class="cs-contact" id="cs-contact"><h3>Contact for follow-up questions</h3><p>' + esc(inc.contact) + '</p><small>Shown to the filer, QMS, the area’s Director and an external auditor only.</small></div>';
+    out += sec('cs-findings', 'Findings at surface', fbody, '6');
+    return out;
+  }
+
+  /* ── Rail: the record and related cases ── */
+  function record(e) {
+    var r = e.record || {}, rows = [];
+    function row(k, v) { if (str(v)) rows.push('<div><dt>' + esc(k) + '</dt><dd>' + nums(v) + '</dd></div>'); }
+    row('Number', e.docNumber || e.id);
+    row('Revision', e.revLabel);
+    row('Status', e.statusLabel);
+    row('Area', e.areaName);
+    row('Class', ({ internal: 'Internal', confidential: 'Confidential', restricted: 'Restricted' })[e.classification] || e.classification);
+    if (e.record) {
+      row('Filed', r.submittedAt ? day(r.submittedAt) : '');
+      row('Approved', r.approvedDate ? day(r.approvedDate) : '');
+      row('In force from', e.released && r.issueDate ? day(r.issueDate) : '');
+      row('Next review', r.nextReviewDate ? day(r.nextReviewDate) : '');
+      // No page revises a case in place yet: say how a due case is reviewed.
+      if (e.released && e.source === 'case') row('At review', 'File an updated case. A case is not revised in place yet.');
+      row('Number status', r.numberStatus === 'provisional' ? 'Provisional, until QHSE assigns a code' : '');
+    } else {
+      row('Published', e.publishedDate ? day(e.publishedDate) : '');
+      row('Source', 'Supplied for the library; not a register record');
+    }
+    return '<section class="cs-box" aria-labelledby="cs-rec-h"><h2 id="cs-rec-h">Record</h2><dl class="cs-rec">' + rows.join('') + '</dl></section>';
+  }
+  function related(e) {
+    var list = [];
+    if (e.services.length || e.holeSize) {
+      list = C.match({ area: e.area, prefer: { services: e.services, holeSize: e.holeSize } }).filter(function (x) {
+        if (x.key === e.key || (x.docNumber && x.docNumber === e.docNumber)) return false;
+        x.why = x.why.filter(function (w) { return /^Same (service|hole size)/.test(w); });
+        return x.why.length > 0;
+      }).slice(0, 4);
+    }
+    var body = list.length ? '<ul class="cs-rel">' + list.map(function (x) {
+      return '<li><span class="mk" aria-hidden="true">' + esc(x.letter) + '</span><div><a href="' + esc(x.url) + '">' + esc(x.title) + '</a>' +
+        '<div class="why">' + esc(x.why.join(' · ')) + '</div>' +
+        '<div class="m">' + esc([x.typeLabel, x.docNumber || x.id].filter(Boolean).join(' · ')) + '</div></div></li>';
+    }).join('') + '</ul>'
+      : '<p class="cs-empty">No other released case in ' + esc(e.areaName) + ' shares a service or hole size with this one yet.</p>';
+    return '<section class="cs-box cs-related" id="cs-related" aria-labelledby="cs-rel-h"><h2 id="cs-rel-h">Related cases</h2>' + body +
+      '<a class="more" href="cases.html?area=' + encodeURIComponent(e.area) + '">All ' + esc(e.areaName) + ' cases</a></section>';
+  }
+
+  /* ── Downloads: a file, or the clipboard inside a framed preview ── */
+  function deliver(name, text, type) {
+    var framed = true;
+    try { framed = window.self !== window.top; } catch (x) { framed = true; }
+    if (!framed) {
+      try {
+        var url = URL.createObjectURL(new Blob([text], { type: type }));
+        var a = document.createElement('a');
+        a.href = url; a.download = name; a.style.display = 'none';
+        document.body.appendChild(a); a.click();
+        setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 2000);
+        announce('Downloaded ' + name + '.');
+        return;
+      } catch (x) {}
+    }
+    var done = function () { announce('Downloads are blocked in this preview, so ' + name + ' was copied to the clipboard. Paste it into a file and save it under that name.'); };
+    var fail = function () { announce('This preview blocks downloads and the clipboard. Open RISE in its own tab to download ' + name + '.'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fail);
+    else fail();
+  }
+
+  var current = null;
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest('button');
+    if (!b || !current) return;
+    if (b.id === 'cs-print') { try { window.print(); } catch (x) {} }
+    else if (b.id === 'cs-json') deliver(C.fileName(current, 'json'), JSON.stringify(C.toJSON(current), null, 2), 'application/json');
+    else if (b.id === 'cs-html') deliver(C.fileName(current, 'html'), C.htmlCard(current), 'text/html');
+  });
+
+  function paint() {
+    var e = C.get(Q);
+    current = e;
+    if (!e) { gone(); return; }
+    if (e.source === 'register') {
+      // A register lesson or alert that is a document, not a card: its own page is the viewer.
+      $('cs-title').textContent = 'Opening the register document';
+      location.replace(e.url);
+      return;
+    }
+    head(e); banner(e); actions(e);
+    var body = e.type === 'incident' ? incident(e) : sections(e);
+    $('cs-content').innerHTML = facts(e) +
+      '<div class="cs-grid"><div class="cs-body">' + (body || '<p class="cs-empty">This case has no further sections.</p>') + '</div>' +
+      '<aside class="cs-rail" aria-label="Record and related cases">' + record(e) + related(e) + '</aside></div>';
+    $('cs-print-foot').textContent = 'Printed from RISE on ' + day(today()) + '. ' + (e.docNumber || e.id || '') + ' ' + (e.revLabel || '') +
+      ', ' + e.statusLabel + '. Classification ' + String(e.classification || 'internal').toUpperCase() + ': handle as RISE requires.';
+  }
+  C.onChange(paint);
+})();
+</script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
+</body>
+</html>

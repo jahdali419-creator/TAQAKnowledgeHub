@@ -1,0 +1,993 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-taqa-theme="light">
+<head>
+<meta charset="UTF-8">
+<script>/* Our own attribute, set outright every load. The page used to key off
+   data-theme, which the page host also sets to theme its own chrome, so a
+   viewer in dark mode handed us data-theme="dark" before our markup was
+   parsed. A second <html> tag only contributes attributes that are not
+   already there, so our light value was dropped and the hub went dark with
+   nothing in our storage saying so. */
+try{var _t=localStorage.getItem('taqa-theme-v3');document.documentElement.setAttribute('data-taqa-theme',_t==='dark'?'dark':'light');}catch(e){document.documentElement.setAttribute('data-taqa-theme','light');}</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>/* Installed app on an iPhone: the status bar is drawn over the page, and iOS keeps taps in that strip for itself, so the bell and the other controls under it could not be tapped. Drawing edge to edge (viewport-fit=cover) turns on the bar's safe-area padding in topbar.css, which drops them below the status bar. A browser tab is left exactly as it was. */(function(){try{if(navigator.standalone||matchMedia('(display-mode: standalone)').matches){var m=document.querySelector('meta[name="viewport"]');if(m&&!/viewport-fit/.test(m.content))m.content+=', viewport-fit=cover';}}catch(e){}})();</script>
+<title>Pre-job Pack, RISE</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#005D63">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RISE">
+<meta name="application-name" content="RISE">
+<link rel="apple-touch-icon" href="icons/rise-apple-touch-icon.png">
+<link rel="icon" href="icons/rise-favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="icons/rise-favicon-16.png" type="image/png" sizes="16x16">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* Pre-job lessons pack. A photo band that says what the pack is for, a
+   "Describe the job" panel that rides over its lower edge, then the pack:
+   released field cases and the register's lessons and alerts for one area,
+   ranked against the job and grouped the way a crew talks them through.
+   A summary rail on a desk screen (as-of stamp, discussed count, print);
+   on a phone the rail sits above the groups and a slim bar keeps the count
+   and Print in reach. Print gives a clean sheet with tick boxes and a
+   sign-off line, no photo, no controls. */
+:root{
+  --primary:#005D63;--primary-ink:#005D63;--primary-light:#00BBB6;
+  --dark:#F4F4F3;--paper:#FFFFFF;--inset:#F7F6F4;
+  --line:rgba(117,106,97,0.18);--line-soft:rgba(117,106,97,0.10);--line-strong:rgba(117,106,97,0.30);
+  --text:#1E1C1A;--text-muted:#5F564F;--text-light:#756A61;
+  --fill:#E7F3F3;--fill-strong:#005D63;
+  --ok:#00705F;--ok-bg:#E6F3F0;--stop:#C8102E;--stop-bg:#FCEBEE;
+  --accent:#FF6720;
+  --shadow:0 1px 2px rgba(0,41,44,.05),0 10px 28px -14px rgba(0,41,44,.22);
+  --shadow-3:0 2px 6px rgba(0,41,44,.06),0 28px 56px -24px rgba(0,41,44,.34);
+  --ease:cubic-bezier(.23,1,.32,1);
+  --focus:0 0 0 3px rgba(0,187,182,.45);
+  --arrow:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23857B73' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+html[data-taqa-theme="dark"]{
+  color-scheme:dark;
+  --primary-ink:#00BBB6;--dark:#001314;--paper:#002326;--inset:#001C1E;
+  --line:rgba(0,187,182,0.20);--line-soft:rgba(0,187,182,0.10);--line-strong:rgba(0,187,182,0.30);
+  --text:#C7DBDD;--text-muted:#9CC0C2;--text-light:#7FAFB2;
+  --fill:rgba(0,187,182,0.12);--fill-strong:#00BBB6;
+  --ok:#4FD1B5;--ok-bg:rgba(79,209,181,.12);--stop:#FF8A94;--stop-bg:rgba(255,138,148,.10);
+  --shadow:0 0 0 1px rgba(0,187,182,.08),0 12px 30px -14px rgba(0,0,0,.6);
+  --shadow-3:0 0 0 1px rgba(0,187,182,.10),0 28px 56px -22px rgba(0,0,0,.7);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;}
+html[data-taqa-theme="dark"] body{background:#001314;}
+.page-wrapper{padding-top:var(--nav-h,64px);min-height:100vh;display:flex;flex-direction:column;}
+.skip{position:absolute;left:-9999px;top:auto;}
+.skip:focus{left:16px;top:calc(var(--nav-h,64px) + 8px);z-index:10001;background:var(--paper);color:var(--primary-ink);padding:8px 14px;border-radius:8px;border:1px solid var(--line);}
+.vh{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+main{display:block;}
+a{color:var(--primary-ink);}
+a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;}
+
+/* ── Hero ── */
+.pj-hero{position:relative;overflow:hidden;isolation:isolate;background:#001314;color:#fff;}
+.pj-photo{position:absolute;inset:-2%;z-index:-3;background:#001314 center 40%/cover no-repeat;
+  animation:pjKen 32s ease-in-out infinite alternate;will-change:transform;}
+@keyframes pjKen{0%{transform:scale(1) translate(0,0);}50%{transform:scale(1.06) translate(-1%,-.6%);}100%{transform:scale(1.09) translate(.6%,.8%);}}
+.pj-hero::before{content:'';position:absolute;inset:0;z-index:-2;
+  background:linear-gradient(105deg,rgba(0,19,20,.95) 0%,rgba(0,19,20,.87) 55%,rgba(0,19,20,.70) 100%);}
+.pj-hero .th-lines{z-index:-1;}
+.pj-hero-in{max-width:1200px;margin:0 auto;padding:42px 40px 104px;display:grid;
+  grid-template-columns:minmax(0,1fr) auto;gap:26px 48px;align-items:end;}
+.pj-eyebrow{display:flex;align-items:center;gap:10px;font:700 11px/1.3 'Inter',sans-serif;letter-spacing:1.5px;
+  text-transform:uppercase;color:#9FE3DF;margin-bottom:16px;}
+.pj-eyebrow::before{content:'';width:22px;height:2px;border-radius:2px;background:var(--accent);flex:none;}
+.pj-hero h1{font-family:'BwGradual','Urbanist',sans-serif;font-weight:800;font-size:clamp(32px,4.2vw,52px);
+  line-height:1.05;letter-spacing:-.025em;color:#fff;text-wrap:balance;}
+.pj-hero h1 .l1,.pj-hero h1 .l2{display:block;animation:pjRise .7s var(--ease) both;}
+.pj-hero h1 .l2{color:#00BBB6;animation-delay:.08s;}
+.pj-lede{margin-top:16px;max-width:60ch;font-size:15.5px;line-height:1.6;color:rgba(255,255,255,.80);animation:pjRise .7s var(--ease) .14s both;}
+@keyframes pjRise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+.pj-stats{display:grid;grid-template-columns:repeat(3,auto);margin:0;animation:pjRise .7s var(--ease) .22s both;}
+.pj-stats[hidden]{display:none;}
+.pj-stat{display:flex;flex-direction:column-reverse;justify-content:flex-end;padding:4px 22px 2px;border-left:1px solid rgba(255,255,255,.18);min-width:0;}
+.pj-stat:first-child{border-left:0;padding-left:0;}
+.pj-stat dd{font:800 34px/1 'BwGradual','Urbanist',sans-serif;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:-.02em;}
+.pj-stat dt{margin-top:8px;font-size:12.5px;line-height:1.35;color:rgba(255,255,255,.76);max-width:14ch;}
+
+/* ── Describe the job ── */
+.pj-panel{position:relative;z-index:5;max-width:1200px;margin:-68px auto 0;padding:0 40px;}
+.pj-form{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-3);padding:18px 20px 18px;}
+.pj-form-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 16px;margin-bottom:12px;}
+.pj-form-h h2{font:700 17px/1.3 'BwGradual','Urbanist',sans-serif;color:var(--text);}
+.pj-form-h p{font-size:13px;line-height:1.45;color:var(--text-light);}
+.pj-grid5{display:grid;grid-template-columns:1.25fr 1fr .8fr 1fr 1.35fr;gap:12px;}
+.pj-field{min-width:0;}
+.pj-lbl{display:block;font:600 12.5px/1.3 'Inter',sans-serif;color:var(--text-muted);margin-bottom:6px;}
+.pj-lbl .req{color:var(--stop);margin-left:2px;}
+.pj-field select,.pj-field input{width:100%;min-height:44px;border-radius:10px;border:1px solid var(--line-strong);
+  background:var(--paper);color:var(--text);font:500 14.5px/1.2 'Inter',sans-serif;}
+.pj-field select{padding:0 34px 0 12px;background:var(--paper) var(--arrow) no-repeat right 12px center;
+  -webkit-appearance:none;appearance:none;text-overflow:ellipsis;cursor:pointer;}
+.pj-field input{padding:0 12px;}
+.pj-field input::placeholder{color:var(--text-light);opacity:1;}
+.pj-field select:focus,.pj-field input:focus{outline:none;border-color:var(--primary-ink);box-shadow:var(--focus);}
+.pj-field select.on,.pj-field input.on{border-color:var(--primary-ink);background-color:var(--fill);}
+.pj-field [aria-invalid="true"]{border-color:var(--stop)!important;}
+.pj-hint{margin-top:5px;font-size:12px;line-height:1.4;color:var(--text-light);}
+.pj-err{margin-top:5px;font-size:12.5px;line-height:1.4;font-weight:600;color:var(--stop);}
+.pj-err[hidden],.pj-hint[hidden]{display:none;}
+.pj-svc{margin-top:14px;padding-top:14px;border-top:1px solid var(--line-soft);border-left:0;border-right:0;border-bottom:0;min-width:0;}
+.pj-svc legend{float:left;width:100%;font:600 12.5px/1.3 'Inter',sans-serif;color:var(--text-muted);margin-bottom:8px;}
+.pj-svc legend span{font-weight:500;color:var(--text-light);}
+.pj-chips{clear:both;display:flex;flex-wrap:wrap;gap:8px;min-width:0;}
+.pj-chips .th-chip{min-height:38px;white-space:normal;text-align:left;line-height:1.2;padding:6px 14px;}
+.pj-chips .th-chip svg{width:13px;height:13px;flex:none;display:none;}
+.pj-chips .th-chip[aria-pressed="true"] svg{display:block;}
+.pj-none{font-size:13px;line-height:1.5;color:var(--text-light);}
+
+/* ── Body: pack + rail ── */
+.pj-body{max-width:1200px;width:100%;margin:0 auto;padding:30px 40px 80px;display:grid;
+  grid-template-columns:minmax(0,1fr) 320px;gap:24px 28px;align-items:start;}
+.pj-pack{min-width:0;}
+.pj-body.solo{grid-template-columns:minmax(0,1fr);}
+.pj-body.solo .pj-tiles{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));}
+.pj-rail{position:sticky;top:calc(var(--nav-h,64px) + 18px);min-width:0;}
+.pj-rail[hidden]{display:none;}
+
+.pj-card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px 20px 18px;min-width:0;}
+.pj-card h2{font:700 16.5px/1.3 'BwGradual','Urbanist',sans-serif;color:var(--text);}
+.pj-asof{margin-top:4px;font-size:13px;line-height:1.5;color:var(--text-muted);font-variant-numeric:tabular-nums;}
+.pj-asof b{color:var(--text);font-weight:600;}
+.pj-prog{margin-top:16px;}
+.pj-prog-t{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:13px;color:var(--text-muted);}
+.pj-prog-t b{font:800 22px/1 'BwGradual','Urbanist',sans-serif;color:var(--text);font-variant-numeric:tabular-nums;}
+.pj-bar{position:relative;height:8px;margin-top:8px;border-radius:999px;background:var(--fill);overflow:hidden;}
+.pj-bar span{position:absolute;inset:0;border-radius:999px;background:var(--fill-strong);transform:scaleX(var(--p,0));transform-origin:left center;transition:transform .45s var(--ease);}
+.pj-jump{list-style:none;margin-top:16px;border-top:1px solid var(--line-soft);}
+.pj-jump li{border-bottom:1px solid var(--line-soft);}
+.pj-jump a,.pj-jump .pj-jrow{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:40px;padding:6px 2px;font-size:13.5px;font-weight:500;color:var(--text);text-decoration:none;}
+.pj-jump a:hover{color:var(--primary-ink);}
+.pj-jump a .n{font-weight:700;font-variant-numeric:tabular-nums;color:var(--primary-ink);white-space:nowrap;}
+.pj-jump a .n i{font-style:normal;font-weight:500;color:var(--text-light);}
+.pj-jump li.zero .pj-jrow{color:var(--text-light);}
+.pj-jump li.zero .n{color:var(--text-light);font-weight:500;}
+.pj-show{border:0;margin-top:16px;min-width:0;}
+.pj-show legend{font:600 12.5px/1.3 'Inter',sans-serif;color:var(--text-muted);margin-bottom:8px;}
+.pj-seg{display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:3px;border-radius:12px;background:var(--inset);border:1px solid var(--line-soft);}
+.pj-seg label{position:relative;display:flex;}
+.pj-seg input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;}
+.pj-seg input:disabled{cursor:not-allowed;}
+.pj-seg span{display:flex;align-items:center;justify-content:center;width:100%;min-height:36px;padding:4px 8px;border-radius:9px;text-align:center;
+  font:600 12.5px/1.2 'Inter',sans-serif;color:var(--text-muted);}
+.pj-seg input:checked + span{background:var(--paper);color:var(--primary-ink);box-shadow:0 1px 2px rgba(0,41,44,.12),0 0 0 1px var(--line);}
+html[data-taqa-theme="dark"] .pj-seg input:checked + span{background:#003A3D;}
+.pj-seg input:disabled + span{color:var(--text-light);opacity:.75;}
+.pj-seg input:focus-visible + span{outline:2px solid var(--primary-ink);outline-offset:1px;}
+.pj-show-note{margin-top:6px;font-size:12px;line-height:1.45;color:var(--text-light);}
+.pj-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;}
+.pj-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:12px;
+  border:1px solid var(--line-strong);background:var(--paper);color:var(--primary-ink);font:600 14px/1 'BwGradual','Urbanist',sans-serif;
+  cursor:pointer;text-decoration:none;white-space:nowrap;transition:transform .12s var(--ease);-webkit-tap-highlight-color:transparent;}
+.pj-btn svg{width:16px;height:16px;flex:none;}
+@media(hover:hover){.pj-btn:hover{border-color:var(--primary-ink);background:var(--fill);}}
+.pj-btn:active{transform:scale(.98);}
+.pj-btn.pri{background:var(--fill-strong);border-color:transparent;color:#fff;}
+html[data-taqa-theme="dark"] .pj-btn.pri{color:#00191B;}
+@media(hover:hover){.pj-btn.pri:hover{background:#003A3D;}html[data-taqa-theme="dark"] .pj-btn.pri:hover{background:#9FE3DF;}}
+.pj-acts .pj-btn{flex:1 1 auto;}
+.pj-link{background:none;border:0;padding:6px 0;font:600 13px 'Inter',sans-serif;color:var(--primary-ink);cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+.pj-link[hidden]{display:none;}
+.pj-keep{margin-top:12px;font-size:12px;line-height:1.5;color:var(--text-light);}
+
+/* ── Groups and items ── */
+.pj-group{margin-bottom:26px;scroll-margin-top:calc(var(--nav-h,64px) + 16px);}
+.pj-ghead{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;margin-bottom:12px;}
+.pj-gico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--fill);color:var(--primary-ink);}
+.pj-gico svg{width:20px;height:20px;}
+.pj-ghead h2{font:700 19px/1.25 'BwGradual','Urbanist',sans-serif;color:var(--text);letter-spacing:-.01em;}
+.pj-ghead p{margin-top:2px;font-size:13px;line-height:1.45;color:var(--text-light);}
+.pj-gcount{font:700 13px/1 'Inter',sans-serif;color:var(--primary-ink);font-variant-numeric:tabular-nums;padding:6px 10px;border-radius:999px;background:var(--fill);white-space:nowrap;}
+.pj-items{list-style:none;display:grid;gap:10px;}
+.pj-item{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 14px;align-items:start;
+  background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px 16px 14px 16px;min-width:0;
+  transition:border-color .2s var(--ease),background-color .2s var(--ease);}
+.pj-item.in{animation:pjIn .42s var(--ease) both;animation-delay:calc(var(--i,0) * 32ms);}
+@keyframes pjIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.pj-item::before{content:'';position:absolute;left:-1px;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0;background:var(--fill-strong);
+  transform:scaleY(0);transform-origin:center;transition:transform .3s var(--ease);}
+.pj-item.is-done{background:var(--fill);border-color:transparent;}
+.pj-item.is-done::before{transform:scaleY(1);}
+.pj-mark{grid-row:1 / span 2;width:42px;height:42px;border-radius:11px;background:var(--fill);color:var(--primary-ink);
+  display:grid;place-items:center;font:800 11px/1 'BwGradual','Urbanist',sans-serif;letter-spacing:.04em;}
+.pj-item.is-done .pj-mark{background:var(--paper);}
+.pj-main{min-width:0;}
+.pj-type{font:600 12.5px/1.35 'Inter',sans-serif;color:var(--text-muted);overflow-wrap:anywhere;}
+.pj-type i{font-style:normal;font-weight:500;color:var(--text-light);}
+.pj-t{margin-top:3px;font:700 16.5px/1.32 'BwGradual','Urbanist',sans-serif;color:var(--text);letter-spacing:-.005em;overflow-wrap:anywhere;}
+.pj-t a{color:inherit;text-decoration:none;}
+.pj-t a:hover{color:var(--primary-ink);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;}
+.pj-meta{margin-top:5px;font-size:13px;line-height:1.45;color:var(--text-muted);font-variant-numeric:tabular-nums;overflow-wrap:anywhere;}
+.pj-why{display:flex;align-items:flex-start;gap:7px;margin-top:8px;font-size:13px;line-height:1.45;color:var(--text-muted);overflow-wrap:anywhere;}
+.pj-why b{flex:none;font:700 10.5px/1.9 'Inter',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--text-light);}
+.pj-why svg{flex:none;width:15px;height:15px;margin-top:2px;color:var(--primary-ink);}
+.pj-why.m{color:var(--primary-ink);font-weight:600;}
+.pj-why.m b{color:var(--primary-ink);}
+.pj-end{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:8px;font-size:12.5px;line-height:1.45;color:var(--text-muted);}
+.pj-endchip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;background:var(--fill);color:var(--primary-ink);font:600 12px/1.4 'Inter',sans-serif;}
+.pj-item.is-done .pj-endchip{background:var(--paper);}
+.pj-tick{grid-row:1 / span 2;grid-column:3;position:relative;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px 0 10px;
+  border-radius:12px;border:1px solid var(--line-strong);background:var(--paper);cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;
+  transition:border-color .15s var(--ease),background-color .15s var(--ease),transform .12s var(--ease);}
+.pj-tick:active{transform:scale(.97);}
+@media(hover:hover){.pj-tick:hover{border-color:var(--primary-ink);}}
+.pj-tick input{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;cursor:pointer;}
+.pj-box{position:relative;flex:none;width:20px;height:20px;border-radius:6px;border:2px solid var(--line-strong);background:var(--paper);
+  transition:background-color .15s var(--ease),border-color .15s var(--ease);}
+.pj-box::after{content:'';position:absolute;left:5px;top:1px;width:5px;height:10px;border:solid #fff;border-width:0 2.5px 2.5px 0;
+  transform:rotate(45deg) scale(0);transition:transform .2s var(--ease);}
+html[data-taqa-theme="dark"] .pj-box::after{border-color:#00191B;}
+.pj-tick-l{font:600 13px/1 'Inter',sans-serif;color:var(--text-muted);white-space:nowrap;}
+.pj-tick input:checked ~ .pj-box{background:var(--fill-strong);border-color:var(--fill-strong);}
+.pj-tick input:checked ~ .pj-box::after{transform:rotate(45deg) scale(1);}
+.pj-tick input:checked ~ .pj-tick-l{color:var(--primary-ink);}
+.pj-tick:has(input:checked){border-color:var(--fill-strong);}
+.pj-tick:has(input:focus-visible){outline:2px solid var(--primary-ink);outline-offset:2px;}
+
+.pj-quiet{margin:6px 0 0;font-size:13px;line-height:1.55;color:var(--text-light);}
+.pj-quiet b{font-weight:600;color:var(--text-muted);}
+
+/* Empty states and the area picker */
+.pj-empty{background:var(--paper);border:1px dashed var(--line-strong);border-radius:16px;padding:26px 24px;}
+.pj-empty h2{font:700 18px/1.3 'BwGradual','Urbanist',sans-serif;color:var(--text);margin-bottom:6px;}
+.pj-empty p{font-size:14px;line-height:1.6;color:var(--text-muted);max-width:64ch;}
+.pj-empty .pj-acts{margin-top:16px;}
+.pj-empty .pj-acts .pj-btn{flex:0 0 auto;}
+.pj-pick{border-style:solid;border-color:var(--line);}
+.pj-tiles{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:18px;}
+.pj-tile{width:100%;height:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 12px;text-align:left;
+  min-height:64px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--inset);color:var(--text);cursor:pointer;
+  font:inherit;transition:border-color .15s var(--ease),transform .2s var(--ease),background-color .15s var(--ease);}
+@media(hover:hover){.pj-tile:hover{border-color:var(--primary-ink);background:var(--paper);transform:translateY(-2px);}}
+.pj-tile:active{transform:scale(.98);}
+.pj-tile .t{font:600 14.5px/1.3 'BwGradual','Urbanist',sans-serif;overflow-wrap:anywhere;}
+.pj-tile .s{grid-column:1;font-size:12px;line-height:1.35;color:var(--text-light);}
+.pj-tile .n{grid-column:2;grid-row:1 / span 2;font:800 24px/1 'BwGradual','Urbanist',sans-serif;color:var(--primary-ink);font-variant-numeric:tabular-nums;}
+.pj-tile.zero .n{color:var(--text-light);font-weight:600;}
+
+/* Phone bar: the count and Print stay in reach while ticking. */
+.pj-dock{display:none;}
+.pj-sum{display:none;}
+
+/* Print-only sheet parts */
+.pj-print,.pj-print-foot{display:none;}
+
+@media(max-width:1100px){.pj-grid5{grid-template-columns:repeat(3,minmax(0,1fr));}.pj-grid5 .pj-wide{grid-column:span 2;}}
+@media(max-width:1023px){
+  .pj-body{grid-template-columns:minmax(0,1fr);}
+  .pj-rail{position:static;order:-1;}
+  .pj-sum{display:none;}
+  .pj-hero-in{grid-template-columns:minmax(0,1fr);}
+}
+@media(max-width:760px){
+  .pj-hero-in{padding:28px 16px 84px;gap:22px;}
+  .pj-hero h1{font-size:clamp(28px,8.4vw,38px);}
+  .pj-lede{font-size:14.5px;}
+  .pj-stats{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .pj-stat{padding:2px 12px 0;}
+  .pj-stat dd{font-size:28px;}
+  .pj-stat dt{font-size:12px;}
+  .pj-panel{margin-top:-56px;padding:0 16px;}
+  .pj-form{padding:16px 14px;border-radius:18px;}
+  .pj-grid5{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px 10px;}
+  .pj-grid5 .pj-full{grid-column:1 / -1;}
+  .pj-grid5 .pj-wide,.pj-grid5 .pj-wide-sm{grid-column:1 / -1;}
+  .pj-body{padding:20px 16px 96px;gap:20px;}
+  .pj-rail{order:1;}
+  .pj-sum{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 14px;margin:0 0 14px;
+    font-size:13.5px;line-height:1.4;color:var(--text-muted);font-variant-numeric:tabular-nums;}
+  .pj-sum b{color:var(--text);font-weight:700;}
+  .pj-card{padding:18px 16px 16px;}
+  .pj-item{grid-template-columns:auto minmax(0,1fr);padding:14px 14px 12px;gap:4px 12px;scroll-margin-bottom:88px;}
+  html{scroll-padding-bottom:88px;}
+  .pj-mark{grid-row:auto;width:36px;height:36px;border-radius:10px;font-size:10px;}
+  .pj-tick{grid-row:auto;grid-column:1 / -1;justify-content:center;margin-top:10px;width:100%;}
+  .pj-ghead{gap:10px;}
+  .pj-gico{width:36px;height:36px;border-radius:10px;}
+  .pj-ghead h2{font-size:17.5px;}
+  .pj-empty{padding:22px 18px;}
+  .pj-dock{position:fixed;left:0;right:0;bottom:0;z-index:900;display:flex;align-items:center;gap:12px;
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--line);
+    box-shadow:0 -10px 24px -18px rgba(0,41,44,.45);transform:translateY(110%);visibility:hidden;
+    transition:transform .3s var(--ease),visibility 0s linear .3s;}
+  .pj-dock.on{transform:none;visibility:visible;transition-delay:0s;}
+  .pj-dock[hidden]{display:none;}
+  html.taqa-menu-open .pj-dock{transform:translateY(110%);}
+  .pj-dock-t{flex:1 1 auto;min-width:0;font-size:13px;line-height:1.3;color:var(--text-muted);}
+  .pj-dock-t b{font:800 18px/1 'BwGradual','Urbanist',sans-serif;color:var(--text);font-variant-numeric:tabular-nums;}
+  .pj-dock .pj-bar{margin-top:6px;height:6px;}
+  .pj-dock .pj-btn{flex:none;}
+}
+@media(max-width:360px){
+  .pj-stat{padding:2px 8px 0;}
+  .pj-stat dd{font-size:24px;}
+  .pj-grid5{grid-template-columns:minmax(0,1fr);}
+  .pj-tick-l{font-size:12.5px;}
+}
+@media(prefers-reduced-motion:reduce){
+  .pj-photo,.pj-hero h1 .l1,.pj-hero h1 .l2,.pj-lede,.pj-stats,.pj-item.in{animation:none!important;}
+  .pj-bar span,.pj-item,.pj-item::before,.pj-tick,.pj-box,.pj-box::after,.pj-tile,.pj-btn,.pj-dock{transition:none!important;}
+  @media(hover:hover){.pj-tile:hover{transform:none;}}
+}
+
+/* ── Print: one clean sheet ── */
+@media print{
+  @page{margin:14mm 12mm;}
+  html,body{background:#fff!important;color:#000;}
+  nav,#nav-mobile-menu,.skip,footer,.pj-hero,.pj-panel,.pj-rail,.pj-dock,.pj-sum,#page-progress,.toast-wrap,#rise-note{display:none!important;}
+  .page-wrapper{padding-top:0;min-height:0;display:block;}
+  .pj-body{display:block;padding:0;max-width:none;}
+  .pj-print{display:block;margin-bottom:14px;}
+  .pj-print-foot{display:block;margin-top:14px;padding-top:8px;border-top:1px solid #999;font-size:9.5pt;line-height:1.4;color:#333;}
+  .pp-top{display:flex;justify-content:space-between;gap:12px;font:700 8.5pt/1.3 'Inter',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#005D63;}
+  .pp-title{margin-top:4px;font:800 20pt/1.15 'BwGradual','Urbanist',sans-serif;color:#000;}
+  .pp-sub{margin-top:2px;font-size:10pt;color:#333;}
+  .pp-job{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 16px;margin-top:10px;padding:8px 10px;border:1px solid #999;border-radius:6px;}
+  .pp-job dt{font:700 7.5pt/1.3 'Inter',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#444;}
+  .pp-job dd{font-size:10pt;font-weight:600;color:#000;overflow-wrap:anywhere;}
+  .pp-sign{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:12px;font-size:9.5pt;color:#333;}
+  .pp-sign span{display:block;border-bottom:1px solid #000;height:20px;margin-top:2px;}
+  .pj-group{margin-bottom:10px;break-inside:auto;}
+  .pj-ghead{display:flex;align-items:baseline;gap:8px;margin:12px 0 6px;padding-bottom:3px;border-bottom:1.5px solid #000;break-after:avoid;}
+  .pj-ghead > div{flex:1 1 auto;}
+  .pj-gico,.pj-ghead p{display:none;}
+  .pj-ghead h2{display:inline;font-size:12.5pt;color:#000;}
+  .pj-gcount{background:none;color:#000;padding:0 0 0 6px;font-size:10pt;}
+  .pj-items{gap:0;}
+  .pj-item{display:grid;grid-template-columns:18px minmax(0,1fr);gap:0 10px;padding:6px 0;border:0;border-bottom:1px solid #ccc;border-radius:0;
+    background:none!important;break-inside:avoid;animation:none!important;opacity:1!important;transform:none!important;}
+  .pj-item::before{display:none;}
+  .pj-mark{display:none;}
+  .pj-tick{grid-row:1;grid-column:1;order:-1;border:0;padding:0;min-height:0;margin:2px 0 0;width:auto;background:none;}
+  .pj-tick-l{display:none;}
+  .pj-box{width:13px;height:13px;border:1.5px solid #000;border-radius:2px;background:#fff!important;}
+  .pj-box::after{left:3px;top:0;width:4px;height:8px;border-color:#000!important;border-width:0 2px 2px 0;}
+  .pj-main{grid-column:2;grid-row:1;}
+  .pj-type{font-size:8.5pt;color:#333;}
+  .pj-t{font-size:11pt;color:#000;margin-top:1px;}
+  .pj-t a{color:#000;text-decoration:none;}
+  .pj-meta,.pj-why,.pj-end{font-size:9pt;color:#222!important;margin-top:2px;}
+  .pj-why b{color:#444!important;}
+  .pj-why svg{display:none;}
+  .pj-endchip{background:none!important;color:#000;padding:0;font-size:9pt;}
+  .pj-empty{border:1px solid #999;padding:10px;}
+  .pj-empty .pj-acts,.pj-pick{border-style:solid;border-color:var(--line);}
+.pj-tiles{display:none;}
+}
+</style>
+<link rel="stylesheet" href="techhub.css">
+<link rel="stylesheet" href="topbar.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="page-wrapper">
+<nav id="navbar" class="topbar" aria-label="Main"><script>/* Role pieces are drawn from the first paint. shared.js confirms them against TAQA_ROLE. */(function(){try{var r=localStorage.getItem('taqa-demo-role'),h=document.documentElement;if(r==='qms'||r==='auditor')h.setAttribute('data-tb-reg','');if(r!=='auditor')h.setAttribute('data-tb-up','');}catch(e){}})();</script>
+  <a href="index.html" class="nav-brand">
+    <img src="assets/brand/rise-lockup-header.png" alt="RISE" class="nav-logo nav-logo-light" width="320" height="120">
+    <img src="assets/brand/rise-lockup-header-reverse.png" alt="RISE" class="nav-logo nav-logo-dark" width="320" height="120">
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li class="nav-dropdown" id="seg-dropdown-li">
+      <button type="button" class="nav-dropdown-btn" id="seg-dropdown-btn" aria-expanded="false" aria-controls="nav-areas-panel">Areas<svg class="nav-dropdown-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="nav-dropdown-panel" id="nav-areas-panel"></div>
+    </li>
+    <li><a href="cases.html" class="active" aria-current="page">Cases</a></li>
+    <li><a href="ai-search.html">Search</a></li>
+    <li class="nav-reg"><a href="master-list.html">Master List</a></li>
+    <li><a href="glossary.html">Field Glossary</a></li>
+    <li><a href="support-ticket.html">Ask Expert</a></li>
+  </ul>
+  <div class="nav-right">
+    <button type="button" class="bell-btn" id="nav-bell" style="display:none" title="Approvals" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bell-badge" style="display:none"></span></button>
+    <button type="button" class="nav-icon" id="nav-bm" title="Bookmarks" aria-label="Bookmarks" aria-haspopup="dialog" aria-expanded="false" aria-controls="bm-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg><span class="nav-count" id="bm-cnt"></span></button>
+    <button type="button" class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Switch light or dark" aria-label="Switch light or dark"><svg id="dark-icon" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><path d="M7.5 1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9A.55.55 0 0 1 7.5 1Zm0 11.1a.55.55 0 0 1 .55.55v.9a.55.55 0 0 1-1.1 0v-.9a.55.55 0 0 1 .55-.55ZM1 7.5a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9A.55.55 0 0 1 1 7.5Zm11.1 0a.55.55 0 0 1 .55-.55h.9a.55.55 0 0 1 0 1.1h-.9a.55.55 0 0 1-.55-.55ZM3.23 3.23a.55.55 0 0 1 .78 0l.63.64a.55.55 0 1 1-.78.77l-.63-.63a.55.55 0 0 1 0-.78Zm7.13 7.13a.55.55 0 0 1 .78 0l.63.63a.55.55 0 1 1-.78.78l-.63-.63a.55.55 0 0 1 0-.78ZM3.23 11.77a.55.55 0 0 1 0-.78l.63-.63a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0Zm7.13-7.13a.55.55 0 0 1 0-.78l.63-.64a.55.55 0 1 1 .78.78l-.63.63a.55.55 0 0 1-.78 0ZM7.5 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></button>
+    <span class="nav-sep nav-up" aria-hidden="true"></span>
+    <a class="nav-cta nav-up" href="upload.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M6.5 9.5 12 4l5.5 5.5"/><path d="M4 20h16"/></svg><span>Upload</span></a>
+    <button type="button" class="nav-hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-mobile-menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<main id="main" tabindex="-1">
+  <section class="pj-hero" aria-labelledby="pj-title">
+    <div class="pj-photo" id="pj-photo" aria-hidden="true"></div>
+    <div class="th-lines" aria-hidden="true"></div>
+    <div class="pj-hero-in">
+      <div>
+        <p class="pj-eyebrow" id="pj-eyebrow">Field cases · Pre-job pack</p>
+        <h1 id="pj-title"><span class="l1">Pre-job lessons pack.</span> <span class="l2">What to watch on this job.</span></h1>
+        <p class="pj-lede" id="pj-lede">Released field cases and the register’s lessons and alerts for one area, ranked against the job you describe. Tick each one as the crew discusses it, then print the sheet.</p>
+      </div>
+      <dl class="pj-stats" id="pj-stats" aria-label="Pack figures" hidden>
+        <div class="pj-stat"><dt>in the pack</dt><dd id="pj-n-all">0</dd></div>
+        <div class="pj-stat"><dt>match the job details</dt><dd id="pj-n-match">0</dd></div>
+        <div class="pj-stat"><dt>discussed</dt><dd id="pj-n-done">0</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <div class="pj-panel">
+    <form class="pj-form" id="pj-form" aria-labelledby="pj-form-h" novalidate>
+      <div class="pj-form-h">
+        <h2 id="pj-form-h">Describe the job</h2>
+        <p>Only the area is required. Every other detail ranks closer matches first; nothing is hidden by it.</p>
+      </div>
+      <div class="pj-grid5">
+        <div class="pj-field pj-full">
+          <label class="pj-lbl" for="pj-area">Area<span class="req" aria-hidden="true">*</span></label>
+          <select id="pj-area" name="area" required aria-required="true" aria-describedby="pj-area-err"></select>
+          <p class="pj-err" id="pj-area-err" hidden></p>
+        </div>
+        <div class="pj-field">
+          <label class="pj-lbl" for="pj-loc">Location</label>
+          <select id="pj-loc" name="loc"></select>
+        </div>
+        <div class="pj-field">
+          <label class="pj-lbl" for="pj-hole">Hole size (in)</label>
+          <input id="pj-hole" name="hole" type="text" inputmode="decimal" autocomplete="off" list="pj-holes" placeholder="e.g. 8 1/2" aria-describedby="pj-hole-err">
+          <datalist id="pj-holes"></datalist>
+          <p class="pj-err" id="pj-hole-err" hidden>Write the hole size in inches, for example 8 1/2 or 8.5.</p>
+        </div>
+        <div class="pj-field pj-wide-sm">
+          <label class="pj-lbl" for="pj-fm">Formation / interval</label>
+          <input id="pj-fm" name="fm" type="text" autocomplete="off" placeholder="e.g. Shuaiba">
+        </div>
+        <div class="pj-field pj-wide">
+          <label class="pj-lbl" for="pj-note">Well / job note</label>
+          <input id="pj-note" name="note" type="text" autocomplete="off" placeholder="e.g. tight spot, losses" aria-describedby="pj-note-hint">
+          <p class="pj-hint" id="pj-note-hint">Entries that mention these words rank higher.</p>
+        </div>
+      </div>
+      <fieldset class="pj-svc">
+        <legend>Service(s) / tool(s) <span id="pj-svc-sub"></span></legend>
+        <div class="pj-chips" id="pj-svc"></div>
+      </fieldset>
+    </form>
+  </div>
+
+  <div class="pj-body">
+    <div class="pj-pack" id="pj-pack"></div>
+    <p class="vh" id="pj-status" role="status" aria-live="polite"></p>
+
+    <section class="pj-rail" id="pj-rail" aria-labelledby="pj-sum-h" hidden>
+      <div class="pj-card">
+        <h2 id="pj-sum-h">This pack</h2>
+        <p class="pj-asof" id="pj-asof"></p>
+        <div class="pj-prog">
+          <div class="pj-prog-t"><span>Discussed at pre-job</span><span><b id="pj-done-n">0</b> of <span id="pj-done-of">0</span></span></div>
+          <div class="pj-bar" aria-hidden="true"><span id="pj-done-bar"></span></div>
+        </div>
+        <ul class="pj-jump" id="pj-jump" aria-label="Groups in this pack"></ul>
+        <fieldset class="pj-show">
+          <legend>Show</legend>
+          <div class="pj-seg">
+            <label><input type="radio" name="pj-show" value="all" checked><span>All for the area</span></label>
+            <label><input type="radio" name="pj-show" value="match" id="pj-show-match"><span>Matches only</span></label>
+          </div>
+          <p class="pj-show-note" id="pj-show-note"></p>
+        </fieldset>
+        <div class="pj-acts pj-acts-desk">
+          <button type="button" class="pj-btn pri" id="pj-print-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg>Print the pack</button>
+          <button type="button" class="pj-btn" id="pj-copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Copy link</button>
+        </div>
+        <p class="pj-keep">Ticks stay in this browser until the end of today. They are not saved to RISE. <button type="button" class="pj-link" id="pj-clear" hidden>Clear the ticks</button></p>
+      </div>
+    </section>
+  </div>
+
+  <div class="pj-dock" id="pj-dock" hidden aria-label="Pack progress" role="region">
+    <div class="pj-dock-t"><span><b id="pj-dock-n">0</b> of <span id="pj-dock-of">0</span> discussed</span><div class="pj-bar" aria-hidden="true"><span id="pj-dock-bar"></span></div></div>
+    <button type="button" class="pj-btn pri" id="pj-dock-print"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg>Print</button>
+  </div>
+</main>
+
+<footer style="height:4px;position:relative;margin-top:auto;"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:#005D63;"></div></footer>
+</div>
+
+<script src="documents-master.js"></script>
+<script src="roles.js"></script>
+<script src="store.js"></script>
+<script src="shared.js"></script>
+<script src="recognition.js"></script>
+<script src="cases-data.js"></script>
+<script src="cases.js"></script>
+<script>
+(function () {
+  'use strict';
+  /* Pre-job lessons pack. Everything shown comes from TAQA_CASES: released
+     entries only (field cases, shipped cases, and the register's lessons and
+     alerts in force), for one operational segment, ranked by
+     TAQA_CASES.match's prefer. Nothing is invented: an area with nothing
+     released says so. Every value a person typed is escaped (C.esc). The
+     "Discussed at pre-job" ticks are a per-person convenience in this
+     browser for today only; they never reach the register. */
+  var $ = function (id) { return document.getElementById(id); };
+  var C = window.TAQA_CASES, pack = $('pj-pack');
+  if (!C || !pack) {
+    if (pack) pack.innerHTML = '<div class="pj-empty"><h2>The pack could not load</h2><p>RISE could not load its field cases. Reload the page.</p></div>';
+    return;
+  }
+  var esc = C.esc, O = C.OPTIONS, AREAS = C.operational();
+  var hasRole = typeof TAQA_ROLE !== 'undefined';
+
+  var PHOTOS = {
+    'coiled-tubing': 'taqa-hero-5.jpeg', 'fracturing': 'taqa-hero-3.jpeg', 'cementing': 'taqa-hero-2.jpg',
+    'drilling': 'taqa-hero.webp', 'wireline': 'taqa-hero-4.jpg', 'inspection': 'taqa-hero-4.jpg',
+    'well-safety': 'taqa-hero.webp', 'well-testing': 'taqa-hero-3.jpeg'
+  };
+  // One line under each group's name: what the crew reads it for.
+  var NOTE = {
+    watch: 'Incident cards from this area: the symptoms in order, what was tried and how it ended.',
+    alerts: 'Tool limits and technical alerts in force. Check each one against the plan.',
+    worked: 'Case studies, best practices and benchmarks: what to repeat.',
+    lessons: 'Lessons learned, filed as cases or held in the register.',
+    context: 'Field profiles, earlier pre-job plans, customer appreciation and who to ask.'
+  };
+  var SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+  var ICON = {
+    watch: SVG + '<path d="M10.3 4.2 2.6 17.5A2 2 0 0 0 4.3 20.5h15.4a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0Z"/><path d="M12 9.5v4.5"/><path d="M12 17.2h.01"/></svg>',
+    alerts: SVG + '<path d="M4.5 16.5a8.5 8.5 0 1 1 15 0"/><path d="m12 13.5 3.5-4"/><circle cx="12" cy="14" r="1.4"/><path d="M8 20h8"/></svg>',
+    worked: SVG + '<circle cx="12" cy="12" r="9"/><path d="m8 12.4 2.8 2.8L16.2 9.6"/></svg>',
+    lessons: SVG + '<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5Z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5Z"/></svg>',
+    context: SVG + '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>'
+  };
+  var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+
+  /* ── State: from the link, so a pack can be shared ── */
+  var url = new URLSearchParams(location.search);
+  var asked = url.get('area') || '';
+  var S = {
+    area: C.isOperational(asked) ? asked : '',
+    location: '', services: url.getAll('svc').filter(Boolean),
+    hole: url.get('hole') || '', formation: url.get('fm') || '', note: url.get('note') || '',
+    only: url.get('show') === 'match'
+  };
+  var loc0 = url.get('loc') || '';
+  if (loc0 && loc0 !== O.other && O.locations.indexOf(loc0) !== -1) S.location = loc0;
+  // A Director (or Maintenance Manager) holding an operational area starts on it.
+  if (!S.area && !asked && hasRole) {
+    try {
+      var held = TAQA_ROLE.area();
+      if (TAQA_ROLE.effective().scope === 'own' && C.isOperational(held)) S.area = held;
+    } catch (e) {}
+  }
+  function svcList(area) { return area ? O.services(area).filter(function (s) { return s !== O.other; }) : []; }
+  S.services = S.services.filter(function (s, i, a) { return a.indexOf(s) === i && svcList(S.area).indexOf(s) !== -1; });
+
+  function holeOk() { return !S.hole.trim() || C.holeNumber(S.hole) !== null; }
+  function hasPrefs() {
+    return !!(S.location || S.services.length || (S.hole.trim() && holeOk()) || S.formation.trim() || S.note.trim());
+  }
+  function prefer() {
+    return { location: S.location, services: S.services.slice(), holeSize: holeOk() ? S.hole.trim() : '',
+             formation: S.formation.trim(), note: S.note.trim() };
+  }
+
+  /* ── Ticks: per person, per area, for today, in this browser ── */
+  var TICK_KEY = 'taqa-prejob-ticks-v1', memTicks = {};
+  function who() { try { return (hasRole && TAQA_ROLE.identity && TAQA_ROLE.identity()) || 'anon'; } catch (e) { return 'anon'; } }
+  function today() {
+    try { if (window.TAQA_STORE && TAQA_STORE.localDay) return TAQA_STORE.localDay(); } catch (e) {}
+    var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function readAll() {
+    try {
+      var o = JSON.parse(localStorage.getItem(TICK_KEY) || '{}');
+      return (o && typeof o === 'object' && !Array.isArray(o)) ? o : {};
+    } catch (e) { return null; }
+  }
+  function scope() { return who() + '|' + S.area; }
+  function loadTicks() {
+    var o = readAll(), k = scope(), t = o && o[k];
+    if (o === null) return (memTicks[k] || []).slice();
+    return (t && t.day === today() && Array.isArray(t.keys)) ? t.keys.filter(function (x) { return typeof x === 'string'; }) : [];
+  }
+  function saveTicks(keys) {
+    var k = scope(), d = today();
+    memTicks[k] = keys.slice();
+    var o = readAll();
+    if (o === null) return;
+    Object.keys(o).forEach(function (x) { if (!o[x] || o[x].day !== d) delete o[x]; });   // yesterday's ticks go
+    if (keys.length) o[k] = { day: d, keys: keys.slice(0, 500) }; else delete o[k];
+    try { localStorage.setItem(TICK_KEY, JSON.stringify(o)); } catch (e) {}
+  }
+  var ticks = [];
+
+  /* ── Formatting ── */
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function day(v) {
+    var m = String(v || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return m ? (+m[3]) + ' ' + MON[+m[2] - 1] + ' ' + m[1] : '';
+  }
+  function month(v) {
+    var m = String(v || '').match(/^(\d{4})-(\d{2})$/);
+    return m ? MON[+m[2] - 1] + ' ' + m[1] : '';
+  }
+  function dateOf(e) {
+    if (e.source === 'register') return e.date ? 'Issued ' + day(e.date) : '';
+    if (e.incidentDate) return day(e.incidentDate);
+    if (e.eventMonth) return month(e.eventMonth);
+    return e.publishedDate ? 'Published ' + day(e.publishedDate) : '';
+  }
+  function stamp(d) {
+    return d.getDate() + ' ' + MON[d.getMonth()] + ' ' + d.getFullYear() + ', ' +
+      String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+  function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
+
+  /* ── The form ── */
+  var areaSel = $('pj-area'), locSel = $('pj-loc'), holeIn = $('pj-hole'), fmIn = $('pj-fm'), noteIn = $('pj-note');
+  areaSel.innerHTML = '<option value="">Choose the area</option>' + AREAS.map(function (a) {
+    return '<option value="' + esc(a.id) + '">' + esc(a.name) + '</option>';
+  }).join('');
+  locSel.innerHTML = '<option value="">Any location</option>' + O.locations.filter(function (l) { return l !== O.other; }).map(function (l) {
+    return '<option value="' + esc(l) + '">' + esc(l) + '</option>';
+  }).join('');
+  $('pj-holes').innerHTML = O.holeSizes.map(function (h) { return '<option value="' + esc(h) + '"></option>'; }).join('');
+  areaSel.value = S.area; locSel.value = S.location;
+  holeIn.value = S.hole; fmIn.value = S.formation; noteIn.value = S.note;
+
+  function areaError(msg) {
+    var p = $('pj-area-err');
+    p.textContent = msg || '';
+    p.hidden = !msg;
+    if (msg) areaSel.setAttribute('aria-invalid', 'true'); else areaSel.removeAttribute('aria-invalid');
+  }
+  if (asked && !C.isOperational(asked))
+    areaError('“' + asked + '” is not an operational segment. Field cases cover the eleven operational segments; choose one.');
+
+  function holeError(show) {
+    $('pj-hole-err').hidden = !show;
+    if (show) holeIn.setAttribute('aria-invalid', 'true'); else holeIn.removeAttribute('aria-invalid');
+  }
+  if (!holeOk()) holeError(true);
+
+  function markOn() {
+    areaSel.classList.toggle('on', !!S.area);
+    locSel.classList.toggle('on', !!S.location);
+    holeIn.classList.toggle('on', !!S.hole.trim() && holeOk());
+    fmIn.classList.toggle('on', !!S.formation.trim());
+    noteIn.classList.toggle('on', !!S.note.trim());
+  }
+
+  function paintServices() {
+    var box = $('pj-svc'), sub = $('pj-svc-sub');
+    if (!S.area) {
+      sub.textContent = '';
+      box.innerHTML = '<p class="pj-none">Choose the area first: its services and tools appear here.</p>';
+      return;
+    }
+    sub.textContent = '· ' + C.areaName(S.area) + ', choose any that apply';
+    box.innerHTML = svcList(S.area).map(function (s) {
+      var on = S.services.indexOf(s) !== -1;
+      return '<button type="button" class="th-chip" data-svc="' + esc(s) + '" aria-pressed="' + on + '">' + CHECK + '<span>' + esc(s) + '</span></button>';
+    }).join('');
+  }
+
+  /* ── The pack ── */
+  var last = { list: [], shown: [] }, lastStatus = '';
+  function syncUrl() {
+    var p = new URLSearchParams();
+    if (S.area) p.set('area', S.area);
+    if (S.location) p.set('loc', S.location);
+    S.services.forEach(function (s) { p.append('svc', s); });
+    if (S.hole.trim()) p.set('hole', S.hole.trim());
+    if (S.formation.trim()) p.set('fm', S.formation.trim());
+    if (S.note.trim()) p.set('note', S.note.trim());
+    if (S.only && hasPrefs()) p.set('show', 'match');
+    var q = p.toString();
+    try { history.replaceState(null, '', location.pathname + (q ? '?' + q : '')); } catch (e) {}
+  }
+  function paintHero() {
+    var name = S.area ? C.areaName(S.area) : '';
+    $('pj-eyebrow').textContent = (name || 'Field cases') + ' · Pre-job pack';
+    $('pj-photo').style.backgroundImage = "url('" + (PHOTOS[S.area] || 'taqa-hero.webp') + "')";
+    document.title = (name ? name + ' pre-job pack' : 'Pre-job Pack') + ', RISE';
+  }
+  function status(text) {
+    if (text === lastStatus) return;
+    lastStatus = text;
+    $('pj-status').textContent = text;
+  }
+
+  function itemHtml(e, n, animate) {
+    var done = ticks.indexOf(e.key) !== -1, m = e.score > 0;
+    var type = esc(e.typeLabel) +
+      (e.incidentType ? ' <i>· ' + esc(e.incidentType) + '</i>' : '') +
+      (e.source === 'register' ? ' <i>· Register document</i>' : e.source === 'shipped' ? ' <i>· Published case</i>' : '');
+    var meta = [];
+    if (e.docNumber) meta.push(e.docNumber + (e.revLabel ? ' ' + e.revLabel : ''));
+    if (e.wellRef) meta.push(e.wellRef);
+    if (e.field) meta.push(e.field);
+    if (e.holeSize) meta.push(C.holeLabel(e.holeSize));
+    if (e.formation) meta.push(e.formation);
+    if (e.services.length) meta.push(e.services.join(', '));
+    var d = dateOf(e); if (d) meta.push(d);
+    if (e.location) meta.push(e.location);
+    var end = '';
+    if (e.type === 'incident' && e.ending) {
+      var hint = C.labelFor.ending(e.area, e.ending);
+      end = '<p class="pj-end"><span class="pj-endchip">Ended: ' + esc(e.ending) + '</span>' + (hint ? '<span>' + esc(hint) + '</span>' : '') + '</p>';
+    }
+    return '<li class="pj-item' + (m ? ' is-m' : '') + (done ? ' is-done' : '') + (animate ? ' in' : '') + '" data-key="' + esc(e.key) + '" style="--i:' + Math.min(n, 14) + '">' +
+      '<span class="pj-mark" aria-hidden="true">' + esc(e.letter || '') + '</span>' +
+      '<div class="pj-main">' +
+        '<p class="pj-type">' + type + '</p>' +
+        '<h3 class="pj-t"><a href="' + esc(e.url) + '">' + esc(e.title) + '</a></h3>' +
+        (meta.length ? '<p class="pj-meta">' + esc(meta.join(' · ')) + '</p>' : '') +
+        '<p class="pj-why' + (m ? ' m' : '') + '">' + (m ? CHECK : '') + '<b>Why</b><span>' + esc(e.why.join(' · ')) + '</span></p>' +
+        end +
+      '</div>' +
+      '<label class="pj-tick"><input type="checkbox" data-key="' + esc(e.key) + '"' + (done ? ' checked' : '') +
+        ' aria-label="Discussed at pre-job: ' + esc(e.title) + '"><span class="pj-box" aria-hidden="true"></span>' +
+        '<span class="pj-tick-l" aria-hidden="true">Discussed</span></label>' +
+    '</li>';
+  }
+
+  function printHead(builtAt, line) {
+    var rows = [
+      ['Area', C.areaName(S.area)],
+      ['Location', S.location || 'Any'],
+      ['Service(s) / tool(s)', S.services.join(', ') || 'Any'],
+      ['Hole size', S.hole.trim() && holeOk() ? (C.holeText || C.holeLabel)(S.hole.trim()) : 'Any'],
+      ['Formation / interval', S.formation.trim() || 'Any'],
+      ['Well / job note', S.note.trim() || 'None']
+    ];
+    return '<div class="pj-print">' +
+      '<div class="pp-top"><span>RISE · Pre-job lessons pack</span><span>As of ' + esc(stamp(builtAt)) + '</span></div>' +
+      '<p class="pp-title">' + esc(C.areaName(S.area)) + '</p>' +
+      '<p class="pp-sub">' + esc(line) + '</p>' +
+      '<dl class="pp-job">' + rows.map(function (r) { return '<div><dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd></div>'; }).join('') + '</dl>' +
+      '<div class="pp-sign"><div>Date of pre-job<span></span></div><div>Led by (role)<span></span></div><div>Job / well<span></span></div></div>' +
+    '</div>';
+  }
+  function printFoot(builtAt) {
+    return '<p class="pj-print-foot">Built from RISE on ' + esc(stamp(builtAt)) + '. Released entries only: drafts, returned and withdrawn cases are left out. ' +
+      'A printed copy is uncontrolled; check RISE for the current revision before relying on it.</p>';
+  }
+
+  function renderPicker() {
+    var tiles = AREAS.map(function (a) {
+      var n = C.forArea(a.id).length;
+      return '<li><button type="button" class="pj-tile' + (n ? '' : ' zero') + '" data-area="' + esc(a.id) + '">' +
+        '<span class="t">' + esc(a.name) + '</span>' +
+        '<span class="s">' + (n ? (n === 1 ? 'released entry' : 'released entries') : 'Nothing released yet') + '</span>' +
+        '<span class="n">' + n + '</span></button></li>';
+    }).join('');
+    pack.innerHTML = '<div class="pj-empty pj-pick"><h2>Choose the area for the job</h2>' +
+      '<p>A pack holds one area’s released field cases with the register’s lessons learned and technical alerts. Pick the area, then describe the job to bring the closest matches to the top.</p>' +
+      '<ul class="pj-tiles" aria-label="Operational segments">' + tiles + '</ul></div>';
+  }
+
+  function paintProgress() {
+    var shown = last.shown, of = shown.length;
+    var done = shown.filter(function (e) { return ticks.indexOf(e.key) !== -1; }).length;
+    var p = of ? done / of : 0;
+    $('pj-done-n').textContent = done; $('pj-done-of').textContent = of;
+    $('pj-dock-n').textContent = done; $('pj-dock-of').textContent = of;
+    $('pj-done-bar').style.setProperty('--p', p);
+    $('pj-dock-bar').style.setProperty('--p', p);
+    $('pj-n-done').textContent = done;
+    $('pj-clear').hidden = !done;
+  }
+
+  function solo(on) { var b = pack.parentNode; if (b) b.classList.toggle('solo', on); }
+  function render(animate) {
+    markOn();
+    syncUrl();
+    paintHero();
+    ticks = loadTicks();
+    var rail = $('pj-rail'), dock = $('pj-dock'), stats = $('pj-stats');
+    if (!S.area) {
+      last = { list: [], shown: [] };
+      renderPicker();
+      rail.hidden = true; dock.hidden = true; stats.hidden = true;
+      solo(true);
+      status('Choose the area for the job.');
+      return;
+    }
+    var name = C.areaName(S.area), builtAt = new Date();
+    var list = C.match({ area: S.area, prefer: prefer() });
+    var prefs = hasPrefs();
+    var matched = list.filter(function (e) { return e.score > 0; });
+    if (!prefs) S.only = false;
+    var only = S.only;
+    var shown = only ? matched : list;
+    last = { list: list, shown: shown };
+
+    stats.hidden = false;
+    $('pj-n-all').textContent = list.length;
+    $('pj-n-match').textContent = prefs ? matched.length : '–';
+
+    if (!list.length) {
+      var who = C.canFile(S.area);
+      pack.innerHTML = '<div class="pj-empty"><h2>Nothing released for ' + esc(name) + ' yet</h2>' +
+        '<p>No field case, lesson learned or technical alert is in force for ' + esc(name) + '. A case appears here once QMS checks it and the area’s Director releases it.</p>' +
+        '<div class="pj-acts">' +
+          (who.ok ? '<a class="pj-btn pri" href="case-new.html?area=' + encodeURIComponent(S.area) + '">Add a case</a>' : '') +
+          '<a class="pj-btn" href="cases.html?area=' + encodeURIComponent(S.area) + '">Open the case library</a>' +
+        '</div></div>';
+      rail.hidden = true; dock.hidden = true;
+      solo(true);
+      paintProgress();
+      status('Nothing released for ' + name + ' yet.');
+      return;
+    }
+
+    var line = plural(list.length, 'released entry', 'released entries') + ' for ' + name +
+      (prefs ? ', ' + matched.length + ' matching the job details' : '') + (only ? '; matches only' : '') + '.';
+    var body;
+    if (!shown.length) {
+      body = '<div class="pj-empty"><h2>Nothing matches these job details</h2>' +
+        '<p>None of the ' + plural(list.length, 'released entry', 'released entries') + ' for ' + esc(name) +
+        ' shares a service, hole size, formation, location or word from the note. Show everything for the area, or change the details above.</p>' +
+        '<div class="pj-acts"><button type="button" class="pj-btn" data-show-all>Show everything for the area</button></div></div>';
+    } else {
+      var n = 0;
+      var groups = C.GROUPS.map(function (g) {
+        return { g: g, items: shown.filter(function (e) { return C.groupOf(e.type) === g.key; }) };
+      });
+      body = groups.filter(function (x) { return x.items.length; }).map(function (x) {
+        var id = 'pj-g-' + x.g.key;
+        return '<section class="pj-group" id="' + id + '" aria-labelledby="' + id + '-h">' +
+          '<div class="pj-ghead"><span class="pj-gico" aria-hidden="true">' + ICON[x.g.key] + '</span>' +
+            '<div><h2 id="' + id + '-h">' + esc(x.g.label) + '</h2><p>' + esc(NOTE[x.g.key] || '') + '</p></div>' +
+            '<span class="pj-gcount">' + x.items.length + '<span class="vh"> ' + (x.items.length === 1 ? 'entry' : 'entries') + '</span></span></div>' +
+          '<ol class="pj-items">' + x.items.map(function (e) { return itemHtml(e, n++, animate); }).join('') + '</ol>' +
+        '</section>';
+      }).join('');
+      var none = groups.filter(function (x) { return !x.items.length; }).map(function (x) { return x.g.label; });
+      if (none.length) body += '<p class="pj-quiet"><b>Nothing ' + (only ? 'matching' : 'released') + ' yet under:</b> ' + esc(none.join(' · ')) + '.</p>';
+
+      $('pj-jump').innerHTML = groups.map(function (x) {
+        var c = x.items.length;
+        var inner = '<span>' + esc(x.g.label) + '</span><span class="n">' + c + '</span>';
+        return c ? '<li><a href="#pj-g-' + x.g.key + '">' + inner + '</a></li>'
+                 : '<li class="zero"><span class="pj-jrow">' + inner + '</span></li>';
+      }).join('');
+    }
+    // On a phone the summary rail follows the results; this one line keeps
+    // the count and the Matches only switch above the first result.
+    var sumLine = '<div class="pj-sum" id="pj-sum"><p><b>' + list.length + '</b> in the pack' +
+      (prefs ? ' · <b>' + matched.length + '</b> ' + (matched.length === 1 ? 'matches' : 'match') + ' the job' : '') + '</p>' +
+      (prefs ? '<button type="button" class="pj-link" id="pj-sum-only" aria-pressed="' + (only ? 'true' : 'false') + '">' +
+        (only ? 'Show all for the area' : 'Matches only') + '</button>' : '') + '</div>';
+    pack.innerHTML = printHead(builtAt, line) + sumLine + body + printFoot(builtAt);
+
+    $('pj-asof').innerHTML = 'As of <b>' + esc(stamp(builtAt)) + '</b>. Released entries only, for ' + esc(name) + '.';
+    var mRadio = $('pj-show-match');
+    mRadio.disabled = !prefs;
+    document.querySelector('input[name="pj-show"][value="' + (only ? 'match' : 'all') + '"]').checked = true;
+    $('pj-show-note').textContent = prefs
+      ? matched.length + ' of ' + list.length + ' match the job details.'
+      : 'Add a service, hole size, formation, location or note to rank by them and to show matches only.';
+    if (!shown.length) $('pj-jump').innerHTML = '';
+    rail.hidden = false; dock.hidden = false;
+    solo(false);
+    paintProgress();
+    status(line);
+  }
+
+  /* ── Events ── */
+  var timer = null;
+  function soon() { clearTimeout(timer); timer = setTimeout(function () { render(false); }, 220); }
+
+  $('pj-form').addEventListener('submit', function (ev) { ev.preventDefault(); render(false); });
+  areaSel.addEventListener('change', function () {
+    S.area = C.isOperational(areaSel.value) ? areaSel.value : '';
+    asked = '';
+    areaError('');
+    var keep = svcList(S.area);
+    S.services = S.services.filter(function (s) { return keep.indexOf(s) !== -1; });
+    paintServices();
+    render(true);
+  });
+  locSel.addEventListener('change', function () { S.location = locSel.value; render(false); });
+  holeIn.addEventListener('input', function () {
+    S.hole = holeIn.value;
+    if (holeOk()) holeError(false);
+    soon();
+  });
+  holeIn.addEventListener('change', function () { S.hole = holeIn.value; holeError(!holeOk()); render(false); });
+  fmIn.addEventListener('input', function () { S.formation = fmIn.value; soon(); });
+  noteIn.addEventListener('input', function () { S.note = noteIn.value; soon(); });
+  $('pj-svc').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-svc]');
+    if (!b) return;
+    var s = b.getAttribute('data-svc'), i = S.services.indexOf(s);
+    if (i === -1) S.services.push(s); else S.services.splice(i, 1);
+    b.setAttribute('aria-pressed', String(i === -1));
+    render(false);
+  });
+  document.querySelectorAll('input[name="pj-show"]').forEach(function (r) {
+    r.addEventListener('change', function () { if (r.checked) { S.only = r.value === 'match'; render(true); } });
+  });
+
+  pack.addEventListener('click', function (ev) {
+    var t = ev.target.closest('[data-area]');
+    if (t) {
+      areaSel.value = t.getAttribute('data-area');
+      areaSel.dispatchEvent(new Event('change'));
+      areaSel.focus();
+      return;
+    }
+    if (ev.target.closest('[data-show-all]')) { S.only = false; render(true); return; }
+    if (ev.target.closest('#pj-sum-only')) {
+      S.only = !S.only; render(true);
+      var b = $('pj-sum-only'); if (b) b.focus();
+    }
+  });
+  pack.addEventListener('change', function (ev) {
+    var box = ev.target;
+    if (!box || !box.matches('input[type="checkbox"][data-key]')) return;
+    var key = box.getAttribute('data-key'), i = ticks.indexOf(key);
+    if (box.checked && i === -1) ticks.push(key);
+    if (!box.checked && i !== -1) ticks.splice(i, 1);
+    saveTicks(ticks);
+    var li = box.closest('.pj-item');
+    if (li) li.classList.toggle('is-done', box.checked);
+    paintProgress();
+  });
+  $('pj-clear').addEventListener('click', function () {
+    ticks = [];
+    saveTicks(ticks);
+    pack.querySelectorAll('input[type="checkbox"][data-key]').forEach(function (b) { b.checked = false; });
+    pack.querySelectorAll('.pj-item.is-done').forEach(function (li) { li.classList.remove('is-done'); });
+    paintProgress();
+    if (window.showToast) window.showToast('Ticks cleared');
+  });
+
+  function doPrint() {
+    if (!S.area) {
+      areaError('Choose the area for the job before printing.');
+      areaSel.focus();
+      return;
+    }
+    clearTimeout(timer);
+    render(false);
+    window.print();
+  }
+  $('pj-print-btn').addEventListener('click', doPrint);
+  $('pj-dock-print').addEventListener('click', doPrint);
+  $('pj-copy').addEventListener('click', function () {
+    function ok() { if (window.showToast) window.showToast('Link copied. It opens this pack with the same job details.'); }
+    function no() { if (window.showToast) window.showToast('Copy the address from the address bar to share this pack.', 'info'); }
+    syncUrl();
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(location.href).then(ok, no);
+      else no();
+    } catch (e) { no(); }
+  });
+
+  /* The phone bar shows only while the summary card is out of view and the
+     pack is in view, so it never sits over the form or the card it repeats.
+     On a phone the card follows the results: it counts as in view once it
+     rises above the strip the bar itself covers, so the bar stays while
+     the last results are read and gives way when the card arrives. */
+  (function dockWatch() {
+    var dock = $('pj-dock'), card = document.querySelector('#pj-rail .pj-card');
+    if (!('IntersectionObserver' in window) || !card) { dock.classList.add('on'); return; }
+    var cardIn = true, packIn = false;
+    function set() { dock.classList.toggle('on', !cardIn && packIn); }
+    new IntersectionObserver(function (es) { es.forEach(function (e) { cardIn = e.isIntersecting; }); set(); },
+      { rootMargin: '0px 0px -96px 0px' }).observe(card);
+    new IntersectionObserver(function (es) { es.forEach(function (e) { packIn = e.isIntersecting; }); set(); }, { rootMargin: '0px 0px -30% 0px' }).observe(pack);
+  })();
+
+  paintServices();
+  // Draws now, then again whenever the register or the role changes.
+  C.onChange(function (ev) { render(!ev || ev.action === 'init'); });
+})();
+</script>
+<script>(function(){var s=document.createElement('style');s.textContent='@keyframes pgLoad{0%{width:0;opacity:1}75%{width:100%;opacity:1}100%{width:100%;opacity:0}}#page-progress{position:fixed;top:0;left:0;height:3px;z-index:9999;pointer-events:none;background:#005D63;animation:pgLoad 0.9s cubic-bezier(.4,0,.2,1) forwards;}';document.head.appendChild(s);var bar=document.createElement('div');bar.id='page-progress';document.body.prepend(bar);})();</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}</script>
+</body>
+</html>

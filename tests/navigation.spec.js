@@ -118,7 +118,8 @@ test.describe('Areas dropdown', () => {
 
 test.describe('Primary nav links', () => {
   const CASES = [
-    { label: 'Document Search', href: 'ai-search.html' },
+    { label: 'Cases', href: 'cases.html' },
+    { label: 'Search', href: 'ai-search.html' },
     { label: 'Field Glossary', href: 'glossary.html' },
     { label: 'Ask Expert', href: 'support-ticket.html' },
   ];
@@ -137,6 +138,78 @@ test.describe('Primary nav links', () => {
       await expect(page).toHaveURL(new RegExp(href.replace('.', '\\.') + '$'));
     });
   }
+});
+
+// Cases sits right after Areas, and Document Search is now just Search, on
+// every page's bar and in the phone menu (which lists the areas below its
+// links, so Cases follows Home there).
+test.describe('Cases and Search in the bar and the menu', () => {
+  const PAGES = ['/index.html', '/segment.html?id=drilling', '/glossary.html', '/recognition.html', '/support-ticket.html',
+    '/cases.html', '/case.html', '/case-new.html', '/prejob.html'];
+
+  test.describe('desktop bar', () => {
+    test.use(DESKTOP);
+    test('every page reads Home, Areas, Cases, Search, Field Glossary, Ask Expert', async ({ page, gotoApp, setRole, consoleErrors }) => {
+      await gotoApp('/index.html');
+      await setRole('employee');
+      for (const path of PAGES) {
+        await gotoApp(path);
+        const labels = await page.locator('#navbar .nav-links > li > a, #navbar .nav-links > li > button').evaluateAll(
+          (els) => els.map((e) => e.textContent.trim()));
+        expect(labels, path).toEqual(['Home', 'Areas', 'Cases', 'Search', 'Field Glossary', 'Ask Expert']);
+      }
+      for (const path of ['/cases.html', '/case.html', '/case-new.html', '/prejob.html']) {
+        await gotoApp(path);
+        await expect(page.locator('#navbar .nav-links a[href="cases.html"]'), path).toHaveAttribute('aria-current', 'page');
+      }
+      assertNoConsoleErrors(consoleErrors);
+    });
+
+    test('QMS sees Master List after Search', async ({ page, gotoApp, setRole }) => {
+      await gotoApp('/index.html');
+      await setRole('qms');
+      await gotoApp('/index.html');
+      const labels = await page.locator('#navbar .nav-links > li > a, #navbar .nav-links > li > button').evaluateAll(
+        (els) => els.map((e) => e.textContent.trim()));
+      expect(labels).toEqual(['Home', 'Areas', 'Cases', 'Search', 'Master List', 'Field Glossary', 'Ask Expert']);
+    });
+
+    for (const width of [1281, 1366, 1440]) {
+      test(`the bar stays on one row at ${width}px with the level badge (owner@pt-drilling-coe)`, async ({ page, gotoApp, setRole }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await gotoApp('/index.html');
+        await setRole('owner', 'pt-drilling-coe');
+        await gotoApp('/glossary.html');
+        await expect(page.locator('#rise-lvl')).toBeVisible();
+        const box = await page.locator('#navbar').boundingBox();
+        const tops = await page.locator('#navbar .nav-links > li').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top)));
+        expect(new Set(tops).size).toBe(1);
+        expect(box.height).toBeLessThanOrEqual(80);
+        const fits = await page.evaluate(() => {
+          const r = (s) => document.querySelector(s).getBoundingClientRect();
+          const links = r('#navbar .nav-links'), right = r('#navbar .nav-right'), brand = r('#navbar .nav-brand');
+          return links.left >= brand.right - 1 && links.right <= right.left + 1 && document.documentElement.scrollWidth <= innerWidth + 1;
+        });
+        expect(fits).toBe(true);
+      });
+    }
+  });
+
+  test.describe('phone menu', () => {
+    test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    test('lists Home, Cases, Search first, and marks Cases on the case pages', async ({ page, gotoApp, setRole, topbar }) => {
+      await gotoApp('/index.html');
+      await setRole('employee');
+      await gotoApp('/index.html');
+      await topbar.openMenu();
+      const labels = await page.locator('#nav-mobile-menu .mm-main').first().locator('a').evaluateAll((els) => els.map((e) => e.firstChild.textContent.trim()));
+      expect(labels.slice(0, 3)).toEqual(['Home', 'Cases', 'Search']);
+      expect(labels).not.toContain('Document Search');
+      await gotoApp('/case-new.html');
+      await topbar.openMenu();
+      await expect(page.locator('#nav-mobile-menu .mm-main a[href="cases.html"]')).toHaveAttribute('aria-current', 'page');
+    });
+  });
 });
 
 test.describe('Master List link (registerView roles only)', () => {

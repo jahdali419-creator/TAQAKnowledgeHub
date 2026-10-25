@@ -498,11 +498,51 @@
       return { problem: 'Only a returned filing can be filed again.' };
     if (rec.docNumber && normNum(rec.docNumber) !== normNum(prev.docNumber))
       return { problem: 'A filing made again keeps its number, ' + prev.docNumber + '.' };
-    if (prev.supersedes) return { revisionOf: prev };
     var fam = revisionsOf(prev.docNumber);
+    // Only the newest attempt is filed again: once a later attempt of the
+    // same revision exists (returned or not), this one is history, so the
+    // fixes made in that later attempt can never be dropped by refiling an
+    // older one.
+    if (fam.some(function (x) { return x !== prev && sameRev(x.revision, prev.revision) && (x.attempt || 1) > (prev.attempt || 1); }))
+      return { problem: 'A later attempt of ' + prev.docNumber + ' has been filed since, so this returned attempt is not filed again. Open the latest attempt instead.' };
+    if (prev.supersedes) return { revisionOf: prev };
     if (fam.some(function (x) { return !(x.status === 'draft' && x.rejected); }))
       return { problem: prev.docNumber + ' has a filing in progress or in force already, so the returned attempt is not filed again.' };
     return { prev: prev };
+  }
+
+  /* ── Field cases (cases.js) ─────────────────────────────────────────────
+     The ten content types of the business case carry `card: true` in
+     TAQA_DOC_LOOKUPS.types. A filing is a field case when its type exists
+     only as a card (cardOnly: case study, incident card and the rest) or when
+     it carries a card (a Lesson Learned or Technical Alert filed in the
+     structured format). Operations file field cases: only for an operational
+     segment, never for a maintenance department, and only by an employee or
+     the area's own Segment Director. QMS checks them and the Director
+     releases them like any other filing. A Lesson Learned or Technical Alert
+     filed as a document, with no card, keeps exactly the rules it had.
+     Checked on the record as it will be (a revision or a resubmission
+     already carries its parent's type, area and department here). */
+  var FIELD_CASE_ROLE = 'Field cases are filed by operations: an employee or the area’s Director.';
+  function fieldCaseProblem(rec, parent) {
+    var t = types()[rec.docType] || {};
+    var hasCard = rec.card !== undefined && rec.card !== null;
+    if (hasCard && (typeof rec.card !== 'object' || Array.isArray(rec.card)))
+      return 'A field case card is a set of named fields.';
+    if (hasCard && !t.card) return 'Only a field case type carries a card.';
+    if (t.cardOnly && !hasCard) return (t.label || 'This type') + ' is filed as a field case, with its card.';
+    // A Lesson Learned or Technical Alert filed as a card stays a card: its
+    // next revision (or a filing made again) is never a plain document that
+    // would strip the card when released. The card rules below apply to it.
+    if (!hasCard && parent && parent.card && typeof parent.card === 'object')
+      return parent.docNumber + ' was filed as a field case, with its card, so it is not revised or filed again as a plain document.';
+    if (!hasCard) return null;
+    if ((segs()[rec.segment] || {}).group !== 'segment') return 'A field case is filed only for an operational segment.';
+    if (rec.department === 'maintenance') return 'A field case is filed by operations, never by a maintenance department.';
+    var who = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE.current() : null;
+    if (who !== 'employee' && who !== 'owner') return FIELD_CASE_ROLE;
+    if (who === 'owner' && TAQA_ROLE.area() !== rec.segment) return FIELD_CASE_ROLE;
+    return null;
   }
 
   function filingProblem(rec) {
@@ -526,6 +566,8 @@
     // so they are not filed at all until the business defines them (PI-33).
     if (rec.docType === 'software' || (types()[rec.docType] || {}).controlled === false)
       return 'Software and tools cannot be filed yet: their numbering, owner and approver are still to be defined.';
+    var caseProblem = fieldCaseProblem(rec, revision ? revision.parent : (again && (again.prev || again.revisionOf)) || null);
+    if (caseProblem) return caseProblem;
     // A Maintenance Bulletin belongs to an operational segment's maintenance
     // team. Anywhere else nobody may approve it, so it is not filed at all.
     if (rec.docType === 'bulletin' && (segs()[rec.segment] || {}).group !== 'segment')
@@ -571,6 +613,12 @@
     for (var k in rec) if (Object.prototype.hasOwnProperty.call(rec, k) &&
                            FILED_BY_STORE.indexOf(k) === -1) row[k] = rec[k];
     row.docNumber = String(rec.docNumber).trim();
+    // A field case's card is kept whole, as its own copy: plain data only,
+    // so nothing the caller holds can change the filed record afterwards.
+    if (row.card !== undefined && row.card !== null) {
+      try { row.card = JSON.parse(JSON.stringify(row.card)); }
+      catch (e) { lastWriteError = 'The case card could not be saved: it holds something that is not plain text or numbers.'; return null; }
+    }
     if (revision && revision.parent) {
       // The register, not the filer, says what a revision is: the same number,
       // the next revision, what it supersedes, and everything that makes it
@@ -927,8 +975,16 @@
     if (!/^\d{4}-\d{2}-\d{2}$/.test(eff) || addMonths(eff, 0) !== eff)
       return { ok: false, error: 'The effective date is not a date.' };
     if (eff < today) return { ok: false, error: 'The effective date cannot be earlier than the approval date (' + today + ').' };
+    // Whether the revision in force was past its review when this one was
+    // approved: flagged overdue, or past its review date, which is how the
+    // area page and the Master List show it. Decided once here, so editing
+    // the old revision's review fields later never changes this approval.
+    var inForce = revisionsOf(d.docNumber).filter(function (x) { return x !== d && isLiveStatus(x.status); });
     var dates = { approvedBy: actingName(), approvedById: actingId(), approvedUnderGrant: actingGrant(), approvedOnBehalfOfId: actingFor(), approvedDate: today, approvedAt: now,
-                  issueDate: eff, nextReviewDate: addMonths(eff, reviewCycle(d)), reviewOverdue: false };
+                  issueDate: eff, nextReviewDate: addMonths(eff, reviewCycle(d)), reviewOverdue: false,
+                  replacedOverdue: inForce.some(function (x) {
+                    return !!x.reviewOverdue || (!!x.nextReviewDate && x.nextReviewDate < today);
+                  }) };
     if (eff > today) {
       // Approved now, in force from its effective date: the revision it
       // replaces stays current until then.
@@ -941,7 +997,7 @@
     // superseded revision keeps every field it had: its approval history is
     // never rewritten. Its translations in force are superseded with it,
     // marked to be re-issued against the new revision (PI-34).
-    var replaced = revisionsOf(d.docNumber).filter(function (x) { return x !== d && isLiveStatus(x.status); });
+    var replaced = inForce;
     write(d, Object.assign({ approvalStage: null, status: 'current' }, dates));
     replaced.forEach(function (x) {
       write(x, { status: 'superseded', supersededBy: 'Rev ' + revOf(d), supersededAt: now, supersededDate: today });
@@ -1065,7 +1121,7 @@
     'submittedById', 'countersignedById', 'approvedById', 'approvedUnderGrant', 'rejectedById', 'rejectedUnderGrant',
     'withdrawnById', 'withdrawnUnderGrant', 'cancelledById',
     'approvedOnBehalfOfId', 'rejectedOnBehalfOfId', 'withdrawnOnBehalfOfId',
-    'supersededAt', 'supersededDate', 'tookEffectAt', 'issueDate'];
+    'supersededAt', 'supersededDate', 'tookEffectAt', 'issueDate', 'replacedOverdue'];
 
   /* Never taken from a caller of add(): the store writes each of these. */
   /* The dates a record carries are the register's: issued (effective) and
@@ -1080,6 +1136,9 @@
      only by filing a new controlled revision. It used to be a block-list of
      the lifecycle fields, so a manager could renumber an approved document,
      move it to another area or department, or swap its file (PI-09). */
+  /* A field case's card is not here on purpose: it is what QMS checked and
+     the Director released, so it changes only by filing again (a returned
+     case) or by a new revision, never by editing details. */
   var EDITABLE = ['title', 'summary', 'keywords', 'audience', 'related', 'changeNote',
     'nextReviewDate', 'reviewOverdue', 'language'];
 
@@ -1110,6 +1169,10 @@
     if (!d || !mayManage(d)) return false;
     // Only the record the number resolves to, and only one filed here.
     if (load().indexOf(d) === -1) return false;
+    // Only a filing nobody has decided on yet. A checked, returned or
+    // released record leaves the register by withdrawal, which keeps its
+    // history and the filer's points; deleting it would erase both.
+    if (d.status !== 'draft' || d.approvedAt || d.countersignedAt || d.rejected) return false;
     _added = load().filter(function (x) { return x !== d; });
     save();
     announce({ action: 'remove', docNumber: docNumber });
