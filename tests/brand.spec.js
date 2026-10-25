@@ -142,27 +142,11 @@ test.describe('RISE logo in the bar', () => {
     expect(Math.min(...px.rev.letter.slice(0, 3))).toBeGreaterThan(235);
   });
 
-  test('the home brand card shows the full reverse RISE logo straight on the card, no plate', async ({ page, gotoApp }) => {
+  test('the home sidebar has no brand card (removed at the owner\'s request, 25 Oct 2026)', async ({ page, gotoApp }) => {
     await gotoApp('/index.html');
-    const img = page.locator('.sidebar-brand-card-name img');
-    await expect(img).toHaveAttribute('src', 'assets/brand/rise-logo-reverse-640.png');
-    await img.scrollIntoViewIfNeeded();
-    await page.waitForFunction(() => { const i = document.querySelector('.sidebar-brand-card-name img'); return i && i.complete && i.naturalWidth > 0; });
-    const look = await img.evaluate((el) => {
-      const cs = getComputedStyle(el), r = el.getBoundingClientRect();
-      return { bg: cs.backgroundColor, pad: cs.padding, ratio: r.width / r.height };
-    });
-    expect(look.bg).toBe('rgba(0, 0, 0, 0)');
-    expect(look.pad).toBe('0px');
-    expect(Math.abs(look.ratio - 637 / 264)).toBeLessThan(0.03);
-    // The file itself is transparent around the artwork (no baked-in box).
-    const corner = await page.evaluate(async () => {
-      const im = new Image(); im.src = 'assets/brand/rise-logo-reverse-640.png'; await im.decode();
-      const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight;
-      const g = c.getContext('2d'); g.drawImage(im, 0, 0);
-      return [g.getImageData(c.width - 2, 2, 1, 1).data[3], g.getImageData(2, c.height - 2, 1, 1).data[3]];
-    });
-    expect(corner).toEqual([0, 0]);
+    await expect(page.locator('.sidebar-tools')).toHaveCount(1);
+    await expect(page.locator('.sidebar-brand-card')).toHaveCount(0);
+    await expect(page.locator('#panel-sidebar, .panel-sidebar').first()).not.toContainText('Your single source of truth');
   });
 });
 
