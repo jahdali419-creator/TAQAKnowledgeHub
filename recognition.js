@@ -251,13 +251,13 @@
        teal, deep teal, blue, green and gold for Knowledge Champion, from the
        TAQA palette. Light values on light ground; the dark theme, the bar
        over the home photo and the level-up note take the dark values. */
-    '.rlv-tone{--lv-bg:transparent;--lv-bd:rgba(117,106,97,.3);--lv-fg:#1E1C1A;--lv-ic:#756A61;}' +
+    '.rlv-tone{--lv-bg:transparent;--lv-bd:rgba(117,106,97,.3);--lv-fg:#1E1C1A;--lv-ic:#FD691D;}' +
     '.rlv-tone.lv-contributor{--lv-bg:#E3F7F6;--lv-bd:#00A6A1;--lv-fg:#00585A;--lv-ic:#00A6A1;}' +
     '.rlv-tone.lv-practitioner{--lv-bg:#E7F1F1;--lv-bd:#005D63;--lv-fg:#004A4F;--lv-ic:#005D63;}' +
     '.rlv-tone.lv-specialist{--lv-bg:#E6F1F7;--lv-bd:#0076A8;--lv-fg:#00567A;--lv-ic:#0076A8;}' +
     '.rlv-tone.lv-expert{--lv-bg:#E5F3F0;--lv-bd:#008675;--lv-fg:#00594E;--lv-ic:#008675;}' +
     '.rlv-tone.lv-champion{--lv-bg:#FFF3D1;--lv-bd:#D99A00;--lv-fg:#5C3F00;--lv-ic:#C98A00;}' +
-    'html[data-taqa-theme="dark"] .rlv-tone,#navbar.nav-on-hero .nav-right .rlv-tone,#rise-note.rlv-tone{--lv-bg:rgba(255,255,255,.06);--lv-bd:rgba(255,255,255,.35);--lv-fg:#FFFFFF;--lv-ic:rgba(255,255,255,.78);}' +
+    'html[data-taqa-theme="dark"] .rlv-tone,#navbar.nav-on-hero .nav-right .rlv-tone,#rise-note.rlv-tone{--lv-bg:rgba(255,255,255,.06);--lv-bd:rgba(255,255,255,.35);--lv-fg:#FFFFFF;--lv-ic:#FF8A4C;}' +
     'html[data-taqa-theme="dark"] .rlv-tone.lv-contributor,#navbar.nav-on-hero .nav-right .rlv-tone.lv-contributor,#rise-note.rlv-tone.lv-contributor{--lv-bg:rgba(0,187,182,.18);--lv-bd:#00BBB6;--lv-fg:#FFFFFF;--lv-ic:#5FE0DB;}' +
     'html[data-taqa-theme="dark"] .rlv-tone.lv-practitioner,#navbar.nav-on-hero .nav-right .rlv-tone.lv-practitioner,#rise-note.rlv-tone.lv-practitioner{--lv-bg:rgba(0,93,99,.55);--lv-bd:#3FB8B4;--lv-fg:#FFFFFF;--lv-ic:#8FE3DF;}' +
     'html[data-taqa-theme="dark"] .rlv-tone.lv-specialist,#navbar.nav-on-hero .nav-right .rlv-tone.lv-specialist,#rise-note.rlv-tone.lv-specialist{--lv-bg:rgba(0,118,168,.35);--lv-bd:#4FB3E0;--lv-fg:#FFFFFF;--lv-ic:#8ED3F2;}' +
@@ -392,6 +392,11 @@
   // (requestAnimationFrame waits for a background tab to be shown), and once
   // it fades the note leaves the page's reading order.
   function showNote(level, pts) {
+    // Pages that show the level visually (My contributions) listen for this
+    // and run their own celebration; the note itself stays the same.
+    try {
+      document.dispatchEvent(new CustomEvent('rise:levelup', { detail: { key: level.key, name: level.name, points: pts } }));
+    } catch (e) {}
     var n = document.getElementById('rise-note');
     if (!n) {
       n = document.createElement('div');
