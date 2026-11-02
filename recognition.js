@@ -392,6 +392,11 @@
   // (requestAnimationFrame waits for a background tab to be shown), and once
   // it fades the note leaves the page's reading order.
   function showNote(level, pts) {
+    // Pages that show the level visually (My contributions) listen for this
+    // and run their own celebration; the note itself stays the same.
+    try {
+      document.dispatchEvent(new CustomEvent('rise:levelup', { detail: { key: level.key, name: level.name, points: pts } }));
+    } catch (e) {}
     var n = document.getElementById('rise-note');
     if (!n) {
       n = document.createElement('div');

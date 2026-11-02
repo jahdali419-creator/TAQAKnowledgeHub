@@ -159,6 +159,109 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
   .ladder .lp{margin-top:0;}
 }
 @media print{nav,#nav-mobile-menu{display:none!important;}}
+
+/* ── Level hero: the page's reward, not a form row ─────────────────── */
+.lv-hero{position:relative;overflow:hidden;border:0;padding:28px 30px;
+  background:linear-gradient(135deg,#07323a,#0d454e 55%,#0a3b42);color:#fff;}
+.lv-hero::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(540px 200px at 12% 0%,rgba(255,255,255,.10),transparent 70%);}
+.lv-hero > *{position:relative;z-index:1;}
+.lv-hero #rc-level-h{font:700 11px/1 'Inter',sans-serif;letter-spacing:1.4px;text-transform:uppercase;
+  color:rgba(255,255,255,.55);margin:0 0 18px;}
+.lv-hero .lv-top{display:flex;align-items:center;gap:24px;margin-bottom:22px;}
+
+/* medal in a progress ring */
+.lv-ring{position:relative;width:112px;height:112px;flex:none;}
+.lv-ring svg.rng{position:absolute;inset:0;transform:rotate(-90deg);}
+.lv-ring .rng .tr{fill:none;stroke:rgba(255,255,255,.16);stroke-width:7;}
+.lv-ring .rng .fl{fill:none;stroke:var(--lv-bd,#FD691D);stroke-width:7;stroke-linecap:round;
+  stroke-dasharray:307.9;stroke-dashoffset:307.9;
+  transition:stroke-dashoffset 1.1s cubic-bezier(.23,1,.32,1) .15s,stroke .4s ease;}
+.lv-hero .lv-mark{position:absolute;inset:15px;width:auto;height:auto;border-radius:50%;
+  background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);}
+.lv-hero .lv-mark svg{width:42px;height:42px;color:var(--lv-ic,#FF8A4C);
+  transition:color .4s ease,transform .5s cubic-bezier(.23,1,.32,1);}
+.lv-hero .lv-mark.pop svg{animation:lvPop .6s cubic-bezier(.23,1,.32,1);}
+@keyframes lvPop{0%{transform:scale(1)}35%{transform:scale(1.26) rotate(-8deg)}100%{transform:scale(1)}}
+
+.lv-hero .lv-name{font-family:'BwGradual','Urbanist',sans-serif;font-size:38px;font-weight:800;
+  letter-spacing:-.9px;line-height:1.04;color:#fff;}
+.lv-hero .lv-pts{display:flex;align-items:baseline;gap:7px;margin-top:4px;font-size:14px;
+  color:rgba(255,255,255,.64);}
+.lv-hero .lv-pts b{font-family:'BwGradual','Urbanist',sans-serif;font-size:26px;font-weight:800;
+  color:var(--lv-ic,#FF8A4C);font-variant-numeric:tabular-nums;}
+.lv-hero .lv-next{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;
+  color:rgba(255,255,255,.84);background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.16);padding:7px 14px;border-radius:999px;}
+.lv-hero .lv-next b{font-weight:700;color:#fff;}
+.lv-hero .lv-next a{color:#9FE7E2;}
+
+/* the bar keeps its progressbar role; in the hero the ring shows it */
+.lv-hero .lv-bar{height:0;margin:0;overflow:hidden;}
+
+/* ── Journey: the ladder, drawn as a track ─────────────────────────── */
+.lv-hero .ladder{list-style:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:0;margin:26px 0 0;padding:0;position:relative;}
+.lv-hero .ladder li{border-top:3px solid rgba(255,255,255,.16);padding:14px 6px 0;min-width:0;
+  text-align:center;position:relative;transition:border-top-color .45s cubic-bezier(.23,1,.32,1);}
+.lv-hero .ladder li::before{content:'';position:absolute;top:-9px;left:50%;transform:translateX(-50%);
+  width:15px;height:15px;border-radius:50%;background:#0a3b42;
+  box-shadow:inset 0 0 0 3px rgba(255,255,255,.26);
+  transition:box-shadow .45s cubic-bezier(.23,1,.32,1),background .45s cubic-bezier(.23,1,.32,1);}
+.lv-hero .ladder li.got::before{background:var(--lv-bd,#00A6A1);box-shadow:inset 0 0 0 3px var(--lv-bd,#00A6A1);}
+.lv-hero .ladder li.here::before{box-shadow:inset 0 0 0 3px var(--lv-bd,#00A6A1),0 0 0 5px rgba(255,255,255,.14);}
+.lv-hero .ladder li.got{border-top-color:var(--lv-bd,#00A6A1);}
+.lv-hero .ladder .ln{font-family:'BwGradual','Urbanist',sans-serif;font-size:12.5px;font-weight:700;
+  color:rgba(255,255,255,.92);line-height:1.25;}
+.lv-hero .ladder li:not(.got) .ln{color:rgba(255,255,255,.5);font-weight:600;}
+.lv-hero .ladder .lp{font-size:11px;color:rgba(255,255,255,.44);margin-top:2px;font-variant-numeric:tabular-nums;}
+.lv-hero .ladder li.here .ln::after{content:" · you";font-weight:600;color:var(--lv-ic,#FF8A4C);}
+
+/* ── How points are earned: rows become cards ──────────────────────── */
+#rc-rules .rules,#rc-rules .rules tbody{display:block;width:100%;}
+#rc-rules .rules tbody{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+#rc-rules .rules tr{display:flex;flex-direction:column-reverse;justify-content:flex-end;gap:6px;
+  border:1px solid var(--line);border-radius:13px;padding:16px 16px 14px;background:var(--paper);
+  opacity:0;transform:translateY(9px);animation:lvRise .5s cubic-bezier(.23,1,.32,1) forwards;}
+#rc-rules .rules tr:nth-child(1){animation-delay:.06s}
+#rc-rules .rules tr:nth-child(2){animation-delay:.13s}
+#rc-rules .rules tr:nth-child(3){animation-delay:.20s}
+#rc-rules .rules tr:nth-child(4){animation-delay:.27s}
+@keyframes lvRise{to{opacity:1;transform:none}}
+#rc-rules .rules td{display:block;padding:0;border:0;}
+#rc-rules .rules td.pt{font-family:'BwGradual','Urbanist',sans-serif;font-size:34px;font-weight:800;
+  line-height:1;text-align:start;color:var(--primary-ink);padding:0;}
+#rc-rules .rules td.pt::after{content:' pts';font-family:'Inter',sans-serif;font-size:12.5px;
+  font-weight:700;color:var(--text-light);}
+#rc-rules .rules tr td:first-child{font-size:13.5px;line-height:1.5;color:var(--text-muted);}
+#rc-rules .rules .zero{background:var(--inset);}
+#rc-rules .rules .zero td.pt{color:var(--text-light);}
+/* the fourth row is the “earns nothing” case — it sits quieter and full width */
+#rc-rules .rules tr.zero{grid-column:1 / -1;flex-direction:row-reverse;align-items:center;
+  justify-content:flex-end;gap:14px;padding:12px 16px;}
+#rc-rules .rules tr.zero td.pt{font-size:22px;}
+
+@media(max-width:860px){
+  #rc-rules .rules tbody{grid-template-columns:minmax(0,1fr);}
+  .lv-hero{padding:22px 18px;}
+  .lv-hero .lv-top{flex-direction:column;align-items:flex-start;gap:16px;}
+  .lv-hero .lv-name{font-size:30px;}
+  .lv-hero .ladder .ln{font-size:11px;}
+  .lv-hero .ladder li.here .ln::after{content:"";}
+}
+
+/* ── Level-up burst ─────────────────────────────────────────────────── */
+#lv-burst{position:fixed;inset:0;pointer-events:none;z-index:8999;overflow:hidden;}
+#lv-burst i{position:absolute;width:9px;height:14px;border-radius:2px;opacity:0;}
+#lv-burst.go i{animation:lvFall 1.5s cubic-bezier(.23,1,.32,1) forwards;}
+@keyframes lvFall{0%{opacity:1;transform:translateY(0) rotate(0)}
+  100%{opacity:0;transform:translateY(70vh) rotate(540deg)}}
+
+@media (prefers-reduced-motion:reduce){
+  .lv-ring .rng .fl,.lv-hero .ladder li,.lv-hero .ladder li::before,.lv-hero .lv-mark svg{transition:none;}
+  #rc-rules .rules tr{opacity:1;transform:none;animation:none;}
+  #lv-burst{display:none;}
+}
 </style>
 <link rel="stylesheet" href="techhub.css">
 <link rel="stylesheet" href="topbar.css">
@@ -197,23 +300,21 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
   <header class="rc-head">
     <div class="eyebrow" id="rc-eyebrow">RISE Recognition</div>
     <h1 id="rc-title">My contributions</h1>
-    <p id="rc-lede">Points for work that passed QMS and approval, so only released documents count. In this preview your points are saved in this browser only.</p>
+    <p id="rc-lede">Points for released work. Only what QMS checked and the approver released counts.</p>
   </header>
 
-  <div class="rc-grid">
-    <section class="card" id="rc-level" aria-labelledby="rc-level-h">
-      <h2 id="rc-level-h">Your level</h2>
-      <div id="rc-level-body"></div>
-    </section>
+  <section class="card lv-hero" id="rc-level" aria-labelledby="rc-level-h">
+    <h2 id="rc-level-h">Your level</h2>
+    <div id="rc-level-body"></div>
+  </section>
 
-    <section class="card" id="rc-rules" aria-labelledby="rc-rules-h">
-      <h2 id="rc-rules-h">How points are earned</h2>
-      <table class="rules">
-        <tbody id="rc-rules-body"></tbody>
-      </table>
-      <p class="rule-note">Only work that QMS checked and the approver released counts. Uploading alone earns nothing, so a level cannot be reached with duplicates or rushed files.</p>
-    </section>
-  </div>
+  <section class="card" id="rc-rules" aria-labelledby="rc-rules-h">
+    <h2 id="rc-rules-h">How points are earned</h2>
+    <table class="rules">
+      <tbody id="rc-rules-body"></tbody>
+    </table>
+    <p class="rule-note">Uploading alone earns nothing: a level cannot be reached with duplicates or rushed files.</p>
+  </section>
 
   <section class="card" id="rc-mine" aria-labelledby="rc-mine-h">
     <div class="card-hd"><h2 id="rc-mine-h">Your released work</h2><span class="sub" id="rc-mine-sum"></span></div>
@@ -299,22 +400,82 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
     var pts = R.pointsOf(), lv = R.levelFor(pts);
     var from = lv.level ? lv.level.min : 0, to = lv.next ? lv.next.min : pts;
     var pct = lv.next ? Math.round((pts - from) / (to - from) * 100) : 100, shown = Math.max(4, pct);
+    var CIRC = 307.9; /* 2 * pi * 49 */
     box.innerHTML =
-      '<div class="lv-top"><div class="lv-mark rlv-tone lv-' + R.levelKey(pts) + '">' + R.MEDAL + '</div><div>' +
-        '<div class="lv-name">' + esc(lv.level ? lv.level.name : 'No level yet') + '</div>' +
-        '<div class="lv-pts">' + plural(pts, 'point', 'points') + ' · ' + esc(R.labelFor(R.me())) + '</div></div></div>' +
+      '<div class="lv-top">' +
+        '<div class="lv-ring rlv-tone lv-' + R.levelKey(pts) + '">' +
+          '<svg class="rng" viewBox="0 0 112 112" aria-hidden="true">' +
+            '<circle class="tr" cx="56" cy="56" r="49"/>' +
+            '<circle class="fl" id="lv-fill" cx="56" cy="56" r="49"/></svg>' +
+          '<div class="lv-mark rlv-tone lv-' + R.levelKey(pts) + '" id="lv-medal">' + R.MEDAL + '</div>' +
+        '</div>' +
+        '<div><div class="lv-name">' + esc(lv.level ? lv.level.name : 'No level yet') + '</div>' +
+        '<div class="lv-pts"><b id="lv-count">0</b> ' + (pts === 1 ? 'point' : 'points') +
+          ' · ' + esc(R.labelFor(R.me())) + '</div></div></div>' +
       '<div class="lv-bar" role="progressbar" aria-label="Progress to the next level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><span style="width:' + shown + '%"></span></div>' +
       '<p class="lv-next">' + (lv.next
-        ? '<b>' + lv.toNext + ' more points</b> to reach ' + esc(lv.next.name) + '.'
-        : 'You have reached the top level.') +
-        (pts === 0 ? ' File a document in <a href="upload.html">Upload</a>; it counts once QMS checks it and it is released.' : '') + '</p>' +
+        ? '<b>' + lv.toNext + ' more</b> to reach ' + esc(lv.next.name)
+        : 'Top level reached') +
+        (pts === 0 ? ' · file something in <a href="upload.html">Upload</a>' : '') + '</p>' +
       ladder(lv.index);
+
+    /* The ring fills toward the next level, and the figure counts up to it. */
+    var fill = $('lv-fill');
+    if (fill) requestAnimationFrame(function () {
+      fill.style.strokeDashoffset = String(CIRC * (1 - (lv.next ? pct / 100 : 1)));
+    });
+    countTo($('lv-count'), pts);
+  }
+
+  /* Counts a figure up from zero, or sets it at once when motion is off. */
+  function countTo(el, target) {
+    if (!el) return;
+    var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (calm || target <= 0) { el.textContent = String(target); return; }
+    var t0 = null, dur = Math.min(900, 300 + target * 2);
+    requestAnimationFrame(function step(ts) {
+      if (!t0) t0 = ts;
+      var k = Math.min(1, (ts - t0) / dur);
+      el.textContent = String(Math.round(target * (1 - Math.pow(1 - k, 3))));
+      if (k < 1) requestAnimationFrame(step);
+    });
+  }
+
+  /* A level-up gets a moment: the medal pops and the level's colours fall. */
+  function celebrate(colour) {
+    var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var medal = $('lv-medal');
+    if (medal) {
+      medal.classList.add('pop');
+      setTimeout(function () { medal.classList.remove('pop'); }, 700);
+    }
+    if (calm) return;
+    var b = document.getElementById('lv-burst');
+    if (!b) { b = document.createElement('div'); b.id = 'lv-burst'; b.setAttribute('aria-hidden', 'true'); document.body.appendChild(b); }
+    b.className = ''; b.innerHTML = '';
+    var cols = [colour || '#00A6A1', '#FD691D', '#FFC94D', '#5FE0DB'];
+    for (var i = 0; i < 26; i++) {
+      var sp = document.createElement('i');
+      sp.style.left = (18 + Math.random() * 64) + '%';
+      sp.style.top = (12 + Math.random() * 14) + '%';
+      sp.style.background = cols[i % cols.length];
+      sp.style.animationDelay = (Math.random() * 0.25) + 's';
+      b.appendChild(sp);
+    }
+    void b.offsetWidth; b.className = 'go';
   }
   function ladder(here) {
     return '<ol class="ladder" aria-label="Levels">' + R.LEVELS.map(function (l, i) {
       return '<li class="rlv-tone lv-' + l.key + (i <= here ? ' got' : '') + (i === here ? ' here' : '') + '"><div class="ln">' + esc(l.name) + '</div><div class="lp">' + l.min + ' pts</div></li>';
     }).join('') + '</ol>';
   }
+
+  /* A level reached while the page is open gets its moment here too. */
+  document.addEventListener('rise:levelup', function () {
+    var medal = $('lv-medal');
+    var col = medal ? getComputedStyle(medal).getPropertyValue('--lv-bd').trim() : '';
+    celebrate(col || '#00A6A1');
+  });
 
   /* Your released work */
   function paintMine() {
