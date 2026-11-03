@@ -309,6 +309,76 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
   .area-top li.lead{grid-column:1;grid-row:auto;}
   .area-top li.chase{grid-column:1;}
 }
+
+/* ── Honour board: the top three take a podium, the rest follow ───── */
+#rc-board-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;
+  align-items:end;list-style:none;margin:18px 0 0;padding:0;}
+
+#rc-board-list li.seat{position:relative;flex-direction:column;text-align:center;
+  border:1px solid var(--line);border-radius:16px;padding:22px 14px 16px;background:var(--paper);
+  display:flex;align-items:center;gap:0;}
+/* DOM order stays 1,2,3 for anyone reading the list; only the eye sees a podium */
+#rc-board-list li.s1{grid-column:2;grid-row:1;padding:28px 16px 20px;
+  background:linear-gradient(180deg,#FFFDF5,#fff 60%);border-color:rgba(217,154,0,.4);
+  box-shadow:0 12px 30px -18px rgba(217,154,0,.65);}
+#rc-board-list li.s2{grid-column:1;grid-row:1;}
+#rc-board-list li.s3{grid-column:3;grid-row:1;}
+#rc-board-list li:not(.seat){grid-column:1 / -1;display:flex;align-items:center;gap:12px;
+  padding:10px 12px;border-radius:10px;}
+
+#rc-board-list li.seat .rank{position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  width:26px;height:26px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--paper);
+  font:800 12.5px/1 'BwGradual','Urbanist',sans-serif;color:#fff;background:#9FB3B3;}
+#rc-board-list li.s1 .rank{background:#D99A00;width:30px;height:30px;font-size:14px;top:-14px;}
+#rc-board-list li.s3 .rank{background:#B06B3A;}
+
+#rc-board-list .av{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;flex:none;
+  font:800 17px/1 'BwGradual','Urbanist',sans-serif;color:#fff;letter-spacing:.5px;
+  background:var(--lv-ic,#7C9292);box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--lv-bd,rgba(0,88,90,.14));}
+#rc-board-list li.seat .av{margin:4px 0 11px;}
+#rc-board-list li.s1 .av{width:62px;height:62px;font-size:21px;}
+#rc-board-list li:not(.seat) .av{width:30px;height:30px;font-size:11px;box-shadow:none;}
+
+#rc-board-list li.seat .who{min-width:0;width:100%;}
+#rc-board-list li.seat .nm{justify-content:center;flex-wrap:wrap;gap:5px;}
+#rc-board-list li.seat .nm .t{display:block;width:100%;font-family:'BwGradual','Urbanist',sans-serif;
+  font-weight:700;font-size:14.5px;line-height:1.25;}
+#rc-board-list li.s1 .nm .t{font-size:16.5px;}
+#rc-board-list li.seat .mt{font-size:11.5px;margin-top:3px;}
+#rc-board-list li.seat .pts{font-family:'BwGradual','Urbanist',sans-serif;font-weight:800;font-size:25px;
+  line-height:1;margin-top:11px;color:var(--primary-ink);font-variant-numeric:tabular-nums;}
+#rc-board-list li.s1 .pts{font-size:32px;color:#C08800;}
+
+#rc-board-list li.mine{background:var(--inset);box-shadow:inset 0 0 0 1px rgba(0,93,99,.22);}
+#rc-board-list li.seat.mine{box-shadow:0 0 0 2px rgba(0,93,99,.4);}
+#rc-board-list li.empty{grid-column:1 / -1;text-align:start;}
+
+@media(max-width:760px){
+  #rc-board-list{grid-template-columns:minmax(0,1fr);align-items:stretch;}
+  #rc-board-list li.s1,#rc-board-list li.s2,#rc-board-list li.s3{grid-column:1;grid-row:auto;}
+  #rc-board-list li.s1{order:-1;}
+}
+
+/* ── The route from filing to points, shown while nothing is released ── */
+#rc-mine-help[hidden]{display:none;}
+.route{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;
+  margin:4px 0 0;padding:0;}
+.route li{position:relative;padding:16px 16px 14px;border:1px solid var(--line);border-radius:13px;
+  background:var(--paper);}
+.route li::after{content:'';position:absolute;top:50%;inset-inline-end:-13px;width:14px;height:1px;
+  background:var(--line);}
+.route li:last-child::after{display:none;}
+.route .rn{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;
+  background:var(--inset);color:var(--primary-ink);font:800 12px/1 'BwGradual','Urbanist',sans-serif;
+  margin-bottom:10px;}
+.route .rt{display:block;font-family:'BwGradual','Urbanist',sans-serif;font-weight:700;font-size:14px;
+  line-height:1.25;color:var(--text);}
+.route .rd{display:block;font-size:12px;color:var(--text-light);margin-top:4px;line-height:1.45;}
+.route-cta{display:inline-block;margin-top:14px;background:var(--primary-ink);color:#fff;
+  font:700 13.5px 'Inter',sans-serif;padding:10px 18px;border-radius:9px;text-decoration:none;}
+.route-cta:hover{background:#00474C;}
+@media(max-width:760px){.route{grid-template-columns:minmax(0,1fr);}
+  .route li::after{display:none;}}
 </style>
 <link rel="stylesheet" href="techhub.css">
 <link rel="stylesheet" href="topbar.css">
@@ -363,11 +433,6 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
     <p class="rule-note">Uploading alone earns nothing: a level cannot be reached with duplicates or rushed files.</p>
   </section>
 
-  <section class="card" id="rc-mine" aria-labelledby="rc-mine-h">
-    <div class="card-hd"><h2 id="rc-mine-h">Your released work</h2><span class="sub" id="rc-mine-sum"></span></div>
-    <ul class="list" id="rc-mine-list"></ul>
-  </section>
-
   <section class="card" id="board" aria-labelledby="rc-board-h">
     <div class="card-hd"><h2 id="rc-board-h">Top contributors this month</h2><span class="sub" id="rc-month"></span></div>
     <div class="board-tools">
@@ -381,6 +446,19 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
   <section class="card" id="rc-areas" aria-labelledby="rc-areas-h">
     <div class="card-hd"><h2 id="rc-areas-h">Top areas this month</h2><span class="sub" id="rc-areas-sub">The five most active. Any example points are made up for this preview.</span></div>
     <ol class="area-top" id="rc-areas-list"></ol>
+  </section>
+
+  <section class="card" id="rc-mine" aria-labelledby="rc-mine-h">
+    <div class="card-hd"><h2 id="rc-mine-h">Your released work</h2><span class="sub" id="rc-mine-sum"></span></div>
+    <ul class="list" id="rc-mine-list"></ul>
+    <div id="rc-mine-help" hidden>
+      <ol class="route" aria-label="How a filing becomes points">
+        <li><span class="rn">1</span><span class="rt">You file it</span><span class="rd">A document, a field case, a lesson learned</span></li>
+        <li><span class="rn">2</span><span class="rt">QMS checks it</span><span class="rd">Format, numbering and the register entry</span></li>
+        <li><span class="rn">3</span><span class="rt">Your approver releases it</span><span class="rd">Only then do the points land here</span></li>
+      </ol>
+      <a class="route-cta" href="upload.html">File your first document</a>
+    </div>
   </section>
 
   <p class="foot">Entries marked <span class="chip ex">Example</span> are made up to show how the lists look; they are not real people and never count in the register. This is a preview: points and levels are not linked to appraisal, pay or performance reviews.</p>
@@ -530,10 +608,13 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
     if (!earner) { $('rc-mine').hidden = true; return; }
     var rows = R.contributions();
     sum.textContent = rows.length ? plural(rows.length, 'item', 'items') + ' · ' + R.pointsOf() + ' points' : '';
+    var help = $('rc-mine-help');
     if (!rows.length) {
-      list.innerHTML = '<li class="empty">Nothing released yet. When a document you filed is checked by QMS and released by its approver, it shows here with its points.</li>';
+      list.innerHTML = '<li class="empty">Nothing of yours has been released yet.</li>';
+      if (help) help.hidden = false;
       return;
     }
+    if (help) help.hidden = true;
     list.innerHTML = rows.map(function (c) {
       var d = c.doc, open = TAQA_STORE.readable(d);
       var title = open ? d.title : 'A document you filed (restricted)';
@@ -568,13 +649,22 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
     paintBoard(); paintAreas();
   });
 
+  /* Up to two initials from a row's label, for the avatar disc. */
+  function initials(label) {
+    var w = String(label || '').replace(/[^\p{L}\p{N}\s]/gu, ' ').trim().split(/\s+/);
+    return (w.slice(0, 2).map(function (x) { return x.charAt(0); }).join('') || '?').toUpperCase();
+  }
+
   function paintBoard() {
     var id = areaSel.value, rows = R.board(id), list = $('rc-board-list'), me = R.me();
     if (!rows.length) {
       list.innerHTML = '<li class="empty">No released work in ' + esc(L[id] ? L[id].name : id) + ' this month yet.</li>';
     } else {
       list.innerHTML = rows.map(function (r, i) {
-        return '<li class="' + (r.you ? 'mine' : '') + '"><span class="rank">' + (i + 1) + '</span>' +
+        var seat = i < 3 ? ' seat s' + (i + 1) : '';
+        var tone = r.level ? ' rlv-tone lv-' + r.level.key : ' rlv-tone';
+        return '<li class="' + (r.you ? 'mine' : '') + seat + tone + '"><span class="rank">' + (i + 1) + '</span>' +
+          '<span class="av" aria-hidden="true">' + esc(initials(r.label)) + '</span>' +
           '<div class="who"><div class="nm"><span class="t">' + esc(r.label) + '</span>' +
             (r.example ? '<span class="chip ex">Example</span>' : '') +
             (r.level ? '<span class="chip lvl rlv-tone lv-' + r.level.key + '">' + esc(r.level.name) + '</span>' : '') + '</div>' +
