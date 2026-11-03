@@ -1162,8 +1162,11 @@ html[data-taqa-theme="dark"] #focus.strata {
    group you are in. None of it is a fill. */
 #focus.strata .st-layer[data-open="true"] .st-chev svg { transform:rotate(180deg); }
 #focus.strata .st-layer[data-open="true"] .st-name { color:var(--st-bore); }
+/* Several beds stand open at once, so a header no longer pins itself to the
+   top: three sticky headers would stack on the same line and hide the two
+   bodies beneath them. The rule that marks an open bed stays. */
 #focus.strata .st-layer[data-open="true"] .st-h {
-  position:sticky; top:var(--st-top); z-index:2; background:var(--st-paper);
+  position:relative; z-index:2; background:var(--st-paper);
   box-shadow:inset 0 -2px 0 var(--st-bore);
 }
 
@@ -2353,15 +2356,15 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
     return out;
   }
 
-  var open = null;
+  var open = {};   /* every bed this person has open, by key */
   function paint(){
     var G = groups();
     beds.innerHTML = ORDER.map(function(k){
       var m = META[k], g = G[k], half = Math.ceil(g.rows.length / 2);
-      return '<div class="st-layer" data-k="' + k + '" data-open="' + (open === k) + '">' +
+      return '<div class="st-layer" data-k="' + k + '" data-open="' + (!!open[k]) + '">' +
         '<h3 class="st-h">' +
           '<button type="button" class="st-head" id="st-h-' + k + '" data-group="' + k + '" ' +
-            'aria-expanded="' + (open === k) + '" aria-controls="st-b-' + k + '">' +
+            'aria-expanded="' + (!!open[k]) + '" aria-controls="st-b-' + k + '">' +
             '<span class="st-name">' + esc(m.title) + '</span>' +
             '<span class="st-meta">' +
               '<span class="st-stat"><b>' + g.rows.length + '</b> ' + m.noun + '</span>' +
@@ -2393,14 +2396,19 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
     return G;
   }
 
-  function setOpen(k){
-    open = k;
+  /* Each bed stands on its own: opening one no longer shuts the others. */
+  function applyOpen(){
     beds.querySelectorAll('.st-layer').forEach(function(el){
-      var on = el.dataset.k === k;
+      var on = !!open[el.dataset.k];
       el.dataset.open = String(on);
       el.querySelector('.st-head').setAttribute('aria-expanded', String(on));
     });
   }
+  function setOpen(k, on){
+    if (k == null) { open = {}; } else if (on === false) { delete open[k]; } else { open[k] = true; }
+    applyOpen();
+  }
+  function isOpen(k){ return !!open[k]; }
 
   // Which bed is open on arrival. On a phone the whole cross-section reads
   // first, cap rock and three beds, so none is; on a wide screen the first
@@ -2409,7 +2417,13 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
   var KEY = 'taqa-strata-bed', saved = null;
   try { saved = localStorage.getItem(KEY); } catch (e) {}
   var narrow = window.matchMedia && matchMedia('(max-width:699px)').matches;
-  open = saved === 'none' ? null : (META[saved] ? saved : (narrow ? null : 'seg'));
+  /* Everything shows on arrival. Only the beds this person closed stay shut,
+     and on a phone the cross-section still reads before the lists do. */
+  open = {};
+  var shut = {};
+  try { if (saved && saved.charAt(0) === '{') shut = JSON.parse(saved) || {}; } catch (e) { shut = {}; }
+  ORDER.forEach(function(k){ if (!(narrow && shut.__phone) && !shut[k]) open[k] = true; });
+  if (narrow && saved == null) { open = {}; open.seg = true; }
   var G = paint();
 
   // The header you touched stays under your finger while a bed above it
@@ -2423,12 +2437,16 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
       if (!reduce && performance.now() - t0 < 360) requestAnimationFrame(step);
     })();
   }
-  function remember(k){ try { localStorage.setItem(KEY, k || 'none'); } catch (e) {} }
+  function remember(){
+    var shut = {};
+    ORDER.forEach(function(k){ if (!open[k]) shut[k] = true; });
+    try { localStorage.setItem(KEY, JSON.stringify(shut)); } catch (e) {}
+  }
 
   // "Explore the segments" lands on the segments themselves: on a phone,
   // where every group starts closed, it opens Operational Segments first.
   var cueLink = document.getElementById('hero-cue');
-  if (cueLink) cueLink.addEventListener('click', function(){ if (open !== 'seg' && META.seg) setOpen('seg'); });
+  if (cueLink) cueLink.addEventListener('click', function(){ if (!isOpen('seg') && META.seg) { setOpen('seg', true); remember(); } });
 
   beds.addEventListener('click', function(e){
     var b = e.target.closest('.st-head');
@@ -2437,8 +2455,8 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
       // pin to where the bed itself sits, not where the header floats.
       var layer = b.closest('.st-layer'),
           y0 = layer.getBoundingClientRect().top,
-          next = open === b.dataset.group ? null : b.dataset.group;
-      setOpen(next); remember(next);
+          key = b.dataset.group;
+      setOpen(key, !isOpen(key)); remember();
       if (y0 >= 0) pin(layer, y0);
       else layer.scrollIntoView({ block:'start', behavior: reduce ? 'auto' : 'smooth' });
       return;
@@ -2446,7 +2464,7 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
     var f = e.target.closest('.st-fold');
     if (f) {
       var lay = f.closest('.st-layer');
-      setOpen(null); remember(null);
+      setOpen(lay.dataset.k, false); remember();
       var top = lay.getBoundingClientRect().top, cov = window.TAQA_TOP ? TAQA_TOP() : 64;
       if (top < cov + 8) window.scrollBy({ top: top - cov - 16, behavior: reduce ? 'auto' : 'smooth' });
       var h = lay.querySelector('.st-head'); if (h) h.focus({ preventScroll:true });
