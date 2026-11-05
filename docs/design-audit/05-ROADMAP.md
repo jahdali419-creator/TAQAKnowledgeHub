@@ -37,11 +37,13 @@ attribute. Direction-independent: do this whichever direction you choose.*
   prototype already behaves that way.
 - **UX-078** — fictional contributors must never be shown as real. Scheduled.
 
-**Still needs a decision, from Part 6:**
-- **UX-093** — may a Maintenance Manager *read* a segment's field knowledge? The
-  segment strip says no, the library says yes; one of them is wrong.
-- **UX-094** — is a Maintenance Manager per-segment like a Director, or
-  cross-segment like QMS?
+**Also decided (5 November 2026):**
+- **UX-093** — **yes.** A Maintenance Manager may read released field knowledge
+  in their authorised segment, subject to classification. The segment strip must
+  stop hiding it. Reading grants no submit, review, approve or modify right.
+- **UX-094** — **per-segment.** A Maintenance Manager manages their assigned
+  segment's maintenance department by default, not every operational segment.
+  QMS keeps only its authorised cross-segment responsibilities.
 
 **Exit gate:** the existing suite (47 spec files, chromium + mobile-chrome +
 webkit-smoke) green, and a re-run of the audit probe showing zero sub-44px
@@ -119,21 +121,34 @@ approach chosen.
   Field Cases link once the segment owns it.
 - UX-092 — make a case's breadcrumb return to the segment it was opened from.
 
-**2F.2 — Build the chosen surface** (A, B or C from Part 7), on the shared
-components listed in Part 7 §5: entry row, letter mark, counted rail, lens tile,
-filter bar, lock chip, empty state, pre-job starter, status badge.
+**2F.2 — Build the chosen surface.** **Decided: Approach B as the primary
+experience, with Approach C as an optional detailed Field Desk** (owner, 5 Nov
+2026). Built on the shared components in Part 7 §5 — entry row, letter mark,
+counted rail, alert shelf, filter bar, lock chip, empty state, pre-job starter,
+status badge. The refined design, the seven previews and the exact navigation
+changes are in **Part 8**.
 
 **2F.3 — The empty state is a first-class state, not a fallback.** Three of the
 eleven operational segments have zero field knowledge (UX-090). It ships with the
 surface, not after it.
 
-**2F.4 — Resolve the duplication** (UX-082). A segment's field cases *are* its
-Lessons Learned and Alerts tabs. Under approach B those two tabs collapse into
-Field knowledge; under A or C the relationship still has to be stated so the same
-record is not presented twice as two different things.
+**2F.4 — Resolve the duplication safely** (UX-082). **No tab is removed.** The
+owner has not approved removal, and the overlap is a property of today's dataset
+rather than a permanent truth. Part 8 §5 sets out a four-stage, independently
+reversible migration: add Field knowledge alongside the existing tabs, then make
+the two tabs open the same view pre-filtered, then pilot and ask, and only then
+consider retiring — with Technical Alerts recommended to stay permanently.
 
 **2F.5 — Scoped search entry.** Add `ai-search.html?area=<id>` to pre-set the
 segment filter that already exists (UX-091). Global search is unchanged.
+
+**2F.6 — Pre-job inside the segment.** The segment is used automatically and
+never asked for; pre-job becomes one of the two main actions alongside Explore
+cases; the matching, `why[]` reasons, source references, group order, "Discussed"
+ticks, pack figures, Print and Copy link are all preserved unchanged. A standing,
+non-dismissible caution states that a pack informs the pre-job conversation and
+does **not** authorise the job or replace approved job safety documentation
+(Part 8 §6).
 
 **Explicitly not in this phase:** no change to `cases.js`, `store.js`, `roles.js`,
 `cases-data.js` or `search-index.js`. If the work starts requiring one, the
@@ -225,7 +240,7 @@ Whatever phase is running:
 | 0 — Before launch | nothing | **No — can start now** |
 | 1 — Foundations | nothing | **No — can start now** |
 | 2 — Role desks | direction (taken: C) | No |
-| 2F — Field Knowledge | Phase 1 + an approach from Part 7 | **Yes — awaiting A / B / C** |
+| 2F — Field Knowledge | Phase 1 + approval of the Part 8 previews | **Yes — awaiting preview approval** (approach decided: B + C) |
 | 3 — Navigation and search | Phase 1 | No |
 | 4 — Depth and unverified surfaces | Phases 1–3 | No |
 

@@ -51,8 +51,24 @@ Two things from that review change the picture materially:
    boundary (the Area select still offers all twelve segments, in three separate
    places) and the chrome (the topbar's "Cases" link silently drops the segment).
 
-A new **Phase 2F** in Part 5 carries this work. It is blocked only on which of the
-three approaches you pick; Phases 0 and 1 remain unblocked.
+A new **Phase 2F** in Part 5 carries this work.
+
+**Decided 5 November 2026:** **Approach B (Segment Knowledge Tab) is the primary
+experience, with Approach C (Field Desk) as an optional detailed surface.**
+Maintenance Managers may read released field knowledge in their authorised
+segment and nothing more; they manage their own segment's maintenance department
+by default. The Lessons Learned and Technical Alerts tabs are **not** being
+removed — Part 8 §5 sets out a four-stage reversible migration that deletes
+nothing, and recommends keeping Technical Alerts permanently. Pre-job moves
+inside the segment, uses the segment automatically, becomes one of two main
+actions, and carries a standing caution that it does not authorise a job or
+replace approved job safety documentation.
+
+**Part 8** holds the refined design: seven previews (overview, listing, case
+detail, add a case, pre-job, empty segment, Maintenance Manager read-only) plus
+the optional Field Desk, each at desktop and mobile, with the exact navigation
+changes and what stays untouched. Phase 2F is now blocked only on approval of
+those previews; Phases 0 and 1 remain unblocked.
 
 ---
 
@@ -196,6 +212,7 @@ set.
 | 5 | `05-ROADMAP.md` | Six phases, dependency-ordered, with an exit gate per phase and the decisions needed from you |
 | 6 | `06-FIELD-KNOWLEDGE-DEEP-REVIEW.md` | The four Field Knowledge pages in depth, the role matrix, the mobile filter sheet, and UX-082 … UX-094 |
 | 7 | `07-SEGMENT-FIELD-KNOWLEDGE-ARCHITECTURE.md` | Three approaches for segment-embedded field knowledge, with previews; preservation; shared components; prototype vs backend authorisation |
+| 8 | `08-FIELD-KNOWLEDGE-DESIGN-SPEC.md` | The approved B+C design: seven previews, navigation changes, the safe tab-migration stages, the pre-job model and the role matrix |
 | — | `previews/` | Three working HTML previews on the real tokens and real Coiled Tubing records, with desktop and mobile renders |
 | — | `evidence/` | 9 probe JSON files (the measured record), `areas.json`, and 14 curated screenshots of the confirmed findings |
 
