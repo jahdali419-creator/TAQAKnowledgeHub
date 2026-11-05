@@ -106,11 +106,24 @@ knowledge is empty, the segment is not.
 
 ### 2.7 Maintenance Manager (preview 7)
 
-Read access to the one authorised segment. A read-only banner states the role and
-the limit in plain words. The rail has no "What I filed". There is no Upload in
-the topbar, no file control, no row actions. A "What you cannot do here" panel
-lists the five limits, and a "Your own desk" panel routes the manager back to the
-work that is theirs. **Controls are absent rather than shown-and-disabled.**
+Read access to the one authorised segment. A banner states it plainly:
+*"Here you read… **Your editing is in maintenance** — the maintenance department
+of this segment — not in field cases and not in any other segment."*
+
+**No pre-job pack is offered on this view at all** (owner, 5 Nov 2026). A pack is
+built by the crew going out on the job; it is not the maintenance manager's work,
+so it is not greyed out and not hidden behind a message — it is simply not there,
+and a short card explains why.
+
+The rail has no "What I filed". There is no Upload in the topbar, no file
+control, no row actions. A "What you cannot do here" panel lists the five limits,
+and a dark "Where your actions live" panel routes the manager to the Coiled
+Tubing maintenance desk. **Controls are absent rather than shown-and-disabled.**
+
+Open: the owner said "maybe cases" about whether a maintenance manager needs the
+case list at all. The preview keeps it read-only, with technical alerts first,
+on the grounds that a maintenance manager has a real reason to read an alert or
+an equipment failure. Say the word and I will cut the list down to alerts only.
 
 ### 2.8 Field Desk (preview 8, Approach C)
 
@@ -179,6 +192,11 @@ tabs never will. **This design therefore removes nothing.**
 
 **Stage 1 — Add, delete nothing.** The Field knowledge tab appears alongside
 Alerts and Lessons Learned. Three tabs, the same records, three entry points.
+**This is what the previews show**: the bar carries all nine of today's tabs plus
+Field knowledge, with Alerts at 1 and Lessons Learned at 3 beside Field knowledge
+at 4 — the counts match on purpose, and the page says so in a line under the bar.
+With ten tabs the bar no longer fits one row at 1440px, so it wraps on a desk
+screen and stays a horizontal scroller on a phone.
 Field knowledge reads the identical register query the two tabs read, so counts
 can never disagree. *Reversible by hiding one tab.*
 
@@ -265,7 +283,7 @@ operational authorisation.
 |---|---|---|---|---|---|
 | Employee | Their segments, by classification | Yes, operational segments | No | No | None |
 | Segment Director | Yes | **Own segment only** | No | **Own segment only** | **Own segment only** |
-| Maintenance Manager | **Yes — authorised segment, by classification** | **No** | No | No | **Own segment's maintenance department** |
+| Maintenance Manager | **Yes — authorised segment, by classification. No pre-job pack** | **No** | No | No | **Edits only within their own segment's maintenance department** |
 | QMS / Document Controller | Yes, per its responsibilities | No — operations files | **Yes** | No | Cross-segment, per responsibilities |
 | External Auditor | Yes, read-only, whole register | No | No | No | None |
 
