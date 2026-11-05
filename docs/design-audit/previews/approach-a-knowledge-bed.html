@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Approach A — Knowledge Bed</title>
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="preview.css">
+<style>
+/* ── Approach A: the field knowledge bed ───────────────────────────────────
+   Field knowledge is a band in the segment page itself. No new route, no new
+   tab, no destination. Horizontal strata, which is the segment page's own
+   idea, carried into the knowledge content. */
+.bed{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;margin-top:22px;}
+.bed-h{display:flex;align-items:center;gap:14px;padding:18px 22px;background:var(--inset);
+  border-bottom:1px solid var(--line);flex-wrap:wrap;}
+.bed-h h2{font:700 19px/1.25 var(--display);letter-spacing:-.01em;flex:1 1 auto;min-width:200px;}
+.bed-h h2 small{display:block;font:400 13px/1.4 var(--text);color:var(--ink-3);margin-top:3px;letter-spacing:0;}
+.bed-h .n{font:700 30px/1 var(--display);font-variant-numeric:tabular-nums;color:var(--teal-700);}
+.bed-h .n i{display:block;font:600 10px/1.3 var(--text);font-style:normal;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);margin-top:3px;}
+
+/* the four lenses: the pre-job pack's own groups, used as the way in */
+.lenses{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);
+  border-bottom:1px solid var(--line);}
+.lens{background:var(--paper);border:0;text-align:left;padding:15px 18px;cursor:pointer;min-width:0;
+  display:flex;flex-direction:column;gap:4px;transition:background .15s var(--ease);}
+.lens:hover{background:var(--tint);}
+.lens[aria-pressed="true"]{background:var(--tint-2);box-shadow:inset 0 -3px 0 var(--teal-700);}
+.lens b{font:700 24px/1 var(--display);font-variant-numeric:tabular-nums;color:var(--ink);}
+.lens[aria-pressed="true"] b,.lens.hot b{color:var(--teal-700);}
+.lens.zero b{color:var(--ink-4);}
+.lens span{font:600 12.5px/1.35 var(--text);color:var(--ink-2);}
+.lens em{font-style:normal;font:400 11.5px/1.3 var(--text);color:var(--ink-3);}
+
+.bed-body{display:grid;grid-template-columns:minmax(0,1fr) 332px;gap:0;align-items:stretch;}
+.bed-main{min-width:0;display:flex;flex-direction:column;}
+.bed-list{padding:4px 22px 18px;min-width:0;}
+.bed-side{border-left:1px solid var(--line);padding:18px 22px;background:var(--canvas);min-width:0;}
+
+.strata .entry{padding:15px 0;}
+.bed-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:16px 22px;
+  border-top:1px solid var(--line);background:var(--inset);}
+.bed-foot .note{margin-right:auto;}
+@media (min-width:1001px){ .bed-side{display:flex;flex-direction:column;} }
+
+/* the pre-job builder, inline — no page change to start one */
+.pj h3{font:700 15px/1.3 var(--display);margin-bottom:4px;}
+.pj .svc{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0 14px;}
+.pj .fld{display:flex;gap:8px;margin-bottom:12px;}
+.pj .fld > span{flex:1 1 0;min-width:0;}
+.pj input,.pj select{flex:1 1 0;min-width:0;height:44px;padding:0 11px;border-radius:10px;
+  border:1px solid var(--line-strong);background:var(--paper);font:400 14px/1 var(--text);color:var(--ink);}
+.pj label{display:block;font:600 12px/1.3 var(--text);color:var(--ink-3);margin-bottom:5px;}
+
+.mine{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);}
+.mine ul{list-style:none;margin-top:10px;display:grid;gap:8px;}
+.mine li{display:flex;align-items:center;gap:9px;font:400 13.5px/1.35 var(--text);color:var(--ink-2);}
+.mine .st{width:7px;height:7px;border-radius:50%;flex:none;}
+.mine .st.q{background:var(--info);} .mine .st.d{background:var(--warn);} .mine .st.p{background:var(--ok);}
+
+@media (max-width:1000px){
+  .lenses{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .bed-body{grid-template-columns:minmax(0,1fr);}
+  .bed-side{border-left:0;border-top:1px solid var(--line);}
+  .lenses{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media (max-width:760px){
+  .bed{border-radius:var(--r-md);margin-top:16px;}
+  .bed-h{padding:14px 16px;gap:10px;}
+  .bed-h h2{font-size:17px;}
+  .lens{padding:13px 14px;}
+  .bed-list,.bed-side,.bed-foot{padding-left:16px;padding-right:16px;}
+  .bed-foot .btn{flex:1 1 auto;}
+}
+</style>
+</head>
+<body>
+
+<div class="pv-flag">Design preview <b>Approach A — Knowledge Bed</b><span>RISE · not the live application</span></div>
+
+<header class="tb">
+  <span class="tb-logo">R<i>I</i>SE</span>
+  <nav class="tb-nav">
+    <a href="#">Home</a><a href="#" aria-current="page">Coiled Tubing</a><a href="#">Search</a><a href="#">Glossary</a>
+  </nav>
+  <div class="tb-r">
+    <a class="tb-cta" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Upload</a>
+    <button class="tb-ic" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+  </div>
+</header>
+
+<section class="band">
+  <p class="crumb"><a href="#">Company</a><i>/</i><a href="#">Well Services</a><i>/</i><span>Coiled Tubing</span></p>
+  <h1>Coiled Tubing Operations</h1>
+  <p class="sub">Standards, SOPs, manuals, forms and the segment's own field knowledge — everything Coiled Tubing works to, in one place.</p>
+  <div class="figs">
+    <span class="fig"><b>36</b><span>Controlled documents</span></span>
+    <span class="fig"><b>4</b><span>Field knowledge</span></span>
+    <span class="fig"><b>2</b><span>Reviews due</span></span>
+  </div>
+</section>
+
+<main class="wrap">
+
+  <p class="eyebrow" style="margin-bottom:10px;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2"/><path d="m9 13 2 2 4-4"/></svg>
+    Documents · 36 in force
+  </p>
+  <div class="card" style="padding:16px 20px;color:var(--ink-3);font-size:14px;">
+    The segment's existing document beds (Standards · SOPs · Manuals · Forms · Bulletins · Software) stay exactly as they are, open as the person left them.
+  </div>
+
+  <!-- ── the field knowledge bed ── -->
+  <section class="bed" aria-labelledby="fk-h">
+    <div class="bed-h">
+      <h2 id="fk-h">Field knowledge
+        <small>What happened before, what was tried, what was found — in Coiled Tubing.</small>
+      </h2>
+      <span class="lock on-paper"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>This segment only</span>
+      <span class="n">4<i>Released</i></span>
+    </div>
+
+    <div class="bed-body">
+      <div class="bed-main">
+    <div class="lenses" role="group" aria-label="Filter by what you need">
+      <button class="lens zero" aria-pressed="false"><b>0</b><span>Failures to watch</span><em>Incident cards</em></button>
+      <button class="lens hot" aria-pressed="false"><b>1</b><span>Tool limits &amp; alerts</span><em>In force now</em></button>
+      <button class="lens zero" aria-pressed="false"><b>0</b><span>What worked</span><em>Case studies, benchmarks</em></button>
+      <button class="lens" aria-pressed="true"><b>3</b><span>Lessons learned</span><em>Showing these</em></button>
+    </div>
+
+      <div class="bed-list strata">
+        <div class="entry">
+          <span class="mark">LL</span>
+          <span class="entry-tx">
+            <a href="#">Lessons from coiled tubing fishing operation</a>
+            <span class="entry-m"><span class="badge reg">Register</span><span>Lesson learned</span><i class="dot"></i><span>16 May 2026</span><i class="dot"></i><span>TQ-TWS-CTSS-LL-003</span></span>
+          </span>
+        </div>
+        <div class="entry">
+          <span class="mark">LL</span>
+          <span class="entry-tx">
+            <a href="#">Near-miss during CT rig-up, lessons from H2 field</a>
+            <span class="entry-m"><span class="badge reg">Register</span><span>Lesson learned</span><i class="dot"></i><span>23 Feb 2024</span><i class="dot"></i><span>TQ-TWS-CTSS-LL-001</span></span>
+          </span>
+        </div>
+        <div class="entry">
+          <span class="mark">LL</span>
+          <span class="entry-tx">
+            <a href="#">Pressure integrity test failure, field findings</a>
+            <span class="entry-m"><span class="badge reg">Register</span><span>Lesson learned</span><i class="dot"></i><span>21 Dec 2022</span><i class="dot"></i><span>TQ-TWS-CTSS-LL-005</span></span>
+          </span>
+        </div>
+        <p class="note" style="padding-top:14px;">Showing 3 of 4. One technical alert is under <b>Tool limits &amp; alerts</b>.</p>
+      </div>
+      </div>
+
+      <aside class="bed-side pj">
+        <h3>Build a pre-job pack</h3>
+        <p class="note">Tell it the job. It ranks Coiled Tubing's own knowledge against it and says why each one came up.</p>
+        <div class="svc">
+          <button class="chip" aria-pressed="true">Fishing</button>
+          <button class="chip">Nitrogen injection</button>
+          <button class="chip">Milling</button>
+          <button class="chip">Acid stimulation</button>
+          <button class="chip">Logging while CT</button>
+        </div>
+        <div class="fld"><span style="flex:1 1 0;"><label for="a-hole">Hole size</label><input id="a-hole" placeholder="3 1/2 in"></span>
+          <span style="flex:1 1 0;"><label for="a-loc">Location</label><select id="a-loc"><option>Saudi Arabia</option><option>UAE</option><option>Pakistan</option></select></span></div>
+        <a class="btn pri" style="width:100%;" href="#">Build the pack</a>
+
+        <div class="mine">
+          <h3 class="sub">What I filed here</h3>
+          <ul>
+            <li><span class="st q"></span>Washpipe washout on run 3 — <b style="font-weight:600;color:var(--info);">with QMS</b></li>
+            <li><span class="st d"></span>Nitrogen kick-off lesson — <b style="font-weight:600;color:var(--warn);">returned to you</b></li>
+          </ul>
+          <p class="note" style="margin-top:10px;">Only you, QMS, this segment's Director and an auditor can see these until release.</p>
+        </div>
+      </aside>
+    </div>
+
+    <div class="bed-foot">
+      <p class="note">A case appears here once QMS checks it and the Coiled Tubing Director releases it.</p>
+      <a class="btn" href="#">Open the full library</a>
+      <a class="btn go" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>File a Coiled Tubing case</a>
+    </div>
+  </section>
+
+  <section class="bed" aria-labelledby="fk-e" style="margin-top:26px;">
+    <div class="bed-h">
+      <h2 id="fk-e">Field knowledge<small>The same bed in a segment that has nothing yet — Slickline.</small></h2>
+      <span class="lock on-paper"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>This segment only</span>
+      <span class="n" style="color:var(--ink-4);">0<i>Released</i></span>
+    </div>
+    <div class="bed-list" style="padding:20px 22px;">
+      <div class="empty">
+        <h4>Slickline has no field knowledge yet.</h4>
+        <p class="note">Three of the eleven operational segments are in this position today. The bed does not hide — it asks. The first case filed here is the one everyone else reads.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+          <a class="btn go" href="#">File the first Slickline case</a>
+          <a class="btn" href="#">See what a good case looks like</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+</body>
+</html>

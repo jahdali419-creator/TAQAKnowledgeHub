@@ -17,6 +17,45 @@ were captured; the probe files and 14 curated screenshots are committed under
 
 ---
 
+## Addendum, 5 November 2026 — decisions taken and Field Knowledge
+
+The owner has selected **Direction C (RISE Signature) with Direction B's
+productivity features**, confirmed the landing page and segment expand/collapse
+stay unchanged, ruled that role switching moves behind a marked development/demo
+mode, that Segment Directors reach only their authorised segment dashboards with
+QMS cross-segment per its responsibilities, and that fictional contributors must
+never be shown as real in production.
+
+The owner also added a requirement the original audit did not address: **Field
+Cases and Pre-job must be segment-specific and embedded in each operational
+segment.** Two new parts answer it:
+
+- **Part 6** — an in-depth review of `cases.html`, `case-new.html`, `case.html`
+  and `prejob.html`, the role-specific workflows and the modals the first audit
+  skipped. Findings UX-082 … UX-094. Running total **94**.
+- **Part 7** — three visually distinct approaches for embedding field knowledge
+  inside a segment, with real desktop and mobile previews, plus what is preserved,
+  what the shared components deliver, and where frontend filtering ends and
+  backend authorisation must begin.
+
+Two things from that review change the picture materially:
+
+1. **A segment's "Field Cases" are, record for record, that segment's own
+   "Lessons Learned" and "Alerts" tabs.** Measured on four segments — Coiled
+   Tubing 3+1=4, Drilling 5+6=11, Well Safety 8+4=12, Slickline 0+0=0. So
+   embedding field knowledge in the segment is not adding a surface; it is
+   removing a duplicate one.
+2. **The architecture is already about 70% built.** `cases.js` filters by area
+   before anything else, all three pages already accept `?area=`, and the segment
+   page already links all three with the area attached. What is missing is the
+   boundary (the Area select still offers all twelve segments, in three separate
+   places) and the chrome (the topbar's "Cases" link silently drops the segment).
+
+A new **Phase 2F** in Part 5 carries this work. It is blocked only on which of the
+three approaches you pick; Phases 0 and 1 remain unblocked.
+
+---
+
 ## The headline
 
 **RISE is in better shape than its page count suggests, and its biggest problem is
@@ -45,11 +84,12 @@ adoption, not design** — and it needs no new design decisions to begin.
 
 ## What is wrong, and how wrong
 
-**81 findings** (UX-001 … UX-081), each tagged `[C]` confirmed by observation or
+**94 findings** (UX-001 … UX-094), each tagged `[C]` confirmed by observation or
 measurement, `[P]` a design proposal, or `[A]` an assumption needing a fact I could
-not get. 10 are P0.
+not get. 14 are P0 — the ten below, plus UX-082, UX-084, UX-085 and UX-090 from
+the Field Knowledge review in Part 6.
 
-The ten P0s, in one line each:
+The original ten P0s, in one line each:
 
 | ID | What a user sees today |
 |---|---|
@@ -150,10 +190,13 @@ set.
 | Part | File | Contents |
 |---|---|---|
 | 1 | `01-INVENTORY-AND-COVERAGE.md` | Route inventory, what was measured per page, coverage matrix by role and viewport, the ten gaps, the probe correction |
-| 2 | `02-FINDINGS-BACKLOG.md` | UX-001 … UX-081 in 18 sections, each with Where / Saw / Problem / Do / Why, plus impact, effort, priority, affected roles, mobile relevance and evidence |
+| 2 | `02-FINDINGS-BACKLOG.md` | UX-001 … UX-081 in 18 sections (UX-082 … UX-094 are in Part 6), each with Where / Saw / Problem / Do / Why, plus impact, effort, priority, affected roles, mobile relevance and evidence |
 | 3 | `03-PRIORITIES.md` | Top 20 high-impact · Top 15 quick wins · Top 10 mobile · Top 10 premium · design-system opportunities · **ten improvements to avoid** |
 | 4 | `04-DESIGN-SYSTEM-AND-DIRECTIONS.md` | The proposed token system with measured contrast ratios, then the three directions in full, then the recommendation |
-| 5 | `05-ROADMAP.md` | Five phases, dependency-ordered, with an exit gate per phase and the decisions needed from you |
+| 5 | `05-ROADMAP.md` | Six phases, dependency-ordered, with an exit gate per phase and the decisions needed from you |
+| 6 | `06-FIELD-KNOWLEDGE-DEEP-REVIEW.md` | The four Field Knowledge pages in depth, the role matrix, the mobile filter sheet, and UX-082 … UX-094 |
+| 7 | `07-SEGMENT-FIELD-KNOWLEDGE-ARCHITECTURE.md` | Three approaches for segment-embedded field knowledge, with previews; preservation; shared components; prototype vs backend authorisation |
+| — | `previews/` | Three working HTML previews on the real tokens and real Coiled Tubing records, with desktop and mobile renders |
 | — | `evidence/` | 9 probe JSON files (the measured record), `areas.json`, and 14 curated screenshots of the confirmed findings |
 
 **Awaiting your approval before anything is implemented.** Phases 0 and 1 are

@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Approach C — Segment Field Desk</title>
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="preview.css">
+<style>
+/* ── Approach C: a full desk that never leaves the segment ─────────────────
+   The existing cases.html / prejob.html keep their routes and their code, but
+   are entered in segment mode. The segment's identity becomes a sticky bar
+   that stays on screen, the Area select is replaced by a locked chip, and the
+   page becomes the register-grade workbench the Master List already proves —
+   a counted left rail, a dense centre, one primary action. */
+.idbar{position:sticky;top:94px;z-index:600;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:11px 24px;background:var(--teal-950);color:#fff;box-shadow:0 10px 24px -18px rgba(0,25,27,.8);}
+.idbar .back{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 13px;border-radius:9px;
+  border:1px solid rgba(159,227,223,.3);color:var(--teal-200);text-decoration:none;font:600 13px/1 var(--text);}
+.idbar .back svg{width:15px;height:15px;}
+.idbar .who{display:flex;flex-direction:column;gap:1px;min-width:0;}
+.idbar .who b{font:700 15px/1.2 var(--display);letter-spacing:-.01em;}
+.idbar .who span{font:500 12px/1.2 var(--text);color:rgba(159,227,223,.8);}
+.idbar .sp{flex:1 1 auto;}
+
+.desk{display:grid;grid-template-columns:250px minmax(0,1fr);gap:26px;align-items:start;margin-top:22px;}
+.rail{position:sticky;top:160px;background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px 12px;}
+.rail h3{font:700 10px/1.2 var(--text);letter-spacing:1.3px;text-transform:uppercase;color:var(--ink-3);margin:0 0 9px 6px;}
+.rail ul{list-style:none;display:grid;gap:1px;}
+.rail a{display:flex;align-items:center;gap:9px;min-height:44px;padding:0 10px;border-radius:9px;
+  text-decoration:none;font:500 14px/1.3 var(--text);color:var(--ink-2);}
+.rail a .n{margin-left:auto;font:700 13px/1 var(--text);font-variant-numeric:tabular-nums;color:var(--ink-3);}
+.rail a[aria-current]{background:var(--teal-700);color:#fff;font-weight:600;}
+.rail a[aria-current] .n{color:#fff;}
+.rail a.zero,.rail a.zero .n{color:var(--ink-4);}
+.rail a:hover:not([aria-current]){background:var(--inset);}
+.rail hr{border:0;border-top:1px solid var(--line);margin:10px 4px;}
+.rail .foot{padding:10px 8px 2px;}
+
+.deskhead{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+.deskhead h1{font:700 28px/1.2 var(--display);letter-spacing:-.02em;flex:1 1 320px;min-width:0;}
+.deskhead h1 small{display:block;font:400 14px/1.5 var(--text);color:var(--ink-3);margin-top:6px;letter-spacing:0;}
+.deskhead .acts{display:flex;gap:9px;flex-wrap:wrap;}
+
+/* the filter bar: one component, overflow-aware, with a visible active count */
+.fbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px;background:var(--paper);
+  border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:14px;}
+.fbar .srch{display:flex;align-items:center;gap:9px;height:44px;padding:0 13px;border-radius:10px;
+  border:1px solid var(--line-strong);background:var(--canvas);flex:1 1 220px;min-width:0;}
+.fbar .srch svg{width:17px;height:17px;color:var(--ink-3);flex:none;}
+.fbar .srch input{flex:1 1 0;min-width:0;align-self:stretch;border:0;outline:0;background:transparent;font:400 14px/1 var(--text);}
+.fbar .active{margin-left:auto;display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 10px;
+  border-radius:var(--r-pill);background:var(--tint);color:var(--teal-700);font:600 12.5px/1 var(--text);}
+
+/* dense table, the Master List's own treatment */
+.tbl{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead th{text-align:left;padding:11px 16px;background:var(--inset);border-bottom:1px solid var(--line-strong);
+  font:700 11px/1.2 var(--text);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;}
+tbody td{padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:top;font:400 14px/1.45 var(--text);color:var(--ink-2);}
+tbody td .badge{white-space:nowrap;}
+thead th:nth-child(2){width:132px;}
+thead th:nth-child(3){width:112px;}
+tbody tr:last-child td{border-bottom:0;}
+tbody tr:hover td{background:var(--tint);}
+td .t a{position:relative;}
+td .t a::after{content:'';position:absolute;inset:-13px -16px;}
+tbody tr{position:relative;}
+td .t{display:flex;align-items:flex-start;gap:11px;min-width:0;}
+td .t a{font:600 14.5px/1.35 var(--display);color:var(--ink);text-decoration:none;overflow-wrap:anywhere;}
+td .num{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink-3);font-size:13px;}
+.rowact{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:9px;
+  border:1px solid var(--line);background:transparent;color:var(--ink-3);cursor:pointer;}
+.rowact svg{width:17px;height:17px;}
+
+.strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px;}
+.scard{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:15px 16px;}
+.scard b{display:block;font:700 15px/1.3 var(--display);margin-bottom:4px;}
+
+@media (max-width:980px){
+  .desk{grid-template-columns:minmax(0,1fr);gap:16px;}
+  .rail{position:static;}
+  .rail ul{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;}
+  .rail ul::-webkit-scrollbar{display:none;}
+  .rail li{flex:none;} .rail a{min-height:44px;border:1px solid var(--line);}
+  .rail hr,.rail .foot{display:none;}
+  .strip{grid-template-columns:minmax(0,1fr);}
+}
+@media (max-width:760px){
+  .idbar{top:94px;padding:10px 16px;gap:10px;}
+  .idbar .who b{font-size:14px;}
+  .deskhead h1{font-size:23px;}
+  .deskhead .acts{width:100%;} .deskhead .acts .btn{flex:1 1 auto;}
+  /* the table becomes stacked rows, key fact first — cases.html already does this well */
+  thead{display:none;}
+  table,tbody,tr,td{display:block;width:100%;}
+  tbody tr{border-bottom:1px solid var(--line);padding:4px 0;}
+  tbody tr:last-child{border-bottom:0;}
+  tbody td{border:0;padding:6px 14px;}
+  tbody td.meta{display:flex;flex-wrap:wrap;gap:6px 10px;padding-top:0;}
+  tbody td.act{padding-bottom:12px;}
+}
+</style>
+</head>
+<body>
+
+<div class="pv-flag">Design preview <b>Approach C — Segment Field Desk</b><span>RISE · not the live application</span></div>
+
+<header class="tb">
+  <span class="tb-logo">R<i>I</i>SE</span>
+  <nav class="tb-nav"><a href="#">Home</a><a href="#">Coiled Tubing</a><a href="#">Search</a><a href="#">Glossary</a></nav>
+  <div class="tb-r">
+    <a class="tb-cta" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Upload</a>
+    <button class="tb-ic" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+  </div>
+</header>
+
+<div class="idbar">
+  <a class="back" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Coiled Tubing</a>
+  <span class="who"><b>Field knowledge</b><span>Coiled Tubing Operations · 4 released</span></span>
+  <span class="sp"></span>
+  <span class="lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Scoped to this segment</span>
+</div>
+
+<main class="wrap" style="padding-top:18px;">
+
+  <div class="desk">
+    <nav class="rail" aria-label="Within Coiled Tubing">
+      <h3>In this segment</h3>
+      <ul>
+        <li><a href="#" aria-current="page">Everything <span class="n">4</span></a></li>
+        <li><a href="#" class="zero">Failures to watch <span class="n">0</span></a></li>
+        <li><a href="#">Tool limits &amp; alerts <span class="n">1</span></a></li>
+        <li><a href="#" class="zero">What worked <span class="n">0</span></a></li>
+        <li><a href="#">Lessons learned <span class="n">3</span></a></li>
+      </ul>
+      <hr>
+      <ul>
+        <li><a href="#">What I filed <span class="n">2</span></a></li>
+        <li><a href="#">Returned to me <span class="n">1</span></a></li>
+        <li><a href="#">Pre-job packs <span class="n">—</span></a></li>
+      </ul>
+      <hr>
+      <div class="foot">
+        <p class="note" style="font-size:12.5px;">Counts are Coiled Tubing's. A segment you do not work in is not listed here and not reachable from here.</p>
+      </div>
+    </nav>
+
+    <section>
+      <div class="deskhead">
+        <h1>What happened before. What was tried. What was found.
+          <small>Coiled Tubing's own field knowledge — its lessons learned, technical alerts and, as they are filed, its incident cards and case studies.</small></h1>
+        <span class="acts">
+          <a class="btn" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2"/></svg>Pre-job pack</a>
+          <a class="btn go" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>File a case</a>
+        </span>
+      </div>
+
+      <div class="fbar">
+        <span class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input placeholder="Search within Coiled Tubing" aria-label="Search within Coiled Tubing"></span>
+        <button class="chip" aria-pressed="true">Fishing <b>1</b></button>
+        <button class="chip">Ended with</button>
+        <button class="chip">Hole size</button>
+        <button class="chip">Location</button>
+        <button class="chip">Type</button>
+        <span class="active">1 filter · clear</span>
+      </div>
+
+      <div class="tbl">
+        <table>
+          <thead><tr><th style="width:52%;">Entry</th><th>Type</th><th>Date</th><th>Number</th><th><span class="vh" style="position:absolute;left:-9999px;">Actions</span></th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="t"><span class="mark alt">ALT</span><span><a href="#">Chemical compatibility update for H2S environments</a><br><span class="num">In force · rev 4.0</span></span></span></td>
+              <td class="meta"><span class="badge alt">Technical alert</span></td>
+              <td class="meta"><span class="num">6 Jun 2025</span></td>
+              <td class="meta"><span class="num">TQ-TWS-CTSS-ALT-003</span></td>
+              <td class="act"><button class="rowact" aria-label="More for TQ-TWS-CTSS-ALT-003"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg></button></td>
+            </tr>
+            <tr>
+              <td><span class="t"><span class="mark">LL</span><span><a href="#">Lessons from coiled tubing fishing operation</a><br><span class="num">Fishing</span></span></span></td>
+              <td class="meta"><span class="badge reg">Lesson learned</span></td>
+              <td class="meta"><span class="num">16 May 2026</span></td>
+              <td class="meta"><span class="num">TQ-TWS-CTSS-LL-003</span></td>
+              <td class="act"><button class="rowact" aria-label="More for TQ-TWS-CTSS-LL-003"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg></button></td>
+            </tr>
+            <tr>
+              <td><span class="t"><span class="mark">LL</span><span><a href="#">Near-miss during CT rig-up, lessons from H2 field</a></span></span></td>
+              <td class="meta"><span class="badge reg">Lesson learned</span></td>
+              <td class="meta"><span class="num">23 Feb 2024</span></td>
+              <td class="meta"><span class="num">TQ-TWS-CTSS-LL-001</span></td>
+              <td class="act"><button class="rowact" aria-label="More for TQ-TWS-CTSS-LL-001"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg></button></td>
+            </tr>
+            <tr>
+              <td><span class="t"><span class="mark">LL</span><span><a href="#">Pressure integrity test failure, field findings</a></span></span></td>
+              <td class="meta"><span class="badge reg">Lesson learned</span></td>
+              <td class="meta"><span class="num">21 Dec 2022</span></td>
+              <td class="meta"><span class="num">TQ-TWS-CTSS-LL-005</span></td>
+              <td class="act"><button class="rowact" aria-label="More for TQ-TWS-CTSS-LL-005"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg></button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="strip">
+        <div class="scard"><b>Build a pre-job pack</b><p class="note">Pick the services, the hole size and where. The pack ranks Coiled Tubing's knowledge and says why each entry came up.</p></div>
+        <div class="scard"><b>File a Coiled Tubing case</b><p class="note">Ten card types. Numbered by the register, checked by QMS, released by this segment's Director.</p></div>
+        <div class="scard"><b>Looking for another segment?</b><p class="note">Open that segment and its field knowledge is there. This desk stays inside Coiled Tubing on purpose.</p></div>
+      </div>
+    </section>
+  </div>
+</main>
+</body>
+</html>

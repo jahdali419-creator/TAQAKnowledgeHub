@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Approach B — Segment Knowledge Tab</title>
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="preview.css">
+<style>
+/* ── Approach B: a tenth tab on the segment's own tab bar ──────────────────
+   The segment page already has nine sticky document tabs. Field knowledge
+   becomes the tenth. Selecting it replaces the document table with a
+   knowledge workspace at the same URL (segment.html?id=…&view=knowledge).
+   The segment is the page, so there is no area control anywhere. */
+.tabs-outer{position:sticky;top:94px;z-index:600;background:var(--canvas);
+  border-bottom:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.04);padding:10px 24px;}
+.tabs{max-width:1180px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;
+  background:rgba(255,255,255,.85);border:1px solid var(--line);border-radius:12px;padding:4px;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex:none;display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 14px;border:0;
+  border-radius:9px;background:transparent;cursor:pointer;white-space:nowrap;
+  font:600 13.5px/1 var(--text);color:var(--ink-2);}
+.tab .c{font:700 12px/1 var(--text);font-variant-numeric:tabular-nums;color:var(--ink-3);
+  background:var(--inset);border-radius:var(--r-pill);padding:3px 7px;}
+.tab[aria-selected="true"]{background:var(--teal-700);color:#fff;}
+.tab[aria-selected="true"] .c{background:rgba(255,255,255,.2);color:#fff;}
+.tab.know{position:relative;}
+.tab.know::before{content:'';position:absolute;left:-3px;top:9px;bottom:9px;width:1px;background:var(--line-strong);}
+
+/* the workspace */
+.ws{display:grid;grid-template-columns:232px minmax(0,1fr) 300px;gap:22px;margin-top:22px;align-items:start;}
+.rail{position:sticky;top:160px;}
+.rail h3{font:700 10px/1.2 var(--text);letter-spacing:1.3px;text-transform:uppercase;color:var(--ink-3);margin:0 0 9px 4px;}
+.rail ul{list-style:none;display:grid;gap:1px;}
+.rail a{display:flex;align-items:center;gap:9px;min-height:44px;padding:0 11px;border-radius:9px;
+  text-decoration:none;font:500 14px/1.3 var(--text);color:var(--ink-2);}
+.rail a .n{margin-left:auto;font:700 13px/1 var(--text);font-variant-numeric:tabular-nums;color:var(--ink-3);}
+.rail a[aria-current]{background:var(--tint);color:var(--teal-700);font-weight:600;}
+.rail a[aria-current] .n{color:var(--teal-700);}
+.rail a.zero,.rail a.zero .n{color:var(--ink-4);}
+.rail a:hover{background:var(--inset);}
+.rail .gap{height:14px;}
+
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:0 0 14px;}
+.filters .sp{flex:1 1 auto;}
+.srch{display:flex;align-items:center;gap:9px;height:44px;padding:0 13px;border-radius:10px;
+  border:1px solid var(--line-strong);background:var(--paper);min-width:230px;flex:1 1 230px;}
+.srch svg{width:17px;height:17px;color:var(--ink-3);flex:none;}
+.srch input{flex:1 1 0;min-width:0;align-self:stretch;border:0;outline:0;background:transparent;font:400 14px/1 var(--text);color:var(--ink);}
+
+.list{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:4px 18px;}
+.list .entry:first-child{padding-top:16px;}
+.list .entry:last-child{padding-bottom:16px;}
+.hdr{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;}
+.hdr h2{font:700 20px/1.25 var(--display);letter-spacing:-.01em;}
+.hdr .note{margin-left:auto;}
+
+.side{display:grid;gap:16px;position:sticky;top:160px;}
+.pane{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:16px 17px;}
+.pane h3{font:700 15px/1.3 var(--display);margin-bottom:5px;}
+.pane .svc{display:flex;flex-wrap:wrap;gap:7px;margin:11px 0 13px;}
+.pane.go-pane{background:var(--teal-800);border-color:transparent;color:#fff;}
+.pane.go-pane h3{color:#fff;} .pane.go-pane .note{color:rgba(255,255,255,.76);}
+.pane.go-pane .btn{background:var(--teal-200);border-color:transparent;color:var(--teal-950);width:100%;}
+
+@media (max-width:1180px){ .ws{grid-template-columns:210px minmax(0,1fr);} .side{grid-column:1 / -1;position:static;grid-template-columns:repeat(2,minmax(0,1fr));} }
+@media (max-width:860px){
+  .tabs-outer{top:94px;padding:8px 12px;}
+  .ws{grid-template-columns:minmax(0,1fr);gap:16px;}
+  .rail{position:static;}
+  .rail ul{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+  .rail ul::-webkit-scrollbar{display:none;}
+  .rail li{flex:none;}
+  .rail a{min-height:44px;border:1px solid var(--line);background:var(--paper);}
+  .rail .gap{display:none;}
+  .side{grid-template-columns:minmax(0,1fr);}
+}
+</style>
+</head>
+<body>
+
+<div class="pv-flag">Design preview <b>Approach B — Segment Knowledge Tab</b><span>RISE · not the live application</span></div>
+
+<header class="tb">
+  <span class="tb-logo">R<i>I</i>SE</span>
+  <nav class="tb-nav"><a href="#">Home</a><a href="#" aria-current="page">Coiled Tubing</a><a href="#">Search</a><a href="#">Glossary</a></nav>
+  <div class="tb-r">
+    <a class="tb-cta" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Upload</a>
+    <button class="tb-ic" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+  </div>
+</header>
+
+<section class="band" style="padding-bottom:16px;">
+  <p class="crumb"><a href="#">Company</a><i>/</i><a href="#">Well Services</a><i>/</i><a href="#">Coiled Tubing</a><i>/</i><span>Field knowledge</span></p>
+  <h1>Coiled Tubing Operations</h1>
+  <div class="figs"><span class="fig"><b>36</b><span>Documents</span></span><span class="fig"><b>4</b><span>Field knowledge</span></span><span class="fig"><b>2</b><span>Reviews due</span></span></div>
+</section>
+
+<div class="tabs-outer">
+  <div class="tabs" role="tablist" aria-label="Coiled Tubing">
+    <button class="tab" role="tab" aria-selected="false">All <span class="c">36</span></button>
+    <button class="tab" role="tab" aria-selected="false">Standards <span class="c">5</span></button>
+    <button class="tab" role="tab" aria-selected="false">SOPs <span class="c">10</span></button>
+    <button class="tab" role="tab" aria-selected="false">Manuals <span class="c">0</span></button>
+    <button class="tab" role="tab" aria-selected="false">Forms <span class="c">1</span></button>
+    <button class="tab" role="tab" aria-selected="false">Bulletins <span class="c">0</span></button>
+    <button class="tab" role="tab" aria-selected="false">Software <span class="c">0</span></button>
+    <button class="tab know" role="tab" aria-selected="true">Field knowledge <span class="c">4</span></button>
+  </div>
+</div>
+
+<main class="wrap" style="padding-top:20px;">
+  <div class="ws">
+
+    <nav class="rail" aria-label="Within Coiled Tubing field knowledge">
+      <h3>In this segment</h3>
+      <ul>
+        <li><a href="#" aria-current="page">Everything <span class="n">4</span></a></li>
+        <li><a href="#" class="zero">Failures to watch <span class="n">0</span></a></li>
+        <li><a href="#">Tool limits &amp; alerts <span class="n">1</span></a></li>
+        <li><a href="#" class="zero">What worked <span class="n">0</span></a></li>
+        <li><a href="#">Lessons learned <span class="n">3</span></a></li>
+        <li class="gap"></li>
+        <li><a href="#">What I filed <span class="n">2</span></a></li>
+        <li><a href="#">Pre-job packs <span class="n">—</span></a></li>
+      </ul>
+      <div style="margin-top:16px;padding:12px;border-radius:10px;background:var(--inset);">
+        <p class="note" style="font-size:12.5px;">You are inside <b style="color:var(--ink);">Coiled Tubing</b>. Every count and every result on this tab is this segment's. To read another segment's knowledge, open that segment.</p>
+      </div>
+    </nav>
+
+    <section>
+      <div class="hdr">
+        <h2>Coiled Tubing field knowledge</h2>
+        <p class="note">4 released · newest first</p>
+      </div>
+      <div class="filters">
+        <span class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input placeholder="Search Coiled Tubing knowledge" aria-label="Search Coiled Tubing knowledge"></span>
+        <button class="chip">Service <b>·</b></button>
+        <button class="chip">Ended with <b>·</b></button>
+        <button class="chip">Hole size <b>·</b></button>
+        <button class="chip">Location <b>·</b></button>
+      </div>
+
+      <div class="list">
+        <div class="entry">
+          <span class="mark alt">ALT</span>
+          <span class="entry-tx"><a href="#">Chemical compatibility update for H2S environments</a>
+            <span class="entry-m"><span class="badge alt">In force</span><span>Technical alert / tool limit</span><i class="dot"></i><span>6 Jun 2025</span><i class="dot"></i><span>TQ-TWS-CTSS-ALT-003</span></span></span>
+        </div>
+        <div class="entry">
+          <span class="mark">LL</span>
+          <span class="entry-tx"><a href="#">Lessons from coiled tubing fishing operation</a>
+            <span class="entry-m"><span class="badge reg">Register</span><span>Lesson learned</span><i class="dot"></i><span>16 May 2026</span><i class="dot"></i><span>TQ-TWS-CTSS-LL-003</span></span></span>
+        </div>
+        <div class="entry">
+          <span class="mark">LL</span>
+          <span class="entry-tx"><a href="#">Near-miss during CT rig-up, lessons from H2 field</a>
+            <span class="entry-m"><span class="badge reg">Register</span><span>Lesson learned</span><i class="dot"></i><span>23 Feb 2024</span><i class="dot"></i><span>TQ-TWS-CTSS-LL-001</span></span></span>
+        </div>
+        <div class="entry">
+          <span class="mark">LL</span>
+          <span class="entry-tx"><a href="#">Pressure integrity test failure, field findings</a>
+            <span class="entry-m"><span class="badge reg">Register</span><span>Lesson learned</span><i class="dot"></i><span>21 Dec 2022</span><i class="dot"></i><span>TQ-TWS-CTSS-LL-005</span></span></span>
+        </div>
+      </div>
+      <p class="note" style="margin-top:12px;">All four are register documents — Coiled Tubing's own lessons learned and technical alerts. They open in the document viewer, with their revision and review date.</p>
+    </section>
+
+    <aside class="side">
+      <div class="pane go-pane">
+        <h3>Going out on a job?</h3>
+        <p class="note">Build a pre-job pack from Coiled Tubing's knowledge. It ranks by the services you pick and tells you why each one came up.</p>
+        <div class="svc">
+          <button class="chip" aria-pressed="true" style="background:rgba(255,255,255,.14);border-color:rgba(159,227,223,.4);color:#fff;">Fishing</button>
+          <button class="chip" style="background:transparent;border-color:rgba(255,255,255,.26);color:rgba(255,255,255,.86);">Milling</button>
+          <button class="chip" style="background:transparent;border-color:rgba(255,255,255,.26);color:rgba(255,255,255,.86);">Nitrogen</button>
+        </div>
+        <a class="btn" href="#">Build the pack</a>
+      </div>
+      <div class="pane">
+        <h3>Add to Coiled Tubing</h3>
+        <p class="note">Filed against this segment. QMS checks it, then the Coiled Tubing Director releases it.</p>
+        <a class="btn go" href="#" style="width:100%;margin-top:12px;">File a case</a>
+        <p class="note" style="margin-top:10px;font-size:12.5px;">Ten card types: incident, lesson, case study, best practice, benchmark, alert, field profile, pre-job plan, appreciation, expert.</p>
+      </div>
+    </aside>
+
+  </div>
+</main>
+</body>
+</html>

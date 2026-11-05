@@ -29,11 +29,19 @@ attribute. Direction-independent: do this whichever direction you choose.*
 | UX-070 | `prefers-reduced-motion` extended to the older animations |
 | UX-060 | Back-to-top on every route over ~4,000px |
 
-**Needs your decision before it can be scheduled:**
-- **UX-006** — role-switch chips in production chrome. Small change, policy call.
-- **UX-041** — a director of area A is hard-gated from area B's dashboard. Is that
-  the intended permission model, or a side effect?
-- **UX-077 / UX-078** — whether the Example contributors stay visible at launch.
+**Decisions now taken by the owner (5 November 2026), so these are scheduled:**
+- **UX-006** — role switching moves behind a clearly marked development/demo mode.
+  No longer blocked.
+- **UX-041** — **closed as working as intended.** A Director reaching only their
+  own segment's dashboard is the decided model, and Part 6 §5 confirms the
+  prototype already behaves that way.
+- **UX-078** — fictional contributors must never be shown as real. Scheduled.
+
+**Still needs a decision, from Part 6:**
+- **UX-093** — may a Maintenance Manager *read* a segment's field knowledge? The
+  segment strip says no, the library says yes; one of them is wrong.
+- **UX-094** — is a Maintenance Manager per-segment like a Director, or
+  cross-segment like QMS?
 
 **Exit gate:** the existing suite (47 spec files, chromium + mobile-chrome +
 webkit-smoke) green, and a re-run of the audit probe showing zero sub-44px
@@ -91,14 +99,69 @@ first screen without using search.
 
 ---
 
+## Phase 2F — Segment-embedded Field Knowledge
+
+*Runs alongside Phase 2. It cannot start until one of the three approaches in
+Part 7 is chosen, and it should not start before Phase 1, because roughly 85% of
+it is the shared components Phase 1 creates.*
+
+Ordered so the boundary is closed before the surface is built — the leaks are
+small, they are the user's stated requirement, and they do not depend on the
+approach chosen.
+
+**2F.1 — Close the boundary (approach-independent, all small)**
+- UX-084 — replace the 12-option Area select with a locked segment chip wherever
+  `?area=` is present, in the desktop filter row **and** the mobile filter sheet.
+- UX-085 — stop the pre-job pack asking "Area*" when it was entered with one.
+- UX-087 — give the filing form the segment's identity: title, breadcrumb and a
+  stated segment instead of a chooser.
+- UX-086 — make the chrome link area-aware inside a segment, or retire the global
+  Field Cases link once the segment owns it.
+- UX-092 — make a case's breadcrumb return to the segment it was opened from.
+
+**2F.2 — Build the chosen surface** (A, B or C from Part 7), on the shared
+components listed in Part 7 §5: entry row, letter mark, counted rail, lens tile,
+filter bar, lock chip, empty state, pre-job starter, status badge.
+
+**2F.3 — The empty state is a first-class state, not a fallback.** Three of the
+eleven operational segments have zero field knowledge (UX-090). It ships with the
+surface, not after it.
+
+**2F.4 — Resolve the duplication** (UX-082). A segment's field cases *are* its
+Lessons Learned and Alerts tabs. Under approach B those two tabs collapse into
+Field knowledge; under A or C the relationship still has to be stated so the same
+record is not presented twice as two different things.
+
+**2F.5 — Scoped search entry.** Add `ai-search.html?area=<id>` to pre-set the
+segment filter that already exists (UX-091). Global search is unchanged.
+
+**Explicitly not in this phase:** no change to `cases.js`, `store.js`, `roles.js`,
+`cases-data.js` or `search-index.js`. If the work starts requiring one, the
+approach has drifted — stop and re-read Part 7 §4.
+
+**Exit gate:** from inside any operational segment, a user can read, filter,
+search and file that segment's field knowledge and build a pre-job pack without
+ever being offered another segment; the pre-job pack's ranking and `why[]`
+sentences are byte-identical to today's for the same inputs; the suite is green;
+and the three zero-entry segments each open on a designed empty state.
+
+**Still unverified before this phase can be specified in full** (Part 6 §6):
+`case.html` with a real filed record and its withdrawn / returned / unreleased
+states; a full case walked through submit → QMS → release in the UI; the
+remaining modals; RTL; and a keyboard and screen-reader pass over the filter
+sheet and the progress rail.
+
+---
+
 ## Phase 3 — Navigation and search
 
 - UX-030 — the count-bearing sidebar, extracted from `master-list.html` and used
   on every data page.
 - UX-004, UX-005, UX-009 — one page shell, so breadcrumbs and "you are here" stop
   being per-page decisions.
-- UX-053 — scoped search; UX-054 — recent searches; UX-055 — one search component
-  instead of two.
+- UX-053 / UX-091 — scoped search (the segment entry point lands in Phase 2F;
+  the wider scoping work is here); UX-054 — recent searches; UX-055 — one search
+  component instead of two.
 - UX-052 — search as an overlay, if the chosen direction wants it.
 - UX-007, UX-011 — gate pages and the hero stop being full-viewport takeovers.
 - UX-033, UX-034, UX-018 — the long pages become navigable rather than long.
@@ -152,6 +215,19 @@ Whatever phase is running:
   set. It is the one piece of this roadmap I cannot do for you.
 - Contrast on gradient panels (UX-066) can only be checked by eye. Any phase that
   touches a gradient panel needs a visual review, not a probe run.
+
+---
+
+## Where the phases now stand
+
+| Phase | Depends on | Blocked? |
+|---|---|---|
+| 0 — Before launch | nothing | **No — can start now** |
+| 1 — Foundations | nothing | **No — can start now** |
+| 2 — Role desks | direction (taken: C) | No |
+| 2F — Field Knowledge | Phase 1 + an approach from Part 7 | **Yes — awaiting A / B / C** |
+| 3 — Navigation and search | Phase 1 | No |
+| 4 — Depth and unverified surfaces | Phases 1–3 | No |
 
 ---
 

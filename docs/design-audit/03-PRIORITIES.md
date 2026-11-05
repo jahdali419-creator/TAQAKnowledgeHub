@@ -3,6 +3,15 @@
 81 findings (UX-001 … UX-081). This part ranks them. Nothing here is new —
 every entry points back to a numbered finding in Part 2, where the evidence sits.
 
+**Superseded in part, 5 November 2026.** The Field Knowledge review (Part 6) added
+UX-082 … UX-094, four of them P0, and Part 5 carries them in a new Phase 2F. The
+rankings below still hold for UX-001 … UX-081; read them together with Part 6 §7.
+Two entries are affected directly: **UX-041** is closed as working as intended
+(the owner has confirmed the Director-per-segment model, and Part 6 §5 verifies
+the prototype already enforces it), and **UX-053** ("no scoped search") is refined
+by UX-091 — search does have a segment filter, it simply cannot be entered
+pre-scoped.
+
 `[C]` confirmed · `[P]` proposal · `[A]` assumption.
 
 ---

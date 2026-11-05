@@ -143,6 +143,9 @@ docs/design-audit/
   00-EXECUTIVE-SUMMARY.md
   01-INVENTORY-AND-COVERAGE.md        this file
   02-FINDINGS-BACKLOG.md              UX-001 … UX-081
+  06-FIELD-KNOWLEDGE-DEEP-REVIEW.md   UX-082 … UX-094
+  07-SEGMENT-FIELD-KNOWLEDGE-ARCHITECTURE.md
+  previews/                           three approaches, desktop + mobile
   03-PRIORITIES.md
   04-DESIGN-SYSTEM-AND-DIRECTIONS.md
   05-ROADMAP.md
