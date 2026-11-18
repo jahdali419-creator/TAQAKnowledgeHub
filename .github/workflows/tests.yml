@@ -20,7 +20,12 @@ concurrency:
 
 jobs:
   playwright:
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: on 18 November 2026 ubuntu-latest moved to
+    # Ubuntu 26.04, which Playwright 1.56.1 does not know, so
+    # `playwright install --with-deps` failed before a single test ran
+    # ("Playwright does not support chromium on ubuntu26.04-x64"). Pin the
+    # image until Playwright is upgraded, then this can go back to latest.
+    runs-on: ubuntu-24.04
     # 30, not 20: the full Chromium suite took 16 to 19 minutes on GitHub's
     # runners in October 2026, and one healthy run was cancelled at 20 with
     # every test so far passing. The limit only stops a hung run; no test was
@@ -61,7 +66,8 @@ jobs:
   # on main before PR 2D are left out and listed in docs/TESTING.md; real
   # iPhone checks stay manual.
   webkit-smoke:
-    runs-on: ubuntu-latest
+    # Pinned for the same reason as the playwright job above.
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - name: Checkout
