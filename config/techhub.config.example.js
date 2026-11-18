@@ -1,7 +1,7 @@
 /* TechHub runtime configuration: EXAMPLE ONLY, placeholders, no secrets.
  *
  * Not loaded by any page today. It shows the shape a per-environment
- * configuration file should take once IT integrates Azure, so values that
+ * configuration file should take once Data and Technology integrates Azure, so values that
  * change between LOCAL / DEV / TEST(UAT) / PRODUCTION live in one place
  * instead of inside the pages. See docs/AZURE-INTEGRATION-REQUIREMENTS.md §2
  * for where each value lives in the prototype today and how to adopt this.
