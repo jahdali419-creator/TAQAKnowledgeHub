@@ -293,8 +293,8 @@ Integrity findings mean the register contradicts itself; data-quality findings m
 | TQ-MS-SOP-003 | 4.0 | Man Overboard Response | Marine Services | TQ-MS-SOP-003 is at Rev 4.0 with no record of what it superseded. |
 | TQ-CFP-S002 | 2.0 | Travel and Expense Standard | Finance | TQ-CFP-S002 is at Rev 2.0 with no record of what it superseded. |
 | TQ-CFP-SOP-003 | 2.0 | Month-End Close Procedure | Finance | TQ-CFP-SOP-003 is at Rev 2.0 with no record of what it superseded. |
-| TQ-IT-SOP-002 | 2.0 | IT Change Management Procedure | Information Technology | TQ-IT-SOP-002 is at Rev 2.0 with no record of what it superseded. |
-| TQ-IT-SOP-003 | 3.0 | Backup and Restore Procedure | Information Technology | TQ-IT-SOP-003 is at Rev 3.0 with no record of what it superseded. |
+| TQ-IT-SOP-002 | 2.0 | IT Change Management Procedure | Data and Technology | TQ-IT-SOP-002 is at Rev 2.0 with no record of what it superseded. |
+| TQ-IT-SOP-003 | 3.0 | Backup and Restore Procedure | Data and Technology | TQ-IT-SOP-003 is at Rev 3.0 with no record of what it superseded. |
 | TQ-SC-S001 | 3.0 | Supplier Qualification Standard | Supply Chain | TQ-SC-S001 is at Rev 3.0 with no record of what it superseded. |
 | TQ-SC-SOP-002 | 2.0 | Purchase Requisition and Approval Procedure | Supply Chain | TQ-SC-SOP-002 is at Rev 2.0 with no record of what it superseded. |
 | TQ-SC-M003 | 3.0 | Goods Receipt and Inspection | Supply Chain | TQ-SC-M003 is at Rev 3.0 with no record of what it superseded. |
