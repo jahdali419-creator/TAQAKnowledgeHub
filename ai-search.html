@@ -766,7 +766,7 @@ html.sr-lock,html.sr-lock body{overflow:hidden!important;}
       ? (d.supersededBy
           ? 'The register names ' + esc(d.supersededBy) + ' as its replacement but holds no record of it here. Verify the current revision in SCORE before use.'
           : 'The register holds no revision of it in force. Verify the current revision in SCORE before use.')
-      : 'It is no longer in force and has no replacement in the register. Check with QMS or SCORE before relying on any copy.';
+      : 'It is no longer in force and has no replacement in the register. Check with the Document Controller or SCORE before relying on any copy.';
     var href = 'viewer.html?doc=' + encodeURIComponent(d.docNumber || '') + (d.revision ? '&rev=' + encodeURIComponent(d.revision) : '') +
       '&seg=' + encodeURIComponent(d.segment || '') + '&type=' + encodeURIComponent(d.docType || '');
     return '<li><a class="result result-withdrawn" href="' + esc(href) + '" data-withdrawn="' + esc(d.status) + '">' +
@@ -857,14 +857,14 @@ html.sr-lock,html.sr-lock body{overflow:hidden!important;}
           (casesAll.length - released.length ? ' (' + (casesAll.length - released.length) + ' not yet released)' : '') + '</button>' });
     } else {
       html += group('cases', 'Field cases', null, '', { foot: '<p class="sr-note">' + (released.length ? '' :
-        'No field cases have been released yet. Operations file them in the <a href="cases.html">case library</a>; once QMS checks a case and the area’s Director approves it, Search finds it here.') + '</p>' });
+        'No field cases have been released yet. Operations file them in the <a href="cases.html">case library</a>; once document control checks a case and the area’s Director approves it, Search finds it here.') + '</p>' });
     }
     return html;
   }
   function emptyView(kind) {
     var q = state.q, nf = activeFilters().length, tips = [];
     if (kind === 'cases' && !casePool().length) {
-      return '<div class="sr-empty"><h3>No field cases yet</h3><p>No field case has been released for you to read yet, so there is nothing to search here. Operations file cases in the case library; once QMS checks a case and the area’s Director approves it, it can be found here.</p>' +
+      return '<div class="sr-empty"><h3>No field cases yet</h3><p>No field case has been released for you to read yet, so there is nothing to search here. Operations file cases in the case library; once document control checks a case and the area’s Director approves it, it can be found here.</p>' +
         '<div class="sr-acts"><a class="sr-btn pri" href="cases.html">Open the case library</a>' + (q || nf ? '<button type="button" class="sr-btn" data-content="all">Search everything</button>' : '') + '</div></div>';
     }
     var what = kind === 'docs' ? 'documents' : kind === 'cases' ? 'field cases' : 'documents or field cases';

@@ -416,7 +416,7 @@ html[data-taqa-theme="dark"] .pub-table-footer{border-color:#003A3D;background:r
   if (typeof TAQA_ROLE === 'undefined') return;
   var id = new URLSearchParams(location.search).get('id') || TAQA_ROLE.area();
   if (TAQA_ROLE.canManage(id)) return;
-  TAQA_ROLE.refuse("This list is the area manager\u2019s view", "Published documents can be withdrawn from here, so it is open to the holder of the area and to QMS.");
+  TAQA_ROLE.refuse("This list is the area manager\u2019s view", "Published documents can be withdrawn from here, so it is open to the holder of the area and to the Document Controller.");
 })();
 </script>
 <script src="store.js"></script>
@@ -461,7 +461,7 @@ function buildAllDocs(segId) {
   // rows apart by is whether the review behind them is still on time. That
   // is what a controller scanning this list is actually looking for, more
   // than who the owner role is (API Q2 4.4.3 c)).
-  // Only documents this person may withdraw: QMS sees every one; a Director
+  // Only documents this person may withdraw: the Document Controller sees every one; a Director
   // the area's Operations documents; a Maintenance Manager its maintenance
   // documents (TAQA_ROLE.canManage with the record).
   return TAQA_STORE.rows('live', { segment: segId })

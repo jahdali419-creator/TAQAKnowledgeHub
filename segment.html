@@ -1662,7 +1662,7 @@ document.getElementById('seg-alerts').textContent = seg.alerts || 'None';
 // An area that does not exist has no counts, no update date, nothing to
 // manage and no shelves to search, so none of that is drawn for it.
 if (!SEG_KNOWN) document.documentElement.classList.add('seg-unknown');
-/* Managing a segment is a Director's or QMS's job. An Employee and an Auditor
+/* Managing a segment is a Director's or the Document Controller's job. An Employee and an Auditor
    read this library; offering them a control they cannot use is noise, and in
    the Auditor's case it misstates what their access is. Shown only to someone
    who holds a control panel for THIS area. */
@@ -1685,7 +1685,7 @@ if (!SEG_KNOWN) document.documentElement.classList.add('seg-unknown');
   document.querySelectorAll('.sort-overdue').forEach(function(b){ b.hidden = false; });
 })();
 
-// A document submitted here is a draft until QMS approves it, so it is not in
+// A document submitted here is a draft until the Document Controller approves it, so it is not in
 // the library count above. Show it anyway: someone who has just uploaded needs
 // to see their document land somewhere.
 (function(){
@@ -2732,7 +2732,7 @@ function copyQRUrl() {
    Operations view only: never on an unknown id, a corporate function, a
    product, the company page, or a segment's Maintenance view (field cases
    are filed by operations). Released entries only (TAQA_CASES.forArea), so
-   nothing waiting on QMS or the Director appears here; every value is
+   nothing waiting on the Document Controller or the Director appears here; every value is
    escaped. */
 (function () {
   'use strict';
@@ -2774,7 +2774,7 @@ function copyQRUrl() {
               // reader hears it here, as the mark is hidden from it.
               '<span class="sc-m">' + esc(when(e)) + '<span class="sc-sr">' + esc((when(e) ? ', ' : '') + e.typeLabel) + '</span></span></span></li>';
           }).join('') + '</ol>'
-        : '<p class="sc-empty">Nothing released for ' + esc(name) + ' yet. A case appears here once QMS checks it and the area’s Director releases it.</p>') +
+        : '<p class="sc-empty">Nothing released for ' + esc(name) + ' yet. A case appears here once document control checks it and the area’s Director releases it.</p>') +
       '<div class="sc-acts">' +
         '<a class="sc-a pri" id="sc-all" href="cases.html?area=' + q + '">See all cases</a>' +
         '<a class="sc-a" id="sc-pack" href="prejob.html?area=' + q + '">Pre-job pack</a>' +

@@ -804,7 +804,7 @@ html[data-taqa-theme="dark"] .cmp-col-current{background:rgba(0,187,182,0.13);}
 <script src="segments-data.js"></script>
 <!-- Before the page script, not after it: the record below is resolved
      through the store, which is the only place that knows about a document
-     filed through upload.html or moved by QMS/Director approval. -->
+     filed through upload.html or moved by the Document Controller/Director approval. -->
 <script src="store.js"></script>
 <script>
 // Areas and type labels come from the register. The map that used to sit here
@@ -920,7 +920,7 @@ const docRev = (params.get('rev') || '').replace(/[^A-Za-z0-9.\-]/g,'').slice(0,
 // the desk or the Workbench names the record itself.
 const docRid = (params.get('rid') || '').replace(/[^A-Za-z0-9@.#_\-]/g,'').slice(0,160);
 const _revLabel = r => (typeof TAQA_STORE !== 'undefined' && TAQA_STORE.revisionLabel) ? TAQA_STORE.revisionLabel(r) : 'Rev ' + r.revision;
-// "on 5 Oct 2026 by QMS: <reason>", from the withdrawal record (PI-11). A
+// "on 5 Oct 2026 by the Document Controller: <reason>", from the withdrawal record (PI-11). A
 // record withdrawn before RISE kept one says so instead of inventing it.
 const _withdrawnBy = r => r.withdrawnAt
   ? ' on ' + _fmt(r.withdrawnDate || r.withdrawnAt) + (r.withdrawnBy ? ' by ' + r.withdrawnBy : '') + (r.withdrawnReason ? ': \u201c' + r.withdrawnReason + '\u201d' : '')
@@ -1099,7 +1099,7 @@ if (_denied) {
   const R = TAQA_ROLES[_roleKey];
   const inForce = (_rec.status === 'approved' && typeof TAQA_STORE !== 'undefined') ? TAQA_STORE.findDoc(_rec.docNumber) : null;
   const reason = _rec.status === 'draft'
-    ? 'This document is a draft. It has not completed approval, carries no authority, and is visible only to its owner and the QMS function. API Q2 4.4.3 b).'
+    ? 'This document is a draft. It has not completed approval, carries no authority, and is visible only to its owner and document control. API Q2 4.4.3 b).'
     : _rec.status === 'approved'
     ? 'This revision is approved and takes effect on ' + esc(_fmt(_rec.issueDate)) + '. Until then it is not in force' +
       (inForce && (inForce.status === 'current' || inForce.status === 'under-review') ? ': ' + esc(_rec.docNumber) + ' Rev ' + esc(inForce.revision) + ' is the revision to use' : '') + '.'
@@ -1114,7 +1114,7 @@ if (_denied) {
   const back = TAQA_ROLE.canRegister(_roleKey)
     ? '<a href="master-list.html">Back to the register</a>'
     : '<a href="ai-search.html">Search the documents</a>';
-  let head = 'Access restricted', body = reason + ' If you need it, request access through the QMS function.', stat = 'Not available to your role';
+  let head = 'Access restricted', body = reason + ' If you need it, request access through document control.', stat = 'Not available to your role';
   if (isDraft && _rec.rejected) {
     head = 'Returned, not in force';
     stat = 'Returned by ' + (_rec.rejectedBy || 'the reviewer');
@@ -1127,7 +1127,7 @@ if (_denied) {
     stat = 'Draft · waiting on ' + (waiting || 'approval');
     body = 'Filed' + (_rec.submittedAt ? ' ' + esc(_fmt(_rec.submittedAt)) : '') +
       ' and now waiting on the <b>' + esc(waiting || 'next approval step') + '</b>. ' +
-      'It carries no authority until QMS has checked it and the named approver has released it (API Q2 4.4.3 b), so it cannot be opened or downloaded yet.';
+      'It carries no authority until the Document Controller has checked it and the named approver has released it (API Q2 4.4.3 b), so it cannot be opened or downloaded yet.';
   }
   document.getElementById('meta-grid').innerHTML =
     cell('Document number', _rec.docNumber ? esc(_rec.docNumber) : null, 'TQ-QHSE-S001 5.3') +
@@ -1309,7 +1309,7 @@ if (_denied) {
   document.getElementById('lifecycle-banner').innerHTML =
     '<div class="lcb lcb-prov"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12.5"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
     '<div><b>Not in the Master Document List available to your role</b><span class="n">RISE has no document matching this link that your role can open, so its revision, approval and review status cannot be confirmed here. ' +
-    'Check the number, ask the QMS function if you believe you need access, and check SCORE before using any copy.</span></div></div>';
+    'Check the number, ask document control if you believe you need access, and check SCORE before using any copy.</span></div></div>';
 }
 
 // Summary
@@ -1393,7 +1393,7 @@ function renderRevHistory() {
     document.getElementById('rev-brief-view').style.display = '';
     document.getElementById('rev-full-view').style.display = 'none';
     document.getElementById('rev-brief-text').innerHTML =
-      'Current revision: <b>Rev ' + hist.current + '</b>. The full revision history is available to the document owner, QMS and an auditor.';
+      'Current revision: <b>Rev ' + hist.current + '</b>. The full revision history is available to the document owner, document control and an auditor.';
     return;
   }
   document.getElementById('rev-brief-view').style.display = 'none';
@@ -1503,36 +1503,36 @@ function renderApprovalTrail() {
   }
   if (_rec.rejected) {
     if (_rec.countersignedBy)
-      rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy, role: 'QMS conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Recorded'});
+      rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy, role: 'Document control conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Recorded'});
     rows.push({icon: iconPending, pending: true, name: _rec.rejectedBy || 'Not recorded',
-      role: 'Returned at the ' + (_rec.rejectedAtStage === 'director' ? 'final approval' : 'QMS conformance check') + ': ' + (_rec.rejectedReason || 'no reason recorded'),
+      role: 'Returned at the ' + (_rec.rejectedAtStage === 'director' ? 'final approval' : 'Document control conformance check') + ': ' + (_rec.rejectedReason || 'no reason recorded'),
       date: _when(_rec.rejectedAt, _rec.rejectedDate) || 'Not recorded'});
   } else if (_rec.cancelled) {
     // Cancelled while in progress: only the steps actually taken, then the
     // cancellation and why. No approval is shown, because none was given.
     if (_rec.countersignedBy)
-      rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy, role: 'QMS conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Recorded'});
+      rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy, role: 'Document control conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Recorded'});
     rows.push({icon: iconPending, pending: true, name: _rec.cancelledBy || 'Not recorded',
       role: 'Cancelled, never approved: ' + (_rec.cancelledReason || 'no reason recorded'),
       date: _when(_rec.cancelledAt, _rec.cancelledDate) || 'Not recorded'});
   } else if (_rec.status === 'obsolete' && (_rec.withdrawnFromStatus === 'draft' || _rec.withdrawnFromStatus === 'approved')) {
     // Withdrawn before it was in force: only the steps actually taken (PI-11).
     if (_rec.countersignedBy)
-      rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy, role: 'QMS conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Recorded'});
+      rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy, role: 'Document control conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Recorded'});
     if (_rec.approvedBy)
       rows.push({icon: iconOk, pending: false, name: _rec.approvedBy, role: 'Final approval · ' + approverRole, date: _when(_rec.approvedAt, _rec.approvedDate) || 'Recorded'});
   } else if (_rec.status === 'approved') {
-    rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy || 'QMS / Document Controller', role: 'QMS conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Recorded'});
+    rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy || 'Document Controller', role: 'Document control conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Recorded'});
     rows.push({icon: iconOk, pending: false, name: _rec.approvedBy || approverRole, role: 'Final approval · ' + approverRole, date: _when(_rec.approvedAt, _rec.approvedDate) || 'Recorded'});
     rows.push({icon: iconPending, pending: true, name: 'Takes effect', role: 'Effective date', date: _fmt(_rec.issueDate)});
   } else if (stage === 'qms') {
-    rows.push({icon: iconPending, pending: true, name: 'Awaiting QMS conformance check', role: 'QMS / Document Controller', date: 'Not yet signed'});
+    rows.push({icon: iconPending, pending: true, name: 'Awaiting the document control conformance check', role: 'Document Controller', date: 'Not yet signed'});
     rows.push({icon: iconPending, pending: true, name: 'Awaiting final approval', role: approverRole, date: 'Not yet signed'});
   } else if (stage === 'director') {
-    rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy || 'QMS / Document Controller', role: 'QMS conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Recorded'});
+    rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy || 'Document Controller', role: 'Document control conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Recorded'});
     rows.push({icon: iconPending, pending: true, name: 'Awaiting final approval', role: approverRole, date: 'Not yet signed'});
   } else {
-    rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy || 'QMS / Document Controller', role: 'QMS conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Not recorded'});
+    rows.push({icon: iconOk, pending: false, name: _rec.countersignedBy || 'Document Controller', role: 'Document control conformance check', date: _when(_rec.countersignedAt, _rec.countersignedDate) || 'Not recorded'});
     rows.push({icon: iconOk, pending: false, name: _rec.approvedBy || approverRole, role: 'Final approval · ' + approverRole, date: _when(_rec.approvedAt, _rec.approvedDate) || 'Not recorded'});
   }
   // What happened after release, from the record itself.

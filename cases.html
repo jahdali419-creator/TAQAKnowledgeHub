@@ -466,10 +466,10 @@ html[data-taqa-theme="dark"] .cl-qbtn.pri:hover{background:#9FE3DF;}
       <h2 id="cl-route-h">How a case reaches the library</h2>
       <ol class="cl-steps">
         <li><span><b>Operations file it:</b> an employee, or the area’s Director.</span></li>
-        <li><span><b>QMS checks it</b> against its source document.</span></li>
+        <li><span><b>document control checks it</b> against its source document.</span></li>
         <li><span><b>The area’s Director releases it.</b> Only then is it listed here.</span></li>
       </ol>
-      <p class="cl-route-note">Until it is released, only its filer, QMS, the area’s Director and an external auditor can see it. Lessons learned and technical alerts that are register documents are listed too, marked Register.</p>
+      <p class="cl-route-note">Until it is released, only its filer, the Document Controller, the area’s Director and an external auditor can see it. Lessons learned and technical alerts that are register documents are listed too, marked Register.</p>
     </section>
   </div>
 </main>
@@ -699,7 +699,7 @@ html[data-taqa-theme="dark"] .cl-qbtn.pri:hover{background:#9FE3DF;}
         add = '';
       } else if (!C.mine().length) {
         h = 'You have not filed a case yet';
-        p = 'Cases you file appear here with their status: With QMS, With the Director, Published or Returned with the reason.';
+        p = 'Cases you file appear here with their status: With Document Control, With the Director, Published or Returned with the reason.';
       } else {
         h = 'None of your cases match';
         p = 'Clear a filter or the search to see all of your cases.';
@@ -708,7 +708,7 @@ html[data-taqa-theme="dark"] .cl-qbtn.pri:hover{background:#9FE3DF;}
     } else if (!lib.some(function (e) { return e.source !== 'register'; }) && S.source === 'case' && !S.q &&
                !S.type && !S.location && !S.service && !S.hole && !S.ending) {
       h = 'No field case has been released in ' + where + ' yet';
-      p = 'A case is listed once QMS has checked it and the area’s Director has released it. Nothing here is made up, so the list starts empty.';
+      p = 'A case is listed once the Document Controller has checked it and the area’s Director has released it. Nothing here is made up, so the list starts empty.';
       clear = S.area ? '<button type="button" class="cl-qbtn" data-src="all">Show register lessons and alerts</button>' : clear;
     } else {
       h = 'Nothing matches' + (S.q ? ' “' + S.q + '”' : ' these filters');
@@ -778,7 +778,7 @@ html[data-taqa-theme="dark"] .cl-qbtn.pri:hover{background:#9FE3DF;}
     mine.forEach(function (e) { counts[e.status] = (counts[e.status] || 0) + 1; });
     var bits = [];
     if (counts['returned']) bits.push(counts['returned'] + ' returned');
-    if (counts['with-qms']) bits.push(counts['with-qms'] + ' with QMS');
+    if (counts['with-qms']) bits.push(counts['with-qms'] + ' with the Document Controller');
     if (counts['with-director']) bits.push(counts['with-director'] + ' with the Director');
     if (counts['published']) bits.push(counts['published'] + ' published');
     $('cl-mine-sub').textContent = mine.length

@@ -778,7 +778,7 @@ html[data-taqa-theme="dark"] .policy-rules {
         <span class="approval-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#00BBB6" stroke-width="1.5"/><path d="M8 7v5M8 5v.5" stroke="#00BBB6" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         <div class="approval-text">
           <strong>Approval Workflow</strong>
-          <small>Documents are reviewed by QMS, then approved by the authority the type names, before being published. Its status (waiting on QMS, waiting on the Director, published, or returned with the reason) shows under <b>Your submissions</b> on this page, and the bell in the top bar tells you once it has been approved or returned; email notifications arrive once this connects to Azure.</small>
+          <small>Documents are reviewed by the Document Controller, then approved by the authority the type names, before being published. Its status (waiting on the Document Controller, waiting on the Director, published, or returned with the reason) shows under <b>Your submissions</b> on this page, and the bell in the top bar tells you once it has been approved or returned; email notifications arrive once this connects to Azure.</small>
         </div>
       </div>
 
@@ -812,7 +812,7 @@ html[data-taqa-theme="dark"] .policy-rules {
         </div>
         <div class="wf-step">
           <div class="wf-dot pending">2</div>
-          <div class="wf-text"><strong>QMS check</strong><small>QMS checks the record and the numbering, or returns it with a reason.</small></div>
+          <div class="wf-text"><strong>document control check</strong><small>document control checks the record and the numbering, or returns it with a reason.</small></div>
         </div>
         <div class="wf-step">
           <div class="wf-dot wait">3</div>
@@ -1003,7 +1003,7 @@ function addFiles(files) {
   const rejected = [];
   const oversized = [];
   // A 0-byte file was accepted and could be filed, so a document with no
-  // content went to QMS and the Director as if it were a procedure.
+  // content went to the Document Controller and the Director as if it were a procedure.
   const empty = [];
   files.forEach(f => {
     if (!ALLOWED_EXT.includes(extOf(f.name))) { rejected.push(f.name); return; }
@@ -1158,7 +1158,7 @@ function submitUpload(e) {
   // figure anywhere on the site ever moved when someone uploaded. Commit it
   // to the register instead. It lands as a draft, per TQ-QHSE-S001 4.4, so
   // the register total and the pending queue move now and the in-force counts
-  // move when QMS approves it. Every open page repaints off this one call.
+  // move when the Document Controller approves it. Every open page repaints off this one call.
   if (typeof TAQA_STORE !== 'undefined' && !TAQA_STORE.add(rec)) {
     const why = TAQA_STORE.writeError && TAQA_STORE.writeError();
     showUploadToast(why ? 'Not sent' : 'Not filed', why || 'Your role cannot file documents, so nothing was added to the register.', ICON_WARN);
@@ -1192,7 +1192,7 @@ function submitUpload(e) {
     var approver = rec.docType === 'policy' ? 'CEO'
       : (typeof TAQA_APPROVAL !== 'undefined' && TAQA_APPROVAL.approverFor(rec)) || null;
     var nextSigner = approver ? 'the ' + approver : 'the named approver';
-    toastSub.appendChild(document.createTextNode('. Next: QMS checks it, then ' + nextSigner + ' approves it. It is in force only after both. Track it under Your submissions below.'));
+    toastSub.appendChild(document.createTextNode('. Next: document control checks it, then ' + nextSigner + ' approves it. It is in force only after both. Track it under Your submissions below.'));
   }
   document.getElementById('toast-icon').innerHTML = ICON_OK;
   const toast = document.getElementById('toast');
@@ -1332,7 +1332,7 @@ let isAutoFilling = false;
    appears by itself and a renamed one cannot go stale.
 
    A POLICY is the exception the business asked for. It is a company
-   commitment signed by the CEO, so it belongs to no area and only QMS may
+   commitment signed by the CEO, so it belongs to no area and only the Document Controller may
    file one. The option is absent for every other role rather than shown and
    disabled: a document owner in Coiled Tubing has no business filing company
    policy, and a greyed control invites the argument. */
@@ -1420,7 +1420,7 @@ function onTypeChange(val){
     if (isPolicy) segSel.value = '';
   }
   if (btn) btn.innerHTML = isPolicy
-    ? 'Submit to QMS for CEO approval &#8594;'
+    ? 'Submit to the Document Controller for CEO approval &#8594;'
     : 'Submit for Review &#8594;';
 
   var fn = document.getElementById('policy-fn');
@@ -1585,7 +1585,7 @@ function numberTaken(n) {
 // person may not open: nothing about that document, not even that it exists
 // (BD-09). The refusal is the store's own wording.
 const NUMBER_REFUSED = (typeof TAQA_STORE !== 'undefined' && TAQA_STORE.NUMBER_REFUSED) ||
-  'This number cannot be used. Choose another number or contact QMS.';
+  'This number cannot be used. Choose another number or contact the Document Controller.';
 function seeable(d) {
   return !!d && (typeof TAQA_STORE === 'undefined' || !TAQA_STORE.readable || TAQA_STORE.readable(d) || !!d.locallyAdded);
 }
@@ -2072,15 +2072,15 @@ function paintRecord(){
                   : docStatus === 'revision' ? revisionLine() : 'Rev 1.0, first issue') + D()],
     ['Owner', esc(t.owner || ',') + D()],
     // Who will actually give final approval: the desk this filing is routed
-    // to after the QMS check (PI-16). Operations → QMS → the area's Segment
+    // to after the document control check (PI-16). Operations → QMS → the area's Segment
     // Director (or Function Head, Centre Manager); Maintenance → QMS → the
     // segment's Maintenance Manager. The register's named approver for the
     // type is shown beside it while that naming is an open decision
     // (BUSINESS-RULES §12 #1).
     ['Approver', (isPolicy ? 'Chief Executive Officer'
-        : deptMaintenance() ? '<b>Maintenance Manager, ' + esc(e.name || '') + '</b>, after the QMS check'
+        : deptMaintenance() ? '<b>Maintenance Manager, ' + esc(e.name || '') + '</b>, after the document control check'
         : e.name ? '<b>' + esc((typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.areaTitle) ? TAQA_ROLE.areaTitle(segKeyOf()) : 'Segment Director') +
-                   ', ' + esc(e.name) + '</b>, after the QMS check' +
+                   ', ' + esc(e.name) + '</b>, after the document control check' +
                    (t.approver && t.approver.trim() !== ',' ? '<span class="warn">The register names: ' + esc(t.approver) + '.</span>' : '')
         : esc(t.approver || ',')) + D()],
     ['Issued', 'When it is released: the date of final approval, or a later effective date chosen then' + D()],
@@ -2138,7 +2138,7 @@ function paintMySubmissions(){
     }
     else if (d.status === 'approved') { st = 'Approved, in force from ' + esc(d.issueDate || ''); cls = 'st-wait'; }
     else if (stage === 'director') { st = 'Waiting on the Director'; cls = 'st-wait'; }
-    else { st = 'Waiting on QMS check'; cls = 'st-wait'; }
+    else { st = 'Waiting on document control check'; cls = 'st-wait'; }
     // The exact revision filed, not whichever revision is in force.
     // and the exact attempt: a returned revision and its re-filing share a
     // revision label, so the link names the record itself (PR 2B, NEW-03).

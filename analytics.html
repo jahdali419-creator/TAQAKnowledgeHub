@@ -371,13 +371,13 @@ document.addEventListener('click',function(e){const a=e.target.closest('a[href]'
 </script>
 <script src="roles.js"></script>
 <script>
-/* Usage analytics are for the people who run the register. QMS may clear
+/* Usage analytics are for the people who run the register. the Document Controller may clear
    them; an auditor reads them. */
 (function(){
   if (typeof TAQA_ROLE === 'undefined') return;
   if (!TAQA_ROLE.canRegister()) {
     TAQA_ROLE.refuse('Usage analytics are for the register’s owners',
-      'This page shows local usage data stored on this device, plus a register-derived audit log, and is open to QMS and to auditors.');
+      'This page shows local usage data stored on this device, plus a register-derived audit log, and is open to the Document Controller and to auditors.');
     return;
   }
   if (!TAQA_ROLE.effective().editMetadata) {
@@ -567,7 +567,7 @@ document.addEventListener('click',function(e){const a=e.target.closest('a[href]'
       var neverInForce = !!d.cancelled || d.withdrawnFromStatus === 'draft' || d.withdrawnFromStatus === 'approved';
       var released = !neverInForce && (d.status === 'current' || d.status === 'under-review' || d.status === 'superseded' || d.status === 'obsolete');
       if (d.issueDate && released) {
-        entries.push({ date: d.issueDate, action: 'released', actor: 'QMS Document Control', doc: d });
+        entries.push({ date: d.issueDate, action: 'released', actor: 'Document Control', doc: d });
       }
       // The withdrawal or replacement as recorded, by whom and when, where the
       // register has the record (PI-11).
@@ -583,7 +583,7 @@ document.addEventListener('click',function(e){const a=e.target.closest('a[href]'
         // log never claims a withdrawal that has not happened yet.
         var due = d.nextReviewDate ? new Date(d.nextReviewDate + 'T00:00:00') : null;
         var wd = (due && !isNaN(due) && due.getTime() <= Date.now()) ? d.nextReviewDate : d.issueDate;
-        if (wd) entries.push({ date: wd, action: 'withdrawn', actor: 'QMS Document Control', doc: d });
+        if (wd) entries.push({ date: wd, action: 'withdrawn', actor: 'Document Control', doc: d });
       }
     });
     // Fold in this device's real, locally recorded document opens. Open
@@ -617,7 +617,7 @@ document.addEventListener('click',function(e){const a=e.target.closest('a[href]'
     if (!section) return;
     // Stricter sub-gate on top of the page-level one above: this table names
     // who approved, released, withdrew and viewed each document, so it stays
-    // limited to QMS and the auditor even if the page's own gate is ever
+    // limited to the Document Controller and the auditor even if the page's own gate is ever
     // widened to admit another role later.
     var role = (typeof TAQA_ROLE !== 'undefined') ? TAQA_ROLE.current() : null;
     if (role !== 'qms' && role !== 'auditor') { section.style.display = 'none'; return; }

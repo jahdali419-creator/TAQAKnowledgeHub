@@ -442,7 +442,7 @@ html[data-taqa-theme="dark"] .cs-qbtn.pri{color:#00191B;}
     var who = C.canFile();
     $('cs-content').innerHTML = '<section class="cs-gone" aria-label="Why this case is not shown">' +
       '<p>This case is not in the library, or it is not open to your role.</p>' +
-      '<p>A case waiting for review can be opened only by the person who filed it, QMS, the area’s Director and an external auditor. Check the address, or find the case in the library.</p>' +
+      '<p>A case waiting for review can be opened only by the person who filed it, the Document Controller, the area’s Director and an external auditor. Check the address, or find the case in the library.</p>' +
       '<div class="acts"><a class="cs-qbtn pri" href="cases.html">Open the case library</a>' +
       (who.ok ? '<a class="cs-qbtn" href="case-new.html">Add a case</a>' : '') + '</div></section>';
   }
@@ -475,22 +475,22 @@ html[data-taqa-theme="dark"] .cs-qbtn.pri{color:#00191B;}
 
   function banner(e) {
     var box = $('cs-banner'), html = '', cls = '';
-    var stage = e.status === 'with-qms' ? 'With QMS' : 'With the Director';
+    var stage = e.status === 'with-qms' ? 'With Document Control' : 'With the Director';
     if (e.status === 'with-qms' || e.status === 'with-director') {
       if (e.mine) {
-        html = '<b>Submitted for review.</b> QMS checks it, then the Director. Until then only you, QMS, the area’s Director and an external auditor can see it. <span>Now: ' + esc(stage) + '.</span>';
+        html = '<b>Submitted for review.</b> document control checks it, then the Director. Until then only you, the Document Controller, the area’s Director and an external auditor can see it. <span>Now: ' + esc(stage) + '.</span>';
       } else {
-        html = '<b>Not released yet: ' + esc(stage) + '.</b> QMS checks it, then the area’s Director releases it. Until then only its filer, QMS, the area’s Director and an external auditor can see it.';
+        html = '<b>Not released yet: ' + esc(stage) + '.</b> document control checks it, then the area’s Director releases it. Until then only its filer, the Document Controller, the area’s Director and an external auditor can see it.';
         var r = TAQA_ROLE.current(), acts = [];
         if (r === 'qms' && e.status === 'with-qms') acts.push('<a href="master-list.html?view=qms&amp;doc=' + encodeURIComponent(e.docNumber) + '">Check it in the QMS Workbench</a>');
         if (r === 'owner' && e.status === 'with-director' && TAQA_ROLE.area() === e.area) acts.push('<a href="dashboard.html?id=' + encodeURIComponent(e.area) + '">Decide on your desk</a>');
         if (acts.length) html += '<div class="acts">' + acts.join('') + '</div>';
       }
     } else if (e.status === 'approved') {
-      html = '<b>' + esc(e.statusLabel) + '.</b> It is listed in the library from that day. Until then only its filer, QMS, the area’s Director and an external auditor can see it.';
+      html = '<b>' + esc(e.statusLabel) + '.</b> It is listed in the library from that day. Until then only its filer, the Document Controller, the area’s Director and an external auditor can see it.';
     } else if (e.status === 'returned') {
       cls = ' ret';
-      var by = e.record && e.record.rejectedAtStage === 'director' ? 'the Director' : 'QMS';
+      var by = e.record && e.record.rejectedAtStage === 'director' ? 'the Director' : 'the Document Controller';
       var later = laterAttempt(e);
       var why = str(e.returnedReason) || 'No reason recorded';
       html = '<b>Returned by ' + esc(by) + ':</b> ' + esc(why) + (/[.!?]$/.test(why) ? '' : '.');
@@ -634,7 +634,7 @@ html[data-taqa-theme="dark"] .cs-qbtn.pri{color:#00191B;}
       block('What was found', inc.findingsText) +
       (!fd.length && !str(inc.findingsText) ? '<p class="cs-empty">No findings recorded' + (str(inc.ending) && inc.ending !== C.OPTIONS.tripOut(e.area) ? ': it did not end with ' + esc(C.OPTIONS.tripOut(e.area) || 'a trip out of the hole') + '.' : '.') + '</p>' : '');
     if (str(inc.cause)) fbody += '<div class="cs-hyp" id="cs-hyp"><div class="hd"><h3>Suspected cause</h3><span class="lab">Hypothesis, not a finding</span></div><p>' + esc(inc.cause) + '</p></div>';
-    if (str(inc.contact)) fbody += '<div class="cs-contact" id="cs-contact"><h3>Contact for follow-up questions</h3><p>' + esc(inc.contact) + '</p><small>Shown to the filer, QMS, the area’s Director and an external auditor only.</small></div>';
+    if (str(inc.contact)) fbody += '<div class="cs-contact" id="cs-contact"><h3>Contact for follow-up questions</h3><p>' + esc(inc.contact) + '</p><small>Shown to the filer, the Document Controller, the area’s Director and an external auditor only.</small></div>';
     out += sec('cs-findings', 'Findings at surface', fbody, '6');
     return out;
   }

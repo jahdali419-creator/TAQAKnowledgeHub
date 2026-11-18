@@ -210,8 +210,8 @@ var TAQA_CASE_OPTIONS = {
      assigned (BD-08). */
   classes: [
     { value: 'internal', label: 'Internal', hint: 'Every TAQA employee can read it once it is released.' },
-    { value: 'confidential', label: 'Confidential', hint: 'Directors, Maintenance Managers, QMS and auditors only. Employees cannot open it.' },
-    { value: 'restricted', label: 'Restricted', hint: 'QMS and auditors only. No Segment Director is cleared for it, so it waits at final approval until an authorised approver is assigned.' }
+    { value: 'confidential', label: 'Confidential', hint: 'Directors, Maintenance Managers, the Document Controller and auditors only. Employees cannot open it.' },
+    { value: 'restricted', label: 'Restricted', hint: 'the Document Controller and auditors only. No Segment Director is cleared for it, so it waits at final approval until an authorised approver is assigned.' }
   ]
 };
 
