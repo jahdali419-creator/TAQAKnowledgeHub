@@ -167,12 +167,12 @@ const TAQA_DOC_LOOKUPS = {
     },
     "it": {
       "group": "function",
-      "name": "Information Technology",
+      "name": "Data and Technology",
       "spl": "IT",
-      "splName": "Information Technology",
+      "splName": "Data and Technology",
       "bu": null,
       "provisional": false,
-      "note": "TQ-QHSE-S001 5.3, corporate function 09: Information Technology, IT."
+      "note": "TQ-QHSE-S001 5.3, corporate function 09: Information Technology, IT. The function is now called Data and Technology; the document-number code stays IT so existing numbers (TQ-IT-...) keep their meaning."
     },
     "supply-chain": {
       "group": "function",

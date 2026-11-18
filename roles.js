@@ -425,7 +425,7 @@ const TAQA_APPROVAL = {
      the individual acting in it, a delegate included, must also be cleared
      for the classification. In the prototype clearance is the role's
      classification list; in production it is the person's, from Microsoft
-     365 (IT decides how). */
+     365 (Data and Technology decides how). */
   cleared(doc, roleKey){
     if (!doc || !doc.classification) return true;
     const R = TAQA_ROLE.def(roleKey);
