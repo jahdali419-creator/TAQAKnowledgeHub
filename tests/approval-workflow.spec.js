@@ -46,7 +46,7 @@ test.describe('1-2. Draft submission and the QMS step', () => {
       const d = TAQA_STORE.findDoc(dn);
       return { approvalStage: d.approvalStage, stageOf: TAQA_APPROVAL.stageOf(d), waitingOn: TAQA_APPROVAL.waitingOn(d) };
     }, docNumber);
-    expect(state).toEqual({ approvalStage: 'qms', stageOf: 'qms', waitingOn: 'document control conformance check' });
+    expect(state).toEqual({ approvalStage: 'qms', stageOf: 'qms', waitingOn: 'Document control conformance check' });
 
     await setRole('qms', 'coiled-tubing');
     let can = await page.evaluate((dn) => {

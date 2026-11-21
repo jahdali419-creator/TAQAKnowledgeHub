@@ -265,7 +265,7 @@ test.describe('TAQA_DELEGATION contract', () => {
     await gotoApp('/index.html');
     await clearAppState();
     await page.evaluate(() => TAQA_ROLE.set('owner'));
-    for (const to of ['Mohammed Jahdali', '  mohammed   JAHDALI ', 'Segment Director', 'Document Controller', 'qms / document controller', 'Employee']) {
+    for (const to of ['Mohammed Jahdali', '  mohammed   JAHDALI ', 'Segment Director', 'Document Controller', '  document   CONTROLLER ', 'Employee']) {
       const out = await page.evaluate(({ to, reason }) => TAQA_DELEGATION.grant({
         fromRole: 'owner', fromName: 'Mohammed Jahdali', to, reason, from: TAQA_DELEGATION.today(),
         until: TAQA_DELEGATION.today(),

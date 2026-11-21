@@ -277,7 +277,7 @@ test.describe('Homepage counts come from the register, not a hardcoded number', 
     expect(await rowTarget('Documents in Force')).toBe(String(baseline.liveCountFor.employee));
     expect(await rowTarget('Business Segments')).toBe(String(segN));
     expect(await rowTarget('Active Technical Alerts')).toBe(String(baseline.liveFor('employee').filter((d) => d.docType === 'alert').length));
-    expect(await rowTarget('Awaiting QMS Approval')).toBe(String(baseline.pendingCountFor.employee));
+    expect(await rowTarget('Awaiting Document Control Check')).toBe(String(baseline.pendingCountFor.employee));
   });
 });
 

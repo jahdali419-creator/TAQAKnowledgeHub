@@ -129,7 +129,7 @@ test.describe('A. NEW-04: names are labels, identities decide, and ambiguity ref
     await setRole('owner', SEG);
     expect(await page.evaluate(() => TAQA_APPROVAL.canApprove(TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-937')))).toBe(false);
     // Delegates named as the grantor, a role, or the QMS label are refused at the grant.
-    for (const to of ['Segment Director', 'Document Controller', ' qms /  document controller ', 'Employee']) {
+    for (const to of ['Segment Director', 'Document Controller', '  document   CONTROLLER ', 'Employee']) {
       expect((await grant(page, 'owner', { to, includesApproval: true })).error, to).toMatch(/not yourself or a role/);
     }
     // A delegate named as the checker or the filer cannot be shown to be someone else.

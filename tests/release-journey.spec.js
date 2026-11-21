@@ -73,7 +73,7 @@ test.describe('one document, every role, through the UI', () => {
     await gotoApp('/viewer.html?doc=' + N + '&seg=' + SEG);
     await expect(page.locator('#doc-title')).toHaveText(TITLE);
     await expect(page.locator('#lifecycle-banner')).toContainText('Submitted for approval, not in force yet');
-    await expect(page.locator('#lifecycle-banner')).toContainText('document control conformance check');
+    await expect(page.locator('#lifecycle-banner')).toContainText('Document control conformance check');
     // Its way out is a page an Employee may open, not the Master List that refuses them.
     await expect(page.locator('#lifecycle-banner a')).toHaveAttribute('href', 'ai-search.html');
 

@@ -440,7 +440,7 @@ test.describe('The door (role / identity switcher)', () => {
     // reflect the new role rather than racing the reload directly.
     await expect(page.locator('#taqa-door .door-btn')).toHaveAttribute(
       'title',
-      /QMS \/ Document Controller/,
+      /Document Controller/,
       { timeout: 10000 }
     );
 

@@ -261,11 +261,12 @@ test.describe('home on a phone', () => {
   test.use({ viewport: { width: 390, height: 844 } });
   test('"Explore the segments" lands on the open list of segments', async ({ page, gotoApp, consoleErrors }) => {
     await gotoApp('/index.html');
-    // Every group closed, as a phone shows them on arrival.
+    // Every bed stands open on arrival (commit 0375a7a). The cue must still
+    // land on the list, which is what this test is really about.
     await page.evaluate(() => { localStorage.setItem('taqa-tour-done', '1'); localStorage.setItem('taqa-strata-bed', 'none'); });
     await gotoApp('/index.html');
     const seg = page.locator('#explore [aria-expanded]', { hasText: 'Operational Segments' });
-    await expect(seg).toHaveAttribute('aria-expanded', 'false');
+    await expect(seg).toHaveAttribute('aria-expanded', 'true');
     await page.locator('#hero-cue').click();
     await expect(page).toHaveURL(/#explore$/);
     await expect(seg).toHaveAttribute('aria-expanded', 'true');

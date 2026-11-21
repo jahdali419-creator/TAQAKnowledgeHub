@@ -385,7 +385,7 @@ test.describe('upload.html, approval workflow text', () => {
     // (stage 'qms') before the type's named approver releases it (stage
     // 'director' -> approve()), never the other way round.
     await expect(page.locator('.approval-text')).toContainText(
-      'Documents are reviewed by QMS, then approved by the authority the type names, before being published.'
+      'Documents are reviewed by the Document Controller, then approved by the authority the type names, before being published.'
     );
   });
 
