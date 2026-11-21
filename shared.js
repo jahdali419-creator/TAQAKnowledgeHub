@@ -283,7 +283,7 @@ window.TAQA_NET = (function(){
     '#taqa-net-bar{position:fixed;top:calc(64px + var(--nav-safe,0px));inset-inline:0;z-index:999;height:30px;' +
       'display:none;align-items:center;justify-content:center;gap:7px;' +
       'padding:0 max(12px, var(--safe-r)) 0 max(12px, var(--safe-l));' +
-      'background:#3D4F4F;color:#fff;font:600 12px/1.2 Inter,system-ui,sans-serif;}' +
+      'background:#3D4F4F;color:#fff;font:600 12px/1.2 Arial,Helvetica,sans-serif;}' +
     '#taqa-net-bar span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0;}' +
     '#taqa-net-bar svg{flex-shrink:0;}' +
     // A phone gets the short wording, so "nothing can be sent" is never cut off.
@@ -660,7 +660,7 @@ window.addEventListener('pageshow', function(e){
     '.nav-mobile-menu{display:none;position:fixed;inset-inline:0;top:var(--nav-h,64px);z-index:998;'+
       'background:var(--tb-solid,#fff);border-bottom:1px solid var(--tb-rule,rgba(117,106,97,.13));'+
       'padding:6px max(16px, var(--safe-r,0px)) calc(28px + var(--safe-b,0px)) max(16px, var(--safe-l,0px));box-shadow:0 22px 44px -26px rgba(0,88,90,.28);'+
-      'overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;font-family:"Inter",system-ui,sans-serif;}'+
+      'overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;font-family:Arial,Helvetica,sans-serif;}'+
     '.nav-mobile-menu.open{display:block;}'+
     /* On a tablet the menu drops as a sheet from the end of the bar rather
        than stretching a phone list across a 1000px screen. */
@@ -669,7 +669,7 @@ window.addEventListener('pageshow', function(e){
       'box-shadow:var(--tb-shadow,0 22px 44px -26px rgba(0,88,90,.28));}}'+
     'html.taqa-menu-open .scroll-top-btn,html.taqa-menu-open #back-to-top,html.taqa-menu-open .bm-panel{display:none!important;}'+
     '.nav-mobile-menu a,.nav-mobile-menu .mm-row{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:0 4px;margin:0;'+
-      'font:500 15.5px/1.2 "Inter",system-ui,sans-serif;color:var(--tb-text,#1E1C1A);text-decoration:none;text-align:start;'+
+      'font:500 15.5px/1.2 Arial,Helvetica,sans-serif;color:var(--tb-text,#1E1C1A);text-decoration:none;text-align:start;'+
       'background:none;border:0;border-bottom:1px solid var(--tb-rule,rgba(117,106,97,.13));cursor:pointer;}'+
     '.nav-mobile-menu .mm-main a:last-child{border-bottom:0;}'+
     '.nav-mobile-menu .mm-main a.active{color:var(--tb-ink,#005D63);font-weight:600;}'+
@@ -687,14 +687,14 @@ window.addEventListener('pageshow', function(e){
       'border-bottom:1px solid var(--tb-rule,rgba(117,106,97,.13));cursor:pointer;}'+
     '.nav-mobile-menu .mm-grp>summary{list-style:none;}'+
     '.nav-mobile-menu .mm-grp>summary::-webkit-details-marker{display:none;}'+
-    '.nav-mobile-menu .mm-n{margin-inline-start:auto;font:500 12.5px/1 "Inter",system-ui,sans-serif;color:var(--tb-light,#756A61);font-variant-numeric:tabular-nums;}'+
+    '.nav-mobile-menu .mm-n{margin-inline-start:auto;font:500 12.5px/1 Arial,Helvetica,sans-serif;color:var(--tb-light,#756A61);font-variant-numeric:tabular-nums;}'+
     '.nav-mobile-menu .mm-chev{flex:none;color:var(--tb-ink,#005D63);transition:transform .2s cubic-bezier(.23,1,.32,1);}'+
     '.nav-mobile-menu .mm-grp[open]>summary .mm-chev{transform:rotate(180deg);}'+
     '.nav-mobile-menu .mm-grp[open]>summary{color:var(--tb-ink,#005D63);border-bottom-color:transparent;}'+
     '.nav-mobile-menu .mm-list{margin:0 0 10px;padding:2px 0 10px;border-inline-start:2px solid var(--tb-rule,rgba(117,106,97,.13));border-bottom:1px solid var(--tb-rule,rgba(117,106,97,.13));}'+
     '.nav-mobile-menu .mm-list a{min-height:44px;padding:0 4px;padding-inline-start:14px;margin-inline-start:-2px;border:0;border-inline-start:2px solid transparent;'+
       'font:300 15.5px/1.3 "BwGradual","Urbanist",sans-serif;color:var(--tb-text,#1E1C1A);}'+
-    '.nav-mobile-menu .mm-dc{margin-inline-start:auto;font:500 12.5px/1 "Inter",system-ui,sans-serif;color:var(--tb-light,#756A61);font-variant-numeric:tabular-nums;}'+
+    '.nav-mobile-menu .mm-dc{margin-inline-start:auto;font:500 12.5px/1 Arial,Helvetica,sans-serif;color:var(--tb-light,#756A61);font-variant-numeric:tabular-nums;}'+
     '.nav-mobile-menu .mm-list a.mm-here{color:var(--tb-ink,#005D63);font-weight:400;border-inline-start-color:var(--tb-ink,#005D63);}'+
     '.nav-mobile-menu a.mm-company.mm-here{color:var(--tb-ink,#005D63);}'+
     '.nav-mobile-menu .mm-door{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:2px 0 0;}'+
@@ -703,9 +703,9 @@ window.addEventListener('pageshow', function(e){
       'font:500 14px/1.2 "BwGradual","Urbanist",sans-serif;cursor:pointer;text-align:start;}'+
     '.nav-mobile-menu .mm-door button[aria-pressed="true"]{border-color:var(--tb-ink,#005D63);color:var(--tb-ink,#005D63);font-weight:600;background:var(--tb-active,rgba(0,93,99,.07));}'+
     '.nav-mobile-menu .mm-door-area{margin-top:10px;}'+
-    '.nav-mobile-menu .mm-door-area label{display:block;font:500 12.5px/1.3 "Inter",system-ui,sans-serif;color:var(--tb-light,#756A61);margin:0 4px 6px;}'+
+    '.nav-mobile-menu .mm-door-area label{display:block;font:500 12.5px/1.3 Arial,Helvetica,sans-serif;color:var(--tb-light,#756A61);margin:0 4px 6px;}'+
     '.nav-mobile-menu .mm-door-area select{width:100%;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--tb-rule,rgba(117,106,97,.13));'+
-      'background:var(--tb-solid,#fff);color:var(--tb-text,#1E1C1A);font:500 15px "Inter",system-ui,sans-serif;}'+
+      'background:var(--tb-solid,#fff);color:var(--tb-text,#1E1C1A);font:500 15px Arial,Helvetica,sans-serif;}'+
     '.nav-mobile-menu .mm-note{font-size:12.5px;line-height:1.45;color:var(--tb-light,#756A61);padding:10px 4px 0;}'+
     '@media (hover:hover){.nav-mobile-menu a:hover,.nav-mobile-menu .mm-row:hover{color:var(--tb-ink,#005D63);}'+
       '.nav-mobile-menu .mm-tools a.mm-up:hover{color:#FFFFFF;background:#004A4F;}}';
@@ -892,12 +892,12 @@ window.addEventListener('pageshow', function(e){
     '.pwa-step-t strong{color:#1E1C1A;}'+
     'html[data-taqa-theme="dark"] .pwa-step-t strong{color:#C7DBDD;}'+
     '.pwa-install-btn{display:block;width:100%;padding:15px;border-radius:14px;text-align:center;'+
-    'font-size:15px;font-weight:700;color:#fff;border:none;cursor:pointer;font-family:"Inter",sans-serif;'+
+    'font-size:15px;font-weight:700;color:#fff;border:none;cursor:pointer;font-family:Arial,Helvetica,sans-serif;'+
     'background:#005D63;box-shadow:0 6px 20px rgba(0,93,99,0.38);'+
     'transition:transform 0.2s,box-shadow 0.2s;margin-bottom:10px;}'+
     '.pwa-install-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,93,99,0.5);}'+
     '.pwa-later{display:block;width:100%;padding:13px;background:none;border:none;'+
-    'font-size:13.5px;color:#756A61;cursor:pointer;font-family:"Inter",sans-serif;text-align:center;}'+
+    'font-size:13.5px;color:#756A61;cursor:pointer;font-family:Arial,Helvetica,sans-serif;text-align:center;}'+
     /* The sheet only restated its title for the dark ground, so the line under
        it, the steps and Maybe later kept the light-theme grey at 3.07:1. */
     'html[data-taqa-theme="dark"] .pwa-sub,html[data-taqa-theme="dark"] .pwa-step-t,'+
@@ -1108,14 +1108,14 @@ window.addEventListener('pageshow', function(e){
     'background:var(--tb-solid,#fff);border:1px solid var(--tb-rule,rgba(117,106,97,.13));border-radius:16px;'+
     'box-shadow:0 22px 44px -26px rgba(0,88,90,.32),0 2px 6px -2px rgba(0,88,90,.08);'+
     'display:none;flex-direction:column;overflow:hidden;'+
-    'animation:bmIn .16s cubic-bezier(.23,1,.32,1);font-family:"Inter",system-ui,sans-serif;}'+
+    'animation:bmIn .16s cubic-bezier(.23,1,.32,1);font-family:Arial,Helvetica,sans-serif;}'+
     '@keyframes bmIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}'+
     '.bm-panel.open{display:flex;}'+
     '.bm-ph{padding-block:14px 12px;padding-inline:16px 12px;border-bottom:1px solid var(--tb-rule,rgba(117,106,97,.13));display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;}'+
     '.bm-pt{font-family:"BwGradual","Urbanist",sans-serif;font-size:15px;font-weight:700;color:var(--tb-text,#1E1C1A);}'+
-    '.bm-pt .bm-pn{font-family:"Inter",sans-serif;font-weight:500;font-size:12.5px;color:var(--tb-light,#756A61);margin-inline-start:6px;font-variant-numeric:tabular-nums;}'+
+    '.bm-pt .bm-pn{font-family:Arial,Helvetica,sans-serif;font-weight:500;font-size:12.5px;color:var(--tb-light,#756A61);margin-inline-start:6px;font-variant-numeric:tabular-nums;}'+
     '.bm-acts{display:flex;gap:2px;}'+
-    '.bm-clr{font-size:12.5px;font-weight:500;color:var(--tb-muted,#524D48);cursor:pointer;background:none;border:0;padding:0 10px;min-height:36px;border-radius:8px;font-family:"Inter",sans-serif;}'+
+    '.bm-clr{font-size:12.5px;font-weight:500;color:var(--tb-muted,#524D48);cursor:pointer;background:none;border:0;padding:0 10px;min-height:36px;border-radius:8px;font-family:Arial,Helvetica,sans-serif;}'+
     '.bm-clr:hover{background:var(--tb-hover,rgba(117,106,97,.08));color:var(--tb-text,#1E1C1A);}'+
     '#bm-clr:hover{color:var(--stop-ink,#C8102E);}'+
     '.bm-list{flex:1;overflow-y:auto;padding:6px;overscroll-behavior:contain;}'+

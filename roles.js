@@ -287,7 +287,7 @@ TAQA_ROLE.refuse = function(title, why){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
   document.documentElement.setAttribute('data-taqa-theme', dark ? 'dark' : 'light');
   document.body.innerHTML =
-    '<main style="max-width:620px;margin:16vh auto;padding:0 24px;text-align:center;font-family:Inter,system-ui,sans-serif">' +
+    '<main style="max-width:620px;margin:16vh auto;padding:0 24px;text-align:center;font-family:Arial,Helvetica,sans-serif">' +
       '<h1 style="font-family:BwGradual,Urbanist,sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.3px;margin:0 0 12px;color:' + ink + '">' + e(title) + '</h1>' +
       '<p style="font-size:14px;line-height:1.7;color:' + mute + ';margin:0 0 10px">' + e(why) +
         ' You are signed in as <b style="color:' + ink + '">' + e(who) + '</b>.</p>' +
