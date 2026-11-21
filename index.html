@@ -1615,19 +1615,19 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
     <div class="hero-stats-panel hw hw-8">
       <div class="stats-panel-title">Platform Overview</div>
       <div class="stats-list">
-        <div class="stat-row">
+        <div class="stat-row" data-stat="docs">
           <span class="stat-row-label">Documents in Force</span>
           <span class="stat-row-value" data-target="">…</span>
         </div>
-        <div class="stat-row">
+        <div class="stat-row" data-stat="segments">
           <span class="stat-row-label">Business Segments</span>
           <span class="stat-row-value" data-target="">…</span>
         </div>
-        <div class="stat-row">
+        <div class="stat-row" data-stat="alerts">
           <span class="stat-row-label">Active Technical Alerts</span>
           <span class="stat-row-value" data-target="">…</span>
         </div>
-        <div class="stat-row">
+        <div class="stat-row" data-stat="pending">
           <span class="stat-row-label">Awaiting Document Control Check</span>
           <span class="stat-row-value" data-target="">…</span>
         </div>
@@ -1681,22 +1681,22 @@ html[data-taqa-theme="dark"] #focus.strata .st-layer[data-open="true"] .st-h { b
 <!-- ── Stats Bridge Strip ── -->
 <div class="stats-strip reveal">
   <div class="stats-strip-inner">
-    <div class="stats-strip-item">
+    <div class="stats-strip-item" data-stat="docs">
       <span class="stats-strip-num" data-target="">…</span>
       <span class="stats-strip-label">Documents</span>
     </div>
     <div class="stats-strip-divider"></div>
-    <div class="stats-strip-item">
+    <div class="stats-strip-item" data-stat="segments">
       <span class="stats-strip-num" data-target="">…</span>
       <span class="stats-strip-label">Operational Segments</span>
     </div>
     <div class="stats-strip-divider"></div>
-    <div class="stats-strip-item">
+    <div class="stats-strip-item" data-stat="functions">
       <span class="stats-strip-num" data-target="">…</span>
       <span class="stats-strip-label">Corporate Functions</span>
     </div>
     <div class="stats-strip-divider"></div>
-    <div class="stats-strip-item">
+    <div class="stats-strip-item" data-stat="products">
       <span class="stats-strip-num" data-target="">…</span>
       <span class="stats-strip-label">Products &amp; Technology</span>
     </div>
@@ -2249,24 +2249,45 @@ html[data-taqa-theme="dark"] .t-dot.on{background:#00BBB6;}
     var lbl = item.querySelector('.stats-strip-label'),
         num = item.querySelector('[data-target]');
     if (!lbl || !num) return;
-    var t = lbl.textContent.trim();
-    if (t.indexOf('Document') !== -1)        set(num, totalDocs);
-    else if (t.indexOf('Function') !== -1)   set(num, fnN);
-    else if (t.indexOf('Technology') !== -1) set(num, ptN);
-    else if (t.indexOf('Segment') !== -1)    set(num, segN);
+    var k = item.dataset.stat || '';
+    if (!k) {                                   /* older markup, by words */
+      var t = lbl.textContent.trim();
+      k = t.indexOf('Function') !== -1 ? 'functions'
+        : t.indexOf('Technology') !== -1 ? 'products'
+        : t.indexOf('Segment') !== -1 ? 'segments'
+        : t.indexOf('Document') !== -1 ? 'docs' : '';
+    }
+    if (k === 'docs')           set(num, totalDocs);
+    else if (k === 'functions') set(num, fnN);
+    else if (k === 'products')  set(num, ptN);
+    else if (k === 'segments')  set(num, segN);
   });
 
   document.querySelectorAll('.stat-row').forEach(function(row){
     var lbl = row.querySelector('.stat-row-label'),
         val = row.querySelector('.stat-row-value');
     if (!lbl || !val) return;
-    var t = lbl.textContent.trim();
-    if (t.indexOf('Document') !== -1)        set(val, totalDocs);
-    else if (t.indexOf('Function') !== -1)   set(val, fnN);
-    else if (t.indexOf('Technology') !== -1) set(val, ptN);
-    else if (t.indexOf('Segment') !== -1)    set(val, segN);
-    else if (t.indexOf('Alert') !== -1)      set(val, totalAlert);
-    else if (t.indexOf('Approval') !== -1)   set(val, S.rows('pending').filter(S.classOpen).length);
+    /* Keyed on data-stat, not on the words in the label.  It used to match
+       the label text with indexOf in order, so renaming "Awaiting QMS
+       Approval" to "Awaiting Document Control Check" made it hit the
+       'Document' branch first and show the total in force, 352, where the
+       pending count, 10, belongs.  A label is wording; this is a figure. */
+    var k = row.dataset.stat || '';
+    if (!k) {                                   /* older markup, by words */
+      var t = lbl.textContent.trim();
+      k = t.indexOf('Awaiting') !== -1 ? 'pending'
+        : t.indexOf('Function') !== -1 ? 'functions'
+        : t.indexOf('Technology') !== -1 ? 'products'
+        : t.indexOf('Segment') !== -1 ? 'segments'
+        : t.indexOf('Alert') !== -1 ? 'alerts'
+        : t.indexOf('Document') !== -1 ? 'docs' : '';
+    }
+    if (k === 'docs')          set(val, totalDocs);
+    else if (k === 'functions') set(val, fnN);
+    else if (k === 'products')  set(val, ptN);
+    else if (k === 'segments')  set(val, segN);
+    else if (k === 'alerts')    set(val, totalAlert);
+    else if (k === 'pending')   set(val, S.rows('pending').filter(S.classOpen).length);
   });
 
   var cc = document.querySelector('.cmd-header-count');
