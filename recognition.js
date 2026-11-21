@@ -299,20 +299,66 @@
     'html.taqa-menu-open #rise-note{display:none;}' +
     '@media (prefers-reduced-motion:reduce){#rise-note{transition:none;}}' +
     /* Area page strip */
-    '.rise-top{margin:0 0 24px;padding:12px 16px;border:1px solid var(--glass-border,rgba(0,0,0,.09));border-radius:12px;background:var(--glass,#fff);' +
-      'display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;min-width:0;}' +
+    /* Concept B, the honour band. The area strip used to be a thin white bar
+       with its label in the same muted grey the page uses for footnotes, so
+       recognition read at the level of a system notice. It now uses the dark
+       brand band and its grid, the way the hero sections do, and first place
+       is given a face and a figure rather than a position in a list. */
+    '.rise-top{position:relative;overflow:hidden;margin:0 0 24px;padding:20px 22px;border:0;border-radius:16px;' +
+      'background:#00292C;color:#fff;display:flex;flex-wrap:wrap;align-items:center;gap:18px 30px;min-width:0;}' +
+    '.rise-top::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;' +
+      'background:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 72px),' +
+      'repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 72px);}' +
+    '.rise-top > *{position:relative;}' +
     '.rise-top[hidden]{display:none!important;}' +
-    '.rise-top-h{display:flex;align-items:center;gap:8px;font:700 10px/1.2 Arial,Helvetica,sans-serif;letter-spacing:1.3px;text-transform:uppercase;color:var(--text-light,#756A61);margin:0;}' +
-    '.rise-top-h svg{width:16px;height:16px;color:var(--primary-ink,#005D63);}' +
-    '.rise-top-l{display:flex;flex-wrap:wrap;gap:6px 16px;list-style:none;margin:0;padding:0;min-width:0;flex:1 1 280px;}' +
-    '.rise-top-l li{display:flex;align-items:baseline;gap:6px;min-width:0;font-size:13px;color:var(--text,#1E1C1A);}' +
-    '.rise-top-l .rk{font-weight:700;color:var(--primary-ink,#005D63);font-variant-numeric:tabular-nums;}' +
-    '.rise-top-l .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;}' +
-    '.rise-top-l .pt{color:var(--text-muted,#756A61);font-variant-numeric:tabular-nums;white-space:nowrap;}' +
-    '.rise-ex{display:inline-block;padding:1px 6px;border-radius:999px;border:1px solid var(--glass-border,rgba(0,0,0,.12));font:600 9.5px/1.4 Arial,Helvetica,sans-serif;letter-spacing:.4px;text-transform:uppercase;color:var(--text-muted,#756A61);}' +
-    '.rise-top-all{margin-inline-start:auto;font-size:13px;font-weight:600;color:var(--primary-ink,#005D63);text-decoration:none;white-space:nowrap;}' +
-    '.rise-top-all:hover{text-decoration:underline;}' +
-    'html.seg-unknown .rise-top{display:none!important;}' +
+    /* On a dark page the band would otherwise melt into the background. */
+    'html[data-taqa-theme="dark"] .rise-top{box-shadow:inset 0 0 0 1px rgba(0,187,182,.22);}' +
+    '.rise-top-h{display:flex;align-items:center;gap:9px;width:100%;margin:0;' +
+      'font:700 10px/1.2 Arial,Helvetica,sans-serif;letter-spacing:1.4px;text-transform:uppercase;' +
+      'color:var(--primary-light,#00BBB6);}' +
+    '.rise-top-h svg{width:17px;height:17px;color:var(--primary-light,#00BBB6);}' +
+    '.rise-top-1{display:flex;align-items:center;gap:14px;min-width:0;flex:0 0 auto;}' +
+    '.rise-av{width:54px;height:54px;border-radius:50%;flex:none;display:grid;place-items:center;' +
+      'background:rgba(0,187,182,.16);box-shadow:inset 0 0 0 2px rgba(0,187,182,.45);' +
+      'font:800 18px/1 \'BwGradual\',\'Urbanist\',sans-serif;color:var(--primary-light,#00BBB6);}' +
+    '.rise-top-n{font:800 21px/1.18 \'BwGradual\',\'Urbanist\',sans-serif;min-width:0;overflow-wrap:anywhere;}' +
+    '.rise-top-p{font-size:13px;color:rgba(255,255,255,.78);margin-top:3px;}' +
+    '.rise-top-p b{color:var(--primary-light,#00BBB6);font-weight:800;font-size:15px;}' +
+    /* The list IS the row: first place is its first item, the runners-up are
+       the next two, and they share whatever room is left before the See all
+       pill rather than hugging the divider. One list, three items, however
+       differently the three are drawn. */
+    '.rise-top-l{display:flex;flex-wrap:wrap;align-items:center;gap:10px 26px;list-style:none;' +
+      'margin:0;padding:0;min-width:0;flex:1 1 auto;}' +
+    '.rise-top-r{min-width:0;flex:1 1 0;}' +
+    /* The rule belongs between first place and the runners-up, so it is drawn
+       on the first runner-up rather than on the list as a whole. */
+    '.rise-top-1 + .rise-top-r{padding-inline-start:28px;' +
+      'border-inline-start:1px solid rgba(255,255,255,.18);}' +
+    '.rise-top-r .rk{font:700 11px/1.2 Arial,Helvetica,sans-serif;color:var(--primary-light,#00BBB6);letter-spacing:.6px;}' +
+    '.rise-top-r .nm{display:block;margin-top:3px;min-width:0;max-width:200px;overflow:hidden;text-overflow:ellipsis;' +
+      'white-space:nowrap;font:700 14px/1.3 \'BwGradual\',\'Urbanist\',sans-serif;}' +
+    '.rise-top-r .pt{display:block;font-size:12px;color:rgba(255,255,255,.72);margin-top:1px;}' +
+    /* The Example badge is kept, and kept legible on the dark field: these are
+       not real colleagues and decoration does not change that. */
+    '.rise-ex{display:inline-block;padding:1px 6px;border-radius:999px;border:1px solid rgba(255,255,255,.32);' +
+      'font:700 9.5px/1.4 Arial,Helvetica,sans-serif;letter-spacing:.4px;text-transform:uppercase;' +
+      'color:rgba(255,255,255,.78);vertical-align:2px;}' +
+    /* Ink on legacy teal is 7.11:1; white on it is 2.39:1, so the label is ink. */
+    '.rise-top-all{margin-inline-start:auto;align-self:center;background:var(--primary-light,#00BBB6);color:#00191B;' +
+      'font:700 13px/1 Arial,Helvetica,sans-serif;padding:0 18px;min-height:44px;display:inline-flex;' +
+      'align-items:center;border-radius:999px;text-decoration:none;white-space:nowrap;}' +
+    '.rise-top-all:hover{background:#9FE3DF;}' +
+    '.rise-top-all:focus-visible{outline:2px solid #fff;outline-offset:2px;}' +
+    '@media (max-width:700px){' +
+      '.rise-top{padding:16px;gap:14px;}' +
+      '.rise-top-1{flex:1 1 100%;padding-bottom:14px;' +
+        'border-bottom:1px solid rgba(255,255,255,.18);}' +
+      '.rise-top-1 + .rise-top-r{padding-inline-start:0;border-inline-start:0;}' +
+      '.rise-top-l{gap:14px 20px;}' +
+      '.rise-top-all{margin-inline-start:0;width:100%;justify-content:center;}' +
+      '.rise-top-n{font-size:18px;}.rise-av{width:46px;height:46px;font-size:16px;}}' +
+'html.seg-unknown .rise-top{display:none!important;}' +
     '@media print{.rise-top,#rise-note{display:none!important;}}';
   document.head.appendChild(css);
 
@@ -357,6 +403,16 @@
   }
 
   // Area pages: the top three this month, with a way to the full list.
+  /* Initials for the first-place avatar. A person whose name is hidden gets a
+     neutral mark rather than letters taken from the words "A colleague". */
+  function initialsOf(r) {
+    if (!r || r.hidden) return '\u00B7\u00B7';
+    var t = String(r.label || '').replace(/\(.*?\)/g, '').replace(/^You,\s*/i, '').trim();
+    var w = t.split(/\s+/).filter(Boolean);
+    if (!w.length) return '\u2014';
+    return (w[0].charAt(0) + (w.length > 1 ? w[w.length - 1].charAt(0) : '')).toUpperCase();
+  }
+
   function paintArea() {
     var box = document.getElementById('rise-top');
     if (!box) return;
@@ -364,13 +420,28 @@
     if (!lookups()[id] || document.documentElement.classList.contains('seg-unknown')) { box.hidden = true; return; }
     var rows = board(id).slice(0, 3);
     if (!rows.length) { box.hidden = true; return; }
+    var ORD = ['1ST', '2ND', '3RD'];
+    var top = rows[0], rest = rows.slice(1);
+    /* One ordered list, three items.  First place is styled as the champion
+       block and the other two as the runners-up beside it, but a ranking is
+       a list whatever it looks like, so all three stay list items: screen
+       readers hear "1 of 3", and the count is the same thing the eye sees. */
     box.innerHTML =
       '<h2 class="rise-top-h" id="rise-top-h">' + MEDAL + 'Top contributors this month</h2>' +
-      '<ol class="rise-top-l">' + rows.map(function (r, i) {
-        return '<li><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.label) + '</span>' +
-               (r.example ? '<span class="rise-ex">Example</span>' : '') +
-               '<span class="pt">' + r.monthPoints + ' pts</span></li>';
-      }).join('') + '</ol>' +
+      '<ol class="rise-top-l">' +
+        '<li class="rise-top-1">' +
+          '<span class="rise-av" aria-hidden="true">' + esc(initialsOf(top)) + '</span>' +
+          '<div><div class="rise-top-n">' + esc(top.label) +
+            (top.example ? ' <span class="rise-ex">Example</span>' : '') + '</div>' +
+            '<div class="rise-top-p"><b>' + top.monthPoints + '</b> points \u00B7 1st this month</div></div>' +
+        '</li>' +
+        rest.map(function (r, i) {
+          return '<li class="rise-top-r"><span class="rk">' + ORD[i + 1] + '</span>' +
+                 '<span class="nm">' + esc(r.label) + '</span>' +
+                 (r.example ? '<span class="rise-ex">Example</span>' : '') +
+                 '<span class="pt">' + r.monthPoints + ' points</span></li>';
+        }).join('') +
+      '</ol>' +
       '<a class="rise-top-all" href="recognition.html?area=' + encodeURIComponent(id) + '#board">See all</a>';
     box.hidden = false;
   }
