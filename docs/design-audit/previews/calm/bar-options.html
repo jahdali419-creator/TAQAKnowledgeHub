@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en" data-taqa-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base href="/">
+<title>Search bar, style options</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root{
+  --primary-ink:#005D63;--paper:#FFFFFF;--inset:#F7F6F4;
+  --line:rgba(117,106,97,0.18);--line-soft:rgba(117,106,97,0.10);--line-strong:rgba(117,106,97,0.32);
+  --text:#1E1C1A;--text-muted:#5F564F;--text-light:#6E655D;
+  --band:#00292C;
+  --shadow-3:0 2px 6px rgba(0,41,44,.06),0 28px 56px -24px rgba(0,41,44,.34);
+  --focus:0 0 0 3px rgba(0,187,182,.45);
+}
+*{box-sizing:border-box;}
+body{margin:0;background:#EFEDEA;font:400 15px/1.55 'Inter',system-ui,sans-serif;color:var(--text);
+  -webkit-font-smoothing:antialiased;}
+.wrap{max-width:1200px;margin:0 auto;padding:40px 40px 80px;}
+
+/* the dark band the real bar rides over, so each option is judged in context */
+.band{background:var(--band);border-radius:16px 16px 0 0;height:70px;}
+.panel{background:var(--paper);border-radius:18px;box-shadow:var(--shadow-3);
+  padding:18px 20px;margin-top:-34px;position:relative;z-index:2;}
+.panel .lbl{display:block;font:500 12px/1.3 'Inter',sans-serif;color:var(--text-muted);margin-bottom:8px;}
+
+h1{font:700 26px/1.2 'Inter',sans-serif;margin:0 0 6px;}
+.intro{max-width:70ch;color:var(--text-muted);margin:0 0 10px;}
+.key{max-width:70ch;background:#fff;border-radius:12px;padding:14px 16px;margin:0 0 36px;
+  box-shadow:inset 0 0 0 1px var(--line);font-size:13.5px;line-height:1.6;color:var(--text-muted);}
+.key b{color:var(--text);}
+
+.opt{margin:0 0 44px;}
+.opt > h2{font:600 16px/1.3 'Inter',sans-serif;margin:0 0 2px;}
+.opt > h2 em{font-style:normal;color:var(--primary-ink);}
+.why{margin:0 0 4px;color:var(--text-muted);font-size:13.5px;max-width:72ch;}
+.spec{margin:0 0 14px;font:400 12px/1.5 ui-monospace,Menlo,Consolas,monospace;color:var(--text-light);}
+.tag{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:#E7F3F3;
+  color:var(--primary-ink);font:600 11px/1.6 'Inter',sans-serif;vertical-align:2px;}
+
+.states{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;}
+.states .st{display:block;font:500 11.5px/1.3 'Inter',sans-serif;color:var(--text-light);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.mini{background:var(--paper);border-radius:14px;padding:12px 14px;box-shadow:inset 0 0 0 1px var(--line);}
+
+/* ── the bar itself ───────────────────────────────────────────────────────
+   One shared skeleton. Only the .bar* class differs between options, so the
+   comparison is honest: same icon, same text, same width. */
+.bar{position:relative;display:flex;align-items:center;width:100%;}
+.bar svg{position:absolute;left:15px;width:17px;height:17px;color:var(--text-light);
+  pointer-events:none;flex:none;}
+.bar input{width:100%;min-width:0;font-family:'Inter',system-ui,sans-serif;
+  font-size:16px;font-weight:400;color:var(--text);
+  border:0;background:transparent;outline:none;padding:0 14px 0 44px;height:100%;}
+/* THE point: the placeholder is sized on its own, so the empty bar reads
+   small and grey while anything typed stays 16px. */
+.bar input::placeholder{font-size:14px;font-weight:400;color:var(--text-light);opacity:1;}
+
+/* reference — exactly what ships today */
+.barNow{height:54px;border-radius:14px;background:var(--inset);
+  box-shadow:inset 0 0 0 1px var(--line-strong);}
+.barNow input{font-size:16.5px;font-weight:500;}
+.barNow input::placeholder{font-size:16.5px;font-weight:500;color:var(--text-light);}
+
+/* A — hairline well */
+.barA{height:48px;border-radius:12px;background:var(--inset);}
+.barA.is-focus{background:#fff;box-shadow:0 0 0 1px var(--primary-ink),var(--focus);}
+
+/* B — framed */
+.barB{height:48px;border-radius:10px;background:#fff;box-shadow:inset 0 0 0 1px var(--line);}
+.barB.is-focus{box-shadow:inset 0 0 0 1.5px var(--primary-ink),var(--focus);}
+
+/* C — underline */
+.barC{height:44px;border-radius:0;background:transparent;
+  box-shadow:inset 0 -1px 0 var(--line-strong);}
+.barC svg{left:2px;}
+.barC input{padding-left:30px;}
+.barC.is-focus{box-shadow:inset 0 -2px 0 var(--primary-ink);}
+
+/* D — compact pill */
+.barD{height:44px;border-radius:999px;background:var(--inset);}
+.barD svg{left:17px;width:16px;height:16px;}
+.barD input{padding-left:44px;}
+.barD input::placeholder{font-size:13.5px;}
+.barD.is-focus{background:#fff;box-shadow:0 0 0 1px var(--line-strong),var(--focus);}
+
+/* E — ghost */
+.barE{height:46px;border-radius:10px;background:transparent;
+  transition:background .15s ease, box-shadow .15s ease;}
+.barE:hover{background:var(--inset);}
+.barE.is-focus{background:#fff;box-shadow:inset 0 0 0 1px var(--line),var(--focus);}
+
+/* F — generous, quiet */
+.barF{height:54px;border-radius:14px;background:var(--inset);}
+.barF input::placeholder{font-size:15px;}
+.barF.is-focus{background:#fff;box-shadow:0 0 0 1px var(--primary-ink),var(--focus);}
+
+@media (max-width:760px){
+  .wrap{padding:24px 16px 60px;}
+  .states{grid-template-columns:1fr;}
+  .panel{padding:14px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Search bar — style options</h1>
+<p class="intro">Same icon, same label, same width in every option. Only the bar's own style changes, so what you are comparing is the style and nothing else. Each one is shown at rest on the real white panel, then focused and with text typed.</p>
+
+<div class="key">
+<b>The reason the text looks big:</b> the field is set to <code>font: 500 16.5px</code> and the placeholder inherits both. So the grey prompt is rendered at body size in medium weight, which is why an empty bar reads like a filled one.<br><br>
+<b>What every option below does:</b> the placeholder is sized separately from the field — <code>14px</code> grey for the prompt, <code>16px</code> for anything you actually type. You get the small quiet prompt you asked for without shrinking real text.<br><br>
+<b>Why typed text stays at 16px:</b> iOS Safari zooms the whole page in when you focus a field whose font-size is under 16px. Shrinking the input itself would make every search on an iPhone jump the layout. Sizing only the placeholder avoids that completely.
+</div>
+
+<!-- TODAY -->
+<section class="opt">
+  <h2>Today <span class="tag">for reference</span></h2>
+  <p class="why">54px tall, 1px border on top of a grey fill, and a 16.5px medium-weight placeholder.</p>
+  <p class="spec">height 54 · radius 14 · fill #F7F6F4 + 1px border · placeholder 16.5px / 500</p>
+  <div class="band"></div>
+  <div class="panel">
+    <span class="lbl">Search for</span>
+    <div class="bar barNow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" placeholder="Title, number, area or type" readonly></div>
+  </div>
+</section>
+
+<!-- A -->
+<section class="opt">
+  <h2><em>A</em> · Hairline well <span class="tag">my pick</span></h2>
+  <p class="why">The fill alone says "type here", so the border goes. Six pixels shorter, and the prompt drops to small grey. Closest to what is there now, so it is the lowest-risk change.</p>
+  <p class="spec">height 48 · radius 12 · fill #F7F6F4 · no border · placeholder 14px / 400 #6E655D</p>
+  <div class="band"></div>
+  <div class="panel">
+    <span class="lbl">Search for</span>
+    <div class="bar barA"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" placeholder="Title, number, area or type" readonly></div>
+  </div>
+  <div class="states">
+    <div><span class="st">Focused</span><div class="mini"><div class="bar barA is-focus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" placeholder="Title, number, area or type" readonly></div></div></div>
+    <div><span class="st">With text</span><div class="mini"><div class="bar barA"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" value="cement slurry" readonly></div></div></div>
+  </div>
+</section>
+
+<!-- B -->
+<section class="opt">
+  <h2><em>B</em> · Framed</h2>
+  <p class="why">White inside, one hairline outline. Reads unmistakably as a form field, which helps if people miss the bar — but it adds an edge back to a panel that already has one.</p>
+  <p class="spec">height 48 · radius 10 · white fill · 1px #E8E4E0 outline · placeholder 14px / 400</p>
+  <div class="band"></div>
+  <div class="panel">
+    <span class="lbl">Search for</span>
+    <div class="bar barB"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" placeholder="Title, number, area or type" readonly></div>
+  </div>
+  <div class="states">
+    <div><span class="st">Focused</span><div class="mini"><div class="bar barB is-focus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" placeholder="Title, number, area or type" readonly></div></div></div>
+    <div><span class="st">With text</span><div class="mini"><div class="bar barB"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" value="cement slurry" readonly></div></div></div>
+  </div>
+</section>
+
+<!-- C -->
+<section class="opt">
+  <h2><em>C</em> · Underline</h2>
+  <p class="why">No box at all — one rule under the text. The quietest of the six and the one that makes the "Search for" label redundant. Hardest to spot at a glance, so it suits people who already know the page.</p>
+  <p class="spec">height 44 · no fill · 1px bottom rule · placeholder 14px / 400</p>
+  <div class="band"></div>
+  <div class="panel">
+    <span class="lbl">Search for</span>
+    <div class="bar barC"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" placeholder="Title, number, area or type" readonly></div>
+  </div>
+  <div class="states">
+    <div><span class="st">Focused</span><div class="mini"><div class="bar barC is-focus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" placeholder="Title, number, area or type" readonly></div></div></div>
+    <div><span class="st">With text</span><div class="mini"><div class="bar barC"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" value="cement slurry" readonly></div></div></div>
+  </div>
+</section>
+
+<!-- D -->
+<section class="opt">
+  <h2><em>D</em> · Compact pill</h2>
+  <p class="why">Shortest and roundest. Stops looking like a form and starts looking like a toolbar — good if you want the bar to feel like a tool rather than a question. 44px is still a full tap target.</p>
+  <p class="spec">height 44 · radius 999 · fill #F7F6F4 · placeholder 13.5px / 400</p>
+  <div class="band"></div>
+  <div class="panel">
+    <span class="lbl">Search for</span>
+    <div class="bar barD"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" placeholder="Title, number, area or type" readonly></div>
+  </div>
+  <div class="states">
+    <div><span class="st">Focused</span><div class="mini"><div class="bar barD is-focus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" placeholder="Title, number, area or type" readonly></div></div></div>
+    <div><span class="st">With text</span><div class="mini"><div class="bar barD"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" value="cement slurry" readonly></div></div></div>
+  </div>
+</section>
+
+<!-- E -->
+<section class="opt">
+  <h2><em>E</em> · Ghost</h2>
+  <p class="why">Nothing but the icon and the grey prompt until you point at it; the fill appears on hover and the full field on focus. The calmest possible, and the riskiest — on a touch screen there is no hover, so it never hints.</p>
+  <p class="spec">height 46 · transparent at rest · fill on hover · outline on focus · placeholder 14px / 400</p>
+  <div class="band"></div>
+  <div class="panel">
+    <span class="lbl">Search for</span>
+    <div class="bar barE"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" placeholder="Title, number, area or type" readonly></div>
+  </div>
+  <div class="states">
+    <div><span class="st">Focused</span><div class="mini"><div class="bar barE is-focus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" placeholder="Title, number, area or type" readonly></div></div></div>
+    <div><span class="st">With text</span><div class="mini"><div class="bar barE"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" value="cement slurry" readonly></div></div></div>
+  </div>
+</section>
+
+<!-- F -->
+<section class="opt">
+  <h2><em>F</em> · Generous, quiet</h2>
+  <p class="why">Keeps today's full 54px height and 14px radius — nothing moves, nothing shrinks — and only fixes the type and the double edge. The option to pick if you like the size of the bar and only want the text calmed down.</p>
+  <p class="spec">height 54 · radius 14 · fill #F7F6F4 · no border · placeholder 15px / 400</p>
+  <div class="band"></div>
+  <div class="panel">
+    <span class="lbl">Search for</span>
+    <div class="bar barF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" placeholder="Title, number, area or type" readonly></div>
+  </div>
+  <div class="states">
+    <div><span class="st">Focused</span><div class="mini"><div class="bar barF is-focus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" placeholder="Title, number, area or type" readonly></div></div></div>
+    <div><span class="st">With text</span><div class="mini"><div class="bar barF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" value="cement slurry" readonly></div></div></div>
+  </div>
+</section>
+
+</div>
+</body>
+</html>
