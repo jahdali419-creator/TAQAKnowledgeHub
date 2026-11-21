@@ -289,6 +289,38 @@ html[data-taqa-theme="dark"] .gl-btn-primary{background:#006369;}
 .gl-btn:focus-visible{outline:2px solid var(--primary-ink);outline-offset:2px;}
 
 /* ── Add a term (in the drawer) ── */
+/* ── Waiting for the Document Controller ──
+   A proposed term is not a glossary term. It is held here, visibly apart from
+   the list, until the Document Controller approves it. */
+.gl-pend{margin:0 0 18px;border:1px solid var(--border,rgba(0,0,0,0.1));border-radius:14px;
+  background:var(--inset,#F7F6F4);padding:16px 18px;}
+.gl-pend[hidden]{display:none;}
+.gl-pend-h{margin:0 0 12px;font:800 12px/1.3 Arial,Helvetica,sans-serif;letter-spacing:.9px;
+  text-transform:uppercase;color:var(--text-muted,#756A61);}
+.gl-pend-list{display:flex;flex-direction:column;gap:10px;}
+.gl-pend-row{display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px 14px;
+  background:var(--bg-white,#fff);border:1px solid var(--border,rgba(0,0,0,0.08));
+  border-radius:11px;padding:12px 14px;}
+.gl-pend-main{flex:1 1 220px;min-width:0;}
+.gl-pend-abbr{font:800 15px/1.25 'BwGradual','Urbanist',sans-serif;color:var(--text,#1E1C1A);}
+.gl-pend-full{font-size:13px;color:var(--text,#1E1C1A);margin-top:2px;}
+.gl-pend-def{font-size:12.5px;color:var(--text-muted,#756A61);margin-top:4px;line-height:1.45;}
+.gl-pend-by{font-size:11.5px;color:var(--text-dim,#968C83);margin-top:6px;}
+.gl-pend-acts{display:flex;gap:8px;align-items:center;flex:0 0 auto;}
+.gl-pend-btn{min-height:38px;padding:0 15px;border-radius:9px;border:1px solid transparent;
+  font:700 12.5px/1 Arial,Helvetica,sans-serif;cursor:pointer;white-space:nowrap;}
+.gl-pend-ok{background:var(--primary,#005D63);color:#fff;}
+.gl-pend-ok:hover{background:#004A4F;}
+.gl-pend-no{background:transparent;border-color:var(--border,rgba(0,0,0,0.18));color:var(--text-muted,#756A61);}
+.gl-pend-no:hover{border-color:var(--stop-ink,#C8102E);color:var(--stop-ink,#C8102E);}
+.gl-pend-btn:focus-visible{outline:2px solid var(--primary,#005D63);outline-offset:2px;}
+/* The proposer sees where their term stands, in words, not a colour alone. */
+.gl-pend-state{font:700 10px/1.5 Arial,Helvetica,sans-serif;letter-spacing:.5px;text-transform:uppercase;
+  padding:3px 9px;border-radius:999px;white-space:nowrap;}
+.gl-pend-state.wait{background:rgba(0,93,99,0.10);color:var(--primary-ink,#005D63);}
+.gl-pend-state.back{background:rgba(200,16,46,0.10);color:var(--stop-ink,#C8102E);}
+html[data-taqa-theme="dark"] .gl-pend{background:#002326;border-color:rgba(255,255,255,0.08);}
+html[data-taqa-theme="dark"] .gl-pend-row{background:#001F22;border-color:rgba(255,255,255,0.08);}
 .submit-form{display:flex;flex-direction:column;gap:14px;}
 .sf-row{display:flex;flex-direction:column;gap:6px;}
 .sf-label{font:600 13px/1.3 var(--th-font-text);color:var(--th-ink-2);}
@@ -497,6 +529,14 @@ footer::before{content:'';position:absolute;top:0;inset-inline:0;height:3px;back
       </span>
     </div>
 
+    <!-- Terms wait here for the Document Controller. Nothing in this panel is
+         in the glossary yet, and the panel is hidden when there is nothing in
+         it. -->
+    <section class="gl-pend" id="gl-pending" aria-labelledby="gl-pending-h" hidden>
+      <h2 class="gl-pend-h" id="gl-pending-h"></h2>
+      <div class="gl-pend-list" id="gl-pending-list"></div>
+    </section>
+
     <div class="gl-list" id="gl-list"></div>
   </main>
 
@@ -509,7 +549,7 @@ footer::before{content:'';position:absolute;top:0;inset-inline:0;height:3px;back
   <div class="th-drawer-head">
     <div>
       <h2 id="sb-add-title">Add a term</h2>
-      <p id="sb-add-sub">Missing an abbreviation your crew uses? Add it to the glossary on this device.</p>
+      <p id="sb-add-sub">Missing an abbreviation your crew uses? Propose it here. It goes to the Document Controller and joins the glossary once approved — it is not published straight away.</p>
     </div>
     <button type="button" class="th-drawer-x" onclick="toggleAddForm(false)" aria-label="Close"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
   </div>
@@ -546,7 +586,7 @@ footer::before{content:'';position:absolute;top:0;inset-inline:0;height:3px;back
           </div>
       <div class="sf-acts">
         <button type="button" class="th-btn th-btn--quiet" onclick="toggleAddForm(false)">Cancel</button>
-        <button type="button" class="th-btn th-btn--primary btn-submit" onclick="submitTerm()">Add to glossary</button>
+        <button type="button" class="th-btn th-btn--primary btn-submit" onclick="submitTerm()">Send for approval</button>
       </div>
     </div>
   </div>
@@ -1278,7 +1318,45 @@ function clearSearch() {
   input.focus();
 }
 
-/* ── Submit new term ───────────────────────────────────────────── */
+/* ── Proposing a term ──────────────────────────────────────────────
+   A term used to go straight into the glossary the moment it was typed, so
+   anyone could put a wrong or invented abbreviation in front of the whole
+   company. A proposal is now held for the Document Controller, who approves
+   it or returns it; only an approved term joins the list.
+
+   Where it is held: this prototype has no server, so proposals live in this
+   browser under taqa_glossary_pending, exactly as approved custom terms
+   already live under taqa_glossary_custom. The queue is therefore this
+   device's, not the company's, and the panel says so on screen. */
+const PEND_KEY = 'taqa_glossary_pending';
+
+function loadPending() {
+  try { const a = JSON.parse(localStorage.getItem(PEND_KEY) || '[]'); return Array.isArray(a) ? a : []; }
+  catch (e) { return []; }
+}
+function savePending(list) {
+  try { localStorage.setItem(PEND_KEY, JSON.stringify(list)); } catch (e) {}
+}
+/* Which role is looking. roles.js loads after this block, so every caller
+   runs from a click or from DOMContentLoaded, never while parsing. */
+function roleNow() {
+  try { return (typeof TAQA_ROLE !== 'undefined' && TAQA_ROLE.current()) || 'employee'; }
+  catch (e) { return 'employee'; }
+}
+function roleLabel(id) {
+  try {
+    if (typeof TAQA_ROLES !== 'undefined' && TAQA_ROLES[id] && TAQA_ROLES[id].label)
+      return TAQA_ROLES[id].label;
+  } catch (e) {}
+  return id;
+}
+function isController() { return roleNow() === 'qms'; }
+
+function gEsc(t) {
+  return String(t == null ? '' : t).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
 function submitTerm() {
   const abbr = document.getElementById('sf-abbr').value.trim().toUpperCase();
   const full  = document.getElementById('sf-full').value.trim();
@@ -1286,28 +1364,119 @@ function submitTerm() {
   const field = document.getElementById('sf-cat').value;
   if (!abbr || !full) { showGlossaryToast('Missing fields', 'Please fill in the abbreviation and full name.', 'warn'); return; }
   if (allTerms.find(t => t.abbr === abbr)) { showGlossaryToast('Already exists', `"${abbr}" is already in the glossary.`, 'warn'); return; }
-  const term = { abbr, full, def: def || 'No definition provided.', cat: 'custom', field };
-  allTerms.push(term);
-  saveCustom();
-  updateStats();
+  const pending = loadPending();
+  if (pending.find(t => t.abbr === abbr && t.status !== 'returned')) {
+    showGlossaryToast('Already proposed', `"${abbr}" is already waiting for the Document Controller.`, 'warn'); return;
+  }
+  pending.push({
+    id: 'p' + Date.now() + Math.random().toString(36).slice(2, 7),
+    abbr, full, def: def || 'No definition provided.', cat: 'custom', field,
+    byRole: roleNow(), status: 'pending', at: new Date().toISOString()
+  });
+  savePending(pending);
   document.getElementById('sf-abbr').value = '';
   document.getElementById('sf-full').value = '';
   document.getElementById('sf-def').value = '';
   toggleAddForm(false);
-  showGlossaryToast('Term added', `"${abbr}" is now in the glossary`, 'ok');
-  activeCat = 'all'; searchQ = '';
-  input.value = '';
-  document.getElementById('glossary-clear').classList.add('hidden');
-  openKeys.add(keyOf(term));
-  buildCatPills();
-  renderCards();
-  /* Show the new row, open, where it now sits in the list. */
-  const row = document.querySelector(`.gl-item[data-k="${CSS.escape(keyOf(term))}"]`);
-  if (row) {
-    const y = row.getBoundingClientRect().top + window.scrollY - topOffset() - 8;
+  showGlossaryToast('Sent for approval',
+    `"${abbr}" is with the Document Controller. It joins the glossary once approved.`, 'ok');
+  renderPending();
+  const panel = document.getElementById('gl-pending');
+  if (panel && !panel.hidden) {
+    const y = panel.getBoundingClientRect().top + window.scrollY - topOffset() - 8;
     window.scrollTo({ top: Math.max(0, y), behavior: REDUCE() ? 'auto' : 'smooth' });
   }
 }
+
+/* ── The Document Controller's decision ────────────────────────────── */
+function approveTerm(id) {
+  if (!isController()) return;                 // the button is not even drawn
+  const pending = loadPending(), i = pending.findIndex(t => t.id === id);
+  if (i === -1) return;
+  const t = pending[i];
+  // RISE's rule everywhere else is that the person who files is never the
+  // person who checks. A term proposed by the Document Controller is held for
+  // a second one rather than waved through by its own author.
+  if (t.byRole === 'qms') {
+    showGlossaryToast('Not yours to approve',
+      'You proposed this term. Another Document Controller has to approve it.', 'warn');
+    return;
+  }
+  if (allTerms.find(x => x.abbr === t.abbr)) {
+    showGlossaryToast('Already exists', `"${t.abbr}" is already in the glossary.`, 'warn');
+  } else {
+    const term = { abbr: t.abbr, full: t.full, def: t.def, cat: 'custom', field: t.field };
+    allTerms.push(term);
+    saveCustom();
+    openKeys.add(keyOf(term));
+    showGlossaryToast('Approved', `"${t.abbr}" is now in the glossary.`, 'ok');
+  }
+  pending.splice(i, 1);
+  savePending(pending);
+  updateStats(); buildCatPills(); renderCards(); renderPending();
+}
+function returnTerm(id) {
+  if (!isController()) return;
+  const pending = loadPending(), t = pending.find(x => x.id === id);
+  if (!t) return;
+  t.status = 'returned';
+  savePending(pending);
+  showGlossaryToast('Returned', `"${t.abbr}" goes back to whoever proposed it, unpublished.`, 'warn');
+  renderPending();
+}
+/* The proposer clears a returned term once they have read it. */
+function dismissTerm(id) {
+  const pending = loadPending().filter(t => t.id !== id);
+  savePending(pending);
+  renderPending();
+}
+
+/* ── The panel ─────────────────────────────────────────────────────── */
+function renderPending() {
+  const panel = document.getElementById('gl-pending');
+  const list  = document.getElementById('gl-pending-list');
+  const head  = document.getElementById('gl-pending-h');
+  if (!panel || !list) return;
+  const me = roleNow(), controller = isController();
+  // The Document Controller sees every proposal. Everyone else sees their own
+  // and nobody else's: a queue is not a noticeboard.
+  const rows = loadPending().filter(t => controller || t.byRole === me);
+  if (!rows.length) { panel.hidden = true; list.innerHTML = ''; return; }
+  panel.hidden = false;
+  head.textContent = controller
+    ? 'Waiting for your approval · ' + rows.length
+    : 'Your proposed terms · ' + rows.length;
+  list.innerHTML = rows.map(t => {
+    const returned = t.status === 'returned';
+    const mine = t.byRole === 'qms';           // the controller's own proposal
+    const acts = controller && !returned && !mine
+      ? '<div class="gl-pend-acts">' +
+          '<button type="button" class="gl-pend-btn gl-pend-ok" onclick="approveTerm(\'' + gEsc(t.id) + '\')">Approve</button>' +
+          '<button type="button" class="gl-pend-btn gl-pend-no" onclick="returnTerm(\'' + gEsc(t.id) + '\')">Return</button>' +
+        '</div>'
+      : '<div class="gl-pend-acts">' +
+          '<span class="gl-pend-state ' + (returned ? 'back' : 'wait') + '">' +
+            (returned ? 'Returned' : 'Waiting') + '</span>' +
+          (returned ? '<button type="button" class="gl-pend-btn gl-pend-no" onclick="dismissTerm(\'' + gEsc(t.id) + '\')">Dismiss</button>' : '') +
+        '</div>';
+    return '<div class="gl-pend-row">' +
+      '<div class="gl-pend-main">' +
+        '<div class="gl-pend-abbr">' + gEsc(t.abbr) + '</div>' +
+        '<div class="gl-pend-full">' + gEsc(t.full) + '</div>' +
+        '<div class="gl-pend-def">' + gEsc(t.def) + '</div>' +
+        '<div class="gl-pend-by">Proposed by ' + gEsc(roleLabel(t.byRole)) +
+          (returned ? ' \u00B7 returned by the Document Controller, not in the glossary'
+                    : ' \u00B7 not in the glossary until approved') +
+          (controller && mine && !returned
+            ? ' \u00B7 your own proposal, so another Document Controller approves it' : '') +
+          ' \u00B7 held in this browser only</div>' +
+      '</div>' + acts + '</div>';
+  }).join('');
+}
+
+document.addEventListener('DOMContentLoaded', renderPending);
+// The role control switches role without reloading, so the panel follows it.
+window.addEventListener('taqa:role-changed', renderPending);
 
 /* ── Toast ─────────────────────────────────────────────────────── */
 const ICON_OK   = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;

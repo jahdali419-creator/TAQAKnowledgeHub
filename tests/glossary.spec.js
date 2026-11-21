@@ -32,6 +32,21 @@
 const { test, expect, assertNoConsoleErrors } = require('./helpers/fixtures');
 
 const CUSTOM_KEY = 'taqa_glossary_custom';
+const PEND_KEY = 'taqa_glossary_pending';
+
+// A term is proposed, not published: it waits for the Document Controller.
+// This takes a proposal all the way through, and returns nothing a caller has
+// to clean up. The proposer must not be the Document Controller, because RISE
+// refuses to let the filer be the checker.
+async function proposeAndApprove(page, setRole, gotoApp, fields) {
+  await setRole('employee');
+  await page.evaluate(() => renderPending());
+  await fillAddForm(page, fields);
+  await page.locator('#sb-add .btn-submit').click();
+  await setRole('qms');
+  await page.evaluate(() => renderPending());
+  await page.locator('.gl-pend-ok').first().click();
+}
 
 // A real, existing built-in term (glossary.html:637) used for the
 // search/filter test, so this suite exercises the real BUILT_IN dataset
@@ -65,31 +80,49 @@ test.describe('glossary.html', () => {
     await setRole('qms', 'coiled-tubing');
   });
 
-  test('a submitted term persists to localStorage and survives a reload', async ({
+  test('a proposed term waits for the Document Controller: it is not in the glossary until approved, and both states survive a reload', async ({
     page,
     gotoApp,
+    setRole,
     consoleErrors,
   }) => {
     await gotoApp('/glossary.html');
 
     const abbr = 'WBHP';
     const full = 'Wellbore Hydrostatic Pressure Test';
+
+    await setRole('employee');
+    await page.evaluate(() => renderPending());
     await fillAddForm(page, { abbr, full, def: 'A regression-suite term.' });
-    await page.locator('.btn-submit').click();
+    await page.locator('#sb-add .btn-submit').click();
 
-    // Immediately after submission: visible in the list, and already
-    // written to the real persistence key (not just in-memory `allTerms`).
+    // Proposed: in the queue, written to the queue's own key, and NOT in the
+    // glossary list or the published key.
     const row = page.locator(`.gl-item[data-k="${abbr}|custom|${full}"]`);
-    await expect(row).toBeVisible();
-    const storedBefore = await page.evaluate(
-      (k) => JSON.parse(localStorage.getItem(k) || '[]'),
-      CUSTOM_KEY
-    );
-    expect(storedBefore.some((t) => t.abbr === abbr && t.full === full)).toBe(true);
+    await expect(row).toHaveCount(0);
+    await expect(page.locator('#gl-pending')).toBeVisible();
+    await expect(page.locator('#gl-pending-list')).toContainText(abbr);
+    const queued = await page.evaluate((k) => JSON.parse(localStorage.getItem(k) || '[]'), PEND_KEY);
+    expect(queued.some((t) => t.abbr === abbr && t.status === 'pending')).toBe(true);
+    const publishedBefore = await page.evaluate((k) => JSON.parse(localStorage.getItem(k) || '[]'), CUSTOM_KEY);
+    expect(publishedBefore.some((t) => t.abbr === abbr)).toBe(false);
 
-    // Reload: loadCustom() must read it back from localStorage and render it
-    // again. This is the behavioral proof the old "session-only" assumption
-    // is false for this app as it stands today.
+    // Still waiting after a reload: the queue is read back, not forgotten.
+    await gotoApp('/glossary.html');
+    await setRole('employee');
+    await page.evaluate(() => renderPending());
+    await expect(page.locator(`.gl-item[data-k="${abbr}|custom|${full}"]`)).toHaveCount(0);
+    await expect(page.locator('#gl-pending-list')).toContainText(abbr);
+
+    // Approved by the Document Controller: now, and only now, it is a term.
+    await setRole('qms');
+    await page.evaluate(() => renderPending());
+    await page.locator('.gl-pend-ok').first().click();
+    await expect(page.locator(`.gl-item[data-k="${abbr}|custom|${full}"]`)).toBeVisible();
+    const publishedAfter = await page.evaluate((k) => JSON.parse(localStorage.getItem(k) || '[]'), CUSTOM_KEY);
+    expect(publishedAfter.some((t) => t.abbr === abbr && t.full === full)).toBe(true);
+
+    // And it stays a term across a reload, labelled as community-contributed.
     await gotoApp('/glossary.html');
     const rowAfterReload = page.locator(`.gl-item[data-k="${abbr}|custom|${full}"]`);
     await expect(rowAfterReload).toBeVisible();
@@ -98,32 +131,43 @@ test.describe('glossary.html', () => {
     assertNoConsoleErrors(consoleErrors);
   });
 
-  test('a submitted term is labeled "Community", distinguishing it from a vetted term, but is not held for review', async ({
+  test('a term is held for review, the Document Controller can return it, and a returned term never reaches the glossary', async ({
     page,
     gotoApp,
+    setRole,
   }) => {
     await gotoApp('/glossary.html');
 
     const abbr = 'QATST';
     const full = 'Quality Assurance Test Term';
-    await fillAddForm(page, { abbr, full, def: 'Docs the current, real distinction.' });
-    await page.locator('.btn-submit').click();
 
-    const row = page.locator(`.gl-item[data-k="${abbr}|custom|${full}"]`);
-    await expect(row).toBeVisible();
-    // Distinguished: a "Community" category chip, not a real subject area,
-    // plus the explanatory note (glossary.html:910-915).
-    await expect(row.locator('.gl-chip')).toHaveText('Community');
-    await expect(row.locator('.gl-note').first()).toContainText(
-      'Added by the community on this device'
-    );
-    // NOT distinguished as pending/unreviewed: there is no "Pending Review"
-    // badge, no moderation state, and the term is immediately live in the
-    // same list as every vetted term, not a separate queue. This is the
-    // real, still-open product gap the removed fixes.js patch could never
-    // have closed (its selectors never matched anything); see the final
-    // report.
-    await expect(row).not.toContainText(/pending review/i);
+    await setRole('employee');
+    await page.evaluate(() => renderPending());
+    await fillAddForm(page, { abbr, full, def: 'Docs the approval step.' });
+    await page.locator('#sb-add .btn-submit').click();
+
+    // The proposer sees their own term waiting, and no decision buttons.
+    await expect(page.locator('#gl-pending-h')).toContainText('Your proposed terms');
+    await expect(page.locator('.gl-pend-state.wait')).toHaveCount(1);
+    await expect(page.locator('.gl-pend-ok')).toHaveCount(0);
+    await expect(page.locator('.gl-pend-no')).toHaveCount(0);
+
+    // Forcing the call does not approve it either: the role is the gate.
+    const id = await page.evaluate(() => loadPending()[0].id);
+    await page.evaluate((x) => approveTerm(x), id);
+    await expect(page.locator(`.gl-item[data-k="${abbr}|custom|${full}"]`)).toHaveCount(0);
+
+    // The Document Controller sees it, and returns it.
+    await setRole('qms');
+    await page.evaluate(() => renderPending());
+    await expect(page.locator('#gl-pending-h')).toContainText('Waiting for your approval');
+    await page.locator('.gl-pend-no').first().click();
+    await expect(page.locator('.gl-pend-state.back')).toHaveCount(1);
+
+    // Returned is not published: not in the list, not in the published key.
+    await expect(page.locator(`.gl-item[data-k="${abbr}|custom|${full}"]`)).toHaveCount(0);
+    const published = await page.evaluate((k) => JSON.parse(localStorage.getItem(k) || '[]'), CUSTOM_KEY);
+    expect(published.some((t) => t.abbr === abbr)).toBe(false);
 
     // A vetted, built-in term must NOT carry the community label.
     const builtInRow = page
@@ -131,6 +175,30 @@ test.describe('glossary.html', () => {
       .filter({ hasText: KNOWN_FULL })
       .first();
     await expect(builtInRow.locator('.gl-chip')).not.toHaveText('Community');
+  });
+
+  test('the Document Controller cannot approve a term they proposed themselves', async ({
+    page,
+    gotoApp,
+    setRole,
+  }) => {
+    await gotoApp('/glossary.html');
+    await setRole('qms');
+    await page.evaluate(() => renderPending());
+    await fillAddForm(page, { abbr: 'SELFA', full: 'Self Approval Check', def: 'Filer is never checker.' });
+    await page.locator('#sb-add .btn-submit').click();
+
+    // It queues like any other proposal, but carries no Approve button...
+    await expect(page.locator('#gl-pending-list')).toContainText('SELFA');
+    await expect(page.locator('.gl-pend-ok')).toHaveCount(0);
+    await expect(page.locator('#gl-pending-list')).toContainText('another Document Controller');
+
+    // ...and the call refuses it even when made directly.
+    const id = await page.evaluate(() => loadPending()[0].id);
+    await page.evaluate((x) => approveTerm(x), id);
+    await expect(page.locator('.gl-item[data-k="SELFA|custom|Self Approval Check"]')).toHaveCount(0);
+    const published = await page.evaluate((k) => JSON.parse(localStorage.getItem(k) || '[]'), CUSTOM_KEY);
+    expect(published.some((t) => t.abbr === 'SELFA')).toBe(false);
   });
 
   test('searching for a real, existing term filters correctly and highlights the match', async ({
@@ -149,9 +217,10 @@ test.describe('glossary.html', () => {
     await expect(page.locator('#results-count')).toContainText('1 term');
   });
 
-  test('XSS: HTML in a submitted term\'s name and definition renders as escaped text, not markup, immediately and after reload', async ({
+  test('XSS: HTML in a submitted term\'s name and definition renders as escaped text, not markup, in the queue, once approved, and after reload', async ({
     page,
     gotoApp,
+    setRole,
   }) => {
     await gotoApp('/glossary.html');
 
@@ -170,8 +239,20 @@ test.describe('glossary.html', () => {
 
     const scriptCountBefore = await page.locator('script').count();
 
+    // Proposed first, and the queue is a render path of its own: the same
+    // markup must not execute while the term is waiting to be approved.
+    await setRole('employee');
+    await page.evaluate(() => renderPending());
     await fillAddForm(page, { abbr: abbr.toUpperCase(), full, def });
-    await page.locator('.btn-submit').click();
+    await page.locator('#sb-add .btn-submit').click();
+    await expect(page.locator('#gl-pending-list')).toContainText(abbr.toUpperCase());
+    expect(await page.locator('script').count()).toBe(scriptCountBefore);
+    expect(await page.locator('#gl-pending-list svg[onload]').count()).toBe(0);
+    expect(await page.evaluate(() => window.__xssRan === true)).toBe(false);
+
+    await setRole('qms');
+    await page.evaluate(() => renderPending());
+    await page.locator('.gl-pend-ok').first().click();
 
     const key = `${abbr.toUpperCase()}|custom|${full}`;
     const row = page.locator(`.gl-item[data-k="${key}"]`);
@@ -299,15 +380,28 @@ test.describe('Add a term dialog', () => {
     assertNoConsoleErrors(consoleErrors);
   });
 
-  test('a term added from the results bar closes the dialog and shows the term', async ({ page, gotoApp, clearAppState }) => {
+  test('a term proposed from the results bar closes the dialog, queues, and shows once approved', async ({ page, gotoApp, clearAppState, setRole }) => {
     await gotoApp('/glossary.html');
     await clearAppState();
     await gotoApp('/glossary.html');
+    await setRole('employee');
+    await page.evaluate(() => renderPending());
     await page.locator('.gl-add-link').click();
     await page.locator('#sf-abbr').fill('ZZQT');
     await page.locator('#sf-full').fill('Redesign Check Term');
     await page.locator('#sb-add .btn-submit').click();
+
+    // The dialog closes either way; the term is in the queue, not the list.
     await expect(page.locator('#sb-add')).not.toHaveAttribute('data-open', '');
+    await expect(page.locator('.gl-item[data-k="ZZQT|custom|Redesign Check Term"]')).toHaveCount(0);
+    await expect(page.locator('#gl-pending-list')).toContainText('ZZQT');
+    // The community figure counts terms in the glossary, so it does not move
+    // for a term that is only proposed.
+    await expect(page.locator('#stat-community')).not.toContainText('1 added by the community');
+
+    await setRole('qms');
+    await page.evaluate(() => renderPending());
+    await page.locator('.gl-pend-ok').first().click();
     await expect(page.locator('.gl-item[data-k="ZZQT|custom|Redesign Check Term"]')).toBeVisible();
     await expect(page.locator('#stat-community')).toContainText('1 added by the community');
   });
