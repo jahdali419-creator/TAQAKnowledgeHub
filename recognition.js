@@ -317,24 +317,28 @@
       'font:700 10px/1.2 Arial,Helvetica,sans-serif;letter-spacing:1.4px;text-transform:uppercase;' +
       'color:var(--primary-light,#00BBB6);}' +
     '.rise-top-h svg{width:17px;height:17px;color:var(--primary-light,#00BBB6);}' +
-    '.rise-top-1{display:flex;align-items:center;gap:14px;min-width:0;}' +
+    '.rise-top-1{display:flex;align-items:center;gap:14px;min-width:0;flex:0 0 auto;}' +
     '.rise-av{width:54px;height:54px;border-radius:50%;flex:none;display:grid;place-items:center;' +
       'background:rgba(0,187,182,.16);box-shadow:inset 0 0 0 2px rgba(0,187,182,.45);' +
       'font:800 18px/1 \'BwGradual\',\'Urbanist\',sans-serif;color:var(--primary-light,#00BBB6);}' +
     '.rise-top-n{font:800 21px/1.18 \'BwGradual\',\'Urbanist\',sans-serif;min-width:0;overflow-wrap:anywhere;}' +
     '.rise-top-p{font-size:13px;color:rgba(255,255,255,.78);margin-top:3px;}' +
     '.rise-top-p b{color:var(--primary-light,#00BBB6);font-weight:800;font-size:15px;}' +
-    '.rise-top-l{display:flex;flex-wrap:wrap;gap:10px 26px;list-style:none;margin:0;padding:0;min-width:0;' +
-    /* The runners-up share whatever room is left between first place and
-       the See all pill, instead of hugging the divider and leaving a dead
-       stretch of band to its right. */
-    'flex:1 1 auto;' +
-      'padding-inline-start:28px;border-inline-start:1px solid rgba(255,255,255,.18);}' +
-    '.rise-top-l li{min-width:0;flex:1 1 0;}' +
-    '.rise-top-l .rk{font:700 11px/1.2 Arial,Helvetica,sans-serif;color:var(--primary-light,#00BBB6);letter-spacing:.6px;}' +
-    '.rise-top-l .nm{display:block;margin-top:3px;min-width:0;max-width:200px;overflow:hidden;text-overflow:ellipsis;' +
+    /* The list IS the row: first place is its first item, the runners-up are
+       the next two, and they share whatever room is left before the See all
+       pill rather than hugging the divider. One list, three items, however
+       differently the three are drawn. */
+    '.rise-top-l{display:flex;flex-wrap:wrap;align-items:center;gap:10px 26px;list-style:none;' +
+      'margin:0;padding:0;min-width:0;flex:1 1 auto;}' +
+    '.rise-top-r{min-width:0;flex:1 1 0;}' +
+    /* The rule belongs between first place and the runners-up, so it is drawn
+       on the first runner-up rather than on the list as a whole. */
+    '.rise-top-1 + .rise-top-r{padding-inline-start:28px;' +
+      'border-inline-start:1px solid rgba(255,255,255,.18);}' +
+    '.rise-top-r .rk{font:700 11px/1.2 Arial,Helvetica,sans-serif;color:var(--primary-light,#00BBB6);letter-spacing:.6px;}' +
+    '.rise-top-r .nm{display:block;margin-top:3px;min-width:0;max-width:200px;overflow:hidden;text-overflow:ellipsis;' +
       'white-space:nowrap;font:700 14px/1.3 \'BwGradual\',\'Urbanist\',sans-serif;}' +
-    '.rise-top-l .pt{display:block;font-size:12px;color:rgba(255,255,255,.72);margin-top:1px;}' +
+    '.rise-top-r .pt{display:block;font-size:12px;color:rgba(255,255,255,.72);margin-top:1px;}' +
     /* The Example badge is kept, and kept legible on the dark field: these are
        not real colleagues and decoration does not change that. */
     '.rise-ex{display:inline-block;padding:1px 6px;border-radius:999px;border:1px solid rgba(255,255,255,.32);' +
@@ -348,8 +352,10 @@
     '.rise-top-all:focus-visible{outline:2px solid #fff;outline-offset:2px;}' +
     '@media (max-width:700px){' +
       '.rise-top{padding:16px;gap:14px;}' +
-      '.rise-top-l{width:100%;padding-inline-start:0;border-inline-start:0;padding-top:14px;' +
-        'border-top:1px solid rgba(255,255,255,.18);}' +
+      '.rise-top-1{flex:1 1 100%;padding-bottom:14px;' +
+        'border-bottom:1px solid rgba(255,255,255,.18);}' +
+      '.rise-top-1 + .rise-top-r{padding-inline-start:0;border-inline-start:0;}' +
+      '.rise-top-l{gap:14px 20px;}' +
       '.rise-top-all{margin-inline-start:0;width:100%;justify-content:center;}' +
       '.rise-top-n{font-size:18px;}.rise-av{width:46px;height:46px;font-size:16px;}}' +
 'html.seg-unknown .rise-top{display:none!important;}' +
@@ -416,20 +422,26 @@
     if (!rows.length) { box.hidden = true; return; }
     var ORD = ['1ST', '2ND', '3RD'];
     var top = rows[0], rest = rows.slice(1);
+    /* One ordered list, three items.  First place is styled as the champion
+       block and the other two as the runners-up beside it, but a ranking is
+       a list whatever it looks like, so all three stay list items: screen
+       readers hear "1 of 3", and the count is the same thing the eye sees. */
     box.innerHTML =
       '<h2 class="rise-top-h" id="rise-top-h">' + MEDAL + 'Top contributors this month</h2>' +
-      '<div class="rise-top-1">' +
-        '<span class="rise-av" aria-hidden="true">' + esc(initialsOf(top)) + '</span>' +
-        '<div><div class="rise-top-n">' + esc(top.label) +
-          (top.example ? ' <span class="rise-ex">Example</span>' : '') + '</div>' +
-          '<div class="rise-top-p"><b>' + top.monthPoints + '</b> points \u00B7 1st this month</div></div>' +
-      '</div>' +
-      (rest.length ? '<ol class="rise-top-l">' + rest.map(function (r, i) {
-        return '<li><span class="rk">' + ORD[i + 1] + '</span>' +
-               '<span class="nm">' + esc(r.label) + '</span>' +
-               (r.example ? '<span class="rise-ex">Example</span>' : '') +
-               '<span class="pt">' + r.monthPoints + ' points</span></li>';
-      }).join('') + '</ol>' : '') +
+      '<ol class="rise-top-l">' +
+        '<li class="rise-top-1">' +
+          '<span class="rise-av" aria-hidden="true">' + esc(initialsOf(top)) + '</span>' +
+          '<div><div class="rise-top-n">' + esc(top.label) +
+            (top.example ? ' <span class="rise-ex">Example</span>' : '') + '</div>' +
+            '<div class="rise-top-p"><b>' + top.monthPoints + '</b> points \u00B7 1st this month</div></div>' +
+        '</li>' +
+        rest.map(function (r, i) {
+          return '<li class="rise-top-r"><span class="rk">' + ORD[i + 1] + '</span>' +
+                 '<span class="nm">' + esc(r.label) + '</span>' +
+                 (r.example ? '<span class="rise-ex">Example</span>' : '') +
+                 '<span class="pt">' + r.monthPoints + ' points</span></li>';
+        }).join('') +
+      '</ol>' +
       '<a class="rise-top-all" href="recognition.html?area=' + encodeURIComponent(id) + '#board">See all</a>';
     box.hidden = false;
   }

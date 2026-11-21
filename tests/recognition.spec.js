@@ -347,7 +347,9 @@ test.describe('Area pages', () => {
     await setRole('employee');
     await gotoApp('/segment.html?id=drilling');
     await expect(page.locator('#rise-top li').first()).toContainText('You, Employee');
-    await expect(page.locator('#rise-top li').first()).toContainText('60 pts');
+    // The honour band has room to spell it out, as the level tooltip already
+    // does; 'pts' remains the shorthand for the cramped navbar badge.
+    await expect(page.locator('#rise-top li').first()).toContainText('60 points');
     await gotoApp('/segment.html?id=no-such-area');
     await expect(page.locator('#rise-top')).toBeHidden();
   });
