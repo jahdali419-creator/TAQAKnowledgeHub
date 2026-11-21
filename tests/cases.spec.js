@@ -143,10 +143,10 @@ test.describe('a Failure / incident card, from the form to every page that reads
     const n = await submitAndLand(page);
     expect(n).toMatch(/^TQ-TDS-DSS-INC-\d{3}$/);
     await expect(page.locator('h1')).toHaveText(INCIDENT.title);
-    await expect(page.locator('#cs-status')).toContainText('Submitted for review. QMS checks it, then the Director. Until then only you, QMS, the area’s Director and an external auditor can see it.');
-    // Nothing is released yet: the filer lists it as With QMS, and no one earns anything.
+    await expect(page.locator('#cs-status')).toContainText('Submitted for review. Document control checks it, then the Director. Until then only you, the Document Controller, the area’s Director and an external auditor can see it.');
+    // Nothing is released yet: the filer lists it as With Document Control, and no one earns anything.
     await gotoApp('/cases.html');
-    await expect(page.locator('#cl-mine li', { has: page.locator('a.t', { hasText: INCIDENT.title }) }).locator('.cl-st')).toHaveText('With QMS');
+    await expect(page.locator('#cl-mine li', { has: page.locator('a.t', { hasText: INCIDENT.title }) }).locator('.cl-st')).toHaveText('With Document Control');
     expect(await points(page)).toBe(before);
 
     await qmsChecks(page, gotoApp, setRole, n, 'Failure / incident card');
@@ -334,7 +334,7 @@ test.describe('the other routes', () => {
     await gotoApp('/cases.html');
     const rows = page.locator('#cl-mine li', { has: page.locator('a.t', { hasText: LESSON.title }) });
     await expect(rows).toHaveCount(1);
-    await expect(rows.locator('.cl-st')).toHaveText('With QMS');
+    await expect(rows.locator('.cl-st')).toHaveText('With Document Control');
     const fam = await page.evaluate((n) => TAQA_STORE.all().filter((d) => d.docNumber === n)
       .map((d) => [d.attempt || 1, !!d.rejected, d.card.sections.applies]), n);
     expect(fam).toEqual(expect.arrayContaining([[1, true, ''], [2, false, 'Every perforating run with a crossover cable head']]));

@@ -307,7 +307,7 @@ test.describe('documents and field cases', () => {
     await setRole('employee');
     await gotoApp('/ai-search.html?content=cases');
     await expect(caseRows(page)).toHaveCount(2);
-    await expect(page.locator(`#results-list a[href*="${n.cs}"] .chip`)).toHaveText('With QMS');
+    await expect(page.locator(`#results-list a[href*="${n.cs}"] .chip`)).toHaveText('With Document Control');
     await expect(page.locator('#st-cases')).toHaveText('0');      // nothing released yet
     await setRole('owner', 'wireline');
     await gotoApp('/ai-search.html?content=cases');

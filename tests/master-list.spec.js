@@ -76,7 +76,7 @@ test.describe('master-list.html, bulk actions', () => {
     await page.locator('#sel-all').check();
     await expect(page.locator('#bulk-bar')).toBeVisible();
     await expect(page.locator('#bulk-count')).toHaveText(rowCount + ' documents selected');
-    await expect(page.locator('#bulk-approve')).toHaveText('Confirm selected (QMS check)');
+    await expect(page.locator('#bulk-approve')).toHaveText('Confirm selected (document control check)');
 
     // A preview lists what will be confirmed before anything happens
     // (qms-queue.spec.js covers the preview and per-document results in full).

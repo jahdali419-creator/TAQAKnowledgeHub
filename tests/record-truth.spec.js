@@ -99,7 +99,7 @@ test.describe('A. PI-11: a withdrawal is a permanent, honest event on the record
     await expect(page.locator('#dash-toast-msg')).toContainText('Withdrawn');
 
     const after = await rec(page, filed.recordId);
-    expect(after).toMatchObject({ status: 'obsolete', withdrawnBy: 'QMS / Document Controller', withdrawnReason: REASON,
+    expect(after).toMatchObject({ status: 'obsolete', withdrawnBy: 'Document Controller', withdrawnReason: REASON,
       withdrawnFromStatus: 'current', withdrawnDate: await today(page) });
     expect(after.withdrawnAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
     for (const k of ['docNumber', 'revision', 'recordId', 'submittedBy', 'submittedAt', 'countersignedBy', 'countersignedAt',
@@ -108,7 +108,7 @@ test.describe('A. PI-11: a withdrawal is a permanent, honest event on the record
     // The viewer, the register and the audit log say so; never current, never missing.
     await gotoApp('/viewer.html?doc=' + n + '&seg=' + SEG);
     await expect(page.locator('#lifecycle-banner')).toContainText('Obsolete. Do not use.');
-    await expect(page.locator('#lifecycle-banner')).toContainText('by QMS / Document Controller');
+    await expect(page.locator('#lifecycle-banner')).toContainText('by Document Controller');
     await expect(page.locator('#lifecycle-banner')).toContainText(REASON);
     await expect(page.locator('#appr-trail')).toContainText('Final approval');
     await expect(page.locator('#appr-trail')).toContainText('Withdrawn: ' + REASON);
@@ -119,7 +119,7 @@ test.describe('A. PI-11: a withdrawal is a permanent, honest event on the record
     await expect(r).toContainText('Obsolete');
     await r.click();
     await expect(page.locator('#dw-withdrawn')).toContainText(REASON);
-    await expect(page.locator('#dw-withdrawn')).toContainText('QMS / Document Controller');
+    await expect(page.locator('#dw-withdrawn')).toContainText('Document Controller');
     assertNoConsoleErrors(consoleErrors);
   });
 

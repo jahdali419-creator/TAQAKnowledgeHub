@@ -255,7 +255,7 @@ test.describe('the full route', () => {
       queue: TAQA_CASES.all({ includeUnreleased: true }).filter((e) => e.docNumber === n).map((e) => e.status),
       mine: TAQA_CASES.mine().filter((e) => e.docNumber === n).map((e) => e.statusLabel),
     }), n);
-    expect(await view('employee')).toEqual({ released: false, queue: ['with-qms'], mine: ['With QMS'] });
+    expect(await view('employee')).toEqual({ released: false, queue: ['with-qms'], mine: ['With Document Control'] });
     expect(await view('qms')).toEqual({ released: false, queue: ['with-qms'], mine: [] });
 
     expect((await check(page, n)).ok).toBe(true);

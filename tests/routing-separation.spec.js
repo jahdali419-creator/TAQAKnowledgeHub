@@ -50,7 +50,7 @@ test.describe('PI-16: maintenance routing', () => {
     await expect(page.locator('#dept-maint')).toBeChecked();
     await toReview(page);
     await expect(approverRow(page)).toContainText('Maintenance Manager, Coiled Tubing');
-    await expect(approverRow(page)).toContainText('after the QMS check');
+    await expect(approverRow(page)).toContainText('after the document control check');
     const n = await page.locator('#doc-ref-id').inputValue();
     await page.click('#submit-btn');
     await expect(page.locator('#toast-title')).toHaveText('Submitted for review');
@@ -125,7 +125,7 @@ test.describe('PI-25: approval data belongs to one exact revision', () => {
     await start(page, gotoApp, clearAppState, setRole, 'employee');
     await page.evaluate((n) => {
       localStorage.removeItem('taqa-status-v2');
-      localStorage.setItem('taqa-status-v1', JSON.stringify({ [n]: { status: 'current', approvalStage: null, approvedBy: 'Segment Director', countersignedBy: 'QMS / Document Controller' } }));
+      localStorage.setItem('taqa-status-v1', JSON.stringify({ [n]: { status: 'current', approvalStage: null, approvedBy: 'Segment Director', countersignedBy: 'Document Controller' } }));
     }, SHIPPED);
     await gotoApp('/index.html');
     expect(await rec(page, SHIPPED)).toMatchObject({ status: 'current', ap: 'Segment Director' });
@@ -195,7 +195,7 @@ test.describe('PI-31: submitter ≠ QMS checker ≠ final approver', () => {
     expect(await page.evaluate(() => TAQA_APPROVAL.separationReason(TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-983'), 'owner'))).toBeNull();
     await setRole('owner', SEG);
     expect((await page.evaluate(() => TAQA_STORE.approve('TQ-TWS-CTSS-SOP-983'))).ok).toBe(true);
-    expect(await rec(page, 'TQ-TWS-CTSS-SOP-983')).toMatchObject({ status: 'current', by: 'Employee', cs: 'QMS / Document Controller', ap: 'Segment Director' });
+    expect(await rec(page, 'TQ-TWS-CTSS-SOP-983')).toMatchObject({ status: 'current', by: 'Employee', cs: 'Document Controller', ap: 'Segment Director' });
   });
 
   test('bulk confirm leaves out a document the QMS user filed, with the reason', async ({ page, gotoApp, setRole, clearAppState }) => {

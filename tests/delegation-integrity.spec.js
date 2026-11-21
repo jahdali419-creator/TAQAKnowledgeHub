@@ -69,9 +69,9 @@ test.describe('A. NEW-04: names are labels, identities decide, and ambiguity ref
     // Filed under this Director's own label by a different identity: the label does not refuse it.
     await seedRegister([
       { docNumber: 'TQ-TWS-CTSS-SOP-932', title: 'Mine under another label', segment: SEG, docType: 'sop', status: 'draft', approvalStage: 'director',
-        submittedBy: 'A. N. Other', submittedById: 'sim:owner@coiled-tubing', countersignedBy: 'QMS / Document Controller', countersignedById: 'sim:qms' },
+        submittedBy: 'A. N. Other', submittedById: 'sim:owner@coiled-tubing', countersignedBy: 'Document Controller', countersignedById: 'sim:qms' },
       { docNumber: 'TQ-TWS-CTSS-SOP-933', title: 'Same label, someone else', segment: SEG, docType: 'sop', status: 'draft', approvalStage: 'director',
-        submittedBy: 'Segment Director', submittedById: 'sim:owner@drilling', countersignedBy: 'QMS / Document Controller', countersignedById: 'sim:qms' },
+        submittedBy: 'Segment Director', submittedById: 'sim:owner@drilling', countersignedBy: 'Document Controller', countersignedById: 'sim:qms' },
     ]);
     await setRole('owner', SEG);
     expect(await page.evaluate(() => ['TQ-TWS-CTSS-SOP-932', 'TQ-TWS-CTSS-SOP-933'].map((n) => TAQA_APPROVAL.canApprove(TAQA_STORE.findDoc(n)))))
@@ -120,16 +120,16 @@ test.describe('A. NEW-04: names are labels, identities decide, and ambiguity ref
     await seedRegister([
       // Recorded before identities were kept: only labels.
       { docNumber: 'TQ-TWS-CTSS-SOP-937', title: 'Legacy, my label', segment: SEG, docType: 'sop', status: 'draft', approvalStage: 'director',
-        submittedBy: 'Segment Director', countersignedBy: 'QMS / Document Controller' },
+        submittedBy: 'Segment Director', countersignedBy: 'Document Controller' },
       { docNumber: 'TQ-TWS-CTSS-SOP-938', title: 'Legacy, checked by Ahmed', segment: SEG, docType: 'sop', status: 'draft', approvalStage: 'director',
         submittedBy: 'Employee', countersignedBy: 'Ahmed Saleh' },
       { docNumber: 'TQ-TWS-CTSS-SOP-939', title: 'Filed by Ahmed as a delegate', segment: SEG, docType: 'sop', status: 'draft', approvalStage: 'director',
-        submittedBy: 'Ahmed Saleh (delegate for Segment Director)', submittedById: 'sim:owner@drilling', countersignedBy: 'QMS / Document Controller', countersignedById: 'sim:qms' },
+        submittedBy: 'Ahmed Saleh (delegate for Segment Director)', submittedById: 'sim:owner@drilling', countersignedBy: 'Document Controller', countersignedById: 'sim:qms' },
     ]);
     await setRole('owner', SEG);
     expect(await page.evaluate(() => TAQA_APPROVAL.canApprove(TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-937')))).toBe(false);
     // Delegates named as the grantor, a role, or the QMS label are refused at the grant.
-    for (const to of ['Segment Director', 'QMS / Document Controller', ' qms /  document controller ', 'Employee']) {
+    for (const to of ['Segment Director', 'Document Controller', ' qms /  document controller ', 'Employee']) {
       expect((await grant(page, 'owner', { to, includesApproval: true })).error, to).toMatch(/not yourself or a role/);
     }
     // A delegate named as the checker or the filer cannot be shown to be someone else.
@@ -139,7 +139,7 @@ test.describe('A. NEW-04: names are labels, identities decide, and ambiguity ref
     const r = await page.evaluate(() => ['TQ-TWS-CTSS-SOP-938', 'TQ-TWS-CTSS-SOP-939'].map((n) => [TAQA_APPROVAL.canApprove(TAQA_STORE.findDoc(n)),
       TAQA_APPROVAL.separationReason(TAQA_STORE.findDoc(n))]));
     expect(r[0][0]).toBe(false);
-    expect(r[0][1]).toMatch(/You did the QMS check/);
+    expect(r[0][1]).toMatch(/You did the document control check/);
     expect(r[1][0]).toBe(false);
     expect(r[1][1]).toMatch(/You filed this document/);
   });

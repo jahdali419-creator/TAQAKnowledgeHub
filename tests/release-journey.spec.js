@@ -60,27 +60,27 @@ test.describe('one document, every role, through the UI', () => {
     const N = nums[0];
     // The toast names the approver the register defines for an SOP (owner's
     // decision, 1 Oct 2026: never a generic "Director").
-    await expect(page.locator('#toast-sub')).toContainText('QMS checks it, then the Relevant Operation Director approves it');
+    await expect(page.locator('#toast-sub')).toContainText('document control checks it, then the Relevant Operation Director approves it');
     await expect(page.locator('#toast-sub')).toContainText('in force only after both');
     const filed = await page.evaluate((n) => TAQA_STORE.findDoc(n), N);
     expect(filed.status).toBe('draft');
     expect(filed.approvalStage).toBe('qms');
     expect(filed.submittedBy).toBe('Employee');
     expect(filed.submittedAt).toBeTruthy();
-    await expect(page.locator('#my-subs-list li', { hasText: TITLE })).toContainText('Waiting on QMS check');
+    await expect(page.locator('#my-subs-list li', { hasText: TITLE })).toContainText('Waiting on document control check');
 
     // The submitter can open their own draft and is told where it is.
     await gotoApp('/viewer.html?doc=' + N + '&seg=' + SEG);
     await expect(page.locator('#doc-title')).toHaveText(TITLE);
     await expect(page.locator('#lifecycle-banner')).toContainText('Submitted for approval, not in force yet');
-    await expect(page.locator('#lifecycle-banner')).toContainText('QMS conformance check');
+    await expect(page.locator('#lifecycle-banner')).toContainText('document control conformance check');
     // Its way out is a page an Employee may open, not the Master List that refuses them.
     await expect(page.locator('#lifecycle-banner a')).toHaveAttribute('href', 'ai-search.html');
 
     // QMS: the desk shows who filed it, when, and the file; Confirm sends it on.
     await as(page, gotoApp, setRole, 'qms');
     await gotoApp('/dashboard.html?id=' + SEG);
-    await expect(page.locator('#queue-title')).toHaveText('Awaiting Your QMS Check');
+    await expect(page.locator('#queue-title')).toHaveText('Awaiting Your Document Control Check');
     const qCard = page.locator('.pending-card', { hasText: TITLE });
     await expect(qCard.locator('.pending-doc-meta')).toContainText('Submitted by Employee');
     await expect(qCard.locator('.pending-doc-meta')).toContainText('release-qa.pdf');
@@ -88,7 +88,7 @@ test.describe('one document, every role, through the UI', () => {
     await expect.poll(() => page.evaluate((n) => TAQA_STORE.findDoc(n).approvalStage, N)).toBe('director');
     const checked = await page.evaluate((n) => TAQA_STORE.findDoc(n), N);
     expect(checked.status).toBe('draft');
-    expect(checked.countersignedBy).toBe('QMS / Document Controller');
+    expect(checked.countersignedBy).toBe('Document Controller');
     expect(checked.countersignedAt).toBeTruthy();
 
     // Director of the area: Approve is what publishes it.
@@ -119,7 +119,7 @@ test.describe('one document, every role, through the UI', () => {
     const trail = page.locator('#appr-trail');
     await expect(trail).toContainText('Employee');
     await expect(trail).toContainText('Submitted for approval');
-    await expect(trail).toContainText('QMS / Document Controller');
+    await expect(trail).toContainText('Document Controller');
     await expect(trail).toContainText('Segment Director');
     await expect(trail).toContainText(/\d{2}:\d{2}/);
 

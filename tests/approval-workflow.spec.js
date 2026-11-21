@@ -46,7 +46,7 @@ test.describe('1-2. Draft submission and the QMS step', () => {
       const d = TAQA_STORE.findDoc(dn);
       return { approvalStage: d.approvalStage, stageOf: TAQA_APPROVAL.stageOf(d), waitingOn: TAQA_APPROVAL.waitingOn(d) };
     }, docNumber);
-    expect(state).toEqual({ approvalStage: 'qms', stageOf: 'qms', waitingOn: 'QMS conformance check' });
+    expect(state).toEqual({ approvalStage: 'qms', stageOf: 'qms', waitingOn: 'document control conformance check' });
 
     await setRole('qms', 'coiled-tubing');
     let can = await page.evaluate((dn) => {
@@ -117,7 +117,7 @@ test.describe('3. QMS countersigns -> moves to the named approver\'s queue', () 
       };
     }, docNumber);
     expect(after.approvalStage).toBe('director');
-    expect(after.countersignedBy).toBe('QMS / Document Controller');
+    expect(after.countersignedBy).toBe('Document Controller');
     expect(after.stageOf).toBe('director');
     expect(after.approverFor).toBe('Relevant Operation Director'); // verbatim, documents-master.js
     expect(after.waitingOn).toBe('Relevant Operation Director');

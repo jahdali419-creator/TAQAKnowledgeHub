@@ -124,7 +124,7 @@ test.describe('the case library', () => {
     await expect(page.locator('#cl-empty a[href="case-new.html"]')).toBeVisible();
     await expect(page).toHaveURL(/src=case/);
     // The opener and the route say who may see what.
-    await expect(page.locator('#cl-route')).toContainText('Until it is released, only its filer, QMS, the area’s Director and an external auditor can see it.');
+    await expect(page.locator('#cl-route')).toContainText('Until it is released, only its filer, the Document Controller, the area’s Director and an external auditor can see it.');
     assertNoConsoleErrors(consoleErrors);
   });
 
@@ -196,7 +196,7 @@ test.describe('the case library', () => {
 
   test('Your contributions shows every status, and a returned case leads to its edit', async ({ page, gotoApp, clearAppState, setRole, consoleErrors }) => {
     await start(page, gotoApp, clearAppState, setRole);
-    const waiting = await fileAs(page, 'employee', null, Object.assign({}, CASE_STUDY, { title: 'Waiting on QMS' }));
+    const waiting = await fileAs(page, 'employee', null, Object.assign({}, CASE_STUDY, { title: 'Waiting on Document Control' }));
     const director = await fileAs(page, 'employee', null, Object.assign({}, CASE_STUDY, { title: 'Waiting on the Director' }));
     await check(page, director.n);
     await fileAndRelease(page, Object.assign({}, CASE_STUDY, { title: 'Released already' }));
@@ -207,7 +207,7 @@ test.describe('the case library', () => {
     await expect(page.locator('#cl-n-mine')).toHaveText('4');
     const box = page.locator('#cl-mine');
     await expect(box).toBeVisible();
-    await expect(box.locator('#cl-mine-sub')).toHaveText('4 cases filed: 1 returned, 1 with QMS, 1 with the Director, 1 published.');
+    await expect(box.locator('#cl-mine-sub')).toHaveText('4 cases filed: 1 returned, 1 with the Document Controller, 1 with the Director, 1 published.');
     const row = (t) => box.locator('li', { has: page.locator('a.t', { hasText: t }) });
     // Newest filing first; a phone shows the latest three, a desk screen five.
     await expect(box.locator('li a.t').first()).toHaveText('Sent back');
@@ -218,11 +218,11 @@ test.describe('the case library', () => {
     await expect(row('Sent back').locator('.cl-why a')).toHaveAttribute('href', 'case-new.html?edit=' + encodeURIComponent(back.key));
     await expect(row('Sent back').locator('a.t')).toHaveAttribute('href', new RegExp('&rid=' + encodeURIComponent(back.key).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'));
     // Waiting cases are not in the library for anyone else, but the filer lists them all.
-    await expect(cardOf(page, 'Waiting on QMS')).toHaveCount(0);
+    await expect(cardOf(page, 'Waiting on Document Control')).toHaveCount(0);
     await box.locator('button[data-src="mine"]').click();
     await expect(page.locator('#cl-results-h')).toHaveText('Your cases');
     await expect(page.locator('#cl-grid .cl-card')).toHaveCount(4);
-    await expect(cardOf(page, 'Waiting on QMS').locator('.cl-st')).toHaveText('With QMS');
+    await expect(cardOf(page, 'Waiting on Document Control').locator('.cl-st')).toHaveText('With Document Control');
     await expect(cardOf(page, 'Waiting on the Director').locator('.cl-st')).toHaveText('With the Director');
     await expect(cardOf(page, 'Sent back').locator('.cl-st')).toHaveText('Returned');
     await expect(cardOf(page, 'Released already').locator('.cl-st')).toHaveCount(0);
@@ -355,8 +355,8 @@ test.describe('one case', () => {
       await gotoApp('/case.html?doc=' + c.n + '&rev=1.0');
       await expect(page.locator('h1'), c.key).toHaveText(c.title);
       await expect(page.locator('#cs-chips'), c.key).toContainText(c.label);
-      await expect(page.locator('#cs-status'), c.key).toContainText('Submitted for review. QMS checks it, then the Director. Until then only you, QMS, the area’s Director and an external auditor can see it.');
-      await expect(page.locator('#cs-chips .cs-pill.st'), c.key).toHaveText('With QMS');
+      await expect(page.locator('#cs-status'), c.key).toContainText('Submitted for review. Document control checks it, then the Director. Until then only you, the Document Controller, the area’s Director and an external auditor can see it.');
+      await expect(page.locator('#cs-chips .cs-pill.st'), c.key).toHaveText('With Document Control');
       for (const [label, value] of c.fields) {
         await expect(page.locator('#cs-type-sec'), c.key + ': ' + label).toContainText(label);
         await expect(page.locator('#cs-type-sec'), c.key + ': ' + label).toContainText(value);
@@ -394,7 +394,7 @@ test.describe('one case', () => {
     await setRole('qms');
     await gotoApp(url);
     await expect(page.locator('h1')).toHaveText(INCIDENT.title);
-    await expect(page.locator('#cs-status')).toContainText('Not released yet: With QMS.');
+    await expect(page.locator('#cs-status')).toContainText('Not released yet: With Document Control.');
     await expect(page.locator('#cs-status a')).toHaveAttribute('href', 'master-list.html?view=qms&doc=' + f.n);
     await expect(page.locator('#cs-contact')).toContainText('Drilling Supervisor');
     // Then the area's Director.
@@ -415,13 +415,13 @@ test.describe('one case', () => {
     await setRole('employee');
     await gotoApp('/' + url);
     await expect(page.locator('h1')).toHaveText(CASE_STUDY.title);
-    await expect(page.locator('#cs-status')).toContainText('Returned by QMS: ' + REASON);
+    await expect(page.locator('#cs-status')).toContainText('Returned by the Document Controller: ' + REASON);
     await expect(page.locator('#cs-edit')).toHaveAttribute('href', 'case-new.html?edit=' + encodeURIComponent(f.key));
     await expect(page.locator('#cs-chips .cs-pill.st')).toHaveText('Returned');
     // QMS can read it, but only the filer edits it.
     await setRole('qms');
     await gotoApp('/' + url);
-    await expect(page.locator('#cs-status')).toContainText('Returned by QMS');
+    await expect(page.locator('#cs-status')).toContainText('Returned by the Document Controller');
     await expect(page.locator('#cs-edit')).toHaveCount(0);
     // Filed again: the returned attempt now points to the attempt in progress.
     const again = await as(page, 'employee', null, (key) => {

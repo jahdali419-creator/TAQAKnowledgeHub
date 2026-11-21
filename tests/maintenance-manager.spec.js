@@ -119,7 +119,7 @@ test.describe('the maintenance journey through the desks', () => {
     await setRole('auditor', SEG);
     await gotoApp('/viewer.html?doc=' + N + '&seg=' + SEG);
     const trail = page.locator('#appr-trail');
-    await expect(trail).toContainText('QMS / Document Controller');
+    await expect(trail).toContainText('Document Controller');
     await expect(trail).toContainText('Maintenance Manager');
     await expect(trail).not.toContainText('Segment Director');
     assertNoConsoleErrors(consoleErrors);
@@ -316,7 +316,7 @@ test.describe('wording follows the approver', () => {
     await prime(page, gotoApp, clearAppState, setRole, 'qms');
     await gotoApp('/index.html');
     // defect: "approved and waiting on your countersignature", from before QMS went first.
-    await expect(page.locator('#desk')).toContainText('waiting on your QMS check');
+    await expect(page.locator('#desk')).toContainText('waiting on your document control check');
     await expect(page.locator('#desk')).not.toContainText('approved and waiting');
   });
 });

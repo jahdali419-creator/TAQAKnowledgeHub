@@ -2,7 +2,7 @@
 //
 // The bell was always company-wide for QMS, but "Open your queue" and
 // "+N more" opened one segment's desk, so QMS saw two documents under a bell
-// that counted sixteen. They now open the Master List's "Waiting on QMS"
+// that counted sixteen. They now open the Master List's "Waiting on Document Control"
 // view, which holds every document at the QMS stage from every area.
 //
 // Upload used to file several selected files onto ONE record with one
@@ -106,7 +106,7 @@ test.describe('QMS bell: company-wide on every page', () => {
 
 test.describe('QMS "Open your queue" and "+N more" open all QMS work', () => {
   for (const from of ['/index.html', '/segment.html?id=coiled-tubing', '/segment.html?id=drilling']) {
-    test(`"Open your queue" from ${from} opens the company-wide Waiting on QMS view`, async ({ page, gotoApp, consoleErrors }) => {
+    test(`"Open your queue" from ${from} opens the company-wide Waiting on Document Control view`, async ({ page, gotoApp, consoleErrors }) => {
       await seedAsQms(page, gotoApp);
       const all = await waitingOnQms(page);
       await gotoApp(from);
@@ -114,7 +114,7 @@ test.describe('QMS "Open your queue" and "+N more" open all QMS work', () => {
       await expect(page.locator('#bell-badge')).toHaveText(String(all.length));
       await page.locator('.bell-foot').click();
       await expect(page).toHaveURL(/master-list\.html\?view=qms$/);
-      await expect(page.locator('#cuts [aria-pressed="true"]')).toContainText('Waiting on QMS');
+      await expect(page.locator('#cuts [aria-pressed="true"]')).toContainText('Waiting on Document Control');
       const rows = await page.locator('#rows .row-chk').evaluateAll((els) => els.map((e) => e.dataset.doc).sort());
       expect(rows).toEqual(all);
       for (const s of SEEDED) expect(rows).toContain(num(s.seg));
@@ -129,7 +129,7 @@ test.describe('QMS "Open your queue" and "+N more" open all QMS work', () => {
     await gotoApp('/segment.html?id=drilling');
     await openBell(page);
     const more = page.locator('.bell-more');
-    await expect(more).toHaveText('+ ' + (all.length - 6) + ' more, see everything waiting on QMS');
+    await expect(more).toHaveText('+ ' + (all.length - 6) + ' more, see everything waiting on the Document Controller');
     await more.click();
     await expect(page).toHaveURL(/master-list\.html\?view=qms$/);
     await expect(page.locator('#rows .row-chk')).toHaveCount(all.length);
@@ -242,7 +242,7 @@ test.describe('bulk QMS confirm: preview, exclusions, a result per document', ()
     const dlg = page.locator('#bulk-dlg');
     await expect(dlg).toBeVisible();
     expect(nativeDialog).toBe(false);
-    await expect(page.locator('#bulk-dlg-h')).toHaveText('Confirm 3 documents as checked by QMS');
+    await expect(page.locator('#bulk-dlg-h')).toHaveText('Confirm 3 documents as checked by the Document Controller');
     await expect(page.locator('#bulk-dlg-lead')).toContainText('1 of the selected documents is left out');
 
     const incl = page.locator('#bq-in .bq-i');
@@ -251,7 +251,7 @@ test.describe('bulk QMS confirm: preview, exclusions, a result per document', ()
       const row = incl.filter({ hasText: title(s.seg) });
       await expect(row).toContainText(num(s.seg));
       await expect(row).toContainText(s.area);
-      await expect(row).toContainText('Now: waiting on the QMS check');
+      await expect(row).toContainText('Now: waiting on the document control check');
       await expect(row).toContainText('next:');
     }
     await expect(incl.filter({ hasText: title('wireline') })).toContainText('next: Maintenance Manager');
@@ -260,7 +260,7 @@ test.describe('bulk QMS confirm: preview, exclusions, a result per document', ()
     await expect(out).toHaveCount(1);
     await expect(out).toContainText(title('qhse'));
     await expect(out).toContainText(num('qhse'));
-    await expect(out).toContainText('Already checked by QMS');
+    await expect(out).toContainText('Already checked by the Document Controller');
 
     // Nothing has changed yet, and Cancel changes nothing.
     await page.locator('#bulk-dlg-cancel').click();
@@ -307,7 +307,7 @@ test.describe('bulk QMS confirm: preview, exclusions, a result per document', ()
     await page.evaluate(() => TAQA_STORE.countersign('TQ-QHSE-SOP-951'));
     await selectInDraftView(page, gotoApp, [num('qhse')]);
     await page.locator('#bulk-approve').click();
-    await expect(page.locator('#bulk-dlg-h')).toHaveText('Nothing selected is waiting on the QMS check');
+    await expect(page.locator('#bulk-dlg-h')).toHaveText('Nothing selected is waiting on the document control check');
     await expect(page.locator('#bq-out .bq-i')).toContainText(title('qhse'));
     await expect(page.locator('#bulk-dlg-go')).toBeHidden();
     await expect(page.locator('#bulk-dlg-cancel')).toHaveText('Close');

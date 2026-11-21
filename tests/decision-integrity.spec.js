@@ -236,7 +236,7 @@ test.describe('NEW-02: withdrawing a document cancels the revision in progress',
     const fam = await family(page, DOC);
     expect(fam.find((d) => d.rev === '1.0')).toMatchObject({ status: 'obsolete', cancelled: false });
     expect(fam.find((d) => d.rev === '2.0')).toMatchObject({ status: 'obsolete', stage: null, cancelled: true,
-      reason: 'Cancelled because the document family was withdrawn.', approvedBy: null, checkedBy: 'QMS / Document Controller' });
+      reason: 'Cancelled because the document family was withdrawn.', approvedBy: null, checkedBy: 'Document Controller' });
 
     // The stale desk cannot approve it.
     await page.evaluate(() => TAQA_ROLE.set('owner'));
@@ -293,10 +293,10 @@ test.describe('NEW-02: withdrawing a document cancels the revision in progress',
 
   test('a revision still at the QMS check is cancelled too, and the Workbench opened on it before cannot confirm it', async ({ page, context, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, clearAppState, setRole, 'employee');
-    await fileRevision(page, DOC, 'Revised and waiting on QMS');
+    await fileRevision(page, DOC, 'Revised and waiting on the Document Controller');
     await setRole('qms', SEG);
     await gotoApp('/master-list.html?view=qms&doc=' + DOC);
-    await expect(page.locator('#dw-title')).toHaveText('Revised and waiting on QMS');
+    await expect(page.locator('#dw-title')).toHaveText('Revised and waiting on the Document Controller');
 
     const p2 = await otherTab(context);
     await p2.evaluate((n) => { TAQA_ROLE.set('qms'); TAQA_STORE.setStatus(n, 'obsolete', undefined, { reason: 'Withdrawn for this test: superseded by a newer controlled document.' }); }, DOC);
@@ -581,7 +581,7 @@ test.describe('PI-12: the approver sees, previews and confirms the exact revisio
     await setRole('owner', SEG);
     await gotoApp('/dashboard.html?id=' + SEG);
     const card = page.locator('.pending-card', { hasText: 'Nitrogen Injection SOP, revised' });
-    await expect(card.locator('.pending-doc-ident')).toHaveText(DOC + ' · Rev 2.0 · Draft, checked by QMS, waiting for your final approval');
+    await expect(card.locator('.pending-doc-ident')).toHaveText(DOC + ' · Rev 2.0 · Draft, checked by the Document Controller, waiting for your final approval');
     await expect(card.locator('.supersedes-row')).toContainText('Rev 1.0 → Rev 2.0. When you approve it, Rev 1.0 becomes Superseded.');
     const href = await card.locator('a.btn-preview-link').getAttribute('href');
     expect(href).toContain('doc=' + DOC);

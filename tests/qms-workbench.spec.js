@@ -1,4 +1,4 @@
-// QMS Workbench: the Master List's "Waiting on QMS" view as the one place QMS
+// QMS Workbench: the Master List's "Waiting on Document Control" view as the one place QMS
 // works its queue.
 //
 // Opening a document waiting on the QMS check, as QMS, shows a check panel:
@@ -94,8 +94,8 @@ test.describe('the check panel', () => {
     const total = await page.evaluate(() => TAQA_STORE.all().filter((d) => TAQA_APPROVAL.stageOf(d) === 'qms').length);
     await openCheck(page, gotoApp, 'wireline');
     const body = page.locator('#dw-body');
-    await expect(page.locator('#wb-pos')).toHaveText(new RegExp('^QMS check · \\d+ of ' + total + ' waiting on QMS$'));
-    await expect(body).toContainText('Waiting on your QMS check.');
+    await expect(page.locator('#wb-pos')).toHaveText(new RegExp('^document control check · \\d+ of ' + total + ' waiting on the Document Controller$'));
+    await expect(body).toContainText('Waiting on your document control check.');
     await expect(body).toContainText('Confirming sends it to Maintenance Manager');
     await expect(body).toContainText(num('wireline'));
     await expect(body).toContainText('Wireline Services, Maintenance');
@@ -103,7 +103,7 @@ test.describe('the check panel', () => {
     await expect(body).toContainText('20.0 KB');
     await expect(body).toContainText(/Submitted\s*\d{2} \w{3} \d{4}, \d{2}:\d{2}/);
     await expect(body).toContainText('Workbench check document for wireline.');
-    await expect(page.locator('#wb-confirm')).toHaveText('Confirm QMS check');
+    await expect(page.locator('#wb-confirm')).toHaveText('Confirm document control check');
     await expect(page.locator('#wb-reject')).toHaveText('Reject…');
   });
 
@@ -189,7 +189,7 @@ test.describe('deciding from the Workbench', () => {
     await page.evaluate(() => TAQA_STORE.countersign('TQ-TDS-DSS-SOP-961'));
     await page.locator('#wb-confirm').click();
     await expect(page.locator('#wb-res')).toHaveAttribute('data-ok', 'false');
-    await expect(page.locator('#wb-res')).toContainText('Not confirmed. Already checked by QMS.');
+    await expect(page.locator('#wb-res')).toContainText('Not confirmed. Already checked by the Document Controller.');
   });
 
   test('the last document: no Next, and the queue says it is clear', async ({ page, gotoApp }) => {
@@ -199,11 +199,11 @@ test.describe('deciding from the Workbench', () => {
       .filter((d) => TAQA_APPROVAL.stageOf(d) === 'qms' && d.docNumber !== 'TQ-TWS-WS-SOP-961')
       .forEach((d) => TAQA_STORE.countersign(d.docNumber)));
     await openCheck(page, gotoApp, 'wireline');
-    await expect(page.locator('#wb-pos')).toHaveText('QMS check · 1 of 1 waiting on QMS');
+    await expect(page.locator('#wb-pos')).toHaveText('document control check · 1 of 1 waiting on the Document Controller');
     await page.locator('#wb-confirm').click();
     await expect(page.locator('#wb-res')).toContainText("the Maintenance Manager's final approval");
-    await expect(page.locator('#wb-pos')).toHaveText('0 waiting on QMS');
-    await expect(page.locator('#dw-body')).toContainText('Nothing else is waiting on the QMS check.');
+    await expect(page.locator('#wb-pos')).toHaveText('0 waiting on the Document Controller');
+    await expect(page.locator('#dw-body')).toContainText('Nothing else is waiting on the document control check.');
     await expect(page.locator('#wb-next')).toHaveCount(0);
   });
 });
@@ -224,7 +224,7 @@ test.describe('what does not change', () => {
     await seedAsQms(page, gotoApp);
     await page.evaluate(() => TAQA_STORE.countersign('TQ-TDS-DSS-SOP-961'));
     await openCheck(page, gotoApp, 'drilling');
-    await expect(page.locator('#toast')).toContainText('TQ-TDS-DSS-SOP-961 is no longer waiting on QMS. Already checked by QMS.');
+    await expect(page.locator('#toast')).toContainText('TQ-TDS-DSS-SOP-961 is no longer waiting on the Document Controller. Already checked by the Document Controller.');
     await expect(page.locator('#wb-confirm')).toHaveCount(0);
   });
 

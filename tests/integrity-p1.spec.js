@@ -325,7 +325,7 @@ test.describe('PI-09: the register refuses forged lifecycle, identity and author
     await setRole('owner', SEG);
     await page.evaluate(() => TAQA_STORE.approve('TQ-TWS-CTSS-SOP-976', 'The CEO'));
     expect(await page.evaluate(() => { const d = TAQA_STORE.findDoc('TQ-TWS-CTSS-SOP-976'); return [d.countersignedBy, d.approvedBy]; }))
-      .toEqual(['QMS / Document Controller', 'Segment Director']);
+      .toEqual(['Document Controller', 'Segment Director']);
   });
 
   test('nobody grants a delegation they do not hold, or revokes one they did not grant', async ({ page, gotoApp, setRole, clearAppState }) => {

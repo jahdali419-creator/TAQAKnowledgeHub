@@ -74,7 +74,7 @@ test.describe('PI-17: "Open your queue" reaches the signer\'s own desk', () => {
     });
   }
 
-  test('QMS still opens the company-wide Waiting on QMS view from another area', async ({ page, gotoApp, setRole, clearAppState }) => {
+  test('QMS still opens the company-wide Waiting on Document Control view from another area', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, clearAppState, setRole, 'employee');
     await page.evaluate(() => TAQA_STORE.add({ title: 'PI17 qms', segment: 'drilling', docType: 'sop', docNumber: 'TQ-TDS-DSS-SOP-962', summary: 'x' }));
     await setRole('qms', CT);
@@ -347,7 +347,7 @@ test.describe('PI-27: titles and counts are what the reader may open', () => {
       return document.getElementById('doc-id-status').textContent;
     }, RESTRICTED.n);
     // BD-09: neutral words, nothing about the document (not even that it exists).
-    expect(msg.trim()).toBe('✕ This number cannot be used. Choose another number or contact QMS.');
+    expect(msg.trim()).toBe('✕ This number cannot be used. Choose another number or contact the Document Controller.');
     expect(msg).not.toContain(RESTRICTED.t);
     // A number this person may see is still named.
     const own = await page.evaluate((n) => {
@@ -371,7 +371,7 @@ test.describe('BD-08: a Restricted document is never sent for final approval to 
     expect(r && r.ok, 'QMS check of ' + n).toBe(true);
   }
 
-  test('after the QMS check, a restricted draft waits, escalated: the Director is not cleared, cannot approve it and is not shown it', async ({ page, gotoApp, setRole, clearAppState, consoleErrors }) => {
+  test('after the document control check, a restricted draft waits, escalated: the Director is not cleared, cannot approve it and is not shown it', async ({ page, gotoApp, setRole, clearAppState, consoleErrors }) => {
     await qmsChecks(page, gotoApp, clearAppState, setRole, R_DRAFT, 'well-safety');
     // Those who may see it are told it is blocked and escalated.
     expect(await page.evaluate((x) => TAQA_APPROVAL.waitingOn(TAQA_STORE.findDoc(x)), R_DRAFT)).toMatch(/authorised final approver.*escalated/);
@@ -410,7 +410,7 @@ test.describe('BD-08: a Restricted document is never sent for final approval to 
 });
 
 test.describe('BD-09: number validation reveals nothing about a document the filer may not open', () => {
-  const NEUTRAL = 'This number cannot be used. Choose another number or contact QMS.';
+  const NEUTRAL = 'This number cannot be used. Choose another number or contact the Document Controller.';
   test('the register refuses a restricted number in neutral words for an Employee; QMS is still told which document holds it', async ({ page, gotoApp, setRole, clearAppState }) => {
     await start(page, gotoApp, clearAppState, setRole, 'employee');
     const rec = (n) => ({ title: 'Probe', segment: CT, docType: 'sop', docNumber: n, summary: 'x' });
