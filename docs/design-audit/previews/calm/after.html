@@ -380,8 +380,6 @@ html.sr-lock,html.sr-lock body{overflow:hidden!important;}
    The empty field read as a filled one because the placeholder inherited
    font-weight 500 (line 107). Labels, tabs and filter names were all 600
    as well, so nothing could step back. */
-#query-input{font-weight:400;}
-#query-input::placeholder{font-weight:400;}
 .sr-lbl{font-weight:500;}
 .sr-seg legend{font-weight:500;}
 .sr-seg-o span{font-weight:400;}
@@ -399,9 +397,35 @@ html.sr-lock,html.sr-lock body{overflow:hidden!important;}
    The strip had three nested rectangles: the field, the tab group, and
    the active tab — each with its own border AND fill. */
 
-/* the field keeps its fill; the focus ring does the rest */
-#query-input{border-color:transparent;}
-#query-input:focus{border-color:var(--primary-ink);}
+/* ── OPTION D — compact pill, Urbanist, small grey prompt ──────────────
+   The shape: 44px tall, fully round, fill only, no border.
+   The type:  Urbanist, already self-hosted in fonts/web/ and until now only
+              a fallback behind Bw Gradual, so it costs no extra download.
+   The prompt is sized and coloured on its own: 13.5px #6E655D (5.28:1 on
+   this fill, measured, so it still passes AA). Anything typed stays 16px in
+   full ink — under 16px iOS Safari zooms the page on focus. */
+.sr-qbox > svg{left:17px;width:16px;height:16px;}
+#query-input{
+  min-height:44px;height:44px;border-radius:999px;
+  background:var(--inset);border-color:transparent;
+  padding:0 46px 0 44px;
+  font-family:'Urbanist',system-ui,sans-serif;
+  font-size:16px;font-weight:400;color:var(--text);
+}
+#query-input::placeholder{
+  font-family:'Urbanist',system-ui,sans-serif;
+  font-size:13.5px;font-weight:400;color:#6E655D;opacity:1;
+}
+#query-input:focus{background:var(--paper);border-color:transparent;
+  box-shadow:0 0 0 1px var(--line-strong),var(--focus);}
+/* the clear button has to shrink with the pill */
+.sr-qx{width:34px;height:34px;right:7px;}
+.sr-qx svg{width:13px;height:13px;}
+/* on a phone the Search button stays, so match it to the pill */
+@media (max-width:720px){
+  #query-input{min-height:44px;height:44px;font-size:16px;}
+  .sr-go{min-height:44px;height:44px;width:44px;border-radius:999px;}
+}
 
 /* the tab group loses its container entirely */
 .sr-seg-g{background:transparent;border:0;padding:0;gap:2px;}
