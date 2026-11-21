@@ -1,4 +1,4 @@
-const CACHE = 'taqa-hub-v114';
+const CACHE = 'taqa-hub-v115';
 
 // Detect base path automatically, works on GitHub Pages and Azure
 const BASE = self.location.pathname.replace('service-worker.js', '');
@@ -61,8 +61,10 @@ const CORE = [
 ];
 
 // Self-hosted webfonts, cached so typography survives offline.
+// Inter is no longer used anywhere: body and UI text are Arial, which is a
+// system font and needs no download. Its five files were 240 KB of offline
+// cache doing nothing, which matters on a rig link.
 const FONTS = [
-  'Inter-300', 'Inter-400', 'Inter-500', 'Inter-600', 'Inter-700',
   'Urbanist-300', 'Urbanist-400', 'Urbanist-500', 'Urbanist-600',
   'Urbanist-700', 'Urbanist-800'
 ].map(f => BASE + 'fonts/web/' + f + '.woff2');
