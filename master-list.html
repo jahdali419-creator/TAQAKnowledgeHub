@@ -95,7 +95,7 @@ a{color:var(--primary-ink);text-decoration:none;}
   .btn:hover{background:var(--inset);border-color:var(--rule-firm);color:var(--ink);}
   .btn-quiet:hover{background:var(--inset);border-color:transparent;}
 }
-select,input[type=search]{font:500 12.5px/1 'BwGradual',sans-serif;color:var(--ink-2);background:var(--paper);
+select,input[type=search]{font:500 12.5px/1 var(--th-font-field);color:var(--ink-2);background:var(--paper);
   border:1px solid var(--rule-firm);border-radius:var(--r2);height:32px;padding:0 10px;outline:none;
   transition:border-color 140ms var(--out-ease),background 140ms var(--out-ease);cursor:pointer;}
 select:hover,input[type=search]:hover{border-color:var(--ink-3);}
@@ -532,7 +532,7 @@ html[dir="rtl"] .dw{padding-right:0;padding-left:var(--safe-l,0px);}
 .wb-rej{display:flex;flex-direction:column;gap:6px;width:100%;}
 .wb-rej label{font:700 11.5px/1.3 'BwGradual',sans-serif;color:var(--ink);}
 .wb-rej textarea{width:100%;min-height:84px;resize:vertical;padding:9px 11px;border:1px solid var(--rule-firm);
-  border-radius:var(--r2);background:var(--paper);color:var(--ink);font:400 13px/1.5 var(--read);}
+  border-radius:var(--r2);background:var(--paper);color:var(--ink);font:400 13px/1.5 var(--th-font-field);}
 .wb-rej textarea:focus{outline:none;border-color:var(--due);box-shadow:0 0 0 3px rgba(200,16,46,.12);}
 .wb-hint{font:500 10.5px/1.3 var(--mono);color:var(--ink-3);}
 .wb-open{align-self:center;font:600 12px/1.3 'BwGradual',sans-serif;color:var(--primary-ink);}
@@ -779,7 +779,7 @@ thead th{top:var(--nav-h,64px);}
   <span id="bulk-count">0 documents selected</span>
   <div class="bulk-actions">
     <button type="button" class="btn btn-quiet" onclick="clearSelection()">Clear</button>
-    <button type="button" class="btn" id="bulk-approve" onclick="bulkAction('approve')">Confirm selected (QMS check)</button>
+    <button type="button" class="btn" id="bulk-approve" onclick="bulkAction('approve')">Confirm selected (document control check)</button>
     <button type="button" class="btn" id="bulk-withdraw" onclick="bulkAction('withdraw')">Withdraw selected</button>
   </div>
 </div>
@@ -836,7 +836,7 @@ thead th{top:var(--nav-h,64px);}
         'The Master List is the document controller\u2019s view</div>' +
       '<p style="font-size:14px;line-height:1.7;color:#524D48;margin:0 0 10px">' +
         'It carries the register export, the overdue queue and every revision ' +
-        'including withdrawn ones. QMS and an external auditor work from it. ' +
+        'including withdrawn ones. the Document Controller and an external auditor work from it. ' +
         'You are signed in as <b style="color:#1E1C1A">' + who + '</b>.</p>' +
       '<p style="font-size:14px;line-height:1.7;color:#524D48;margin:0 0 24px">' +
         'Every document you need is still open to you, and each one tells you ' +
@@ -897,13 +897,13 @@ function byKey(k){
   if(at>1)return TAQA_STORE.revisionsOf(n).filter(d=>String(d.revision||'')===r&&d.attempt===at)[0]||null;
   return (TAQA_STORE.findRev&&TAQA_STORE.findRev(n,r))||TAQA_STORE.findDoc(n);
 }
-// What the QMS check acts on for a number: its open revision, if any.
+// What the document control check acts on for a number: its open revision, if any.
 function workDoc(n){return (TAQA_STORE.openDraft&&TAQA_STORE.openDraft(n))||TAQA_STORE.findDoc(n);}
 const CT=[
   {k:'controlled', l:'All controlled',f:d=>A.controlled(d),               strip:true},
-  // Every document waiting on the QMS check, from every area: QMS's whole
+  // Every document waiting on the document control check, from every area: the Document Controller's whole
   // queue in one place. The bell's "Open your queue" lands here for QMS.
-  {k:'qms',        l:'Waiting on QMS',f:d=>TAQA_APPROVAL.stageOf(d)==='qms', strip:true},
+  {k:'qms',        l:'Waiting on Document Control',f:d=>TAQA_APPROVAL.stageOf(d)==='qms', strip:true},
   {k:'current',    l:'Current',       f:d=>d.status==='current'},
   {k:'review',     l:'Review due',    f:d=>d.status==='under-review'},
   {k:'draft',      l:'Draft',         f:d=>d.status==='draft'},
@@ -975,7 +975,7 @@ function renderRole(){
 // Of those two, auditor is deliberately read-only end to end: approve,
 // countersign and editMetadata are all false on that role in roles.js. qms
 // is the one that holds countersign, the register-release step whose own
-// comment in store.js says setStatus() "is what QMS approval and withdrawal
+// comment in store.js says setStatus() "is whwith the Document Controller approval and withdrawal
 // call" - the exact call bulkAction() below makes. So countersign is reused
 // here rather than a new flag, and it is the same test that keeps bulk
 // approve/withdraw out of reach for auditor while leaving every single-row
@@ -1132,8 +1132,8 @@ function updateBulkBar(){
 // single Withdraw button makes, so the register updates for every reader.
 // It opens a preview first (bulkWithdrawPreview below).
 //
-// Confirm is QMS's own step and only that: it confirms drafts that are
-// waiting on the QMS check and sends each to its named approver. It never
+// Confirm is the Document Controller's own step and only that: it confirms drafts that are
+// waiting on the document control check and sends each to its named approver. It never
 // puts anything in force. It opens a preview first (bulkConfirmPreview below).
 function bulkAction(kind){
   if(!canBulk()||typeof TAQA_STORE==='undefined')return;
@@ -1231,11 +1231,11 @@ function bulkGo(){
   if(document.getElementById('bulk-dlg').dataset.mode==='withdraw')bulkWithdrawRun(); else bulkConfirmRun();
 }
 /* ── Bulk QMS confirm: preview, then a result for every document ─────────
-   QMS may confirm several documents without opening each one, but never
+   the Document Controller may confirm several documents without opening each one, but never
    blind. Before anything happens the dialog lists exactly which documents
    will be confirmed (title, number, area, where it stands now, who approves
    next) and which of the selected ones are left out and why. Only a document
-   the rules say QMS may countersign right now is included; nothing else can
+   the rules say the Document Controller may countersign right now is included; nothing else can
    be confirmed from here, and nothing is rejected from here either, because
    a rejection needs its own reason and stays one document at a time.
 
@@ -1276,12 +1276,12 @@ function withdrawnNote(d){
 function whyNotQms(d){
   if(d.cancelled)return d.cancelledReason||'Cancelled, so there is nothing to confirm.';
   if(d.status==='obsolete'||d.status==='superseded')return 'Withdrawn, so there is nothing to confirm.';
-  if(d.status!=='draft')return 'Already in force ('+(LABEL[d.status]||d.status)+'), so there is no QMS check to do.';
-  if(d.rejected)return 'Returned to its author'+(d.rejectedReason?': '+String(d.rejectedReason).replace(/[.\s]+$/,'')+'.':'.')+' A corrected filing comes to QMS as its next attempt.';
-  if(TAQA_APPROVAL.stageOf(d)==='director')return 'Already checked by QMS. It is waiting on '+nextApprover(d)+' for final approval.';
+  if(d.status!=='draft')return 'Already in force ('+(LABEL[d.status]||d.status)+'), so there is no document control check to do.';
+  if(d.rejected)return 'Returned to its author'+(d.rejectedReason?': '+String(d.rejectedReason).replace(/[.\s]+$/,'')+'.':'.')+' A corrected filing comes to the Document Controller as its next attempt.';
+  if(TAQA_APPROVAL.stageOf(d)==='director')return 'Already checked by the Document Controller. It is waiting on '+nextApprover(d)+' for final approval.';
   const sep=TAQA_APPROVAL.separationReason&&TAQA_APPROVAL.separationReason(d);
   if(sep)return sep;
-  return 'Not waiting on the QMS check.';
+  return 'Not waiting on the document control check.';
 }
 function bulkDocLine(d,extra,cls){
   return `<li class="bq-i${cls?' '+cls:''}"><b class="bq-t">${esc(d.title)}</b>
@@ -1296,16 +1296,16 @@ function bulkConfirmPreview(chosen){
   bulkPending=eligible.map(d=>({num:d.docNumber,key:TAQA_STORE.recordKey(d)}));
   const n=eligible.length, s=n===1?'':'s';
   document.getElementById('bulk-dlg-h').textContent=n
-    ? 'Confirm '+n+' document'+s+' as checked by QMS'
-    : 'Nothing selected is waiting on the QMS check';
+    ? 'Confirm '+n+' document'+s+' as checked by the Document Controller'
+    : 'Nothing selected is waiting on the document control check';
   document.getElementById('bulk-dlg-lead').textContent=n
     ? 'Each document is confirmed on its own and sent to its next approver. None of them is in force until that approver approves. Rejecting is not done here: reject a document from its own card, with a reason.'+
       (left.length?' '+left.length+' of the selected documents '+(left.length===1?'is':'are')+' left out; '+(left.length===1?'it is':'they are')+' listed at the end with the reason.':'')
-    : 'Only a document waiting on the QMS check can be confirmed. Nothing has been changed.';
+    : 'Only a document waiting on the document control check can be confirmed. Nothing has been changed.';
   document.getElementById('bulk-dlg-body').innerHTML=
     (n?`<h3 class="bq-h" id="bq-in-h">Will be confirmed (${n})</h3><ul class="bq-list" id="bq-in" aria-labelledby="bq-in-h">`+
       eligible.map(d=>bulkDocLine(d,
-        `<span class="bq-s">Now: waiting on the QMS check &rarr; next: ${esc(nextApprover(d))}</span>`)).join('')+'</ul>':'')+
+        `<span class="bq-s">Now: waiting on the document control check &rarr; next: ${esc(nextApprover(d))}</span>`)).join('')+'</ul>':'')+
     (left.length?`<h3 class="bq-h" id="bq-out-h">Left out (${left.length})</h3><ul class="bq-list" id="bq-out" aria-labelledby="bq-out-h">`+
       left.map(d=>bulkDocLine(d,`<span class="bq-s bq-why">${esc(whyNotQms(d))}</span>`,'bq-out')).join('')+'</ul>':'');
   const go=document.getElementById('bulk-dlg-go');
@@ -1379,7 +1379,7 @@ function openDoc(d){
   const t=A.type(d), s=A.seg(d), n=A.reviewDays(d), gone=d.status==='obsolete'||d.status==='superseded';
   document.getElementById('dw-title').textContent=d.title;
   document.getElementById('dw-num').textContent=(d.docNumber||'Not numbered')+(d.legacyId?'   was '+d.legacyId:'');
-  // A document waiting on the QMS check opens as the QMS Workbench's check
+  // A document waiting on the document control check opens as the QMS Workbench's check
   // panel for whoever holds that check: the facts the check needs, then
   // Confirm and Reject, then the next document. Everyone else, and every
   // other document, gets the register record below exactly as before.
@@ -1393,7 +1393,7 @@ function openDoc(d){
   // QMS opening a document it may not check: say why, rather than leave the
   // Confirm and Reject buttons silently missing (PI-31).
   const sep=TAQA_APPROVAL.canCountersign(d,undefined,{ignoreSeparation:true})&&TAQA_APPROVAL.separationReason(d);
-  if(sep)notes+=`<div class="dw-note" id="dw-sep"><b>Not yours to check.</b> ${esc(sep)} Submitter, QMS checker and final approver are three different people.</div>`;
+  if(sep)notes+=`<div class="dw-note" id="dw-sep"><b>Not yours to check.</b> ${esc(sep)} Submitter, document control checker and final approver are three different people.</div>`;
   else if(A.overdue(d))notes+=`<div class="dw-note"><b>Review overdue by ${Math.abs(n)} days.</b> It stays in force until withdrawn, but nobody has confirmed it is still suitable.</div>`;
   if(d.numberStatus==='provisional')notes+=`<div class="dw-note"><b>Provisional number.</b> ${esc(A.numberNote(d)||'')}</div>`;
   document.getElementById('dw-body').innerHTML = notes +
@@ -1430,11 +1430,11 @@ function showDrawer(focusSel){
 }
 
 /* ── QMS Workbench: check one document, decide, move on ──────────────────
-   The Master List's "Waiting on QMS" view is QMS's whole queue. Opening a
+   The Master List's "Waiting on QMS" view is the Document Controller's whole queue. Opening a
    document from it used to show a read-only record, so confirming one meant
    ticking it and going through the bulk preview, and rejecting one meant
    finding that area's desk among twenty-six. The panel now carries what the
-   check needs and the two decisions QMS holds, and steps to the next
+   check needs and the two decisions the Document Controller holds, and steps to the next
    document, so the queue is worked from one place.
 
    Nothing about who may do what changes here. Confirm calls
@@ -1496,8 +1496,8 @@ function wbPaint(d){
   const t=A.type(d), f=(d.files&&d.files[0])||null, twins=sameTitleInArea(d);
   const prov=d.numberStatus==='provisional';
   document.getElementById('dw-body').innerHTML=
-    `<div class="wb-pos" id="wb-pos" tabindex="-1">QMS check &middot; ${pos+1} of ${q.length} waiting on QMS</div>`+
-    `<div class="dw-note"><b>Waiting on your QMS check.</b> Confirming sends it to ${esc(nextApprover(d))} for final approval. It is not in force until then.</div>`+
+    `<div class="wb-pos" id="wb-pos" tabindex="-1">document control check &middot; ${pos+1} of ${q.length} waiting on the Document Controller</div>`+
+    `<div class="dw-note"><b>Waiting on your document control check.</b> Confirming sends it to ${esc(nextApprover(d))} for final approval. It is not in force until then.</div>`+
     (prov?`<div class="dw-note"><b>Provisional number.</b> ${esc(A.numberNote(d)||'')}</div>`:'')+
     returnedAttempts(d).map(x=>`<div class="dw-note" id="wb-earlier"><b>Earlier attempt returned${x.rejectedBy?' by '+esc(x.rejectedBy):''}${x.rejectedDate?' on '+esc(fmt(x.rejectedDate)):''}:</b> ${esc(x.rejectedReason||'no reason recorded')}</div>`).join('')+
     (twins.length?`<div class="dw-note out" id="wb-twins"><b>Same title already in this area:</b> ${twins.map(x=>esc(x.docNumber)+' ('+esc(LABEL[x.status]||x.status)+')').join(', ')}. Check this is not a duplicate.</div>`:'')+
@@ -1518,7 +1518,7 @@ function wbPaint(d){
   document.getElementById('dw-foot').innerHTML=
     `<div class="wb-acts" id="wb-acts">
       <button type="button" class="btn wb-reject" id="wb-reject" onclick="wbRejectOpen()">Reject&hellip;</button>
-      <button type="button" class="btn wb-go" id="wb-confirm" onclick="wbConfirm()">Confirm QMS check</button>
+      <button type="button" class="btn wb-go" id="wb-confirm" onclick="wbConfirm()">Confirm document control check</button>
     </div>
     <div class="wb-rej" id="wb-rej" hidden>
       <label for="wb-reason">Reason for returning it to the author</label>
@@ -1600,10 +1600,10 @@ function wbResult(num,ok,msg,next,stale){
   const left=wbQueue().length;
   wbDone={num,ok};
   document.getElementById('dw-body').innerHTML=
-    `<div class="wb-pos" id="wb-pos">${left} waiting on QMS</div>`+
+    `<div class="wb-pos" id="wb-pos">${left} waiting on the Document Controller</div>`+
     `<div class="wb-res" id="wb-res" data-ok="${ok}" role="status" tabindex="-1">${ok?'&#10003; ':'&#10007; '}${esc(msg)}</div>`+
     (stillNext?`<div class="dw-s">${stale&&stillNext===d?'Waiting under this number now':'Next'}</div><p class="wb-sum"><b>${esc(stillNext.title)}</b><br><span class="wb-meta">${esc(stillNext.docNumber)} &middot; ${esc(areaOf(stillNext))}</span></p>`
-      :`<p class="wb-sum">${left?'':'Nothing else is waiting on the QMS check.'}</p>`);
+      :`<p class="wb-sum">${left?'':'Nothing else is waiting on the document control check.'}</p>`);
   document.getElementById('dw-foot').innerHTML=
     `<div class="wb-acts">
       <button type="button" class="btn btn-quiet" onclick="closeDetail()">Close</button>
@@ -1634,7 +1634,7 @@ function openFromUrl(){
   // In the QMS queue a number means the revision waiting on the check.
   const d=quick==='qms'?workDoc(num):TAQA_STORE.findDoc(num);
   if(!d||!visible().some(x=>x.docNumber===d.docNumber)){toast('That document is not in the register.');return;}
-  if(quick==='qms'&&TAQA_APPROVAL.stageOf(d)!=='qms')toast(d.docNumber+' is no longer waiting on QMS. '+whyNotQms(d));
+  if(quick==='qms'&&TAQA_APPROVAL.stageOf(d)!=='qms')toast(d.docNumber+' is no longer waiting on the Document Controller. '+whyNotQms(d));
   openDoc(d);
 }
 function closeDetail(){

@@ -102,14 +102,14 @@ html[data-taqa-theme="dark"] .sr-hero{border-bottom:1px solid rgba(0,187,182,.14
 .sr-lbl{display:block;font:600 12.5px/1.3 'Inter',sans-serif;color:var(--text-muted);margin-bottom:6px;}
 .sr-qrow{display:flex;gap:10px;align-items:stretch;}
 .sr-qbox{position:relative;flex:1 1 auto;min-width:0;}
-.sr-qbox > svg{position:absolute;left:16px;top:50%;width:19px;height:19px;transform:translateY(-50%);color:var(--text-light);pointer-events:none;}
-#query-input{width:100%;min-height:54px;padding:0 48px 0 48px;border-radius:14px;border:1px solid var(--line-strong);background:var(--inset);
-  color:var(--text);font:500 16.5px/1.2 'Inter',sans-serif;-webkit-appearance:none;appearance:none;
+.sr-qbox > svg{position:absolute;left:17px;top:50%;width:16px;height:16px;transform:translateY(-50%);color:var(--text-light);pointer-events:none;}
+#query-input{width:100%;min-height:44px;height:44px;padding:0 46px 0 44px;border-radius:999px;border:1px solid transparent;background:var(--inset);
+  color:var(--text);font:400 16px/1.2 var(--th-font-field);-webkit-appearance:none;appearance:none;
   transition:border-color .15s var(--ease),background-color .15s var(--ease),box-shadow .15s var(--ease);}
-#query-input::placeholder{color:var(--text-light);opacity:1;}
-#query-input:focus{outline:none;border-color:var(--primary-ink);background:var(--paper);box-shadow:var(--focus);}
+#query-input::placeholder{font-size:13px;font-weight:400;color:#8A817A;opacity:1;}
+#query-input:focus{outline:none;border-color:transparent;background:var(--paper);box-shadow:0 0 0 1px var(--line-strong),var(--focus);}
 #query-input::-webkit-search-cancel-button,#query-input::-webkit-search-decoration{-webkit-appearance:none;appearance:none;display:none;}
-.sr-qx{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;border:0;background:transparent;
+.sr-qx{position:absolute;right:7px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;border:0;background:transparent;
   color:var(--text-light);cursor:pointer;display:grid;place-items:center;}
 .sr-qx:hover{background:var(--fill);color:var(--text);}
 .sr-qx svg{width:14px;height:14px;}
@@ -156,7 +156,7 @@ html[data-taqa-theme="dark"] .filters-badge{background:#00BBB6;color:#00191B;}
 .filters-group > label,.filters-group > .fg-lbl{display:block;font:600 12.5px/1.3 'Inter',sans-serif;color:var(--text-muted);margin-bottom:6px;}
 .filters-group select,.filters-group input[type="date"]{width:100%;min-height:44px;padding:0 34px 0 12px;border-radius:10px;border:1px solid var(--line-strong);
   background:var(--paper) var(--arrow) no-repeat right 12px center;-webkit-appearance:none;appearance:none;
-  color:var(--text);font:500 14px/1.2 'Inter',sans-serif;text-overflow:ellipsis;cursor:pointer;}
+  color:var(--text);font:500 14px/1.2 var(--th-font-field);text-overflow:ellipsis;cursor:pointer;}
 .filters-group input[type="date"]{background-image:none;padding:0 10px;min-width:0;color-scheme:light;}
 html[data-taqa-theme="dark"] .filters-group input[type="date"]{color-scheme:dark;}
 .filters-group select.on,.filters-group input.on{border-color:var(--primary-ink);background-color:var(--fill);font-weight:600;}
@@ -310,8 +310,8 @@ html.sr-lock,html.sr-lock body{overflow:hidden!important;}
   .sr-stat dt{font-size:12px;}
   .sr-panel{padding:0 12px;margin-top:-64px;}
   .sr-panel-in{padding:14px 14px 12px;border-radius:18px;}
-  #query-input{min-height:52px;font-size:16px;padding-right:44px;}
-  .sr-go{min-height:52px;width:52px;padding:0;}
+  #query-input{min-height:44px;height:44px;font-size:16px;padding-right:44px;}
+  .sr-go{min-height:44px;height:44px;width:44px;padding:0;border-radius:999px;}
   .sr-go span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
   .sr-row2{margin-top:12px;}
   .sr-seg{width:100%;}
@@ -766,7 +766,7 @@ html.sr-lock,html.sr-lock body{overflow:hidden!important;}
       ? (d.supersededBy
           ? 'The register names ' + esc(d.supersededBy) + ' as its replacement but holds no record of it here. Verify the current revision in SCORE before use.'
           : 'The register holds no revision of it in force. Verify the current revision in SCORE before use.')
-      : 'It is no longer in force and has no replacement in the register. Check with QMS or SCORE before relying on any copy.';
+      : 'It is no longer in force and has no replacement in the register. Check with the Document Controller or SCORE before relying on any copy.';
     var href = 'viewer.html?doc=' + encodeURIComponent(d.docNumber || '') + (d.revision ? '&rev=' + encodeURIComponent(d.revision) : '') +
       '&seg=' + encodeURIComponent(d.segment || '') + '&type=' + encodeURIComponent(d.docType || '');
     return '<li><a class="result result-withdrawn" href="' + esc(href) + '" data-withdrawn="' + esc(d.status) + '">' +
@@ -857,14 +857,14 @@ html.sr-lock,html.sr-lock body{overflow:hidden!important;}
           (casesAll.length - released.length ? ' (' + (casesAll.length - released.length) + ' not yet released)' : '') + '</button>' });
     } else {
       html += group('cases', 'Field cases', null, '', { foot: '<p class="sr-note">' + (released.length ? '' :
-        'No field cases have been released yet. Operations file them in the <a href="cases.html">case library</a>; once QMS checks a case and the area’s Director approves it, Search finds it here.') + '</p>' });
+        'No field cases have been released yet. Operations file them in the <a href="cases.html">case library</a>; once document control checks a case and the area’s Director approves it, Search finds it here.') + '</p>' });
     }
     return html;
   }
   function emptyView(kind) {
     var q = state.q, nf = activeFilters().length, tips = [];
     if (kind === 'cases' && !casePool().length) {
-      return '<div class="sr-empty"><h3>No field cases yet</h3><p>No field case has been released for you to read yet, so there is nothing to search here. Operations file cases in the case library; once QMS checks a case and the area’s Director approves it, it can be found here.</p>' +
+      return '<div class="sr-empty"><h3>No field cases yet</h3><p>No field case has been released for you to read yet, so there is nothing to search here. Operations file cases in the case library; once document control checks a case and the area’s Director approves it, it can be found here.</p>' +
         '<div class="sr-acts"><a class="sr-btn pri" href="cases.html">Open the case library</a>' + (q || nf ? '<button type="button" class="sr-btn" data-content="all">Search everything</button>' : '') + '</div></div>';
     }
     var what = kind === 'docs' ? 'documents' : kind === 'cases' ? 'field cases' : 'documents or field cases';

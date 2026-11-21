@@ -1,7 +1,7 @@
 /* RISE Recognition (demo)
    ─────────────────────────────────────────────────────────────────────────
    People earn points only for work that passed the controlled-document
-   route: a document they filed that QMS checked and the approver released.
+   route: a document they filed that document control checked and the approver released.
    Uploading alone never earns anything, so the levels cannot be climbed with
    duplicates or rushed files, and a returned or rejected filing earns 0 (it
    never takes points away).
@@ -41,7 +41,7 @@
   ];
   var POINTS = { document: 10, overdue: 15, lesson: 20 };
   var KIND_LABEL = { document: 'Document released', overdue: 'Overdue document brought up to date', lesson: 'Lesson, incident or alert released' };
-  // QMS checks documents and an auditor only reads, so neither files work
+  // document control checks documents and an auditor only reads, so neither files work
   // that can be released under their own name in this demo.
   var EARNERS = ['employee', 'owner', 'maintenance'];
   var PREF_KEY = 'taqa-recognition-v1';
@@ -93,7 +93,7 @@
     var role = m[1], area = m[2];
     if (role === 'owner') return TAQA_ROLE.areaTitle(area) + ', ' + areaName(area);
     if (role === 'maintenance') return 'Maintenance Manager, ' + areaName(area);
-    if (role === 'qms') return 'QMS';
+    if (role === 'qms') return 'Doc Control';
     if (role === 'auditor') return 'External Auditor';
     return 'Employee';
   }

@@ -1,0 +1,124 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Shared chrome for the three Field Knowledge previews.
+   DESIGN PREVIEW ONLY — not application code, not loaded by any app page.
+
+   Everything here is drawn from the real product: the token values come from
+   techhub.css, the topbar proportions from topbar.css, the segment band and
+   the letter marks from segment.html. Nothing is invented.
+   ────────────────────────────────────────────────────────────────────── */
+:root{
+  --teal-950:#00191B; --teal-900:#00292C; --teal-800:#003A3D; --teal-700:#005D63;
+  --teal-600:#00757C; --teal-400:#00BBB6; --teal-200:#9FE3DF;
+  --tint:rgba(0,93,99,.07); --tint-2:rgba(0,93,99,.12);
+  --ink:#1E1C1A; --ink-2:#4A4540; --ink-3:#6E655D; --ink-4:#B9B2AB;
+  --paper:#FFFFFF; --canvas:#F5F5F3; --inset:#EEECE9;
+  --line:rgba(117,106,97,.13); --line-strong:rgba(117,106,97,.24);
+  --ok:#00705F; --warn:#8A6200; --stop:#C8102E; --info:#0076A8; --orange:#FD691D;
+  --display:'BwGradual','Urbanist',system-ui,sans-serif;
+  --text:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --r-sm:6px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+  --sh-1:0 1px 2px rgba(0,41,44,.06);
+  --sh-2:0 1px 2px rgba(0,41,44,.05),0 10px 28px -14px rgba(0,41,44,.22);
+  --ease:cubic-bezier(.23,1,.32,1);
+  --nav-h:64px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--text);background:var(--canvas);color:var(--ink);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+
+/* the preview label, so no screenshot can be mistaken for the real app */
+.pv-flag{position:sticky;top:0;z-index:900;display:flex;align-items:center;gap:10px;
+  padding:7px 20px;background:var(--teal-950);color:var(--teal-200);
+  font:700 11px/1.3 var(--text);letter-spacing:.12em;text-transform:uppercase;}
+.pv-flag b{color:#fff;letter-spacing:.04em;text-transform:none;font:700 12.5px/1.3 var(--display);}
+.pv-flag span{margin-left:auto;color:rgba(159,227,223,.72);letter-spacing:.04em;text-transform:none;font-weight:500;}
+
+/* ── topbar, as topbar.css draws it ── */
+.tb{position:sticky;top:30px;z-index:800;height:var(--nav-h);display:flex;align-items:center;gap:18px;
+  padding:0 24px;background:rgba(255,255,255,.97);border-bottom:1px solid var(--line);
+  box-shadow:0 22px 44px -26px rgba(0,88,90,.18);}
+.tb-logo{display:flex;align-items:baseline;gap:2px;font:300 23px/1 var(--display);color:var(--teal-950);letter-spacing:-.01em;}
+.tb-logo i{font-style:normal;font-weight:800;color:var(--orange);}
+.tb-nav{display:flex;gap:2px;margin-left:10px;}
+.tb-nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border-radius:var(--r-sm);font:500 14px/1 var(--text);color:var(--ink-2);text-decoration:none;}
+.tb-nav a[aria-current]{background:var(--tint);color:var(--teal-700);font-weight:600;}
+.tb-r{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.tb-cta{display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 16px;border-radius:10px;
+  background:var(--teal-700);color:#fff;font:600 13.5px/1 var(--text);text-decoration:none;}
+.tb-ic{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:transparent;
+  display:grid;place-items:center;color:var(--ink-3);}
+.tb-ic svg{width:19px;height:19px;}
+
+/* ── segment identity band, as segment.html draws its hero ── */
+.band{position:relative;isolation:isolate;overflow:hidden;background:var(--teal-800);color:#fff;padding:26px 24px 22px;}
+.band::after{content:'';position:absolute;inset:0;z-index:-1;
+  background:radial-gradient(120% 140% at 12% 0%,rgba(0,187,182,.26),transparent 62%);}
+.band .crumb{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:center;font:500 13px/1 var(--text);color:rgba(255,255,255,.72);margin-bottom:10px;}
+.band .crumb a{display:inline-flex;align-items:center;min-height:44px;padding:0 2px;color:rgba(255,255,255,.84);text-decoration:none;}
+.band .crumb i{font-style:normal;color:rgba(255,255,255,.45);}
+.band h1{font:700 clamp(26px,3vw,36px)/1.15 var(--display);letter-spacing:-.02em;}
+.band .sub{margin-top:8px;font:400 15px/1.5 var(--text);color:rgba(255,255,255,.80);max-width:62ch;}
+.band .figs{display:flex;flex-wrap:wrap;gap:22px;margin-top:18px;}
+.band .fig{display:flex;flex-direction:column;gap:2px;}
+.band .fig b{font:700 26px/1 var(--display);font-variant-numeric:tabular-nums;}
+.band .fig span{font:600 11px/1.3 var(--text);letter-spacing:.1em;text-transform:uppercase;color:rgba(159,227,223,.86);}
+
+/* ── the lock chip: the segment you are in, never a chooser ── */
+.lock{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 13px;border-radius:var(--r-pill);
+  background:rgba(0,187,182,.16);border:1px solid rgba(159,227,223,.38);
+  font:600 13px/1 var(--text);color:#fff;white-space:nowrap;}
+.lock svg{width:14px;height:14px;flex:none;color:var(--teal-200);}
+.lock.on-paper{background:var(--tint);border-color:rgba(0,93,99,.26);color:var(--teal-700);}
+.lock.on-paper svg{color:var(--teal-700);}
+
+/* ── letter mark, exactly segment.html's .sc-mark ── */
+.mark{flex:none;width:32px;height:32px;border-radius:9px;display:grid;place-items:center;
+  background:rgba(0,93,99,.10);color:var(--teal-700);font:800 10.5px/1 var(--display);letter-spacing:.04em;}
+.mark.alt{background:rgba(253,105,29,.12);color:#A8431A;}
+
+/* ── shared primitives the three approaches all reuse ── */
+.eyebrow{font:700 10px/1.2 var(--text);letter-spacing:1.3px;text-transform:uppercase;color:var(--ink-3);
+  display:flex;align-items:center;gap:8px;}
+.eyebrow svg{width:16px;height:16px;color:var(--teal-700);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 16px;
+  border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--teal-700);
+  font:600 13.5px/1 var(--display);text-decoration:none;cursor:pointer;white-space:nowrap;}
+.btn.pri{background:var(--teal-700);border-color:transparent;color:#fff;}
+.btn.go{background:var(--orange);border-color:transparent;color:#1E1C1A;}
+.btn svg{width:15px;height:15px;flex:none;}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:var(--r-pill);
+  border:1px solid var(--line);background:var(--paper);font:500 13px/1 var(--text);color:var(--ink-2);cursor:pointer;}
+.chip b{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
+.chip[aria-pressed="true"]{background:var(--tint);border-color:rgba(0,93,99,.3);color:var(--teal-700);}
+.badge{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:var(--r-pill);
+  font:600 12px/1 var(--text);background:var(--tint);color:var(--teal-700);}
+.badge.reg{background:rgba(0,118,168,.1);color:var(--info);}
+.badge.alt{background:rgba(253,105,29,.12);color:#A8431A;}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);}
+.note{font:400 13.5px/1.5 var(--text);color:var(--ink-3);}
+.empty{padding:22px;border:1px dashed var(--line-strong);border-radius:var(--r-md);background:var(--paper);}
+.empty h4{font:700 15px/1.3 var(--display);margin-bottom:6px;}
+
+.wrap{max-width:1180px;margin:0 auto;padding:26px 24px 56px;}
+h2.sec{font:700 22px/1.3 var(--display);letter-spacing:-.01em;}
+h3.sub{font:700 15px/1.3 var(--display);}
+
+/* an entry row, the one list component all three share */
+.entry{position:relative;display:flex;align-items:flex-start;gap:12px;padding:15px 0;border-bottom:1px solid var(--line);min-width:0;}
+.entry:last-child{border-bottom:0;}
+.entry-tx{min-width:0;flex:1 1 auto;}
+.entry-tx a{font:600 15px/1.35 var(--display);color:var(--ink);text-decoration:none;overflow-wrap:anywhere;}
+/* the row is the target, not the 18px line of text inside it */
+.entry-tx > a::after{content:'';position:absolute;inset:0;border-radius:8px;}
+.entry:hover{background:var(--tint);box-shadow:0 0 0 12px var(--tint);}
+.entry-m{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:5px;
+  font:400 13px/1.3 var(--text);color:var(--ink-3);}
+.entry-m .dot{width:3px;height:3px;border-radius:50%;background:var(--ink-4);}
+
+@media (max-width:760px){
+  .tb{padding:0 16px;gap:10px;}
+  .tb-nav,.tb-cta{display:none;}
+  .band{padding:20px 16px 18px;}
+  .wrap{padding:18px 16px 44px;}
+  .pv-flag{padding:7px 16px;font-size:10px;}
+  .pv-flag span{display:none;}
+}

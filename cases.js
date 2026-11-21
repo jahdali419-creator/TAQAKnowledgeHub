@@ -8,7 +8,7 @@
    Where cases come from
      case      a register record of one of the ten card types that carries a
                `card` (filed in the browser through TAQA_STORE.add). It
-               follows the ordinary route: QMS checks it, the area's Segment
+               follows the ordinary route: document control checks it, the area's Segment
                Director releases it. Numbering, review dates, separation of
                duties and returns are the register's (store.js, roles.js).
      register  a Lesson Learned or Technical Alert that is a document (no
@@ -19,7 +19,7 @@
                no register count, queue or Master List figure.
 
    Who sees what. Released entries follow TAQA_STORE.readable (role and
-   classification). An unreleased case (with QMS, with the Director, or
+   classification). An unreleased case (with the Document Controller, with the Director, or
    approved for a later date, or returned) is visible to its filer, QMS and
    the area's Segment Director, and to the External Auditor, who reads the
    whole register. Lists never show a returned case except to its filer
@@ -199,7 +199,7 @@
     if (!d || !st) return false;
     if (isMine(d)) return true;
     if (LIVE[d.status] || d.status === 'superseded' || d.status === 'obsolete') return st.readable(d);
-    // Unreleased: waiting on QMS or the Director, returned, or approved for
+    // Unreleased: waiting on the Document Controller or the Director, returned, or approved for
     // a later date. Its filer (above), QMS, the auditor and the area's
     // Director, who is its approver.
     if (!st.classOpen(d)) return false;
@@ -259,7 +259,7 @@
     return str(d.status) || 'unknown';
   }
   var STATUS_LABEL = {
-    'with-qms': 'With QMS', 'with-director': 'With the Director', 'returned': 'Returned',
+    'with-qms': 'With Document Control', 'with-director': 'With the Director', 'returned': 'Returned',
     'approved': 'Approved', 'published': 'Published', 'superseded': 'Superseded',
     'withdrawn': 'Withdrawn', 'cancelled': 'Cancelled'
   };
@@ -378,7 +378,7 @@
   /* all({includeUnreleased}) — every entry this person may see, newest first.
      Released: register cases and register lessons/alerts in force in an
      operational segment (never a maintenance department), plus shipped
-     cases. includeUnreleased adds the cases still on their way (with QMS,
+     cases. includeUnreleased adds the cases still on their way (with the Document Controller,
      with the Director, approved for a later date) that this person may see.
      Returned, superseded and withdrawn records are never listed here; the
      filer finds their own in mine(). */

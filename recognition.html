@@ -114,7 +114,7 @@ main{max-width:1060px;margin:0 auto;width:100%;padding:32px 40px 80px;display:gr
 .board-tools{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin-bottom:10px;}
 .board-tools label{font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:8px;min-width:0;max-width:100%;}
 .board-tools label[for="rc-area"] select{flex:1 1 auto;min-width:0;}
-.board-tools select{font:500 14px 'Inter',sans-serif;color:var(--text);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 12px;min-height:40px;max-width:100%;}
+.board-tools select{font:500 14px var(--th-font-field);color:var(--text);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 12px;min-height:40px;max-width:100%;}
 .board-tools input[type=checkbox]{width:18px;height:18px;accent-color:var(--fill-strong);}
 .card-hd{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px;margin-bottom:12px;}
 .card-hd h2{margin:0;}
@@ -417,7 +417,7 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
   <header class="rc-head">
     <div class="eyebrow" id="rc-eyebrow">RISE Recognition</div>
     <h1 id="rc-title">My contributions</h1>
-    <p id="rc-lede">Points for released work. Only what QMS checked and the approver released counts.</p>
+    <p id="rc-lede">Points for released work. Only what document control checked and the approver released counts.</p>
   </header>
 
   <section class="card lv-hero" id="rc-level" aria-labelledby="rc-level-h">
@@ -454,7 +454,7 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
     <div id="rc-mine-help" hidden>
       <ol class="route" aria-label="How a filing becomes points">
         <li><span class="rn">1</span><span class="rt">You file it</span><span class="rd">A document, a field case, a lesson learned</span></li>
-        <li><span class="rn">2</span><span class="rt">QMS checks it</span><span class="rd">Format, numbering and the register entry</span></li>
+        <li><span class="rn">2</span><span class="rt">document control checks it</span><span class="rd">Format, numbering and the register entry</span></li>
         <li><span class="rn">3</span><span class="rt">Your approver releases it</span><span class="rd">Only then do the points land here</span></li>
       </ol>
       <a class="route-cta" href="upload.html">File your first document</a>
@@ -500,7 +500,7 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
 
   /* Rules: addressed to the reader when they earn, neutral when they
      check or read (QMS and the auditor earn nothing). */
-  if (!earner) $('rc-lede').textContent = 'Points for work that passed QMS and approval, so only released documents count. Everyone who files work earns them; QMS and auditors check and read, so they do not.';
+  if (!earner) $('rc-lede').textContent = 'Points for work that passed document control and approval, so only released documents count. Everyone who files work earns them; the Document Controller and auditors check and read, so they do not.';
   $('rc-rules-body').innerHTML = earner
     ? '<tr><td>A document or field case you filed is released</td><td class="pt">' + R.POINTS.document + '</td></tr>' +
       '<tr><td>You brought an overdue document up to date with a new revision</td><td class="pt">' + R.POINTS.overdue + '</td></tr>' +
@@ -519,7 +519,7 @@ a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(-
       $('rc-level-h').textContent = 'Points and levels';
       box.innerHTML = '<p class="empty">' + (role === 'auditor'
         ? 'An auditor reads the register and files nothing, so there is no level for this view. Every area’s list is below.'
-        : 'QMS checks other people’s work before the approver releases it, so QMS earns no points in this preview. Every area’s list is below.') + '</p>' + ladder(-1);
+        : 'document control checks other people’s work before the approver releases it, so the Document Controller earns no points in this preview. Every area’s list is below.') + '</p>' + ladder(-1);
       return;
     }
     var pts = R.pointsOf(), lv = R.levelFor(pts);

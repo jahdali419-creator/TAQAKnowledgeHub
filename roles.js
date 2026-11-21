@@ -23,7 +23,7 @@
 //   1. ROLE decides which FUNCTIONS you get (control panel, export, approve).
 //   2. CLASSIFICATION decides which DOCUMENTS you get (internal/confidential/
 //      restricted). See classificationsFor() below.
-// Restricting the register itself to QMS would breach 5.5, because a supervisor needs
+// Restricting the register itself to the Document Controller would breach 5.5, because a supervisor needs
 // to know which revision is current before starting a job.
 
 const TAQA_ROLES = {
@@ -45,7 +45,7 @@ const TAQA_ROLES = {
     delegate:     false,
     editMetadata: false,
     // May file a document for approval. Filing is not authority: the draft
-    // carries none until QMS has checked it and the named approver has
+    // carries none until the Document Controller has checked it and the named approver has
     // released it (API Q2 4.4.3 b), so anyone who writes a procedure may
     // propose it. This is the business workflow: an employee submits, QMS
     // checks, the Director approves.
@@ -55,9 +55,9 @@ const TAQA_ROLES = {
 
   owner: {
     label: 'Segment Director',
-    // Wording only: QMS checks first and the Director's approval releases
+    // Wording only: document control checks first and the Director's approval releases
     // (TAQA_APPROVAL), so the description says it in that order.
-    blurb: 'Holds a segment. Gives final approval to its Operations documents once QMS has checked them, and that approval is what publishes them. May delegate the authority for a fixed period.',
+    blurb: 'Holds a segment. Gives final approval to its Operations documents once the Document Controller has checked them, and that approval is what publishes them. May delegate the authority for a fixed period.',
     statuses:        ['current', 'under-review', 'superseded', 'obsolete', 'draft', 'approved'],
     classifications: ['internal', 'confidential'],
     controlPanel: true,
@@ -84,7 +84,7 @@ const TAQA_ROLES = {
 
   maintenance: {
     label: 'Maintenance Manager',
-    blurb: 'Heads a segment\'s maintenance department. Approves that department\'s documents, and only those: its maintenance procedures, manuals and checklists. The Segment Director keeps the segment\'s other documents. QMS still checks every one first.',
+    blurb: 'Heads a segment\'s maintenance department. Approves that department\'s documents, and only those: its maintenance procedures, manuals and checklists. The Segment Director keeps the segment\'s other documents. Document control still checks every one first.',
     statuses:        ['current', 'under-review', 'superseded', 'obsolete', 'draft', 'approved'],
     classifications: ['internal', 'confidential'],
     controlPanel: true,
@@ -103,7 +103,7 @@ const TAQA_ROLES = {
   },
 
   qms: {
-    label: 'QMS / Document Controller',
+    label: 'Document Controller',
     blurb: 'Custodian of the register. Checks every document first, the record, the numbering and the revision, before its Segment Director or Maintenance Manager gives final approval. Owns withdrawal, periodic review and the TQ-QHSE-F086 export. Does not give the technical sign-off on another function\'s procedure.',
     statuses:        ['current', 'under-review', 'superseded', 'obsolete', 'draft', 'approved'],
     classifications: ['internal', 'confidential', 'restricted'],
@@ -111,7 +111,7 @@ const TAQA_ROLES = {
     export:       true,
     registerView: true,
     // Deliberately false. Technical suitability is the approver's judgement,
-    // not the document controller's; QMS confirms the record instead. Where a
+    // not the document controller's; the Document Controller confirms the record instead. Where a
     // type names QHSE Manager as approver, that person holds approve, not this
     // role by virtue of controlling the register.
     approve:      false,
@@ -384,7 +384,7 @@ if (typeof module !== 'undefined' && module.exports)
    ──────────────────────────────────────────────────────────────────────────
    A document is released by two different people, on purpose:
 
-     1. COUNTERSIGN  QMS checks the record first: the number conforms to
+     1. COUNTERSIGN  document control checks the record first: the number conforms to
                      TQ-QHSE-S001 5.3, the revision and dates are right, and
                      anything it supersedes is withdrawn with it. Not a
                      co-signature after the fact, a gate before the Director's
@@ -403,7 +403,7 @@ if (typeof module !== 'undefined' && module.exports)
    page which already filters on status keeps working and a document in either
    queue is still, correctly, a draft with no authority.
 
-     approvalStage 'qms'       waiting on QMS's conformance check
+     approvalStage 'qms'       waiting on the Document Controller's conformance check
      approvalStage 'director'  checked, waiting on the Director's approval
      approvalStage null        released, rejected, or never submitted
    ────────────────────────────────────────────────────────────────────────── */
@@ -432,7 +432,7 @@ const TAQA_APPROVAL = {
     return !!R && R.classifications.indexOf(doc.classification) !== -1;
   },
   /* A document at final approval that no approver for its route is cleared
-     to open. It is not sent to anyone who may not open it, QMS does not
+     to open. It is not sent to anyone who may not open it, the Document Controller does not
      step in as final approver, and classification is not bypassed: the
      workflow waits, escalated, until an authorised approver is assigned
      under the production governance process (BD-08). */
@@ -454,7 +454,7 @@ const TAQA_APPROVAL = {
 
   /* A draft that shipped in the register has no stage field, so read the
      stage rather than the field: otherwise every pre-existing draft sits in
-     QMS's queue on screen and refuses to be checked from it. A rejected
+     the Document Controller's queue on screen and refuses to be checked from it. A rejected
      draft holds no stage either, so it drops out of both queues until it is
      resubmitted rather than sitting there asking to be signed again. */
   stageOf(doc){
@@ -464,7 +464,7 @@ const TAQA_APPROVAL = {
 
   /* Separation of duties (PI-31; BUSINESS-RULES §4, §10):
        SUBMITTER ≠ QMS CHECKER ≠ FINAL APPROVER.
-     Whoever filed a document may not perform the QMS check on it or give it
+     Whoever filed a document may not perform the document control check on it or give it
      final approval, and whoever performed the check may not also approve it.
      Returns the reason in words, or null.
 
@@ -491,9 +491,9 @@ const TAQA_APPROVAL = {
     if (TAQA_APPROVAL.mayBeMe(doc.submittedById, doc.submittedBy))
       return stage === 'director'
         ? 'You filed this document, so someone else must give it final approval.'
-        : 'You filed this document, so someone else must do the QMS check.';
+        : 'You filed this document, so someone else must do the document control check.';
     if (stage === 'director' && TAQA_APPROVAL.mayBeMe(doc.countersignedById, doc.countersignedBy))
-      return 'You did the QMS check on this document, so someone else must give it final approval.';
+      return 'You did the document control check on this document, so someone else must give it final approval.';
     return null;
   },
 
@@ -555,7 +555,7 @@ const TAQA_APPROVAL = {
   // What is this document waiting for, in words, for whoever is looking at it.
   waitingOn(doc){
     const st = TAQA_APPROVAL.stageOf(doc);
-    if (st === 'qms') return 'QMS conformance check';
+    if (st === 'qms') return 'Document control conformance check';
     if (st === 'director' && TAQA_APPROVAL.approvalBlocked(doc))
       return 'an authorised final approver (escalated: no approver for this route may open ' +
         String(doc.classification) + ' documents; one must be assigned)';
@@ -877,9 +877,9 @@ TAQA_ROLE.effective = function(roleKey){
   // Director's delegation could check a document and then approve it too:
   // both release steps in one pair of hands (PI-04).
   //   approve      only if the delegation includes it and the grantor holds it,
-  //                and never for a role that performs the QMS check: QMS never
+  //                and never for a role that performs the document control check: QMS never
   //                gives final approval, delegation included (BUSINESS-RULES §4)
-  //   countersign  never: the QMS check is not delegable, and a delegate is
+  //   countersign  never: the document control check is not delegable, and a delegate is
   //                someone signing in another person's place
   //   manage       (edit details and withdraw) only if the delegation names
   //                "Manage documents" and the grantor holds it: approval does

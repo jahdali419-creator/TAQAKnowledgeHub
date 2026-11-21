@@ -42,6 +42,10 @@
   /* ── Type ── */
   --th-font-display:'BwGradual','Urbanist',system-ui,sans-serif;
   --th-font-text:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  /* Every control a person types in or chooses from. Separate from
+     --th-font-text on purpose: body copy and form fields are allowed to
+     differ, and the fields are the one surface the reader aims at. */
+  --th-font-field:'Urbanist',system-ui,-apple-system,'Segoe UI',sans-serif;
   --th-fs-hero:clamp(32px,4.4vw,54px);
   --th-fs-h1:clamp(28px,3.2vw,38px);
   --th-fs-h2:22px;
@@ -180,3 +184,15 @@ html.th-lock,html.th-lock body{overflow:hidden!important;}
 @media (prefers-reduced-motion: reduce){
   .th-btn,.th-chip,.th-scrim,.th-drawer,.th-drawer-x{transition-duration:.01ms!important;}
 }
+
+/* ── Form controls ────────────────────────────────────────────────────────
+   One face for everything you fill in: text boxes, searches, selects,
+   textareas and date fields. Pages that set their own font on a control
+   override this by specificity, so each of those is pointed at the same
+   token rather than left to drift. */
+/* Buttons are deliberately NOT in this list. Most already set their own
+   face, so adding them here would change only the ones that do not and
+   leave the rest, which is worse than leaving them all alone. Changing
+   buttons is a separate, deliberate decision. */
+input, select, textarea { font-family: var(--th-font-field); }
+input::placeholder, textarea::placeholder { font-family: var(--th-font-field); }

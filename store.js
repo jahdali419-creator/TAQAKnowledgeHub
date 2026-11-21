@@ -29,7 +29,7 @@
 
    An upload lands as a draft, per TQ-QHSE-S001 4.4: it counts in register
    and in pending from the instant it is submitted, and joins live only when
-   QMS approves it. So the number a person sees move on submit is the honest
+   the Document Controller approves it. So the number a person sees move on submit is the honest
    one, and approval moves the rest.
    ────────────────────────────────────────────────────────────────────── */
 (function (root) {
@@ -128,7 +128,7 @@
   /* Every write, and every check a write depends on, starts from what is in
      storage now rather than what this tab read earlier. save() writes the whole
      list back, so a tab left open on a stale copy used to overwrite another
-     tab's changes: QMS confirming one document in one tab and another in a
+     tab's changes: the Document Controller confirming one document in one tab and another in a
      second tab erased the first confirmation. */
   function fresh() { _added = null; _over = null; }
   // Another tab wrote: drop the cached copy whether or not this page asked
@@ -235,7 +235,7 @@
   // left both queues when it was returned (PI-24).
   function isPending(d) { return d.status === 'draft' && !d.rejected; }
   /* A draft that shipped in the file carries no stage, so treat it as
-     waiting on QMS: that is the first step now, before the Director's
+     waiting on the Document Controller: that is the first step now, before the Director's
      approval releases it. Otherwise fifteen real drafts would sit in no
      queue at all and look like nobody had to do anything about them. */
   function stageOf(d) {
@@ -284,11 +284,11 @@
      and its title is never listed. This is the prototype filtering its own
      demonstration data in the browser, not security; in production the
      server trims what it returns (Microsoft 365 permission trimming). */
-  var NUMBER_REFUSED = 'This number cannot be used. Choose another number or contact QMS.';
+  var NUMBER_REFUSED = 'This number cannot be used. Choose another number or contact the Document Controller.';
   function readable(d) {
     return typeof TAQA_ROLE === 'undefined' || TAQA_ROLE.canSee(d, TAQA_ROLE.current());
   }
-  // A count of work in progress (drafts waiting on QMS or approval) names no
+  // A count of work in progress (drafts waiting on the Document Controller or approval) names no
   // document, so it is trimmed by classification only: an Employee is told
   // how many internal drafts are waiting, never about restricted ones.
   function classOpen(d) {
@@ -518,7 +518,7 @@
      it carries a card (a Lesson Learned or Technical Alert filed in the
      structured format). Operations file field cases: only for an operational
      segment, never for a maintenance department, and only by an employee or
-     the area's own Segment Director. QMS checks them and the Director
+     the area's own Segment Director. document control checks them and the Director
      releases them like any other filing. A Lesson Learned or Technical Alert
      filed as a document, with no card, keeps exactly the rules it had.
      Checked on the record as it will be (a revision or a resubmission
@@ -577,10 +577,10 @@
     // approver either (BUSINESS-RULES §1, §3).
     if (rec.department === 'maintenance' && (segs()[rec.segment] || {}).group !== 'segment')
       return 'Only an operational segment has a maintenance department.';
-    // A policy is company policy, signed by the CEO, and only QMS files one.
+    // A policy is company policy, signed by the CEO, and only the Document Controller files one.
     // Upload offers the type to nobody else; the register now says the same.
     if (rec.docType === 'policy' && (typeof TAQA_ROLE === 'undefined' || TAQA_ROLE.current() !== 'qms'))
-      return 'Only QMS files a policy.';
+      return 'Only the Document Controller files a policy.';
     // One file is one document (BUSINESS-RULES §7).
     if (Array.isArray(rec.files) && rec.files.length > 1) return 'File one controlled document at a time.';
     if (!normNum(rec.docNumber)) return 'A document number is needed.';
@@ -647,7 +647,7 @@
       row.supersedes = null;           // only a revision supersedes anything
     }
     if (again) row.resubmitOf = rec.resubmitOf;
-    // A filing is a draft at the QMS check, whatever the caller sent. add()
+    // A filing is a draft at the document control check, whatever the caller sent. add()
     // used to keep the caller's status, signatures and filer, so a record
     // could be filed straight into force, "approved" by a name of the
     // caller's choosing (PI-09). Every lifecycle field is now the store's.
@@ -655,7 +655,7 @@
     row.approvalStage = 'qms';
     // Every filing is its own record, for good (PR 2B, NEW-01, NEW-03): a
     // permanent id that no later filing can share, and, for a revision, which
-    // attempt at that revision it is. A revision returned by QMS or the
+    // attempt at that revision it is. A revision returned by the Document Controller or the
     // approver keeps its revision label as history; filing it again is the
     // same revision, next attempt (Rev 4.0, attempt 2), never a second record
     // that claims to be the same one. Decisions name this id, so a click made
@@ -949,7 +949,7 @@
      signed-in identity (actingName), never one the caller chooses (PI-09).
 
      The Director's step now comes second and is what releases a document.
-     QMS goes first: it confirms the record is fit to carry the Director's
+     document control goes first: it confirms the record is fit to carry the Director's
      name before it goes live, not a co-signature after the Director has
      already acted. See TAQA_APPROVAL's "Two-step release" comment in
      roles.js for why the order is this way round. */
@@ -1136,7 +1136,7 @@
      only by filing a new controlled revision. It used to be a block-list of
      the lifecycle fields, so a manager could renumber an approved document,
      move it to another area or department, or swap its file (PI-09). */
-  /* A field case's card is not here on purpose: it is what QMS checked and
+  /* A field case's card is not here on purpose: it is what document control checked and
      the Director released, so it changes only by filing again (a returned
      case) or by a new revision, never by editing details. */
   var EDITABLE = ['title', 'summary', 'keywords', 'audience', 'related', 'changeNote',

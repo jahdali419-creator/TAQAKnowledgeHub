@@ -210,7 +210,7 @@ html[data-taqa-theme="dark"] .pg-btn:hover:not(:disabled):not(.pg-dots){border-c
   .pg-btn.pg-nav{min-width:80px;height:42px;font-size:14px;}
   .pg-wrap{gap:8px;padding:20px 0 8px;justify-content:center;}
 }
-.doc-search input{background:transparent;border:none;outline:none;color:var(--text);font-size:13.5px;font-family:'Inter',sans-serif;width:100%;}
+.doc-search input{background:transparent;border:none;outline:none;color:var(--text);font-size:13.5px;font-family:var(--th-font-field);width:100%;}
 .doc-search input::placeholder{color:var(--text-muted);}
 .doc-count-label{font-size:13px;color:var(--text-muted);}
 .doc-count-label strong{color:var(--text);}
@@ -471,7 +471,7 @@ html[data-taqa-theme="dark"] .sh-pill.alert{color:#FF9B5E;}
 .qr-doc-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:13px;font-weight:700;color:#1E1C1A;margin-bottom:14px;line-height:1.4;max-height:3.2em;overflow:hidden;}
 .qr-img{width:170px;height:170px;border-radius:10px;margin:0 auto 14px;display:block;border:3px solid #F4F4F3;}
 .qr-url-row{display:flex;gap:7px;margin-bottom:8px;}
-.qr-url-in{flex:1;padding:7px 10px;border:1px solid rgba(0,0,0,0.1);border-radius:7px;font-size:10.5px;color:#756A61;background:#F4F4F3;font-family:'Inter',sans-serif;min-width:0;}
+.qr-url-in{flex:1;padding:7px 10px;border:1px solid rgba(0,0,0,0.1);border-radius:7px;font-size:10.5px;color:#756A61;background:#F4F4F3;font-family:var(--th-font-field);min-width:0;}
 html[data-taqa-theme="dark"] .qr-url-in{background:#001314;border-color:rgba(0,187,182,0.2);color:#8CB6B9;}
 .qr-copy{padding:7px 12px;border-radius:7px;border:none;background:#005D63;color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
 .qr-close{display:block;width:100%;padding:9px;border-radius:9px;border:1px solid rgba(0,0,0,0.1);background:transparent;color:var(--text-light);font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;}
@@ -1662,7 +1662,7 @@ document.getElementById('seg-alerts').textContent = seg.alerts || 'None';
 // An area that does not exist has no counts, no update date, nothing to
 // manage and no shelves to search, so none of that is drawn for it.
 if (!SEG_KNOWN) document.documentElement.classList.add('seg-unknown');
-/* Managing a segment is a Director's or QMS's job. An Employee and an Auditor
+/* Managing a segment is a Director's or the Document Controller's job. An Employee and an Auditor
    read this library; offering them a control they cannot use is noise, and in
    the Auditor's case it misstates what their access is. Shown only to someone
    who holds a control panel for THIS area. */
@@ -1685,7 +1685,7 @@ if (!SEG_KNOWN) document.documentElement.classList.add('seg-unknown');
   document.querySelectorAll('.sort-overdue').forEach(function(b){ b.hidden = false; });
 })();
 
-// A document submitted here is a draft until QMS approves it, so it is not in
+// A document submitted here is a draft until the Document Controller approves it, so it is not in
 // the library count above. Show it anyway: someone who has just uploaded needs
 // to see their document land somewhere.
 (function(){
@@ -2732,7 +2732,7 @@ function copyQRUrl() {
    Operations view only: never on an unknown id, a corporate function, a
    product, the company page, or a segment's Maintenance view (field cases
    are filed by operations). Released entries only (TAQA_CASES.forArea), so
-   nothing waiting on QMS or the Director appears here; every value is
+   nothing waiting on the Document Controller or the Director appears here; every value is
    escaped. */
 (function () {
   'use strict';
@@ -2774,7 +2774,7 @@ function copyQRUrl() {
               // reader hears it here, as the mark is hidden from it.
               '<span class="sc-m">' + esc(when(e)) + '<span class="sc-sr">' + esc((when(e) ? ', ' : '') + e.typeLabel) + '</span></span></span></li>';
           }).join('') + '</ol>'
-        : '<p class="sc-empty">Nothing released for ' + esc(name) + ' yet. A case appears here once QMS checks it and the area’s Director releases it.</p>') +
+        : '<p class="sc-empty">Nothing released for ' + esc(name) + ' yet. A case appears here once document control checks it and the area’s Director releases it.</p>') +
       '<div class="sc-acts">' +
         '<a class="sc-a pri" id="sc-all" href="cases.html?area=' + q + '">See all cases</a>' +
         '<a class="sc-a" id="sc-pack" href="prejob.html?area=' + q + '">Pre-job pack</a>' +

@@ -88,7 +88,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .pub-table-search{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--border);}
 .pub-table-search svg{flex-shrink:0;color:var(--text-muted);}
 .pub-table-search-input{flex:1;border:none;background:transparent;font-size:14px;
-  font-family:'Inter',sans-serif;color:var(--text);outline:none;}
+  font-family:var(--th-font-field);color:var(--text);outline:none;}
 .pub-table-search-input::placeholder{color:var(--text-muted);}
 .pub-search-clear{background:none;border:none;cursor:pointer;color:var(--text-muted);
   padding:2px 6px;border-radius:4px;font-size:17px;line-height:1;display:none;transition:color 0.15s;}
@@ -224,7 +224,7 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
 .wd-dlg .wd-doc{font-style:italic;}
 .wd-dlg .wd-open{color:var(--warn-ink,#8a5a00);}
 .wd-dlg label{display:block;font-size:12px;font-weight:700;margin:4px 0;}
-.wd-dlg textarea{width:100%;min-height:80px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:13px;resize:vertical;box-sizing:border-box;}
+.wd-dlg textarea{width:100%;min-height:80px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font:inherit;font-family:var(--th-font-field);font-size:13px;resize:vertical;box-sizing:border-box;}
 .wd-hint{font-size:11.5px;color:var(--text-muted);margin-top:4px;}
 .wd-acts{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
 .wd-acts button{min-height:40px;padding:0 16px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text);}
@@ -416,7 +416,7 @@ html[data-taqa-theme="dark"] .pub-table-footer{border-color:#003A3D;background:r
   if (typeof TAQA_ROLE === 'undefined') return;
   var id = new URLSearchParams(location.search).get('id') || TAQA_ROLE.area();
   if (TAQA_ROLE.canManage(id)) return;
-  TAQA_ROLE.refuse("This list is the area manager\u2019s view", "Published documents can be withdrawn from here, so it is open to the holder of the area and to QMS.");
+  TAQA_ROLE.refuse("This list is the area manager\u2019s view", "Published documents can be withdrawn from here, so it is open to the holder of the area and to the Document Controller.");
 })();
 </script>
 <script src="store.js"></script>
@@ -461,7 +461,7 @@ function buildAllDocs(segId) {
   // rows apart by is whether the review behind them is still on time. That
   // is what a controller scanning this list is actually looking for, more
   // than who the owner role is (API Q2 4.4.3 c)).
-  // Only documents this person may withdraw: QMS sees every one; a Director
+  // Only documents this person may withdraw: the Document Controller sees every one; a Director
   // the area's Operations documents; a Maintenance Manager its maintenance
   // documents (TAQA_ROLE.canManage with the record).
   return TAQA_STORE.rows('live', { segment: segId })

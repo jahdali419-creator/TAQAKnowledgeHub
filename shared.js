@@ -1385,7 +1385,7 @@ document.addEventListener('keydown',function(e){
    The three doors
    ──────────────────────────────────────────────────────────────────────────
    One hub, one register, one URL per document. What changes between an
-   employee, a Segment Director and QMS is which actions appear and which
+   employee, a Segment Director and the Document Controller is which actions appear and which
    queue is theirs, never the address of a document or the figures behind it.
 
    In Azure this control does not exist: the door is decided by the Entra ID
@@ -1405,7 +1405,7 @@ document.addEventListener('keydown',function(e){
     employee: { short:'Employee',  name:'Employee',         line:'Read the register' },
     owner:    { short:'Director',  name:'Segment Director', line:'Approve your segment' },
     maintenance:{ short:'Maintenance', name:'Maintenance Manager', line:'Approve your maintenance' },
-    qms:      { short:'QMS',       name:'QMS',              line:'Check before approval' },
+    qms:      { short:'Doc Control', name:'Document Controller', line:'Check before approval' },
     auditor:  { short:'Auditor',   name:'Auditor',          line:'Read only, everything' }
   };
 
@@ -1433,7 +1433,7 @@ document.addEventListener('keydown',function(e){
       'background:transparent;border-radius:9px;cursor:pointer;font-family:inherit;transition:background .15s;}' +
     '.door-i:hover{background:rgba(0,93,99,.06);}' +
     '.door-i[aria-current="true"]{background:rgba(0,93,99,.08);}' +
-    '.door-i .dt{grid-column:2;font-size:13px;font-weight:700;color:var(--text,#1E1C1A);line-height:1.25;}' +
+    '.door-i .dt{grid-column:2;font-size:13px;font-weight:500;color:var(--text,#1E1C1A);line-height:1.25;}' +
     '.door-i .dd{grid-column:2;font-size:11px;color:var(--text-muted,#524D48);line-height:1.3;}' +
     '.door-i .dk{grid-column:3;grid-row:1/3;color:var(--primary,#005D63);opacity:0;font-size:12px;font-weight:800;}' +
     '.door-i[aria-current="true"] .dk{opacity:1;}' +
@@ -1805,7 +1805,7 @@ document.addEventListener('keydown',function(e){
     'html[data-taqa-theme="dark"] .bell-i:hover,html[data-taqa-theme="dark"] .bell-foot:hover{background:rgba(0,187,182,.08);}';
   document.head.appendChild(css);
 
-  // QMS checks every area's documents, so its queue is the company-wide
+  // document control checks every area's documents, so its queue is the company-wide
   // "Waiting on QMS" view of the Master List. The desk below is one area's
   // desk by design (right for a Director or a Maintenance Manager), and
   // sending QMS there showed one segment's two documents under a bell that
@@ -2007,7 +2007,7 @@ document.addEventListener('keydown',function(e){
               // signer's page unescaped, so a title carrying markup ran as
               // script in the Director's browser the moment the bell was built.
               // It opens the desk the signature is given from, not the viewer.
-              // Where it is from and when, because QMS's bell spans every area
+              // Where it is from and when, because the Document Controller's bell spans every area
               // and a bare title does not say whose document it is.
               // For QMS that is the Workbench, open on this document; for a
               // Director or a Maintenance Manager it is their area's desk.
@@ -2021,7 +2021,7 @@ document.addEventListener('keydown',function(e){
             }).join('')
           : '<div class="bell-i" style="cursor:default;"><span class="bd">Nothing waiting right now.</span></div>') +
         (pending.length > SHOWN ? '<button type="button" class="bell-more">+ ' + (pending.length - SHOWN) + ' more, see ' +
-          (qmsQueue() ? 'everything waiting on QMS' : 'your queue') + '</button>' : '')
+          (qmsQueue() ? 'everything waiting on the Document Controller' : 'your queue') + '</button>' : '')
       : '';
     var mineHtml = mine.length
       ? '<div class="bell-hd">Your submissions</div>' +
