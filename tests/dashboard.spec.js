@@ -29,45 +29,88 @@ async function addDraft(page, overrides = {}) {
 const CLEAN_SEGMENT = 'cementing';
 
 test.describe('Contributors', () => {
-  test('Add Contributor appends a row with the chosen name, title and role, and toasts', async ({ page, gotoApp, setRole, clearAppState, consoleErrors }) => {
+  // A contributor is named by address: the name, job title and employee ID
+  // come from the directory, and there is no field in which to type them.
+  async function openDialog(page, gotoApp, setRole, clearAppState) {
     await gotoApp('/index.html');
     await clearAppState();
     await setRole('qms', CLEAN_SEGMENT);
     await gotoApp('/dashboard.html?id=' + CLEAN_SEGMENT);
-
     const before = await page.locator('#contributors-list .contributor-row').count();
     await page.getByRole('button', { name: '+ Add Contributor' }).click();
     await expect(page.locator('#add-contributor-modal')).toHaveClass(/open/);
-    // The dialog moves focus to Name 100 ms after opening. Typing before that
-    // lands raced it: under load "QA Engineer" ended up in Name. Let the
-    // page's own focus settle first, as a person necessarily does.
-    await expect(page.locator('#contrib-name')).toBeFocused();
+    // The dialog moves focus to the address field 100 ms after opening; let
+    // the page's own focus settle first, as a person necessarily does.
+    await expect(page.locator('#contrib-email')).toBeFocused();
+    return before;
+  }
 
-    await page.fill('#contrib-name', 'Regression Test Person');
-    await page.fill('#contrib-title', 'QA Engineer');
+  // Adds whoever the area's directory lists first, and returns that record.
+  async function addFirstFromDirectory(page) {
+    const who = await page.evaluate(() => {
+      const d = directory(), k = Object.keys(d);
+      return k.length ? d[k[0]] : null;
+    });
+    expect(who, 'the area has at least one directory record').not.toBeNull();
+    await page.fill('#contrib-email', who.email);
+    await expect(page.locator('#lk-card')).toHaveClass(/show/);
+    await page.getByRole('button', { name: 'Add to Segment' }).click();
+    return who;
+  }
+
+  test('a contributor is named by address: the record is looked up, not typed, and the row is marked a preview', async ({ page, gotoApp, setRole, clearAppState, consoleErrors }) => {
+    const before = await openDialog(page, gotoApp, setRole, clearAppState);
+
+    // There is no name or job title to type.
+    await expect(page.locator('#contrib-name')).toHaveCount(0);
+    await expect(page.locator('#contrib-title')).toHaveCount(0);
+
+    const who = await page.evaluate(() => {
+      const d = directory(), k = Object.keys(d);
+      return k.length ? d[k[0]] : null;
+    });
+    expect(who, 'the area has at least one directory record').not.toBeNull();
+
+    await page.fill('#contrib-email', who.email);
+    await expect(page.locator('#lk-card')).toHaveClass(/show/);
+    await expect(page.locator('#lk-name')).toHaveText(who.name);
+    await expect(page.locator('#lk-title')).toHaveText(who.title);
+    await expect(page.locator('#lk-eid')).toHaveText(who.eid);
+    // RISE has no tenant connection, so every record says what it is.
+    await expect(page.locator('#lk-card .lk-badge')).toHaveText('Preview record');
+
     await page.selectOption('#contrib-role', 'Viewer');
     await page.getByRole('button', { name: 'Add to Segment' }).click();
 
     await expect(page.locator('#add-contributor-modal')).not.toHaveClass(/open/);
     await expect(page.locator('#contributors-list .contributor-row')).toHaveCount(before + 1);
-    await expect(page.locator('#contributors-list')).toContainText('Regression Test Person');
-    await expect(page.locator('#contributors-list')).toContainText('QA Engineer');
-    await expect(page.locator('#dash-toast-msg')).toHaveText('Regression Test Person added as Viewer');
+    await expect(page.locator('#contributors-list')).toContainText(who.name);
+    await expect(page.locator('#contributors-list')).toContainText(who.title);
+    await expect(page.locator('#contributors-list')).toContainText(who.eid);
+    await expect(page.locator('#contributors-list .crole-preview')).toHaveCount(1);
+    await expect(page.locator('#dash-toast-msg')).toHaveText(who.name + ' added as Viewer');
 
     assertNoConsoleErrors(consoleErrors);
   });
 
-  test('an empty name is refused: focus moves to the field and no row is added', async ({ page, gotoApp, setRole, clearAppState }) => {
-    await gotoApp('/index.html');
-    await clearAppState();
-    await setRole('qms', CLEAN_SEGMENT);
-    await gotoApp('/dashboard.html?id=' + CLEAN_SEGMENT);
+  test('an address outside @tq.com is refused, and so is one the directory does not hold', async ({ page, gotoApp, setRole, clearAppState }) => {
+    const before = await openDialog(page, gotoApp, setRole, clearAppState);
+    const add = page.getByRole('button', { name: 'Add to Segment' });
 
-    const before = await page.locator('#contributors-list .contributor-row').count();
-    await page.getByRole('button', { name: '+ Add Contributor' }).click();
-    await page.getByRole('button', { name: 'Add to Segment' }).click();
+    await expect(add).toBeDisabled();                       // nothing entered
 
-    await expect(page.locator('#contrib-name')).toBeFocused();
+    await page.fill('#contrib-email', 'someone@gmail.com');
+    await expect(page.locator('#lk-msg')).toContainText('@tq.com');
+    await expect(page.locator('#lk-card')).not.toHaveClass(/show/);
+    await expect(add).toBeDisabled();
+
+    await page.fill('#contrib-email', 'no.such.person@tq.com');
+    await expect(page.locator('#lk-msg')).toContainText('No directory record');
+    await expect(page.locator('#lk-card')).not.toHaveClass(/show/);
+    await expect(add).toBeDisabled();
+
+    // Forced anyway, it still adds nobody: the record is the gate, not the button.
+    await page.evaluate(() => addContributor());
     await expect(page.locator('#contributors-list .contributor-row')).toHaveCount(before);
   });
 
@@ -77,8 +120,7 @@ test.describe('Contributors', () => {
     await setRole('qms', CLEAN_SEGMENT);
     await gotoApp('/dashboard.html?id=' + CLEAN_SEGMENT);
     await page.getByRole('button', { name: '+ Add Contributor' }).click();
-    await page.fill('#contrib-name', 'Temp Person');
-    await page.getByRole('button', { name: 'Add to Segment' }).click();
+    await addFirstFromDirectory(page);
 
     const removeControls = await page.locator(
       '#contributors-list button, #contributors-list [class*="remove" i], #contributors-list [class*="delete" i]'
@@ -93,9 +135,8 @@ test.describe('Contributors', () => {
     await gotoApp('/dashboard.html?id=' + CLEAN_SEGMENT);
 
     await page.getByRole('button', { name: '+ Add Contributor' }).click();
-    await page.fill('#contrib-name', 'Ephemeral Person');
-    await page.getByRole('button', { name: 'Add to Segment' }).click();
-    await expect(page.locator('#contributors-list')).toContainText('Ephemeral Person');
+    const who = await addFirstFromDirectory(page);
+    await expect(page.locator('#contributors-list')).toContainText(who.name);
 
     // addContributor() only mutates the DOM; it is not even localStorage-
     // backed, so a fresh load of the same desk has no trace of it. Real
@@ -103,7 +144,7 @@ test.describe('Contributors', () => {
     // addContributor() (~line 1460), which never calls TAQA_STORE or
     // localStorage.
     await gotoApp('/dashboard.html?id=' + CLEAN_SEGMENT);
-    await expect(page.locator('#contributors-list')).not.toContainText('Ephemeral Person');
+    await expect(page.locator('#contributors-list .crole-preview')).toHaveCount(0);
 
     // Guard against future copy claiming this is saved beyond this page
     // load: it is not organisation-wide, and today it is not even

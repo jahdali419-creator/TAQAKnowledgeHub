@@ -282,6 +282,42 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
 .form-select{width:100%;padding:10px 40px 10px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:var(--th-font-field);color:var(--text);background:#fff;outline:none;cursor:pointer;transition:border-color 0.2s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23968C83' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
 .form-select:focus{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(0,187,182,0.1);}
 .role-hint{font-size:11.5px;color:var(--text-dim);margin-top:5px;}
+/* ── Directory lookup ──
+   The Director types an address and the record appears; nothing about the
+   person is typed. The fields below are therefore shown, not offered: they
+   are read-only by construction, not inputs that happen to be disabled. */
+.lk-msg{font-size:12px;margin-top:7px;display:none;line-height:1.45;}
+.lk-msg.show{display:block;}
+.lk-msg.bad{color:var(--stop-ink,#C8102E);}
+.lk-msg.hint{color:var(--text-muted);}
+.lk-card{display:none;margin-top:14px;border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;background:var(--inset,#F7F6F4);}
+.lk-card.show{display:block;}
+.lk-head{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.lk-av{width:40px;height:40px;border-radius:50%;flex:none;display:grid;place-items:center;
+  background:rgba(0,93,99,0.10);color:var(--primary-ink);
+  font:800 14px/1 'BwGradual','Urbanist',sans-serif;}
+.lk-name{font:800 15px/1.25 'BwGradual','Urbanist',sans-serif;color:var(--text);}
+.lk-mail{font-size:12px;color:var(--text-muted);margin-top:2px;word-break:break-all;}
+.lk-rows{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:12.5px;}
+.lk-k{color:var(--text-muted);}
+.lk-v{color:var(--text);font-weight:600;}
+/* These are example records. The badge says so wherever one is shown, and it
+   is not styling that can be turned off: the record is only rendered with it. */
+.lk-badge{display:inline-block;margin-top:12px;padding:3px 9px;border-radius:999px;
+  background:rgba(253,105,29,0.12);border:1px solid rgba(253,105,29,0.35);
+  color:#A8431A;font:700 9.5px/1.5 Arial,Helvetica,sans-serif;letter-spacing:.5px;
+  text-transform:uppercase;}
+.lk-note{font-size:11.5px;color:var(--text-muted);margin-top:7px;line-height:1.45;}
+.btn-modal-add[disabled]{opacity:.45;cursor:not-allowed;}
+.btn-modal-add[disabled]:hover{opacity:.45;}
+/* A contributor added from an example record is marked in the list too, so a
+   preview person is never read as a colleague who really holds the role. */
+.crole-preview{background:rgba(253,105,29,0.12);color:#A8431A;}
+/* The employee ID is what tells two colleagues of the same name apart, so it
+   stays on the row; on its own line it does not fight the badges for width. */
+.contributor-eid{font-size:10.5px;color:var(--text-dim,#968C83);margin-top:1px;
+  font-variant-numeric:tabular-nums;}
 .modal-actions{display:flex;gap:10px;margin-top:24px;}
 .btn-modal-add{flex:1;padding:11px;border-radius:10px;background:var(--gradient);color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:Arial,Helvetica,sans-serif;transition:opacity 0.2s;}
 .btn-modal-add:hover{opacity:0.88;}
@@ -742,14 +778,31 @@ html[data-taqa-theme="dark"] .dash-unknown{background:#002326;border-color:#0048
   <div class="modal-box">
     <button class="modal-close" onclick="closeAddContributor()">×</button>
     <div class="modal-title">Add Contributor</div>
-    <div class="modal-sub">This person will be able to upload documents to the <span id="modal-seg-name">Coiled Tubing</span> segment.</div>
+    <div class="modal-sub">Enter the person’s TAQA address. Their name, job title and employee ID come from the directory — they are never typed here. They will be able to upload documents to the <span id="modal-seg-name">Coiled Tubing</span> segment.</div>
     <div class="form-group">
-      <label class="form-label">Full Name</label>
-      <input class="form-input" id="contrib-name" type="text" placeholder="e.g. Ahmed Al-Zahrani" autocomplete="off">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Job Title</label>
-      <input class="form-input" id="contrib-title" type="text" placeholder="e.g. CT Field Engineer">
+      <label class="form-label" for="contrib-email">TAQA email address</label>
+      <input class="form-input" id="contrib-email" type="email" inputmode="email"
+             placeholder="name@tq.com" autocomplete="off" spellcheck="false"
+             list="contrib-dir" aria-describedby="lk-msg">
+      <datalist id="contrib-dir"></datalist>
+      <div class="lk-msg" id="lk-msg" role="status" aria-live="polite"></div>
+      <div class="lk-card" id="lk-card">
+        <div class="lk-head">
+          <span class="lk-av" id="lk-av" aria-hidden="true"></span>
+          <div>
+            <div class="lk-name" id="lk-name"></div>
+            <div class="lk-mail" id="lk-mail"></div>
+          </div>
+        </div>
+        <div class="lk-rows">
+          <span class="lk-k">Job title</span><span class="lk-v" id="lk-title"></span>
+          <span class="lk-k">Employee ID</span><span class="lk-v" id="lk-eid"></span>
+        </div>
+        <span class="lk-badge">Preview record</span>
+        <div class="lk-note">RISE is not yet connected to the TAQA tenant, so this
+          record is an example, not a live directory lookup. Once IT connects it,
+          the same fields arrive from the tenant and nothing on this screen changes.</div>
+      </div>
     </div>
     <div class="form-group">
       <label class="form-label">Assign Role</label>
@@ -762,7 +815,7 @@ html[data-taqa-theme="dark"] .dash-unknown{background:#002326;border-color:#0048
     </div>
     <div class="modal-actions">
       <button class="btn-modal-cancel" onclick="closeAddContributor()">Cancel</button>
-      <button class="btn-modal-add" onclick="addContributor()">Add to Segment</button>
+      <button class="btn-modal-add" id="contrib-add" onclick="addContributor()" disabled>Add to Segment</button>
     </div>
   </div>
 </div>
@@ -1777,14 +1830,104 @@ const ROLE_HINTS = {
 const AVATAR_COLORS = ['av-teal','av-blue','av-orange','av-purple','av-deep','av-soft'];
 let avatarIdx = 0;
 
+/* ── The directory ──
+   A Director names a colleague by address and nothing else: the name, the job
+   title and the employee ID are the directory's to give, not theirs to type.
+   RISE has no tenant connection, so the records here are the same example
+   people this segment already shows on its honour band, and every one of them
+   is rendered with a Preview badge. When IT connects Entra ID, lookUp() is the
+   single function that changes; the screen around it does not. */
+const DOMAIN = '@tq.com';
+
+// first.last@tq.com, as TAQA addresses are formed. "Al-Amri" -> "alamri".
+function emailOf(name) {
+  const w = String(name || '').trim().split(/\s+/).filter(Boolean);
+  if (!w.length) return '';
+  const part = t => t.toLowerCase().replace(/[^a-z]/g, '');
+  const first = part(w[0]), last = w.length > 1 ? part(w[w.length - 1]) : '';
+  return (last ? first + '.' + last : first) + DOMAIN;
+}
+// Stable per name, so the same person shows the same number every time.
+function eidOf(name) {
+  let h = 5381;
+  for (let i = 0; i < name.length; i++) h = ((h << 5) + h + name.charCodeAt(i)) >>> 0;
+  return 'TQ-' + String(h % 900000 + 100000);
+}
+function directory() {
+  const id = new URLSearchParams(location.search).get('id') ||
+             (typeof TAQA_ROLE !== 'undefined' ? TAQA_ROLE.area() : '');
+  let people = [];
+  try { people = (window.TAQA_RECOGNITION && TAQA_RECOGNITION.examples(id)) || []; } catch (e) {}
+  const out = {};
+  people.forEach(function (r) {
+    const mail = emailOf(r.label);
+    if (mail) out[mail] = { name: r.label, title: r.title || 'Segment Contributor',
+                            eid: eidOf(r.label), email: mail, preview: true };
+  });
+  return out;
+}
+// The one function a tenant connection replaces.
+function lookUp(email) { return directory()[String(email || '').trim().toLowerCase()] || null; }
+
+let foundPerson = null;
+
+function renderLookup() {
+  const raw = document.getElementById('contrib-email').value.trim().toLowerCase();
+  const msg = document.getElementById('lk-msg');
+  const card = document.getElementById('lk-card');
+  const addBtn = document.getElementById('contrib-add');
+  foundPerson = null;
+  card.classList.remove('show');
+  msg.className = 'lk-msg';
+  msg.textContent = '';
+  addBtn.disabled = true;
+  if (!raw) return;
+  if (raw.indexOf('@') === -1) return;              // still typing
+  if (!raw.endsWith(DOMAIN)) {
+    msg.className = 'lk-msg show bad';
+    msg.textContent = 'Only a TAQA address ending ' + DOMAIN + ' can be added.';
+    return;
+  }
+  const hit = lookUp(raw);
+  if (!hit) {
+    msg.className = 'lk-msg show bad';
+    msg.textContent = 'No directory record for that address. Check the spelling, or pick one of the suggestions.';
+    return;
+  }
+  document.getElementById('lk-av').textContent =
+    hit.name.split(' ').map(w => w[0]).join('').toUpperCase().substring(0, 2);
+  document.getElementById('lk-name').textContent = hit.name;
+  document.getElementById('lk-mail').textContent = hit.email;
+  document.getElementById('lk-title').textContent = hit.title;
+  document.getElementById('lk-eid').textContent = hit.eid;
+  card.classList.add('show');
+  addBtn.disabled = false;
+  foundPerson = hit;
+}
+
 function openAddContributor() {
-  document.getElementById('contrib-name').value = '';
-  document.getElementById('contrib-title').value = '';
+  const mail = document.getElementById('contrib-email');
+  mail.value = '';
+  const dl = document.getElementById('contrib-dir');
+  dl.innerHTML = Object.keys(directory()).sort()
+    .map(a => '<option value="' + dEsc(a) + '"></option>').join('');
   document.getElementById('contrib-role').value = 'Editor';
   updateRoleHint();
+  renderLookup();
   document.getElementById('add-contributor-modal').classList.add('open');
-  setTimeout(() => document.getElementById('contrib-name').focus(), 100);
+  setTimeout(() => mail.focus(), 100);
 }
+document.addEventListener('DOMContentLoaded', function () {
+  const mail = document.getElementById('contrib-email');
+  if (!mail) return;
+  mail.addEventListener('input', renderLookup);
+  mail.addEventListener('change', renderLookup);
+  mail.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); renderLookup();
+      if (foundPerson) document.getElementById('contrib-add').focus(); }
+  });
+});
+
 function closeAddContributor() {
   document.getElementById('add-contributor-modal').classList.remove('open');
 }
@@ -1796,11 +1939,11 @@ function updateRoleHint() {
   document.getElementById('role-hint').textContent = ROLE_HINTS[role];
 }
 function addContributor() {
-  const name = document.getElementById('contrib-name').value.trim();
-  const title = document.getElementById('contrib-title').value.trim();
+  // Nothing is added without a directory record behind it, so there is no
+  // path by which a typed name becomes a contributor.
+  if (!foundPerson) { document.getElementById('contrib-email').focus(); return; }
+  const name = foundPerson.name, title = foundPerson.title;
   const role = document.getElementById('contrib-role').value;
-  if(!name) { document.getElementById('contrib-name').focus(); document.getElementById('contrib-name').style.borderColor='var(--stop-ink,#C8102E)'; return; }
-  document.getElementById('contrib-name').style.borderColor='';
   const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().substring(0,2);
   const roleBadgeClass = {Editor:'crole-editor',Viewer:'crole-viewer',Owner:'crole-owner'}[role];
   if (!roleBadgeClass) return;
@@ -1817,7 +1960,9 @@ function addContributor() {
     <div class="contributor-info">
       <div class="contributor-name">${dEsc(name)}</div>
       <div class="contributor-role">${dEsc(title || 'Segment Contributor')}</div>
+      <div class="contributor-eid">${dEsc(foundPerson.eid)}</div>
     </div>
+    ${foundPerson.preview ? '<span class="contributor-role-badge crole-preview">Preview</span>' : ''}
     <span class="contributor-role-badge ${roleBadgeClass}">${dEsc(role)}</span>`;
   list.insertBefore(newRow, list.lastElementChild);
   setTimeout(() => newRow.style.opacity = '1', 30);
