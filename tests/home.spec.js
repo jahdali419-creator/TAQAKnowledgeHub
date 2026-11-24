@@ -514,7 +514,11 @@ test.describe('Home, as before: full screen, moving, the segments one scroll bel
     await expect(page.locator('h1').first()).toBeVisible();
   });
 
-  test('dark theme: the photo band stays dark with white and teal words; the strip below follows the theme', async ({ page, gotoApp }) => {
+  // The teal used to be a phrase of the slogan, "Better Together." The
+  // headline is one plain sentence now and carries no accent of its own, so
+  // what this checks on the dark band is that both of its lines stay legible
+  // and that the accent still appears where it means something: the figures.
+  test('dark theme: the photo band stays dark, both headline lines stay legible, the figures keep the accent; the strip below follows the theme', async ({ page, gotoApp }) => {
     await page.addInitScript(() => { try { localStorage.setItem('taqa-theme-v3', 'dark'); } catch (e) {} });
     await gotoApp('/index.html');
     await expect(page.locator('html')).toHaveAttribute('data-taqa-theme', 'dark');
@@ -522,13 +526,15 @@ test.describe('Home, as before: full screen, moving, the segments one scroll bel
       const col = (s, p = 'color') => getComputedStyle(document.querySelector(s))[p];
       return {
         lead: col('.hero h1 .hero-h1-lead'),
-        teal: col('.hero h1 > span:nth-child(2)'),
+        sub: col('.hero h1 .hero-h1-sub'),
+        teal: col('.stat-row-value'),
         cue: col('.hero-cue'),
         ground: col('.hero-wrap', 'backgroundColor'),
         strip: col('.doors-strip', 'backgroundColor'),
       };
     });
     expect(c.lead).toBe('rgb(255, 255, 255)');
+    expect(c.sub).toBe('rgba(255, 255, 255, 0.84)');
     expect(c.teal).toBe('rgb(0, 187, 182)');
     expect(c.cue).toBe('rgba(255, 255, 255, 0.88)');
     expect(c.ground).toBe('rgb(0, 19, 20)');
