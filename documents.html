@@ -160,7 +160,8 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--tex
    warning family: the word in the chip already says which type it is. Both
    inks go through a token because the chip keeps its tint on the dark card,
    where the light-ground teal measured under 2:1. */
-.pub-type-sop,.pub-type-manual,.pub-type-policy,.pub-type-lesson{
+.pub-type-sop,.pub-type-manual,.pub-type-policy,.pub-type-lesson,
+.pub-type-form,.pub-type-software{
   background:rgba(0,93,99,0.07);color:var(--primary-ink);}
 .pub-type-alert{background:rgba(253,105,29,0.12);color:var(--alert-ink);}
 .pub-table-date{color:var(--text-muted);font-size:12px;white-space:nowrap;}
@@ -355,10 +356,12 @@ html[data-taqa-theme="dark"] .pub-table-footer{border-color:#003A3D;background:r
     <div class="pub-type-filters" id="pub-type-filters">
       <button class="pub-filter-pill active" data-filter="all" onclick="setPubFilter('all',this)">All <span class="pill-count" id="pill-count-all"></span></button>
       <button class="pub-filter-pill" data-filter="sop" onclick="setPubFilter('sop',this)" id="pill-sop">SOP <span class="pill-count" id="pill-count-sop"></span></button>
+      <button class="pub-filter-pill" data-filter="form" onclick="setPubFilter('form',this)" id="pill-form">Form <span class="pill-count" id="pill-count-form"></span></button>
       <button class="pub-filter-pill" data-filter="manual" onclick="setPubFilter('manual',this)" id="pill-manual">Manual <span class="pill-count" id="pill-count-manual"></span></button>
       <button class="pub-filter-pill" data-filter="policy" onclick="setPubFilter('policy',this)" id="pill-policy">Policy <span class="pill-count" id="pill-count-policy"></span></button>
       <button class="pub-filter-pill" data-filter="alert" onclick="setPubFilter('alert',this)" id="pill-alert">Alert <span class="pill-count" id="pill-count-alert"></span></button>
       <button class="pub-filter-pill" data-filter="lesson" onclick="setPubFilter('lesson',this)" id="pill-lesson">Lesson <span class="pill-count" id="pill-count-lesson"></span></button>
+      <button class="pub-filter-pill" data-filter="software" onclick="setPubFilter('software',this)" id="pill-software">Software <span class="pill-count" id="pill-count-software"></span></button>
     </div>
     <!-- Table -->
     <table class="pub-table">
@@ -454,9 +457,16 @@ function buildAllDocs(segId) {
   };
   // The register stores an area's own rules as standards; this page's table
   // has always called that column policy, so keep the key and relabel above.
-  const TYPE_KEY = { sop:'sop',form:'sop', manual:'manual', standard:'policy',
-                     policy:'policy', alert:'alert', lesson:'lesson' };
-  const ORDER = { sop:0, manual:1, policy:2, alert:3, lesson:4 };
+  // A checklist is a Form, not a procedure. This page used to fold form into
+  // sop, so TQ-TWS-CTSS-F001, the Pre-Job Safety Checklist, carried an SOP
+  // badge here while the segment page correctly listed it under Forms &
+  // Checklists: two pages naming the same record two different things, which
+  // is exactly what a document-control audit looks for. Software had no entry
+  // at all, so its rows fell through to an undefined type.
+  const TYPE_KEY = { sop:'sop', form:'form', manual:'manual', standard:'policy',
+                     policy:'policy', alert:'alert', lesson:'lesson',
+                     software:'software' };
+  const ORDER = { sop:0, form:1, manual:2, policy:3, alert:4, lesson:5, software:6 };
   // Everything in 'live' is status current, so the one thing left to tell
   // rows apart by is whether the review behind them is still on time. That
   // is what a controller scanning this list is actually looking for, more
@@ -492,12 +502,14 @@ function getTypeLabels(segId) {
     policy: lbl.policies|| 'Standard',   // an area issues standards, not policy
     standard: lbl.policies|| 'Standard',
     alert:  lbl.alerts  || 'Alert',
-    lesson: lbl.lessons || 'Lesson'
+    lesson: lbl.lessons || 'Lesson',
+    form:   lbl.forms   || 'Form',
+    software: lbl.software || 'Software'
   };
 }
 
 function renderPubTable(docs, tl) {
-  const tc = { sop:'pub-type-sop',form:'pub-type-sop', manual:'pub-type-manual', policy:'pub-type-policy', alert:'pub-type-alert', lesson:'pub-type-lesson' };
+  const tc = { sop:'pub-type-sop', form:'pub-type-form', manual:'pub-type-manual', policy:'pub-type-policy', alert:'pub-type-alert', lesson:'pub-type-lesson', software:'pub-type-software' };
   const ri = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>`;
   document.getElementById('pub-docs-body').innerHTML = docs.map(d =>
     `<tr data-type="${esc(d.type)}">
@@ -505,7 +517,7 @@ function renderPubTable(docs, tl) {
         ${d.num ? `<span class="pdt-num">${esc(d.num)}</span>` : ''}
         <span class="pdt-t">${esc(d.title)}</span>
       </td>
-      <td><span class="pub-doc-type-badge ${tc[d.type]||'pub-type-sop'}">${d.kind==='policy'?'Policy':esc(tl[d.type]||d.type)}</span></td>
+      <td><span class="pub-doc-type-badge ${tc[d.type]||'pub-type-sop'}">${d.kind==='policy'?'Policy':esc(tl[d.type]||d.type||'Document')}</span></td>
       <td class="pub-table-date">${esc(d.date)}</td>
       <td class="pub-table-status" data-late="${d.late}">${d.late > 0
         ? `<span class="pub-status pub-status-warn">Review overdue, ${d.late < 60 ? d.late + (d.late === 1 ? ' day' : ' days') : Math.floor(d.late / 30.44) + ' months'}</span>`
@@ -518,10 +530,15 @@ function renderPubTable(docs, tl) {
 }
 
 function initPubPills(tl) {
-  const pillMap = { sop:'pill-sop',form:'pill-sop', manual:'pill-manual', policy:'pill-policy', alert:'pill-alert', lesson:'pill-lesson' };
+  // form used to point at pill-sop as well. The loop reached sop first and
+  // wrote "SOP", then reached form, found no label for it, and overwrote the
+  // same button with the word undefined. Each type now has its own button,
+  // and a type with no label is left alone rather than blanking one.
+  const pillMap = { sop:'pill-sop', form:'pill-form', manual:'pill-manual', policy:'pill-policy',
+                    alert:'pill-alert', lesson:'pill-lesson', software:'pill-software' };
   Object.keys(pillMap).forEach(k => {
     const pill = document.getElementById(pillMap[k]);
-    if (!pill) return;
+    if (!pill || !tl[k]) return;
     const countSpan = pill.querySelector('.pill-count');
     pill.textContent = tl[k] + ' ';
     if (countSpan) pill.appendChild(countSpan);
@@ -529,12 +546,23 @@ function initPubPills(tl) {
 }
 
 function updatePillCounts(docs) {
-  const counts = { all: docs.length, sop: 0, manual: 0, policy: 0, alert: 0, lesson: 0 };
+  const counts = { all: docs.length, sop: 0, form: 0, manual: 0, policy: 0, alert: 0, lesson: 0, software: 0 };
   docs.forEach(d => { if (counts[d.type] !== undefined) counts[d.type]++; });
   Object.keys(counts).forEach(k => {
     const el = document.getElementById('pill-count-' + k);
     if (el) el.textContent = counts[k] ? '(' + counts[k] + ')' : '';
+    // A filter for a type this area holds none of leads to an empty table, so
+    // it is not offered. All stays whatever the figure is.
+    const pill = document.getElementById('pill-' + k);
+    if (pill && k !== 'all') pill.hidden = !counts[k];
   });
+  // If the hidden one was the active filter, fall back to All rather than
+  // leaving the table filtered by something no longer on screen.
+  const active = document.getElementById('pill-' + pubActiveFilter);
+  if (pubActiveFilter !== 'all' && active && active.hidden) {
+    const allPill = document.querySelector('.pub-filter-pill[data-filter="all"]');
+    if (allPill) setPubFilter('all', allPill);
+  }
 }
 
 function updateHeroStats(docs) {

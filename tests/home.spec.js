@@ -37,7 +37,7 @@ test.describe('Hero', () => {
     await gotoApp('/index.html');
 
     await expect(page.locator('.hero h1')).toBeVisible();
-    await expect(page.locator('.hero h1')).toContainText('Knowledge Is Better Together');
+    await expect(page.locator('.hero h1')).toContainText('Find the procedure, manual or alert you need');
     await expect(page.locator('#hero-search-input')).toBeVisible();
     await expect(page.locator('#hero-search-btn')).toBeVisible();
   });
@@ -283,7 +283,7 @@ test.describe('Homepage counts come from the register, not a hardcoded number', 
 
 // ── Home, as before ─────────────────────────────────────────────────────
 // The owner asked for the home they had before the redesign back: the photo
-// fills the first screen and pans slowly, "Knowledge Is Better Together."
+// fills the first screen and pans slowly, under a headline that names
 // sits in the middle of it with the hashtag above and the promise in
 // italic below, the search is the one action, and the three ways in, the
 // figures and the segments follow below. A cue at the foot of the photo
@@ -337,7 +337,12 @@ test.describe('Home, as before: full screen, moving, the segments one scroll bel
     expect(await page.locator('#hero-layer-a').evaluate((el) => getComputedStyle(el).animationName)).toBe('heroKenBurns');
   });
 
-  test('the slogan reads as before: hashtag above, "Better Together." in teal, the promise in italic', async ({ page, gotoApp }) => {
+  // The headline used to be a slogan: "Knowledge Is Better Together. / Every
+  // Answer, Within Reach." Two matched fragments, abstract, nothing a person
+  // could act on. It names what the search box finds now, and the line under
+  // it states a fact rather than a promise, so it is no longer set in italic
+  // the way a tagline is.
+  test('the headline names what the page finds, and the line under it states a fact, not a tagline', async ({ page, gotoApp }) => {
     await gotoApp('/index.html');
     const tag = page.locator('.hero-left > a.hero-label');
     await expect(tag).toHaveText('#BetterTogether@TAQA');
@@ -347,23 +352,20 @@ test.describe('Home, as before: full screen, moving, the segments one scroll bel
       const tagEl = document.querySelector('.hero-left > a.hero-label');
       return {
         tagFirst: !!(tagEl.compareDocumentPosition(h1) & Node.DOCUMENT_POSITION_FOLLOWING),
-        lead: spans[0].textContent.replace(/ /g, ' ').trim(),
-        teal: spans[1].textContent,
-        tealColour: getComputedStyle(spans[1]).color,
-        sub: spans[2].textContent,
-        subStyle: getComputedStyle(spans[2]).fontStyle,
-        oneLine: Math.abs(spans[0].getBoundingClientRect().top - spans[1].getBoundingClientRect().top) < 2,
-        wide: window.innerWidth >= 700,
+        lead: spans[0].textContent.trim(),
+        sub: spans[1].textContent.trim(),
+        subStyle: getComputedStyle(spans[1]).fontStyle,
+        spanCount: spans.length,
+        twoLines: spans[1].getBoundingClientRect().top > spans[0].getBoundingClientRect().top,
       };
     });
     expect(look.tagFirst).toBe(true);
-    expect(look.lead).toBe('Knowledge Is');
-    expect(look.teal).toBe('Better Together.');
-    expect(look.tealColour).toBe('rgb(0, 187, 182)');
-    expect(look.sub).toBe('Every Answer, Within Reach.');
-    expect(look.subStyle).toBe('italic');
-    // One line on a wide screen, as before; a phone wraps it.
-    if (look.wide) expect(look.oneLine).toBe(true);
+    expect(look.spanCount).toBe(2);
+    expect(look.lead).toBe('Find the procedure, manual or alert you need.');
+    expect(look.sub).toBe('Every document currently in force, in one register.');
+    expect(look.subStyle).toBe('normal');
+    expect(look.twoLines).toBe(true);
+    expect(look.lead + ' ' + look.sub).not.toMatch(/Better Together|Within Reach/);
     // The redesign's pieces are gone: the grid lines, the "RISE" eyebrow,
     // the separate subline, and the kickers and arrows on the cards.
     await expect(page.locator('.hero-lines, .th-lines, .hero-eyebrow, .hero-sub, .door-kicker, .door-go')).toHaveCount(0);
@@ -512,7 +514,11 @@ test.describe('Home, as before: full screen, moving, the segments one scroll bel
     await expect(page.locator('h1').first()).toBeVisible();
   });
 
-  test('dark theme: the photo band stays dark with white and teal words; the strip below follows the theme', async ({ page, gotoApp }) => {
+  // The teal used to be a phrase of the slogan, "Better Together." The
+  // headline is one plain sentence now and carries no accent of its own, so
+  // what this checks on the dark band is that both of its lines stay legible
+  // and that the accent still appears where it means something: the figures.
+  test('dark theme: the photo band stays dark, both headline lines stay legible, the figures keep the accent; the strip below follows the theme', async ({ page, gotoApp }) => {
     await page.addInitScript(() => { try { localStorage.setItem('taqa-theme-v3', 'dark'); } catch (e) {} });
     await gotoApp('/index.html');
     await expect(page.locator('html')).toHaveAttribute('data-taqa-theme', 'dark');
@@ -520,13 +526,15 @@ test.describe('Home, as before: full screen, moving, the segments one scroll bel
       const col = (s, p = 'color') => getComputedStyle(document.querySelector(s))[p];
       return {
         lead: col('.hero h1 .hero-h1-lead'),
-        teal: col('.hero h1 > span:nth-child(2)'),
+        sub: col('.hero h1 .hero-h1-sub'),
+        teal: col('.stat-row-value'),
         cue: col('.hero-cue'),
         ground: col('.hero-wrap', 'backgroundColor'),
         strip: col('.doors-strip', 'backgroundColor'),
       };
     });
     expect(c.lead).toBe('rgb(255, 255, 255)');
+    expect(c.sub).toBe('rgba(255, 255, 255, 0.84)');
     expect(c.teal).toBe('rgb(0, 187, 182)');
     expect(c.cue).toBe('rgba(255, 255, 255, 0.88)');
     expect(c.ground).toBe('rgb(0, 19, 20)');

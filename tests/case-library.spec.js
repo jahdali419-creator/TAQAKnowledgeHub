@@ -101,8 +101,8 @@ test.describe('the case library', () => {
   test('lists the register\'s lessons and alerts as Register, invents no case, and says so when there is none', async ({ page, gotoApp, clearAppState, setRole, consoleErrors }) => {
     await start(page, gotoApp, clearAppState, setRole);
     await gotoApp('/cases.html');
-    await expect(page.locator('h1')).toContainText('What happened before.');
-    await expect(page.locator('h1 .l2')).toHaveText('What was tried. What was found.');
+    await expect(page.locator('h1')).toContainText('What crews ran into,');
+    await expect(page.locator('h1 .l2')).toHaveText('and what they did about it.');
     await expect(page.locator('#cl-eyebrow')).toHaveText('All operational segments · Field cases');
     const n = await page.evaluate(() => TAQA_CASES.released().length);
     expect(n).toBeGreaterThan(20);
