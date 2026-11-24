@@ -362,8 +362,11 @@ test.describe('the Field cases strip on an area page', () => {
     await expect(strip.locator('#sc-all')).toHaveAttribute('href', 'cases.html?area=drilling');
     await expect(strip.locator('#sc-pack')).toHaveAttribute('href', 'prejob.html?area=drilling');
     await expect(strip.locator('#sc-add')).toHaveAttribute('href', 'case-new.html?area=drilling');
-    // It sits beside the contributors strip, which is untouched.
-    expect(await page.evaluate(() => document.getElementById('seg-cases').nextElementSibling.id)).toBe('rise-top');
+    // The contributors band moved below the document panels so the documents
+    // are reachable without scrolling, so the strip is followed by the first
+    // panel and the band is the last thing in the column.
+    expect(await page.evaluate(() => document.getElementById('seg-cases').nextElementSibling.id)).toBe('panel-all');
+    expect(await page.evaluate(() => document.getElementById('rise-top').nextElementSibling)).toBeNull();
 
     // A filed case waits off the strip until the Director releases it.
     const waiting = await fileOnly(page, MOTOR_INCIDENT, 'director');

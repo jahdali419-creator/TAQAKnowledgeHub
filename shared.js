@@ -972,8 +972,21 @@ window.addEventListener('pageshow', function(e){
     // opened together and the sheet covered the tour's Skip and Next, so a
     // new user met two overlays and could not use either until closing one.
     // Wait until the tour is finished, then offer the install.
+    //
+    // This asked whether the tour's markup existed, which it always does: the
+    // card is in the page from the start and only shown when the tour runs.
+    // That was harmless while the tour opened itself, because the flag was
+    // always set within a few steps. Now the tour is only offered, so a
+    // visitor who ignores the offer never sets the flag, and this rescheduled
+    // itself every 1.5s for as long as the page stayed open while the install
+    // was never offered at all. It asks whether the tour is on screen.
+    // Read display, not offsetParent: the card is position:fixed, and a fixed
+    // element's offsetParent is null whether it is on screen or not.
     var tourOn=false;
-    try{ tourOn=!!document.getElementById('tc-skip')&&!localStorage.getItem('taqa-tour-done'); }catch(e){}
+    try{
+      var tc=document.getElementById('tour-card');
+      tourOn=!!tc&&getComputedStyle(tc).display!=='none';
+    }catch(e){}
     if(tourOn){ setTimeout(showSheet,1500); return; }
     // Not over anything the person has started or opened since the page
     // loaded: typed text, a chosen file, an open dialog, drawer or menu.

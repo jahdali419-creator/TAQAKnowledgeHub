@@ -365,15 +365,35 @@ test.describe('on a phone', () => {
 test.describe('on a phone, the install suggestion', () => {
   test.use({ viewport: { width: 360, height: 800 }, isMobile: true, hasTouch: true, installPrompt: true });
 
+  // The tour no longer opens itself, so there are two cases rather than one:
+  // while it is on screen the sheet still waits, and when nobody opens it the
+  // sheet is offered instead of waiting for a tour that never comes.
   test('the install prompt waits for the welcome tour instead of covering it', async ({ page, gotoApp, clearAppState }) => {
     await gotoApp('/index.html');
     await clearAppState();
     await gotoApp('/index.html');
+    // Take the tour, as a new colleague would from the offer.
+    await page.locator('#tour-invite-go').click();
     await expect(page.locator('#tc-skip')).toBeVisible();
     await page.evaluate(() => window.dispatchEvent(new Event('beforeinstallprompt')));
     await page.waitForTimeout(2600);
     await expect(page.locator('#pwa-sheet')).not.toHaveClass(/pwa-open/);
     await page.locator('#tc-skip').click();
     await expect(page.locator('#pwa-sheet')).toHaveClass(/pwa-open/, { timeout: 5000 });
+  });
+
+  // The gate used to ask whether the tour's markup existed, which it always
+  // does: the card sits in the page and is only shown when the tour runs. That
+  // was harmless while the tour opened itself. Once it was only offered, a
+  // visitor who ignored the offer left the flag unset, and the sheet
+  // rescheduled itself every 1.5s and was never shown.
+  test('ignoring the tour offer still gets the install prompt, rather than waiting on a tour nobody opened', async ({ page, gotoApp, clearAppState }) => {
+    await gotoApp('/index.html');
+    await clearAppState();
+    await gotoApp('/index.html');
+    await expect(page.locator('#tour-invite')).toBeVisible();
+    await expect(page.locator('#tour-card')).toBeHidden();
+    await page.evaluate(() => window.dispatchEvent(new Event('beforeinstallprompt')));
+    await expect(page.locator('#pwa-sheet')).toHaveClass(/pwa-open/, { timeout: 8000 });
   });
 });
