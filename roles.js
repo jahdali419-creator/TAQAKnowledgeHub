@@ -288,23 +288,23 @@ TAQA_ROLE.refuse = function(title, why){
   document.documentElement.setAttribute('data-taqa-theme', dark ? 'dark' : 'light');
   document.body.innerHTML =
     '<main style="max-width:620px;margin:16vh auto;padding:0 24px;text-align:center;font-family:Arial,Helvetica,sans-serif">' +
-      '<h1 style="font-family:BwGradual,Urbanist,sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.3px;margin:0 0 12px;color:' + ink + '">' + e(title) + '</h1>' +
-      '<p style="font-size:14px;line-height:1.7;color:' + mute + ';margin:0 0 10px">' + e(why) +
+      '<h1 style="font-family:BwGradual,Urbanist,sans-serif;font-size:21px;font-weight:700;letter-spacing:-0.3px;margin:0 0 12px;color:' + ink + '">' + e(title) + '</h1>' +
+      '<p style="font-size:15px;line-height:1.7;color:' + mute + ';margin:0 0 10px">' + e(why) +
         ' You are signed in as <b style="color:' + ink + '">' + e(who) + '</b>.</p>' +
-      '<p style="font-size:14px;line-height:1.7;color:' + mute + ';margin:0 0 24px">Every document you need is still open to you, and each one tells you whether it is current before you use it.</p>' +
-      '<a href="ai-search.html" style="display:inline-block;font-size:13.5px;font-weight:600;color:#fff;background:#005D63;border-radius:9px;padding:11px 22px;text-decoration:none;margin:0 4px 8px">Search the documents</a>' +
-      '<a href="index.html" style="display:inline-block;font-size:13.5px;font-weight:600;color:' + teal + ';border:1px solid ' + line + ';border-radius:9px;padding:11px 22px;text-decoration:none;margin:0 4px 8px">Home</a>' +
+      '<p style="font-size:15px;line-height:1.7;color:' + mute + ';margin:0 0 24px">Every document you need is still open to you, and each one tells you whether it is current before you use it.</p>' +
+      '<a href="ai-search.html" style="display:inline-block;font-size:13px;font-weight:600;color:#fff;background:#005D63;border-radius:8px;padding:11px 22px;text-decoration:none;margin:0 4px 8px">Search the documents</a>' +
+      '<a href="index.html" style="display:inline-block;font-size:13px;font-weight:600;color:' + teal + ';border:1px solid ' + line + ';border-radius:8px;padding:11px 22px;text-decoration:none;margin:0 4px 8px">Home</a>' +
       // A preview has no sign-in, so whoever is previewing needs a way to try
       // another role from here instead of going home to find the switcher.
-      '<p style="font-size:12.5px;color:' + mute + ';margin:22px 0 8px">Trying a different role? View this page as</p>' +
+      '<p style="font-size:13px;color:' + mute + ';margin:22px 0 8px">Trying a different role? View this page as</p>' +
       // Acting under a delegation that has ended or been revoked opens nothing,
       // so the way out is offered here too.
       ((typeof TAQA_DELEGATION !== 'undefined' && TAQA_DELEGATION.actingAs())
-        ? '<p style="font-size:12.5px;color:' + mute + ';margin:22px 0 8px">You are acting under a delegation.</p>' +
-          '<button type="button" data-stop-acting="1" style="font:inherit;font-size:12.5px;font-weight:600;color:' + teal + ';background:none;border:1px solid ' + line + ';border-radius:999px;padding:8px 14px;min-height:44px;margin:0 3px 6px;cursor:pointer">Stop acting under it</button>'
+        ? '<p style="font-size:13px;color:' + mute + ';margin:22px 0 8px">You are acting under a delegation.</p>' +
+          '<button type="button" data-stop-acting="1" style="font:inherit;font-size:13px;font-weight:600;color:' + teal + ';background:none;border:1px solid ' + line + ';border-radius:999px;padding:8px 14px;min-height:44px;margin:0 3px 6px;cursor:pointer">Stop acting under it</button>'
         : '') +
       TAQA_ROLE_ORDER.filter(function(k){ return k !== TAQA_ROLE.current(); }).map(function(k){
-        return '<button type="button" data-role="' + k + '" style="font:inherit;font-size:12.5px;font-weight:600;color:' + teal + ';background:none;border:1px solid ' + line + ';border-radius:999px;padding:8px 14px;min-height:44px;margin:0 3px 6px;cursor:pointer">' + e(TAQA_ROLES[k].label) + '</button>';
+        return '<button type="button" data-role="' + k + '" style="font:inherit;font-size:13px;font-weight:600;color:' + teal + ';background:none;border:1px solid ' + line + ';border-radius:999px;padding:8px 14px;min-height:44px;margin:0 3px 6px;cursor:pointer">' + e(TAQA_ROLES[k].label) + '</button>';
       }).join('') +
     '</main>';
   document.body.addEventListener('click', function(ev){

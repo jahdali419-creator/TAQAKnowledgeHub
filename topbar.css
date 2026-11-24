@@ -38,7 +38,9 @@
   --tb-hover:rgba(117,106,97,0.08);
   --tb-active:rgba(0,93,99,0.07);
   --tb-disc:rgba(0,93,99,0.06);
-  --tb-shadow:0 22px 44px -26px rgba(0,88,90,0.28),0 2px 6px -2px rgba(0,88,90,0.06);
+  /* The dropdown is a thing above the page, so it takes the page's own
+     raised elevation rather than a third depth of its own. */
+  --tb-shadow:var(--lift-2,0 14px 34px rgba(0,88,90,0.16));
 }
 html[data-taqa-theme="dark"]{
   --tb-paper:rgba(0,35,38,0.96);
@@ -114,9 +116,9 @@ html[data-taqa-theme="dark"] #navbar .nav-logo-light,
 #navbar .nav-links > li > a,
 #navbar .nav-dropdown-btn{
   position:relative; display:inline-flex; align-items:center; gap:6px;
-  height:38px; padding:0 13px; margin:0; border-radius:10px; border:0;
+  height:38px; padding:0 13px; margin:0; border-radius:8px; border:0;
   background:transparent; color:var(--tb-muted);
-  font:500 14px/1 'BwGradual','Urbanist',sans-serif; letter-spacing:0; white-space:nowrap;
+  font:500 15px/1 'BwGradual','Urbanist',sans-serif; letter-spacing:0; white-space:nowrap;
   text-decoration:none; cursor:pointer;
   transition:background-color 150ms cubic-bezier(.23,1,.32,1),color 150ms cubic-bezier(.23,1,.32,1);
 }
@@ -137,7 +139,7 @@ html[data-taqa-theme="dark"] #navbar .nav-logo-light,
   position:fixed; top:calc(var(--nav-h) + 8px); inset-inline:0; margin-inline:auto;
   width:min(860px,calc(100vw - 32px)); max-height:calc(100dvh - var(--nav-h) - 24px); overflow-y:auto;
   transform:translateY(-4px); opacity:0; visibility:hidden; pointer-events:none;
-  background:var(--tb-solid); border:1px solid var(--tb-rule); border-radius:18px;
+  background:var(--tb-solid); border:1px solid var(--tb-rule); border-radius:20px;
   box-shadow:var(--tb-shadow); padding:10px 10px 14px;
   display:block; z-index:1001;
   transition:opacity 160ms cubic-bezier(.23,1,.32,1),transform 160ms cubic-bezier(.23,1,.32,1),visibility 0s linear 160ms;
@@ -148,10 +150,10 @@ html[data-taqa-theme="dark"] #navbar .nav-logo-light,
 }
 #navbar .ad-company{
   display:flex; align-items:center; gap:12px; height:auto; min-height:52px; padding:10px 14px;
-  margin:0 0 6px; border-radius:12px; border-bottom:0;
+  margin:0 0 6px; border-radius:14px; border-bottom:0;
   font:700 15px/1.25 'BwGradual','Urbanist',sans-serif; color:var(--tb-text); text-decoration:none;
 }
-#navbar .ad-company .ad-sub{font:400 12.5px/1.3 Arial,Helvetica,sans-serif; color:var(--tb-light); margin-inline-start:2px;}
+#navbar .ad-company .ad-sub{font:400 13px/1.3 Arial,Helvetica,sans-serif; color:var(--tb-light); margin-inline-start:2px;}
 #navbar .ad-cols{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0;
   border-top:1px solid var(--tb-rule); padding-top:8px;}
 #navbar .ad-col{min-width:0; padding:4px 4px 0;}
@@ -166,11 +168,11 @@ html[data-taqa-theme="dark"] #navbar .nav-logo-light,
 }
 #navbar .ad-col a{
   display:flex; align-items:center; gap:10px; height:auto; min-height:36px; padding:6px 10px;
-  border-radius:9px; background:transparent; text-decoration:none; white-space:normal;
+  border-radius:8px; background:transparent; text-decoration:none; white-space:normal;
   font:300 15px/1.3 'BwGradual','Urbanist',sans-serif; color:var(--tb-text);
 }
 #navbar .ad-col a span:first-child{min-width:0;}
-#navbar .ad-n{margin-inline-start:auto; font:500 12px/1 Arial,Helvetica,sans-serif; color:var(--tb-light);
+#navbar .ad-n{margin-inline-start:auto; font:500 13px/1 Arial,Helvetica,sans-serif; color:var(--tb-light);
   font-variant-numeric:tabular-nums; flex-shrink:0;}
 @media (hover:hover){
   #navbar .ad-col a:hover,#navbar .ad-company:hover{background:var(--tb-hover); color:var(--tb-ink);}
@@ -184,7 +186,7 @@ html[data-taqa-theme="dark"] #navbar .nav-logo-light,
 #navbar .bell-btn{
   position:relative; width:40px; height:40px; min-width:40px!important; min-height:40px!important;
   display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
-  padding:0; margin:0; border:0; border-radius:10px; background:transparent;
+  padding:0; margin:0; border:0; border-radius:8px; background:transparent;
   color:var(--tb-muted); cursor:pointer;
   transition:background-color 150ms cubic-bezier(.23,1,.32,1),color 150ms cubic-bezier(.23,1,.32,1);
 }
@@ -198,7 +200,7 @@ html[data-taqa-theme="dark"] #navbar .nav-logo-light,
 #navbar .nav-count{
   position:absolute; top:5px; inset-inline-end:4px; min-width:17px; height:17px; padding:0 4px;
   border-radius:999px; display:none; align-items:center; justify-content:center;
-  font:700 10px/1 Arial,Helvetica,sans-serif; font-variant-numeric:tabular-nums;
+  font:700 11px/1 Arial,Helvetica,sans-serif; font-variant-numeric:tabular-nums;
   background:var(--tb-primary); color:#FFFFFF; border:2px solid var(--tb-solid);
 }
 
@@ -216,8 +218,8 @@ html[data-tb-up] #navbar .nav-cta.nav-up{display:inline-flex;}
 /* Upload, the one primary action, only for roles that may file */
 #navbar .nav-cta{
   display:inline-flex; align-items:center; gap:7px; height:38px; padding:0 16px; margin:0;
-  border-radius:10px; border:1px solid transparent; background:var(--tb-primary); color:#FFFFFF;
-  font:600 13.5px/1 Arial,Helvetica,sans-serif; text-decoration:none; white-space:nowrap; flex-shrink:0;
+  border-radius:8px; border:1px solid transparent; background:var(--tb-primary); color:#FFFFFF;
+  font:600 13px/1 Arial,Helvetica,sans-serif; text-decoration:none; white-space:nowrap; flex-shrink:0;
   transition:background-color 150ms cubic-bezier(.23,1,.32,1),transform 100ms cubic-bezier(.23,1,.32,1);
 }
 #navbar .nav-cta svg{width:15px; height:15px;}
@@ -239,7 +241,7 @@ html[data-taqa-theme="dark"] #navbar .nav-cta{border-color:rgba(0,187,182,0.35);
 /* Hamburger */
 #navbar .nav-hamburger{
   display:none; width:44px; height:44px; padding:0; margin:0; margin-inline-end:-6px;
-  border:0; border-radius:10px; background:transparent; cursor:pointer;
+  border:0; border-radius:8px; background:transparent; cursor:pointer;
   flex-direction:column; align-items:center; justify-content:center; gap:4.5px;
 }
 #navbar .nav-hamburger span{display:block; width:18px; height:1.75px; border-radius:2px; background:var(--tb-text);

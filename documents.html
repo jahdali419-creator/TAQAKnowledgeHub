@@ -44,7 +44,7 @@ html{scroll-behavior:smooth;}
 body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;animation:pageFadeIn 0.4s ease;}
 .page-wrapper{min-height:100vh;display:flex;flex-direction:column;}
 
-.btn{padding:8px 20px;border-radius:9px;font-size:13.5px;font-weight:500;cursor:pointer;
+.btn{padding:8px 20px;border-radius:8px;font-size:13.5px;font-weight:500;cursor:pointer;
   border:none;font-family:Arial,Helvetica,sans-serif;transition:all 0.2s;text-decoration:none;
   display:inline-flex;align-items:center;gap:6px;}
 .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
@@ -70,7 +70,7 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--tex
 .docs-breadcrumb .bc-cur{color:rgba(0,187,182,0.85);font-weight:600;}
 .docs-hero-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;
   justify-content:space-between;gap:32px;position:relative;z-index:1;flex-wrap:wrap;}
-.docs-hero-tag{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+.docs-hero-tag{font-size:11px;font-weight:700;letter-spacing:0.2px;
   color:var(--primary-light);margin-bottom:10px;display:block;}
 .docs-hero-title{font-family:'BwGradual','Urbanist',sans-serif;font-size:28px;font-weight:800;color:#fff;
   margin-bottom:6px;letter-spacing:-0.3px;}
@@ -91,7 +91,7 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--tex
   font-family:var(--th-font-field);color:var(--text);outline:none;}
 .pub-table-search-input::placeholder{color:var(--text-muted);}
 .pub-search-clear{background:none;border:none;cursor:pointer;color:var(--text-muted);
-  padding:2px 6px;border-radius:4px;font-size:17px;line-height:1;display:none;transition:color 0.15s;}
+  padding:2px 6px;border-radius:8px;font-size:17px;line-height:1;display:none;transition:color 0.15s;}
 .pub-search-clear:hover{color:var(--text);}
 .pub-search-clear.show{display:block;}
 
@@ -119,7 +119,12 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--tex
 .pub-table colgroup col:nth-child(3){width:13%;}
 .pub-table colgroup col:nth-child(4){width:21%;}
 .pub-table colgroup col:nth-child(5){width:13%;}
-.pub-table th{font-size:10.5px;font-weight:700;letter-spacing:0.9px;text-transform:uppercase;
+/* The headings are written "Document", "Type", "Published", "Status" in the
+   markup and were being shouted by CSS: 10.5px capitals on tracking, which is
+   the hardest shape to read quickly and gives a column heading the same
+   urgency as a warning. They are set as written now, a size up, and told apart
+   from the rows by weight and colour rather than by volume. */
+.pub-table th{font-size:11px;font-weight:700;letter-spacing:0;
   color:var(--text-muted);padding:10px 18px;text-align:left;border-bottom:1px solid var(--border);
   white-space:nowrap;background:rgba(0,0,0,0.013);}
 /* Narrow columns cannot hold a padded uppercase header on one line, and a
@@ -137,8 +142,11 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--tex
    48% column it ate the space and four hundred pixels of every title were cut.
    It sits above the title now and the title may take two lines. */
 .pub-doc-title{font-weight:500;max-width:0;overflow:hidden;}
-.pdt-num{display:block;font-family:'BwGradual','Urbanist',sans-serif;font-size:9.5px;
-  font-weight:800;letter-spacing:0.9px;text-transform:uppercase;color:var(--primary-ink);
+/* A document number is already upper case in the register: TQ-TWS-CTSS-SOP-009
+   is the record's own identifier, not a label being shouted, so the capitals
+   stay and the transform that was imposing them goes. It reads as a code. */
+.pdt-num{display:block;font-family:'BwGradual','Urbanist',sans-serif;font-size:11px;
+  font-weight:800;letter-spacing:0.4px;color:var(--primary-ink);
   opacity:0.8;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis;margin-bottom:2px;}
 .pdt-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
@@ -175,7 +183,7 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--tex
 .pub-status-warn{color:var(--warn-ink,#8A6200);white-space:normal;}
 .pub-remove-btn{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-dim);
   background:transparent;border:1px solid transparent;cursor:pointer;
-  padding:4px 10px;border-radius:6px;font-family:Arial,Helvetica,sans-serif;font-weight:500;
+  padding:4px 10px;border-radius:8px;font-family:Arial,Helvetica,sans-serif;font-weight:500;
   transition:all 0.15s;white-space:nowrap;}
 .pub-table tbody tr:hover .pub-remove-btn{color:var(--text);}
 /* Hovering the button also hovers its row, and the row rule above is the
@@ -212,7 +220,7 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
 
 /* ── Toast ── */
 .dash-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
-  background:#1E1C1A;color:#fff;padding:12px 24px;border-radius:50px;font-size:13.5px;font-weight:500;
+  background:#1E1C1A;color:#fff;padding:12px 24px;border-radius:999px;font-size:13.5px;font-weight:500;
   box-shadow:0 8px 32px rgba(0,0,0,0.2);opacity:0;transition:all 0.3s;z-index:9999;pointer-events:none;
   display:flex;align-items:center;gap:10px;}
 .dash-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -228,7 +236,7 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
 .wd-dlg textarea{width:100%;min-height:80px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font:inherit;font-family:var(--th-font-field);font-size:13px;resize:vertical;box-sizing:border-box;}
 .wd-hint{font-size:11.5px;color:var(--text-muted);margin-top:4px;}
 .wd-acts{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
-.wd-acts button{min-height:40px;padding:0 16px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text);}
+.wd-acts button{min-height:40px;padding:0 16px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text);}
 .wd-acts .wd-go{background:var(--stop-ink,#C8102E);border-color:var(--stop-ink,#C8102E);color:#fff;}
 .wd-acts .wd-go:disabled{opacity:.45;cursor:not-allowed;}
 .dash-toast-dot{width:8px;height:8px;border-radius:50%;background:#00BBB6;flex-shrink:0;}

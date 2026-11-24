@@ -268,7 +268,7 @@
        phone menu carries it. */
     '#navbar .rise-lvl{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 9px;border-radius:999px;' +
       'border:1px solid var(--lv-bd);background:var(--lv-bg);color:var(--lv-fg);text-decoration:none;white-space:nowrap;flex:none;' +
-      'font:600 12.5px/1 Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums;transition:box-shadow .15s ease;}' +
+      'font:600 13px/1 Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums;transition:box-shadow .15s ease;}' +
     '#navbar .rise-lvl:hover{box-shadow:inset 0 0 0 1px var(--lv-bd);}' +
     '#navbar .rise-lvl:focus-visible{outline:2px solid var(--tb-ink,#005D63);outline-offset:2px;}' +
     '#navbar .rise-lvl svg{width:17px;height:17px;color:var(--lv-ic);flex:none;}' +
@@ -290,7 +290,7 @@
        over the bar, the bell or the menu. */
     '#rise-note{position:fixed;left:16px;right:16px;margin-inline:auto;width:max-content;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:9000;pointer-events:none;' +
       'max-width:calc(100vw - 32px);display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:14px;' +
-      'background:#00474C;color:#fff;box-shadow:0 14px 34px -14px rgba(0,40,44,.55);font:500 14px/1.35 Arial,Helvetica,sans-serif;' +
+      'background:#00474C;color:#fff;box-shadow:0 14px 34px -14px rgba(0,40,44,.55);font:500 15px/1.35 Arial,Helvetica,sans-serif;' +
       'opacity:0;transition:opacity .25s ease,transform .25s ease;}' +
     '#rise-note.on{opacity:1;transform:translateY(-4px);}' +
     '#rise-note[hidden]{display:none;}' +
@@ -304,7 +304,7 @@
        recognition read at the level of a system notice. It now uses the dark
        brand band and its grid, the way the hero sections do, and first place
        is given a face and a figure rather than a position in a list. */
-    '.rise-top{position:relative;overflow:hidden;margin:0 0 24px;padding:20px 22px;border:0;border-radius:16px;' +
+    '.rise-top{position:relative;overflow:hidden;margin:0 0 24px;padding:20px 22px;border:0;border-radius:14px;' +
       'background:#00292C;color:#fff;display:flex;flex-wrap:wrap;align-items:center;gap:18px 30px;min-width:0;}' +
     '.rise-top::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;' +
       'background:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 72px),' +
@@ -314,7 +314,7 @@
     /* On a dark page the band would otherwise melt into the background. */
     'html[data-taqa-theme="dark"] .rise-top{box-shadow:inset 0 0 0 1px rgba(0,187,182,.22);}' +
     '.rise-top-h{display:flex;align-items:center;gap:9px;width:100%;margin:0;' +
-      'font:700 10px/1.2 Arial,Helvetica,sans-serif;letter-spacing:1.4px;text-transform:uppercase;' +
+      'font:700 11px/1.2 Arial,Helvetica,sans-serif;letter-spacing:1.4px;text-transform:uppercase;' +
       'color:var(--primary-light,#00BBB6);}' +
     '.rise-top-h svg{width:17px;height:17px;color:var(--primary-light,#00BBB6);}' +
     '.rise-top-1{display:flex;align-items:center;gap:14px;min-width:0;flex:0 0 auto;}' +
@@ -337,12 +337,12 @@
       'border-inline-start:1px solid rgba(255,255,255,.18);}' +
     '.rise-top-r .rk{font:700 11px/1.2 Arial,Helvetica,sans-serif;color:var(--primary-light,#00BBB6);letter-spacing:.6px;}' +
     '.rise-top-r .nm{display:block;margin-top:3px;min-width:0;max-width:200px;overflow:hidden;text-overflow:ellipsis;' +
-      'white-space:nowrap;font:700 14px/1.3 \'BwGradual\',\'Urbanist\',sans-serif;}' +
-    '.rise-top-r .pt{display:block;font-size:12px;color:rgba(255,255,255,.72);margin-top:1px;}' +
+      'white-space:nowrap;font:700 15px/1.3 \'BwGradual\',\'Urbanist\',sans-serif;}' +
+    '.rise-top-r .pt{display:block;font-size:13px;color:rgba(255,255,255,.72);margin-top:1px;}' +
     /* The Example badge is kept, and kept legible on the dark field: these are
        not real colleagues and decoration does not change that. */
     '.rise-ex{display:inline-block;padding:1px 6px;border-radius:999px;border:1px solid rgba(255,255,255,.32);' +
-      'font:700 9.5px/1.4 Arial,Helvetica,sans-serif;letter-spacing:.4px;text-transform:uppercase;' +
+      'font:700 11px/1.4 Arial,Helvetica,sans-serif;letter-spacing:.4px;text-transform:uppercase;' +
       'color:rgba(255,255,255,.78);vertical-align:2px;}' +
     /* Ink on legacy teal is 7.11:1; white on it is 2.39:1, so the label is ink. */
     '.rise-top-all{margin-inline-start:auto;align-self:center;background:var(--primary-light,#00BBB6);color:#00191B;' +
